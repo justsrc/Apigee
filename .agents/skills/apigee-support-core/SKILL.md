@@ -218,6 +218,7 @@ substitute for opening the primary page before you assert something consequentia
 | `references/products.md` | Telling the products apart, and where an answer must branch |
 | `references/security.md` | OAuth, JWT, API keys, and TLS behaviour and limits |
 | `references/hybrid.md` | Hybrid runtime, sync, key-value maps, logging, upgrades |
+| `references/policy-mechanics.md` | Targets, timeouts, deployment, variables, and conditions |
 | `references/sources.md` | Verified URLs, how to check one, and how to find more |
 
 Intake and action safety stay in this file rather than becoming lookups, because what to
