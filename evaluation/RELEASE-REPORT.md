@@ -1,8 +1,76 @@
 # Audit and release report
 
+> **Superseded in part.** This report was written at commit `832bbca` on 2026-10-12. Everything
+> below section 0 is kept as a dated record and has not been rewritten. Its section 1 is not
+> the current verdict and several of its figures are out of date. Section 0 states where
+> things stand now and why they moved.
+
 Date: 2026-10-12. Baseline: git tag `baseline-v0.1` at `ce3d96d`.
 
-## 1. Verdict
+## 0. Current status
+
+Written 2026-10-13. Read this before section 1, which describes the project as it stood at
+`832bbca`.
+
+`python3 tests/release_gate.py` returns **PROVISIONAL**: 28 PASS, 0 FAIL, 0 BLOCKED,
+3 UNVERIFIED across 31 criteria, on the full run including the live URL audit. The same run
+offline, with `--skip-urls`, is 27 PASS, 1 BLOCKED, 3 UNVERIFIED and reports NOT QUALIFIED,
+because the URL criterion is recorded as BLOCKED rather than passed when the network run is
+skipped.
+
+**PROVISIONAL is the honest result and is not a step toward a green build.** E5, G1 and G2
+ask for a model to have actually answered the scenarios. No model has been run against this
+suite under a declared protocol, so those three stay UNVERIFIED. Nothing else is missing.
+
+The verdict moved from NOT QUALIFIED to PROVISIONAL because the gate changed, not because
+the project passed something it had not passed before. At `832bbca` the gate computed
+`qualified = not failed and not blocked`, which ignored UNVERIFIED entirely, so the three
+model criteria were worth nothing to the verdict and the report below reads NOT QUALIFIED
+only because D3 happened to be BLOCKED at the time. `c564ee1` replaced that with three
+outcomes and fixed two criteria that could not fail: C2 read `PASS if unresolved else PASS`,
+which returns PASS for every possible value of the thing it checks, and C4 mapped
+`check_urls.py`'s exit 2, meaning "I could not audit anything", to PASS.
+
+| | At 832bbca | Now |
+| --- | --- | --- |
+| Verdict | NOT QUALIFIED | PROVISIONAL |
+| Criteria | 30 | 31 |
+| PASS / FAIL / BLOCKED / UNVERIFIED | 26 / 0 / 1 / 3 | 28 / 0 / 0 / 3 |
+| Scenarios with a recorded technical review | 53 of 103 | 103 of 103 |
+| Cited URLs | 168 unique, 842 occurrences | 172 unique, 885 occurrences |
+| Citations that permanently redirect | 108 | 112 |
+| Cached pages with a verified URL | 289 of 294 | 300 of 305 |
+| Manifest rows recorded at fetch time | 109 | 120 |
+| Fault-injection probes | 25 | 32 |
+| Origin classification | 34 real-world, 32 documented, 37 synthetic | 34 real-world, 31 documented, 38 synthetic |
+
+The fault-code index now reports 195 runtime codes, 116 deployment errors and 33 fault
+variables from 305 fetched pages. Section 2 quotes 82, which was the count of codes that
+had to be merged after D-001, not the size of the index.
+
+### What is still not true
+
+- No model has answered these scenarios under a declared protocol. The central claim this
+  project would want to make is still unevidenced.
+- Whether the skills change an answer is an open question. The only run on record covers
+  seven scenarios with one grader and one model.
+- Two documentation conflicts remain unresolved, in section 5 of the record below.
+- B3 and D4 are DECLARED. They rest on the review in `evaluation/audit-*.md`, not on a
+  check this run performed.
+
+### Commits that moved the ground
+
+| Commit | What it changed |
+| --- | --- |
+| `c564ee1` | Three verdicts, UNVERIFIED no longer implies qualified, C2 and C4 made failable, `tests/test_release_gate.py` |
+| `3e23cfa` | README states `.agents/skills/` is the only tested platform; B4 had been a false PASS |
+| `bb5d859` | Cached the eleven OPDK pages the corpus was missing |
+| `7aa47f5` | The leakage test was comparing against an empty string and had never checked anything; `tests/make_eval_workspace.py` added |
+| `1f23d4c` | The rubric defined weights and no pass threshold; thresholds and a two-grader procedure added |
+| `444579a`, `2ffb8bd`, `c53d527`, `d0115e6`, `29ec460`, `7bdcefa` | Scenario ground truths that contradicted their own sources or rubrics |
+| `cb057df`, `135006b`, `970e75a`, `30e42a8`, `f94ef05`, `0755e82` | MED-09, MED-20, MED-18, MED-12, MED-14, MED-16 |
+
+## 1. Verdict as recorded at 832bbca (superseded by section 0)
 
 **NOT QUALIFIED.**
 
