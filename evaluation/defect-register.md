@@ -30,13 +30,22 @@ Severity, as defined for this project:
 **Affected** scenario metadata across all five files
 
 **What failed.** The project reported its scenario library as 53.4% real-world, 31.1%
-documented, 15.5% synthetic. Measured from the scenarios, it is **33.0% real-world, 31.1%
-documented, 35.9% synthetic**.
+documented, 15.5% synthetic. Measured from the scenarios, it is **33.0% real-world, 30.1%
+documented, 36.9% synthetic**.
 
-The difference is exact rather than approximate. Adding the 13 `adversarial.md` and 8
-`regression.md` scenarios to real-world gives 55; removing them from synthetic gives 16.
-Both match the reported figures to the scenario, and the documented count already matched at
-32. Those two suites are constructed evaluations and say so in their own headers.
+The gap is explained by two constructed suites, not by measurement noise. Adding the 13
+`adversarial.md` and 8 `regression.md` scenarios to the 34 real-world gives 55, which is the
+reported figure exactly. Those two suites are constructed evaluations and say so in their own
+headers.
+
+Two of the three reported counts no longer reproduce to the scenario, and this entry no
+longer claims they do. Documented measures 31 against a reported 32, because MED-20 was
+relabelled on 2026-10-13 from documented to reported real-world case: it is built from known
+issue 471125841, and every other register-sourced scenario in the library already said
+reported real-world case. Synthetic measures 17 after removing the constructed suites against
+a reported 16. Both were already off before that relabelling, by the same one scenario in the
+opposite direction. The inflation finding does not depend on either number: 55 reported against
+34 measured is the twenty-one-scenario gap, and that gap is what the correction fixes.
 
 **Why it matters.** Counting synthetic cases as real incidents is one of the specific errors
 this project exists to prevent, and it was inflating the library's apparent provenance by
@@ -51,7 +60,7 @@ controlled vocabulary, fails on a missing or unclassifiable `Origin` field, and 
 `origin-field-removed`, `origin-unclassifiable-value`.
 
 **Evidence.** `check_repo.py` reports "origin classification is unambiguous across 103
-scenarios (34 real-world, 32 documented, 37 synthetic)". All three probes fail without the
+scenarios (34 real-world, 31 documented, 38 synthetic)". All three probes fail without the
 fix.
 
 **Status: FIXED.**
