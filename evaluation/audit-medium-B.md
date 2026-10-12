@@ -1,5 +1,12 @@
 # Technical audit — scenarios/medium.md, MED-23..MED-46
 
+> **Annotation, 2026-10-13.** The seven title-leak findings in this file (MED-23, MED-33,
+> MED-36, MED-38, MED-39, MED-42, MED-44, MED-46) are superseded, not outstanding. At the time
+> of this audit `tests/make_packets.py` injected the scenario title into the agent prompt. It no
+> longer does: the prompt carries the scenario ID and nothing else identifying, and the title
+> survives only in the answer key for the grader. See D-009 and the note at the end of
+> `evaluation/defect-register.md`. The substantive findings in this file are unaffected.
+
 Scope note: the brief said MED-32 and MED-40 do not exist. They **do** exist in the file
 (`medium.md` line 4250 and line 3529, both recovered by commit `77e7ac8` "Recover MED-32 and
 MED-40"). They are inside the MED-23..MED-46 range, so they are audited here. 23 scenarios

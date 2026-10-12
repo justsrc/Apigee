@@ -16,6 +16,12 @@ Method note on titles: `tests/make_packets.py` line 206 writes `# <ID>: <clean t
 prompt, so the scenario title is shown to the agent. Title leakage is therefore a live defect,
 not a cosmetic one.
 
+> **Annotation, 2026-10-13.** Superseded. `make_packets.py` no longer injects the title; the
+> prompt carries the scenario ID and nothing else identifying, and the title stays in the answer
+> key for the grader. Every title-leak finding in this file (HARD-06, REG-01 through REG-08 and
+> the eight regression titles) is therefore no longer an outstanding defect. See D-009 in
+> `evaluation/defect-register.md`. The other findings in this file stand.
+
 ---
 
 ### REG-01 The safest recommendation is to change nothing
@@ -532,6 +538,15 @@ Two cross-cutting observations worth carrying forward:
    antipatterns/intro, view-page). Their quotes verified against the live documentation, but a
    reviewer running only the local corpus cannot check them, which is how HARD-16's "eight central
    types" survived.
+
+   > **Annotation, 2026-10-13.** This list is wrong and the count is too low. It is twelve, not
+   > ten. `view-page` is not a URL and appears nowhere else in the repository.
+   > `antipatterns/intro` is a cloud.google.com page scoped to Apigee and hybrid, not an OPDK
+   > page. Three genuinely uncached OPDK pages (nginx-45301, rollback-45301,
+   > update-apigee-edge-45202-45301) are missing from the list because raw copies of them survive
+   > under `research/scratch-pages/` and read as fetched. Commit `bb5d859` re-derived the list and
+   > cached all eleven OPDK pages. Five cited documentation URLs still have no local copy; they
+   > are listed in D-022 in `evaluation/defect-register.md`.
 
 | ID | Severity | One-line description | Source that contradicts it |
 | --- | --- | --- | --- |
