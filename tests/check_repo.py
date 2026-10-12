@@ -815,6 +815,91 @@ def check_reference_discovery(root: Path, r: Results) -> None:
         r.ok("every reference path listed in a SKILL.md resolves to a file")
 
 
+def check_scenario_codes(root: Path, r: Results) -> None:
+    """Every fault-code-shaped token in a scenario body must exist in the source corpus.
+
+    The reviews this project has run keep finding invented codes: a
+    steps.javacallout.JavaCalloutExecutionError that does not exist, a
+    messaging.adaptors.http.flow.BadRequest that is not in the reference. Both were
+    plausible, both were confidently cited, and no structural check noticed either.
+
+    The test below exists because those are mechanical defects wearing a technical costume.
+    A token counts as a fault code if it is dotted lowercase-initial, which is Apigee's
+    convention, or if it is CamelCase ending in a fault-like word. Config properties,
+    filenames and flow-variable names are excluded, because those are legitimately not in
+    the fault-code corpus and flagging them would train a reader to ignore this check.
+
+    Deliberately conservative: a token this misses is a miss, not a false pass, and the
+    limit is recorded rather than hidden.
+    """
+    corpus_parts: list[str] = []
+    for p in sorted((root / RESEARCH_DIR / "pages").glob("*.txt")):
+        corpus_parts.append(read(p))
+    ref = root / ".agents" / "skills" / "apigee-support-core" / "references" / "error-codes.md"
+    if ref.is_file():
+        corpus_parts.append(read(ref))
+    corpus = "\n".join(corpus_parts)
+    if not corpus.strip():
+        r.fail("cannot verify scenario fault codes: the research corpus is empty")
+        return
+
+    # Fault-word suffixes, used only for the CamelCase half of the pattern.
+    suffix = (r"Error|Failed|Failure|NotFound|Found|Invalid|Missing|Expired|Timeout|"
+              r"Exceeded|Unknown|Wrong|Required|Unavailable|Rejected|Limit|Disabled|"
+              r"Conflict|Duplicate|Mismatch|Busy|Empty|Bad|Blocked|Denied|Unsupported|"
+              r"Violation|Quota|Condition")
+    code_re = re.compile(rf"`((?:[a-z][a-z0-9_]*\.){{2,}}[A-Za-z][A-Za-z0-9_]*|[A-Z][A-Za-z0-9]+(?:{suffix}))`")
+
+    # Config elements, file names and flow variables that look like codes but are not.
+    # Apigee flow variables are conventionally written private.<name> or app.<name> for
+    # user-scoped ones, and scenario authors invent plausible ones constantly, so that
+    # prefix is excluded outright.
+    not_codes = re.compile(
+        r"^(?:io|connect|keepalive|overrides|cassandra|logger|spec|iam|apigee|ratelimit|"
+        r"target|request|response|context|system|private|app|my|api|docs|entry|report)\."
+        r"|\.(?:md|yaml|sh|properties|txt)$", re.I)
+
+    unknown: list[str] = []
+    checked = 0
+    for p in sorted((root / SCENARIOS_DIR).glob("*.md")):
+        if p.name == "index.md":
+            continue
+        for sid, block in find_scenario_blocks(read(p)):
+            # The "cases deliberately not converted" appendix records codes that were
+            # considered and rejected. Flagging them would invert their meaning.
+            if "NOT converted into scenarios" in block or "Rejected" in block:
+                continue
+            for m in code_re.finditer(block):
+                tok = m.group(1)
+                if not_codes.match(tok):
+                    continue
+                checked += 1
+                if tok in corpus:
+                    continue
+                # A scenario may deliberately quote a code that does not exist, provided
+                # it says so. HARD-21 transcribes an operator's errorcode that is absent
+                # from the Apigee reference and asks the agent to notice. That is a test,
+                # not a defect, so a token the scenario itself marks as unverified is
+                # accepted. Requiring the marker keeps this from becoming a loophole: an
+                # invented code that is passed off as real still fails.
+                line_no = block[:m.start()].count("\n")
+                window = "\n".join(block.splitlines()[max(0, line_no - 6):line_no + 6])
+                if re.search(r"(unverified|not in the (?:Apigee )?fault|does not exist|"
+                             r"no code by that name|no such code|absent from)", window, re.I):
+                    continue
+                unknown.append(f"{sid}: {tok}")
+
+    if unknown:
+        r.fail(f"{len(unknown)} fault-code-shaped token(s) in scenario bodies do not appear "
+               f"anywhere in research/pages/ or the generated index: "
+               f"{', '.join(sorted(set(unknown))[:8])}"
+               f"{'...' if len(set(unknown)) > 8 else ''}. An invented code is worse than "
+               f"no code, because an agent is graded against it.")
+    else:
+        r.ok(f"all {checked} fault-code-shaped tokens in scenario bodies exist in the "
+             f"cached source corpus")
+
+
 def check_origin_integrity(root: Path, r: Results) -> None:
     """Origin classification must use the controlled set and must not inflate real-world.
 
@@ -908,6 +993,7 @@ def main() -> int:
     check_generated_references(root, r)
     check_generated_freshness(root, r)
     check_reference_discovery(root, r)
+    check_scenario_codes(root, r)
     check_origin_integrity(root, r)
     check_unslop_scope(r)
 

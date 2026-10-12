@@ -371,6 +371,28 @@ def _p_bad_ref_path(sb: Sandbox) -> None:
         "`references/products.md`", "`references/products-v9.md`"))
 
 
+@probe("scenario-invents-fault-code", "FAIL",
+       "replace a real fault code in a scenario body with a plausible one that does not exist")
+def _p_invented_code(sb: Sandbox) -> None:
+    p = sb.path("scenarios/easy.md")
+    t = p.read_text()
+    if "`InvalidQuotaInterval`" not in t:
+        raise AssertionError("fixture precondition failed: code not present")
+    p.write_text(t.replace("`InvalidQuotaInterval`",
+                          "`steps.quota.TotallyMadeUpQuotaCode`", 1))
+
+
+@probe("scenario-code-quoted-as-real-but-absent", "FAIL",
+       "quote a non-existent code with no unverified marker, presented as fact")
+def _p_unmarked_fake_code(sb: Sandbox) -> None:
+    p = sb.path("scenarios/easy.md")
+    t = p.read_text()
+    t = t.replace("`InvalidQuotaInterval`", "`steps.raisefault.NotADocumentedFault`", 1)
+    # Make sure no nearby 'unverified' wording excuses it.
+    t = t.replace("unverified", "confirmed", 1)
+    p.write_text(t)
+
+
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
