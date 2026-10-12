@@ -262,6 +262,19 @@ def main() -> int:
             if not name or name.startswith("*"):
                 continue
             cause = clean(cells[1]) if len(cells) > 1 else ""
+            # Some pages collapse several deployment error names into one cell instead of
+            # giving each its own row. The decode-jws page does this with 20 names on one
+            # line under "Other possible deployment errors." Taken literally the index
+            # then advertises one absurd 600-character error name, which looks invented
+            # and cannot be matched against anything a user actually sees. Split the cell
+            # on whitespace into its individual names and flag them as listed together
+            # upstream, which is exactly what the source page says.
+            parts = name.split()
+            if len(parts) > 1 and all(re.fullmatch(r"[A-Za-z][A-Za-z0-9]*", p) for p in parts):
+                for p in parts:
+                    deployment.append((p, cause + " (source page lists this name in a "
+                                          "shared 'other errors' cell)", url))
+                continue
             deployment.append((name, cause, url))
 
         for cells in parsed["fault_vars"]:
@@ -272,20 +285,63 @@ def main() -> int:
                 continue
             fault_vars.append((var, clean(cells[1]), url))
 
-    # Dedupe by fault code, keeping the first occurrence.
-    def dedupe(rows, key):
-        seen, out = set(), []
+    # Merge records that share a code instead of dropping the duplicates.
+    #
+    # Keeping only the first occurrence was wrong in a way that mattered. Apigee documents
+    # the same fault code on several policy pages, and the pages do not always agree:
+    # "steps.oauth.v2.invalid_access_token" is HTTP 401 on delete-oauth-v2-info and HTTP 500
+    # on get-oauth-v2-info-policy. Sorting by filename put delete first, so the index
+    # asserted 401 for a code that the runtime returns as 500 from a different policy, and
+    # a user triaging a 500 would be told the status was wrong. 82 codes were affected.
+    #
+    # Merging keeps every source page, and surfaces the conflict instead of resolving it by
+    # accident. Picking one status would be the same silent choice in a different place.
+    def merge(rows, code_i, status_i, cause_i):
+        """Collapse rows that share a code into one record that keeps every source.
+
+        Indices are passed explicitly. Inferring them from len(row) was wrong: the runtime
+        rows have four fields and the deployment and fault-variable rows have three, so a
+        length test silently emptied the Cause column for two thirds of the table.
+        """
+        order: list = []
+        by_key: dict = {}
         for row in rows:
-            k = key(row)
-            if k in seen:
-                continue
-            seen.add(k)
-            out.append(row)
+            k = row[code_i]
+            if k not in by_key:
+                by_key[k] = []
+                order.append(k)
+            by_key[k].append(row)
+
+        out = []
+        for k in order:
+            group = by_key[k]
+            first = group[0]
+            sources: list[str] = []
+            statuses: list[str] = []
+            causes: list[str] = []
+            for r in group:
+                if r[-1] not in sources:
+                    sources.append(r[-1])
+                if status_i is not None:
+                    status = clean(r[status_i]).strip("` ").strip()
+                    if status and status not in statuses:
+                        statuses.append(status)
+                cause = clean(r[cause_i])
+                if cause and cause not in causes:
+                    causes.append(cause)
+            cause_cell = truncate(causes[0], 110) if causes else ""
+            if len(causes) > 1:
+                cause_cell = (
+                    f"{cause_cell} "
+                    f"(wording differs on {len(causes)} policy pages, see Sources)"
+                )
+            conflict = len(statuses) > 1
+            out.append((first[code_i], ", ".join(statuses), cause_cell, sources, conflict))
         return out
 
-    runtime = dedupe(runtime, lambda r: r[0])
-    deployment = dedupe(deployment, lambda r: r[0])
-    fault_vars = dedupe(fault_vars, lambda r: r[0])
+    runtime = merge(runtime, code_i=0, status_i=1, cause_i=2)
+    deployment = merge(deployment, code_i=0, status_i=None, cause_i=1)
+    fault_vars = merge(fault_vars, code_i=0, status_i=None, cause_i=1)
 
     lines: list[str] = []
     A = lines.append
@@ -299,12 +355,21 @@ def main() -> int:
     A("roughly why it fires. Open the policy page before telling someone what happened, because")
     A("the cause text here is truncated.")
     A("")
+    A("**Several policy pages document the same code.** Where they agree on the HTTP status,")
+    A("one status is shown and every page is listed under Source. Where they disagree, the")
+    A("row lists every status and is marked CONFLICT, because the documented answers are")
+    A("genuinely different and neither is more correct. Read the page for the policy you")
+    A("are actually debugging. Do not treat a single status here as the answer.")
+    A("")
     A("## Runtime errors, meaning a deployed revision failed while serving a request")
     A("")
     A("| Fault code | HTTP | Cause | Source |")
     A("| --- | --- | --- | --- |")
-    for code, status, cause, url in sorted(runtime, key=lambda r: (r[0].split(".")[0], r[0])):
-        A(f"| `{code}` | {status} | {truncate(cause, 130)} | [{url.rsplit('/', 1)[-1]}]({url}) |")
+    for code, status, cause, sources, conflict in sorted(
+            runtime, key=lambda r: (r[0].split(".")[0], r[0])):
+        tag = " **CONFLICT**" if conflict else ""
+        src = ", ".join(f"[{u.rsplit('/', 1)[-1]}]({u})" for u in sources)
+        A(f"| `{code}` | {status}{tag} | {cause} | {src} |")
     A("")
     A("## Deployment errors, meaning the revision was rejected at upload")
     A("")
@@ -312,28 +377,47 @@ def main() -> int:
     A("")
     A("| Error name | Cause | Source |")
     A("| --- | --- | --- |")
-    for name, cause, url in sorted(deployment):
-        A(f"| `{name}` | {truncate(cause, 130)} | [{url.rsplit('/', 1)[-1]}]({url}) |")
+    for name, _status, cause, sources, _conflict in sorted(deployment):
+        src = ", ".join(f"[{u.rsplit('/', 1)[-1]}]({u})" for u in sources)
+        A(f"| `{name}` | {cause} | {src} |")
     A("")
     A("## Fault variables set when a policy errors")
     A("")
     A("| Variable | Meaning | Source |")
     A("| --- | --- | --- |")
-    for var, desc, url in sorted(fault_vars):
-        A(f"| `{var}` | {truncate(desc, 130)} | [{url.rsplit('/', 1)[-1]}]({url}) |")
+    for var, _status, desc, sources, _conflict in sorted(fault_vars):
+        src = ", ".join(f"[{u.rsplit('/', 1)[-1]}]({u})" for u in sources)
+        A(f"| `{var}` | {desc} | {src} |")
     A("")
     A("## How to use this")
     A("")
     A("1. Take the `errorcode` from the response body, not the `faultstring` prose. Google")
     A("   states the text can change between releases, so matching on it is fragile.")
-    A("2. Look the code up above and note which policy owns it.")
-    A("3. Open that policy page and read the full cause before proposing a fix.")
-    A(f"4. If the code is absent here, the policy page may not have been fetched. Check")
+    A("2. Look the code up above and note which policies document it. A code listed on")
+    A("   several pages is not owned by one of them at random.")
+    A("3. Open the page for the policy actually in the proxy and read the full cause before")
+    A("   proposing a fix.")
+    A("4. If a row says CONFLICT, the documentation disagrees about the HTTP status. Do not")
+    A("   average the values and do not quietly pick one. Say which page documents which")
+    A("   status and tell the reader the documented answers conflict.")
+    A(f"5. If the code is absent here, the policy page may not have been fetched. Check")
     A(f"   `research/pages/` and re-run `research/fetch.sh` on the policy's doc path.")
     A("")
+    n_conflict = sum(1 for r in runtime if r[4])
     A(f"Coverage: {len(runtime)} runtime codes, {len(deployment)} deployment errors, "
       f"{len(fault_vars)} fault variables, from {len(pages := sorted(PAGES.glob('*.txt')))} fetched pages.")
     A("")
+    if n_conflict:
+        A(f"{n_conflict} runtime code(s) are documented with conflicting HTTP statuses across")
+        A("policy pages. They are listed below in full so the conflict stays visible rather")
+        A("than being resolved by this script.")
+        A("")
+        for code, status, _cause, sources, _conflict in sorted(runtime):
+            if not _conflict:
+                continue
+            A(f"- `{code}`: documented as HTTP {status} on "
+              + ", ".join(u.rsplit("/", 1)[-1] for u in sources))
+        A("")
     if empty:
         A("## Pages with an error section that parsed to nothing")
         A("")
