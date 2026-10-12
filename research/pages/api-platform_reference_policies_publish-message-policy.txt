@@ -1,0 +1,776 @@
+[<span class="devsite-label" background="google-blue">Standard policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The PublishMessage policy lets you publish your API proxy flow information to a Google Cloud Pub/Sub topic. Google's Pub/Sub allows services to communicate asynchronously, with significantly less latency. For more information about Pub/Sub, see [What is Pub/Sub?](/pubsub/docs/overview). The information you want to publish to a Pub/Sub topic can be a literal text or a flow variable. You can also specify a combination of literal text and flow variables by using a [message template](/apigee/docs/api-platform/reference/message-template-intro).
+
+If the publish request is successful, Apigee sets the `publishmessage.message.id` flow variable to the value returned by the Pub/Sub server. For more information, see [Flow variables](#flowvariables).
+
+**Note:**
+
+- You can publish a message to only one topic by using the PublishMessage policy. If you want to publish a message to multiple topics, use multiple PublishMessage policies (one policy for each topic).
+- To run the PublishMessage policy, you should enable the Pub/Sub APIs for your Google Cloud project. For more information about enabling APIs for a Google Cloud project, see [Enabling and Disabling Services](/service-usage/docs/enable-disable).
+
+This policy is a *Standard policy* and can be deployed to any environment type. For information on policy types and availability with each environment type, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+## Authentication and proxy deployment
+
+To run the PublishMessage policy, you need an authentication token. However, there is no explicit \<Authentication\> element in the policy definition. You must deploy your API proxy to use Google authentication, which adds the authentication token to the request under the hood. For information on how to deploy an API proxy that uses Google authentication, see [Deployment steps](/apigee/docs/api-platform/security/google-auth/overview#deployment-steps).
+
+You must deploy your API proxy with a service account that has a role with the `pubsub.topics.publish` permission. For more information about Identity and Access Management (Identity and Access Management (IAM)) roles for Pub/Sub, see [Permissions and roles](/pubsub/docs/access-control).
+
+The service account should also have the `roles/iam.serviceAccountTokenCreator` role in order to generate the token for the proxy service account. See [Service Account Token Creator](/iam/docs/roles-permissions/iam#iam.serviceAccountTokenCreator) for more information.
+
+## `<PublishMessage>`
+
+Specifies the PublishMessage policy.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | Complex type |
+| Parent Element | N/A |
+| Child Elements | <Attributes> <CloudPubSub> <DisplayName> <IgnoreUnresolvedVariables> <Source> <UseMessageAsSource> |
+
+The following table provides a high-level description of the child elements of [`<PublishMessage>`](/apigee/docs/api-platform/reference/policies/publish-message-policy#publishmessage):
+
+| Child Element | Required? | Description |
+| --- | --- | --- |
+| <Attributes> | Optional | A set of attributes to attach to the Pub/Sub message. |
+| <CloudPubSub> | Required | Parent element of <Topic> . The <Topic> element specifies the Pub/Sub topic in which you want to publish your message. |
+| <DisplayName> | Optional | A custom name for the policy. |
+| <IgnoreUnresolvedVariables> | Optional | Specifies whether processing stops if Apigee encounters an unresolved variable. |
+| <Source> | Optional | Specifies the message to publish to the Pub/Sub topic. This element is optional, but you must use either <Source> or <UseMessageAsSource> . |
+| <UseMessageAsSource> | Optional | Specifies the message to publish to the Pub/Sub topic. This element is optional, but you must use either <Source> or <UseMessageAsSource> . |
+| Other child elements |  |  |
+| <Topic> | Required | A child element of <CloudPubSub> . Specifies the Pub/Sub topic to which you want to publish the message. |
+| <Endpoint> | Optional | A child element of <CloudPubSub> . Specifies the regional endpoint for Pub/Sub messaging to support advanced data residency . Defaults to the global endpoint pubsub.googleapis.com:443 if not specified. |
+
+The `<PublishMessage>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PublishMessage continueOnError="[true|false]" enabled="[true|false]" name="Publish-Message-1">
+    <DisplayName>DISPLAY_NAME</DisplayName>
+    <Source>SOURCE_VALUE</Source>
+    <Attributes>
+        <Attribute> name=ATTRIBUTE_NAME>ATTRIBUTE_VALUE</Attribute>
+    </Attributes>
+    <CloudPubSub>
+        <Topic>TOPIC_NAME</Topic>
+        <Endpoint>REGIONAL_ENDPOINT</Endpoint>
+    </CloudPubSub>
+    <IgnoreUnresolvedVariables>[true|false]</IgnoreUnresolvedVariables>
+</PublishMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example - Source
+
+The following example shows the `<PublishMessage>` policy definition:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PublishMessage continueOnError="false" enabled="true" name="Publish-Message-1">
+    <DisplayName>Publish Message-1</DisplayName>
+    <Source>this is a message template {flow-variable1}</Source>
+    <CloudPubSub>
+        <Topic>projects/{flow-variable-project-id}/topics/{flow-variable-topic-name}</Topic>
+    </CloudPubSub>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</PublishMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example - UseMessageAsSource
+
+This `<PublishMessage>` policy specifies the `UseMessageAsSource` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PublishMessage continueOnError="false" enabled="true" name="Publish-Message-2">
+    <UseMessageAsSource>request</UseMessageAsSource>
+    <CloudPubSub>
+        <Topic>projects/{flow-variable-project-id}/topics/{flow-variable-topic-name}</Topic>
+    </CloudPubSub>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</PublishMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example - Attributes
+
+This `<PublishMessage>` policy specifies the `Attributes` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PublishMessage name="Publish-Message-3">
+  <Source>this is a message template {flow-variable1}</Source>
+  <Attributes>
+    <Attribute name='attr-name-0'>fixed-value</Attribute>
+    <Attribute name='another-attribute-name'>{request.queryparam.attr1}</Attribute>
+    <Attribute name='a-third-attribute-name'>{request.queryparam.attr2:default-value}</Attribute>
+  </Attributes>
+  <CloudPubSub>
+    <Topic>projects/{flow-variable-project-id}/topics/{flow-variable-topic-name}</Topic>
+  </CloudPubSub>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</PublishMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example - Data residency
+
+This `<PublishMessage>` policy specifies the `Endpoint` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PublishMessage name="Publish-Message-3">
+  <Source>this is a message template {flow-variable1}</Source>
+  <CloudPubSub>
+    <Topic>projects/{flow-variable-project-id}/topics/{flow-variable-topic-name}</Topic>
+    <Endpoint>pubsub.us.rep.googleapis.com:443</Endpoint>
+  </CloudPubSub>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</PublishMessage>
+```
+
+</div>
+
+</div>
+
+This element has the following attributes that are common to all policies:
+
+**Attribute**
+
+**Default**
+
+**Required?**
+
+**Description**
+
+`name`
+
+N/A
+
+**Required**
+
+The internal name of the policy. The value of the `name` attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters.
+
+Optionally, use the `<DisplayName>` element to label the policy in the management UI proxy editor with a different, natural-language name.
+
+`continueOnError`
+
+false
+
+Optional
+
+Set to `false` to return an error when a policy fails. This is expected behavior for most policies. Set to `true` to have flow execution continue even after a policy fails. See also:
+
+- [Fault rules are triggered ONLY in an error state (about continueOnError)](/apigee/docs/api-platform/fundamentals/fault-handling#multiplefaultrulesandexecutionlogic-faultrulesaretriggeredonlyinanerrorstateaboutcontinueonerror)
+- [Handling faults within the current flow](/apigee/docs/api-platform/fundamentals/fault-handling#continueonerror)
+
+`enabled`
+
+true
+
+Optional
+
+Set to `true` to enforce the policy. Set to `false` to *turn off* the policy. The policy will not be enforced even if it remains attached to a flow.
+
+`async`  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray">not_interested</span></span>
+
+false
+
+Deprecated
+
+This attribute is deprecated.
+
+## Child element reference
+
+This section describes the child elements of [`<PublishMessage>`](/apigee/docs/api-platform/reference/policies/publish-message-policy#publishmessage).
+
+### `<Attributes>`
+
+Specifies the attributes to attach to the Pub/Sub message.
+
+Each attribute is a key-value pair. The name associated to the attribute should be unique. The value for each is determined dynamically at runtime via a [message template](/apigee/docs/api-platform/reference/message-template-intro).
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | String |
+| Parent Element | <PublishMessage> |
+| Child Elements | None |
+
+The `<Attributes>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  <Attributes>
+    <Attribute name='NAME-1'>fixed-value</Attribute>
+    <Attribute name='NAME-2'>{flow-variable}</Attribute>
+    ...
+    <Attribute name='NAME-N'>message template here {flow-variable:default-value}</Attribute>
+  </Attributes>
+```
+
+</div>
+
+<div class="section">
+
+#### Example 1
+
+The following example sets a single attribute with a fixed value on the message as it is published:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PublishMessage name="PM-with-one-attribute">
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <Source>{request.queryparam.message}</Source>
+  <Attributes>
+    <Attribute name='my-attribute-1'>fixed-value</Attribute>
+  </Attributes>
+  <CloudPubSub>
+    <Topic>projects/{request.queryparam.project}/topics/{request.queryparam.topic}</Topic>
+  </CloudPubSub>
+</PublishMessage>
+```
+
+</div>
+
+<div class="section">
+
+#### Example 2
+
+The following example sets multiple attributes on the message as it is published; the values of some of them are dynamically determined at runtime:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PublishMessage name="PM-with-multiple-attributes">
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <Source>{my-assembled-message}</Source>
+  <Attributes>
+    <Attribute name='attr-0'>fixed-value</Attribute>
+    <Attribute name='attr-1'>{flow-variable1}</Attribute>
+    <Attribute name='attr-2'>fixed portion {flow-variable2:default-value}</Attribute>
+  </Attributes>
+  <CloudPubSub>
+    <Topic>projects/{propertyset.settings.project}/topics/{propertyset.settings.topic}</Topic>
+  </CloudPubSub>
+</PublishMessage>
+```
+
+</div>
+
+</div>
+
+### `<DisplayName>`
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, more natural-sounding name.
+
+The `<DisplayName>` element is common to all policies.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional. If you omit `<DisplayName>`, the value of the policy's `name` attribute is used. |
+| **Type** | String |
+| **Parent Element** | \<`PolicyElement`\> |
+| **Child Elements** | None |
+
+The `<DisplayName>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>POLICY_DISPLAY_NAME</DisplayName>
+  ...
+</PolicyElement>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>My Validation Policy</DisplayName>
+</PolicyElement>
+```
+
+</div>
+
+</div>
+
+The `<DisplayName>` element has no attributes or child elements.
+
+### `<Source>`
+
+Specifies the message to publish.
+
+The message can be a literal text, a flow variable, or a combination of both in the form of a [message template](/apigee/docs/api-platform/reference/message-template-intro).
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | String |
+| Parent Element | <PublishMessage> |
+| Child Elements | None |
+
+The `<Source>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+ <Source>SOURCE</Source>
+```
+
+</div>
+
+<div class="section">
+
+#### Example-1
+
+The following example sets the source message to the value of the `flow-var-1` flow variable:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Source>{flow-var-1}</Source>
+```
+
+</div>
+
+<div class="section">
+
+#### Example-2
+
+The following example uses a message template to publish a JSON message with dynamic content:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PublishMessage name="PM-with-source-template">
+  <Source>{
+    "name": "value-1",
+    "count": "{flow-variable1}",
+    "action": "{flow-variable2}"
+  }</Source>
+  <Attributes>
+    <Attribute name='content-type'>application/json</Attribute>
+  </Attributes>
+  <CloudPubSub>
+    <Topic>projects/{propertyset.settings.project}/topics/{propertyset.settings.topic}</Topic>
+  </CloudPubSub>
+</PublishMessage>
+```
+
+</div>
+
+</div>
+
+### `<CloudPubSub>`
+
+Parent element of [`<Topic>`](/apigee/docs/api-platform/reference/policies/publish-message-policy#topic).
+
+You can publish to only one Pub/Sub topic. Hence, you can have only one `<Topic>` element in the `<CloudPubSub>` element.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | Complex type |
+| Parent Element | <PublishMessage> |
+| Child Elements | <Topic> <Endpoint> |
+
+The `<CloudPubSub>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<CloudPubSub>
+  <Topic>TOPIC_NAME</Topic>
+  <Endpoint>REGIONAL_ENDPOINT</Endpoint>
+</CloudPubSub>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example shows the declaration of the `<CloudPubSub>` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<CloudPubSub>
+  <Topic>projects/{my-project}/topics/{my-topic}</Topic>
+  <Endpoint>pubsub.us.rep.googleapis.com:443</Endpoint>
+</CloudPubSub>
+```
+
+</div>
+
+</div>
+
+### `<Topic>`
+
+Specifies the Pub/Sub topic to which you want to publish the [`<Source>`](/apigee/docs/api-platform/reference/policies/publish-message-policy#source) message.
+
+Use the following format: `projects/``project-id``/topics/``topic-name`
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | String |
+| Parent Element | <CloudPubSub> |
+| Child Elements | None |
+
+The `<Topic>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+##### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Topic>TOPIC_NAME</Topic>
+```
+
+</div>
+
+<div class="section">
+
+##### Example
+
+The following example specifies the Pub/Sub topic to publish to:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Topic>projects/project-id-marketing/topics/topic-name-test1</Topic>
+```
+
+In this example, `project-id-marketing` is your Google Cloud Project ID and `topic-name-test1` is the topic in which the message should be published.
+
+</div>
+
+</div>
+
+### `<Endpoint>`
+
+Specifies the regional endpoint for Pub/Sub messaging to support [data residency](/apigee/docs/api-platform/get-started/drz-concepts).
+
+| Default Value | pubsub.googleapis.com:443 (global endpoint) |
+| --- | --- |
+| Required? | Optional |
+| Type | String |
+| Parent Element | <CloudPubSub> |
+| Child Elements | None |
+
+The `<Endpoint>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+##### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Endpoint>pubsub.CONTROL_PLANE_LOCATION.rep.googleapis.com:443</Endpoint>
+```
+
+**Important:** When using VPC Service Controls with data residency, you must use the following regional endpoint: `CONTROL_PLANE_LOCATION``-pubsub.googleapis.com:443`.
+
+Where **CONTROL_PLANE_LOCATION** is the physical location at which Apigee control plane data will be stored. For a list of available control plane locations, see [Apigee locations](/apigee/docs/locations#control-plane-location).
+
+</div>
+
+<div class="section">
+
+##### Example
+
+The following example specifies the regional endpoint URL to use for Pub/Sub messaging in the US to support data residency:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Endpoint>pubsub.us.rep.googleapis.com:443</Endpoint>
+```
+
+</div>
+
+<div class="section">
+
+##### Example - With VPC Service Controls
+
+The following example specifies the regional endpoint URL to use for Pub/Sub messaging in the US to support data residency with VPC Service Controls:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Endpoint>us-pubsub.googleapis.com:443</Endpoint>
+```
+
+</div>
+
+</div>
+
+### `<UseMessageAsSource>`
+
+Specifies the message to publish.
+
+Use this as an alternative to the `<Source>` element. The value should be the name of a flow variable referring to a message, such as `request`, `response`, or `message`. When you specify this element, the policy uses the content of the message as the message to publish. You should use this element rather than `<Source>` when the message content is an octet stream which cannot be represented as a string, for example content from a binary file.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | String |
+| Parent Element | <PublishMessage> |
+| Child Elements | None |
+
+The `<UseMessageAsSource>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PublishMessage name="PM-with-use-message-as-source">
+  <UseMessageAsSource>MESSAGE_NAME</UseMessageAsSource>
+  <Attributes>
+    <Attribute name='attr-1'>{flowvar1}</Attribute>
+  </Attributes>
+  <CloudPubSub>
+    <Topic>projects/{flowvar1}/topics/{flowvar-topic}</Topic>
+  </CloudPubSub>
+</PublishMessage>
+```
+
+</div>
+
+<div class="section">
+
+#### Example-1
+
+The following example tells the policy to use the content of the request message as the payload for the Pub/Sub message:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PublishMessage name="PM-with-use-message-as-source">
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <UseMessageAsSource>request</UseMessageAsSource>
+  <Attributes>
+    <Attribute name='attr-1'>{flowvar1}</Attribute>
+  </Attributes>
+  <CloudPubSub>
+    <Topic>projects/{propertyset.settings.project}/topics/{propertyset.settings.topic}</Topic>
+  </CloudPubSub>
+</PublishMessage>
+```
+
+</div>
+
+</div>
+
+### `<IgnoreUnresolvedVariables>`
+
+Specifies whether processing stops if Apigee encounters an unresolved variable.
+
+|  |  |
+|----|----|
+| **Default Value** | False |
+| **Required?** | Optional |
+| **Type** | Boolean |
+| **Parent Element** | [`<PublishMessage>`](/apigee/docs/api-platform/reference/policies/publish-message-policy#publishmessage) |
+| **Child Elements** | None |
+
+Set the value to `true` to ignore unresolved variables and continue processing; otherwise `false`. The default value is `false`.
+
+Setting `<IgnoreUnresolvedVariables>` to `true` is different from setting the [`<PublishMessage>`](/apigee/docs/api-platform/reference/policies/publish-message-policy#publishmessage)'s `continueOnError` to `true`. If you set `continueOnError` to `true`, Apigee ignores all errors, not only errors in variables.
+
+The `<IgnoreUnresolvedVariables>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IgnoreUnresolvedVariables>[true|false]</IgnoreUnresolvedVariables>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+The following example sets `<IgnoreUnresolvedVariables>` to `true`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+```
+
+</div>
+
+</div>
+
+## Flow variables
+
+Flow variables are objects that hold specific data and are available to you in the context of an API proxy flow. These variables store information such as payload information, URL path, IP addresses, and data from policy execution. For more information about flow variables, see [Using flow variables](/apigee/docs/api-platform/fundamentals/introduction-flow-variables).
+
+If the PublishMessage policy successfully publishes to the Pub/Sub topic, Apigee sets the [`publishmessage.message.id`](/apigee/docs/api-platform/reference/variables-reference#publishmessage) flow variable to the [messageId](/pubsub/docs/reference/rest/v1/PubsubMessage) returned by the Pub/Sub server. The flow variable is of type string, and the variable is available to you from the Proxy request flow onwards. Based on your requirement, you can use the flow variable in other downstream policies. However, if the publish fails, Apigee does not set the `publishmessage.message.id` variable, and accessing this variable will cause errors.
+
+For more information about various types of flow variables, see [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference).
+
+## Error codes
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+| Fault code | HTTP status | Cause |
+|----|----|----|
+| `steps.publishmessage.PermissionDeniedError` | `500` | This error occurs when the runtime service account cannot impersonate the proxy service account or the proxy service account does not have the permission to publish to the topic. |
+| `steps.publishmessage.ExecutionError` | `500` | This error occurs if there was an unexpected error while publishing the message to Pub/Sub. You can view the details of the error in the error message. |
+| `steps.publishmessage.MessageVariableNotMessageType` | `500` | This error occurs if the variable name you specified in `UseMessageAsSource` cannot be resolved, or is not a message type. |
+
+### Fault variables
+
+Whenever there are execution errors in a policy, Apigee generates error messages. You can view these error messages in the error response. Many a time, system generated error messages might not be relevant in the context of your product. You might want to customize the error messages based on the type of error to make the messages more meaningful.
+
+To customize the error messages, you can use either fault rules or the RaiseFault policy. For information about differences between fault rules and the RaiseFault policy, see [FaultRules vs. the RaiseFault policy](/apigee/docs/api-platform/fundamentals/fault-handling#rulesvraisefault). You must check for conditions using the `Condition` element in both the fault rules and the RaiseFault policy. Apigee provides fault variables unique to each policy and the values of the fault variables are set when a policy triggers runtime errors. By using these variables, you can check for specific error conditions and take appropriate actions. For more information about checking error conditions, see [Building conditions](/apigee/docs/api-platform/fundamentals/fault-handling#buildingconditions).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name` | The `fault.name` can match to any of the faults listed in the [Runtime errors](#runtime-errors) table. The fault name is the last part of the fault code. | `fault.name Matches "UnresolvedVariable"` |
+| `publishmessage.``POLICY_NAME``.failed` | `POLICY_NAME` is the user-specified name of the policy that threw the fault. | `publishmessage.publish-message-1.failed = true` |
+
+For more information about policy errors, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors)

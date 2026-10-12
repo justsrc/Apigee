@@ -1,0 +1,18 @@
+URL: https://github.com/apigee/apigeelint/issues/64
+TITLE: New Plugin - Caching Error Responses
+STATE: closed state_reason: completed
+AUTHOR: davidwallen association: CONTRIBUTOR
+CREATED: 2017-07-19T17:41:12Z CLOSED: 2017-07-20T04:51:21Z
+LABELS: enhancement
+MILESTONE: None
+--- BODY ---
+The Response Cache policy allows us to cache the error responses in its default configuration.  However, it is not advisable to cache the error responses without considerable thought on the adverse implications because: 
+The failure occurs for a temporary unknown period and we may continue to send error responses due to caching even after the problem has been fixed, OR
+The failure will be observed for a fixed period of time, then we will have to modify the code to avoid caching responses once the problem is fixed
+
+Don’t store the error responses in the response cache.  Ensure that the <ExcludeErrorResponse> element is set to true in the Response Cache policy to prevent error responses from being cached as shown in the below code snippet.   With this configuration only the responses for the default success codes 200 to 205 (unless the success codes are modified) will be cached.
+
+--- COMMENTS (1) ---
+
+### comment by davidwallen (association=CONTRIBUTOR) at 2017-07-20T04:50:26Z
+completed

@@ -1,0 +1,353 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/cassandra-external.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/cassandra-external.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/cassandra-external.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/cassandra-external.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/cassandra-external.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/cassandra-external.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/cassandra-external.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/cassandra-external.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/cassandra-external.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/cassandra-external.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/cassandra-external.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/cassandra-external.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/cassandra-external.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/cassandra-external.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/cassandra-external.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/cassandra-external.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/cassandra-external.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/cassandra-external.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+This topic tells you how to connect an Apigee hybrid runtime to a Cassandra datastore in a different Kubernetes cluster. In this configuration, the runtime cluster has no Cassandra pods. The name of this configuration is **external datastore** mode.
+
+**Note:** External datastore mode is available in hybrid version 1.17.1 and later. Most hybrid installations run Cassandra in the same cluster as the runtime. External datastore mode is for installations that must operate Cassandra in a separate cluster, for example, when a dedicated team manages Cassandra. For a Cassandra ring in the runtime cluster, see [Configure Cassandra for production](/apigee/docs/hybrid/v1.17/cassandra-production).
+
+## Two-cluster topology
+
+External datastore mode uses two Kubernetes clusters:
+
+- The **Cassandra cluster** runs the Cassandra ring. It doesn't run the hybrid runtime components.
+- The **runtime cluster** runs the hybrid runtime components, but it has **no Cassandra pods**. The runtime components connect to the Cassandra ring in the Cassandra cluster through the network.
+
+**The Apigee operator runs in both clusters.** You install cert-manager, the Apigee custom resource definitions (CRDs), and the `apigee-operator` chart in each cluster. The following table shows the components in each cluster:
+
+| Component | Cassandra cluster | Runtime cluster |
+|----|----|----|
+| cert-manager | Yes | Yes |
+| Apigee CRDs and the `apigee-operator` chart | Yes | Yes |
+| `apigee-datastore` chart | Yes, with the Cassandra pods | Yes, with `replicaCount: 0` and no Cassandra pods |
+| All other hybrid charts, such as `apigee-telemetry`, `apigee-redis`, `apigee-ingress-manager`, `apigee-org`, `apigee-env`, and `apigee-virtualhost` | No | Yes |
+
+The Apigee operator does a different job in each cluster:
+
+- In the Cassandra cluster, the operator creates the Cassandra pods. It also manages the Cassandra lifecycle, for example, when you scale the ring.
+- In the runtime cluster, the operator does not create Cassandra pods. It creates a headless Service and an Endpoints object that point to the Cassandra ring in the Cassandra cluster. If you enable [dynamic endpoint sync](#endpoint-sync), the operator in the runtime cluster also reads the Cassandra endpoints from the Cassandra cluster.
+
+**Note:** All the clusters and regions of one Apigee organization must use **one Cassandra ring**. External datastore mode changes the location of Cassandra. It does not let you connect more than one ring to one organization. For more information, see the split-brain warning in [Multi-region deployment](/apigee/docs/hybrid/v1.17/multi-region).
+
+## Setup overview
+
+Do these steps in the sequence that follows. The sequence is important. The shared certificate authority (CA) must be in the runtime cluster before the runtime cluster issues certificates. For more information, see [Share the Apigee CA before you install the operator](#shared-ca).
+
+1.  In the Cassandra cluster, install cert-manager, the Apigee CRDs, the `apigee-operator` chart, and the `apigee-datastore` chart.
+2.  Make sure that the Cassandra pods in the Cassandra cluster are ready.
+3.  In the runtime cluster, install cert-manager.
+4.  Copy the `apigee-ca` secret from the Cassandra cluster to the runtime cluster. **Do this step before you install the `apigee-operator` chart in the runtime cluster.**
+5.  In the runtime cluster, install the hybrid runtime components. Use the [external datastore overrides](#configure-datastore) for the `apigee-datastore` chart. Use the [same Cassandra credentials](#credentials) as in the Cassandra cluster.
+6.  (Recommended) Enable [dynamic endpoint sync](#endpoint-sync).
+7.  [Verify the connection](#verify).
+
+For the steps that install each chart, see [Install Apigee hybrid using Helm](/apigee/docs/hybrid/v1.17/install-helm-charts).
+
+## Before you begin
+
+Make sure that your environment meets the following requirements:
+
+- **Network connection to Cassandra.** The runtime cluster must connect to the Cassandra pods on TCP port **9042**. Put the two clusters in a shared VPC, or in networks with a private connection between them.
+- **One region.** Put the two clusters in the same region. The round-trip time between the clusters adds to the latency of each runtime request.
+- **cert-manager in both clusters.** In each cluster, cert-manager issues the certificates for the mTLS connection between the runtime and Cassandra. Install [cert-manager](/apigee/docs/hybrid/v1.17/install-cert-manager) in the Cassandra cluster and in the runtime cluster.
+- **A route to each Cassandra pod.** The Cassandra client driver connects directly to each Cassandra pod. The runtime cluster must connect to the IP address of each Cassandra pod, not only to one address. A load balancer or a single virtual IP address in front of the ring does not meet this requirement.
+- **Network connection to the Kubernetes API server.** This requirement applies only if you use dynamic endpoint sync. The runtime cluster must connect to the Kubernetes API server of the Cassandra cluster.
+
+## Share the Apigee CA before you install the operator
+
+**Copy the `apigee-ca` secret to the runtime cluster *before* you install the `apigee-operator` chart in the runtime cluster.**
+
+The runtime and Cassandra use mTLS, so the two clusters must trust the **same** CA. The `apigee-operator` chart creates a self-signed CA in each cluster. This CA is a cert-manager `Certificate` named `apigee-ca` in the `cert-manager` namespace.
+
+If each cluster creates its own `apigee-ca`, the two CAs have different fingerprints. The mTLS handshake then fails, and the runtime cannot connect to Cassandra.
+
+If the `apigee-ca` secret is already in the cluster, cert-manager does not replace it. Thus, if you copy the secret first, the runtime cluster uses the shared CA. If the runtime cluster issued certificates from a different CA, a copy of the secret is not sufficient. You must also recreate those certificates so that the shared CA signs them.
+
+Install cert-manager in the runtime cluster. Then copy the CA secret from the Cassandra cluster to the runtime cluster:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+kubectl --context CASSANDRA_CLUSTER -n cert-manager get secret apigee-ca -o yaml \
+  | grep -v -E '^\s+(resourceVersion|uid|creationTimestamp|selfLink):' \
+  | kubectl --context RUNTIME_CLUSTER -n cert-manager apply -f -
+```
+
+Replace the following::
+
+- `CASSANDRA_CLUSTER`: the kubectl context of the Cassandra cluster.
+- `RUNTIME_CLUSTER`: the kubectl context of the runtime cluster.
+
+The `grep` command removes the metadata fields that belong to the Cassandra cluster. The Kubernetes API server does not create an object that has a `resourceVersion` value.
+
+Multi-region installations use the same shared-CA principle. For a similar copy step, see [Rotate the root CA certificate](/apigee/docs/hybrid/v1.17/rotate-root-ca). For the Cassandra mTLS configuration, see [Configure authentication for Cassandra](/apigee/docs/hybrid/v1.17/cassandra-tls).
+
+## Use the same Cassandra credentials in both clusters
+
+**Set the same Cassandra credentials in the overrides files of the two clusters.**
+
+The `apigee-datastore` chart in each cluster creates a credentials secret from the `cassandra.auth` values of that cluster. The runtime components and the Cassandra setup jobs in the runtime cluster use these credentials to connect to the Cassandra ring. If the credentials in the runtime cluster are different, the authentication fails.
+
+The default passwords of the chart are the same in the two clusters. Thus, an installation with the default passwords connects. But if you change the passwords in only one cluster, the connection fails.
+
+Use one of these methods in the overrides files of the two clusters:
+
+- Set the same usernames and passwords in `cassandra.auth`: `default`, `admin`, `ddl`, `dml`, `jmx`, and `jolokia`.
+- Set `cassandra.auth.secret`. In each cluster, the secret must contain the same users and passwords. See [Create the Secret](/apigee/docs/hybrid/v1.17/cassandra-tls#create-the-secret).
+- Set `cassandra.auth.secretProviderClass` to a SecretProviderClass that reads the same secret store. See [Storing Cassandra secrets in Hashicorp Vault](/apigee/docs/hybrid/v1.17/storing-cassandra-secrets-in-vault).
+
+You do not copy the credentials secret from the Cassandra cluster. The chart in the runtime cluster creates the secret from your overrides. To find an authentication failure, see [Verify the connection](#verify).
+
+## Configure the external datastore
+
+In the runtime cluster, the `apigee-datastore` chart must not create Cassandra pods. It must point to the Cassandra ring in the Cassandra cluster. Add these `cassandra` settings to the overrides file of the runtime cluster:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+cassandra:
+  # No Cassandra pods in the runtime cluster.
+  replicaCount: 0
+  properties:
+    # A comma-separated list of the Cassandra pod IP addresses.
+    externalHost: "CASSANDRA_IP_ADDRESSES"
+  storage:
+    # Required, even with replicaCount: 0.
+    storageSize: "10Gi"
+```
+
+Where:
+
+- `CASSANDRA_IP_ADDRESSES` is a comma-separated list of the IP addresses of the Cassandra pods in the Cassandra cluster. For example: `10.0.0.1:9042,10.0.0.2:9042,10.0.0.3:9042`. The `:9042` suffix is optional. To get the list, run this command:
+
+  <div>
+
+  </div>
+
+  ``` devsite-terminal
+  kubectl --context CASSANDRA_CLUSTER -n APIGEE_NAMESPACE get pods -l app=apigee-cassandra \
+    -o jsonpath='{.items[*].status.podIP}' | tr ' ' ','
+  ```
+
+- `APIGEE_NAMESPACE` is your Apigee namespace. The default is `apigee`.
+
+- `replicaCount: 0` tells the operator to create no Cassandra pods in the runtime cluster. The operator creates a headless Service and an Endpoints object that point to the `externalHost` addresses.
+
+- `cassandra.properties.externalHost` is a comma-separated list of Cassandra IP addresses. Each address can have a `:port` suffix, but the operator ignores the port and always uses port 9042. The operator accepts only IP addresses. It ignores hostnames and DNS names, and it writes a warning to its log for each ignored entry.
+
+- `cassandra.storage.storageSize` is **required**, but the runtime cluster does not create PersistentVolumes for Cassandra. The `ApigeeDatastore` validating webhook always checks `storageSize`. Use a valid quantity, for example `10Gi`.
+
+**Note:** The `apigee-datastore` chart includes a complete example of these overrides in `apigee-datastore/examples/external-datastore-values.yaml`.
+
+A pod IP address changes when you scale the ring and when Kubernetes reschedules a pod. Then the list in `externalHost` becomes incorrect. Thus, we recommend [dynamic endpoint sync](#endpoint-sync). Dynamic endpoint sync keeps the list of Cassandra pod IP addresses current automatically. Use `externalHost` alone only for a simple installation or for the first setup.
+
+## Keep the endpoints current with dynamic endpoint sync
+
+With only `externalHost`, you must edit your overrides each time that the Cassandra ring changes. **Dynamic endpoint sync** removes this manual step. The operator in the runtime cluster reads the ready Cassandra endpoints from the Cassandra cluster at a regular interval. Then it copies these endpoints into the Endpoints object in the runtime cluster.
+
+**We recommend dynamic endpoint sync.** Pod IP addresses change each time that you scale the ring or Kubernetes reschedules a pod. Dynamic endpoint sync reads the IP addresses of the ready pods of the Cassandra headless Service. Thus, the Endpoints object in the runtime cluster always contains the current Cassandra pod IP addresses.
+
+With dynamic endpoint sync, `externalHost` is still necessary. The operator uses it in these two conditions:
+
+- Before the first successful read from the Cassandra cluster.
+- When a read from the Cassandra cluster fails and there are no endpoints from a previous successful read.
+
+If a read fails and there are endpoints from a previous successful read, the operator keeps those endpoints. The runtime keeps its connection to Cassandra.
+
+To enable dynamic endpoint sync, add the `externalEndpointsSync` block to the overrides file of the runtime cluster:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+cassandra:
+  replicaCount: 0
+  properties:
+    # The first endpoints, and the fallback if a read fails.
+    externalHost: "CASSANDRA_IP_ADDRESSES"
+    externalEndpointsSync:
+      # A secret in the runtime cluster. Its "kubeconfig" key holds the
+      # kubeconfig for the Cassandra cluster.
+      secretRef: apigee-remote-cass-kubeconfig
+      # The namespace of the Cassandra headless Service in the Cassandra cluster.
+      namespace: apigee
+      # The Cassandra headless Service in the Cassandra cluster.
+      serviceName: apigee-cassandra-default
+      # The interval between reads, in seconds. The default is 30.
+      intervalSeconds: 30
+  storage:
+    storageSize: "10Gi"
+```
+
+**Note:** The `apigee-datastore` chart includes a complete example of these overrides in `apigee-datastore/examples/external-datastore-endpoint-sync-values.yaml`.
+
+### Create a read-only service account in the Cassandra cluster
+
+The operator in the runtime cluster uses a kubeconfig to connect to the Cassandra cluster. This kubeconfig must use a **read-only ServiceAccount with the least privilege**. This ServiceAccount can only read the Cassandra endpoints. It cannot change resources in the Cassandra cluster.
+
+In the Cassandra cluster, create these resources:
+
+- A ServiceAccount, for example `apigee-endpoint-reader`.
+- A Role and a RoleBinding in the Cassandra namespace. The Role gives **only** the `get`, `list`, and `watch` verbs on core `endpoints`. Do not give other verbs, such as `create`, `update`, `patch`, or `delete`. Do not give access to other resources.
+- A long-lived token Secret for the ServiceAccount.
+
+Then make a kubeconfig file for the Kubernetes API server of the Cassandra cluster. This kubeconfig must use the token of the ServiceAccount. In the runtime cluster, create a secret with the name that you set in `externalEndpointsSync.secretRef`. Put the kubeconfig in the `kubeconfig` key:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+kubectl --context RUNTIME_CLUSTER -n APIGEE_NAMESPACE create secret generic \
+  apigee-remote-cass-kubeconfig --from-file=kubeconfig=READER_KUBECONFIG_FILE
+```
+
+Replace `READER_KUBECONFIG_FILE` with the path to the kubeconfig file for the read-only ServiceAccount.
+
+The kubeconfig contains a long-lived token. Keep this secret as safe as your other credentials.
+
+**Note:** The `apigee-datastore` chart includes a sample of these resources in `apigee-datastore/examples/external-cassandra-reader-rbac.yaml`. The sample includes the ServiceAccount, the Role, the RoleBinding, the token Secret, and the kubeconfig secret for the runtime cluster.
+
+### Monitor dynamic endpoint sync
+
+If a read from the Cassandra cluster fails, the runtime keeps its connection. But the endpoints in the runtime cluster do not change until a read is successful again. Monitor the sync so that you find a persistent failure before the Cassandra ring changes.
+
+The operator in the runtime cluster gives these signals:
+
+- The `EndpointSyncDegraded` condition in the status of the `ApigeeDatastore` resource. The condition becomes `True` after three consecutive failed reads. The reason is `RemoteReadFailed` or `NoReadyRemoteEndpoints`. After a successful read, the condition becomes `False` with the reason `SyncSucceeded`.
+- The `external_endpoint_sync_last_success_timestamp` metric. This metric is the time of the last successful read, in Unix seconds.
+- The `external_endpoint_sync_failures_total` metric. This metric counts the failed reads.
+
+The two metrics have the `namespace` and `name` labels of the `ApigeeDatastore` resource. The operator shows them on its metrics endpoint.
+
+To see the condition, run this command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+kubectl --context RUNTIME_CLUSTER -n APIGEE_NAMESPACE get apigeedatastore default \
+  -o jsonpath='{.status.conditions}'
+```
+
+**We recommend an alert on the `EndpointSyncDegraded` condition.** The `ApigeeDatastore` status keeps the condition when the operator restarts. Only a successful read sets the condition to `False`.
+
+If you also use an alert on the metric, send an alert when one of these two expressions is true:
+
+- `time() - external_endpoint_sync_last_success_timestamp > 300`
+- `absent(external_endpoint_sync_last_success_timestamp)`
+
+The operator sets the metric only after a successful read. If the operator restarts while the reads fail, the metric is absent. Then the first expression does not match, and only the second expression sends the alert.
+
+## Verify the connection
+
+After you install the runtime components, do these checks in the runtime cluster:
+
+1.  Make sure that the runtime cluster has no Cassandra pods:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl --context RUNTIME_CLUSTER -n APIGEE_NAMESPACE get pods -l app=apigee-cassandra
+    ```
+
+    The output is `No resources found`.
+
+2.  Make sure that the Endpoints object points to the Cassandra ring:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl --context RUNTIME_CLUSTER -n APIGEE_NAMESPACE get endpoints apigee-cassandra-default
+    ```
+
+    The `ENDPOINTS` column shows the Cassandra IP addresses. If you use dynamic endpoint sync, these are the IP addresses of the ready Cassandra pods in the Cassandra cluster.
+
+3.  Make sure that the Cassandra setup jobs completed:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl --context RUNTIME_CLUSTER -n APIGEE_NAMESPACE get jobs \
+      | grep -E 'apigee-cassandra-(schema|user)-setup'
+    ```
+
+    The `COMPLETIONS` column shows `1/1` for each job. If a job does not complete, examine the log of the job for authentication errors. Then make sure that the two clusters use the [same Cassandra credentials](#credentials).
+
+## Scale the Cassandra ring
+
+The **Apigee operator in the Cassandra cluster owns the Cassandra lifecycle**. Scale Cassandra in the Cassandra cluster. You cannot scale Cassandra from the runtime cluster.
+
+**Do not run `nodetool decommission` manually before you decrease the number of Cassandra pods.**
+
+The operator in the Cassandra cluster manages the ring membership when you decrease the number of pods. If you decommission a node manually and then decrease the number of pods, the StatefulSet and the operator become inconsistent. The decrease then stops and cannot continue. Let the operator decommission the nodes.
+
+Obey the same rules as for a Cassandra ring in the runtime cluster:
+
+- Scale Cassandra in **multiples of three**. This keeps the ring balanced across three availability zones.
+- Before you increase the number of pods, make sure that the Cassandra cluster has sufficient **node capacity**.
+- If you do not use dynamic endpoint sync, update `externalHost` after each scale operation.
+
+For more information, see [Scaling Cassandra](/apigee/docs/hybrid/v1.17/cassandra-scaling).
+
+## What's next
+
+- To install the charts in each cluster, see [Install Apigee hybrid using Helm](/apigee/docs/hybrid/v1.17/install-helm-charts).
+- For Cassandra mTLS and credentials, see [Configure authentication for Cassandra](/apigee/docs/hybrid/v1.17/cassandra-tls).
+- To add capacity to the Cassandra ring, see [Scaling Cassandra](/apigee/docs/hybrid/v1.17/cassandra-scaling).

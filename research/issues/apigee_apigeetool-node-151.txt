@@ -1,0 +1,39 @@
+URL: https://github.com/apigee/apigeetool-node/issues/151
+TITLE: Deploy of shared flows failing but not resulting in error
+STATE: open state_reason: None
+AUTHOR: jhonnymertz association: NONE
+CREATED: 2019-06-24T14:46:49Z CLOSED: None
+LABELS: 
+MILESTONE: None
+--- BODY ---
+I've been using the tool to automate the deploy of API layer, but sometimes the deploy of shared flows fail and the javascript command does not result on errors nor trigger exceptions.
+
+It may be due to some network issue or something on apigee side that `partially` deploys the shared flow, so I'm not able to reproduce it. But from time to time I keep facing this issue. The problem is that the tool does not recognize the error received from apigee and thus it does not trigger an exception or error when it happens.
+
+For example, this is the expected result while deploying the sharedflow with success:
+```
+[{"name":"shared-flow-name","environment":"dev","revision":48,"state":"deployed","basePath":"N/A","uris":[]}]
+```
+
+However, sometimes I got:
+```
+[{"name":"shared-flow-name","environment":"dev","revision":47,"state":"error","basePath":"N/A","partialResults":[{"pod":{"name":"rde1dmp010-1","region":"eu-central-1"},"status":"deployed","type":["message-processor"],"uUID":"1be899cb-3228-4239-baeb-713ac2b5fad4"},{"pod":{"name":"rea1dmp010-1","region":"us-east-1"},"status":"deployed","type":["message-processor"],"uUID":"d7ffaa10-16da-4bc3-a2e8-5512f37bc33d"},{"pod":{"name":"rea1dmp010-1","region":"us-east-1"},"status":"deployed","type":["message-processor"],"uUID":"aa47e8f2-6f1b-416a-866f-f05b561e4c66"},{"pod":{"name":"rea1dmp010-1","region":"us-east-1"},"status":"deployed","type":["message-processor"],"uUID":"ab6ec230-8336-44e4-83c2-51dfdbca177d"},{"pod":{"name":"rea1dmp010-1","region":"us-east-1"},"status":"deployed","type":["message-processor"],"uUID":"6b01b7f9-42ee-4073-ae81-912bfcf43ed5"}]}]
+```
+
+That's how I'm using the tool, and apigeetool sdk does not trigger the exception, it proceeds to the `then`:
+
+```
+apigeeSdk.deploySharedflow(opts)
+          .then(function (result) {
+            log('%s: %s - Sharedflow was deployed successfully: %s', sharedFlowName, opts.name, JSON.stringify(result))
+          }, function (err) {
+            handleError(err) // not reached when the error mentioned happens...
+          })
+```
+
+Of course, I can verify the content of the `result` and check the `state` field of the deployment (which indeed I'm doing right now). But, I'd like to confirm if it is expected behavior, and apigeetool is not supposed to throw the exception when the deploy is done partially with errors. Otherwise, it may be nice to fail the sharedflow deploy when it happens.
+
+--- COMMENTS (1) ---
+
+### comment by maheshdhummi (association=NONE) at 2019-11-19T11:29:20Z
+you got any solution?

@@ -1,0 +1,61 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/logging.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/logging.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/logging.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/logging.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/logging.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/logging.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/logging.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/logging.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/logging.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/logging.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/logging.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/logging.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/logging.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/logging.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/logging.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/logging.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/logging.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/logging.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+All of the Apigee hybrid services that run in your Kubernetes cluster output operational log information. This log information is useful for troubleshooting and debugging. For example, if a service pod's status indicates a problem, you can look at the log files for that pod to gain insight into the issue. Apigee support may request you to provide log information to diagnose and solve a problem.
+
+## About logging
+
+Each runtime plane service writes log data to stdout/stderr, and Kubernetes writes this data to the host filesystem. A logs collector for hybrid runs on each hybrid node. The collector is a <a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/" class="external">DaemonSet</a> (replicated once and only once per node) whose job is to collect the written log data and export it to the <a href="/logging/docs" class="external">Cloud Logging</a> application associated with your Google Cloud account.
+
+The following diagram shows the log data collection process:
+
+![Apigee hybrid logs data collection](/static/apigee/docs/hybrid/v1.17/images/arch-logs.svg)
+
+## Next step
+
+- [View logs](/apigee/docs/hybrid/v1.17/logging-view)

@@ -1,0 +1,859 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The DataCapture policy captures data (such as payload, HTTP headers, and path or query parameters) from an API proxy for use in Analytics. You can use captured data in custom Analytics reports, as well as to implement monetization, and monitoring rules.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+**Note**:If you have an Apigee organization with Pay-as-you-go billing, you must enable the Apigee API Analytics add-on to use this policy. For more information, see [Manage the Apigee API Analytics add-on](/apigee/docs/api-platform/reference/manage-analytics-add-on).
+
+## Data collector resource
+
+To use the `DataCapture` policy, you must first create a [data collector](/apigee/docs/reference/apis/apigee/rest/v1/organizations.datacollectors) resource. For steps to create a data collector resource using either the Apigee UI and the Apigee API, see [Creating a data collector](/apigee/docs/api-platform/system-administration/data-collectors#creating-a-data-collector).
+
+## `<DataCapture>`
+
+The `<DataCapture>` element defines a `DataCapture` policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DataCapture async="true" continueOnError="true" enabled="true" name="DC">
+```
+
+Here's an example of a `DataCapture` policy:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DataCapture name="DC-1">
+    <Capture>
+        <DataCollector>dc_data_collector</DataCollector>
+        <Collect ref="my_data_variable" />
+    </Capture>
+</DataCapture>
+```
+
+The main element of the `DataCapture` policy is the `<Capture>` element, which specifies the means of capturing the data. It has two required child elements:
+
+- The [`<DataCollector>`](#datacollector) element, which specifies a [data collector REST resource](#data-collector-rest-resource). In this case, the resource is named `dc_data_collector`.
+- The [`<Collect>`](#collect) element, which specifies the means for capturing the data.
+
+In this simple example, the data is extracted from a variable named `my_data_variable`, which has been created elsewhere in the proxy. The variable is specified by the `ref` attribute.
+
+The `<Collect>` element also provides several other ways of capturing data from various sources through its [child elements](#collect-child). See [Examples](#examples) for more examples of capturing data with the `DataCapture` policy.
+
+**Note:** You can use multiple `<Capture>` elements, provided they use distinct values for the respective child `<DataCollector` elements. For example, if you define another data collector resource named `dc_data_collector2`, you can add the following `<Capture>` block to the policy shown above:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+    <Capture>
+        <DataCollector>dc_data_collector2</DataCollector>
+            <Collect ref="my_data_variable2"/>
+    </Capture>
+```
+
+However, you **cannot** include two `<Capture>` elements that refer to the same data collector resource in the same policy.
+
+The `DataCapture` element has the following syntax.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DataCapture name="capturepayment" continueOnError="false" enabled="true"> 
+  <DisplayName>Data-Capture-Policy-1</DisplayName>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <ThrowExceptionOnLimit>false</ThrowExceptionOnLimit>
+
+  <!-- Existing Variable -->
+  <Capture>
+    <Collect ref="existing-variable" default="0"></Collect>
+    <DataCollector>dc_1</DataCollector>
+  </Capture>
+
+  <!-- JSONPayload -->
+  <Capture>
+    <DataCollector>dc_2</DataCollector>
+    <Collect default="0">
+      <Source>request</Source>
+      <JSONPayload>
+        <JSONPath>result.var</JSONPath>
+      </JSONPayload>
+    </Collect>
+  </Capture>
+
+  <!-- URIPath -->
+  <Capture>
+    <DataCollector>dc_3</DataCollector>
+    <Collect default="0">
+      <URIPath>
+        <!-- All patterns must specify a single variable to extract named $ -->
+        <Pattern ignoreCase="false">/foo/{$}</Pattern>
+        <Pattern ignoreCase="false">/foo/bar/{$}</Pattern>
+      </URIPath>
+    </Collect>
+  </Capture>
+</DataCapture>
+```
+
+**Caution:** Some elements of the `DataCapture` policy behave differently than the corresponding elements of the ExtractVariables policy, which have the same names. These include: `<URIPath>`, `<QueryParam>`, `<Header>`, `<FormParam>`, `<JSONPayload>`, and `<XMLPayload>`.
+
+To learn how these elements work in the `DataCapture` policy, see [Child elements of `<Collect>`](#collect-child).
+
+This element has the following attributes that are common to all policies:
+
+**Attribute**
+
+**Default**
+
+**Required?**
+
+**Description**
+
+`name`
+
+N/A
+
+**Required**
+
+The internal name of the policy. The value of the `name` attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters.
+
+Optionally, use the `<DisplayName>` element to label the policy in the management UI proxy editor with a different, natural-language name.
+
+`continueOnError`
+
+false
+
+Optional
+
+Set to `false` to return an error when a policy fails. This is expected behavior for most policies. Set to `true` to have flow execution continue even after a policy fails. See also:
+
+- [Fault rules are triggered ONLY in an error state (about continueOnError)](/apigee/docs/api-platform/fundamentals/fault-handling#multiplefaultrulesandexecutionlogic-faultrulesaretriggeredonlyinanerrorstateaboutcontinueonerror)
+- [Handling faults within the current flow](/apigee/docs/api-platform/fundamentals/fault-handling#continueonerror)
+
+`enabled`
+
+true
+
+Optional
+
+Set to `true` to enforce the policy. Set to `false` to *turn off* the policy. The policy will not be enforced even if it remains attached to a flow.
+
+`async`  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray">not_interested</span></span>
+
+false
+
+Deprecated
+
+This attribute is deprecated.
+
+The following table provides a high-level description of the child elements of `<DataCapture>`.
+
+| Child Element | Required | Description |
+|----|----|----|
+| [`<Capture>`](#acaptureattribures) | Required | Captures the data for a specified variable. |
+
+## Examples
+
+The following examples illustrate various ways to use the `DataCapture` policy.
+
+### Capturing data for a built-in variable
+
+The code sample below illustrates how to capture data for a built-in variable, `message.content`, which contains the content of the request, response, or error message. See [Flow variables](/apigee/docs/api-platform/reference/variables-reference) for more information about built-in variables.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DataCapture name="DC-FullMessage">
+    <Capture>
+        <DataCollector>dc_data_collector</DataCollector>
+        <Collect ref="message.content" />
+    </Capture>
+</DataCapture>
+```
+
+In the code above, the `ref`attribute of the `</Collect>` element specifies the variable to capture, which in this example is named `"message.content"`.
+
+The sample captures the data with a `<Capture>` element, which also contains a `<DataCollector>` element specifying the name of the [data collector resource](#data-collector-rest-resource).
+
+### Capturing data inline
+
+The next example shows how to capture data inline using [`<JSONPayload>`](#jsonpayloadelement), a child element of the [`<Collect>`](#collect) element.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DataCapture name="DC-Currency">
+    <Capture>
+        <DataCollector>dc_data_collector<DataCollector>
+        <Collect>
+            <JSONPayload>
+                <JSONPath>$.results[0].currency</JSONPath>
+            </JSONPayload>
+        </Collect>
+    </Capture>
+</DataCapture>
+```
+
+In the code above:
+
+- The `<JSONPayload>` element specifies the JSON-formatted message from which the value of the variable is extracted.
+- The `<JSONPath>` element specifies the JSON path used to extract the value from the message, which in this case is `$.results[0].currency`.
+
+As an illustration, suppose the value extracted at the time the message was received is `1120`. Then the resulting entry sent to Analytics would be
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+    "dc_data_collector": "1120"
+}
+```
+
+## \<Capture\>
+
+The `<Capture>` element specifies the means of capturing the data.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Capture />
+```
+
+The following table provides a high-level description of the child elements of `<Capture>`.
+
+| Child Element | Required? | Description |
+|----|----|----|
+| [`<DataCollector>`](#datacollector) | **Required** | Specifies the data collector resource. |
+| [`<Collect>`](#collect) | **Required** | Specifies the means for capturing data. |
+
+## \<DataCollector\>
+
+The `<DataCollector>` element specifies the [data collector resource.](#data-collector-rest-resource)
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DataCollector>dc_data_collector</DataCollector>
+```
+
+The following table describes the attributes of the `<DataCollector>` element.
+
+|  |  |  |  |  |
+|----|----|----|----|----|
+| Attribute | Description | Default | Required? | Type |
+| scope | Specify this attribute and set the value to `monetization` if you want to capture the monetization variables. For more information about the monetization variables that you can capture, see [Capturing monetization data](/apigee/docs/api-platform/monetization/capture-monetization-data). | N/A | Optional | String |
+
+The body of the `<DataCollector>` element contains the name of the data collector resource.
+
+**Notes:**
+
+- You can use multiple `<Capture>` elements, provided they use distinct values for the respective child `<DataCollector` elements. For example, if you define two data collector resources named `dc_data_collector` and `dc_data_collector2`, you can include the following `<Capture>` blocks in a policy:
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+      <Capture>
+          <DataCollector>dc_data_collector</DataCollector>
+          <Collect ref="my_data_variable" />
+      </Capture>
+      <Capture>
+          <DataCollector>dc_data_collector2</DataCollector>
+          <Collect ref="my_data_variable2" />
+      </Capture>
+  ```
+
+  However, you **cannot** include two `<Capture>` elements that refer to the same data collector resource in the same policy.
+
+- If you use a data collector in multiple policies, the captured data will be overwritten by the last policy that executes.
+
+## \<Collect\>
+
+The `<Collect>` element specifies the means for capturing data.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Collect ref="existing-variable" default="0"/>
+```
+
+The following table describes the attributes of the `<Collect>` element.
+
+|  |  |  |  |  |
+|----|----|----|----|----|
+| Attribute | Description | Default | Required? | Type |
+| ref | The variable for which you are capturing data. | N/A | Optional—If `ref` is omitted, exactly one of the following must be specified: `QueryParam`, `Header`, `FormParam`, `URIPath`, `JSONPayload`, or `XMLPayload`. | String |
+| default | Specifies the value that is sent to Analytics if the value of the variable is not populated at runtime. For example, if you set `default="0"`, the value sent to Analytics would be 0. | If you don't specify the value of `default`, and the value of the variable is not populated at runtime, the value sent to Analytics is `null` for a numeric variable or `"Not set"` for a string variable. | Required | String |
+
+The data can be captured from an existing variable using the `ref` attribute, or by child elements `<Collect>`.
+
+### Child elements of `<Collect>`
+
+The following table provides a high-level description of the child elements of `<Collect>`:
+
+**Caution:** The child elements of `<Collect>` listed below behave differently than the corresponding elements of the [ExtractVariables](/apigee/docs/api-platform/reference/policies/extract-variables-policy) policy, which have the same names.
+
+| Child Element | Required? | Description |
+| --- | --- | --- |
+| <Source> | Optional | Specifies the variable to be parsed. |
+| <URIPath> | Optional | Extracts a value from the proxy.pathsuffix of a request source message. |
+| <QueryParam> | Optional | Extracts a value from the specified query parameter of a request source message. |
+| <Header> | Optional | Extracts a value from the specified HTTP header of the specified request or response message. |
+| <FormParam> | Optional | Extracts a value from the specified form parameter of the specified request or response message. |
+| <JSONPayload> | Optional | Specifies the JSON-formatted message from which the value of the variable will be extracted. Note: Unlike the corresponding element in the ExtractVariables policy, the <JSONPayload> element in the DataCapture policy does not require or nest with a <Variable> element. |
+| <XMLPayload> | Optional | Specifies the XML-formatted message from which the value of the variable will be extracted. Note: Unlike the corresponding element in the ExtractVariables policy, the <XMLPayload> element in the DataCapture policy does not require or nest with a <Variable> element. |
+
+### \<Source\>
+
+Specifies a variable naming the message to be parsed. The value of `<Source>` defaults to `message`. The `message` value is context-sensitive. In a request flow, `message` resolves to the request message. In a response flow, `message` resolves to the response message.
+
+If the variable specified in `<Source>` cannot be resolved, or resolves to a non-message type, the policy will fail to respond.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | String |
+| Parent Element | <Collect> |
+| Child Elements | N/A |
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Source >request</Source>
+```
+
+### \<URIPath\>
+
+Extracts a value from the `proxy.pathsuffix` of a `request` source message. The path applied to the pattern is the `proxy.pathsuffix`, which does not include the basepath for the API proxy. If the source message resolves to a message type of `response`, the element does nothing.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex |
+| Parent Element | <Collect> |
+| Child Elements | <Pattern> |
+
+### Attributes
+
+|  |  |  |  |  |
+|----|----|----|----|----|
+| Attribute | Description | Default | Required? | Type |
+| ignoreCase | Specifies to ignore case when matching the pattern. | false | Optional | Boolean |
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Collect>
+    <URIPath>
+        <Pattern ignoreCase="false">/foo/{$}</Pattern>
+    </URIPath>
+</Collect>
+```
+
+You can use multiple `<Pattern>` elements:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<URIPath>
+   <Pattern ignoreCase="false">/foo/{$}</Pattern>
+   <Pattern ignoreCase="false">/foo/bar/{$}</Pattern>
+</URIPath>
+```
+
+**Note:** You must specify a single variable named `{$}`. There may be multiple unique `Pattern` elements, but the first matching pattern will resolve for a particular request.
+
+### \<QueryParam\>
+
+Extracts a value from the specified query parameter of a `request` source message. If the source message resolves to a message type of `response`, the element does nothing.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex |
+| Parent Element | <Collect> |
+| Child Elements | <Pattern> |
+
+### Attributes
+
+|  |  |  |  |  |
+|----|----|----|----|----|
+| Attribute | Description | Default | Required? | Type |
+| name | Specifies the name of the query parameter. If multiple query parameters have the same name, use indexed referencing, where the first instance of the query parameter has no index, the second is at index 2, the third at index 3, etc. | N/A | Required | String |
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Collect>
+    <QueryParam name="code">
+        <Pattern ignoreCase="true">{$}</Pattern>
+    </QueryParam>
+</Collect>
+```
+
+If multiple query parameters have the same name, use indices to reference the parameters:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Collect>
+    <QueryParam name="code.2">
+        <Pattern ignoreCase="true">{$}</Pattern>
+    </QueryParam>
+</Collect>
+```
+
+**Note:** You must specify a single variable named `{$}`. There may be multiple unique `Pattern` elements, but the first matching pattern will resolve for a particular request.
+
+### \<Header\>
+
+Extracts a value from the specified HTTP header of the specified `request` or `response` message. If multiple headers have the same name, their values are stored in an array.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex |
+| Parent Element | <Collect> |
+| Child Elements | <Pattern> |
+
+### Attributes
+
+|  |  |  |  |  |
+|----|----|----|----|----|
+| Attribute | Description | Default | Required? | Type |
+| name | Specifies the name of the header from which you extract the value. If multiple headers have the same name, use indexed referencing, where the first instance of the header has no index, the second is at index 2, the third at index 3, etc. Use `.values` to get all headers in the array. | N/A | Required | String |
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Collect>
+    <Header name="my_header">
+        <Pattern ignoreCase="false">Bearer {$}</Pattern>
+    </Header>
+</Collect>
+```
+
+If multiple headers have the same name, use indices to reference individual headers in the array:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Collect>
+    <Header name="my_header.2">
+        <Pattern ignoreCase="true">{$}</Pattern>
+    </Header>
+</Collect>
+```
+
+Or the following to list all the headers in the array:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Collect>
+    <Header name="my_header.values">
+        <Pattern ignoreCase="true">{$}</Pattern>
+    </Header>
+</Collect>
+```
+
+**Note:** You must specify a single variable named `{$}`. There may be multiple unique `Pattern` elements, but the first matching pattern will resolve for a particular request.
+
+### \<FormParam\>
+
+Extracts a value from the specified form parameter of the specified `request` or `response` message. Form parameters can be extracted only when the `Content-Type` header of the specified message is `application/x-www-form-urlencoded`.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex |
+| Parent Element | <Collect> |
+| Child Elements | <Pattern> |
+
+### Attributes
+
+|  |  |  |  |  |
+|----|----|----|----|----|
+| Attribute | Description | Default | Required? | Type |
+| name | The name of the form parameter from which you extract the value. | N/A | Optional | String |
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Collect>
+    <FormParam name="greeting">
+        <Pattern>hello {$}</Pattern>
+    </FormParam>
+</Collect>
+```
+
+**Note:** You must specify a single variable named `{$}`. There may be multiple unique `Pattern` elements, but the first matching pattern will resolve for a particular request.
+
+### \<JSONPayload\>
+
+Specifies the JSON-formatted message from which the value of the variable will be extracted. JSON extraction is performed only when message's `Content-Type` header is `application/json`.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex |
+| Parent Element | <Collect> |
+| Child Elements | <JSONPath> |
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Collect>
+    <JSONPayload>
+        <JSONPath>$.results[0].currency</JSONPath>
+    </JSONPayload>
+</Collect>
+```
+
+**Note:** Unlike the corresponding element in the ExtractVariables policy, the `<JSONPayload>` element in the `DataCapture` policy does not require or nest with a `<Variable>` element.
+
+### \<JSONPath\>
+
+Required child element of the `<JSONPayload>` element. Specifies the JSON path used to extract a value from a JSON-formatted message.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | String |
+| Parent Element | <JSONPayload> |
+| Child Elements | N/A |
+
+**Note:** The `<JSONPath>` element supports the dynamic string substitution feature called [message templating](/apigee/docs/api-platform/reference/message-template-intro).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<JSONPath>$.rss.channel.title</JSONPath>
+```
+
+### \<XMLPayload\>
+
+Specifies the XML-formatted message from which the value of the variable will be extracted. XML payloads are extracted only when the `Content-Type` header of the message is `text/xml`, `application/xml`, or `application/*+xml`.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex |
+| Parent Element | <Collect> |
+| Child Elements | <Namespaces> <XPath> |
+
+The following table provides a high-level description of the child elements of `<XMLPayload>`.
+
+| Child Element | Required? | Description |
+|----|----|----|
+| [`<Namespaces>`](#xmlpayloadelement-xmlpayloadnamespaceselement) | Optional | Specifies zero or more namespaces to be used in the XPath evaluation. |
+| [`<XPath>`](#xmlpayloadelement-xmlpayloadvariablexpathelement) | Required | Specifies the XPath defined for the variable. |
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Collect>
+    <XMLPayload>
+        <Namespaces>
+            <Namespace prefix="soap">http://schemas.xmlsoap.org/soap/envelope/</Namespace>
+            <Namespace prefix="ns1">http://ns1.example.com/operations</Namespace>
+        </Namespaces>
+        <!-- get the local name of the SOAP operation -->
+        <XPath>local-name(/soap:Envelope/soap:Body/ns1:*[1])</XPath>
+    </XMLPayload>
+</Collect>
+```
+
+**Note:** Unlike the `<XMLPayload>` element in the `ExtractVariables` policy, the `<XMLPayload>` element in the `DataCapture` policy does not nest within a `<Variable>` element.
+
+### \<Namespaces\>
+
+Specifies the set of namespaces that can be used in the XPath expression. An example.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Collect>
+    <XMLPayload>
+        <Namespaces>
+            <Namespace prefix="maps">http://maps.example.com</Namespace>
+            <Namespace prefix="places">http://places.example.com</Namespace>
+        </Namespaces>
+        <XPath>/maps:Directions/maps:route/maps:leg/maps:endpoint/places:name</XPath>
+    </XMLPayload>
+</Collect>
+```
+
+If you are not using namespaces in your XPath expressions, you can omit or comment out the `<Namespaces>` element, as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Collect>
+    <XMLPayload>
+        <!-- <Namespaces/> -->
+        <XPath>/Directions/route/leg/name</XPath>
+    </XMLPayload>
+</Collect>
+```
+
+### \<Namespace\>
+
+Specifies one namespace and a corresponding prefix for use within the XPath expression. An example.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | String |
+| Parent Element | <Namespaces> |
+| Child Elements | N/A |
+
+#### Attributes
+
+|  |  |  |  |  |
+|----|----|----|----|----|
+| Attribute | Description | Default | Required? | Type |
+| `prefix` | The prefix you use to refer to the namespace in the xpath expression. This need not be the same prefix as is used in the original XML document. | N/A | Required | String |
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Collect>
+    <XMLPayload>
+        <Namespaces>
+            <Namespace prefix="maps">http://maps.example.com</Namespace>
+        </Namespaces>
+        <XPath>/maps:Directions/maps:route/maps:leg/maps:endpoint</XPath>
+    </XMLPayload>
+</Collect>
+```
+
+### \<XPath\>
+
+Required child element of the XMLPayload element. Specifies the XPath defined for the variable. Only XPath 1.0 expressions are supported.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | String |
+| Parent Element | <XMLPayload> |
+| Child Elements | N/A |
+
+The `<XPath>` element does not support [message templating](/apigee/docs/api-platform/reference/message-template-intro).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+   <XPath>/test/example</XPath>
+```
+
+**Note:** If you use namespaces in your XPath expressions, you must declare the namespaces in the [`<XMLPayload><Namespaces>`](#xmlpayloadelement-xmlpayloadnamespaceselement) section of the policy.
+
+**Note:** Using `parent`, `ancestor`, `following`, and `preceding` in XPath expressions is not supported in Apigee. To get the same matching results, try explicit node name matching or indexing. For example:
+
+- `<XPath>/Attributes/Attribute[@Name=’foo_attribute']/Value</XPath>`  
+  gets the value of `foo_attribute`.
+- `<XPath>/Attributes/Attribute[4]/Value</XPath>`  
+  gets the value of the 4th attribute.
+
+## \<ThrowExceptionOnLimit\>
+
+The `<ThrowExceptionOnLimit>` element specifices what happens when the capture limits on the number of variables or the maximum size of a variable are reached. See [Enforcing capture limits](#enforcing-capture-limits).
+
+The value of `<ThrowExceptionOnLimit>` can be one of the following:
+
+- `false`: The data for the variables is sent to Analytics.
+- `true`: An error message is returned, and the data is *not* sent to Analytics.
+
+## Error Reference
+
+### Runtime errors
+
+The table below describes runtime errors, which can occur when the policy executes.
+
+Fault code
+
+Cause
+
+`DataCollectorTypeMismatch`
+
+The value to be captured did not match the `DataCollector` type.
+
+`ExtractionFailure`
+
+The data extraction failed.
+
+`UnresolvedVariable`
+
+The variable does not exist.
+
+`VariableCountLimitExceeded`
+
+The number of captured variables exceeded the variable count limit of 100 variables
+
+`VariableValueLimitExceeded`
+
+The size of a captured value exceeded the single variable limit of 400 bytes.
+
+`MsgContentParsingFailed`
+
+Message content failed to be parsed into XML or JSON.
+
+`InvalidMsgContentType`
+
+The message content type does not match the expected message content type in the policies capture clause.
+
+`NonMsgVariable`
+
+The `<Source>` element value did not reference a message variable.
+
+`JSONPathQueryFailed`
+
+The `JSONPath` query failed to resolve to a value.
+
+`PrivateVariableAccess`
+
+Attempt to access a private variable failed.
+
+`XPathEvaluationFailed`
+
+`XPath` failed to resolve to a value.
+
+Runtime errors are returned in two ways:
+
+- Error response back to client (`continueOnError=false`)
+
+  When the policy's `continueOnError` attribute is set to `false`, errors that occur during the policy execution will abort the message processing and return a descriptive error message. The policy will attempt to capture all the relevant errors in the data capture policy before returning the message.
+
+- `DataCapture` errors analytics field
+
+  The `dataCapturePolicyErrors` field contains a list of all errors that have occurred. An example of how this would appear in the analytics data map is shown below:
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+  # Example payload
+  [
+       {
+           errorType: TypeMismatch,
+           policyName: MyDataCapturePolicy-1,
+           dataCollector: purchaseValue
+       },
+       {
+           errorType: MaxValueSizeLimitReached,
+           policyName: MyDataCapturePolicy-1,
+           dataCollector: purchasedItems
+       },
+  ]
+  ```
+
+This field is subject to the 400 byte variable size limit.
+
+### Deployment errors
+
+Fault code
+
+Cause
+
+`DeploymentAssertionError`
+
+The DataCollector referenced in the policy couldn't be found in the organization during deployment.
+
+`JsonPathCompilationFailed`
+
+Compiling with the specified `JSONPath` failed.
+
+`XPathCompilationFailed`
+
+If the prefix or the value used in the `XPath` element is not part of any of the declared namespaces in the policy, then the deployment of the API proxy fails.
+
+`PatternCompilationFailed`
+
+Pattern compilation failed.
+
+### Finding `DataCapture` Errors in the Debug tool
+
+The `dataCapturePolicyErrors` variable is available in the Debug tool. This an additional tool that you can use to catch errors without going to Analytics. For example, you can catch an error that occurs if you upgrade your version of the hybrid runtime and inadvertently break the analytics in an already deployed proxy.
+
+#### Enforcing capture limits
+
+Apigee enforces the following limits on variables in the captured data:
+
+- The number of variables allowed is 100.
+- The maximum size of each variable (including list values) is 400 bytes.
+
+When the Data Capture Policy execution, before a value is added to the data capture map in the message context:
+
+- If the limit on the number of variables has been reached, the new variable will be dropped.
+- If the limit on the size of the variables has been reached, the value will be trimmed to fit within the desired limits.
+
+In both cases:
+
+- A debug message will be logged to the Message Processor log.
+- A `limit reached` error message will be appended to `dataCapturePolicyErrors`, which will available in both Analytics and Debug. **Note:** Only one error message for reaching the maximum number of allowed variables will be appended.
+- If \<ThrowExceptionOnLimit\> is `true`, the data is not sent to Analytics and instead an error is returned to the client.
+
+## Related topics
+
+- [ExtractVariables policy](/apigee/docs/api-platform/reference/policies/extract-variables-policy)

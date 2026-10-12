@@ -1,0 +1,98 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/undeploy" class="section">
+
+- [HTTP request](#body.HTTP_TEMPLATE)
+- [Path parameters](#body.PATH_PARAMETERS)
+- [Query parameters](#body.QUERY_PARAMETERS)
+- [Request body](#body.request_body)
+- [Response body](#body.response_body)
+- [Authorization scopes](#body.aspect)
+- [Try it!](#try-it)
+
+<div id="google.cloud.apigee.v1.DeploymentService.UndeployApiProxy" class="section">
+
+</div>
+
+<div id="description" class="section">
+
+Undeploys an API proxy revision from an environment.
+
+For a request path `organizations/{org}/environments/{env}/apis/{api}/revisions/{rev}/deployments`, two permissions are required:
+
+- `apigee.deployments.delete` on the resource `organizations/{org}/environments/{env}`
+- `apigee.proxyrevisions.undeploy` on the resource `organizations/{org}/apis/{api}/revisions/{rev}`
+
+</div>
+
+<div id="body" class="section">
+
+<div id="body.HTTP_TEMPLATE" class="section">
+
+### HTTP request
+
+`DELETE https://apigee.googleapis.com/v1/{name=organizations/*/environments/*/apis/*/revisions/*}/deployments`
+
+The URL uses [gRPC Transcoding](https://google.aip.dev/127) syntax.
+
+</div>
+
+<div id="body.PATH_PARAMETERS" class="section">
+
+### Path parameters
+
+| Parameters |  |
+| --- | --- |
+| name | string Required. Name of the API proxy revision deployment in the following format: organizations/{org}/environments/{env}/apis/{api}/revisions/{rev} If the API proxy resource has the space attribute set, IAM permissions are checked differently . To learn more, read the Apigee Spaces Overview . |
+
+</div>
+
+<div id="body.QUERY_PARAMETERS" class="section">
+
+### Query parameters
+
+| Parameters |  |
+| --- | --- |
+| sequencedRollout | boolean Flag that specifies whether to enable sequenced rollout. If set to true , the environment group routing rules corresponding to this deployment will be removed before removing the deployment from the runtime. This is likely to be a rare use case; it is only needed when the intended effect of undeploying this proxy is to cause the traffic it currently handles to be rerouted to some other existing proxy in the environment group. The [deployments.generateUndeployChangeReport API][DeploymentService.GenerateUndeployChangeReport] may be used to examine routing changes before issuing the undeployment request, and its response will indicate if a sequenced rollout is recommended for the undeployment. |
+
+</div>
+
+<div id="body.request_body" class="section">
+
+### Request body
+
+The request body must be empty.
+
+</div>
+
+<div id="body.response_body" class="section">
+
+### Response body
+
+If successful, the response body is an empty JSON object.
+
+</div>
+
+<div id="body.aspect" class="section">
+
+### Authorization scopes
+
+Requires the following OAuth scope:
+
+- `https://www.googleapis.com/auth/cloud-platform`
+
+</div>
+
+</div>
+
+<div id="try-it" class="section">
+
+<div class="devsite-apix">
+
+<div class="apis-explorer" discovery-rest-url="https://apigee.googleapis.com/$discovery/rest?version=v1" method-id="apigee.organizations.environments.apis.revisions.undeploy" params="">
+
+</div>
+
+</div>
+
+</div>
+
+</div>

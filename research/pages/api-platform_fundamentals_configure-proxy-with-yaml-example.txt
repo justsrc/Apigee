@@ -1,0 +1,440 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This page shows you how to define an API proxy as an Apigee Feature Template in YAML and deploy it with the Google Cloud CLI. You first build a simple proxy, and then build a more complete example that fronts a Gemini model.
+
+For background, see [Configuring a proxy with YAML](/apigee/docs/api-platform/fundamentals/configure-proxy-with-yaml). For the full schema, see [API proxy YAML configuration reference](/apigee/docs/api-platform/reference/api-proxy-yaml-configuration-reference).
+
+## Before you begin
+
+- Enable the **Vertex AI API** in your Google Cloud project so the proxy can communicate with Gemini models.
+
+  <div>
+
+  </div>
+
+  ``` devsite-terminal
+  gcloud services enable aiplatform.googleapis.com
+  ```
+
+- Install and initialize the <a href="/sdk/docs/install" class="external">Google Cloud CLI</a>.
+
+- Have an Apigee organization and at least one environment. Note the organization and environment names; the examples use `ORG` and `ENV` as placeholders. The AI gateway in [Part 2](#ai-gateway) additionally requires an **Intermediate** or **Comprehensive** environment (not a **Base** environment); see [Apigee environment types](/apigee/docs/api-platform/reference/pay-as-you-go-environment-types).
+
+- Make sure you have the required permissions:
+  - To import (create) an API proxy: the **API Admin** role (`roles/apigee.apiAdmin`), or an equivalent role that grants `apigee.proxies.create`.
+  - To deploy an API proxy: **Environment Admin** (`roles/apigee.environmentAdmin`) on the target environment, and **API Reader** (`roles/apigee.apiReaderV2`) at the project level.
+  - To create the API product, developer, and app that produce the API key in [Part 2, Step 6](#ai-api-key): **API Admin** (`roles/apigee.apiAdmin`) and **Developer Admin** (`roles/apigee.developerAdmin`). For the full list of roles, see [Apigee roles](/apigee/docs/api-platform/system-administration/apigee-roles).
+
+**Note:** You can omit `--organization` on every command if the active Google Cloud project is associated with an Apigee organization; the CLI then uses that organization automatically. To see which project the CLI is using, run `gcloud config get-value project`; to change it, run `gcloud config set project ``PROJECT_ID`.
+
+## Part 1: Create a simple API proxy
+
+In this section, you create a proxy that forwards requests to the Apigee mock target service and enforces a rate limit.
+
+### Step 1: Create the template
+
+A *template* is the file you deploy. It defines your proxy's base path, routes, and backend target, and lists the *features* to include.
+
+Create a directory for your proxy, and then create a file named `hello-proxy.yaml`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gateway: apigee
+schemaVersion: 1.0.0
+name: hello-proxy
+type: template
+description: A simple proxy to the Apigee mock target, protected by a rate limit.
+features:
+- spike-arrest.yaml
+endpoints:
+- name: default
+  basePath: /hello
+  routes:
+  - name: default
+    target: default
+targets:
+- name: default
+  url: https://mocktarget.apigee.net
+```
+
+This template defines:
+
+- An **endpoint** with the base path `/hello`. Clients call the proxy at this path.
+- A **route** that sends requests to the target named `default`.
+- A **target** that points to the backend URL.
+- A **feature**, `spike-arrest.yaml`, which you create next.
+
+**Note:** The `name` field (`hello-proxy`) is the name written into the proxy bundle. When you import the proxy, the proxy name in Apigee comes from the **command-line argument**. Keep the two consistent to avoid confusion.
+
+### Step 2: Create the feature
+
+A *feature* is a reusable unit of configuration that holds policies. A template can't contain policies directly, so the rate-limiting policy lives in a feature.
+
+In the same directory as the template, create a file named `spike-arrest.yaml`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gateway: apigee
+schemaVersion: 1.0.0
+name: spike-arrest
+displayName: Spike Arrest
+type: feature
+description: Protects the backend by smoothing traffic spikes.
+categories:
+- traffic
+parameters:
+- name: RATE
+  displayName: RATE
+  description: Maximum request rate, for example 30ps (per second) or 100pm (per minute).
+  default: 30ps
+  examples:
+  - 30ps
+  - 100pm
+defaultEndpoint:
+  name: default
+  flows:
+  - name: PreFlow
+    mode: Request
+    steps:
+    - name: SA-SpikeArrest
+policies:
+- name: SA-SpikeArrest
+  type: SpikeArrest
+  content:
+    SpikeArrest:
+      metadata:
+        name: SA-SpikeArrest
+        enabled: "true"
+        continueOnError: "false"
+      DisplayName: SA-SpikeArrest
+      Rate: "{RATE}"
+```
+
+This feature:
+
+- Defines a **SpikeArrest** policy that limits the request rate.
+- Uses `defaultEndpoint.flows` to add the policy to the request **PreFlow**, so it runs on every request.
+- Declares a **parameter**, `RATE`, whose default (`30ps`) is substituted for `{RATE}` when the proxy is compiled.
+
+**Note:** Parameter values resolve to the `default` defined in the feature. To use a different rate, edit the `default` value.
+
+**Important:** Every feature file that a template references must be in the same directory as the template file.
+
+### Step 3: Import the proxy
+
+Import the template to create an API proxy revision. Run this command from the directory that contains your files:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+gcloud apigee apis import hello-proxy \
+    --from-template=hello-proxy.yaml \
+    --organization=ORG
+```
+
+The CLI compiles the template and its feature into an API proxy bundle, uploads it, and prints the new proxy revision. Importing creates a revision but does not deploy it.
+
+**Note:** Each time you import, Apigee creates a new revision instead of overwriting the existing one.
+
+### Step 4: Deploy the proxy
+
+Deploy the revision to an environment:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+gcloud apigee apis deploy \
+    --api=hello-proxy \
+    --environment=ENV \
+    --organization=ORG
+```
+
+By default, this command deploys the latest revision. To deploy a specific revision, pass its number as the first argument, for example `gcloud apigee apis deploy 1 --api=hello-proxy --environment=``ENV`. If a different proxy is already deployed at the same base path, add `--override` to replace it with zero downtime.
+
+### Step 5: Call the proxy
+
+To call the deployed proxy over the network, your environment must be attached to an *environment group* that has a routable hostname. If you just created your organization, confirm this is set up before you call the proxy; see [About environments and environment groups](/apigee/docs/api-platform/fundamentals/environments-overview).
+
+Find the hostname of an environment group that contains your environment:
+
+1.  In the Google Cloud console, go to **Apigee <span aria-label="and then">\></span> Management <span aria-label="and then">\></span> Environments**.
+2.  Select the **Environment groups** tab.
+3.  Find the environment group that contains your environment, and copy a value from its **Hostnames** column.
+
+Call the proxy at that hostname, using the base path from your template:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://HOSTNAME/hello
+```
+
+Replace `HOSTNAME` with the hostname you copied. A successful response comes from the mock target service.
+
+**Note:** A deployment can take a short time to start serving traffic after the deploy command returns, so you might need to wait a moment and retry. If the call returns `HTTP 503` with `no healthy upstream`, the environment's runtime routing (environment group hostname and load balancer) isn't serving that environment; verify your environment group and hostname configuration.
+
+## Part 2: Build an AI gateway for Gemini
+
+This section builds a more complete proxy: an AI gateway that forwards requests to a Gemini model on Vertex AI, enforces a rate limit, and requires an API key. It uses one template, three features, and a service account.
+
+Unlike the simple proxy in [Part 1](#simple-proxy), this proxy calls a Google Cloud service (Vertex AI). The `gemini-target` feature uses `auth: GoogleAccessToken`, so Apigee attaches a Google OAuth token to each request to Vertex AI. That token is issued for a *service account* that you create and then provide when you deploy the proxy, so this part adds a step to create that service account ([Step 3](#ai-service-account)).
+
+**Note:** A service account is required here only because this proxy authenticates to a Google Cloud backend; the proxy in [Part 1](#simple-proxy) doesn't need one. For a full explanation, see [Using Google authentication](/apigee/docs/api-platform/security/google-auth/overview).
+
+### Step 1: Create the template
+
+Create a file named `ai-gateway.yaml`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gateway: apigee
+schemaVersion: 1.0.0
+name: ai-gateway
+type: template
+description: AI gateway that fronts a Gemini model with throttling and API key enforcement.
+features:
+- spike-arrest.yaml
+- verify-api-key.yaml
+- gemini-target.yaml
+endpoints:
+- name: gemini
+  basePath: /v1/gemini
+  routes:
+  - name: default
+    target: gemini
+```
+
+### Step 2: Create the features
+
+In the same directory, create the three feature files.
+
+Reuse the `spike-arrest.yaml` feature from [Part 1](#create-feature).
+
+Create `verify-api-key.yaml` to require an API key in the `x-api-key` header:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gateway: apigee
+schemaVersion: 1.0.0
+name: verify-api-key
+displayName: Verify API Key
+type: feature
+description: Requires a valid API key in the x-api-key request header.
+categories:
+- security
+defaultEndpoint:
+  name: default
+  flows:
+  - name: PreFlow
+    mode: Request
+    steps:
+    - name: VA-VerifyAPIKey
+policies:
+- name: VA-VerifyAPIKey
+  type: VerifyAPIKey
+  content:
+    VerifyAPIKey:
+      metadata:
+        name: VA-VerifyAPIKey
+        enabled: "true"
+        continueOnError: "false"
+      DisplayName: VA-VerifyAPIKey
+      APIKey:
+        metadata:
+          ref: request.header.x-api-key
+```
+
+Create `gemini-target.yaml` to route to a Gemini model, authenticated with a Google access token:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gateway: apigee
+schemaVersion: 1.0.0
+name: gemini-target
+displayName: Gemini Target
+type: feature
+description: Routes requests to a Gemini model on Vertex AI, authenticated with a Google access token.
+categories:
+- llm
+targets:
+- name: gemini
+  url: https://REGION-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/REGION/publishers/google/models/gemini-2.5-flash:generateContent
+  auth: GoogleAccessToken
+  scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+```
+
+Replace `PROJECT_ID` with your Google Cloud project ID, and `REGION` with the Vertex AI region you are using (such as `us-central1`). This feature uses `auth: GoogleAccessToken` so that Apigee attaches a Google access token to each request to Vertex AI.
+
+Models are not available in every location, and the URL depends on the location you use. The preceding URL is the *regional* form, which works for a model served from a specific region, such as `gemini-2.5-flash` in `us-central1`. Other models are served only from the *global* endpoint, which uses a different host and `locations/global`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  url: https://aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/global/publishers/google/models/MODEL:generateContent
+```
+
+To find the locations that a model supports, see [Generative AI on Vertex AI locations](/vertex-ai/generative-ai/docs/learn/locations).
+
+**Note:** If Vertex AI returns `404 Not Found` when you call the proxy, the model isn't available in the location you specified—switch to a supported region or to the global URL—or the Vertex AI API isn't enabled.
+
+### Step 3: Create a service account for the proxy
+
+Because the `gemini-target` feature uses `auth: GoogleAccessToken`, the deployed proxy calls Vertex AI as a *service account*. Create that service account, give it access to Vertex AI, and let the Apigee service agent use it. You provide this service account when you deploy the proxy in [Step 5](#ai-deploy). For more detail, see [Using Google authentication](/apigee/docs/api-platform/security/google-auth/overview).
+
+1.  Create a user-managed service account in the same Google Cloud project as your Apigee organization. (The Compute Engine default service account is not accepted.) For other ways to create one, see <a href="https://cloud.google.com/iam/docs/creating-managing-service-accounts" class="external">Creating and managing service accounts</a>.
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    gcloud iam service-accounts create SA_NAME \
+        --project=PROJECT_ID \
+        --display-name="Apigee AI gateway"
+    ```
+
+    This creates the service account `SA_NAME``@``PROJECT_ID``.iam.gserviceaccount.com`.
+
+2.  Grant the service account access to the backend it calls. For a Vertex AI target, grant the **Vertex AI User** role (`roles/aiplatform.user`):
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    gcloud projects add-iam-policy-binding PROJECT_ID \
+        --member="serviceAccount:SA_NAME@PROJECT_ID.iam.gserviceaccount.com" \
+        --role="roles/aiplatform.user"
+    ```
+
+    If your project's IAM policy already contains conditional role bindings, add `--condition=None` to this command.
+
+3.  Let the Apigee service agent mint tokens for the service account by granting it the **Service Account Token Creator** role (`roles/iam.serviceAccountTokenCreator`) on the service account:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    gcloud iam service-accounts add-iam-policy-binding \
+        SA_NAME@PROJECT_ID.iam.gserviceaccount.com \
+        --project=PROJECT_ID \
+        --member="serviceAccount:service-PROJECT_NUMBER@gcp-sa-apigee.iam.gserviceaccount.com" \
+        --role="roles/iam.serviceAccountTokenCreator"
+    ```
+
+    To find `PROJECT_NUMBER`, run `gcloud projects describe ``PROJECT_ID`` --format='value(projectNumber)'`.
+
+**Note:** To deploy a proxy with a service account, the identity you deploy with needs the `iam.serviceAccounts.actAs` permission on that service account (for example, through the **Service Account User** role). For the full list of required permissions, see [About service account permissions](/apigee/docs/api-platform/security/google-auth/overview#about-service-account-permissions).
+
+### Step 4: Import the proxy
+
+Import the template to create an API proxy revision:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+gcloud apigee apis import ai-gateway \
+    --from-template=ai-gateway.yaml \
+    --organization=ORG
+```
+
+Note the revision number in the command output; you need it in [Step 5](#ai-deploy). To print just the revision number, add `--format="value(revision)"` to the import command.
+
+### Step 5: Deploy the proxy with the service account
+
+Deploying the AI gateway differs from the simple proxy in [Part 1](#simple-proxy) in two ways:
+
+- **You must provide the service account** you created in [Step 3](#ai-service-account). If you deploy without one, the deployment fails with a `MISSING_SERVICE_ACCOUNT` error.
+- **You must deploy to an Intermediate or Comprehensive environment.** This proxy uses an extensible policy, which a **Base** environment does not support; deploying to one fails with the error “Extensible proxy can not be deployed to a base environment”. See [Apigee environment types](/apigee/docs/api-platform/reference/pay-as-you-go-environment-types).
+
+**Note:** The `gcloud apigee apis deploy` command doesn't accept a service account, so deploy this proxy with the Apigee UI or the deployment API, as shown below. For general deployment instructions, see [Deploying an API proxy](/apigee/docs/api-platform/deploy/ui-deploy-new).
+
+**Apigee UI:** deploy the proxy and, when prompted for a service account, enter `SA_NAME``@``PROJECT_ID``.iam.gserviceaccount.com`. For steps, see [Deploying an API proxy](/apigee/docs/api-platform/deploy/ui-deploy-new).
+
+**Deployment API:** call the [deployments API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/deploy), passing the service account as the `serviceAccount` query parameter. Replace `REVISION` with the revision number from [Step 4](#ai-import):
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -H "Authorization: Bearer $(gcloud auth print-access-token)" -X POST \
+"https://apigee.googleapis.com/v1/organizations/ORG/environments/ENV/apis/ai-gateway/revisions/REVISION/deployments?serviceAccount=SA_NAME@PROJECT_ID.iam.gserviceaccount.com"
+```
+
+The deploy request returns immediately; deployment is asynchronous. Poll the revision's deployment status, which reports `PROGRESSING` until it becomes `READY`:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+"https://apigee.googleapis.com/v1/organizations/ORG/environments/ENV/apis/ai-gateway/revisions/REVISION/deployments"
+```
+
+When the proxy is compiled, the `spike-arrest` and `verify-api-key` features add their policies to the request PreFlow (rate limiting first, then the API key check), and the `gemini-target` feature adds the Vertex AI backend. After the deployment completes, the proxy authenticates to Vertex AI as your service account.
+
+### Step 6: Get an API key
+
+The `verify-api-key` feature rejects any request that doesn't carry a valid API key, so you need a key before you can call the proxy. An API key is a credential of a *developer app* that is associated with an *API product* containing this proxy. Complete the following tasks, which are described in [Publishing overview](/apigee/docs/api-platform/publish/publishing-overview):
+
+1.  [Create an API product](/apigee/docs/api-platform/publish/publishing-overview#task1createanapiproductonedge) that includes the `ai-gateway` proxy and the environment you deployed it to.
+2.  [Register an app developer](/apigee/docs/api-platform/publish/publishing-overview#task2registeranappdeveloperonedge).
+3.  [Register a developer app](/apigee/docs/api-platform/publish/publishing-overview#task3registeradeveloperapponedge) that is associated with that API product.
+
+Registering the app generates the key. To retrieve it, see [Viewing an API key and secret](/apigee/docs/api-platform/publish/creating-apps-surface-your-api#view-api-key).
+
+### Step 7: Call the proxy
+
+Find your environment group's hostname as described in [Part 1, Step 5](#call), then call the proxy at the base path `/v1/gemini`. Pass the API key in the `x-api-key` header, and send a Gemini [`generateContent`](/vertex-ai/generative-ai/docs/model-reference/inference) request body:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -X POST https://HOSTNAME/v1/gemini \
+    -H "x-api-key: API_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{"contents":[{"role":"user","parts":[{"text":"Say hello in one sentence."}]}]}'
+```
+
+Replace `HOSTNAME` with your environment group hostname and `API_KEY` with the key from [Step 6](#ai-api-key). A successful response is the model's JSON output. Omitting the key returns an authorization failure from the `VerifyAPIKey` policy, which confirms that the `verify-api-key` feature is in effect. For other ways to pass a key, see [Submitting a request with a valid API key](/apigee/docs/api-platform/security/setting-api-key-validation#submittingarequestwithavalidapikey).
+
+## Next steps
+
+- [API proxy YAML configuration reference](/apigee/docs/api-platform/reference/api-proxy-yaml-configuration-reference)
+- [Configuring a proxy with YAML](/apigee/docs/api-platform/fundamentals/configure-proxy-with-yaml)
+- [Deploying API proxies](/apigee/docs/api-platform/deploy/ui-deploy-overview)
+- [Publishing overview](/apigee/docs/api-platform/publish/publishing-overview)

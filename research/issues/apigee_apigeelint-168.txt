@@ -1,0 +1,34 @@
+URL: https://github.com/apigee/apigeelint/issues/168
+TITLE: Quota policy attachment count does not consider scope of flows
+STATE: closed state_reason: completed
+AUTHOR: karsten-wagner association: NONE
+CREATED: 2020-07-17T16:32:57Z CLOSED: 2023-03-11T00:38:01Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+Rule PO023 checks how often a quota policy is attached in the proxy.
+I have a setup with three different proxy sections/files, each using the same quota in 5 mutually exclusive flows.
+The rule simply counts all of them (so 15 in total) and raises an error that it's attached more than once.
+
+Neither three different scopes, nor the mutually exclusive flow setup has been considered - so this creates a false positive.
+
+--- COMMENTS (5) ---
+
+### comment by karsten-wagner (association=NONE) at 2021-08-05T11:41:24Z
+Recently it turns out this behavior also applies when multiple targets exist. We are using the same quota policy in two different targets within the same proxy and the rule complains the quota is used twice...
+
+Similar to flows, targets are mutually exclusive in the routing, hence apigeelint should not consider the quota to be used twice.
+
+### comment by samcrutt9900 (association=NONE) at 2023-03-10T17:07:02Z
+I am facing the same issue with this rule. 
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-03-11T00:43:57Z
+@karsten-wagner  / @samcrutt9900 - Released v2.36.0 with a fix for this. Can you please try it out?
+It looks for the policy and checks if its across flows or across ProxyEndpoint or TargetEndpoint
+If its within the same flow, it checks if the Condition tag is same.
+
+### comment by karsten-wagner (association=NONE) at 2023-03-14T08:11:27Z
+@ssvaidyanathan, I can confirm it works now as expected. Thanks for the fix!
+
+### comment by samcrutt9900 (association=NONE) at 2023-03-14T09:48:01Z
+I can also confirm it is now working as expected. Thanks for the fix :)

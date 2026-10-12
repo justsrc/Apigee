@@ -1,0 +1,142 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+**[OAuth home](/apigee/docs/api-platform/security/oauth/oauth-home)**: **See the OAuth home page for a top-level view of the OAuth guidance we provide**.
+
+This topic offers a basic overview of OAuth 2.0 on Apigee.
+
+## What is OAuth 2.0?
+
+There are many books, blogs, and sites devoted to OAuth 2.0. We highly recommend that you begin by reviewing the [IETF OAuth 2.0 specification](https://tools.ietf.org/html/rfc6749). Here's the definition of OAuth 2.0 from the OAuth 2.0 IETF specification itself:
+
+"The OAuth 2.0 authorization framework enables a third-party application to obtain limited access to an HTTP service, either on behalf of a resource owner by orchestrating an approval interaction between the resource owner and the HTTP service, or by allowing the third-party application to obtain access on its own behalf."
+
+The main thing you need to know is that OAuth 2.0 provides a way for apps to gain [limited access](#scopes) to a user's protected resources (think of bank account or any other sensitive information a user might wish to access from an app) without the need for the user to divulge their login credentials to the app.
+
+**Tip:** Let's say you found an app that lets you access multiple bank accounts. Maybe the app is used to help with your taxes, or for managing your budget. You have three bank accounts that you want to manage with the app, and you have a different username and password for each one. Now, for the app to access your bank accounts, it needs those sensitive credentials. Basically, you're giving this sensitive information to the app. Do you trust the app to possess your passwords and usernames? What if the app is hacked? Now, you've got to remember to change your bank credentials for each account. This is the fundamental problem that OAuth 2.0 solves. Read on to learn how.
+
+## The OAuth 2.0 flow
+
+Here is the general flow for the OAuth 2.0 security framework. We'll discuss this flow in more detail in this topic, starting with a diagram, which illustrates a lot about how OAuth 2.0 works. If you're unfamiliar with the terms used in this diagram, read this section for a quick introduction.
+
+![General flow for the OAuth 2.0 security framework.](/static/apigee/docs/api-platform/images/oauth-abstract.png)
+
+### Terms you should know
+
+- **Client:** Also called *the app*. It can be an app running on a mobile device or a traditional web app. The app makes requests to the resource server for protected assets on behalf of the resource owner. The resource owner must give the app permission to access the protected resources.
+- **Resource owner:** Also called an *end user*. This is generally the person (or other entity) who is capable of granting access to a protected resource. For example, if an app needs to use data from one of your social media sites, then you are the resource owner -- the only person who can grant the app access to your data.
+- **Resource server:** Think of the resource server as a service like Facebook, Google, or Twitter; or an HR service on your intranet; or a partner service on your B2B extranet. Apigee is a resource server whenever OAuth token validation is required to process API requests. The resource server needs some kind of authorization before it will serve up protected resources to the app.
+- **Authorization server:** The authorization server is implemented in compliance with the OAuth 2.0 specification, and it is responsible for validating **authorization grants** and issuing the **access tokens** that give the app access to the user's data on the resource server. You can configure *token endpoints* on Apigee, in which case Apigee takes on the role of authorization server.
+- **Authorization grant:** Gives the app permission to retrieve an access token on behalf of the end user. OAuth 2.0 defines four specific "grant types". See [What are the OAuth 2.0 grant types](#granttypes).
+- **Access token:** A long string of characters that serves as a credential used to access protected resources. See [What is an access token?](#accesstoken).
+- **Protected resource:** Data owned by the resource owner. For example, the user's contact list, account information, or other sensitive data.
+
+## Where Apigee fits in
+
+You can protect any API proxied through Apigee with OAuth 2.0. Apigee includes an authorization server implementation, and as such, can generate and validate access tokens. Developers begin by [registering their apps](#registering) with Apigee. Registered apps can request access tokens through any of the four [grant type](#granttypes) interactions.
+
+Apigee provides a multi-faceted [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy) that implements the details of each grant type, making it relatively easy to set up OAuth on Apigee. For example, you can configure a policy that receives a request for an access token, evaluates all required credentials, and returns an access token if the credentials are valid.
+
+Note that any resource servers that your secure API proxy calls should be behind a firewall (that is, the resources must not be accessible through any means besides the API proxy or another API that is well secured).
+
+## <span id="granttypes"></span>What are OAuth 2.0 grant types?
+
+Think of grant types as different paths or interactions an app can take to gain an access token. Each grant type addresses one or more use cases, and you'll need to select which grant types to use based on your own needs. In general, each grant type has advantages and disadvantages, and you'll need to weigh the tradeoffs based on your business use cases. One important consideration is the *trustworthiness* of the apps that will be accessing your data. Generally, third-party apps are less trustworthy than apps that are developed and used within an enterprise.
+
+Apigee supports the four main OAuth 2.0 grant types:
+
+- **authorization code** -- Considered the most secure grant type. Before the authorization server issues an access token, the app must first receive an authorization code from the resource server. You've seen this flow anytime your app opens a browser to the resource server's login page and invites you to log in to your actual account (for example, Facebook or Twitter).
+
+If you successfully log in, the app will receive an authorization code that it can use to negotiate an access token with the authorization server. Typically, this grant type is used when the app resides on a server rather than on the client. This grant type is considered highly secure because the client app never handles or sees the user's username or password for the resource server (that is, for example, the app never sees or handles your Twitter credentials). This grant type flow is also called *three-legged* OAuth.
+
+- **implicit** -- Considered a simplified version of authorization code. Typically this grant type is used when the app resides on the client. For example, the app's code is implemented in a browser using JavaScript or another scripting language (instead of residing and running on a separate web server). In this grant type flow, the authorization server returns an access token directly when the user is authenticated, rather than issuing an authorization code first. Implicit grants can improve app responsiveness in some cases, but this advantage needs to be weighed against possible security implications as described in the IETF specification.
+- **resource owner password credentials** -- In this flow, the client is issued an access token when the user's username/password are validated by the authorization server. This flow is recommended for highly trusted applications. An advantage of this flow over, say, basic authentication, is that the user only presents their username/password once. From then on, the access token is used.
+- **client credentials** -- Consider using for situations where the client app is acting on its own behalf. That is, the client is also the resource owner. This grant type is typically used when the app needs to access a backend data storage service, for example. The app needs to use the service to do its work, and the service is otherwise opaque to the end user. With this grant type, an app can receive an access token by presenting it's client ID and client secret keys to the authorization server. No further steps are required. provides an out-of-the-box client credentials solution that's easy to implement for any API proxy. <span style="font-size: 12px;"> </span>
+
+## <span id="accesstoken"></span>What is an access token?
+
+An access token is a long string of characters that serves as a credential used to access protected resources. Resources tokens (also called bearer tokens) are passed in Authorization headers, like this:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+$ curl -H "Authorization: Bearer UAj2yiGAcMZGxfN2DhcUbl9v8WsR" \
+  http://myorg-test.apigee.net/v0/weather/forecastrss?w=12797282
+```
+
+The resource server understands that the access token *stands in* for credentials like username and password. In addition, the access tokens can be issued with restrictions, so that, for example, the app can read but not write or delete data on the resource server. Note that an access token can be revoked if, for instance, the app is compromised. In this case, you will need to get a new access token to continue using the app; however, you will not have to change your username or password on the protected resources server (for example, Facebook or Twitter).
+
+Access tokens generally have an expiration (for security reasons). Some grant types allow the authorization server to issue a refresh token, which allows the app to fetch a new access token when the old one expires. For more details on access and refresh tokens, refer to the IETF OAuth 2.0 specification.
+
+## <span id="scopes"></span>Limited access through scopes
+
+Through the mechanism of scopes, OAuth 2.0 can grant an app limited access to protected resources. For example, an app may have access only to specific resources, may be able to update resources, or may only be granted read-only access. Under so-called *three-legged* OAuth flows, the user typically specifies the level of access through a consent page (for example, a web page where the user selects the scope with a checkbox or other mechanism).
+
+## <span id="registering"></span>Registering an app
+
+All clients (apps) must register with the OAuth 2.0 authorization server from which they intend to request access tokens. When you register an app, you receive back a set of keys. One is a public key called the client identifier, and the other is a secret key called the client secret. Without these keys, an app cannot issue requests for authorization codes or access tokens to the authorization server. Note that while the IETF OAuth specification calls these keys client ID and client secret, the Apigee UI calls them the Consumer ID and Consumer secret. They are equivalent.
+
+## Summary of OAuth 2.0 use cases
+
+Which OAuth 2.0 grant type flow you chose to implement depends on your specific use case, as some grant types are more secure than others. Your choice of grant types depends on the trustworthiness of the client app and requires very careful consideration, as described in the following table:
+
+| Use Case | Trustworthiness | Suggested OAuth 2.0 Authorization Grant Types | Description |
+| --- | --- | --- | --- |
+| B2B (extranet), intranet, other | Highly trusted apps, written by internal developer or developers with a trusted business relationship with the API provider. Apps that need to access resources on their own behalf. | Client credentials | Typically, the app is also the resource owner Requires Client ID and Client secret keys Requires app to be registered with service provider |
+| Intranet sites, portals | Trusted apps written by internal or trusted third-party developers. A good example is logging in to your company HR site to make insurance selections, submit reviews, or change personal information. | Password Implicit | Requires client Id and secret, plus username and password Requires app to be registered with service provider |
+| Publicly available apps | Untrusted apps are written by third-party developers who do not have a trusted business relationship with the API provider. For example, developers who register for public API programs should not generally be trusted. | Authorization code | Requires user to log in to third-party resource provider (e.g., Twitter, Facebook) App never sees user's username and password Requires app to be registered with service provider |
+| B2C | There is an individual end user (mobile user) involved, and user credentials are stored on the mobile device. | Implicit | Requires app to be registered with the service provider. User credentials are stored on the device running the app. |
+
+<div>
+
+</div>
+
+## <span id="apikey"></span>OAuth 2.0 vs. API key security
+
+API key validation requires an app to send a key to Apigee. The key must be a valid consumer key from an Apigee developer app that is associated with the API proxy. If for some reason you need to revoke permission for a client app to make calls to a proxy, you must revoke that consumer key. Any client apps using that key will also be unable to access the API proxy. On the other hand, an OAuth token can be revoked at any time without revoking the app's keys. The app can simply request a new token on behalf of the user, and if a token is granted, the app can continue using the API proxy.
+
+Another difference between an API key and a token is that a token can include metadata attributes that you can retrieve and use later. For example, you might store the ID of the user making the API call and use it to customize calls to the backend target service.
+
+For details on API key validation, see [API keys](/apigee/docs/api-platform/security/api-keys). For information about using custom attributes with OAuth tokens, see [Customizing Tokens and Authorization Codes](/apigee/docs/api-platform/security/oauth/customizing-access-tokens).
+
+## Impact of token expiration and purge times on disk storage
+
+**Note:** This section only applies to Apigee hybrid customers.
+
+When you generate a new OAuth token with the OAuthV2 policy, you can set an expiration time for the token with the [`ExpiresIn`](/apigee/docs/api-platform/reference/policies/oauthv2-policy#expiresinelement) attribute. By default, tokens are [purged from storage](/apigee/docs/api-platform/reference/policies/oauthv2-policy#purgingaccesstokens) three days after the token expires. If you set a large expiration time, such as 48 hours, you may see an unexpected increase in disk space usage for Cassandra. To avoid excess disk space usage, you can set a shorter expiration time (one hour is recommended) and/or set a configuration that changes the post-expiration delay of three days to a shorter time period.
+
+Apigee hybrid customers can change the default purge time by setting the following configuration in their overrides file:
+
+<div>
+
+</div>
+
+```
+runtime:
+  cwcAppend:
+    "conf_keymanagement_oauth.access.token.purge.after.seconds": "SECONDS"
+```
+
+Where `SECONDS` is the number of seconds Apigee will wait to purge tokens after they expire. Be sure to include this stanza exactly as written, with the quotation marks included.
+
+For example, to set the purge time to one hour after expiration:
+
+<div>
+
+</div>
+
+```
+runtime:
+  cwcAppend:
+    "conf_keymanagement_oauth.access.token.purge.after.seconds": "3600"
+```
+
+## <span id="recommended"></span>Recommended resources
+
+### Reading
+
+See [Learn about OAuth 2.0](/apigee/docs/api-platform/security/oauth/oauth-home#theoauth20framework-learnaboutoauth20).

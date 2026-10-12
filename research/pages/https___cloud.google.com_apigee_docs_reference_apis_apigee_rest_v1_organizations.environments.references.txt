@@ -1,0 +1,69 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.references" class="section">
+
+- [Resource: Reference](#Reference)
+  - [JSON representation](#Reference.SCHEMA_REPRESENTATION)
+- [Methods](#METHODS_SUMMARY)
+
+<div id="Reference" class="section">
+
+## Resource: Reference
+
+<div id="Reference.description" class="section">
+
+A Reference configuration. References must refer to a keystore that also exists in the parent environment.
+
+</div>
+
+<div id="Reference.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;name&quot;: string,
+  &quot;description&quot;: string,
+  &quot;resourceType&quot;: string,
+  &quot;refers&quot;: string
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="Reference.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| name | string Required. The resource id of this reference. Values must match the regular expression [\w\s-.]+. |
+| description | string Optional. A human-readable description of this reference. |
+| resourceType | string The type of resource referred to by this reference. Valid values are 'KeyStore' or 'TrustStore'. |
+| refers | string Required. The id of the resource to which this reference refers. Must be the id of a resource that exists in the parent environment and is of the given resourceType. |
+
+</div>
+
+</div>
+
+<div id="METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | Creates a Reference in the specified environment. |
+| delete | Deletes a Reference from an environment. |
+| get | Gets a Reference resource. |
+| list | Lists all References in an environment as a JSON array. |
+| update | Updates an existing Reference. |
+
+</div>
+
+</div>

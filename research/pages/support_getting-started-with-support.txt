@@ -1,0 +1,26 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/troubleshoot/getting-started-with-support" target="_blank">Apigee Edge</a> documentation.*</span>
+
+If you are an existing Apigee customer with a paid Apigee [support plan](https://cloud.google.com/support/docs), you can request help from Google Cloud Support.
+
+**Note:** This topic applies to Apigee **Subscription** customers with a paid Apigee [support plan](https://cloud.google.com/apigee/pricing).
+
+New Google Cloud Apigee customers and customers with an Apigee **Pay-as-you-go** pricing plan can access support by signing up for a Google Cloud support plan. More information and detailed descriptions of available support plans are available from [Cloud Customer Care](/support). Once enrolled, customers can use the console to submit support cases to [Google Cloud Support](https://cloud.google.com/support-hub).
+
+If you have a free trial Apigee **eval** account, you can post questions and find answers in the <a href="https://discuss.google.dev/c/google-cloud/cloud-apigee/104" class="external">Apigee community</a>, where Apigee engineers are able to respond.
+
+The following documents describe how to access support services:
+
+- [Getting support with Cloud Customer Care](/support/docs): Describes the support options, how to sign up for support, and how to contact support.
+- [Access control with IAM](/support/docs/access-control): Describes how to control who (identity) has what access (roles) to which resource.
+- [Customer Care procedures & support activities](/support/docs/customer-care-procedures): Describes how to complete support procedures and activities.
+- [Managing support cases](/support/docs/manage-cases): Describes how to manage support cases using the Google Cloud console.
+
+To find the level of support you currently have for Apigee:
+
+1.  Sign in to the Google Cloud console Support page.
+
+    <a href="https://console.cloud.google.com/support/" class="button button-primary" target="console">Go to Google Cloud Support</a>
+
+2.  Your support service is shown near the top of the **Support** page.

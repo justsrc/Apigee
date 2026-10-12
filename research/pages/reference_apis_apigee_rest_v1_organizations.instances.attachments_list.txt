@@ -1,0 +1,145 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.attachments/list" class="section">
+
+- [HTTP request](#body.HTTP_TEMPLATE)
+- [Path parameters](#body.PATH_PARAMETERS)
+- [Query parameters](#body.QUERY_PARAMETERS)
+- [Request body](#body.request_body)
+- [Response body](#body.response_body)
+  - [JSON representation](#body.ListInstanceAttachmentsResponse.SCHEMA_REPRESENTATION)
+- [Authorization scopes](#body.aspect)
+- [Try it!](#try-it)
+
+<div id="google.cloud.apigee.v1.InstanceAttachmentService.ListInstanceAttachments" class="section">
+
+</div>
+
+<div id="description" class="section">
+
+Lists all attachments to an instance.
+
+**Note:** Not supported for Apigee hybrid.
+
+</div>
+
+<div id="body" class="section">
+
+<div id="body.HTTP_TEMPLATE" class="section">
+
+### HTTP request
+
+`GET https://apigee.googleapis.com/v1/{parent=organizations/*/instances/*}/attachments`
+
+The URL uses [gRPC Transcoding](https://google.aip.dev/127) syntax.
+
+</div>
+
+<div id="body.PATH_PARAMETERS" class="section">
+
+### Path parameters
+
+| Parameters |  |
+| --- | --- |
+| parent | string Required. Name of the organization. Use the following structure in your request: organizations/{org}/instances/{instance} |
+
+</div>
+
+<div id="body.QUERY_PARAMETERS" class="section">
+
+### Query parameters
+
+| Parameters |  |
+| --- | --- |
+| pageSize | integer Maximum number of instance attachments to return. Defaults to 25. |
+| pageToken | string Page token, returned by a previous attachments.list call, that you can use to retrieve the next page of content. |
+
+</div>
+
+<div id="body.request_body" class="section">
+
+### Request body
+
+The request body must be empty.
+
+</div>
+
+<div id="body.response_body" class="section">
+
+### Response body
+
+<div id="body.ListInstanceAttachmentsResponse" class="section">
+
+<div id="body.ListInstanceAttachmentsResponse.description" class="section">
+
+Response for [`attachments.list`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.attachments/list#google.cloud.apigee.v1.InstanceAttachmentService.ListInstanceAttachments).
+
+If successful, the response body contains data with the following structure:
+
+</div>
+
+<div id="body.ListInstanceAttachmentsResponse.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;attachments&quot;: [
+    {
+      object (InstanceAttachment)
+    }
+  ],
+  &quot;nextPageToken&quot;: string
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="body.ListInstanceAttachmentsResponse.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| attachments[] | object ( InstanceAttachment ) Attachments for the instance. |
+| nextPageToken | string Page token that you can include in a attachments.list request to retrieve the next page of content. If omitted, no subsequent pages exist. |
+
+</div>
+
+</div>
+
+</div>
+
+<div id="body.aspect" class="section">
+
+### Authorization scopes
+
+Requires the following OAuth scope:
+
+- `https://www.googleapis.com/auth/cloud-platform`
+
+</div>
+
+</div>
+
+<div id="try-it" class="section">
+
+<div class="devsite-apix">
+
+<div class="apis-explorer" discovery-rest-url="https://apigee.googleapis.com/$discovery/rest?version=v1" method-id="apigee.organizations.instances.attachments.list" params="">
+
+</div>
+
+</div>
+
+</div>
+
+</div>

@@ -1,0 +1,47 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+In this step, you will create a simple API proxy that calls a mock target service.
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Proxy development <span aria-label="and then">\></span> API proxies** page.
+
+    <a href="https://console.cloud.google.com/apigee/proxies" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to API proxies</a>
+
+2.  Be sure that your organization name is selected from the project picker in the **Google Cloud** pane. The organization name is the same as your Google Cloud project name.
+
+3.  Click **+ Create**.
+
+4.  In the **Create a proxy** pane, under **Proxy template**, select **Reverse proxy (Most common)**. A reverse proxy simply routes incoming traffic to a backend service.
+
+5.  Under **Proxy details**, enter the following:
+    - **Proxy name:** Enter `myproxy`. The remaining steps in this section assume that this is your proxy's name.
+    - **Base Path**: Automatically set to the value you enter for `Proxy name`. The **Base Path** is part of the URL used to make requests to your API. Apigee uses the URL to match and route incoming requests to the proper API proxy.
+    - **Description (Optional)**: Enter a description for your new API proxy, such as "Testing Apigee with a simple proxy."
+    - **Target (Existing API)**: Enter `https://mocktarget.apigee.net`. This defines the target URL that Apigee invokes on a request to the API proxy. The mocktarget service is hosted at Apigee and returns simple data. It requires no API key or access token.
+    - **Space (Optional)**: If your organization has Apigee Spaces enabled, you can associate the API proxy with a Space selected from the list of available options. For more information, see [Apigee Spaces overview](/apigee/docs/api-platform/system-administration/spaces/apigee-spaces-overview).
+    - Click **Next**.
+
+6.  Under **Deploy (optional)** leave the **Deployment environments** field unchanged. In this example, you just create the proxy without deploying it at this stage. You can also ignore the **Service Account** field. Leave it blank.
+
+7.  Click **Create**.
+
+    Apigee creates the new proxy and displays a summary of the proxy details in the **Proxy summary** pane.
+
+    <img src="/static/apigee/docs/api-platform/get-started/images/myproxy-summary.png" class="screenshot" style="width:80.0%" alt="myproxy summary pane." />
+
+    The **Deployments** section is empty because the proxy has not yet been deployed.
+
+8.  In the **Revisions** section under **Endpoint summary**, click **View**.
+
+    The endpoints view pane displays:
+
+    - **Proxy endpoints**: The basepath you set for the proxy, which in this example is `/myproxy`.
+    - **Target endpoints**: The basepath you set for the target, which in this example is `https://mocktarget.apigee.net`.
+
+9.  Click **Close** to return to the Proxy summary page.
+
+Next you'll deploy the API proxy. A proxy must be deployed before it can be used by a client.
+
+<a href="/apigee/docs/api-platform/get-started/create-proxy" class="button button-disabled">1</a> <a href="/apigee/docs/api-platform/get-started/deploy-proxy" class="button button-primary">(NEXT) Step 2: Deploy the API proxy</a> <a href="/apigee/docs/api-platform/get-started/test-proxy" class="button">3</a> <a href="/apigee/docs/api-platform/get-started/change-endpoint" class="button">4</a> <a href="/apigee/docs/api-platform/get-started/add-policy" class="button">5</a>

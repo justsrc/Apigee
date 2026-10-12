@@ -1,0 +1,4773 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The AssignMessage policy changes an existing request or response message, or creates a custom request or response message, during the API proxy flow.
+
+You can use the AssignMessage policy to accomplish many different types of message changes, including to:
+
+- Define a default value for a query string parameter or other type of input.
+- Strip HTTP headers from a request message before the message is forwarded to the backend service.
+- Add HTTP headers before a response is sent to the consumer app.
+- Insert JSON or XML message content before a response is sent.
+- Generate complete request or response messages. For example, you might use a [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy) to invoke a remote API from an API proxy. You can use the AssignMessage policy to create a custom request message and assign it to a variable. Then, use `ServiceCallout` to send that message to the remote API.
+- Add headers to requests and responses for debugging and troubleshooting.
+
+To implement this policy, configure actions such as:
+
+- [Add](#add) new form parameters, headers, or query parameters to a message
+- [Copy](#copy) existing properties from one message to another
+- [Remove](#remove) headers, query parameters, form parameters, and message payloads from a message
+- [Set](#set) the value of properties in a message, including setting arbitrary context variables.
+- Create [custom request messages](#customrequests) and pass them to an alternative target
+
+The AssignMessage policy executes actions in the order in which they appear in the policy configuration. If, for example, you need to remove all headers and then set a specific header, include the [`<Remove>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#remove) element before the [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set) element.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+## `<AssignMessage>` element
+
+Defines an AssignMessage policy.
+
+| Default Value | See Default Policy tab, below |
+| --- | --- |
+| Required? | Required |
+| Type | Complex object |
+| Parent Element | N/A |
+| Child Elements | <Add> <AssignTo> <AssignVariable> <Copy> <DisplayName> <IgnoreUnresolvedVariables> <Remove> <Set> |
+
+The `<AssignMessage>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+The `<AssignMessage>` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <!-- All AssignMessage child elements are optional -->
+  <Add>
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+    <Headers>
+      <Header name="HEADER_NAME">HEADER_VALUE</Header>
+      ...
+    </Headers>
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+  </Add>
+
+  <AssignTo createNew="[true|false]" transport="http"
+    type="[request|response]">DESTINATION_VARIABLE_NAME</AssignTo>
+
+  <AssignVariable>
+    <Name>VARIABLE_NAME</Name>
+    <PropertySetRef>SOURCE_VARIABLE</PropertySetRef>
+    <Ref>SOURCE_VARIABLE</Ref>
+    <ResourceURL>RESOURCE_URL_OR_TEMPLATE</ResourceURL>
+    <Template>MESSAGE_TEMPLATE</Template>
+    or
+    <Template ref='TEMPLATE_VARIABLE'></Template>
+    <Value>VARIABLE_VALUE</Value>
+  </AssignVariable>
+
+  <Copy source="VARIABLE_NAME">
+    <!-- Can also be an empty array (<FormParams/>) -->
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+    <!-- Copy all headers -->
+    <Headers/>
+    <!-- or, copy specific headers by name -->
+    <Headers>
+      <Header name="HEADER_NAME"/>
+      <!-- or -->
+      <Header name="HEADER_NAME">[false|true]</Header>
+      ...
+    </Headers>
+    <Path>[false|true]</Path>
+    <Payload>[false|true]</Payload>
+    <!-- Can also be an empty array (<QueryParams/>) -->
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+    <StatusCode>[false|true]</StatusCode>
+    <Verb>[false|true]</Verb>
+    <Version>[false|true]</Version>
+  </Copy>
+
+  <DisplayName>POLICY_DISPLAY_NAME</DisplayName>
+
+  <IgnoreUnresolvedVariables>[true|false]</IgnoreUnresolvedVariables>
+
+  <!-- Can also be empty to remove everything from the message (<Remove/>) -->
+  <Remove>
+    <!-- Remove all form parameters -->
+    <FormParams/>
+    <!-- or, remove specific form parameters by name -->
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME"/>
+      <!-- or -->
+      <FormParam name="FORMPARAM_NAME">[false|true]</FormParam>
+      ...
+    </FormParams>
+    <!-- Remove all headers -->
+    <Headers/>
+    <!-- or, remove specific headers by name -->
+    <Headers>
+      <Header name="HEADER_NAME"/>
+      <!-- or -->
+      <Header name="HEADER_NAME">[false|true]</Header>
+      ...
+    </Headers>
+    <Payload>[false|true]</Payload>
+    <!-- Remove all query parameters -->
+    <QueryParams/>
+    <!-- or, remove specific query parameters by name -->
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME"/>
+      <!-- or -->
+      <QueryParam name="QUERYPARAM_NAME">[false|true]</QueryParam>
+      ...
+    </QueryParams>
+  </Remove>
+
+  <Set>
+    <Authentication>
+      <HeaderName>HEADER_NAME</HeaderName>
+      <!-- Use either GoogleAccessToken or GoogleIDToken  -->
+      <GoogleAccessToken>
+        <Scopes>
+          <Scope>SCOPE</Scope>
+          ...
+        </Scopes>
+      </GoogleAccessToken>
+
+    ----- or -----
+      <GoogleIDToken>
+        <Audience ref='FLOW_VARIABLE_NAME>TARGET_URL</Scope>
+      </GoogleAccessToken>
+    </Authentication>
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+    <Headers>
+      <Header name="HEADER_NAME">HEADER_VALUE</Header>
+      ...
+    </Headers>
+    <Path>PATH</Path>
+    <Payload contentType="CONTENT_TYPE" variablePrefix="PREFIX"
+        variableSuffix="SUFFIX">NEW_PAYLOAD</Payload>
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+    <StatusCode>HTTP_STATUS_CODE or {variable}</StatusCode>
+    <Verb>[GET|POST|PUT|PATCH|DELETE|{variable}]</Verb>
+    <Version>[1.0|1.1|{variable}]</Verb>
+  </Set>
+
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Default Policy
+
+The following example shows the default settings when you add an AssignMessage policy to your flow in the Apigee UI. You will probably never want all of the configuration elements shown here.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage continueOnError="false" enabled="true" name="assign-message-default">
+  <DisplayName>Assign Message-1</DisplayName>
+  <Properties/>
+  <Copy source="request">
+    <Headers/>
+    <QueryParams/>
+    <FormParams/>
+    <Payload/>
+    <Verb/>
+    <StatusCode/>
+    <Path/>
+  </Copy>
+  <Remove>
+    <Headers>
+      <Header name="h1"/>
+    </Headers>
+    <QueryParams>
+      <QueryParam name="q1"/>
+    </QueryParams>
+    <FormParams>
+      <FormParam name="f1"/>
+    </FormParams>
+    <Payload/>
+  </Remove>
+  <Add>
+    <Headers/>
+    <QueryParams/>
+    <FormParams/>
+  </Add>
+  <Set>
+    <Headers/>
+    <QueryParams/>
+    <FormParams/>
+    <!-- <Verb>GET</Verb> -->
+    <Path/>
+  </Set>
+  <AssignVariable>
+    <Name>name</Name>
+    <Value/>
+    <Ref/>
+  </AssignVariable>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <AssignTo createNew="false" transport="http" type="request"/>
+</AssignMessage>
+```
+
+When you insert a new AssignMessage policy in the Apigee UI, the template contains stubs for all possible operations. Typically, you select which operations you want to perform with this policy and remove the rest of the child elements. For example, if you want to perform a copy operation, use the `<Copy>` element and remove `<Add>`, `<Remove>`, and other child elements from the policy to make it more readable.
+
+</div>
+
+This element has the following attributes that are common to all policies:
+
+**Attribute**
+
+**Default**
+
+**Required?**
+
+**Description**
+
+`name`
+
+N/A
+
+**Required**
+
+The internal name of the policy. The value of the `name` attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters.
+
+Optionally, use the `<DisplayName>` element to label the policy in the management UI proxy editor with a different, natural-language name.
+
+`continueOnError`
+
+false
+
+Optional
+
+Set to `false` to return an error when a policy fails. This is expected behavior for most policies. Set to `true` to have flow execution continue even after a policy fails. See also:
+
+- [Fault rules are triggered ONLY in an error state (about continueOnError)](/apigee/docs/api-platform/fundamentals/fault-handling#multiplefaultrulesandexecutionlogic-faultrulesaretriggeredonlyinanerrorstateaboutcontinueonerror)
+- [Handling faults within the current flow](/apigee/docs/api-platform/fundamentals/fault-handling#continueonerror)
+
+`enabled`
+
+true
+
+Optional
+
+Set to `true` to enforce the policy. Set to `false` to *turn off* the policy. The policy will not be enforced even if it remains attached to a flow.
+
+`async`  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray">not_interested</span></span>
+
+false
+
+Deprecated
+
+This attribute is deprecated.
+
+The following table provides a high-level description of the child elements of [`<AssignMessage>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignmessage):
+
+| Child Element | Required? | Description |
+| --- | --- | --- |
+| Common operations |  |  |
+| <Add> | Optional | Adds information to the message object that is specified by the <AssignTo> element. <Add> adds headers or parameters to the message that don't exist in the original message. Note that <Set> also provides this functionality. To overwrite existing headers or parameters, use the <Set> element. |
+| <Copy> | Optional | Copies information from the message specified by the source attribute to the message object specified by the <AssignTo> element. |
+| <Remove> | Optional | Deletes the specified elements from the message variable specified in the <AssignTo> element. |
+| <Set> | Optional | Replaces values of existing properties on the request or response, which is specified by the <AssignTo> element. <Set> overwrites headers or parameters that already exist in the original message or adds new if they don't. |
+| Other child elements |  |  |
+| <AssignTo> | Optional | Specifies which message the AssignMessage policy operates on. This can be the standard request or response, or it can be a new custom message. |
+| <AssignVariable> | Optional | Assigns a value to a flow variable. If the variable does not exist, then <AssignVariable> creates it. |
+| <IgnoreUnresolvedVariables> | Optional | Determines whether processing stops when an unresolved variable is encountered. |
+
+Each of these child elements is described in the sections that follow.
+
+## Examples
+
+The following examples show some of the ways in which you can use the AssignMessage policy:
+
+<div class="section">
+
+### 1: Add header
+
+The following example adds a header to the request with the [`<Add>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#add) element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-add-headers-1">
+  <Add>
+    <Headers>
+      <Header name="partner-id">{verifyapikey.VAK-1.developer.app.partner-id}</Header>
+    </Headers>
+  </Add>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### 2: Remove payload
+
+The following example deletes the payload from the response with the [`<Remove>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#remove) element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-remove-1">
+  <DisplayName>remove-1</DisplayName>
+  <Remove>
+    <Payload>true</Payload>
+  </Remove>
+  <AssignTo>response</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### 3: Modify response
+
+The following example modifies an existing response object by adding a header to it:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-modify-response">
+  <Set>
+    <Headers>
+      <Header name="Cache-Hit">{lookupcache.LookupCache-1.cachehit}</Header>
+    </Headers>
+  </Set>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <AssignTo>response</AssignTo>
+</AssignMessage>
+```
+
+This example does not create a new message. Instead, it modifies an existing response message by adding an HTTP header.
+
+Because this example specifies `response` as the variable name in the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element, this policy modifies the response object that was originally set with data returned by the target server.
+
+The HTTP header added to the response message by this policy is derived from a variable populated by the [LookupCache policy](/apigee/docs/api-platform/reference/policies/lookup-cache-policy). Therefore the response message modified by this Assign Message policy contains an HTTP header that indicates whether the results have been pulled from the cache or not. Setting headers in the response can be handy for debugging and troubleshooting.
+
+**Tip:** This pattern of setting headers for debugging and troubleshooting is a common practice. You can see what header value was sent back by inspecting the response with the Debug tool or other means.
+
+</div>
+
+<div class="section">
+
+### 4: Set dynamic content
+
+You can use AssignMessage to embed *dynamic* content in the payload of response and request messages.
+
+To embed flow variables in an XML payload, wrap the designated variable in curly braces, like this: `{prefix.name}`.
+
+The following example embeds the value of the `user-agent` HTTP header flow variable in an XML element called `User-agent`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-set-dynamic-content">
+  <AssignTo>response</AssignTo>
+  <Set>
+    <Payload contentType="text/xml">
+      <User-agent>{request.header.user-agent}</User-agent>
+    </Payload>
+  </Set>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+</AssignMessage>
+```
+
+For JSON payloads, you can insert variables using the `variablePrefix` and `variableSuffix` attributes with delimiter characters as shown in the following example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-set-payload">
+  <Payload contentType="application/json" variablePrefix="@" variableSuffix="#">
+  {
+     "user-agent": "@request.header.user-agent#"
+  }
+  </Payload>
+</AssignMessage>
+```
+
+For a complete list of flow variables, see [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference).
+
+You can also use curly braces to insert variables.
+
+</div>
+
+<div class="section">
+
+### 5: Remove query param
+
+The following example removes the `apikey` query parameter from the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-remove-query-param">
+  <Remove>
+    <QueryParams>
+      <QueryParam name="apikey"/>
+    </QueryParams>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+It's a best practice to strip the `apikey` query parameter from the request message when you use the [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy) for user authentication. You do this to prevent sensitive key information from being passed to the backend target.
+
+</div>
+
+<div class="section">
+
+### 6: Set/get variables
+
+The following example uses three AssignMessage policies:
+
+1.  Creates three flow variables in the request, with static values
+2.  Gets the flow variables dynamically in a second policy in the request flow
+3.  Sets them in the payload of the response
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<!-- Policy #1: Set variables in the request -->
+<AssignMessage name="AM-set-variables">
+    <!-- Create a variable named myAppSecret -->
+    <AssignVariable>
+        <Name>myAppSecret</Name>
+        <Value>42</Value>
+    </AssignVariable>
+    <!-- Create a variable named config.environment -->
+    <AssignVariable>
+        <Name>config.environment</Name>
+        <Value>test</Value>
+    </AssignVariable>
+    <!-- Create a variable named config.protocol -->
+    <AssignVariable>
+        <Name>config.protocol</Name>
+        <Value>gopher</Value>
+    </AssignVariable>
+</AssignMessage>
+```
+
+In the first policy, the [`<AssignVariable>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable) element creates and sets three variables in the request. Each [`<Name>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-name) element specifies a variable name, and [`<Value>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-value) specifies the value.
+
+The second policy uses the `<AssignVariable>` element to read in the values and creates three new variables:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<!-- Policy #2: Get variables from the request -->
+<AssignMessage continueOnError="false" enabled="true" name="get-variables">
+  <AssignTo createNew="false" transport="http" type="request"/>
+  <!-- Get the value of myAppSecret and create a new variable, secret -->
+  <AssignVariable>
+    <Name>secret</Name>
+    <Ref>myAppSecret</Ref>
+    <Value>0</Value>
+  </AssignVariable>
+  <!-- Get the value of config.environment and create a new variable, environment -->
+  <AssignVariable>
+    <Name>environment</Name>
+    <Ref>config.environment</Ref>
+    <Value>default</Value>
+  </AssignVariable>
+  <!-- Get the value of config.protocol and create a new variable, protocol -->
+  <AssignVariable>
+    <Name>protocol</Name>
+    <Ref>config.protocol</Ref>
+    <Value>default</Value>
+  </AssignVariable>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</AssignMessage>
+```
+
+In the second policy, the [`<Ref>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-ref) element references the source variable, and `<Name>` elements specify the names of the new variables. If the variable referenced by the `<Ref>` element is not accessible, you can use the value specified by the `<Value>` element.
+
+**To try out this set of policies:**
+
+1.  Add policies \#1 and \#2 to the request flow. Be sure to put policy \#1 *before* policy \#2.
+
+2.  Add the third policy in the *response* flow.
+
+3.  The third policy uses the `<Set>` element to add the variables to the response. The following example constructs an XML payload in the response that Edge returns to the client:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    <!-- Policy #3: Add variables to the response -->
+    <AssignMessage continueOnError="false" enabled="true" name="put-em-in-the-payload">
+      <DisplayName>put-em-in-the-payload</DisplayName>
+      <Set>
+        <Payload contentType="application/xml">
+          <wrapper>
+            <secret>{secret}</secret>
+            <config>
+              <environment>{environment}</environment>
+              <protocol>{protocol}</protocol>
+            </config>
+          </wrapper>
+        </Payload>
+      </Set>
+      <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+      <AssignTo createNew="false" transport="http" type="response"/>
+    </AssignMessage>
+    ```
+
+    Note that the syntax to access flow variables in `<Set>` is to wrap them in curly braces.
+
+    Be sure to set the `<Payload>` element's `contentType` attribute to `application/xml`.
+
+4.  Send a request to your API proxy; for example:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    curl -vL https://ahamilton-eval-test.apigee.net/myproxy
+    ```
+
+    Optionally, you can pipe the results through a utility such as `xmllint` so that the XML is displayed in a nicely formatted structure:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    curl -vL https://ahamilton-eval-test.apigee.net/myproxy | xmllint --format -
+    ```
+
+    The body of the response should look like the following:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+
+      42
+      
+        test
+        gopher
+      
+    ```
+
+</div>
+
+<div class="section">
+
+### 7: Get ServiceCallout response headers
+
+In the following example, let's say that a [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy) is in the API proxy request, and the callout response contains multiple headers of the same name (`Set-Cookie`). Assuming the Service Callout's response variable is the default `calloutResponse`, the following policy gets the second `Set-Cookie` header value.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-Payload-from-SC-header">
+  <Set>
+    <Payload contentType="application/json">
+      {"Cookies from Service Callout":" {calloutResponse.header.Set-Cookie.2}"}
+    </Payload>
+  </Set>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <AssignTo>response</AssignTo>
+</AssignMessage>
+```
+
+To list *all* header values, use the following variable instead:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{calloutResponse.header.Set-Cookie.values}
+```
+
+</div>
+
+<div class="section">
+
+### 8: Store and remove form params, headers, query params
+
+If you want to use `<Remove>` to delete your headers, query parameters, or form parameters, but retain access to their values later in the policy flow, you can store their values using `<AssignVariable>`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage async="false" continueOnError="false" enabled="true" name="AM-StoreAndRemove">
+  <DisplayName>AM-StoreAndRemove</DisplayName>
+  <AssignVariable>
+    <Name>var_grant_type</Name>
+    <Ref>request.formparam.grant_type</Ref>
+  </AssignVariable>
+  <Remove>
+    <Headers/>
+    <FormParams/>
+    <Payload/>
+  </Remove>
+  <Set>
+    <Headers>
+      <Header name="Content-Type">application/x-www-form-urlencoded</Header>
+      <Header name="Accept">application/json</Header>
+      <Header name="Grant-Type">{var_grant_type}</Header>
+    </Headers>
+  </Set>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <AssignTo createNew="false" transport="http" type="request"/>
+</AssignMessage>
+```
+
+**Note**: Form parameters, headers, and query parameters stripped using `<Remove>` in the Assign Message policy cannot be accessed after completion of the policy flow unless their values are stored in variables as described in this example.
+
+</div>
+
+Each child element in this reference has additional examples. For even more examples, see <a href="https://gist.github.com/ApigeeSamples/3414852" class="external">AssignMessage example</a> on GitHub.
+
+## Child element reference
+
+This section describes the child elements of [`<AssignMessage>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignmessage).
+
+### `<Add>`
+
+Adds information to the request or response, which is specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element.
+
+The `<Add>` element adds new properties on the message that don't exist in the original message. Note that [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set) also provides this functionality. To change the values of *existing* properties, use the [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set) element.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex type |
+| Parent Element | <AssignMessage> |
+| Child Elements | <FormParams> <Headers> <QueryParams> |
+
+The `<Add>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Add>
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+    <Headers>
+      <Header name="HEADER_NAME">HEADER_VALUE</Header>
+      ...
+    </Headers>
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+  </Add>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example modifies the request message by getting the values of three query string parameters from the initial request and setting them as form parameters on the target endpoint request, and then finally removing all of the original query string parameters:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-add-formparams-3">
+  <Add>
+    <FormParams>
+      <FormParam name="username">{request.queryparam.name}</FormParam>
+      <FormParam name="zip_code">{request.queryparam.zipCode}</FormParam>
+      <FormParam name="default_language">{request.queryparam.lang}</FormParam>
+    </FormParams>
+  </Add>
+  <Remove>
+    <QueryParams/>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example uses the [`<Headers>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#add-headers) element to add a `partner-id` header to the request that will be sent to the target endpoint:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-add-headers-1">
+  <Add>
+    <Headers>
+      <Header name="partner-id">{verifyapikey.VAK-1.developer.app.partner-id}</Header>
+    </Headers>
+  </Add>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+The following example uses the [`<QueryParams>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#add-queryparams) element to add a single query parameter with a static value to the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-add-queryparams-1">
+  <Add>
+    <QueryParams>
+      <QueryParam name="myParam">42</QueryParam>
+    </QueryParams>
+  </Add>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+This example uses `<Add>` in the request preflow. If you look at the results in a tool such as the [Debug overview](/apigee/docs/api-platform/debug/trace-overview), the request to `https://example-target.com/get` becomes `https://example-target.com/get?myParam=42`.
+
+</div>
+
+The child elements of `<Add>` support dynamic string substitution, known as [message templating](/apigee/docs/api-platform/reference/message-template-intro).
+
+#### `<FormParams>` (child of [`<Add>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#add))
+
+Adds new form parameters to the request message. This element has no effect on a response message.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <FormParam> elements |
+| Parent Element | <Add> |
+| Child Elements | <FormParam> |
+
+The `<FormParams>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Add>
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+  <AssignTo createNew="[true|false]" transport="http"
+    type="[request|response]">DESTINATION_VARIABLE_NAME</AssignTo>
+  </Add>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example adds a single form parameter (`answer`) and a static value (`42`) to the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-add-formparams-1">
+  <Add>
+    <FormParams>
+      <FormParam name="answer">42</FormParam>
+    </FormParams>
+  </Add>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example gets the value of the `name` query parameter and adds it to the request as a form parameter, and then removes the query parameter:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-Swap-QueryParam-to-FormParams">
+  <Add>
+    <FormParam name="name">{request.queryparam.name}</FormParam>
+  </Add>
+  <Remove>
+    <QueryParam name="name"/>
+  </Remove>
+</AssignMessage>
+```
+
+Note that this example does not specify a target with `<AssignTo>`. This policy adds the parameter to the request only.
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+The following example adds multiple form parameters to the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-add-formparams-3">
+  <Add>
+    <FormParams>
+      <FormParam name="username">{request.queryparam.name}</FormParam>
+      <FormParam name="zip_code">{request.queryparam.zipCode}</FormParam>
+      <FormParam name="default_language">{request.queryparam.lang}</FormParam>
+    </FormParams>
+  </Add>
+  <Remove>
+    <QueryParams/>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+This example gets the query string parameters from the originating request and adds them as form parameters with different names. Then it removes the original query parameters. Apigee will send the modified request to the target endpoint.
+
+You can use the [Debug overview](/apigee/docs/api-platform/debug/trace-overview) to look at the flow. You'll see that the body of the request contains the URL-encoded form data, which was originally passed in as query string parameters:
+
+<div>
+
+</div>
+
+```
+username=nick&zip_code=90210&default_language=en
+```
+
+</div>
+
+You can use `<FormParams>` only when the following criteria are met:
+
+- HTTP verb: POST
+- Message type: Request
+- One (or both) of the following:
+  - Form data: Set to some value, or "" (the empty string). For example, with `curl`, add `-d ""` to your request.
+  - `Content-Length` header: Set to 0 (if no data is in the original request; otherwise, the current length, in bytes). For example, with `curl` add `-H "Content-Length: 0"` to your request.
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -vL -X POST -d "" -H "Content-Type: application/x-www-form-urlencoded"
+  https://ahamilton-eval-test.apigee.net/am-test
+```
+
+When you add `<FormParams>`, Apigee sets the request's `Content-Type` header to `application/x-www-form-urlencoded` before sending the message to the target service.
+
+#### `<Headers>` (child of [`<Add>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#add))
+
+Adds new headers to the specified request or response, which is specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <Header> elements |
+| Parent Element | <Add> |
+| Child Elements | <Header> |
+
+The `<Headers>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Add>
+    <Headers>
+      <Header name="HEADER_NAME">HEADER_VALUE</Header>
+      ...
+    </Headers>
+  </Add>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example adds a `partner-id` header to the request message, and assigns the value of the `verifyapikey.VAK-1.developer.app.partner-id` flow variable to that header.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-add-headers-1">
+  <Add>
+    <Headers>
+      <Header name="partner-id">{verifyapikey.VAK-1.developer.app.partner-id}</Header>
+    </Headers>
+  </Add>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+#### `<QueryParams>` (child of [`<Add>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#add))
+
+Adds new query parameters to the request. This element has no effect on a response.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <QueryParam> elements |
+| Parent Element | <Add> |
+| Child Elements | <QueryParam> |
+
+The `<QueryParams>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Add>
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+  </Add>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example adds the query parameter `myParam` to the request and assigns the value `42` to it:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-add-queryparams-1">
+  <Add>
+    <QueryParams>
+      <QueryParam name="myParam">42</QueryParam>
+    </QueryParams>
+  </Add>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+You can use `<QueryParams>` only when the following criteria are met:
+
+- HTTP verbs: `GET`, `POST`, `PATCH`, `DELETE`
+- Message type: Request
+
+In addition, you can only set query parameters when the `<AssignTo>` element's `type` attribute is a request message. Setting them on the response has no effect.
+
+If you define an empty array of query parameters in your policy (`<Add><QueryParams/></Add>`), the policy does not add any query parameters. This is the same as omitting `<QueryParams>`.
+
+### `<AssignTo>`
+
+Determines which object the AssignMessage policy operates on. The options are:
+
+- **Request message:** The [`request`](/apigee/docs/api-platform/reference/variables-reference#request) received by the API proxy
+- **Response message:** The [`response`](/apigee/docs/api-platform/reference/variables-reference#response) returned from the target server
+- **Custom message:** A custom request or response object
+
+Note that in some cases, you cannot change the object on which the AssignMessage policy acts. For example, you cannot use [`<Add>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#add) or [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set) to add or change query parameters (`<QueryParams>`) or form parameters (`<FormParams>`) on the response. You can only manipulate query parameters and form parameters on the request.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<AssignMessage>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignmessage) |
+| **Child Elements** | None |
+
+If you do not specify `<AssignTo>`, or if you specify the `<AssignTo>` element, but do not specify a text value for the element, the policy acts on the default request or response, which is based on where the policy executes. If the policy executes in the request flow, it affects the request message. If it executes in the response flow, the policy affects the response by default.
+
+The `<AssignTo>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <AssignTo createNew="[true|false]" transport="http"
+    type="[request|response]">DESTINATION_VARIABLE_NAME</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example specifies no message in the text of the `<AssignTo>`. That implies that the policy will act on either the `request` or `response` message, depending on where the policy executes.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="assignto-1">
+  <AssignTo createNew="false" transport="http" type="request"/> <!-- no-op -->
+  ...
+</AssignMessage>
+```
+
+If you specify `createNew="false"`, and do not explicitly provide a message name, the other attributes of `<AssignTo>` are irrelevant. In this case, you might wish to omit the `<AssignTo>` element completely.
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example creates a new request object, over-writing the existing object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="assignto-2">
+  <AssignTo createNew="true" transport="http" type="request"/>
+  ...
+</AssignMessage>
+```
+
+When you create a new request or response object, the other elements of the AssignMessage policy (such as [`<Add>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#add), [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set), and [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy)) act on that new request or response object.
+
+You can access the new request object in other policies later in the flow, or send the new request object to an external service with a [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy).
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+The following example creates a new request object named `MyRequestObject`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="assignto-2">
+  <AssignTo createNew="true" transport="http" type="request">MyRequestObject</AssignTo>
+  ...
+</AssignMessage>
+```
+
+When you create a new request or response object, the other elements of the AssignMessage policy (such as [`<Add>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#add), [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set), and [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy)) act on that new request object.
+
+You can access the new request object by name in other policies later in the flow, or send the new request object to an external service with a [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy).
+
+</div>
+
+The following table describes the attributes of `<AssignTo>`:
+
+<span id="am_assignto_attributes"></span>
+
+| Attribute | Description | Required? | Type |
+| --- | --- | --- | --- |
+| createNew | Determines whether this policy creates a new message when assigning values. If true , then the policy creates a new variable of the type specified by type (either request or response ). If you do not specify the name of the new variable, then the policy creates a new request or response object, based on the value of type . Caution : When creating a new request or response object, the existing request or response object is deleted and replaced by the new one, meaning all information in the object is lost. If false , then the policy responds in one of two ways: If <AssignTo> can resolve the variable name to a request or response, then it continues processing. For example, if the policy is in a request flow, the variable is the request object. If the policy is in a response, the variable is the response object. If <AssignTo> cannot be resolved, or resolves to a non-message type, then the policy throws an error. If createNew is not specified, the policy responds in one of two ways: If <AssignTo> resolves to a message, then processing advances to the next step. If <AssignTo> cannot be resolved, or resolves to a non-message type, a new variable of type specified in type is created. | Optional | Boolean |
+| transport | Specifies the transport type for the request or response message type. The default value is http (the only supported value). | Optional | String |
+| type | Specifies the type of the new message, when createNew is true . Valid values are request or response . The default value is request . If you omit this attribute, then Apigee creates either a request or a response, depending on where in the flow this policy executes. | Optional | String |
+
+### `<AssignVariable>`
+
+Assigns a value to a destination flow variable (such as a variable whose value is set by the AssignMessage policy). If the flow variable does not exist, then `<AssignVariable>` creates it. You can use multiple AssignVariable elements within the AssignMessage policy. They are executed in order of appearance in the policy configuration.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex type |
+| Parent Element | <AssignMessage> |
+| Child Elements | <Name> (required) <PropertySetRef> <Ref> <ResourceURL> <Template> <Value> |
+
+The value that you assign to the destination flow variable can be one of the following:
+
+- Literal string: Use the [`<Value>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-value) child element to specify a literal string value for the destination flow variable.
+- Flow variable: Use the [`<Ref>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-ref) child element to specify the value of an existing flow variable for the destination flow variable. For a complete list of flow variables that can be used as a source, see [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference).
+- Property set: Use the [`<PropertySetRef>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-propset) child element to retrieve the value from a [property set](/apigee/docs/api-platform/cache/property-sets) name/key pair and store it in a flow variable. Lets you access property sets dynamically.
+- Resource URL: Use the [`<ResourceURL>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-resourceurl) child element to specify a URL for a text resource, of type XSL, XSD, WSDL, JavaScript, or OpenAPI Spec. This assigns the contents of the resource into the named flow variable.
+- Message template: Use the [`<Template>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-template) child element to specify a [message template](/apigee/docs/api-platform/reference/message-template-intro) for the destination flow variable.
+
+The order of precedence for these child elements is: ResourceURL, Template, Ref, Value, PropertySetRef.
+
+The `<AssignVariable>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <AssignVariable>
+    <Name>VARIABLE_NAME</Name>
+    <PropertySetRef>SOURCE_VARIABLE</PropertySetRef>
+    <Ref>SOURCE_VARIABLE</Ref>
+    <ResourceURL>RESOURCE_URL_OR_TEMPLATE</ResourceURL>
+    <Template>MESSAGE_TEMPLATE</Template>
+    or
+    <Template ref='TEMPLATE_VARIABLE'></Template>
+    <Value>VARIABLE_VALUE</Value>
+  </AssignVariable>
+</AssignMessage>
+```
+
+Use the [`<Ref>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-ref) element to specify the source variable. If the variable referenced by `<Ref>` is not accessible, Apigee uses the value specified by the [`<Value>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-value) element. If you define [`<Template>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-template), it takes precedence over the [`<Ref>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-ref) and [`<Value>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-value) sibling elements.
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets the value of a new variable, `myvar`, to the literal value `42`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="assignvariable-1">
+  <AssignVariable>
+    <Name>myvar</Name>
+    <Value>42</Value>
+  </AssignVariable>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example assigns the value of the flow variable `request.header.user-agent` to the destination flow variable `myvar` and the value of the query parameter `country` to the destination flow variable `Country`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="assignvariable-2">
+  <AssignVariable>
+    <Name>myvar</Name>
+    <Ref>request.header.user-agent</Ref>
+    <Value>ErrorOnCopy</Value>
+  </AssignVariable>
+  <AssignVariable>
+    <Name>Country</Name>
+    <Ref>request.queryparam.country</Ref>
+    <Value>ErrorOnCopy</Value>
+  </AssignVariable>
+</AssignMessage>
+```
+
+If either assignment fails, Apigee instead assigns the value `ErrorOnCopy` to the destination flow variable.
+
+If the `myvar` or `Country` flow variables do not exist, `<AssignVariable>` creates them.
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+The following example uses the `<Template>` child element to concatenate two context variables with a literal string (a hyphen) between them:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name='AV-via-template-1'>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <AssignVariable>
+    <Name>my_destination_variable</Name>
+    <Value>BADDBEEF</Value>
+    <Template>{system.uuid}-{messageid}</Template>
+  </AssignVariable>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 4
+
+The following example uses `<AssignVariable>` to disable the default behavior of propagating the path suffix from the proxy request to the target request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name='AM-PathSuffixFalse'>
+  <AssignVariable>
+    <Name>target.copy.pathsuffix</Name>
+    <Value>false</Value>
+  </AssignVariable>
+</AssignMessage>
+```
+
+</div>
+
+A common use for `<AssignVariable>` is to set a default value for a query parameter, header, or other value that can be passed in with the request. You do this with a combination of both the [`<Ref>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-ref) and [`<Value>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-value) child elements. For more information, see the examples for `<Ref>`.
+
+#### `<Name>` (child of [`<AssignVariable>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable))
+
+Specifies the name of the destination flow variable - the variable whose value is set by the AssignMessage policy. If the variable named in `<Name>` does not exist, the policy creates one with that name.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Required |
+| **Type** | String |
+| **Parent Element** | [`<AssignVariable>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable) |
+| **Child Elements** | None |
+
+The `<Name>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <AssignVariable>
+    <Name>VARIABLE_NAME</Name>
+  </AssignVariable>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example specifies the destination variable as `myvar`, and sets it to the literal value `42`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="assignvariable-1">
+  <AssignVariable>
+    <Name>myvar</Name>
+    <Value>42</Value>
+  </AssignVariable>
+</AssignMessage>
+```
+
+If `myvar` does not exist, `<AssignVariable>` creates it.
+
+</div>
+
+**Note**: The name `ratelimit` is reserved. For more information, see <a href="https://discuss.google.dev/t/quota-policy-throws-nullpointerexception/11361.html" class="external">Quota Policy Throws NullPointerException</a> in the Apigee Community.
+
+#### `<PropertySetRef>` (child of [`<AssignVariable>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable))
+
+This element allows you to retrieve the value of a property set name/key pair dynamically. To learn about property sets, see [Using property sets](/apigee/docs/api-platform/cache/property-sets).
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<AssignVariable>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable) |
+| **Child Elements** | None |
+
+A property set consists of a name/key pair. For example: `propset1.id=12345`, where `propset1` is the name of the property set, `id` is a key, and `12345` is the key's value.
+
+The `PropertySetRef` child element lets you select property set names and/or keys dynamically. Assume you have 200 routing rules in a property set file. You can access the property set rules as follows, where `routingrules` is the property set name and `rule1`, `rule2`, `rule`*`n`*are keys:
+
+<div>
+
+</div>
+
+```
+propertyset.routingrules.rule1
+propertyset.routingrules.rule2
+propertyset.routingrules.rulen
+```
+
+To access these properties in an API proxy flow, you must know which rule you want to select at design time. However, assume the rule name comes in the request header or payload. One way to select the rule is to use a JavaScript policy with code such as the following:
+
+<div>
+
+</div>
+
+```
+context.getVariables("propertyset.routingrules." + ruleName); //assuming ruleName was populated earlier.
+```
+
+On the other hand, the AssignMessage `PropertySetRef` feature lets you select a property key dynamically without introducing JavaScript.
+
+You can use a mix of flow variables and literal string values in the `<PropertySetRef>` element. See the examples for more details.
+
+**Note:** When using this feature, do not refer to the property set using the prefix `propertyset`, as in: `propertyset.``PROPNAME``.``KEY`. The prefix `propertyset` is assumed.
+
+The `<PropertySetRef>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <AssignVariable>
+    <PropertySetRef>SOURCE_VARIABLE</PropertySetRef>
+  </AssignVariable>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+This example assigns the value from a property set key to a flow variable. In this case, the property set name is obtained from the header `propset_name`, the key is provided in the header `propset_key`, and the value assigned to the key is stored in the variable `flow_variable`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage async="false" continueOnError="false" enabled="true" name="assignMessage">
+  <DisplayName>Assign Message-1</DisplayName>
+  <Properties/>
+  <AssignVariable>
+    <Name>flow_variable</Name>
+    <PropertySetRef>{request.header.propset_name}.{request.header.propset_key}</PropertySetRef>
+  </AssignVariable>
+</AssignMessage>
+```
+
+You can use any combination of flow variables and literal strings in the `<PropertySetRef>` element.
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+This example assigns the value from a property set key to a flow variable using a fixed key name (literal string). In this case, the property set name is obtained from the header `propset_name`, the key is the literal string `key1`, and the value assigned to the key is stored in the variable `flow_variable`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage async="false" continueOnError="false" enabled="true" name="assignMessage">
+  <DisplayName>Assign Message-1</DisplayName>
+  <Properties/>
+  <AssignVariable>
+    <Name>flow_variable</Name>
+    <PropertySetRef>{request.header.propset_name}.key1</PropertySetRef>
+  </AssignVariable>
+</AssignMessage>
+```
+
+You can use any combination of flow variables and literal strings in the `<PropertySetRef>` element.
+
+</div>
+
+#### `<Ref>` (child of [`<AssignVariable>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable))
+
+Specifies the source of the assignment as a flow variable. The flow variable can be one of the pre-defined flow variables (as listed in the [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference)), or a custom flow variable that you created.
+
+The value of `<Ref>` is always interpreted as a flow variable; you cannot specify a literal string as the value. To assign a literal string value, use the [`<Value>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-value) element instead.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<AssignVariable>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable) |
+| **Child Elements** | None |
+
+When you specify a flow variable with `<Ref>`, omit the enclosing brackets `{}` that you would normally use to reference a flow variable. For example, to set the value of your new variable to the value of the `client.host` flow variable:
+
+<div>
+
+</div>
+
+```
+  DO specify the variable name without brackets:
+  <Ref>client.host</Ref>
+
+  DO NOT use brackets:
+  <Ref>{client.host}</Ref>
+```
+
+To define a default value for the destination flow variable, use [`<Value>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-value) in combination with `<Ref>`. If the flow variable specified by `<Ref>` does not exist, cannot be read, or is null, then Apigee assigns the value of `<Value>` to the destination flow variable instead.
+
+The `<Ref>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <AssignVariable>
+    <Name>VARIABLE_NAME</Name>
+    <Ref>SOURCE_VARIABLE</Ref>
+  </AssignVariable>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example assigns the value of the flow variable `request.header.user-agent` to the destination flow variable `myvar` and the value of the query parameter `country` to the `Country` variable:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="assignvariable-4">
+  <AssignVariable>
+    <Name>myvar</Name>
+    <Ref>request.header.user-agent</Ref>
+  </AssignVariable>
+  <AssignVariable>
+    <Name>Country</Name>
+    <Ref>request.queryparam.country</Ref>
+  </AssignVariable>
+</AssignMessage>
+```
+
+In this example, Apigee does not have a default (or fallback value) specified for either assignment.
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example assigns the value of the flow variable `request.header.user-agent` to the destination flow variable `myvar` and the value of the query parameter `country` to the `Country` variable:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="assignvariable-2">
+  <AssignVariable>
+    <Name>myvar</Name>
+    <Ref>request.header.user-agent</Ref>
+    <Value>ErrorOnCopy</Value>
+  </AssignVariable>
+  <AssignVariable>
+    <Name>Country</Name>
+    <Ref>request.queryparam.country</Ref>
+    <Value>ErrorOnCopy</Value>
+  </AssignVariable>
+</AssignMessage>
+```
+
+In this example, if the values of the `request.header.user-agent` flow variable or the `Country` query parameter are null, unreadable, or malformed, Apigee assigns the value `ErrorOnCopy` to the new variables.
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+A common use case for `<AssignVariable>` is to set the default value of a query parameter, header, or other value that can be passed in with the request. For example, you create a weather API proxy where the request takes a single query parameter named `w`. This parameter contains the ID of the city for which you want the weather. The request URL has the form:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+http://myCO.com/v1/weather/forecastrss?w=CITY_ID
+```
+
+To define a default value for `w`, create an AssignMessage policy like the following:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage continueOnError="false" enabled="true" name="assignvariable-3">
+  <AssignTo createNew="false" transport="http" type="request"/>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <AssignVariable>
+    <Name>request.queryparam.w</Name>
+    <Ref>request.queryparam.w</Ref>
+    <Value>12797282</Value>
+  </AssignVariable>
+</AssignMessage>
+```
+
+In this example, `<AssignVariable>` gets the value of `request.queryparam.w` and assigns it to itself. If the flow variable is null, meaning the `w` query parameter was omitted from the request, then this example uses the default value from the [`<Value>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-value) element. Therefore, you can make a request to this API proxy that omits the `w` query parameter:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+http://myCO.com/v1/weather/forecastrss
+```
+
+...and still have the API proxy return a valid result.
+
+</div>
+
+The value of `<Ref>` must be a flow variable, such as a property of a [`request`](/apigee/docs/api-platform/reference/variables-reference#request), [`response`](/apigee/docs/api-platform/reference/variables-reference#response), or [`target`](/apigee/docs/api-platform/reference/variables-reference#target) object, or the name of a custom flow variable.
+
+If you specify a flow variable that does not exist for the value of `<Ref>`, and the value of [`<IgnoreUnresolvedVariables>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#ignoreunresolvedvariables) is `false`, Apigee throws an error.
+
+#### `<ResourceURL>` (child of [`<AssignVariable>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable))
+
+Specifies the URL of a [text resource](/apigee/docs/api-platform/develop/resource-files) as the source of the variable assignment. Apigee loads the flow variable specified in `<Name>` with the contents of the referenced resource. The resource can be of type XSD, XSL, WSDL, JavaScript, Property Set, or OpenAPI Spec.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<AssignVariable>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable) |
+| **Child Elements** | None |
+
+If the resource specified by `<ResourceURL>` does not exist, then: if the value of [`<IgnoreUnresolvedVariables>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#ignoreunresolvedvariables) is `true`, Apigee assigns the value `null` to the destination flow variable, whereas if the value of [`<IgnoreUnresolvedVariables>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#ignoreunresolvedvariables) is `false`, Apigee throws an error.
+
+The `<ResourceURL>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <AssignVariable>
+    <Name>VARIABLE_NAME</Name>
+    <ResourceURL>RESOURCE_URL_OR_TEMPLATE</ResourceURL>
+  </AssignVariable>
+</AssignMessage>
+      
+```
+
+The text value takes a string value, and is interpreted as a [message template](/apigee/docs/api-platform/reference/message-template-intro). Any of these are valid:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+jsc://my-js-file.js
+wsdl://{variable-goes-here}
+{variable-goes-here}
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example assigns the value of a JSON resource, loaded into the proxy in the `jsc` folder, into the flow variable `assigned-variable`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name='AM-From-ResourceURL-Proxy-JSC'>
+  <AssignVariable>
+    <Name>assigned-variable</Name>
+    <ResourceURL>jsc://settings.json</ResourceURL>
+  </AssignVariable>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example assigns the value of an OpenAPI Spec resource, loaded into the proxy in the `oas` folder, into the flow variable `assigned-variable`, and then sets that value as the `Payload` in the response body:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name='AM-Response'>
+  <AssignVariable>
+    <Name>assigned-variable</Name>
+    <ResourceURL>oas://Fulfillment.yaml</ResourceURL>
+  </AssignVariable>
+  <Set>
+    <Payload contentType='application/yaml'>{assigned-variable}</Payload>
+  </Set>
+</AssignMessage>
+```
+
+</div>
+
+#### `<Template>` (child of [`<AssignVariable>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable))
+
+Specifies a [message template](/apigee/docs/api-platform/reference/message-template-intro). A message template allows you to perform variable string substitution when the policy executes, and can combine literal strings with variable names wrapped in curly braces. In addition, message templates support [functions](/apigee/docs/api-platform/reference/message-template-intro#using-message-template-functions) such as escaping and case conversion.
+
+Use the `ref` attribute to specify a flow variable where the value of the variable is a message template. For example, you could store a message template as a [custom attribute on a developer app](/apigee/docs/api-platform/publish/creating-apps-surface-your-api#register). When Apigee identifies the developer app after it verifies the API key or security token (through an additional policy), the `<AssignVariable>` element could use the message template from the app's custom attribute, which is available as a flow variable from the security policy. The following example assumes the message template is available in a custom attribute called `message_template` on the developer app making the API call, where the [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy) was used to verify the app's API key:
+
+`<Template ref='verifyapikey.myVerifyAPIKeyPolicy.app.name.message_template'/>`
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<AssignVariable>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable) |
+| **Child Elements** | None |
+
+The `<Template>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <AssignVariable>
+    <Template>MESSAGE_TEMPLATE</Template>
+    or
+    <Template ref='TEMPLATE_VARIABLE'></Template>
+  </AssignVariable>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example uses message templating syntax to concatenate two context variables with a literal string (a hyphen) between them:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name='AV-via-template-1'>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <AssignVariable>
+    <Name>my_destination_variable</Name>
+    <Value>BADDBEEF</Value>
+    <Template>{system.uuid}-{messageid}</Template>
+  </AssignVariable>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example specifies a flow variable, where the value of the variable is a pre-defined message template. Use this option if you want to inject a pre-defined template at runtime without having to modify the policy:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name='AV-via-template-indirectly'>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <AssignVariable>
+    <Name>my_destination_variable</Name>
+    <Value>BADDBEEF</Value>
+    <Template ref='my_template_variable'/>
+  </AssignVariable>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+The following example specifies a flow variable and a text value. In this case, if the referenced variable is non-null, that value is used as the template. If the referenced value is null, then the text value (in this case, `{system.uuid}-{messageid}`) is used as the template. This pattern is useful to provide an `override` value, where in some cases you want to override the default template (the text part) with values that are set dynamically. For example, a conditional statement might grab a value from a key-value map and set the referenced variable to that value:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name='AV-template-with-fallback'>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <AssignVariable>
+    <Name>my_destination_variable</Name>
+    <Template ref='my_variable'>{system.uuid}-{messageid}</Template>
+  </AssignVariable>
+</AssignMessage>
+```
+
+</div>
+
+#### `<Value>` (child of [`<AssignVariable>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable))
+
+Defines the value of the destination flow variable set with [`<AssignVariable>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable). The value is always interpreted as a literal string; you cannot use a flow variable as the value, even if you wrap the value in brackets (`{}`). To use a flow variable, use [`<Ref>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable-ref) instead.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<AssignVariable>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignvariable) |
+| **Child Elements** | None |
+
+When used in combination with the `<Ref>` element, `<Value>` acts as the default (or fallback) value. If `<Ref>` is not specified, is unresolvable, or is null, the value of `<Value>` is used.
+
+The `<Value>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <AssignVariable>
+    <Name>VARIABLE_NAME</Name>
+    <Value>VARIABLE_VALUE</Value>
+  </AssignVariable>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets the value of the destination flow variable, `myvar`, to the literal value `42`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="assignvariable-1">
+  <AssignVariable>
+    <Name>myvar</Name>
+    <Value>42</Value>
+  </AssignVariable>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example assigns the value of the flow variable `request.header.user-agent` to the flow variable `myvar` and the value of the query parameter `country` to the `Country` variable:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="assignvariable-2">
+  <AssignVariable>
+    <Name>myvar</Name>
+    <Ref>request.header.user-agent</Ref>
+    <Value>ErrorOnCopy</Value>
+  </AssignVariable>
+  <AssignVariable>
+    <Name>Country</Name>
+    <Ref>request.queryparam.country</Ref>
+    <Value>ErrorOnCopy</Value>
+  </AssignVariable>
+</AssignMessage>
+```
+
+If either assignment fails, `<AssignVariable>` instead assigns the value `ErrorOnCopy` to the destination flow variable.
+
+</div>
+
+### `<Copy>`
+
+Copies values *from* the message specified by the `source` attribute *to* the message specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element. If you do not specify a target with `<AssignTo>`, then this policy copies the values to the request or the response, depending on where in the flow this policy executes.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | String |
+| Parent Element | <AssignMessage> |
+| Child Elements | <FormParams> <Headers> <Path> <Payload> <QueryParams> <StatusCode> <Verb> <Version> |
+
+If you specify no child elements beneath the `<Copy>` element, then it will copy all parts of the designated source message.
+
+The `<Copy>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+    <Copy source="VARIABLE_NAME">
+    <!-- Can also be an empty array (<FormParams/>) -->
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+    <!-- Copy all headers -->
+    <Headers/>
+    <!-- or, copy specific headers by name -->
+    <Headers>
+      <Header name="HEADER_NAME"/>
+      <!-- or -->
+      <Header name="HEADER_NAME">[false|true]</Header>
+      ...
+    </Headers>
+    <Path>[false|true]</Path>
+    <Payload>[false|true]</Payload>
+    <!-- Can also be an empty array (<QueryParams/>) -->
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+    <StatusCode>[false|true]</StatusCode>
+    <Verb>[false|true]</Verb>
+    <Version>[false|true]</Version>
+  </Copy>
+  <!-- Used as the destination for the <Copy> values -->
+  <AssignTo createNew="[true|false]" transport="http"
+    type="[request|response]">DESTINATION_VARIABLE_NAME</AssignTo>
+</AssignMessage>
+  
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example copies a header, three form parameters, the path, and all query parameters from the `request` message to a new, custom request named `newRequest`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-copy-1">
+  <AssignTo createNew="true" transport="http" type="request">newRequest</AssignTo>
+  <Copy source="request">
+    <Headers>
+      <Header name="Header_Name_1"/>
+    </Headers>
+    <FormParams>
+      <FormParam name="Form_Param_Name_1"/>
+      <FormParam name="Form_Param_Name_2"/>
+      <FormParam name="Form_Param_Name_3"/>
+    </FormParams>
+    <Path>true</Path>
+    <QueryParams/>
+  </Copy>
+</AssignMessage>
+```
+
+Because elements like [`<Payload>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy-payload) and [`<Verb>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy-verb) are not present, the policy does not copy those parts of the message.
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example first removes everything in the existing `response` message, then copies all the values from a different message called `secondResponse` into the `response` message:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name='AM-Copy-Response'>
+  <AssignTo>response</AssignTo>
+  <!-- first remove any existing values -->
+  <Remove/>
+  <!-- then copy everything from the designated message -->
+  <Copy source="secondResponse"/>
+</AssignMessage>
+```
+
+</div>
+
+The `<Copy>` element has a single attribute:
+
+| Attribute | Description | Required? | Type |
+| --- | --- | --- | --- |
+| source | Specifies the source object of the copy. If source is not specified, it defaults to message , which takes a different value depending on the flow in which the policy executes. If the policy executes within the request flow, then the message variable refers to the request object. If the policy executes within the response flow, then the message variable refers to the response object. If the variable specified in the source attribute cannot be resolved, or resolves to a non-message type, <Copy> will have no effect. Ensure that the value you specify for source is different than the destination message, whether it is the default destination message or a destination explicitly specified with <AssignTo> . If the source is the same as the destination message, <Copy> will have no effect. | Optional | String |
+
+#### `<FormParams>` (child of [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy))
+
+Copies form parameters from the request specified by the [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy) element's `source` attribute *to* the request specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element. This element has no effect on a response.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <FormParam> elements or an empty array |
+| Parent Element | <Copy> |
+| Child Elements | <FormParam> |
+
+The `<FormParams>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Copy source="VARIABLE_NAME">
+    <!-- Can also be an empty array (<FormParams/>) -->
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+  </Copy>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example copies a single form parameter from the request to the custom request `MyCustomRequest`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-copy-formparams-1">
+  <Copy source="request">
+    <FormParams>
+      <FormParam name="paramName">Form param value 1</FormParam>
+    </FormParams>
+  </Copy>
+  <AssignTo createNew="true" transport="http" type="request">MyCustomRequest</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example copies all form parameters to the custom request `MyCustomRequest`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-copy-formparams-2">
+  <Copy source="request">
+    <FormParams/>
+  </Copy>
+  <AssignTo createNew="true" transport="http" type="request">MyCustomRequest</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+The following example copies three form parameters to the custom request `MyCustomRequest`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-copy-formparams-3">
+  <Copy source="request">
+    <FormParams>
+      <FormParam name="paramName1"/>
+      <FormParam name="paramName2"/>
+      <FormParam name="paramName3"/>
+    </FormParams>
+  </Copy>
+  <AssignTo createNew="true" transport="http" type="request">MyCustomRequest</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 4
+
+If there are multiple form params with the same name, use the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-copy-formparams-4">
+  <Copy source="request">
+    <FormParams>
+      <FormParam name="f1"/>
+      <FormParam name="f2"/>
+      <FormParam name="f3.2"/>
+    </FormParams>
+  </Copy>
+  <AssignTo createNew="true" transport="http" type="request">MyCustomRequest</AssignTo>
+</AssignMessage>
+```
+
+This example copies `f1`, `f2`, and the second value of `f3`. If `f3` has only one value, then it is not copied.
+
+</div>
+
+You can use [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy)/`<FormParams>` only when the following criteria are met:
+
+- The Message type for both source and destination is request
+- HTTP verb for both source and destination is `POST` or `PUT`
+- The source message has the `Content-Type` header set to `application/x-www-form-urlencoded`.
+
+When you copy `<FormParams>`, `<Copy>` sets the `Content-Type` header in the destination message (designated by the `<AssignTo>` element) to `application/x-www-form-urlencoded`.
+
+#### `<Headers>` (child of [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy))
+
+Copies HTTP headers *from* the request or response message specified by the [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy) element's `source` attribute *to* the request or response message specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | An array of <Header> elements or an empty array |
+| Parent Element | <Copy> |
+| Child Elements | <Header> |
+
+The `<Headers>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Copy source="VARIABLE_NAME">
+    <!-- Copy all headers -->
+    <Headers/>
+    <!-- or, copy specific headers by name -->
+    <Headers>
+      <Header name="HEADER_NAME"/>
+      <!-- or -->
+      <Header name="HEADER_NAME">[false|true]</Header>
+      ...
+    </Headers>
+  </Copy>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example copies the `user-agent` header from the request to the new, custom request object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-copy-headers-1">
+  <Copy source="request">
+    <Headers>
+      <Header name="user-agent"/>
+    </Headers>
+  </Copy>
+  <AssignTo createNew="true" transport="http" type="request">MyCustomRequest</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+To copy all headers, use an empty `<Headers>` element, as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-copy-headers-2">
+  <Copy source="request">
+    <Headers/>
+  </Copy>
+  <AssignTo createNew="true" transport="http" type="request">MyCustomRequest</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+If there are multiple headers with the same name, use the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-copy-headers-3">
+  <Copy source="request">
+    <Headers>
+      <Header name="h1"/>
+      <Header name="h2"/>
+      <Header name="h3.2"/>
+    </Headers>
+  </Copy>
+  <AssignTo createNew="true" transport="http" type="request">MyCustomRequest</AssignTo>
+</AssignMessage>
+```
+
+This example copies `h1`, `h2`, and the second value of `h3`. If `h3` has only one value, then it is not copied.
+
+</div>
+
+#### `<Path>` (child of [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy))
+
+Determines whether the path should be copied from the source request to the destination request. This element has no effect on a response.
+
+If `true`, this policy copies the path *from* the request message specified by the [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy) element's `source` attribute *to* the request message specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element.
+
+|  |  |
+|----|----|
+| **Default Value** | False |
+| **Required?** | Optional |
+| **Type** | Boolean |
+| **Parent Element** | [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy) |
+| **Child Elements** | None |
+
+The `<Path>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Copy source="VARIABLE_NAME">
+    <Path>[false|true]</Path>
+  </Copy>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example indicates that AssignMessage should copy the path from the source request to the new, custom request object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="copy-path-1">
+  <Copy source="request">
+    <Path>true</Path>
+  </Copy>
+  <AssignTo createNew="true" transport="http" type="request">MyCustomRequest</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+You can use [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy)/`<Path>` only when the following criteria are met:
+
+- The Message type for both source and destination is request
+
+#### `<Payload>` (child of [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy))
+
+Determines whether the payload should be copied from the source to the destination. The source and destination can be requests or responses.
+
+If `true`, this policy copies the payload *from* the message specified by the [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy) element's `source` attribute *to* the message specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element.
+
+|  |  |
+|----|----|
+| **Default Value** | False |
+| **Required?** | Optional |
+| **Type** | Boolean |
+| **Parent Element** | [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy) |
+| **Child Elements** | None |
+
+The `<Payload>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Copy source="VARIABLE_NAME">
+    <Payload>[false|true]</Payload>
+  </Copy>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets `<Payload>` to `true` so that the request payload is copied from the request to the response:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-copy-payload-1">
+  <Copy source="request">
+    <Payload>true</Payload>
+  </Copy>
+  <AssignTo>response</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+#### `<QueryParams>` (child of [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy))
+
+Copies query string parameters *from* the request specified by the [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy) element's `source` attribute *to* the request specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element. This element has no effect on a response.
+
+|                    |                                                       |
+|--------------------|-------------------------------------------------------|
+| **Default Value**  | N/A                                                   |
+| **Required?**      | Optional                                              |
+| **Type**           | An array of `<QueryParam>` elements or an empty array |
+| **Parent Element** | `<QueryParam>`                                        |
+| **Child Elements** | None                                                  |
+
+The `<QueryParams>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Copy source="VARIABLE_NAME">
+    <!-- Can also be an empty array (<QueryParams/>) -->
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+  </Copy>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example copies the `my_param` query parameter from the request into a new, custom request object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="copy-queryparams-1">
+  <Copy source="request">
+    <QueryParams>
+      <QueryParam name="my_param"/>
+    </QueryParams>
+  </Copy>
+  <AssignTo createNew="true" transport="http" type="request">MyCustomRequest</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example copies all query parameters from the request into a new, custom request object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="copy-queryparams-2">
+  <Copy source="request">
+    <QueryParams/>
+  </Copy>
+  <AssignTo createNew="true" transport="http" type="request">MyCustomRequest</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+If there are multiple query params with the same name, use the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="copy-queryparams-3">
+  <Copy source="request">
+    <QueryParams>
+      <QueryParam name="qp1"/>
+      <QueryParam name="qp2"/>
+      <QueryParam name="qp3.2"/>
+    </QueryParams>
+  </Copy>
+  <AssignTo createNew="true" transport="http" type="request">MyCustomRequest</AssignTo>
+</AssignMessage>
+```
+
+This example copies `qp1`, `qp2`, and the second value of `qp3`. If `qp3` has only one value, then it is not copied.
+
+</div>
+
+You can use [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy)/`<QueryParams>` only when the following criteria are met:
+
+- HTTP verbs: `GET`, `PUT`, `POST`, `PATCH`, `DELETE`
+- The Message type for both source and destination is request
+
+#### `<StatusCode>` (child of [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy))
+
+Determines whether the status code is copied from the source response to the destination response. This element has no effect on a request.
+
+If `true`, this policy copies the status code *from* the response message specified by the [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy) element's `source` attribute *to* the response message specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element.
+
+|  |  |
+|----|----|
+| **Default Value** | False |
+| **Required?** | Optional |
+| **Type** | Boolean |
+| **Parent Element** | [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy) |
+| **Child Elements** | None |
+
+The `<StatusCode>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Copy source="VARIABLE_NAME">
+    <StatusCode>[false|true]</StatusCode>
+  </Copy>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets `<StatusCode>` to `true`, which copies the status code from the default response object to a new, custom response object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="copy-statuscode-1">
+  <Copy source="response">
+    <StatusCode>true</StatusCode>
+  </Copy>
+  <AssignTo createNew="true" transport="http" type="response">MyCustomResponse</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+You can use `<StatusCode>` only when the source and destination messages are of type response.
+
+A common use of `<StatusCode>` is to set that the proxy response status code to a different value than that received from the target.
+
+#### `<Verb>` (child of [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy))
+
+Determines whether the HTTP verb is copied from the source request to the destination request. This element has no effect on a response.
+
+If `true`, copies the verb found in the `<Copy>` element's `source` attribute to the request specified in the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element.
+
+|  |  |
+|----|----|
+| **Default Value** | False |
+| **Required?** | Optional |
+| **Type** | Boolean |
+| **Parent Element** | [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy) |
+| **Child Elements** | None |
+
+The `<Verb>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Copy source="VARIABLE_NAME">
+    <Verb>[false|true]</Verb>
+  </Copy>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets `<Verb>` to `true`, which copies the verb from the default request to a new, custom request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="copy-verb-1">
+  <Copy source="request">
+    <Verb>true</Verb>
+  </Copy>
+  <AssignTo createNew="true" transport="http" type="request">MyCustomRequest</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+You can use [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy)/`<Verb>` only when the following criteria are met:
+
+- The Message type for both source and destination is request
+
+#### `<Version>` (child of [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy))
+
+Determines whether the HTTP version is copied from the source request to the destination request. This element has no effect on a response.
+
+If `true`, copies the HTTP version found in the `<Copy>` element's `source` attribute to the object specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element.
+
+|  |  |
+|----|----|
+| **Default Value** | False |
+| **Required?** | Optional |
+| **Type** | Boolean |
+| **Parent Element** | [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy) |
+| **Child Elements** | None |
+
+The `<Version>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Copy source="VARIABLE_NAME">
+    <Version>[false|true]</Version>
+  </Copy>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets `<Version>` to `true` on the request, which copies the version from the default request object to a new, custom request object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="copy-version-1">
+  <Copy source="request">
+    <Version>true</Version>
+  </Copy>
+  <AssignTo createNew="true" transport="http" type="request">MyCustomRequest</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+You can use [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy)/`<Version>` only when the following criteria are met:
+
+- The Message type for both source and destination is request
+
+### `<DisplayName>`
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, more natural-sounding name.
+
+The `<DisplayName>` element is common to all policies.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional. If you omit `<DisplayName>`, the value of the policy's `name` attribute is used. |
+| **Type** | String |
+| **Parent Element** | \<`PolicyElement`\> |
+| **Child Elements** | None |
+
+The `<DisplayName>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>POLICY_DISPLAY_NAME</DisplayName>
+  ...
+</PolicyElement>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>My Validation Policy</DisplayName>
+</PolicyElement>
+```
+
+</div>
+
+</div>
+
+The `<DisplayName>` element has no attributes or child elements.
+
+### `<IgnoreUnresolvedVariables>`
+
+Determines whether processing stops when an unresolved variable is encountered.
+
+|  |  |
+|----|----|
+| **Default Value** | False |
+| **Required?** | Optional |
+| **Type** | Boolean |
+| **Parent Element** | [`<AssignMessage>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignmessage) |
+| **Child Elements** | None |
+
+Set to `true` to ignore unresolved variables and continue processing; otherwise `false`. The default value is `false`.
+
+Setting `<IgnoreUnresolvedVariables>` to `true` is different from setting the [`<AssignMessage>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignmessage)'s `continueOnError` to `true` in that it is specific to setting and getting values of variables. If you set `continueOnError` to `true`, then Apigee ignores all errors, not just errors encountered when using variables.
+
+The `<IgnoreUnresolvedVariables>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <IgnoreUnresolvedVariables>[true|false]</IgnoreUnresolvedVariables>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets `<IgnoreUnresolvedVariables>` to `true`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-Set-Headers">
+  <Set>
+    <Headers>
+      <Header name='new-header'>{possibly-defined-variable}<Header>
+    </Headers>
+  </Set>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</AssignMessage>
+```
+
+Because `<IgnoreUnresolvedVariables>` is set to `true`, if the `possibly-defined-variable` variable is not defined, this policy will not throw a fault.
+
+</div>
+
+### `<Remove>`
+
+Removes headers, query parameters, form parameters, and/or the message payload from a message. An empty `<Remove>` tag removes everything from the message.
+
+The affected message can be a request or a response. You specify which message `<Remove>` acts on by using the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex type |
+| Parent Element | <AssignMessage> |
+| Child Elements | <FormParams> <Headers> <Payload> <QueryParams> |
+
+A common use case for `<Remove>` is to delete a query parameter or header that contains sensitive information from the incoming request object, to avoid passing it to the backend server.
+
+The `<Remove>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <!-- Can also be empty to remove everything from the message (<Remove/>) -->
+  <Remove>
+    <!-- Remove all form parameters -->
+    <FormParams/>
+    <!-- or, remove specific form parameters by name -->
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME"/>
+      <!-- or -->
+      <FormParam name="FORMPARAM_NAME">[false|true]</FormParam>
+      ...
+    </FormParams>
+    <!-- Remove all headers -->
+    <Headers/>
+    <!-- or, remove specific headers by name -->
+    <Headers>
+      <Header name="HEADER_NAME"/>
+      <!-- or -->
+      <Header name="HEADER_NAME">[false|true]</Header>
+      ...
+    </Headers>
+    <Payload>[false|true]</Payload>
+    <!-- Remove all query parameters -->
+    <QueryParams/>
+    <!-- or, remove specific query parameters by name -->
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME"/>
+      <!-- or -->
+      <QueryParam name="QUERYPARAM_NAME">[false|true]</QueryParam>
+      ...
+    </QueryParams>
+  </Remove>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example removes the message's body from the response:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-remove-1">
+  <DisplayName>remove-1</DisplayName>
+  <Remove>
+    <Payload>true</Payload>
+  </Remove>
+  <AssignTo>response</AssignTo>
+</AssignMessage>
+```
+
+In the response flow, this policy removes the body of the response, returning only HTTP headers to the client.
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example removes all form parameters and a query parameter from the `request` object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-remove-2">
+  <Remove>
+    <!-- Empty (<FormParams/>) removes all form parameters -->
+    <FormParams/>
+    <QueryParams>
+      <QueryParam name="qp1"/>
+    </QueryParams>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+The following example removes everything from a message object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-remove-3">
+  <Remove/>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+Typically you would do this only if you were going to use the [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set) element or the [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy) element to set some replacement values into the message.
+
+</div>
+
+#### `<FormParams>` (child of [`<Remove>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#remove))
+
+Removes the specified form parameters from the request. This element has no effect on a response.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <FormParam> elements or an empty array |
+| Parent Element | <Remove> |
+| Child Elements | <FormParam> |
+
+The `<FormParams>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <!-- Can also be empty to remove everything from the message (<Remove/>) -->
+  <Remove>
+    <!-- Remove all form parameters -->
+    <FormParams/>
+    <!-- or, remove specific form parameters by name -->
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME"/>
+      <!-- or -->
+      <FormParam name="FORMPARAM_NAME">[false|true]</FormParam>
+      ...
+    </FormParams>
+  </Remove>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example removes three form parameters from the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-remove-formparams-1">
+  <Remove>
+    <FormParams>
+      <FormParam name="form_param_1"/>
+      <FormParam name="form_param_2"/>
+      <FormParam name="form_param_3"/>
+    </FormParams>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example removes all form parameters from the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-remove-formparams-2">
+  <Remove>
+    <FormParams/>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+If there are multiple form params with the same name, use the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-remove-formparams-3">
+  <Remove>
+    <FormParams>
+      <FormParam name="f1"/>
+      <FormParam name="f2"/>
+      <FormParam name="f3.2"/>
+    </FormParams>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+This example removes `f1`, `f2`, and the second value of `f3`. If `f3` has only one value, then it is not removed.
+
+</div>
+
+You can use `<FormParams>` only when the following criteria are met:
+
+- Message type: Request
+- `Content-Type`: `application/x-www-form-urlencoded`
+
+#### `<Headers>` (child of [`<Remove>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#remove))
+
+Removes the specified HTTP headers from the request or response, which is specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <Header> elements or an empty array |
+| Parent Element | <Remove> |
+| Child Elements | <Header> |
+
+The `<Headers>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <!-- Can also be empty to remove everything from the message (<Remove/>) -->
+  <Remove>
+    <!-- Remove all headers -->
+    <Headers/>
+    <!-- or, remove specific headers by name -->
+    <Headers>
+      <Header name="HEADER_NAME"/>
+      <!-- or -->
+      <Header name="HEADER_NAME">[false|true]</Header>
+      ...
+    </Headers>
+  </Remove>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example removes the `user-agent` header from the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-remove-one-header">
+  <Remove>
+    <Headers>
+      <Header name="user-agent"/>
+    </Headers>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example removes all headers from the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-remove-all-headers">
+  <Remove>
+    <Headers/>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+If there are multiple headers with the same name, use the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-remove-headers-3">
+  <Remove>
+    <Headers>
+      <Header name="h1"/>
+      <Header name="h2"/>
+      <Header name="h3.2"/>
+    </Headers>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+This example removes `h1`, `h2`, and the second value of `h3` from the request. If `h3` has only one value, then it is not removed.
+
+</div>
+
+#### `<Payload>` (child of [`<Remove>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#remove))
+
+Determines whether `<Remove>` deletes the payload in the request or response, which is specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element. Set to `true` to clear the payload; otherwise `false`. The default value is `false`.
+
+|  |  |
+|----|----|
+| **Default Value** | False |
+| **Required?** | Optional |
+| **Type** | Boolean |
+| **Parent Element** | [`<Remove>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#remove) |
+| **Child Elements** | None |
+
+The `<Payload>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <!-- Can also be empty to remove everything from the message (<Remove/>) -->
+  <Remove>
+    <Payload>[false|true]</Payload>
+  </Remove>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets `<Payload>` to `true` so that the request payload is cleared:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-remove-payload-1">
+  <Remove>
+    <Payload>true</Payload>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+#### `<QueryParams>` (child of [`<Remove>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#remove))
+
+Removes the specified query parameters from the request. This element has no effect on a response.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <QueryParam> elements or an empty array |
+| Parent Element | <Remove> |
+| Child Elements | <QueryParam> |
+
+The `<QueryParams>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <!-- Can also be empty to remove everything from the message (<Remove/>) -->
+  <Remove>
+    <!-- Remove all query parameters -->
+    <QueryParams/>
+    <!-- or, remove specific query parameters by name -->
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME"/>
+      <!-- or -->
+      <QueryParam name="QUERYPARAM_NAME">[false|true]</QueryParam>
+      ...
+    </QueryParams>
+  </Remove>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example removes the `apikey` query parameter from the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-remove-query-param">
+  <Remove>
+    <QueryParams>
+      <QueryParam name="apikey"/>
+    </QueryParams>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example removes all query parameters from the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-remove-queryparams-2">
+  <Remove>
+      <QueryParams/>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+If there are multiple query params with the same name, use the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-remove-queryparams-3">
+  <Remove>
+      <QueryParams>
+        <QueryParam name="qp1"/>
+        <QueryParam name="qp2"/>
+        <QueryParam name="qp3.2"/>
+      </QueryParams>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+This example removes `qp1`, `qp2`, and the second value of `qp3` from the request. If `qp3` has only one value, then it is not removed.
+
+</div>
+
+You can use `<QueryParams>` only when the following criteria are met:
+
+- HTTP verbs: `GET`, `POST`, `PATCH`, `DELETE`
+- Message type: Request
+
+### `<Set>`
+
+Sets information in the request or response message, which is specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element. `<Set>` overwrites headers or query or form parameters that already exist in the original message or adds new if they don't.
+
+Headers and query and form parameters in an HTTP message might hold multiple values. To add additional values for a header or parameter, use the [`<Add>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#add) element instead.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex type |
+| Parent Element | <AssignMessage> |
+| Child Elements | <Authentication> <FormParams> <Headers> <Payload> <Path> <QueryParams> <StatusCode> <Verb> <Version> |
+
+**Note**: The sub-elements of `<Set>` support the dynamic string substitution feature called [message templating](/apigee/docs/api-platform/reference/message-template-intro).
+
+The `<Set>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Set>
+    <Authentication>
+      <HeaderName>HEADER_NAME</HeaderName>
+      <!-- Use either GoogleAccessToken or GoogleIDToken  -->
+      <GoogleAccessToken>
+        <Scopes>
+          <Scope>SCOPE</Scope>
+          ...
+        </Scopes>
+      </GoogleAccessToken>
+
+    ----- or -----
+      <GoogleIDToken>
+        <Audience ref='FLOW_VARIABLE_NAME>TARGET_URL</Scope>
+      </GoogleAccessToken>
+    </Authentication>
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+    <Headers>
+      <Header name="HEADER_NAME">HEADER_VALUE</Header>
+      ...
+    </Headers>
+    <Path>PATH</Path>
+    <Payload contentType="CONTENT_TYPE" variablePrefix="PREFIX"
+        variableSuffix="SUFFIX">NEW_PAYLOAD</Payload>
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+    <StatusCode>HTTP_STATUS_CODE or {variable}</StatusCode>
+    <Verb>[GET|POST|PUT|PATCH|DELETE|{variable}]</Verb>
+    <Version>[1.0|1.1|{variable}]</Verb>
+  </Set>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets a specific header. When this policy is attached in the Request flow, it will allow the upstream system to receive an additional header that was not included in the original inbound request.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-Set-Header">
+  <Set>
+    <Headers>
+        <Header name="authenticated-developer">{verifyapikey.VAK-1.developer.id}</Header>
+    </Headers>
+  </Set>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example overwrites the payload for a response, as well as the `Content-Type` header.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-Overwrite-Payload">
+  <Set>
+    <Payload contentType="application/json">{ "status" : 42 }</Payload>
+  </Set>
+  <AssignTo>response</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+#### \<Authentication\> (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set))
+
+Generates a <a href="https://developers.google.com/identity/protocols/oauth2" class="external">Google OAuth 2.0</a> access token or Google-issued <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" class="external">OpenID Connect</a> ID token and sets it into the `Authorization` header. This is useful when the proxy needs to make authenticated calls to Google services and custom services running on certain Google Cloud products, such as <a href="https://cloud.google.com/functions" class="external">Cloud Functions</a> and <a href="https://cloud.google.com/run" class="external">Cloud Run</a>. Use of this element requires setup and deployment steps described in [Using Google authentication](/apigee/docs/api-platform/security/google-auth/overview). With proper setup, the policy creates a token for you and adds it to the appropriate header in the request.
+
+The child elements, `GoogleAccessToken` and `GoogleIDToken`, let you configure the policy to generate either a Google OAuth or OpenID Connect token. You select one of these child elements based on the requirement of the service you wish to call.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex type |
+| Parent Element | <Set> |
+| Child Elements | <HeaderName> <GoogleAccessToken> <GoogleIdToken> |
+
+The `Authentication` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage>
+  ...
+  <Set>
+    <Authentication>
+      <HeaderName>HEADER_NAME</HeaderName>
+      --EITHER--
+      <GoogleAccessToken>
+        <Scopes>
+          <Scope>SCOPE</Scope>
+            ...
+        </Scopes>
+      <GoogleAccessToken>
+
+      --OR--
+      <GoogleIDToken>
+        <Audience ref="FLOW_VARIABLE">TARGET_URL</Audience>
+      </GoogleIDToken>
+
+    </Authentication>
+  </Set>
+  ...
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Using Access Token
+
+The following example shows the `GoogleAccessToken` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Authentication>
+  <GoogleAccessToken>
+    <Scopes>
+      <Scope>https://www.googleapis.com/auth/cloud-platform</Scope>
+    </Scopes>
+  </GoogleAccessToken>
+</Authentication>
+```
+
+</div>
+
+<div class="section">
+
+### Using ID Token
+
+The following example shows the `GoogleIDToken` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Authentication>
+  <GoogleIDToken>
+    <Audience>https://httpserver0-bar.run.app</Audience>
+  </GoogleIDToken>
+</Authentication>
+```
+
+</div>
+
+<div class="section">
+
+### Using HeaderName
+
+The following example shows the `HeaderName` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  <Authentication>
+    <HeaderName>Authorization</HeaderName>
+    <GoogleAccessToken>
+      <Scopes>
+        <Scope>https://www.googleapis.com/auth/cloud-platform</Scopes>
+      </Scopes>
+    </GoogleAccessToken>
+  </Authentication>
+```
+
+</div>
+
+#### \<HeaderName\> (child of [`<Authentication>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set-auth))
+
+By default, when an Authentication configuration is present, Apigee generates a bearer token and injects it into the `Authorization` header in the message sent to the target system. The `HeaderName` element allows you to specify the name of a different header to hold that bearer token. The `Authorization` header, if present, is left unmodified and also sent in the request.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | String |
+| Parent Element | <Authentication> |
+| Child Elements | None |
+
+The `HeaderName` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage>
+...
+  <Authentication>
+    <HeaderName>HEADER_NAME</HeaderName>
+    <GoogleAccessToken>
+      ...
+    </GoogleAccessToken>
+  </Authentication>
+  ...
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### With static string
+
+In this example, the generated bearer token is added, by default, to a header named `Authorization` that is sent to the target system. The `Authorization` header, if present, is left unmodified and also sent in the request.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Authentication>
+  <HeaderName>Authorization</HeaderName>
+  <GoogleAccessToken>
+    <Scopes>
+      <Scope>https://www.googleapis.com/auth/cloud-platform</Scope>
+    </Scopes>
+  </GoogleAccessToken>
+</Authentication>
+```
+
+</div>
+
+<div class="section">
+
+### With variable reference
+
+In this example, the generated bearer token is added, by default, to a header named `Authorization` that is sent to the target system. If `my-variable` has a value, that value is used instead of the default string. The `Authorization` header, if present, is left unmodified and also sent in the request.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Authentication>
+  <HeaderName ref='my-variable'>Authorization</HeaderName>
+  <GoogleAccessToken>
+    <Scopes>
+      <Scopes>https://www.googleapis.com/auth/cloud-platform</Scopes>
+    </Scopes>
+  >/GoogleAccessToken>
+</Authentication>
+```
+
+</div>
+
+#### \<GoogleAccessToken\> (child of [`<Authentication>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set-auth))
+
+Generates <a href="https://developers.google.com/identity/protocols/oauth2" class="external">Google OAuth 2.0</a> tokens to make authenticated calls to Google services. Google OAuth tokens can be used to call many kinds of Google services, such as [Cloud Logging](/logging) and [Secret Manager](/secret-manager).
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Either the GoogleAccessToken or GoogleIDToken child element must be present. |
+| Type | String |
+| Parent Element | <Authentication> |
+| Child Elements | <Scopes> |
+
+The `GoogleAccessToken` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage>
+...
+  <Authentication>
+    <GoogleAccessToken>
+      <Scopes>
+        <Scope>SCOPE_1</Scope>
+        ...
+      </Scopes>
+    >/GoogleAccessToken>
+  </Authentication>
+  ...
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example shows the `GoogleAccessToken` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Authentication>
+  <GoogleAccessToken>
+    <Scopes>
+      <Scope>https://www.googleapis.com/auth/cloud-platform</Scopes>
+    </Scopes>
+  </GoogleAccessToken>
+</Authentication>
+```
+
+</div>
+
+#### \<Scopes\> (child of [`<GoogleAccessToken>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set-goog-token))
+
+Identifies the scopes to be included in the OAuth 2.0 access token. For more information, see <a href="https://developers.google.com/identity/protocols/googlescopes" class="external">OAuth 2.0 Scopes for Google APIs</a>. You can add one or more `<Scope>` child elements under this element.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | String |
+| Parent Element | <GoogleAccessToken> |
+| Child Elements | <Scope> |
+
+The `Scopes` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  <Scopes>
+    <Scope>SCOPE_1</Scope>
+    <Scope>SCOPE_2</Scope>
+    ...
+  </Scopes>
+```
+
+#### \<Scope\> (child of [`<Scopes>`)](/apigee/docs/api-platform/reference/policies/assign-message-policy#set-scopes)
+
+Specifies a valid Google API scope. For more information, see <a href="https://developers.google.com/identity/protocols/googlescopes" class="external">OAuth 2.0 Scopes for Google APIs</a>.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | At least one value is required. |
+| Type | String |
+| Parent Element | <Scopes> |
+| Child Elements | None |
+
+The `Scope` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  <Scope>SCOPE_1</Scope>
+```
+
+#### \<GoogleIDToken\> (child of [`<GoogleAccessToken>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set-goog-token))
+
+Generates Google-issued <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" class="external">OpenID Connect</a> tokens to make authenticated calls to Google services.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Either the GoogleAccessToken or GoogleIDToken child element must be present. |
+| Type | String |
+| Parent Element | <Authentication> |
+| Child Elements | <Audience> |
+
+The `GoogleIDToken` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage>
+...
+  <Authentication>
+    <GoogleIDToken>
+        <Audience ref="FLOW_VARIABLE_NAME">TARGET_URL</Audience>
+    </GoogleIDToken>
+  </Authentication>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example shows the `GoogleIDToken` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Authentication>
+  <GoogleIDToken>
+      <Audience>https://httpserver0-bar.run.app</Audience>
+  </GoogleIDToken>
+</Authentication>
+```
+
+</div>
+
+#### \<Audience\> (child of [`<GoogleAccessToken>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set-goog-token))
+
+The audience for the generated authentication token, such as the API or account that the token grants access to.
+
+If the value of `Audience` is empty or the `ref` variable does not resolve to a valid value, and `useTargetUrl` is `true`, then the URL of the target (excluding any query parameters) is used as the audience. By default, `useTargetUrl` is `false`.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | String |
+| Parent Element |  |
+| Child Elements | None |
+
+The `Audience` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  <Audience>TARGET_URL</Audience>
+
+or:
+
+  <Audience ref='FLOW_VARIABLE_NAME'/>
+```
+
+#### `<FormParams>` (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set))
+
+Overwrites existing form parameters on a request and replaces them with the new values that you specify with this element. This element has no effect on a response.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <FormParam> elements |
+| Parent Element | <Set> |
+| Child Elements | <FormParam> |
+
+The `<FormParams>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Set>
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+  </Set>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets a form parameter called `myparam` to the value of the `request.header.myparam` variable in a new, custom request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-set-formparams-1">
+  <Set>
+    <FormParams>
+      <FormParam name="myparam">{request.header.myparam}</FormParam>
+    </FormParams>
+  </Set>
+  <AssignTo createNew="true" transport="http" type="request">MyCustomRequest</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+You can use `<FormParams>` only when the following criteria are met:
+
+- HTTP verb: `POST`
+- Message type: Request
+
+If you set empty form parameters in your policy (`<Set><FormParams/></Set>`), the policy does not add any form parameters. This is the same as omitting the `<FormParams>`.
+
+When you use `<Set>` with `<FormParams>`, Apigee changes the `Content-Type` of the message to `application/x-www-form-urlencoded`.
+
+#### `<Headers>` (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set))
+
+Overwrites existing HTTP headers in the request or response, which is specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <Header> elements |
+| Parent Element | <Set> |
+| Child Elements | <Header> |
+
+The `<Headers>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Set>
+    <Headers>
+      <Header name="HEADER_NAME">HEADER_VALUE</Header>
+      ...
+    </Headers>
+  </Set>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets the `x-ratelimit-remaining` header to the value of the `ratelimit.Quota-1.available.count` variable:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-Set-RateLimit-Header">
+  <Set>
+    <Headers>
+      <Header name="X-RateLimit-Remaining">{ratelimit.Quota-1.available.count}</Header>
+    </Headers>
+  </Set>
+  <AssignTo>response</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+If you define empty headers in your policy (`<Set><Headers/></Set>`), the policy does not set any headers. This will have the same effect as omitting `<Headers>`.
+
+#### `<Path>` (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set))
+
+**Note**:
+
+Sometimes you might need to send a message to a URL other than the URL defined in an API proxy's `TargetEndpoint`. If you want to rewrite the target URL, override the `target.url` variable by configuring an AssignMessage policy with the `<AssignVariable>` element, and attaching it to the `TargetEndpoint`. (You can't override `target.url` in a policy attached to the `ProxyEndpoint`, because Apigee initializes the variable in the `TargetEndpoint`).
+
+The following example shows how a policy could override `target.url`. With this policy attached to the `TargetEndpoint` request, the proxy would call the URL below instead of the URL defined on the `TargetEndpoint`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-Override-Target-URL">
+  ...
+  <AssignVariable>
+    <Name>target.url</Name>
+    <Value>https://mocktarget.apigee.net/user?user=Dude</Value>
+  </AssignVariable>
+  ...
+```
+
+You can also use a [JavaScript policy](/apigee/docs/api-platform/reference/policies/javascript-policy) in the `TargetEndpoint` to override the `target.url`.
+
+#### `<Payload>` (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set))
+
+Defines the message body for a request or response, which is specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element. The payload can be any valid content type, such as plain text, JSON, or XML.
+
+|  |  |
+|----|----|
+| **Default Value** | empty string |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set) |
+| **Child Elements** | None |
+
+The `<Payload>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Set>
+    <Payload contentType="CONTENT_TYPE" variablePrefix="PREFIX"
+        variableSuffix="SUFFIX">NEW_PAYLOAD</Payload>
+  </Set>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets a plain text payload:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-set-payload-1">
+  <Set>
+    <Payload contentType="text/plain">42</Payload>
+  </Set>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example sets a JSON payload:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-set-payload-2">
+  <Set>
+    <Payload contentType="application/json">
+      {"name":"foo", "type":"bar"}
+    </Payload>
+  </Set>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+The following example inserts variable values into the payload by wrapping variable names in curly braces:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-set-payload-3">
+  <Set>
+    <Payload contentType="application/json">
+      {"name":"foo", "type":"{variable_name}"}
+    </Payload>
+  </Set>
+</AssignMessage>
+```
+
+In older versions of Apigee—for example, prior to cloud release 16.08.17—you could not use curly braces to denote variable references within JSON payloads. In those releases, you needed to use the `variablePrefix` and `variableSuffix` attributes to specify delimiter characters, and use those to wrap variable names, like so:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-set-payload-3b">
+  <Set>
+    <Payload contentType="application/json" variablePrefix="@" variableSuffix="#">
+      {"name":"foo", "type":"@variable_name#"}
+    </Payload>
+  </Set>
+</AssignMessage>
+```
+
+This older syntax still works.
+
+</div>
+
+<div class="section">
+
+### Example 4
+
+The content of `<Payload>` is treated as a message template. This means that the AssignMessage policy replaces variables wrapped in curly braces with the value of the referenced variables at runtime.
+
+The following example uses the curly braces syntax to set part of the payload to a variable value:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-set-payload-4">
+  <Set>
+    <Payload contentType="text/xml">
+      <root>
+        <e1>sunday</e1>
+        <e2>funday</e2>
+        <e3>{var1}</e3>
+      </root>
+    </Payload>
+  </Set>
+</AssignMessage>
+```
+
+**Note**: Do not include the XML prologue in the payload; otherwise, you will get XML validation errors.
+
+</div>
+
+The following table describes the attributes of `<Payload>`:
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Presence | Type |
+| `contentType` | If specified, the value of `contentType` is assigned to the `Content-Type` HTTP header. | Optional | String |
+| `variablePrefix` | Optionally specifies the leading delimiter on a flow variable. Defaults to "{". For more information, see [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference). | Optional | Char |
+| `variableSuffix` | Optionally specifies the trailing delimiter on a flow variable. Defaults to "}". For more information, see [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference). | Optional | Char |
+
+#### `<QueryParams>` (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set))
+
+Overwrites existing query parameters in the request with new values. This element has no effect on a response.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <QueryParam> elements |
+| Parent Element | <Set> |
+| Child Elements | <QueryParam> |
+
+The `<QueryParams>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Set>
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+  </Set>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets the `address` query parameter to the value of the `request.header.address` variable:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-set-queryparams-1">
+  <Set>
+    <QueryParams>
+      <QueryParam name="address">{request.header.address}</QueryParam>
+    </QueryParams>
+  </Set>
+</AssignMessage>
+```
+
+</div>
+
+You can use `<Set>`/`<QueryParams>` only when the following criteria are met:
+
+- HTTP verbs: `GET`, `PUT`, `POST`, `PATCH`, `DELETE`
+- Message type: Request
+
+If you define empty query parameters in your policy (`<Set><QueryParams/></Set>`), the policy does not set any query parameters. This is the same as omitting `<QueryParams>`.
+
+#### `<StatusCode>` (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set))
+
+Sets the status code on the response. This element has no effect on a request.
+
+|  |  |
+|----|----|
+| **Default Value** | '200' (when [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto)'s `createNew` attribute is set to 'true') |
+| **Required?** | Optional |
+| **Type** | String or `VARIABLE` |
+| **Parent Element** | [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set) |
+| **Child Elements** | None |
+
+The `<StatusCode>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Set>
+    <StatusCode>HTTP_STATUS_CODE or {variable}</StatusCode>
+  </Set>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets a simple status code:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-set-statuscode-404">
+  <Set>
+    <StatusCode>404</StatusCode>
+  </Set>
+  <AssignTo>response</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The content of `<StatusCode>` is treated as a message template. This means a variable name wrapped in curly braces will be replaced at runtime with the value of the referenced variable, as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="set-statuscode-2">
+  <Set>
+    <StatusCode>{calloutresponse.status.code}</StatusCode>
+  </Set>
+  <AssignTo>response</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+You can use `<Set>`/`<StatusCode>` only when the following criteria are met:
+
+- Message type: Response
+
+#### `<Verb>` (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set))
+
+Sets the HTTP verb on the request. This element has no effect on a response.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional |
+| **Type** | String or `VARIABLE` |
+| **Parent Element** | [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set) |
+| **Child Elements** | None |
+
+The `<Verb>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Set>
+    <Verb>[GET|POST|PUT|PATCH|DELETE|{variable}]</Verb>
+  </Set>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets a simple verb on the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-set-verb-1">
+  <Set>
+    <Verb>POST</Verb>
+  </Set>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The content of `<Verb>` is treated as a message template. This means a variable name wrapped in curly braces will be replaced at runtime with the value of the referenced variable.
+
+The following example uses a variable to populate a verb:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-set-verb-to-dynamic-value">
+  <Set>
+    <Verb>{my_variable}</Verb>
+  </Set>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+You can use `<Set>`/`<Verb>` only when the following criteria are met:
+
+- Message type: Request
+
+#### `<Version>` (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set))
+
+Sets the HTTP version on a request. This element has no effect on a response.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional |
+| **Type** | String or `VARIABLE` |
+| **Parent Element** | [`<Set>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set) |
+| **Child Elements** | None |
+
+The `<Version>` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Set>
+    <Version>[1.0|1.1|{variable}]</Verb>
+  </Set>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets the version number to `1.1`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-set-version-1">
+  <Set>
+    <Version>1.1</Version>
+  </Set>
+ </AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following uses a variable in curly braces to set the version number:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-set-version-2">
+  <Set>
+    <Version>{my_version}</Version>
+  </Set>
+  <AssignTo>request</AssignTo>
+</AssignMessage>
+```
+
+The content of `<Version>` is treated as a message template. This means a variable name wrapped in curly braces will be replaced at runtime with the value of the referenced variable.
+
+</div>
+
+You can use `<Set>`/`<Version>` only when the following criteria are met:
+
+- Message type: Request
+
+## Create custom request messages
+
+You can use AssignMessage to create a custom request message. After you create a custom request, you can use it in the following ways:
+
+- Access its variables in other policies
+- Pass it to an external service
+
+**Note**: You cannot pass a custom request message to the target endpoint in the flow. Apigee only passes the *original request* (with any modifications you might have made) to the target endpoint.
+
+To create a custom request message, use the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#assignto) element in your AssignMessage policy. Set `createNew` to `true` and specify the name of the new message in the body of the element, as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="assignto-2">
+  <AssignTo createNew="true" transport="http" type="request">MyRequestObject</AssignTo>
+  ...
+</AssignMessage>
+```
+
+By default, Apigee does nothing with the custom request message. After creating it, Apigee will continue through the flow with the original request. To use the custom request, add a policy such as the [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy) to your proxy, and explicitly reference the newly created request message in the configuration for that policy. This would allow you to pass the custom request to an external service endpoint.
+
+The following examples create custom request messages:
+
+<div class="section">
+
+### Example 1
+
+The following example creates a custom request object with AssignMessage:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AssignMessage-3">
+  <AssignTo createNew="true" type="request">MyCustomRequest</AssignTo>
+  <Copy>
+    <Headers>
+      <Header name="user-agent"/>
+    </Headers>
+  </Copy>
+  <Set>
+    <QueryParams>
+      <QueryParam name="address">{request.queryparam.addy}</QueryParam>
+    </QueryParams>
+    <Verb>GET</Verb>
+  </Set>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+</AssignMessage>
+```
+
+This example:
+
+- Creates a new request message object called `MyCustomRequest`.
+- On MyCustomRequest, this policy:
+  - Copies the value of the `user-agent` HTTP header from the incoming request to the new message. Because [`<Copy>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#copy) does not specify the `source` attribute, Apigee will use the `request` message as the source to copy *from*.
+  - Sets the `address` query parameter on the custom message to the value of the incoming request's `addy` query parameter.
+  - Sets the HTTP verb to `GET`.
+- Sets [`<IgnoreUnresolvedVariables>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#ignoreunresolvedvariables) to `false`. When `<IgnoreUnresolvedVariables>` is `false`, if one of the variables referenced in the policy configuration does not exist, Apigee will enter [fault state](/apigee/docs/api-platform/fundamentals/fault-handling#howerrorsoccur) in the API flow.
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+Here's another example demonstrating how to create a custom request object with AssignMessage:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AssignMessage-2">
+  <AssignTo createNew="true" type="request">partner.request</AssignTo>
+  <Set>
+    <Verb>POST</Verb>
+    <Payload contentType="text/xml">
+      <request><operation>105</operation></request>
+    </Payload>
+  </Set>
+</AssignMessage>
+```
+
+This example creates a new custom request called `partner.request`. It then sets the [`<Verb>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set-verb) and [`<Payload>`](/apigee/docs/api-platform/reference/policies/assign-message-policy#set-payload) on the new request.
+
+</div>
+
+You can access the various properties of a custom message in another AssignMessage policy that occurs later in the flow. The following example gets the value of a header from a named custom response, and places it into a new header in the request message:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-Copy-Custom-Header">
+  <AssignTo>request</AssignTo>
+  <Set>
+    <Headers>
+      <Header name="injected-approval-id">{MyCalloutResponse.header.approval-id}</Header>
+    </Headers>
+  </Set>
+</AssignMessage>
+```
+
+## Error codes
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+**Tip:** Need help resolving an error? Click *build* in the **Fix** column for detailed troubleshooting information.
+
+| Fault code | HTTP status | Cause | Fix |
+| --- | --- | --- | --- |
+| steps.assignmessage.SetVariableFailed | 500 | The policy was not able to set a variable. See the fault string for the name of the unresolved variable. |  |
+| steps.assignmessage.VariableOfNonMsgType | 500 | This error occurs if the source attribute in the <Copy> element is set to a variable which is not of type message . Message type variables represent entire HTTP requests and responses. The built-in Apigee flow variables request , response , and message are of type message. To learn more about message variables, see the Variables reference . | build |
+| steps.assignmessage.UnresolvedVariable | 500 | This error occurs if a variable specified in the AssignMessage policy is either: Out of scope (not available in the specific flow where the policy is being executed) or Can't be resolved (is not defined) | build |
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+**Tip:** Need help resolving an error? Click *build* next to the error's cause description to visit the troubleshooting page.
+
+| Error name | Cause | Fix |
+|----|----|----|
+| `InvalidIndex` | If the index specified in the `<Copy>` and/or `<Remove>` elements of the `AssignMessage` policy is `0` or a negative number, then deployment of the API Proxy fails. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/assign-message-deployment-errors#invalidindex) |
+| `InvalidVariableName` | If the child element `<Name>` is empty or not specified in the `<AssignVariable>` element, then the deployment of the API proxy fails because there is no valid variable name to which to assign a value. A valid variable name is required. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/assign-message-deployment-errors#invalidvariablename) |
+| `InvalidPayload` | A payload specified in the policy is invalid. |  |
+
+### Fault variables
+
+These variables are set when this policy triggers an error at runtime. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``FAULT_NAME``"` | `FAULT_NAME` is the name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name Matches "UnresolvedVariable"` |
+| `assignmessage.``POLICY_NAME``.failed` | `POLICY_NAME` is the user-specified name of the policy that threw the fault. | `assignmessage.AM-SetResponse.failed = true` |
+
+### Example error response
+
+**Note:** For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{  
+   "fault":{  
+      "detail":{  
+         "errorcode":"steps.assignmessage.VariableOfNonMsgType"
+      },
+      "faultstring":"AssignMessage[AM-SetResponse]: value of variable is not of type Message"
+   }
+}
+```
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name="Assign Message Faults">
+    <Step>
+        <Name>AM-CustomNonMessageTypeErrorResponse</Name>
+        <Condition>(fault.name Matches "VariableOfNonMsgType") </Condition>
+    </Step>
+    <Step>
+        <Name>AM-CustomSetVariableErrorResponse</Name>
+        <Condition>(fault.name = "SetVariableFailed")</Condition>
+    </Step>
+    <Condition>(assignmessage.failed = true) </Condition>
+</FaultRule>
+```
+
+## Schemas
+
+Each policy type is defined by an XML schema (`.xsd`). For reference, <a href="https://github.com/apigee/api-platform-samples/tree/master/schemas/policy" class="external">policy schemas</a> are available on GitHub.
+
+## Related topics
+
+<a href="https://github.com/apigee/api-platform-samples/tree/master/sample-proxies/pagination" class="external">Working samples of the AssignMessage</a> policy are available in the <a href="https://github.com/apigee/api-platform-samples" class="external">API Platform samples</a>.
+
+For a more advanced example of how to override the `target.url` from the `ProxyEndpoint`, see <a href="https://discuss.google.dev/t/how-do-i-transform-the-path-between-the-proxy-and-the-target-load-balancer-endpoint/191864.html" class="external">this Apigee Community article</a>.
+
+To see a *set path* in action in a [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy), check out this <a href="https://github.com/apigee/api-platform-samples/tree/master/learn-edge/service-callout-1" class="external">Learn by doing example</a> in the Apigee GitHub samples. Just clone the repository and follow the instructions in that topic. The example uses AssignMessage to set a request path, then uses a `ServiceCallout` policy to make the request to an external service.

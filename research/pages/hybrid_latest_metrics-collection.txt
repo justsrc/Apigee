@@ -1,0 +1,72 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/metrics-collection.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/metrics-collection.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/metrics-collection.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/metrics-collection.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/metrics-collection.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/metrics-collection.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/metrics-collection.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/metrics-collection.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/metrics-collection.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/metrics-collection.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/metrics-collection.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/metrics-collection.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/metrics-collection.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/metrics-collection.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/metrics-collection.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/metrics-collection.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/metrics-collection.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/metrics-collection.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+Apigee hybrid collects operational metrics that you can use to monitor the health of hybrid services, to set up alerts, and so on. Apigee uses Open Telemetry for metrics collection. Once collected, hybrid sends the metrics data to Cloud Operations, at which point you can use the Cloud Operations console for viewing, searching, and analyzing metrics and managing alerts.
+
+The following diagram shows the metrics collection process:
+
+<img src="/static/apigee/docs/hybrid/v1.17/images/open-telemetry-arch.png" title="image_tooltip" style="width:80.0%" alt="alt_text" />
+
+As you can see in this diagram, there is one Open Telemetry pod running per node, and it can run on any pod in the node. The Open Telemetry collector scrapes application metrics data from all hybrid services and sends the metrics data to Cloud Operations. You can access metrics data through the Cloud Operations console.
+
+Metrics collection is enabled by default. To disable it, see [Configure metrics collection](/apigee/docs/hybrid/v1.17/metrics-enable).
+
+For a list of metrics you can use to analyze proxy traffic, see [Available metrics](/apigee/docs/hybrid/v1.17/metrics-view#available_metrics).
+
+## About metrics
+
+Application metrics data is made available on a port as an internal Kubernetes service. Data collected by this service is scraped by the hybrid metrics collector service. You can use the <a href="https://console.cloud.google.com/monitoring/metrics-explorer" class="external">Monitoring Metrics Explorer</a> to select metrics you want to view, such as:
+
+- read request count
+- read request latency
+- write request count
+- write request latency
+
+For example, you can create a dashboard in Cloud Operations to show your metrics:
+
+<img src="/static/apigee/docs/hybrid/v1.17/images/gcp-metricscharts.png" title="image_tooltip" style="width:80.0%" alt="alt_text" />

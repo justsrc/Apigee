@@ -1,0 +1,155 @@
+URL: https://github.com/apigee/apigee-edge-drupal/issues/481
+TITLE: Error on Developer App Analytics page for Hybrid Org
+STATE: closed state_reason: completed
+AUTHOR: varuntit101 association: NONE
+CREATED: 2020-09-10T17:10:05Z CLOSED: 2021-04-23T10:16:52Z
+LABELS: bug
+MILESTONE: None
+--- BODY ---
+## Description
+After creating a App, On Analytics page I am seeing below error:-
+"Unable to retrieve analytics data. Please try again."
+
+On checking Drupal logs I saw below error message:-
+"Apigee\Edge\Exception\ClientErrorException: INVALID_ARGUMENT: Invalid JSON payload received. Unknown name "_optimized": Cannot bind query parameter. Field 'optimized' could not be found in request message. in Apigee\Edge\HttpClient\Plugin\ResponseHandlerPlugin->decodeResponse() (line 104 of G:\Projects\apigee_kickstart\vendor\apigee\apigee-client-php\src\HttpClient\Plugin\ResponseHandlerPlugin.php)."
+
+Refer screenshot for Apigee Debug message of Request and Response
+
+
+## Version Info
+1.14
+![91218232-5f385900-e736-11ea-886b-0c0de1b4740a](https://user-images.githubusercontent.com/9864661/92769321-77ef7280-f3b6-11ea-855f-1086c0124e06.png)
+
+
+
+
+--- COMMENTS (16) ---
+
+### comment by arunz6161 (association=NONE) at 2020-09-16T01:56:45Z
+@varuntit101 thanks for the detailed problem statement, that helps. Could you confirm if the issue is seen with all apps or selective few ?
+
+### comment by varuntit101 (association=NONE) at 2020-09-17T14:00:05Z
+Hi, @arunz6161 
+
+This error is with all the Apps, I generated analytics data for 4 to 5 apps, I am getting same error with other Apps too.
+
+### comment by varuntit101 (association=NONE) at 2020-10-07T11:08:31Z
+Hi @arunz6161 Did you got a chance to check this issue?
+
+### comment by varuntit101 (association=NONE) at 2020-12-03T20:42:21Z
+@arunz6161 any updates on this?
+
+### comment by arlina-espinoza (association=CONTRIBUTOR) at 2020-12-03T21:35:08Z
+Hi @varuntit101 , I found this to be because Hybrid endpoints do not support the `_optimized` parameter. Could you try using the `apigee/apigee-client-php` from this PR? https://github.com/apigee/apigee-client-php/pull/111
+
+### comment by varuntit101 (association=NONE) at 2020-12-07T09:24:30Z
+Hi @arlina-espinoza , I applied the patch and getting below error now:-
+`Apigee\Edge\Exception\ClientErrorException: NOT_FOUND: Invalid API Call - Tenant not found in Apigee\Edge\HttpClient\Plugin\ResponseHandlerPlugin->decodeResponse() (line 104 of \vendor\apigee\apigee-client-php\src\HttpClient\Plugin\ResponseHandlerPlugin.php).`
+
+### comment by arlina-espinoza (association=CONTRIBUTOR) at 2020-12-07T18:20:21Z
+Hi @varuntit101 , have you configured the environment that should be used for analytics data at `/admin/config/apigee-edge/app-settings/general/analytics`?
+
+### comment by varuntit101 (association=NONE) at 2020-12-08T06:59:07Z
+hi @arlina-espinoza , on configuring the environment I was able to get analytics data in the debug log messages, still not able to see any info on analytics page.
+getting below message on analytics:
+"No performance data is available for the criteria you supplied."
+
+Debug log of Response:
+`{
+  "environments": [
+    {
+      "name": "dev",
+      "dimensions": [
+        {
+          "name": "Test_App",
+          "metrics": [
+            {
+              "name": "total_response_time",
+              "values": [
+                {
+                  "timestamp": 1607403600000,
+                  "value": "20.333333333333332"
+                },
+                {
+                  "timestamp": 1607400000000,
+                  "value": "39.0"
+                },
+                {
+                  "timestamp": 1607356800000,
+                  "value": "715.2635494512894"
+                },
+                {
+                  "timestamp": 1607353200000,
+                  "value": "730.690028527504"
+                },
+                {
+                  "timestamp": 1607349600000,
+                  "value": "3501.4727272727273"
+                },
+                {
+                  "timestamp": 1607346000000,
+                  "value": "908.0862068965517"
+                },
+                {
+                  "timestamp": 1607342400000,
+                  "value": "226.57894736842104"
+                },
+                {
+                  "timestamp": 1607335200000,
+                  "value": "1526.2"
+                },
+                {
+                  "timestamp": 1607331600000,
+                  "value": "743.2448979591836"
+                },
+                {
+                  "timestamp": 1607328000000,
+                  "value": "2489.4285714285716"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metaData": {
+    "notices": [
+      "Source:Postgres",
+      "PG Host:uap-us-central1-1:us-central1:rgce1uappg01s",
+      "Table used: edge.api.hybridgroup003.agg_app",
+      "query served by:"
+    ]
+  }
+}`
+
+### comment by varuntit101 (association=NONE) at 2021-01-06T11:14:57Z
+hi @arlina-espinoza any update on this.
+
+### comment by raakesh-blokhra (association=CONTRIBUTOR) at 2021-01-06T16:44:48Z
+@varuntit101  We are looking into this issue and should have some information for you shortly. 
+
+### comment by varuntit101 (association=NONE) at 2021-01-21T07:24:20Z
+hi @raakesh-blokhra @phdhiren any update on this issue.
+
+### comment by raakesh-blokhra (association=CONTRIBUTOR) at 2021-01-21T16:47:28Z
+> hi @raakesh-blokhra @phdhiren any update on this issue.
+
+@varuntit101 Thanks for your patience. We have identified the issue and are working on it. We will get back to you as soon as it is resolved. 
+
+### comment by phdhiren (association=CONTRIBUTOR) at 2021-01-25T06:02:23Z
+Duplicate of # https://github.com/apigee/apigee-client-php/issues/105
+
+@varuntit101 , Check the latest patch of https://github.com/apigee/apigee-client-php/issues/105 i.e.
+https://github.com/phdhiren/apigee-client-php/commit/bf68932105db97d74192de9718a6b26fff8f4ed3
+
+Please note the patch is under review.
+
+### comment by cnovak (association=COLLABORATOR) at 2021-03-17T19:22:22Z
+reopening this ticket since the PR is not merged.
+
+### comment by phdhiren (association=CONTRIBUTOR) at 2021-03-18T04:26:29Z
+The issue is be fixed by https://github.com/apigee/apigee-client-php/pull/123 which is merged and it it will be part of next release of https://github.com/apigee/apigee-client-php
+
+### comment by phdhiren (association=CONTRIBUTOR) at 2021-04-23T10:16:52Z
+This has been resolved with latest version of apigee-client-php library [2.0.7](https://github.com/apigee/apigee-client-php/releases/tag/2.0.7)

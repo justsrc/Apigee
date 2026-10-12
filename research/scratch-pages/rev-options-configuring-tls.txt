@@ -1,0 +1,230 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This section shows how to configure TLS for traffic from a proxy to a target.
+
+**Unsupported TLS versions:** Apigee does not support the use of TLS 1.0 or TLS1.1. If you use these protocols in your target endpoint configuration, the Apigee target endpoint throws the error `messaging.adaptors.http.flow.SslHandshakeFailed`.
+
+## About setting TLS options in a target endpoint or target server
+
+A target can be represented by an XML object like the one below:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPTargetConnection>
+    <Properties/>
+    <URL>https:myTargetAddress</URL>
+    <SSLInfo>
+        <Enabled>true</Enabled>
+        <Enforce>true</Enforce>
+        <ClientAuthEnabled>true</ClientAuthEnabled>
+        <KeyStore>ref://myKeystoreRef</KeyStore>
+        <KeyAlias>myKeyAlias</KeyAlias>
+        <TrustStore>ref://myTruststoreRef</TrustStore>
+        <IgnoreValidationErrors>false</IgnoreValidationErrors>
+        <Protocols>myProtocols</Protocols>
+        <Ciphers>myCipher</Ciphers>
+    </SSLInfo>
+</HTTPTargetConnection>
+```
+
+The area of the target endpoint configuration that you modify to configure TLS is defined by the `<SSLInfo>` tag. You use the same `<SSLInfo>` tag to configure a target endpoint or target server.
+
+For information about the child elements of `<SSLInfo>`, see [TLS/SSL TargetEndpoint configuration](/apigee/docs/api-platform/reference/api-proxy-configuration-reference#tlsssltargetendpointconfiguration).
+
+The following table describes the TLS configuration elements used by the `<SSLInfo>` tag:
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Element</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code translate="no" dir="ltr">&lt;Enabled&gt;</code></td>
+<td>The <code translate="no" dir="ltr">&lt;SSLInfo&gt;</code> block can be used for both one-way and two-way TLS/SSL.
+<p>If set to <code translate="no" dir="ltr">true</code>, <code translate="no" dir="ltr">&lt;Enabled&gt;</code> specifies that the <code translate="no" dir="ltr">&lt;SSLInfo&gt;</code> block should be used. When set to <code translate="no" dir="ltr">false</code>, the <code translate="no" dir="ltr">&lt;SSLInfo&gt;</code> block is ignored.</p>
+<p>The default value of <code translate="no" dir="ltr">&lt;Enabled&gt;</code> is <code translate="no" dir="ltr">true</code> if <code translate="no" dir="ltr">&lt;URL&gt;</code> specifies the HTTPS protocol, and <code translate="no" dir="ltr">false</code> if <code translate="no" dir="ltr">&lt;URL&gt;</code> specifies HTTP.</p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">&lt;Enforce&gt;</code></td>
+<td><p>Enforces strict SSL between Apigee and the target backend.</p>
+<p>If set to <code translate="no" dir="ltr">true</code>, connections will fail for targets with invalid certs, expired certs, self-signed certs, certs with a hostname mismatch, and certs with an untrusted root. A failure code of <code translate="no" dir="ltr">4xx</code> or <code translate="no" dir="ltr">5xx</code> is returned.</p>
+<p>If unset, or set to <code translate="no" dir="ltr">false</code>, the result of connections to target backends with problematic certs depends upon the setting of <code translate="no" dir="ltr">&lt;IgnoreValidationErrors&gt;</code> (see below). A success response (<code translate="no" dir="ltr">2xx</code>) can occur under certain conditions, if <code translate="no" dir="ltr">&lt;IgnoreValidationErrors&gt;</code> is set to <code translate="no" dir="ltr">true</code>.</p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">&lt;ClientAuthEnabled&gt;</code></td>
+<td><p>Enables two-way TLS (also known as mutual TLS or mTLS) between Apigee and the API client, or between Apigee and the target backend.</p>
+<p>Enabling two-way TLS typically requires that you set up a truststore on Apigee and a truststore.</p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">&lt;KeyStore&gt;</code></td>
+<td>A keystore containing private keys used for outbound client authentication</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">&lt;KeyAlias&gt;</code></td>
+<td>The alias specified when you uploaded a cert and private key to the keystore.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">&lt;TrustStore&gt;</code></td>
+<td>A keystore containing trusted server certificates.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">&lt;IgnoreValidationErrors&gt;</code></td>
+<td><p>Indicates whether validation errors are ignored. If the backend system uses SNI and returns a cert with a subject Distinguished Name (DN) that does not match the hostname, there is no way to ignore the error and the connection fails.</p>
+<p><strong>Note</strong>: If <code translate="no" dir="ltr">&lt;Enforce&gt;</code> is set to <code translate="no" dir="ltr">true</code>, the value of <code translate="no" dir="ltr">&lt;IgnoreValidationErrors&gt;</code> is ignored.</p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">&lt;Ciphers&gt;</code></td>
+<td><p>Supported ciphers for outbound TLS/SSL. If no ciphers are specified, then all ciphers available for the JVM will be permitted.</p>
+<p>To restrict ciphers, add the following elements listing the supported ciphers:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="scdoc" data-syntax-guessed=""><code>&lt;Ciphers&gt;
+ &lt;Cipher&gt;TLS_RSA_WITH_3DES_EDE_CBC_SHA&lt;/Cipher&gt;
+ &lt;Cipher&gt;TLS_RSA_WITH_DES_CBC_SHA&lt;/Cipher&gt;
+&lt;/Ciphers&gt;</code></pre></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">&lt;Protocols&gt;</code></td>
+<td><p>Supported protocols for outbound TLS/SSL. If no protocols are specified, then all protocols available for the JVM will be permitted.</p>
+<p>To restrict protocols, specify them explicitly. For example, to allow only TLS v1.2 or TLS v1.3:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="Text only" data-syntax-guessed=""><code>&lt;Protocols&gt;
+ &lt;Protocol&gt;TLSv1.2&lt;/Protocol&gt;
+ &lt;Protocol&gt;TLSv1.3&lt;/Protocol&gt;
+&lt;/Protocols&gt;</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+## About setting the \<KeyStore\> and \<TrustStore\> elements
+
+In the example above, the keystore and truststore are specified by using **references**, in the form:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<KeyStore>ref://myKeystoreRef</KeyStore>
+<TrustStore>ref://myTruststoreRef</TrustStore>
+```
+
+**Warning:** Apigee strongly recommends that you always use references to the keystore and truststore. A reference is a variable that contains the name of the keystore or truststore, rather than specifying the keystore name directly. If you upload a new certificate that does not use a reference but instead specifies the keystore name directly, the runtime Message Processors will **not** automatically detect the change. To resolve this, you must contact Google Cloud Support to restart your Message Processors, which may cause temporary service degradation.
+
+In this example:
+
+- **`myKeystoreRef`** is a reference that contains the name of the keystore. In this example, the name of the keystore is **myKeystore**.
+- **`myTruststoreRef`** is a reference that contains the name of the truststore. In this example, the name of the truststore is **myTruststore**.
+
+When a cert expires, you must update the target endpoint/target server to specify the keystore or truststore that contains the new cert. However, if you use references, you can modify the value of the *references* to reflect the new keystore or truststore names instead of modifying the target endpoint/target server. Changing the value of the reference does not require you to contact <a href="https://cloud.google.com/support-hub/" class="external">Google Cloud Customer Care</a>.
+
+Alternatively, you can specify the keystore name and truststore name directly:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<KeyStore>myKeystore</KeyStore>
+<TrustStore>myTruststore</TrustStore>
+```
+
+If you directly specify the name of the keystore or truststore, then you must contact <a href="https://cloud.google.com/support-hub/" class="external">Google Cloud Customer Care</a>.
+
+A third option is to use flow variables:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<KeyStore>{ssl.keystore}</KeyStore>
+<TrustStore>{ssl.truststore}</TrustStore>
+```
+
+You can use flow variables to dynamically specify a keystore or truststore, with an effect similar to using a reference. For more information, see [Using flow variables to set TLS/SSL values dynamically](/apigee/docs/api-platform/reference/api-proxy-configuration-reference#tlsssltargetendpointconfiguration-usingflowvariablestosettlssslvaluesdynamically).
+
+## About configuring TLS
+
+All Apigee customers, both paid and evaluation, have complete control over the configuration of target endpoints/target servers. In addition, paid Apigee customers have complete control over TLS properties.
+
+### Handling expired certificates
+
+If a TLS certificate expires, or if your system configuration changes such that the certificate is no longer valid, then you need to update the certificate. When configuring TLS for a target endpoint/target server, you should decide how you are going to perform that update before you perform any configuration.
+
+**Note:** You cannot update an existing keystore or truststore to add a new certificate. You must create a new keystore/truststore when updating a certificate. Typically, you create the new keystore/truststore and upload the new cert before the cert in the old keystore/truststore expires. This lets you test the new keystore/truststore and rollback to the old keystore/truststore if there are any issues.
+
+### When a cert expires
+
+On Apigee, you store certs in one of two places:
+
+- **Keystore** - Contains the TLS certificate and private key used to identify the entity during TLS handshaking.
+- **Truststore** - Contains trusted certificates on a TLS client used to validate a TLS server's certificate presented to the client. These certificates are typically self-signed certificates, certificates signed by a trusted CA, or certs used as part of two-way TLS (also known as mutual TLS or mTLS).
+
+The method you use to specify the keystore and truststore in the target endpoint or target server determines how you perform the certificate update. You can use references, direct names, or flow variables. Each method has different repercussions on the update process, as described in the following table:
+
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th><strong>Config type</strong></th>
+<th><strong>How to update/replace cert</strong></th>
+<th><strong>Usage / Impact</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reference (Recommended)</td>
+<td><p><strong>Keystore:</strong> Create a new keystore with a <strong>new name</strong> and an alias with the <strong>same name</strong> as the old alias.</p>
+<p><strong>Truststore:</strong> Create a truststore with a <strong>new name</strong>. The alias name does not matter.</p>
+<strong>Note:</strong> If a certificate is part of a chain, you must either create a single file containing all the certs and upload that file to a single alias, or upload all certs in the chain separately to the truststore using a different alias for each cert.</td>
+<td>Update the reference to point to the new store.
+<p>No need to contact Apigee Support. No downtime.</p></td>
+</tr>
+<tr>
+<td>Flow variable</td>
+<td><p><strong>Keystore:</strong> Create a new keystore with a <strong>new name</strong> and an alias with the same or new name.</p>
+<p><strong>Truststore:</strong> Create a truststore with a <strong>new name</strong>.</p></td>
+<td>Pass the updated flow variable on each request with the name of the new store.
+<p>No need to contact Apigee Support. No downtime.</p></td>
+</tr>
+<tr>
+<td>Direct</td>
+<td><p><strong>Method 1: Create a new store (Recommended to avoid downtime)</strong></p>
+<p>Create a new keystore or truststore with a <strong>new name</strong> and upload the new cert (and private key if creating a keystore).</p></td>
+<td>Update your target endpoint or target server configuration to specify the new store name directly, then <strong>redeploy the API proxy</strong>.
+<p>No need to contact Apigee Support.</p></td>
+</tr>
+<tr>
+<td>Direct</td>
+<td><p><strong>Method 2a: In-place update (Delete &amp; Recreate)</strong></p>
+<p>Delete the keystore or truststore and recreate it with the same name.</p></td>
+<td><p>API requests will fail during the deletion and recreation window.</p>
+<p>Because Message Processors cache directly-specified stores, they will not automatically detect the updated certificate. You <strong>must contact <a href="https://cloud.google.com/support-hub/" class="external">Google Cloud Customer Care</a></strong> to restart the Message Processors.</p></td>
+</tr>
+<tr>
+<td>Direct</td>
+<td><p><strong>Method 2b: In-place update (Truststore upload)</strong></p>
+<p>For <strong>truststores only</strong>, upload a new cert directly to the existing truststore.</p></td>
+<td><p>Because Message Processors cache directly-specified stores, they will not automatically detect the new certificate. You <strong>must contact <a href="https://cloud.google.com/support-hub/" class="external">Google Cloud Customer Care</a></strong> to restart the Message Processors.</p></td>
+</tr>
+</tbody>
+</table>

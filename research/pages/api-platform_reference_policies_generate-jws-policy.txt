@@ -1,0 +1,595 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The GenerateJWS policy generates a signed JWS, with a configurable set of claims. The JWS can then be returned to clients, transmitted to backend targets, or used in other ways. See [JWS and JWT policies overview](/apigee/docs/api-platform/reference/policies/jwt-policies-overview) for a detailed introduction.
+
+To learn about the parts of a JWS and how they are encrypted and signed, refer to <a href="https://tools.ietf.org/html/rfc7515" class="external">RFC7515</a>.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+## Samples
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Generate a JWS signed with HS256
+
+This example policy generates a JWS that is signed using the HS256 algorithm. HS256 relies on a shared secret for both signing and verifying the signature. This JWS uses "attached" content, meaning the encoded header, payload, and signature are dot-concatenated to produce the final JWS:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+[header].[payload].[signature]
+```
+
+Use the `<Payload>` element to specify the raw, unencoded JWS payload. In this example, a variable contains the payload. When this policy action is triggered, Apigee encodes the JWS header and payload, then adds the encoded signature to digitally sign the JWS.
+
+The policy configuration below creates a JWS from a payload contained in the variable `my-payload`, and stores the resulting JWS in the variable `output-variable`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<GenerateJWS name="JWS-Generate-HS256">
+    <DisplayName>JWS Generate HS256</DisplayName>
+    <Algorithm>HS256</Algorithm>
+    <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+    <SecretKey>
+        <Value ref="private.secretkey"/>
+        <Id>1918290</Id>
+    </SecretKey>
+    <Payload ref="my-payload"/>
+    <OutputVariable>output-variable</OutputVariable>
+</GenerateJWS>
+```
+
+</div>
+
+<div class="section">
+
+### Generate an HS256-signed JWT
+
+This example also generates a JWS with attached content that is signed using the HS256 algorithm. In this case, the payload is JSON. Setting the `typ` header to JWT results in a signed JWS that is also a signed JWT. (<a href="https://datatracker.ietf.org/doc/html/rfc7519#section-5.1" class="external">reference</a>)
+
+The policy configuration below creates a JWS from a payload contained in the variable `json-content`, and stores the resulting JWS in the variable `output-variable`. The result will be a signed JWT if and only if the `json-content` variable holds a JSON payload, and the properties within that JSON payload are valid for JWT. For example, the `exp` property, if it is present, must hold a numeric value. The `aud` property, if it is present, must be a string or an array of strings. And so on. Consult <a href="https://datatracker.ietf.org/doc/html/rfc7519" class="external">IETF RFC7519</a> for details on the valid values for JWT claims.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<GenerateJWS name="JWS-Generate-HS256-JWT">
+    <Algorithm>HS256</Algorithm>
+    <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+    <SecretKey>
+        <Value ref="private.secretkey"/>
+    </SecretKey>
+    <Payload ref="json-content"/>
+    <AdditionalHeaders>
+        <Claim name="typ">JWT</Claim>
+    </AdditionalHeaders>
+    <OutputVariable>output-variable</OutputVariable>
+</GenerateJWS>
+```
+
+</div>
+
+<div class="section">
+
+### Generate a detached JWS
+
+This example policy generates a JWS with detached content, signed using the RS256 algorithm. Generating an RS256 signature relies on an RSA private key, which must be provided in PEM-encoded form.
+
+A JWS with detached content omits the payload from the generated JWS:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+[header]..[signature]
+```
+
+See [Parts of a JWS/JWT](/apigee/docs/api-platform/reference/policies/jwt-policies-overview#parts-of-a-jwt) for more on the structure and format of a JWS.
+
+Use the `<Payload>` element to specify the raw, unencoded JWS payload. When this policy is triggered, Apigee encodes the JWS header and payload, and then uses them to generate the encoded signature. However, the generated JWS omits the encoded payload from the serialized JWS. This is helpful when the signed content is large, or binary (such as an image or PDF), or both. To allow validation, you must pass both elements, the JWS and the payload that was included in the signed content, to the verifying party. If you are using the [VerifyJWS policy](/apigee/docs/api-platform/reference/policies/verify-jws-policy) to verify the JWS, you can specify the variable containing the payload with the `<DetachedContent>` element of the VerifyJWS policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<GenerateJWS name="JWS-Generate-RS256">
+    <DisplayName>JWS Generate RS256</DisplayName>
+    <Algorithm>RS256</Algorithm>
+    <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+    <PrivateKey>
+        <Value ref="private.privatekey"/>
+        <Password ref="private.privatekey-password"/>
+        <Id ref="private.privatekey-id"/>
+    </PrivateKey>
+    <Payload ref="my-payload"/>
+    <DetachContent>true</DetachContent>
+    <OutputVariable>output-variable</OutputVariable>
+</GenerateJWS>
+```
+
+**Note:** You can use a slightly modified version of this example to generate a JWS for the PS\* or ES\* algorithms. Just change the value of `<Algorithm>RS256</Algorithm>` to `PS256`, or `ES256`, etc. The key you specify must be compatible with the algorithm. For more on the key requirements, see [About signature encryption algorithms](/apigee/docs/api-platform/reference/policies/jwt-policies-overview#about-signature-encryption-algorithms).
+
+</div>
+
+</div>
+
+## Setting the key elements
+
+The elements that you use to specify the key used to generate the JWS depend on the chosen algorithm, as shown in the following table:
+
+**Note:** The RS\*, PS\*, and ES\* algorithms all use the same elements to specify the key. The key data you provide must be compatible with the algorithm you specify. For more on the key requirements, see [About signature encryption algorithms](/apigee/docs/api-platform/reference/policies/jwt-policies-overview#about-signature-encryption-algorithms).
+
+| Algorithm | Key elements |  |
+| --- | --- | --- |
+| HS{256/384/512} * | <SecretKey> <Value ref="private.secretkey"/> <Id>1918290</Id> </SecretKey> |  |
+| RS/PS/ES{256/384/512} * | <PrivateKey> <Value ref="private.privatekey"/> <Password ref="private.privatekey-password"/> <Id ref="private.privatekey-id"/> </PrivateKey> The <Password> and <Id> elements are optional. |  |
+| * For more on the key requirements, see About signature encryption algorithms . |  |  |
+
+## Element reference for Generate JWS
+
+The policy reference describes the elements and attributes of the Generate JWS policy.
+
+**Note:** Configuration will differ somewhat depending on the encryption algorithm you use. Refer to the [Samples](#samples) for examples that demonstrate configurations for specific use cases.
+
+### Attributes that apply to the top-level element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<GenerateJWS name="JWS" continueOnError="false" enabled="true" async="false">
+```
+
+The following attributes are common to all policy parent elements.
+
+| Attribute | Description | Default | Presence |
+| --- | --- | --- | --- |
+| name | The internal name of the policy. Characters you can use in the name are restricted to: A-Z0-9._\-$ % . However, the Apigee UI enforces additional restrictions, such as automatically removing characters that are not alphanumeric. Optionally, use the <displayname></displayname> element to label the policy in the Apigee UI proxy editor with a different, natural-language name. | N/A | Required |
+| continueOnError | Set to false to return an error when a policy fails. This is expected behavior for most policies. Set to true to have flow execution continue even after a policy fails. | false | Optional |
+| enabled | Set to true to enforce the policy. Set to false to "turn off" the policy. The policy will not be enforced even if it remains attached to a flow. | true | Optional |
+| async | This attribute is deprecated. | false | Deprecated |
+
+## \<DisplayName\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+Use in addition to the name attribute to label the policy in the Apigee UI proxy editor with a different, natural-language name.
+
+|  |  |
+|----|----|
+| **Default** | If you omit this element, the value of the policy's name attribute is used. |
+| **Presence** | Optional |
+| **Type** | String |
+
+## \<Algorithm\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Algorithm>algorithm-here</Algorithm>
+```
+
+Specifies the encryption algorithm to sign the token.
+
+|  |  |
+|----|----|
+| **Default** | N/A |
+| **Presence** | Required |
+| **Type** | String |
+| **Valid values** | HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512 |
+
+## \<AdditionalHeaders/Claim\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AdditionalHeaders>
+    <Claim name='claim1'>explicit-value-of-claim-here</Claim>
+    <Claim name='claim2' ref='variable-name-here'/>
+    <Claim name='claim3' ref='variable-name-here' type='boolean'/>
+    <Claim name='claim4' ref='variable-name' type='string' array='true'/>
+ </AdditionalHeaders>
+```
+
+Puts the additional claim name/value pair(s) in the header for the JWS.
+
+The `<Claim>` element supports the dynamic string substitution feature called [message templating](/apigee/docs/api-platform/reference/message-template-intro) when **type=map**.
+
+|  |  |
+|----|----|
+| **Default** | N/A |
+| **Presence** | Optional |
+| **Valid values** | Any value that you want to use for an additional claim. You can specify the claim explicitly as string, a number, a boolean, a map, or an array. |
+
+The `<Claim>` element takes these attributes:
+
+- **name** - (Required) The name of the claim, also known as the parameter.
+- **ref** - (Optional) The name of a flow variable. If present, the policy will use the value of this variable as the claim. If both a **ref** attribute and an explicit claim value are specified, the explicit value is the default, and is used if the referenced flow variable is unresolved.
+  **Warning:** When `ref` is used with `type`=`map` and when the variable contains untrusted input (for example, from request headers or query parameters), an attacker could inject template expressions. For example, an attacker can use `{private.secret}` to extract sensitive data from the message context. Protect against this risk. See [Prevent template injection when using JWS and JWT](/apigee/docs/api-platform/reference/policies/jwt-policies-overview#prevent-template-injection) for more information.
+- **type** - (Optional) One of: string (default), number, boolean, or map
+- **array** - (Optional) Set to **true** to indicate if the value is an array of types. Default: false.
+
+## \<CriticalHeaders\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<CriticalHeaders>a,b,c</CriticalHeaders>
+
+or:
+
+<CriticalHeaders ref="variable_containing_headers"/>
+```
+
+Adds the critical header, **crit**, to the JWS. The **crit** header is an array of header names that must be known and recognized by the JWS receiver. For example, you can use this configuration element to produce a JWS header that when decoded, looks like this:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "typ": "...",
+  "alg" : "...",
+  "hyb" : "some-value-here",
+  "crit" : [ "hyb" ],
+}
+```
+
+This JWS header asserts that the **hyb** header parameter is of critical importance, and any recipient of the JWS must understand the meaning and value of that parameter.
+
+Per <a href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.11" class="external">IETF RFC 7515</a>, the recipient of a JWS should reject the JWS as invalid if the recipient does not understand one or more of the parameters referenced in the **crit** parameter. In Apigee, the [VerifyJWS policy](/apigee/docs/api-platform/reference/policies/verify-jws-policy) conforms to this behavior. For each parameter listed in the **crit** parameter, it checks that the `<KnownHeaders>` element of the VerifyJWS policy also lists that parameter. Any header that the VerifyJWS policy finds in **crit** that is not also listed in `<KnownHeaders>` causes the VerifyJWS policy to reject the JWS.
+
+**Note:** It is nonsensical to include in the list of CriticalHeaders any header parameters that do not exist in the actual JWS header. The `<CriticalHeaders>` does not actually add the referenced parameters to the JWS header. It only defines the contents of the **crit** parameter. You can use the `<AdditionalHeader/Claims>` to add the referenced header claims or parameters.
+
+|  |  |
+|----|----|
+| **Default** | N/A |
+| **Presence** | Optional |
+| **Type** | Comma separated array of one or more strings |
+| **Valid values** | Either an array or a reference to a variable containing the array. |
+
+## \<DetachContent\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DetachContent>true|false</DetachContent>
+```
+
+Specifies whether to generate the JWS with a detached payload, `<DetachContent>true</DetachContent>`, or not, `<DetachContent>false</DetachContent>`.
+
+If you specify false, the default, the generated JWS is in the form:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+[header].[payload].[signature]
+```
+
+If you specify true to create a JWS with a detached payload, the generated JWS omits the payload and is in the form:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+[header]..[signature]
+```
+
+With a JWS using a detached payload, it is up to you to pass the original unencoded payload to the verifying party, along with the serialized JWS.
+
+|                  |               |
+|------------------|---------------|
+| **Default**      | false         |
+| **Presence**     | Optional      |
+| **Type**         | Boolean       |
+| **Valid values** | true or false |
+
+## \<IgnoreUnresolvedVariables\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IgnoreUnresolvedVariables>true|false</IgnoreUnresolvedVariables>
+```
+
+Set to false if you want the policy to throw an error when any referenced variable specified in the policy is unresolvable. Set to true to treat any unresolvable variable as an empty string (null).
+
+|                  |               |
+|------------------|---------------|
+| **Default**      | false         |
+| **Presence**     | Optional      |
+| **Type**         | Boolean       |
+| **Valid values** | true or false |
+
+## \<OutputVariable\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OutputVariable>output-variable</OutputVariable>
+```
+
+Specifies the name of the context variable that the policy will set with the generated JWS. By default, the policy places the JWS into the context variable named `jws.``POLICYNAME``.generated_jws`.
+
+|              |                                    |
+|--------------|------------------------------------|
+| **Default**  | `jws.``POLICYNAME``.generated_jws` |
+| **Presence** | Optional                           |
+| **Type**     | String (a flow variable name)      |
+
+## \<Payload\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Payload ref="flow-variable-name-here" />
+
+or
+
+<Payload>payload-value</Payload>
+```
+
+Specifies the raw, unencoded JWS payload. Specify a variable containing the payload, or a string.
+
+The `<Payload>` element supports the dynamic string substitution feature called [message templating](/apigee/docs/api-platform/reference/message-template-intro). A message template permits you to perform variable string substitution in the `payload-value` string. In the following example, the payload would be constructed from a combination of text and the value of a variable.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Payload>fixed-text-{request.formparam.payload}-more-fixed-text</Payload>
+```
+
+**Warning:** When `ref` is used with the `<Payload>` element, an attacker could inject template expressions. For example, an attacker can use `{private.secret}` to extract sensitive data from the message context. Protect against this risk. See [Prevent template injection when using JWS and JWT](/apigee/docs/api-platform/reference/policies/jwt-policies-overview#prevent-template-injection) for more information.
+
+|  |  |
+|----|----|
+| **Default** | N/A |
+| **Presence** | Required |
+| **Type** | String, byte array, stream, or any other representation of the unencoded JWS payload. |
+| **Valid values** | Either a message template, or a reference to a variable containing the payload. |
+
+## \<PrivateKey\> element
+
+This is optional, for use only when the `<Algorithm>` is one of the RS\*, PS\*, or ES\* options. It specifies the private key to use for signing, as well as other information related to the private key. It is used when the algorithm is an asymmetric algorithm.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PrivateKey>
+   <Value ref="private.privatekey"</Value>
+</PrivateKey>
+```
+
+|  |  |
+|----|----|
+| **Default:** | N/A |
+| **Presence:** | Optional. However, you must include exactly one of either the `<PrivateKey>` or `<SecretKey>` element. Use the `<PrivateKey>` element when the algorithm is RS\*, PS\*, or ES\*, and use the `<SecretKey>` element when the algorithm is HS\*. |
+| **Type:** | N/A |
+
+### \<PrivateKey/Id\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PrivateKey>
+  <Id ref="flow-variable-name-here"/>
+</PrivateKey>
+
+or
+
+<PrivateKey>
+  <Id>your-id-value-here</Id>
+</PrivateKey>
+```
+
+Specifies the key ID (kid) to include in the JWS header.
+
+|                  |                           |
+|------------------|---------------------------|
+| **Default**      | N/A                       |
+| **Presence**     | Optional                  |
+| **Type**         | String                    |
+| **Valid values** | A flow variable or string |
+
+### \<PrivateKey/Password\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PrivateKey>
+  <Password ref="private.privatekey-password"/>
+</PrivateKey>
+```
+
+Specify the password the policy should use to decrypt the private key, if necessary. Use the **ref** attribute to pass the key in a flow variable.
+
+|  |  |
+|----|----|
+| **Default** | N/A |
+| **Presence** | Optional |
+| **Type** | String |
+| **Valid values** | A flow variable reference. **Note:** You must specify a flow variable with the **ref** attribute. Apigee will reject as invalid a policy configuration in which the password is specified in plaintext. The flow variable must have the prefix "private". For example, `private.mypassword` |
+
+### \<PrivateKey/Value\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PrivateKey>
+  <Value ref="private.variable-name-here"/>
+</PrivateKey>
+```
+
+Specifies a PEM-encoded private key used to sign the JWS. Use the ref attribute to pass the key in a flow variable.
+
+| Default | N/A |
+| --- | --- |
+| Presence | Required when using the policy to generate a JWS using one of the RS*, PS*, or ES* algorithms. |
+| Type | String |
+| Valid values | A flow variable containing a string representing a PEM-encoded private key value. Note: The flow variable must have the prefix "private". For example, private.mykey |
+
+## \<SecretKey\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SecretKey encoding="base16|hex|base64|base64url" >
+  <Id ref="variable-containing-key-id-here">secret-key-id</Id>
+  <Value ref="private.variable-here"/>
+</SecretKey>
+```
+
+Specifies the secret key to use when generating a JWS that uses a symmetric (HS\*) algorithm, one of HS256, HS384, or HS512.
+
+This element is optional. However, you must include exactly one of either the `<PrivateKey>` or `<SecretKey>` element. Use the `<PrivateKey>` element when generating a JWS signed with an asymmetric algorithm (one of RS\*, PS\*, or ES\*), and use the `<SecretKey>` element when generating a JWS signed with a symmetric algorithm (algorithm like HS\*).
+
+### Children of `<SecretKey>`
+
+The following table provides a description of the child elements and attributes of `<SecretKey>`:
+
+| Child | Presence | Description |
+| --- | --- | --- |
+| encoding (attribute) | Optional | Specifies how the key is encoded in the referenced variable. By default, when no encoding attribute is present, the encoding of the key is treated as UTF-8. Valid values for the attribute are: hex, base16, base64, or base64url. The encoding values hex and base16 are synonyms. <SecretKey encoding="hex" > <Id ref="variable-containing-key-id-here">secret-key-id</Id> <Value ref="private.secretkey"/> </SecretKey> In the above example, because the encoding is hex , if the contents of the variable private.secretkey is 494c6f766541504973 , the key will be decoded as a set of 9 bytes, which in hex will be 49 4c 6f 76 65 41 50 49 73 . Note: Apigee enforces a minimum key strength. See the documentation for the Value element for details. |
+| Id (element) | Optional | The key identifier. The value can be any string. You can specify the value as a literal text value, or indirectly, via a variable reference, with the ref attribute. <SecretKey> <Id ref="flow-variable-name-here"/> <Value ref="private.variable-here"/> </SecretKey> or <SecretKey> <Id>your-id-value-here</Id> <Value ref="private.variable-here"/> </SecretKey> The policy will include this key identifier as the kid claim in the header of the generated JWS. |
+| Value (element) | Required | An encoded secret key. Specifies the secret key used to sign the payload. Use the ref attribute to provide the key indirectly via a variable, such as private.secret-key . <SecretKey> <Id ref="flow-variable-name-here"/> <Value ref="private.my-secret-variable"/> </SecretKey> Note: The variable name must include the private prefix as shown in the example above. Apigee enforces a minimum key strength for the HS256/HS384/HS512 algorithms. The minimum key length for HS256 is 32 bytes, for HS384 it is 48 bytes, and for HS512 it is 64 bytes. Using a lower-strength key causes a runtime error. |
+
+## \<Type\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Type>type-string-here</Type>
+```
+
+Optional element whose only allowed value is `Signed`, specifying that the policy generates a signed JWS. `<Type>` is provided just to match the corresponding element for the GenerateJWT and VerifyJWT policies (where it can take on either of the values `Signed` or `Encrypted`).
+
+|                 |          |
+|-----------------|----------|
+| **Default**     | N/A      |
+| **Presence**    | Optional |
+| **Type**        | String   |
+| **Valid value** | `Signed` |
+
+## Flow variables
+
+The Generate JWS policy does not set flow variables.
+
+## Error reference
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+| Fault code | HTTP status | Occurs when |
+|----|----|----|
+| `steps.jws.GenerationFailed` | `401` | The policy was unable to generate the JWS. |
+| `steps.jws.InsufficientKeyLength` | `401` | For a key less than 32 bytes for the HS256 algorithm |
+| `steps.jws.InvalidClaim` | `401` | For a missing claim or claim mismatch, or a missing header or header mismatch. |
+| `steps.jws.InvalidCurve` | `401` | The curve specified by the key is not valid for the Elliptic Curve algorithm. |
+| `steps.jws.InvalidJsonFormat` | `401` | Invalid JSON found in the JWS header. |
+| `steps.jws.InvalidPayload` | `401` | The JWS payload is invalid. |
+| `steps.jws.InvalidSignature` | `401` | `<DetachedContent>` is omitted and the JWS has a detached content payload. |
+| `steps.jws.KeyIdMissing` | `401` | The Verify policy uses a JWKS as a source for public keys, but the signed JWS does not include a `kid` property in the header. |
+| `steps.jws.KeyParsingFailed` | `401` | The public key could not be parsed from the given key information. |
+| `steps.jws.MissingPayload` | `401` | The JWS payload is missing. |
+| `steps.jws.NoAlgorithmFoundInHeader` | `401` | Occurs when the JWS omits the algorithm header. |
+| `steps.jws.SigningFailed` | `401` | In GenerateJWS, for a key less than the minimum size for the HS384 or HS512 algorithms |
+| `steps.jws.UnknownException` | `401` | An unknown exception occurred. |
+| `steps.jws.WrongKeyType` | `401` | Wrong type of key specified. For example, if you specify an RSA key for an Elliptic Curve algorithm, or a curve key for an RSA algorithm. |
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+| Error name | Occurs when |
+| --- | --- |
+| InvalidAlgorithm | The only valid values are: RS256, RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512, HS256, HS384, HS512 . |
+| EmptyElementForKeyConfiguration FailedToResolveVariable InvalidConfigurationForActionAndAlgorithmFamily InvalidConfigurationForVerify InvalidEmptyElement InvalidFamiliesForAlgorithm InvalidKeyConfiguration InvalidNameForAdditionalClaim InvalidNameForAdditionalHeader InvalidPublicKeyId InvalidPublicKeyValue InvalidSecretInConfig InvalidTypeForAdditionalClaim InvalidTypeForAdditionalHeader InvalidValueForElement InvalidValueOfArrayAttribute InvalidVariableNameForSecret MissingConfigurationElement MissingElementForKeyConfiguration MissingNameForAdditionalClaim MissingNameForAdditionalHeader | Other possible deployment errors. |
+
+### Fault variables
+
+These variables are set when a runtime error occurs. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``fault_name``"` | `fault_name` is the name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name Matches "TokenExpired"` |
+| `JWS.failed` | All JWS policies set the same variable in the case of a failure. | `jws.JWS-Policy.failed = true` |
+
+### Example error response
+
+For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRules>
+    <FaultRule name="JWS Policy Errors">
+        <Step>
+            <Name>JavaScript-1</Name>
+            <Condition>(fault.name Matches "TokenExpired")</Condition>
+        </Step>
+        <Condition>JWS.failed=true</Condition>
+    </FaultRule>
+</FaultRules>
+```

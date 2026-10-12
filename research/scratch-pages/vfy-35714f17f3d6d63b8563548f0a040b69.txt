@@ -1,0 +1,186 @@
+<div id="NAME" class="section">
+
+NAME
+
+<span class="normalfont"> gcloud apigee deployments list - list Apigee API proxy deployments </span>
+
+</div>
+
+<div id="SYNOPSIS" class="section">
+
+SYNOPSIS
+
+<span class="normalfont"> `gcloud apigee deployments list` \[<span class="flag">[`--api`](#--api)=`API`</span> <span class="flag">[`--environment`](#--environment)=`ENVIRONMENT`</span> <span class="flag">[`--organization`](#--organization)=`ORGANIZATION`</span> <span class="flag">[`--revision`](#--revision)=`REVISION`\]</span> \[<span class="flag">[`--filter`](#--filter)=`EXPRESSION`\]</span> \[<span class="flag">[`--limit`](#--limit)=`LIMIT`\]</span> \[<span class="flag">[`--page-size`](#--page-size)=`PAGE_SIZE`\]</span> \[<span class="flag">[`--sort-by`](#--sort-by)=\[`FIELD`,</span><span class="flag">…\]\]</span> \[<span class="flag">[`--uri`](#--uri)\]</span> \[[`GCLOUD_WIDE_FLAG`](#GCLOUD-WIDE-FLAGS)` …`\] </span>
+
+</div>
+
+<div id="DESCRIPTION" class="section">
+
+DESCRIPTION
+
+List Apigee API proxy deployments.
+
+`gcloud apigee deployments list` lists deployments of API proxies, optionally filtered by environment, proxy name, proxy revision, or a combination of these.
+
+</div>
+
+<div id="EXAMPLES" class="section">
+
+EXAMPLES
+
+To list all deployments for the active Cloud Platform project, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee deployments list
+```
+
+To list all deployments in an Apigee organization called `my-org`, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee deployments list --organization=my-org
+```
+
+To list all deployments of an API proxy called `my-proxy` in the active Cloud Platform project, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee deployments list --api=my-proxy
+```
+
+To list all deployments to the `test` environment of the active Cloud Platform project, formatted as a JSON array, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee deployments list --environment=test --format=json
+```
+
+To list all deployments of `my-proxy` to the `test` environment in an Apigee organization called `my-org`, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee deployments list --organization=my-org --api=my-proxy --environment=test
+```
+
+</div>
+
+<div id="FLAGS" class="section">
+
+FLAGS
+
+Revision resource - API proxy revision and environment whose deployments should be listed. Providing a REVISION is only valid if API is also specified. If no REVISION is provided, all deployed revisions that match the other arguments will be included. The arguments in this group can be used to specify the attributes of this resource.
+
+<span class="normalfont">`--api`=`API`</span>
+
+The API proxy whose deployments should be listed. If not provided, all proxies will be listed. To get a list of existing API proxies, run [`gcloud apigee apis list`](/sdk/gcloud/reference/apigee/apis/list).
+
+To set the `api` attribute:
+
+- provide the argument `--revision` on the command line with a fully specified name;
+- leave the argument unspecified for it to be chosen automatically with a fully specified name;
+- provide the argument `--api` on the command line;
+- leave the argument unspecified for it to be chosen automatically.
+
+<span class="normalfont">`--environment`=`ENVIRONMENT`</span>
+
+The environment whose deployments should be listed. If not provided, all environments will be listed. To get a list of available environments, run [`gcloud apigee environments list`](/sdk/gcloud/reference/apigee/environments/list).
+
+To set the `environment` attribute:
+
+- provide the argument `--revision` on the command line with a fully specified name;
+- leave the argument unspecified for it to be chosen automatically with a fully specified name;
+- provide the argument `--environment` on the command line;
+- leave the argument unspecified for it to be chosen automatically.
+
+<span class="normalfont">`--organization`=`ORGANIZATION`</span>
+
+The organization whose deployments should be listed.If unspecified, the Cloud Platform project's associated organization will be used.
+
+To set the `organization` attribute:
+
+- provide the argument `--revision` on the command line with a fully specified name;
+- leave the argument unspecified for it to be chosen automatically with a fully specified name;
+- provide the argument `--organization` on the command line;
+- set the property \[project\] or provide the argument \[--project\] on the command line, using a Cloud Platform project with an associated Apigee organization.
+
+<span class="normalfont">`--revision`=`REVISION`</span>
+
+ID of the revision or fully qualified identifier for the revision.
+
+To set the `revision` attribute:
+
+- provide the argument `--revision` on the command line;
+- leave the argument unspecified for it to be chosen automatically.
+
+</div>
+
+<div id="LIST-COMMAND-FLAGS" class="section">
+
+LIST COMMAND FLAGS
+
+<span class="normalfont">`--filter`=`EXPRESSION`</span>  
+Apply a Boolean filter `EXPRESSION` to each resource item to be listed. If the expression evaluates `True`, then that item is listed. For more details and examples of filter expressions, run \$ [gcloud topic filters](/sdk/gcloud/reference/topic/filters). This flag interacts with other flags that are applied in this order: `--flatten`, `--sort-by`, `--filter`, `--limit`.
+
+<span class="normalfont">`--limit`=`LIMIT`</span>  
+Maximum number of resources to list. The default is `unlimited`. This flag interacts with other flags that are applied in this order: `--flatten`, `--sort-by`, `--filter`, `--limit`.
+
+<span class="normalfont">`--page-size`=`PAGE_SIZE`</span>  
+Some services group resource list output into pages. This flag specifies the maximum number of resources per page. The default is determined by the service if it supports paging, otherwise it is `unlimited` (no paging). Paging may be applied before or after `--filter` and `--limit` depending on the service.
+
+<span class="normalfont">`--sort-by`=\[`FIELD`,…\]</span>  
+Comma-separated list of resource field key names to sort by. The default order is ascending. Prefix a field with \`\`~´´ for descending order on that field. This flag interacts with other flags that are applied in this order: `--flatten`, `--sort-by`, `--filter`, `--limit`.
+
+<span class="normalfont">`--uri`</span>  
+Print a list of resource URIs instead of the default output, and change the command output to a list of URIs. If this flag is used with `--format`, the formatting is applied on this URI list. To display URIs alongside other keys instead, use the `uri()` transform.
+
+</div>
+
+<div id="GCLOUD-WIDE-FLAGS" class="section">
+
+GCLOUD WIDE FLAGS
+
+These flags are available to all commands: [`--access-token-file`](/sdk/gcloud/reference#--access-token-file), [`--account`](/sdk/gcloud/reference#--account), [`--billing-project`](/sdk/gcloud/reference#--billing-project), [`--configuration`](/sdk/gcloud/reference#--configuration), [`--flags-file`](/sdk/gcloud/reference#--flags-file), [`--flatten`](/sdk/gcloud/reference#--flatten), [`--format`](/sdk/gcloud/reference#--format), [`--help`](/sdk/gcloud/reference#--help), [`--impersonate-service-account`](/sdk/gcloud/reference#--impersonate-service-account), [`--log-http`](/sdk/gcloud/reference#--log-http), [`--project`](/sdk/gcloud/reference#--project), [`--quiet`](/sdk/gcloud/reference#--quiet), [`--trace-token`](/sdk/gcloud/reference#--trace-token), [`--user-output-enabled`](/sdk/gcloud/reference#--user-output-enabled), [`--verbosity`](/sdk/gcloud/reference#--verbosity).
+
+Run `$ `[`gcloud help`](/sdk/gcloud/reference) for details.
+
+</div>
+
+<div id="NOTES" class="section">
+
+NOTES
+
+These variants are also available:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud alpha apigee deployments list
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee deployments list
+```
+
+</div>

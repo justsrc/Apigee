@@ -1,0 +1,198 @@
+<span style="background-color: #f0f0f0; font-size:10pt"> You're viewing **Apigee Edge** documentation.  
+<a href="http://cloud.google.com/apigee/docs" data-title="The link may not always point to
+   the exact same topic in Apigee X. If the link does not take you to the information you are looking for, the information or feature
+      is not applicable to Apigee X, or it&#39;s moved to a page on a related topic.">Go to the <strong>Apigee X</strong> documentation</a>.</span> <span class="material-symbols-outlined" data-title="The link may not always point to
+     the exact same topic in Apigee X. If the link does not take you to the information you are looking for, the information or feature
+        is not applicable to Apigee X, or it's moved to a page on a related topic.">info</span>
+
+## Get started with 4.53.01 (latest version)
+
+- [Edge for Private Cloud overview](/private-cloud/latest/overview)
+- [Installation](/private-cloud/latest/installation-overview)
+- [Configuration](/private-cloud/latest/how-configure-edge)
+- [Operations](/private-cloud/latest/starting-stopping-and-restarting-apigee-edge)
+- [<span class="abbr" title="Identity Provider">IDP</span> authentication](/private-cloud/latest/idp-overview)
+- [Troubleshooting](/api-platform/troubleshoot/troubleshooting-introduction) ([PDF](/static/files/ApigeeEdgeTroubleshootingGuide.pdf))
+- [4.53.01 Release Notes](/release/notes/45301-edge-private-cloud-release-notes)
+
+## Previous versions
+
+This section provides links to release notes and other documentation for each of the earlier versions of Edge for Private Cloud.
+
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>Version</th>
+<th>Installing        </th>
+<th>Operations &amp; Config</th>
+<th>Installing Portal</th>
+<th>External Auth</th>
+<th>Monitoring Dashboard<sup>*</sup></th>
+<th>Troubleshooting Guide</th>
+<th>Release Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="alt">
+<td><a href="/private-cloud/v4.53.00/overview"><strong>v4.53.00</strong></a></td>
+<td><a href="/private-cloud/v4.53.00/installation-overview">HTML</a></td>
+<td><a href="/private-cloud/v4.53.00/how-configure-edge">HTML</a></td>
+<td>N/A</td>
+<td><a href="/private-cloud/v4.53.00/external-authentication-configuration-overview">HTML</a></td>
+<td>n/a</td>
+<td><a href="/api-platform/troubleshoot/troubleshooting-introduction">HTML</a>/<a href="/static/files/ApigeeEdgeTroubleshootingGuide.pdf">PDF</a></td>
+<td><a href="/release/notes/45300-edge-private-cloud-release-notes">HTML</a></td>
+</tr>
+<tr class="alt">
+<td><a href="/private-cloud/v4.52.00/overview"><strong>v4.52.00</strong></a></td>
+<td><a href="/private-cloud/v4.52.00/installation-overview">HTML</a></td>
+<td><a href="/private-cloud/v4.52.00/how-configure-edge">HTML</a></td>
+<td>N/A</td>
+<td><a href="/private-cloud/v4.52.00/external-authentication-configuration-overview">HTML</a></td>
+<td>n/a</td>
+<td><a href="/api-platform/troubleshoot/troubleshooting-introduction">HTML</a>/<a href="/static/files/ApigeeEdgeTroubleshootingGuide.pdf">PDF</a></td>
+<td><a href="/release/notes/45200-edge-private-cloud-release-notes">HTML</a></td>
+</tr>
+<tr class="alt">
+<td><a href="/private-cloud/v4.51.00/overview"><strong>v4.51.00</strong></a>  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray;font-size:14pt">not_interested</span></span></td>
+<td><a href="/private-cloud/v4.51.00/installation-overview">HTML</a></td>
+<td><a href="/private-cloud/v4.51.00/how-configure-edge">HTML</a></td>
+<td><a href="/private-cloud/v4.51.00/portal-installation">HTML</a></td>
+<td><a href="/private-cloud/v4.51.00/external-authentication-configuration-overview">HTML</a></td>
+<td>n/a</td>
+<td><a href="/api-platform/troubleshoot/troubleshooting-introduction">HTML</a>/<a href="/static/files/ApigeeEdgeTroubleshootingGuide.pdf">PDF</a></td>
+<td><a href="/release/notes/45100-edge-private-cloud-release-notes">HTML</a></td>
+</tr>
+<tr class="alt">
+<td><a href="/private-cloud/v4.50.00/overview"><strong>v4.50.00</strong></a>  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray;font-size:14pt">not_interested</span></span></td>
+<td><a href="/private-cloud/v4.50.00/installation-overview">HTML</a></td>
+<td><a href="/private-cloud/v4.50.00/how-configure-edge">HTML</a></td>
+<td><a href="/private-cloud/v4.50.00/portal-installation">HTML</a></td>
+<td><a href="/private-cloud/v4.50.00/external-authentication-configuration-overview">HTML</a></td>
+<td>n/a</td>
+<td><a href="/api-platform/troubleshoot/troubleshooting-introduction">HTML</a>/<a href="/static/files/ApigeeEdgeTroubleshootingGuide.pdf">PDF</a></td>
+<td><a href="/release/notes/45000-edge-private-cloud-release-notes">HTML</a></td>
+</tr>
+<tr class="alt">
+<td><a href="/private-cloud/v4.19.06/overview"><strong>v4.19.06</strong></a>  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray;font-size:14pt">not_interested</span></span></td>
+<td><a href="/private-cloud/v4.19.06/installation-overview">HTML</a></td>
+<td><a href="/private-cloud/v4.19.06/how-configure-edge">HTML</a></td>
+<td><a href="/private-cloud/v4.19.06/portal-installation">HTML</a></td>
+<td><a href="/private-cloud/v4.19.06/external-authentication-configuration-overview">HTML</a></td>
+<td>n/a</td>
+<td><a href="/api-platform/troubleshoot/troubleshooting-introduction">HTML</a>/<a href="/static/files/ApigeeEdgeTroubleshootingGuide.pdf">PDF</a></td>
+<td><a href="/release/notes/41906-edge-private-cloud-release-notes">HTML</a></td>
+</tr>
+<tr class="alt">
+<td><a href="/private-cloud/v4.19.01/overview"><strong>v4.19.01</strong></a>  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray;font-size:14pt">not_interested</span></span></td>
+<td><a href="/private-cloud/v4.19.01/installation-overview">HTML</a></td>
+<td><a href="/private-cloud/v4.19.01/how-configure-edge">HTML</a></td>
+<td><a href="/private-cloud/v4.19.01/portal-installation">HTML</a></td>
+<td><a href="/private-cloud/v4.19.01/external-authentication-configuration-overview">HTML</a></td>
+<td>n/a</td>
+<td><a href="/api-platform/troubleshoot/troubleshooting-introduction">HTML</a>/<a href="/static/files/ApigeeEdgeTroubleshootingGuide.pdf">PDF</a></td>
+<td><a href="/release/notes/41901-edge-private-cloud-release-notes">HTML</a></td>
+</tr>
+<tr class="alt">
+<td><a href="/private-cloud/v4.18.05/overview"><strong>v4.18.05</strong></a>  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray;font-size:14pt">not_interested</span></span></td>
+<td><a href="/private-cloud/v4.18.05/installation-overview">HTML</a></td>
+<td><a href="/private-cloud/v4.18.05/how-configure-edge">HTML</a></td>
+<td><a href="/private-cloud/v4.18.05/portal-installation">HTML</a></td>
+<td><a href="/private-cloud/v4.18.05/external-authentication-configuration-overview">HTML</a></td>
+<td>n/a</td>
+<td><a href="/api-platform/troubleshoot/troubleshooting-introduction">HTML</a>/<a href="/static/files/ApigeeEdgeTroubleshootingGuide.pdf">PDF</a></td>
+<td><a href="/release/notes/41805-edge-private-cloud-release-notes">HTML</a></td>
+</tr>
+<tr class="alt">
+<td><a href="/private-cloud/v4.18.01/overview"><strong>v4.18.01</strong></a>  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray;font-size:14pt">not_interested</span></span></td>
+<td><a href="/private-cloud/v4.18.01/installing-edge-private-cloud">HTML</a></td>
+<td><a href="/private-cloud/v4.18.01/operations-and-configuration">HTML</a></td>
+<td><a href="/private-cloud/v4.18.01/installing-edge-private-cloud-developer-services-portal">HTML</a></td>
+<td><a href="/private-cloud/v4.18.01/external-authentication-configuration">HTML</a></td>
+<td>n/a</td>
+<td><a href="/static/files/ApigeeEdgeTroubleshootingGuide.pdf">PDF</a></td>
+<td><a href="/release/notes/41801-edge-private-cloud-release-notes">HTML</a></td>
+</tr>
+<tr class="alt">
+<td id="41709"><a href="/private-cloud/v4.17.09/edge-private-cloud-overview"><strong>v4.17.09</strong></a>  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray;font-size:14pt">not_interested</span></span></td>
+<td><a href="/private-cloud/v4.17.09/installing-edge-private-cloud">HTML</a></td>
+<td><a href="/private-cloud/v4.17.09/operations-and-configuration">HTML</a></td>
+<td><a href="/private-cloud/v4.17.09/installing-edge-private-cloud-developer-services-portal">HTML</a></td>
+<td><a href="/private-cloud/v4.17.09/external-authentication-configuration">HTML</a></td>
+<td><a href="/private-cloud/v4.17.09/apigee-monitoring-dashboard-overview">HTML</a></td>
+<td><a href="/static/files/ApigeeEdgeTroubleshootingGuide.pdf">PDF</a></td>
+<td><a href="/release/notes/41709-edge-private-cloud-release-notes">HTML</a></td>
+</tr>
+<tr class="alt">
+<td id="41705"><a href="/private-cloud/v4.17.05/edge-private-cloud-overview">v4.17.05</a>  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray;font-size:14pt">not_interested</span></span></td>
+<td><a href="/private-cloud/v4.17.05/installing-edge-private-cloud">HTML</a></td>
+<td><a href="/private-cloud/v4.17.05/operations-and-configuration">HTML</a></td>
+<td><a href="/private-cloud/v4.17.05/installing-edge-private-cloud-developer-services-portal">HTML</a></td>
+<td><a href="/private-cloud/v4.17.05/external-authentication-configuration">HTML</a></td>
+<td><a href="/private-cloud/v4.17.05/apigee-monitoring-dashboard-beta-overview">HTML</a></td>
+<td><a href="/static/files/ApigeeEdgeTroubleshootingGuide.pdf">PDF</a></td>
+<td><a href="/release/notes/41705-edge-private-cloud-release-notes">HTML</a></td>
+</tr>
+<tr class="alt">
+<td id="41701"><a href="/private-cloud/v4.17.01/edge-private-cloud-overview">v4.17.01</a>  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray;font-size:14pt">not_interested</span></span></td>
+<td><a href="/private-cloud/v4.17.01/installing-edge-private-cloud">HTML</a></td>
+<td><a href="/private-cloud/v4.17.01/operations-and-configuration">HTML</a></td>
+<td><a href="/private-cloud/v4.17.01/installing-edge-private-cloud-developer-services-portal">HTML</a></td>
+<td><a href="/private-cloud/v4.17.01/external-authentication-configuration">HTML</a></td>
+<td><a href="/private-cloud/v4.17.01/apigee-monitoring-dashboard-beta-overview">HTML</a></td>
+<td><a href="/static/files/ApigeeEdgeTroubleshootingGuide.pdf">PDF</a></td>
+<td><a href="/release/notes/41701-edge-private-cloud-release-notes">HTML</a></td>
+</tr>
+<tr class="alt">
+<td id="41609"><a href="/private-cloud/v4.16.09/edge-private-cloud-overview">v4.16.09</a>  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray;font-size:14pt">not_interested</span></span></td>
+<td><a href="/private-cloud/v4.16.09/installing-edge-private-cloud">HTML</a></td>
+<td><a href="/private-cloud/v4.16.09/operations-and-configuration">HTML</a></td>
+<td><a href="/private-cloud/v4.16.09/installing-edge-private-cloud-developer-services-portal">HTML</a></td>
+<td><a href="/private-cloud/v4.16.09/external-authentication-configuration">HTML</a></td>
+<td><a href="/static/files/EdgeMonitoringDashboardBeta_v2.pdf">PDF (Beta)</a><sup>**</sup></td>
+<td>n/a</td>
+<td><a href="/release/notes/41609-edge-private-cloud-release-notes">HTML</a></td>
+</tr>
+<tr class="alt">
+<td id="41605"><a href="/private-cloud/v4.16.05/edge-private-cloud-overview">v4.16.05</a>  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray;font-size:14pt">not_interested</span></span></td>
+<td><a href="/private-cloud/v4.16.05/installing-edge-private-cloud">HTML</a>/<a href="/static/files/ApigeeEdgePrivateCloud-Install-Config-Guide_v3.pdf">PDF</a></td>
+<td><a href="/private-cloud/v4.16.05/operations-and-configuration">HTML</a>/<a href="/static/files/ApigeeEdgePrivateCloud-Operations-Guide_v4.pdf">PDF</a></td>
+<td><a href="/private-cloud/v4.16.05/installing-edge-private-cloud-developer-services-portal">HTML</a>/<a href="/static/files/ApigeeEdgePrivateCloud-DevPortalInstallConfigGuide16_05_v3.pdf">PDF</a></td>
+<td><a href="/static/files/ApigeeEdgePrivateCloud-ExtAuthConfig_v4.pdf">PDF</a></td>
+<td><a href="/static/files/ApigeeEdgePrivateCloud-DashboardAlpha.pdf">PDF (Alpha)</a></td>
+<td>n/a</td>
+<td><a href="/release/notes/41605-edge-private-cloud-release-notes">HTML</a></td>
+</tr>
+<tr class="alt">
+<td id="41601"><a href="/private-cloud/v4.16.01/update-apigee-edge-41601x-latest-41601-release">v4.16.01</a>  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray;font-size:14pt">not_interested</span></span></td>
+<td><a href="/private-cloud/v4.16.01/update-apigee-edge-41601x-latest-41601-release">HTML</a></td>
+<td>n/a</td>
+<td>n/a</td>
+<td>n/a</td>
+<td>n/a</td>
+<td>n/a</td>
+<td><a href="/release/notes/4160100-apigee-edge-private-cloud-release-notes">HTML</a></td>
+</tr>
+<tr>
+<td colspan="8"><sup>* Before you can install and use the Apigee Monitoring Dashboard, you must complete the <a href="/static/files/ApigeeEvaluationAgreeement.pdf">Apigee Evaluation Agreement (PDF)</a> and return it to Apigee by emailing it to <a href="mailto:orders@apigee.com" target="_blank">orders@apigee.com</a>.</sup><br />
+<sup>** The Dashboard was in the Beta release stage for this release. To read about Beta releases and how they are supported, see <a href="/release/release-stages">Edge release stages</a>.</sup></td>
+</tr>
+<tr class="alt">
+<td colspan="8"><span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray;font-size:14pt">not_interested</span></span><sup>Versions marked with this icon are considered unsupported. For more information, see <a href="/release/deprecation">Apigee deprecation policy</a>.</sup></td>
+</tr>
+</tbody>
+</table>
+
+## Community
+
+The <a href="https://discuss.google.dev/c/google-cloud/cloud-apigee/104" class="external">Apigee Community</a> is a free resource where you can contact Apigee as well as other Apigee customers with questions, tips, and other issues. Before posting to the community, be sure to first search existing posts to see if your question has already been answered.

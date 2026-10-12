@@ -1,0 +1,139 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/environment-create.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/environment-create.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/environment-create.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/environment-create.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/environment-create.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/environment-create.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/environment-create.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/environment-create.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/environment-create.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/environment-create.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/environment-create.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/environment-create.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/environment-create.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/environment-create.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/environment-create.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/environment-create.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/environment-create.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/environment-create.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+This topic explains how to create new environments for Apigee hybrid. For an introduction, see [About environments and environment groups](/apigee/docs/api-platform/fundamentals/environments-overview).
+
+## About environment creation
+
+Environment creation is a two-step process:
+
+- Create an environment in the management plane using either the UI or an Apigee API.
+- Add configuration for that environment to your overrides file and apply it to the cluster.
+
+The steps for adding an environment are described in adding and configuring an environment are explained in [Step 5: Add an environment](/apigee/docs/hybrid/v1.17/precog-add-environment) and [Specify configuration overrides](/apigee/docs/hybrid/v1.17/install-copy-overrides#specify-configuration-overrides).
+
+## How to create an environment
+
+1.  Create one or more new environments in the <a href="https://apigee.google.com" class="external">Apigee UI</a> or with the [Create environments API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments/create). For the basic steps, see [Step 5: Add an environment](/apigee/docs/hybrid/v1.17/precog-add-environment).
+
+2.  Add a new environment definition to the `envs[]` property in your overrides file. Note that the property is an array; therefore, you can add more than one environment definition to it. Give the new environment the same name as the environment you created in the UI. For example, the following configuration defines two environments: **test** and **prod**:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    namespace: my-namespace
+    org: my-organization
+    ...
+    envs:
+      - name: test
+        serviceAccountPaths:
+          synchronizer: "your_keypath/synchronizer-manager-service-account.json
+          udca: "your_keypath/analytic-agent-service-account.json
+
+      - name: prod
+        serviceAccountPaths:
+          synchronizer: "your_keypath/synchronizer-manager-service-account.json
+          udca: "your_keypath/analytic-agent-service-account.json
+    ...
+    ```
+
+3.  Apply any changes to the cluster. Apply the changes to each environment in sequence.
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    helm upgrade ENV_RELEASE_NAME apigee-env/ \
+      --install \
+      --namespace APIGEE_NAMESPACE \
+      --set env=ENV_NAME \
+      -f OVERRIDES_FILE \
+      --dry-run=server
+    ```
+
+    - `ENV_RELEASE_NAME` is a name used track installation and upgrades of the `apigee-env` chart. Helm release names must be unique within your Apigee hybrid installation. If you environment name is unique, this can be the same as `ENV_NAME`. However, if you have the same name for your environment and environment group, make sure to enter a unique Helm release name for each. For example, if both are named `dev` you could use something like `dev-env-release` and `dev-envgroup-release`.
+
+      For more information on releases in Helm, see <a href="https://helm.sh/docs/intro/using_helm/#three-big-concepts" class="external">Three big concepts</a> in the Helm documentation.
+
+    The `test` environment:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    helm upgrade test-release apigee-env/ \
+      --namespace apigee \
+      --atomic \
+      --set env=test \
+      -f OVERRIDES_FILE.yaml
+    ```
+
+    **Note:** If you see an error saying `Error: UPGRADE FAILED: "`*`test`*`" has no deployed releases`, replace `upgrade` with `install` and try the command again.
+
+    The `prod` environment:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    helm upgrade prod-release apigee-env/ \
+      --namespace apigee \
+      --set env=prod \
+      --atomic \
+      -f OVERRIDES_FILE.yaml
+    ```
+
+For more information about virtual host configuration see [Configure virtual hosts](/apigee/docs/hybrid/v1.17/base-path-routing). For a complete list of environment configuration elements, see [envs](/apigee/docs/hybrid/v1.17/config-prop-ref#envs) in the [Configuration property reference](/apigee/docs/hybrid/v1.17/config-prop-ref#envs).

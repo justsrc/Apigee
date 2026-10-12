@@ -1,0 +1,22 @@
+URL: https://github.com/apigee/apigeelint/issues/443
+TITLE: PO035 is enforcing {SyncIntervalInSecond, SyncMessageCount} as mutually exclusive
+STATE: closed state_reason: completed
+AUTHOR: DinoChiesa association: COLLABORATOR
+CREATED: 2024-05-15T23:21:17Z CLOSED: 2024-05-16T19:15:50Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+The documentation for AsynchonousConfiguration states that  people can use EITHER the SyncIntervalInSeconds or the SyncMessageCount.  And that they are mutually exclusive. The doc does not state what happens if a configuration uses both.
+
+[link](https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy#asynchronousconfiguration)
+<img width="1004" alt="quota-async-mutually-exclusive" src="https://github.com/apigee/apigeelint/assets/253266/d5bf0d5d-2439-41aa-bfa2-4c491f110cc6">
+
+But I think this may be incorrect.  I think it is valid to use both elements. And when you do, it means: 
+"Sync every N messages, or... M seconds, whichever comes first."
+
+If this is so, then the PO035 plugin needs to tolerate both elements.
+
+--- COMMENTS (1) ---
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2024-05-16T19:15:51Z
+This is fixed by #445 

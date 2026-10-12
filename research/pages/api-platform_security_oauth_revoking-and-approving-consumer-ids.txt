@@ -1,0 +1,160 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This topic explains how to use the UI and APIs to revoke or approve API keys for products in developer apps and for developer apps.
+
+**Note:** If you need to revoke an access token, you can do that directly by calling a properly configured OAuthV2 endpoint. For details, see [Approving and revoking access tokens](/apigee/docs/api-platform/security/oauth/validating-and-invalidating-access-tokens).
+
+## Using the UI to revoke the key for a specific API product in a developer app
+
+You can revoke the key associated with a specific API product through the UI. The effect is that the API resources defined in that API product will no longer be accessible unless the key is re-approved.
+
+To revoke the key using the Google Cloud console:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Distribution <span aria-label="and then">\></span> Apps** page.
+
+    <a href="https://console.cloud.google.com/apigee/apps" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Apps</a>
+
+2.  Select the app that contains the key you wish to revoke.
+
+3.  Click <span class="material-icons" aria-hidden="true" translate="no">edit</span> **Edit**.
+
+4.  In the **Credentials** section, you can either:
+    - Revoke the credential and all the associated products:
+      1.  Select **Revoked** under **Status**.
+      2.  Click **Save**.
+    - Revoke one or more individual products attached to a credential.
+      1.  Select the products you want to revoke.
+      2.  Click **Revoke**.
+      3.  Click **Save**.
+
+**Tip:** You can use the [Get Developer App Details](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.apps/get) API to get the JSON representation of a developer app to discover the approval status of products in that app. In the following JSON representation of a developer app, you can see where the API Product called "Weather-Product" has been revoked:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "accessType": "",
+  "appFamily": "default",
+  "appId": "6ed3a4d1-4733-439a-80a4-0d71149ec9ad",
+  "attributes": [
+    {
+      "name": "DisplayName",
+      "value": "AnotherTestApp"
+    },
+    {
+      "name": "Notes",
+      "value": ""
+    }
+  ],
+  "callbackUrl": "",
+  "createdAt": 1415728893126,
+  "createdBy": "wwitman@apigee.com",
+  "credentials": [
+    {
+      "apiProducts": [
+        {
+          "apiproduct": "Weather-Product",
+          "status": "revoked"
+        }
+      ],
+      "attributes": [],
+      "consumerKey": "giIC9Au6XP82wJ1oxZuQU4L75OdNKLhb",
+      "consumerSecret": "SXg8JizqeTA8j3gX",
+      "expiresAt": -1,
+      "issuedAt": 1415728893154,
+      "scopes": [],
+      "status": "approved"
+    }
+  ],
+  "developerId": "Z2S37rxX2Suzkwtg",
+  "lastModifiedAt": 1420682967414,
+  "lastModifiedBy": "wwitman@apigee.com",
+  "name": "AnotherTestApp",
+  "scopes": [],
+  "status": "approved"
+}
+```
+
+## Using the UI to approve the key for a specific API product in a developer app
+
+You can approve a previously revoked consumer key for an API product in a developer app through the Apigee UI. The client app will once again be able to access the APIs in that product.
+
+To approve an API product key:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Distribution <span aria-label="and then">\></span> Apps** page.
+
+    <a href="https://console.cloud.google.com/apigee/apps" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Apps</a>
+
+2.  Select the app that contains the key you wish to approve.
+
+3.  Click <span class="material-icons" aria-hidden="true" translate="no">edit</span> **Edit**.
+
+4.  In the **Credentials** section, you can either:
+    - Approve the credential and all the associated products:
+      1.  Select **Approved** under **Status**.
+      2.  Click **Save**.
+    - Approve one or more individual products attached to a credential.
+      1.  Select the products you want to approve.
+      2.  Click **Approve**.
+      3.  Click **Save**.
+
+## Revoking and approving keys for API products with the Apigee API
+
+Apigee provides APIs that let you manage API key status, depending on your use case. In the developer app JSON below, the location of each approve/revoke flag is indicated for each of these three cases:
+
+- \(1\) Shows key status for a specific API product in a developer app. This API does exactly what the UI operations described previously in this topic do. See the API for [approving or revoking an app's consumer key.](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.apps.keys.apiproducts/updateDeveloperAppKeyApiProduct).
+- \(2\) Shows key status for a developer app key. Revoking the key renders it unusable for the app to use it to access an API. Any access tokens associated with a revoked app key will remain active, but Apigee checks the status of the app key first. If the status is set to "revoked," Apigee will not allow the call go through. See the API for [approving or revoking an API key for a developer app](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.apps.keys/updateDeveloperAppKey).
+- \(3\) Shows the key status for all keys associated with a developer app. A revoked app cannot access any API products and cannot invoke any API managed by Apigee. See the API for [approving or revoking all keys for a developer app](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.apps/generateKeyPairOrUpdateDeveloperAppStatus).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "accessType": "",
+  "appFamily": "default",
+  "appId": "6ed3a4d1-4733-439a-80a4-0d71149ec9ad",
+  "attributes": [
+    {
+      "name": "DisplayName",
+      "value": "AnotherTestApp"
+    },
+    {
+      "name": "Notes",
+      "value": ""
+    }
+  ],
+  "callbackUrl": "",
+  "createdAt": 1415728893126,
+  "createdBy": "wwitman@apigee.com",
+  "credentials": [
+    {
+      "apiProducts": [
+        {
+          "apiproduct": "Weather-Product",
+          "status": "revoked" // (1)
+        }
+      ],
+      "attributes": [],
+      "consumerKey": "giIC9Au6XP82wJ1oxZuQU4L75OdNKLhb",
+      "consumerSecret": "SXg8JizqeTA8j3gX",
+      "expiresAt": -1,
+      "issuedAt": 1415728893154,
+      "scopes": [],
+      "status": "approved" // (2) 
+    }
+  ],
+  "developerId": "Z2S37rxX2Suzkwtg",
+  "lastModifiedAt": 1420682967414,
+  "lastModifiedBy": "wwitman@apigee.com",
+  "name": "AnotherTestApp",
+  "scopes": [],
+  "status": "approved" // (3)
+}
+```

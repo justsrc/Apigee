@@ -1,0 +1,75 @@
+URL: https://github.com/apigee/apigeetool-node/issues/70
+TITLE: Deployment fails when a keystore or target server is added in the service callout policy
+STATE: closed state_reason: completed
+AUTHOR: anshul07 association: NONE
+CREATED: 2017-04-25T23:18:02Z CLOSED: 2018-06-04T16:23:17Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+Deployment through the node tool fails during the validation of the policy schema when a keystore or target server is added to the service callout policy. When I create a zip of the same proxy bundle and upload it to management UI then it deploys fine. 
+
+Please find my keystore configuration in Service callout policy:
+
+    <HTTPTargetConnection>
+      <URL>https://myURL.com</URL>
+      <SSLInfo>
+          <Enabled>true</Enabled>
+          <ClientAuthEnabled>true</ClientAuthEnabled>
+          <KeyStore>openiam_tls_keystore</KeyStore>
+          <KeyAlias>openiam_tls_client_cert</KeyAlias>
+      </SSLInfo>
+    </HTTPTargetConnection>
+
+I tried to debug the issue and following is my understanding-
+
+Apigee nodetool makes a post call to https://api.enterprise.apigee.com/v1/o/<org-name>/apis/<proxy-name>/revisions/<revision-no>/policies with policy content in body and in response Apigee is throwing back the error:
+
+```
+"{\n  \"code\" : \"beans.OtherValidationError\",\n  \"message\" : \"Unexpected Validation Error null\",\n  \"contexts\" : [ ]\n}"
+ ```
+
+
+--- COMMENTS (12) ---
+
+### comment by ssvaidyanathan (association=NONE) at 2017-11-07T19:55:23Z
+Same issue raised - 
+https://community.apigee.com/questions/49215/apigeetool-error-uploading-service-callout-policy.html
+
+### comment by Michael-McD (association=NONE) at 2017-11-08T10:57:28Z
+Is this being investigated?  I ask because I note that the original issue was raised way back in April and it still has not been resolved.
+
+
+### comment by noahdietz (association=COLLABORATOR) at 2017-11-08T16:34:15Z
+Hi all, I am currently investigating it, thanks Sai for the bump
+
+### comment by noahdietz (association=COLLABORATOR) at 2017-11-08T17:23:10Z
+I've found the root cause. It is an issue in the Apigee Management Server API, which means the issue cannot be completely fixed from Apigee tool. I will look into a work around for the time being while getting the fix pushed.
+
+### comment by Michael-McD (association=NONE) at 2017-11-13T11:47:03Z
+Hi @noahdietz any news of either the underlying fix or temp fix being deployed?
+
+### comment by Michael-McD (association=NONE) at 2017-11-13T14:21:06Z
+In the interim we're using the Apigee management API which does work:
+ curl -X POST --header "Authorization: Basic *******=" -F "file=@apiproxy.zip" "https://api.enterprise.apigee.com/v1/organizations/our-org/apis?action=import&name=oauth&validate=true"
+
+### comment by Michael-McD (association=NONE) at 2017-11-30T17:25:57Z
+Hi @noahdietz any news of an underlying fix being deployed?  We're trying to integrate our Apigee Proxies into our CI and have just discovered the same issue in attempting to deploy "Shared Flows" that reference a LoadBalancer .
+
+### comment by noahdietz (association=COLLABORATOR) at 2017-11-30T18:34:53Z
+The fix will not be released until beginning of Jan 2018. I know this is a while away, and I apologize for the inconvenience. I believe using the aforementioned bundle import API is the available workaround.
+
+To be clear, does the issue you just mentioned WRT deploying Shared Flows + LBs occur on `import` or `deployment` of the Shared Flow? If it is the former, `import`, then the fix inflight should resolve that issue as well.
+
+Again, sorry for the inconvenience. 
+
+### comment by Michael-McD (association=NONE) at 2017-12-02T22:09:20Z
+Hi @noahdietz, Thanx for the update.  To answer your question: Shared Flow fails on import.
+
+### comment by anshul07 (association=NONE) at 2018-03-26T00:51:50Z
+@noahdietz any news on the fix ?
+
+### comment by dhayalakumarc (association=NONE) at 2018-06-02T06:27:35Z
+Has this issue been fixed?
+
+### comment by noahdietz (association=COLLABORATOR) at 2018-06-04T16:23:06Z
+The fix for this was released. I will close this issue. If the issue persists, please reopen and paste any additional error messages. Thank you for following up!

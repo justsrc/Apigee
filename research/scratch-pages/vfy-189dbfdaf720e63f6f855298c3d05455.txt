@@ -1,0 +1,100 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.apiproducts/create" class="section">
+
+- [HTTP request](#body.HTTP_TEMPLATE)
+- [Path parameters](#body.PATH_PARAMETERS)
+- [Request body](#body.request_body)
+- [Response body](#body.response_body)
+- [Authorization scopes](#body.aspect)
+- [Try it!](#try-it)
+
+<div id="google.cloud.apigee.v1.ApiProducts.CreateApiProduct" class="section">
+
+</div>
+
+<div id="description" class="section">
+
+Creates an API product in an organization. You create API products after you have proxied backend services using API proxies.
+
+An API product is a collection of API resources combined with quota settings and metadata that you can use to deliver customized and productized API bundles to your developer community. This metadata can include:
+
+- Scope
+- Environments
+- API proxies
+- Extensible profile
+
+API products enable you repackage APIs on the fly, without having to do any additional coding or configuration.
+
+Apigee recommends that you start with a simple API product including only required elements. You then provision credentials to apps to enable them to start testing your APIs. After you have authentication and authorization working against a simple API product, you can iterate to create finer-grained API products, defining different sets of API resources for each API product.
+
+**WARNING:**
+
+- If you don't specify an API proxy in the request body, *any* app associated with the product can make calls to *any* API in your entire organization.
+- If you don't specify an environment in the request body, the product allows access to all environments.
+
+For more information, see [What is an API product?](https://cloud.google.com/apigee/docs/api-platform/publish/what-api-product)
+
+</div>
+
+<div id="body" class="section">
+
+<div id="body.HTTP_TEMPLATE" class="section">
+
+### HTTP request
+
+`POST https://apigee.googleapis.com/v1/{parent=organizations/*}/apiproducts`
+
+The URL uses [gRPC Transcoding](https://google.aip.dev/127) syntax.
+
+</div>
+
+<div id="body.PATH_PARAMETERS" class="section">
+
+### Path parameters
+
+| Parameters |  |
+| --- | --- |
+| parent | string Required. Name of the organization in which the API product will be created. Use the following structure in your request: organizations/{org} If the resource has the space attribute set, IAM permissions are checked against the Space resource path. To learn more, read the Apigee Spaces Overview . Authorization requires the following IAM permission on the specified resource parent : apigee.apiproducts.create |
+
+</div>
+
+<div id="body.request_body" class="section">
+
+### Request body
+
+The request body contains an instance of [`ApiProduct`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apiproducts#ApiProduct).
+
+</div>
+
+<div id="body.response_body" class="section">
+
+### Response body
+
+If successful, the response body contains a newly created instance of [`ApiProduct`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apiproducts#ApiProduct).
+
+</div>
+
+<div id="body.aspect" class="section">
+
+### Authorization scopes
+
+Requires the following OAuth scope:
+
+- `https://www.googleapis.com/auth/cloud-platform`
+
+</div>
+
+</div>
+
+<div id="try-it" class="section">
+
+<div class="devsite-apix">
+
+<div class="apis-explorer" discovery-rest-url="https://apigee.googleapis.com/$discovery/rest?version=v1" method-id="apigee.organizations.apiproducts.create" params="">
+
+</div>
+
+</div>
+
+</div>
+
+</div>

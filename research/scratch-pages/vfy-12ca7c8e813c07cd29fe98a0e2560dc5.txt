@@ -1,0 +1,109 @@
+<div id="NAME" class="section">
+
+NAME
+
+<span class="normalfont"> gcloud apigee deployments - manage deployments of Apigee API proxies in runtime environments </span>
+
+</div>
+
+<div id="SYNOPSIS" class="section">
+
+SYNOPSIS
+
+<span class="normalfont"> `gcloud apigee deployments` [`COMMAND`](#COMMAND) \[[`GCLOUD_WIDE_FLAG`](#GCLOUD-WIDE-FLAGS)` …`\] </span>
+
+</div>
+
+<div id="DESCRIPTION" class="section">
+
+DESCRIPTION
+
+Manage deployments of Apigee API proxies in runtime environments.
+
+`gcloud apigee deployments` contains commands for enumerating and checking the status of deployments of proxies to runtime environments.
+
+</div>
+
+<div id="EXAMPLES" class="section">
+
+EXAMPLES
+
+To list all deployments for the active Cloud Platform project, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee deployments list
+```
+
+To list all deployments in a particular environment of a particular Apigee organization, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee deployments list --environment=ENVIRONMENT --organization=ORG_NAME
+```
+
+To get the status of a specific deployment as a JSON object, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee deployments describe --api=API_NAME --environment=ENVIRONMENT --format=json
+```
+
+</div>
+
+<div id="GCLOUD-WIDE-FLAGS" class="section">
+
+GCLOUD WIDE FLAGS
+
+These flags are available to all commands: [`--help`](/sdk/gcloud/reference#--help).
+
+Run `$ `[`gcloud help`](/sdk/gcloud/reference) for details.
+
+</div>
+
+<div id="COMMAND" class="section">
+
+COMMANDS
+
+`COMMAND` is one of the following:
+
+<span class="normalfont">[`describe`](/sdk/gcloud/reference/apigee/deployments/describe)</span>  
+Describe an Apigee API proxy deployment.
+
+<span class="normalfont">[`list`](/sdk/gcloud/reference/apigee/deployments/list)</span>  
+List Apigee API proxy deployments.
+
+</div>
+
+<div id="NOTES" class="section">
+
+NOTES
+
+These variants are also available:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud alpha apigee deployments
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee deployments
+```
+
+</div>

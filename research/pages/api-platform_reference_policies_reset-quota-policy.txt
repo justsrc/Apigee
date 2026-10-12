@@ -1,0 +1,327 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+Use the ResetQuota policy to dynamically modify the remaining number of requests allowed by the target Quota policy. You typically use this policy to decrease the current quota count of the target Quota policy rather than waiting for the quota count to reset.
+
+For example, the target Quota policy limits a developer to 1000 requests per week. By the second day of the week, the developer has already reached this limit. Use the Reset Quota policy to subtract 500 from their quota counter to allow an additional 500 requests for the remainder of the week. At the end of the week, the Quota policy resets, and the developer is back to 1000 requests for the week.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+See [Quota policy](/apigee/docs/api-platform/reference/policies/quota-policy) for more on the Quota policy. Also see [this community post](https://discuss.google.dev/t/how-to-use-reset-quota-correctly/7564.html) on using the Reset Quota policy.
+
+### Samples
+
+These policy code samples illustrate how to reset quota counters:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Reset Default Counter
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ResetQuota name="resetQuota">
+   <Quota name="MyQuotaPolicy">
+      <Identifier name="_default">
+         <Allow>100</Allow>
+      </Identifier>
+   </Quota>
+</ResetQuota>
+```
+
+The Reset Quota policy specifies the target Quota policy by using the <span style="font-family:courier new,courier,monospace;">name</span> attribute of the <span style="font-family:courier new,courier,monospace;">\<Quota\></span> tag. In the example above, the MyQuotaPolicy policy is the target.
+
+All Reset Quota policies require the <span style="font-family:courier new,courier,monospace;">\<Identifier\></span> tag to specify the counter in the Quota policy to update. By default, a Quota policy has a single counter, unless the Quota policy also includes the <span style="font-family:courier new,courier,monospace;">\<Identifier\></span> tag. In this example, the target Quota policy does not use the <span style="font-family:courier new,courier,monospace;">\<Identifier\></span> tag, so you specify the <span style="font-family:courier new,courier,monospace;">name</span> attribute as <span style="font-family:courier new,courier,monospace;">\_default</span>.
+
+The <span style="font-family:courier new,courier,monospace;">\<Allow\></span> element specifies the value used to decrease the current quota count on the target policy. In this example, the quota count is decreased by 100, to allow 100 more requests to the target Quota policy. When the target Quota policy resets, this change is discarded.
+
+Shown below is the definition of the target Quota policy:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Quota name="MyQuotaPolicy">
+  <Interval>5</Interval>
+  <TimeUnit>hour</TimeUnit>
+  <Allow count="100"/>
+</Quota>
+```
+
+</div>
+
+<div class="section">
+
+### Use a Reference
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ResetQuota name="resetQuota">
+   <Quota ref="request.header.quotapolicy">
+      <Identifier name="_default">
+         <Allow ref="request.header.allowquota" />
+      </Identifier>
+   </Quota>
+</ResetQuota>
+```
+
+In this example, you pass the name of the target Quota policy, and the change to its quota count, as headers in the request. You can then reference the flow variables containing these values in the Reset Quota policy.
+
+</div>
+
+<div class="section">
+
+### Specify the Identifier
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ResetQuota name="resetQuota">
+   <Quota name="QuotaPolicy">
+      <Identifier ref="request.header.clientId">
+         <Allow>100</Allow>
+      </Identifier>
+   </Quota>
+</ResetQuota>
+```
+
+If the target Quota policy specifies the <span style="font-family:courier new,courier,monospace;">\<Identifier\></span> tag, then you can specify the same value to the <span style="font-family:courier new,courier,monospace;">\<Identifier\></span> tag of the Reset Quota policy to update a specific quota count. Notice how the <span style="font-family:courier new,courier,monospace;">\<Identifier\></span> tag in the target Quota policy below matches the value specified to the Reset Quota policy:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Quota name="QuotaPolicy">
+  <Identifier ref="request.header.clientId"/>
+  <Interval>5</Interval>
+  <TimeUnit>hour</TimeUnit>
+  <Allow count="100"/>
+</Quota>
+```
+
+</div>
+
+</div>
+
+------------------------------------------------------------------------
+
+## Element reference
+
+The element reference describes the elements and attributes of the Reset Quota policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ResetQuota async="false" continueOnError="false" enabled="true" name="Reset-Quota-1">
+   <DisplayName>Reset Quota 1</DisplayName>
+   <Quota name="quotaName" ref="request.header.quotapolicy">
+      <Identifier name="identifierName" ref="request.header.identifier">
+         <Class ref="request.header.classIdentifier" />
+         <Allow>100</Allow>
+      </Identifier>
+   </Quota>
+</ResetQuota>
+```
+
+## \<ResetQuota\> attributes
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ResetQuota async="false" continueOnError="false" enabled="true" name="Reset-Quota-1">
+```
+
+The following table describes attributes that are common to all policy parent elements:
+
+| Attribute | Description | Default | Presence |
+| --- | --- | --- | --- |
+| name | The internal name of the policy. The value of the name attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters. Optionally, use the <DisplayName> element to label the policy in the management UI proxy editor with a different, natural-language name. | N/A | Required |
+| continueOnError | Set to false to return an error when a policy fails. This is expected behavior for most policies. Set to true to have flow execution continue even after a policy fails. See also: Fault rules are triggered ONLY in an error state (about continueOnError) Handling faults within the current flow | false | Optional |
+| enabled | Set to true to enforce the policy. Set to false to turn off the policy. The policy will not be enforced even if it remains attached to a flow. | true | Optional |
+| async | This attribute is deprecated. | false | Deprecated |
+
+## \<DisplayName\> element
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, natural-language name.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+| Default | N/A If you omit this element, the value of the policy's name attribute is used. |
+| --- | --- |
+| Presence | Optional |
+| Type | String |
+
+## \<Quota\> element
+
+Identifies the target Quota policy whose counter should be updated.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Quota name="quotaName"  ref="request.header.quotapolicy">
+   <Identifier name="identifierName" ref="request.header.identifier">
+      <Allow>100</Allow>
+   </Identifier>
+</Quota>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Required |
+| **Type:**     | N/A      |
+
+### Attributes
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| name | Specifies the name of the target Quota policy. | N/A | Optional |
+| ref | A flow variable that contains the name of the target Quota policy. If both <span style="font-family: 'courier new', courier, monospace;">ref</span> and <span style="font-family: 'courier new', courier, monospace;">name</span> are specified, then <span style="font-family: 'courier new', courier, monospace;">ref</span> gets priority. If <span style="font-family: 'courier new', courier, monospace;">ref</span> does not resolve at runtime, then <span style="font-family: 'courier new', courier, monospace;">name</span> is used. | N/A | Optional |
+
+## \<Quota\>/\<Identifier\> element
+
+Variable used to uniquely identify the counter if the target Quota policy specifies the <span style="font-family: 'courier new', courier, monospace;">\<Identifier\></span> tag.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Quota name="quotaName">
+   <Identifier name="identifierName" ref="request.header.identifier">
+      <Allow>100</Allow>
+   </Identifier>
+</Quota>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Required |
+| **Type:**     | String   |
+
+### Attributes
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| name | Specifies the name of the count identifier in the target Quota policy. For a Quota policy that does not use the <span style="font-family:courier new,courier,monospace;">\<Identifier\></span> tag, specify <span style="font-family:courier new,courier,monospace;">\_default</span>. | N/A | Optional |
+| ref | A flow variable that contains the name of the count identifier in the target Quota policy. If both <span style="font-family: 'courier new', courier, monospace;">ref</span> and <span style="font-family: 'courier new', courier, monospace;">name</span> are specified, then <span style="font-family: 'courier new', courier, monospace;">ref</span> gets priority. If <span style="font-family: 'courier new', courier, monospace;">ref</span> does not resolve at runtime, then <span style="font-family: 'courier new', courier, monospace;">name</span> is used. | N/A | Optional |
+
+## \<Quota\>/\<Identifier\>/\<Allow\> element
+
+Specifies the amount to decrease the quota counter. You must specify <span style="font-family:courier new,courier,monospace;">\<Allow\></span>, otherwise, the policy does not modify the quota.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Identifier name="identifierName" ref="request.header.identifier">
+   <Allow ref="request.header.allowquota">100</Allow>
+</Identifier>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Required |
+| **Type:**     | Integer  |
+
+### Attributes
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| ref | A flow variable that contains the change to the quota count in the target Quota policy. | N/A | Optional |
+
+## \<Quota\>/\<Identifier\>/\<Class\> element
+
+Specifies the class for which the Quota counter is updated. For more on using class with the Quota policy, see [Quota policy](/apigee/docs/api-platform/reference/policies/quota-policy).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Identifier name="_default">
+   <Class ref="request.header.classIdentifier">
+     <Allow>200</Allow>
+   </Class>
+</Identifier>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | N/A      |
+
+### Attributes
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| ref | Reference to the flow variable that contains the quota class to update. | N/A | Optional |
+
+## Error reference
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+**Tip:** Need help resolving an error? Click *build* in the Fix column for detailed troubleshooting information.
+
+| Fault code | HTTP status | Cause | Fix |
+|----|----|----|----|
+| `policies.resetquota.InvalidRLPolicy` | `500` | The `Quota` policy specified in the `<Quota>` element of the `ResetQuota` policy is not defined in the API proxy and thus is not available during the flow. The `<Quota>` element is mandatory and identifies the target `Quota` policy whose counter should be updated through the `ResetQuota` policy. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/reset-quota-runtime-errors#invalidrlpolicy) |
+| `policies.resetquota.FailedToResolveAllowCountRef` | N/A | The reference to the variable containing the allow count in the `<Allow>` element of the policy cannot be resolved to a value. This element is mandatory and specifies the amount to decrease the quota counter. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/reset-quota-runtime-errors#failedtoresolveallowcountref) |
+| `policies.resetquota.FailedToResolveRLPolicy` | `500` | The variable referenced by the `ref` attribute in the `<Quota>` element cannot be resolved. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/reset-quota-runtime-errors#failedtoresolverlpolicy) |
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+**Tip:** Need help resolving an error? Click *build* next to the error's cause description to visit the troubleshooting page.
+
+| Error name | Cause | Fix |
+|----|----|----|
+| `InvalidCount` | If the count value specified in the `<Allow>` element of the `ResetQuota` Policy is not an integer, then the deployment of the API proxy fails. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/reset-quota-deployment-errors#invalidcount) |
+
+## Schemas
+
+**Sample:** See our [GitHub repository](https://github.com/apigee/api-platform-samples/tree/master/schemas/policy) samples for the most recent schemas.
+
+## Related topics
+
+[Quota policy](/apigee/docs/api-platform/reference/policies/quota-policy)

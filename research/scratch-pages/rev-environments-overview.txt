@@ -1,0 +1,431 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This section describes environments and environment groups.
+
+## Overview
+
+An Apigee *environment* is a <a href="https://en.wikipedia.org/wiki/Deployment_environment" class="external">software environment</a>, within an organization, for [creating](/apigee/docs/api-platform/get-started/create-proxy) and [deploying](/apigee/docs/api-platform/get-started/deploy-proxy) API proxies. You must deploy an API proxy to an environment before it can be accessed. You can deploy an API proxy to a single environment or to multiple environments.
+
+Each environment is subject to limits on the number of API proxies, shared flows, and other resources that can be deployed to it. These limits vary based on the Apigee organization type (Subscription, Pay-as-you-go, or Apigee hybrid) that uses the environment. For more detailed information, see the [Limits](/apigee/docs/api-platform/reference/limits) documentation.
+
+An *environment group* (sometimes called an *envgroup* in the [Apigee API](/apigee/docs/reference/apis/apigee/rest)) is the basic mechanism for defining the way requests are routed to individual environments. You define hostnames on your environment groups (not on individual environments), and Apigee routes requests to the environments within a group using those hostname definitions.
+
+An environment must be a member of at least one environment group before you can access proxies deployed within it. In other words, you must assign an environment to a group before you can use it.
+
+The logical grouping of environments by environment group provides the following benefits:
+
+- **Centralized hostname management:** Environment groups provide a centralized place to manage hostnames.
+- **Aggregate insights:** With groups, you can analyze errors by looking at reports for an entire environment group at once rather than individual environments.
+- **Conflict avoidance:** By grouping environments, you can ensure that the base paths for your deployed proxies exist under the same hostname.
+
+## Supported deployment types
+
+Apigee supports the following deployment types in an environment:
+
+|  |  |
+|----|----|
+| **Type** | **Description** |
+| Proxy | Develop and test your API proxies in your Apigee development environments, and then deploy them to Apigee integration test and production environments. See [Deploying an API proxy](/apigee/docs/api-platform/deploy/ui-deploy-new). |
+| Archive | Develop and test your [programmable API proxies using Apigee in VS Code](/apigee/docs/api-platform/local-development/overview). |
+
+### Summary of prevented actions with Archive deployment
+
+When you enable Archive deployment in an Apigee environment, you will be **prevented from performing the following actions within the environment** to prevent conflicts:
+
+- In the Apigee UI, you **cannot** view, confirm deployment status, or manage your Archive deployments, as described [Deploying an API proxy](/apigee/docs/api-platform/deploy/ui-deploy-new), or use the Debug UI as described in [Using Debug](/apigee/docs/api-platform/debug/trace-overview). As a workaround, you can use gcloud or the API to [List all Archive deployments in an environment](/apigee/docs/api-platform/deploy/manage-archive-deployments#list-archive-deployments) and use the [Debug API](/apigee/docs/api-platform/debug/trace#apigee-api).
+- You **cannot** create, update, or delete resource files or target servers using the Apigee UI, API, or gcloud.
+- At this time, Google Authentication using Service Accounts is not supported.
+
+**Note**: You can manage key value maps (KVMs), and TLS keystores in an Apigee environment that is enabled for Archive deployment.
+
+If you attempt to perform any of the prevented actions listed above, the action will fail with the following error message:
+
+`FAILED_PRECONDITION`
+
+## Proxy deployment units
+
+Proxy deployment units (PDUs) measure the consumption of your Apigee capacity based on the deployment of API proxies and shared flows across your infrastructure.
+
+A **proxy deployment unit** is defined as one API proxy or shared flow revision deployment, per environment, per instance (region). Because Apigee scales with your infrastructure, a single proxy deployment can count as multiple units if it is deployed to an environment that spans multiple instances.
+
+### Calculating PDUs
+
+The total PDUs are calculated by summing the deployment units across all environments in your organization. For each environment, the PDU contribution is the number of deployed revisions multiplied by the number of instances (regions) the environment is attached to.
+
+The general formula for total PDUs is:
+
+`Total PDUs = Σ (Deployed Revisions in Env`<sub>`n`</sub>` × Instances for Env`<sub>`n`</sub>`)`
+
+Where the sum is over all environments (Env<sub>n</sub>) where the proxy or shared flow is deployed.
+
+If a proxy or shared flow is deployed to environments that are all attached to the same number of instances, a simplified formula can be used:
+
+`PDUs = (Deployed Revisions) × (Environments) × (Instances)`
+
+### Examples
+
+The following table provides examples of how PDUs are calculated in different infrastructure scenarios:
+
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Proxies</th>
+<th>Environments</th>
+<th>Instances (Regions)</th>
+<th>Total PDUs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Single Region</strong><br />
+<span class="small">Small-scale deployment</span></td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td><strong>1</strong></td>
+</tr>
+<tr>
+<td><strong>Multi-Region High Availability</strong><br />
+<span class="small">Same proxy in two regions</span></td>
+<td>1</td>
+<td>1 (attached to 2 instances)</td>
+<td>2</td>
+<td><strong>2</strong></td>
+</tr>
+<tr>
+<td><strong>Multi-Environment</strong><br />
+<span class="small">Same proxy in Dev and Test</span></td>
+<td>1</td>
+<td>2 (Dev, Test)</td>
+<td>1</td>
+<td><strong>2</strong></td>
+</tr>
+<tr>
+<td><strong>Enterprise Scale</strong><br />
+<span class="small">Global deployment across multiple envs</span><br />
+<span class="small">(Assumes both Prod and Staging environments are attached to all 3 instances)</span></td>
+<td>5</td>
+<td>2 (Prod, Staging)</td>
+<td>3 (US, EU, Asia)</td>
+<td><strong>30</strong></td>
+</tr>
+</tbody>
+</table>
+
+### Proxy deployment unit types
+
+Proxy deployment units count proxies and shared flows deployed to environments per region.
+
+These are the deployment unit types:
+
+- **Standard proxy deployment units** count the number of currently deployed proxies that qualify as [Standard proxies](/apigee/docs/api-platform/fundamentals/understanding-apis-and-api-proxies#proxy-types).
+- **Extensible proxy deployment units** count the number of currently deployed proxies that qualify as [Extensible proxies](/apigee/docs/api-platform/fundamentals/understanding-apis-and-api-proxies#proxy-types).
+- **Shared flow deployment units** count the number of deployed [shared flow](/apigee/docs/api-platform/fundamentals/shared-flows).
+
+Your usage might be subject to *deployments quota*, which is a limit on how many deployment units you can use at a time. See your entitlements ([Pay-as-you-go](/apigee/docs/api-platform/reference/pay-as-you-go-updated-overview) or [Subscription 2024](/apigee/docs/api-platform/reference/subscription-entitlements#subscription-2024-entitlements)) for details. For information on system limits, see [Max proxy deployment units per instance.](/apigee/docs/api-platform/reference/limits#pdu)
+
+For more information on viewing proxy deployment unit usage and deployments quota details for your organization, see [View proxy deployment usage](/apigee/docs/api-platform/deploy/ui-deploy-overview#view-proxy-deployment-usage).
+
+## Environment types
+
+For Pay-as-you-go users, when you create an environment you will select the environment type: **Base**, **Intermediate**, or **Comprehensive**. Features, functionality, and costs associated with the environment depend on the environment type. See [Pay-as-you-go environment types](/apigee/docs/api-platform/reference/pay-as-you-go-environment-types) and [Pay-as-you-go entitlements](/apigee/docs/api-platform/reference/pay-as-you-go-updated-entitlements) for more information.
+
+For Apigee subscription plans, your environment type is always Apigee Comprehensive and you do not need to know about environment types.
+
+## Forward proxying
+
+Apigee supports forwarding traffic to a specified URI. This feature applies at the environment level and can be used to direct traffic to the internet after initial processing in a proxy.
+
+Incoming requests to proxies in the configured environment process for any included policies (see [Forward proxying feature support](#forward-proxying-feature-support)) and then forward using HTTP to the new URI.
+
+Changes made to the forward proxy setting of an environment are effective immediately for new requests only. Requests already processing complete with the setting that was in place when the request was received.
+
+For instructions to configure forward proxying, see [Configure forward proxying in an environment](/apigee/docs/api-platform/fundamentals/environments-working-with#configure-forward-proxying).
+
+### Forward proxying feature support
+
+Not all generally available proxy features have the same availability or applicability with forward proxying.
+
+Apigee does not currently support Basic Authentication with forward proxying, except in Apigee Hybrid.
+
+This table shows support for additional functionality:
+
+|  |  |
+|----|----|
+| **Feature or policy** | **Supported/applicable for forward proxying?** |
+| Target Endpoints | Yes |
+| HTTP Health Check | Yes |
+| Service Callouts | Yes |
+| HTTP calls via JavaScript | Yes |
+| Integration targets | Yes |
+| Proxy chaining, via local loopbacks | No |
+| Publishing messages | No |
+| Cloud Logging | No |
+| Communication with Synchronizer | No |
+| Message logging via Syslog | No |
+
+### Forward proxying limitations
+
+GoogleToken via an external audience is currently not supported with forward proxying.
+
+## Key points
+
+The following table lists important points to remember about environments, organizations, and environment groups:
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Element</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="alt">Organizations</td>
+<td><ul>
+<li>Can contain multiple environment groups</li>
+<li>Must have at least one environment group</li>
+</ul></td>
+</tr>
+<tr>
+<td class="alt">Environments</td>
+<td><ul>
+<li>Must be in at least one environment group</li>
+<li>Can be in more than one group</li>
+<li>Share hostnames with all other environments in the same group</li>
+<li>Can be used to forward traffic to a specified URI</li>
+</ul></td>
+</tr>
+<tr>
+<td class="alt">Environment Types</td>
+<td><ul>
+<li>Determine the functionality available in and with that environment</li>
+<li>Determine the pricing for the environment</li>
+</ul>
+<p>(See <a href="#environment-types">Environment types</a>.)</p></td>
+</tr>
+<tr>
+<td class="alt">Environment Groups</td>
+<td><ul>
+<li>Can have multiple hostnames</li>
+<li>Contain one or more environments</li>
+<li>Hostnames assigned to a group must be unique to that group (they cannot be used by other groups)</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+**Apigee Hybrid users:** Every environment group you create with an attached environment must be included in all override files where the environment is used.
+
+## Examples
+
+The following sections show common ways in which environments are structured within environment groups.
+
+### One environment group and one environment
+
+The simplest structure is a single environment group with a single environment in it. This is common for organizations that are currently evaluating the product or have not yet set up testing or analytics infrastructure, nor have any proxies deployed in production.
+
+### Multiple environments in a single environment group
+
+An environment group can contain multiple environments. For example, a single environment group, **prod-group**, can contain three environments, **cart-prod**, **catalog-prod**, and **payment-prod**.
+
+The environment group has a single hostname, `example.com`. You can use the hostname to route requests to a proxy deployed in any of the environments. Note that hostnames are defined on the environment group level: they do not route to a specific environment.
+
+See [Working with environment groups](/apigee/docs/api-platform/fundamentals/environmentgroups-working-with) to learn how to create this environment group.
+
+### Restricting routing to a single environment
+
+In the previous example, requests can be routed to proxies in all three environments by a single hostname. If you want to restrict access to proxies in a single environment, say **catalog-prod**, create another environment group that contains only the environment **catalog-prod**. Then a hostname defined for that environment group can only access **catalog-prod**.
+
+For example, the hostname `catalog.example.com`, for the environment group **catalog-prod-group**, can only route requests to proxies in the environment **catalog-prod**.
+
+<table class="columns">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<tbody>
+<tr class="alt">
+<td style="text-align: center;" width="33.333333333333336%"><p> </p>
+<p>Ready to <strong>create a group</strong>?</p>
+<p><a href="https://apigee.google.com" class="button button-primary">Open the Console</a></p>
+<p> </p></td>
+<td style="text-align: center;" width="33.333333333333336%"><p> </p>
+<p>To <strong>learn more</strong> about environments:</p>
+<p><a href="/apigee/docs/api-platform/fundamentals/environments-working-with" class="button button-primary">Keep Reading</a></p>
+<p> </p></td>
+<td style="text-align: center;" width="33.333333333333336%"><p> </p>
+<p>To <strong>learn more</strong> about environment groups:</p>
+<p><a href="/apigee/docs/api-platform/fundamentals/environmentgroups-working-with" class="button button-primary">Keep Reading</a></p>
+<p> </p></td>
+</tr>
+</tbody>
+</table>
+
+## Routing and base paths
+
+In a simple configuration, a request to a deployed API proxy is made up of a hostname, base path, and the name of an API resource; for example:
+
+<div>
+
+</div>
+
+```
+
+https://www.example.com/shopping/cart/addItem
+        |_____________| |___________| |_____|
+               |             |           |
+            hostname      basepath     resource
+```
+
+You define hostnames on the environment group so that multiple environments can share them. Basepaths and API resources are defined on the API proxy.
+
+**Note:** The environment and group names do not affect the URL of the API endpoint. They are meant only for you to organize and configure your environments, and are not exposed to the proxy's end users.
+
+For more information about base paths and API resources, start with [Understanding routes](/apigee/docs/api-platform/fundamentals/understanding-routes). In addition, check out the [Flow configuration reference](/apigee/docs/api-platform/reference/flow-configuration-reference) and [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference) to gain a greater understanding of how these pieces fit together.
+
+### Hostnames
+
+When you create an environment group, you attach one or more hostnames to that group. For example, you might have the following environment groups, each with its own hostnames:
+
+<table class="cyan">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Environment Group Name<br />
+(Environments)</th>
+<th class="alt"><strong>prod-group</strong><br />
+<br />
+(catalog-prod<br />
+cart-prod<br />
+pymnt-prod)</th>
+<th class="alt"><strong>dev-group</strong><br />
+<br />
+(dev-env)</th>
+<th class="alt"><strong>test-group</strong><br />
+<br />
+(test-env)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>Hostnames</th>
+<td class="alt">catalog.example.com<br />
+payment.example.com</td>
+<td class="alt">dev.example.com</td>
+<td class="alt">test.example.com</td>
+</tr>
+</tbody>
+</table>
+
+You define base paths on the proxy when you [create it](/apigee/docs/api-platform/develop/ui-create-proxy).
+
+When you deploy a proxy to an environment within the group, the hostname plus the base path and the resource name together define the endpoint of an API request to that proxy.
+
+You can define more than one hostname on an environment group. They can all be used to call any proxy deployed to any environment in the group. For example, `catalog.example.com/proxy1` and `payment.example.com/proxy1` will both call the `proxy1` resource if the hostnames `catalog.example.com` and `payment.example.com` are defined on the same environment group.
+
+### Routing example
+
+For example:
+
+- The `prod-group` environment group contains the following environments:
+
+  - `catalog-prod`
+  - `cart-prod`
+  - `pymnt-prod`
+
+- The `prod-group` has the following hostnames defined on it:
+
+  - `catalog.example.com`
+  - `payment.example.com`
+
+- The following proxies are deployed to these environments:
+
+  - The `catalog` proxy on `catalog-prod` with a base path of `/catalog`
+  - The `cart` proxy on `cart-prod` with a base path of `/catalog/cart`
+  - The `payment` proxy on `pymnt-prod` with a base path of `/payment`
+
+This creates the following endpoints:
+
+- `catalog.example.com/catalog` routes to the `catalog` proxy in the `catalog-prod` environment.
+- `catalog.example.com/catalog/cart` routes to the `cart` proxy in the `cart-prod` environment.
+- `payment.example.com/payment` routes to the `payment` proxy in the `pymnt-prod` environment.
+
+The following example shows that the requests are routed to different proxies that are deployed to environments within the group, matching any of the hostnames and the base path:
+
+![API requests are routed to different environments within the group based on the hostname and base path](/static/apigee/docs/api-platform/images/ng-saas/environments-apirequests.png)
+
+**Tip:**
+
+The hostnames that you define on an environment group:
+
+- Must be unique across all environment groups in an organization; they cannot be used by more than one group
+- Do not support wildcards
+- Base paths must be unique within an environment group (no two proxies can have the same base path within an environment group)
+
+For more information, see [Adding hostnames to a group](/apigee/docs/api-platform/fundamentals/environmentgroups-working-with#adding-host-names-to-a-group).
+
+### Shared environments and routing
+
+An environment can belong to multiple environment groups. If you deploy a proxy to such an environment, the proxy will have a multiple addresses, one for each environment group the environment belongs to. This is useful if a customer has wildcard certificates (like \*.example.com) for multiple partners.
+
+For example:
+
+- `shared-env` belongs to two environment groups:
+  - `partner-1` with host alias `api.partner-1.com`
+  - `partner-2` with host alias `api.partner-2.com`
+- Proxy `foo` is deployed to `shared-env` with a base path `/foo`. Because `shared-env` is shared by both environment groups, `foo` has two addresses:
+  - `api.partner-1.com/foo`
+  - `api.partner-2.com/foo`
+
+Note that both of the hostnames route to the same environment. This gives each environment group a unique domain name. For Apigee Hybrid, this scenario can use mTLS with a different certificate for each partner.
+
+## About environment scope
+
+The organization provides scope for some Apigee capabilities. For example, key-value-map (KVM) data can be made available at the organization level, meaning that API proxies deployed to any environment within that organization can access the same KVM data.
+
+Similarly, some capabilities can be scoped to environments or environment groups within the organization. For example, Apigee analytics data is partitioned by a combination of organization, environment, and (eventually) environment group.
+
+## Considerations
+
+Every deployment to an environment has the potential to affect the routing of traffic for every environment group to which that environment is attached. When new basepaths are added, they may start capturing entirely new traffic, or they may start capturing a subset of existing traffic already being handled by an existing deployment.
+
+Similarly, when basepaths are removed, they may correspond to endpoints that no longer receive any traffic, or they may cause existing traffic to be rerouted to a different proxy. When traffic is rerouted, it may be to a proxy in the same environment, or when multiple environments share a single environment group, it may be to a proxy in a different environment.
+
+The total number of API proxy basepaths added to an environment, or environment group, should also be considered. For optimal performance, Apigee recommends using no more than 3,000 API proxy basepaths per Apigee environment or environment group. Exceeding this recommendation can result in increased latency for all new and existing API proxy deployments.
+
+## Additional resources
+
+The following information describes how to manage your environments and environment groups:
+
+- **With the Apigee UI:**
+
+  - [Working with environments](/apigee/docs/api-platform/fundamentals/environments-working-with)
+  - [Working with environment groups](/apigee/docs/api-platform/fundamentals/environmentgroups-working-with)
+
+- **With the Apigee API:**
+
+  - [Environments API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments)
+  - [Environment groups API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups)
+  - [Environment group attachment API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups.attachments)

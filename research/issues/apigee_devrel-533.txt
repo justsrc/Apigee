@@ -1,0 +1,60 @@
+URL: https://github.com/apigee/devrel/issues/533
+TITLE: Sackmesser - Deploy always fails if config.json is present
+STATE: open state_reason: None
+AUTHOR: vitor-a-pinto-alb association: NONE
+CREATED: 2022-05-02T16:14:35Z CLOSED: None
+LABELS: enhancement
+MILESTONE: None
+--- BODY ---
+If config.json (supported by apigee-deploy-maven-plugin [config.json](https://github.com/apigee/apigee-deploy-maven-plugin/blob/hybrid/samples/mockapi-recommended/src/gateway/Mock-v1/config.json) ) is present, using sackmesser to deploy the proxy with
+`sackmesser deploy --googleapi -d <path to proxy> -t $(gcloud auth  print-access-token) -e $ENV -o $ORG`
+Fails with the error
+`[ERROR] Failed to execute goal io.apigee.build-tools.enterprise4g:apigee-edge-maven-plugin:2.3.1:configure (configure-bundle-step) on project apigee-deployer: null: MojoExecutionException -> [Help 1]`
+
+If I remove config.json everything works just fine. This feature of the maven plugin should work when using sackmesser
+
+
+Attached proxy to reproduce the issue.
+[mockapiSack.zip](https://github.com/apigee/devrel/files/8604220/mockapiSack.zip)
+
+
+
+--- COMMENTS (7) ---
+
+### comment by danistrebel (association=COLLABORATOR) at 2022-05-02T16:28:48Z
+Hi @vitor-a-pinto, can you confirm you're using the config.json you linked? Because the linked file is the Apigee Edge config.json file and some of the resources might not be 100% compatible with the X/hybrid API you target with `--googleapi`.
+
+### comment by vitor-a-pinto-alb (association=NONE) at 2022-05-02T17:34:10Z
+hi @danistrebel  the config.json i'm using is on the zip file. The one linked in the 1st sentence is just for context (still I updated the link to avoid confusion).
+Moreover if I try to use maven plugin to deploy the proxy with the config.json on the zip file, with works fine.
+
+### comment by danistrebel (association=COLLABORATOR) at 2022-05-02T19:45:35Z
+Got it thanks, I'll take a look to see what's missing.
+
+### comment by danistrebel (association=COLLABORATOR) at 2022-05-03T05:51:27Z
+Thanks for bringing this up @vitor-a-pinto! He's where I am currently at:
+
+Apigee Sackmesser's intention was to remove the need for writing a manifest and the complexity that comes with Maven. So far this has worked out nicely but it breaks a few features that are dependent on some maven constructs. The config.json is one of them because it depends on a match of the key in the config.json and the profile used. Because the pom.xml is auto generated the profile functionality is not used.
+
+I see the following options in this trade off between flexibility and simplicity:
+1. Sackmesser does not support the config.json functionality and instead encourages templating through external templating or envsubst as we do for the [Auth schemes reference](https://github.com/apigee/devrel/blob/main/references/auth-schemes/pipeline.sh#L33-L34).
+2. We provide a default profile in the generated pom and allow for a config.json that holds the config for exactly that profile.
+3. We provide the option to fully customize the generated maven profiles by re-introducing the maven concept of profile.
+
+@OmidTahouri @seymen what do you think? 
+
+
+### comment by vitor-a-pinto-alb (association=NONE) at 2022-05-03T08:29:25Z
+Hi @danistrebel
+
+Just a quick note on your 2nd option: the idea behind the config.json is to be able to customize configs per profile. Speaking of experience, profiles usually match with the different environments (e.g. dev, quality assurance, production, etc). So to have a single profile (the default)  wont address the issue completely. Just my 2 cents
+
+### comment by danistrebel (association=COLLABORATOR) at 2022-05-03T08:38:51Z
+Yeah I fully agree. Let me elaborate on 2 a bit more. The motivation would be to make it such that you could have a `config-test.json` and `config-prod.json` that you could use as is without having to template. Basically say `sackmesser deploy ... --config config-prod.json` this way we would retain the configuration flexibility but not leak the maven profiles.
+
+Alternatively (maybe an in-between 2&3) we could do `sackmesser deploy ... --config prod` where prod picks up the config for `prod` from the config.json if it exists.
+
+I am not yet convinced this is a great idea so any input is very welcome.
+
+### comment by vitor-a-pinto-alb (association=NONE) at 2022-05-03T08:46:19Z
+Ok got it, thanks for your detailed explanation.

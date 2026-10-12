@@ -1,0 +1,1058 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+Many error conditions can arise while API proxies are servicing requests from apps. For example, API proxies might encounter network issues when communicating with backend services, apps might present expired credentials, request messages might be incorrectly formatted, and so on.
+
+When an error occurs after a client app calls an API proxy, an error message gets returned to the client. By default, the client receives an often cryptic error message with no details or guidance. But if you want to replace default error messages with more useful custom messages, and even enrich them with things like additional HTTP headers, you need to set up custom fault handling in Apigee.
+
+Custom fault handling also lets you add functionality such as message logging whenever an error occurs.
+
+**Tip:** Fault handling is a major architectural design task for API proxy development. It's important to take the time to figure out how and when you're going to handle errors, determine what error messages will say, and design error message formats. After (or as) you figure those things out, then use this topic to help you implement your own custom fault handling.
+
+Before we talk about implementing custom error handling in your API proxies, it's helpful to understand how errors occur and how API proxies react to them.
+
+## Videos
+
+**Note:** The following videos were recorded with a previous version of the Apigee UI; however, the concepts are still valid.
+
+Watch the following videos to learn more about fault handling.
+
+| Video | Description |
+|----|----|
+| <a href="https://www.youtube.com/watch?v=8WJoULoW5UM" class="external">Introduction to fault handling and error flows</a> | Learn about fault handling and what happens when an error occurs in an API proxy. |
+| <a href="https://www.youtube.com/watch?v=FviROBfmdYM" class="external">Handle faults using fault rules</a> | Learn how to handle faults using fault rules. |
+| <a href="https://www.youtube.com/watch?v=oO0DTfwnpSg" class="external">Raise custom faults using the RaiseFault policy</a> | Raise custom faults during API runtime using RaiseFault policy. |
+| <a href="https://www.youtube.com/watch?v=yt9_xEgZmQI" class="external">Define fault rules in API proxy and target endpoints</a> | Define fault rules in the API proxy and target endpoints and understand the differences. |
+| <a href="https://www.youtube.com/watch?v=N1hTowdhBww" class="external">Understand execution order of fault rules</a> | Understand the execution order of fault rules in the API proxy and target endpoints. |
+| <a href="https://www.youtube.com/watch?v=LGw4AP9cYHw" class="external">Define default fault rule</a> | Define default fault rule to handle generic errors in your API. |
+
+## How errors occur
+
+First we'll simply cover *how* errors occur. Knowing how errors occur helps you plan for the different situations in which you want to implement custom error handling.
+
+### Automatic errors
+
+An API proxy throws an error automatically in the following situations:
+
+- A policy throws an error. For example, if an API call sends an expired key, the [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy) automatically throws an error; or if the number of API calls exceeds a certain limit, the [Quota policy](/apigee/docs/api-platform/reference/policies/quota-policy) or [SpikeArrest policy](/apigee/docs/api-platform/reference/policies/spike-arrest-policy) throws an error. (See the [Policy error reference](/apigee/docs/api-platform/reference/policies/error-code-reference) for the types of errors policies can throw).
+- There's an issue in the API proxy message flow, such as a routing error.
+- There's a backend failure, such as an HTTP error due to protocol level failures, TLS/SSL errors, or an unavailable target service.
+- There's a system-level failure, such as an out-of-memory exception.
+
+For more information on these errors, see [Fault taxonomy](#tax) in this topic.
+
+### Custom errors
+
+For situations where there's not an automatic error, you may want to throw a custom error; for example, if a response contains the word `unavailable`, or if the HTTP status code is greater than `201`. Do this by adding a [RaiseFault policy](/apigee/docs/api-platform/reference/policies/raise-fault-policy) to the appropriate place in an API proxy flow.
+
+You can add a RaiseFault policy to an API proxy flow the same as you do any other policy. In the following proxy configuration example, the `Raise-Fault-1` policy is attached to the TargetEndpoint response. If the word `unavailable` is present in the response from the target service, the RaiseFault policy gets executed and throws an error.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<TargetEndpoint name="default">
+...
+  <Response>
+    <Step>
+      <Name>Raise-Fault-1</Name>
+      <Condition>message.content Like "*unavailable*"</Condition>
+    </Step>
+  </Response>
+```
+
+This is just to show you that you can throw custom errors. We go into more detail about the RaiseFault policy in the [FaultRules vs. the RaiseFault policy](#rulesvraisefault) section.
+
+For more examples, see these <a href="https://discuss.google.dev/" class="external">Apigee Community</a> posts:
+
+- <div>
+
+  <a href="https://discuss.google.dev/t/how-to-use-javascript-variable-in-raise-fault/13094.html" class="external">Referencing JavaScript variables in RaiseFault</a>
+
+  </div>
+
+## What API proxies do when errors occur
+
+Here's what happens when a proxy throws an error.
+
+### Exit the proxy pipeline
+
+When an API proxy encounters an error, regardless of how it occurs, it exits the [normal flow pipeline](/apigee/docs/api-platform/fundamentals/what-are-flows), enters an error state, and returns an error message to the client app. Once the API proxy enters the error state, it cannot return processing back to the normal flow pipeline.
+
+For example, assume an API proxy has policies in the following order in the ProxyEndpoint request:
+
+1.  Verify API Key
+2.  Quota
+3.  JSON to XML
+
+If an error occurs during API key verification, the API proxy moves into an error state. The Quota and JSON to XML policies are not executed, the proxy doesn't proceed to the TargetEndpoint, and an error message is returned to the client app.
+
+### Check for FaultRules
+
+In the error state, API proxies also check for the presence of the following (in order) in the API proxy configuration before returning a default error message to the client app:
+
+1.  A `<FaultRules>` section, which contains the logic to trigger custom error messages (and other policies) based on specific conditions that you define.
+2.  A `<DefaultFaultRule>` section, which triggers a default error message in the following situations:
+    - No `<FaultRules>` are defined.
+    - No existing `<FaultRules>` get executed.
+    - The `<AlwaysEnforce>` element is set to true.
+
+In essence, the API proxy is giving you the opportunity to return a custom error message and trigger other logic. If the proxy finds neither of those sections, or they exist but no custom fault was triggered, the proxy sends its own Apigee-generated default message.
+
+## Simple fault handling example
+
+**Sample:** **Learn by doing!**  
+If you want to see a simple fault handling example in action, check out this <a href="https://github.com/apigee/api-platform-samples/tree/master/learn-edge/fault-handling-1" class="external">Learn by doing example</a> in the Apigee GitHub samples. Just clone the repository and follow the instructions in that topic. You can always come back to this section for more details on how simple fault handling is implemented.
+
+Let's start with a simple example, where a call to an API proxy doesn't contain a required API key. By default, following is the response that gets returned to the client app:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 401 Unauthorized
+Date: Wed, 20 Jul 2016 19:19:32 GMT
+Content-Type: application/json
+Content-Length: 150
+Connection: keep-alive
+Server: Apigee Router
+
+* Connection #0 to host myorg-test.apigee.net left intact
+{"fault":{"faultstring":"Failed to resolve API Key variable request.queryparam.apikey","detail":{"errorcode":"steps.oauth.v2.FailedToResolveAPIKey"}}}
+```
+
+Your API users may be able to figure out the error message, but they may not. And many default errors are more subtle and harder to decipher.
+
+As an API developer, it's up to you to change this message to meet the needs of whoever will ultimately receive the error message, whether it's an iOS app developer or an internal testing group that has its own error message format requirements.
+
+Here's a basic example of how you'd create a custom error message to handle this error. This requires 1) a policy that defines the custom message, and 2) a FaultRule that executes the policy when the proxy goes into an error state.
+
+### 1. Create a policy that defines the custom message
+
+First, create a policy that defines the custom error message. You can use any type of policy, such as an [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy), that can set a payload and optional HTTP headers such as the status code. The [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) is ideal for this. It lets you control message payload, set a different HTTP status code and add HTTP headers.
+
+You don't need to attach the policy to a flow; just create it, as described in [Create the policy](/apigee/docs/api-platform/get-started/add-policy#create-the-policy).
+
+Following is an example [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) that:
+
+- Returns a JSON message.
+- Sets an HTTP status code (`911`, which is an obvious non-existent status code simply to illustrate the flexibility you have). The status code appears in the HTTP header.
+- Creates and populates a new HTTP header called `invalidKey`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage async="false" continueOnError="false" enabled="true" name="invalid-key-message">
+    <DisplayName>Invalid key message</DisplayName>
+    <Set>
+        <Payload contentType="application/json">{"Citizen":"Where's your API key? I don't see it as a query parameter"}</Payload>
+        <StatusCode>911</StatusCode>
+    </Set>
+    <Add>
+        <Headers>
+            <Header name="invalidKey">Invalid API key!</Header>
+        </Headers>
+    </Add>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+    <AssignTo createNew="false" transport="http" type="request"/>
+</AssignMessage>
+```
+
+When this policy is executed, the response to the client app will look like the following. Compare it to the default response shown earlier.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 911 Rejected by API Key Emergency Services
+Date: Wed, 20 Jul 2016 18:42:36 GMT
+Content-Type: application/json
+Content-Length: 35
+Connection: keep-alive
+invalidKey: Invalid API key!
+Server: Apigee Router
+
+* Connection #0 to host myorg-test.apigee.net left intact
+{"Citizen":"Where's your API key? I don't see it as a query parameter."}
+```
+
+Yes, it's a little silly, but it shows you what's possible. At least now the developer receiving the message knows they forgot to include an API key as a query parameter.
+
+But how does this policy get executed? The next section shows you.
+
+### 2. Create the \<FaultRule\> that will trigger the policy
+
+In the `<ProxyEndpoint>` or `<TargetEndpoint>` sections of the proxy configuration, you'll add a `<FaultRules>` XML block that contains one or more individual `<FaultRule>` sections. Each FaultRule represents a different error you want to handle. In this simple example, we'll use only one FaultRule to show you what it's composed of.
+
+You should also add a `<DefaultFaultRule>` to provide a custom general error message if none of your FaultRules is executed.
+
+#### Example
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ProxyEndpoint name="default">
+...
+    <FaultRules>
+       <FaultRule name="invalid_key_rule">
+            <Step>
+                <Name>invalid-key-message</Name>
+            </Step>
+            <Condition>(fault.name = "FailedToResolveAPIKey")</Condition>
+        </FaultRule>
+    </FaultRules>
+    <DefaultFaultRule name="default-fault">
+        <Step>
+            <Name>Default-message</Name>
+        </Step>
+    </DefaultFaultRule>
+```
+
+Key points:
+
+- The FaultRules are defined in the ProxyEndpoint. This is important. More on putting FaultRules in the ProxyEndpoint vs. TargetEndpoint later.
+
+- `<Name>`: The name of the policy to execute. The name comes from the policy's `name` attribute on the parent element, as shown in the policy example earlier.
+
+- `<Condition>`: Apigee evaluates the condition and executes the policy only if the condition is true. If there are multiple FaultRules that evaluate to true, Apigee executes the first one that is true. (**Important**: The order in which the FaultRules are evaluated, top to bottom or bottom to top, differs between the TargetEndpoint and ProxyEndpoint, as described in the [Multiple FaultRules and execution logic](#executionlogic) section.) If you don't include a condition, the FaultRule is automatically true. But that's not a best practice. Each FaultRule should have its own condition.
+
+  **Note:** As you'll see later, Steps can have their own *inner* conditions that determine whether or not a policy gets executed. (More on that in the [Multiple FaultRules and execution logic](#executionlogic) section.) But Step conditions have nothing to do with whether or not a FaultRule gets executed. Apigee looks at only the *outer* FaultRule conditions to determine which FaultRule gets executed.
+
+- `<DefaultFaultRule>`: If no custom FaultRule is executed, the `<DefaultFaultRule>` is executed, sending a more generic custom message instead of the cryptic default Apigee-generated message. Unlike a custom `<FaultRule>`, a `<DefaultFaultRule>` does not evaluate an outer rule-level `<Condition>` element. To conditionally execute a policy within a `<DefaultFaultRule>`, add an inner `<Condition>` element to the `<Step>` element inside the `<DefaultFaultRule>`.
+
+  The DefaultFaultRule is typically used to return a generic error message for any unexpected error. An example would be a message that contains contact information for technical support. This default response serves the dual purpose of providing developer-friendly information while also obfuscating backend URLs or other information that might be used to compromise the system.
+
+## Multiple FaultRules and execution logic
+
+**Sample:** **Learn by doing!**  
+If you want to dive in and get your hands dirty with an easy-to-use sample that illustrates multiple FaultRules, check out this <a href="https://github.com/apigee/api-platform-samples/tree/master/learn-edge/fault-handling-2" class="external">Learn by doing example</a> in the Apigee GitHub samples. Just clone the repository and follow the instructions in that topic. You can always come back to this section to get more details on how it all works.
+
+In the [Simple fault handling example](#example) section, we used a simple example of a single FaultRule and condition. In a real-world API project, with all the possible errors that can occur, you're likely to have multiple FaultRules and a DefaultFaultRule in both your `<ProxyEndpoint>` and `<TargetEndpoint>`. Ultimately, though, only one FaultRule is executed when an API proxy goes into an error state.
+
+This section describes the logic Apigee uses in handling FaultRules, from how it arrives at a single FaultRule to execute to how *inner* Step conditions are handled when their FaultRule is triggered. This section also provides guidance on when to define FaultRules in the `<ProxyEndpoint>` vs. the `<TargetEndpoint>`, and describes the relationship between FaultRules and the [RaiseFault policy](/apigee/docs/api-platform/reference/policies/raise-fault-policy).
+
+### FaultRules execution
+
+**Note:** ***Outer* and *inner* conditions**
+
+In this topic we refer to *outer* and *inner* conditions. You can also think of them as *FaultRule* and *Step* conditions. The difference is important. Following is an example of a FaultRule that has an outer FaultRule condition and an inner step condition. We'll discuss the differences in this section.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name="over_quota">
+            <Step>
+                <Name>developer-over-quota-fault</Name>
+                <!-- Inner (Step) condition. Only gets executed if
+                     the FaultRule is executed. -->
+                <Condition>(ratelimit.developer-quota-policy.exceed.count GreaterThan "0")</Condition>
+            </Step>
+            <!-- Outer (FaultRule) condition. Apigee evaluates this
+                 to determine whether or not to execute
+                 the FaultRule. -->
+            <Condition>(fault.name = "QuotaViolation")</Condition>
+        </FaultRule>
+```
+
+In brief, here's the logic Apigee uses when an API proxy goes into an error state. Note that there is a slight difference between FaultRules evaluation in the ProxyEndpoint versus the TargetEndpoint.
+
+1.  Apigee evaluates the FaultRules in either the ProxyEndpoint or TargetEndpoint, depending on where the error occurred:
+    - **ProxyEndpoint** - Apigee starts with the **bottom** `<FaultRule>` in the configuration XML and works its way up, evaluating the `<Condition>` of each `<FaultRule>` (the *outer* condition, not the *inner* `<Step>` conditions).
+    - **TargetEndpoint** - Apigee starts with the **top** `<FaultRule>` in the configuration XML and works its way down, evaluating the `<Condition>` of each `<FaultRule>` (the *outer* condition, not the *inner* `<Step>` conditions).
+2.  Executes the **first** FaultRule whose condition is true. If a FaultRule has no condition, it's true by default.
+    - When a FaultRule is executed, all Steps inside the FaultRule are evaluated in order, top to bottom in the XML configuration. Steps without conditions are automatically executed (the policies are executed), and Steps that have a `<Condition>` that evaluates to are executed (conditions that evaluate to `code` are not executed).
+
+    - If a FaultRule is executed, but no steps in the FaultRule are executed (because their conditions evaluate to `code`), the Apigee-generated default error message is returned to the client app. The `<DefaultFaultRule>` is *not* executed, because Apigee has already executed its one FaultRule.
+
+      **Note:** The exception to this is if the `<DefaultFaultRule>` has the child element `<AlwaysEnforce>true</AlwaysEnforce>`, which executes the DefaultFaultRule even if a FaultRule was executed.
+
+      However, there's one instance where this isn't the case. If a FaultRule other than the DefaultFaultRule invokes a [RaiseFault policy](/apigee/docs/api-platform/reference/policies/raise-fault-policy), the DefaultFaultRule does not execute, even if the `<AlwaysEnforce>` element in the `<DefaultFaultRule>` tag is true.
+3.  If no FaultRule is executed, Apigee executes the `<DefaultFaultRule>`, if present.
+
+Following are examples with inline comments.
+
+#### ProxyEndpoint execution
+
+Evaluation of ProxyEndpoint FaultRules is bottom to top, so start reading at the last FaultRule in the following sample and work your way up. Look at the DefaultFaultRule last.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ProxyEndpoint name="default">
+...
+    <FaultRules>
+<!-- 3. This FaultRule is automatically TRUE, because there's no outer
+     condition. But because the FaultRule just below this got
+     executed (bottom-to-top evaluation in a ProxyEndpoint), Apigee
+     doesn't even evaluate this FaultRule.
+     Note that it's not a best practice to have a FaultRule without
+     an outer condition, which automatically makes the FaultRule true. -->
+        <FaultRule name="random-error-message">
+            <Step>
+                <Name>Random-fault</Name>
+            </Step>
+        </FaultRule>
+<!-- 2. Let's say this fault is TRUE. The Quota policy threw a QuotaViolation
+     error. This is the first FaultRule to be TRUE, so it's executed.
+     Now the Steps are evaluated, and for the ones whose conditions
+     evaluate to TRUE, their policies are executed. Steps without
+     conditions are automatically true. -->
+<FaultRule name="over_quota">
+            <Step>
+                <Name>developer-over-quota-fault</Name>
+                <Condition>(ratelimit.developer-quota-policy.exceed.count GreaterThan "0")</Condition>
+            </Step>
+            <Step>
+                <Name>global-over-quota-fault</Name>
+                <Condition>(ratelimit.global-quota-policy.exceed.count GreaterThan "0")</Condition>
+            </Step>
+            <Step>
+                <Name>log-error-message</Name>
+            </Step>
+            <Condition>(fault.name = "QuotaViolation")</Condition>
+        </FaultRule>
+<!-- 1. Because this is the ProxyEndpoint, Apigee looks at this FaultRule
+     first. But let's say this FaultRule is FALSE. A policy did not
+     throw a FailedToResolveAPIKey error. Apigee moves UP to check
+     the next FaultRule. -->
+        <FaultRule name="invalid_key_rule">
+            <Step>
+                <Name>invalid-key-message</Name>
+            </Step>
+            <Condition>(fault.name = "FailedToResolveAPIKey")</Condition>
+        </FaultRule>
+    </FaultRules>
+
+<!-- If no <FaultRule> is executed, the <DefaultFaultRule> is executed.
+     If a FaultRule is executed, but none of its Steps are executed,
+     The DefaultFaultRule is not executed (because Apigee has already
+     executed its one FaultRule). -->
+    <DefaultFaultRule name="default-fault">
+        <Step>
+            <Name>Default-message</Name>
+        </Step>
+    </DefaultFaultRule>
+```
+
+#### TargetEndpoint execution
+
+Evaluation of TargetEndpoint FaultRules is top to bottom, so start reading at the first FaultRule in the following sample and work your way down. Look at the DefaultFaultRule last.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<TargetEndpoint name="default">
+...
+    <FaultRules>
+<!-- 1. Because this is the TargetEndpoint, Apigee looks at this FaultRule
+     first. Let's say this FaultRule is FALSE.
+     A policy did not throw a FailedToResolveAPIKey error.
+     Apigee moves down to the next FaultRule. -->
+        <FaultRule name="invalid_key_rule">
+            <Step>
+                <Name>invalid-key-message</Name>
+            </Step>
+            <Condition>(fault.name = "FailedToResolveAPIKey")</Condition>
+        </FaultRule>
+<!-- 2. Let's say this fault is TRUE. The Quota policy threw a QuotaViolation
+     error. This is the first FaultRule to be TRUE, so it's executed.
+     Now the Steps are evaluated, and for the ones whose conditions
+     evaluate to TRUE, their policies are executed. Steps without
+     conditions are automatically true. -->
+        <FaultRule name="over_quota">
+            <Step>
+                <Name>developer-over-quota-fault</Name>
+                <Condition>(ratelimit.developer-quota-policy.exceed.count GreaterThan "0")</Condition>
+            </Step>
+            <Step>
+                <Name>global-over-quota-fault</Name>
+                <Condition>(ratelimit.global-quota-policy.exceed.count GreaterThan "0")</Condition>
+            </Step>
+            <Step>
+                <Name>log-error-message</Name>
+            </Step>
+            <Condition>(fault.name = "QuotaViolation")</Condition>
+        </FaultRule>
+<!-- 3. This FaultRule is automatically TRUE, because there's no outer
+     condition. But because the FaultRule just above this got
+     executed (top-to-bottom evaluation in a TargetEndpoint), Apigee
+     doesn't even evaluate this FaultRule.
+     Note that it's not a best practice to have a FaultRule without
+     an outer condition, which automatically makes the FaultRule true. -->
+        <FaultRule name="random-error-message">
+            <Step>
+                <Name>Random-fault</Name>
+            </Step>
+        </FaultRule>
+    </FaultRules>
+
+<!-- If no <FaultRule> is executed, the <DefaultFaultRule> is executed.
+     If a FaultRule is executed, but none of its Steps are executed,
+     The DefaultFaultRule is not executed (because Apigee has already
+     executed its one FaultRule). -->
+    <DefaultFaultRule name="default-fault">
+        <Step>
+            <Name>Default-message</Name>
+        </Step>
+    </DefaultFaultRule>
+```
+
+### Fault rule order
+
+As you can see in the previous example, the order in which you put your FaultRules is important depending on whether the error occurs in the ProxyEndpoint versus the TargetEndpoint.
+
+For example:
+
+| ProxyEndpoint order | TargetEndpoint order |
+| --- | --- |
+| In the following example, since evaluation is bottom to top, FaultRule 3 is executed, which means FaultRules 2 and 1 aren't evaluated. 5. FaultRule 1: FALSE 4. FaultRule 2: TRUE 3. FaultRule 3: TRUE 2. FaultRule 4: FALSE 1. FaultRule 5: FALSE | In the following example, since evaluation is top to bottom, FaultRule 2 is executed, which means FaultRules 3, 4, and 5 aren't evaluated. 1. FaultRule 1: FALSE 2. FaultRule 2: TRUE 3. FaultRule 3: TRUE 4. FaultRule 4: FALSE 5. FaultRule 5: FALSE |
+
+### Policies to include
+
+You can execute any policies from a FaultRule by putting them in Steps. For example, you can execute an [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) to format a response to the client app, then log a message with the [MessageLogging policy](/apigee/docs/api-platform/reference/policies/message-logging-policy). Policies are executed in the order you put them (top to bottom in the XML).
+
+### Fault rules are triggered ONLY in an error state (about continueOnError)
+
+The heading may seem like we're repeating ourselves, but there's one particular nuance to be aware of with regard to a proxy error causing an API proxy to enter an error state—or rather, *not* entering an error state: the `continueOnError` attribute on a policy.
+
+To recap: An API proxy evaluates `<FaultRules>` and `<DefaultFaultRule>` *only* if the proxy has entered an error state. That means that even if a FaultRule condition evaluates to true, it won't get triggered if the proxy isn't in an error state.
+
+However, here's an example of an error occurring and the proxy not entering an error state. On any policy, you can set an attribute on the parent element called `continueOnError`. That attribute is very important with regard to fault handling, because it determines whether or not the proxy enters an error state if the policy fails. In most cases, you'll want to keep the default `continueOnError="false"`, which puts the proxy in an error state if the policy fails, and your custom error handling will get triggered. However, if `continueOnError="true"` (for example, if you don't want the failure of a Service Callout to stop the proxy execution), the proxy will *not* go into an error state if that policy fails, and the proxy won't look at your FaultRules.
+
+For information on logging errors when `continueOnError="true"`, see [Handling policy faults within the current flow](#continueonerror).
+
+### Where to define FaultRules: ProxyEndpoint or TargetEndpoint
+
+When an API proxy experiences an error, the error occurs either in the `<ProxyEndpoint>` (request from or response to client app) or in the `<TargetEndpoint>` (request to or response from target service). Wherever that error occurs is where Apigee looks for FaultRules.
+
+For example, if a target server isn't available (HTTP status code `503`), the API proxy would go into an error state in the `<TargetEndpoint>` response, and the normal API proxy flow wouldn't continue to the `<ProxyEndpoint>`. If you have FaultRules defined only in the `<ProxyEndpoint>`, they won't handle that error.
+
+Here's another example. If a [RaiseFault policy](/apigee/docs/api-platform/reference/policies/raise-fault-policy) on the `<ProxyEndpoint>` response triggers an error, a FaultRule in the `<TargetEndpoint>` won't get executed.
+
+**Note:** Remember, as mentioned in the [FaultRules execution](#execution) section, FaultRules are evaluated in the following order. The first FaultRule whose *outer* condition evaluates to true is executed.
+
+- **ProxyEndpoint**: Bottom up, last FaultRule in the XML configuration first.
+- **TargetEndpoint**: Top down, first FaultRule in the XML configuration first.
+
+### FaultRules vs. the RaiseFault policy
+
+Fault rules and the [RaiseFault policy](/apigee/docs/api-platform/reference/policies/raise-fault-policy) may on the surface sound like alternative ways to accomplish fault handling; and in some ways that's true. But they also work together. This section explains the relationship between the two. Understanding this relationship should help you design your fault handling, especially if you want to use both.
+
+In brief:
+
+- **Fault rules** are always evaluated when an API proxy enters an error state.
+
+- The **RaiseFault** policy is a way of putting an API proxy in an error state when an error wouldn't have otherwise occurred.
+
+  For example, if you want to throw an error if the HTTP status code in the response from the target service is greater than `200`, you add a [RaiseFault policy](/apigee/docs/api-platform/reference/policies/raise-fault-policy) in your response flow. It would look something like this:
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+  <TargetEndpoint name="default">
+      <PreFlow name="PreFlow">
+  ...
+          <Response>
+              <Step>
+                  <Name>Raise-Fault-1</Name>
+  <!-- If the condition is true, the Raise-Fault-1 policy gets executed -->
+                  <Condition>(response.status.code GreaterThan "200")</Condition>
+              </Step>
+          </Response>
+  ```
+
+  The RaiseFault policy also sends an error message to the client app.
+
+What happens when a RaiseFault policy triggers an error, which puts the proxy in an error state, which potentially executes a FaultRule? Here's where things can get a little tricky. If the RaiseFault policy returns an error message *and* a FaultRule gets triggered and returns an error message, what gets returned to the client app?
+
+- Since the FaultRule or DefaultFaultRule is executed after the RaiseFault policy, the FaultRule response data wins.
+- The RaiseFault policy response data (status code or message payload) is used if that data is not set by the FaultRule or DefaultFaultRule.
+- If both the RaiseFault policy and FaultRule add custom HTTP headers, both are included in the response. Duplicate header names create a header with multiple values.
+
+Here's an example of what's set by a RaiseFault policy and a FaultRule, and what gets returned to the client app. The samples are designed for brevity, not for best practices.
+
+<img src="/static/apigee/docs/api-platform/images/fault_response_in_trace.png" style="width:80.0%" alt="What&#39;s set by a RaiseFault policy and a FaultRule." />
+
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<tbody>
+<tr>
+<td><p><strong>Client app receives</strong>:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy devsite-code-highlight" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="GDScript" data-syntax-guessed=""><code>Status Code: 468
+Payload: {&quot;Whoa&quot;:&quot;Sorry.&quot;}
+Header:
+  errorNote: woops,gremlins</code></pre></td>
+<td><p><strong>&lt;- Fault rules policy sets this</strong>:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy devsite-code-highlight" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="Transact-SQL" data-syntax-guessed=""><code>Status Code: [none]
+Payload: {&quot;Whoa&quot;:&quot;Sorry.&quot;}
+Header:
+  errorNote: gremlins</code></pre></td>
+<td><p><strong>&lt;- RaiseFault policy sets this</strong>:</p>
+<div>
+&#10;</div>
+<pre class="terminal" translate="no" dir="ltr" data-is-upgraded=""><code>
+Status Code: 468
+Payload: {&quot;DOH!&quot;:&quot;Try again.&quot;}
+Header:
+  errorNote: woops</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+**Note:** If the `<DefaultFaultRule>` has the child element `<AlwaysEnforce>true</AlwaysEnforce>`, the DefaultFaultRule is always executed, even if another FaultRule was executed as well. Any payload and/or headers set by a policy in the DefaultFaultRule get returned to the client, since it's the last to execute.
+
+## Building conditions
+
+Conditions are the key to FaultRule execution. You create FaultRule conditions the same way you do for other conditions in Apigee, such as for conditional flows or RaiseFault conditions.
+
+To put the rest of this section in context, here's a sample fault rule that has an outer FaultRule condition and an inner Step condition.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name="invalid_key_rule">
+    <Step>
+        <Name>invalid-key-message</Name>
+        <Condition>oauthV2.Verify-API-Key-1.failed = true</Condition>
+    </Step>
+    <Condition>fault.name = "FailedToResolveAPIKey"</Condition>
+</FaultRule>
+```
+
+### Variables specific to policy errors
+
+The `fault.name` and `{policy_namespace}.{policy_name}.failed` variables are available when a policy throws an error.
+
+#### fault.name
+
+When a policy fails, catch the error in a condition using the `fault.name` variable. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Condition>fault.name = "policy_error_name"</Condition>
+```
+
+The error name appears in the default error message. For example, in the following, the fault name is `FailedToResolveAPIKey`. In this case, a flow variable called `fault.name` is set to the value `FailedToResolveAPIKey`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{"fault":{"faultstring":"Failed to resolve API Key variable request.queryparam.apikey","detail":{"errorcode":"steps.oauth.v2.FailedToResolveAPIKey"}}}
+```
+
+So the condition would look like this:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Condition>fault.name = "FailedToResolveAPIKey"</Condition>
+```
+
+See the [Policy error reference](/apigee/docs/api-platform/reference/policies/error-code-reference) for a list of policy errors.
+
+#### {policy_namespace}.{policy_name}.failed
+
+The `*.failed` variable is available when a policy fails. Following are examples of `*.failed` variables for different policies. For policy namespaces, see the flow variables in each [policy reference](/apigee/docs/api-platform/reference/policies/access-entity-policy) topic.
+
+- [RaiseFault policy](/apigee/docs/api-platform/reference/policies/raise-fault-policy): `raisefault.failed` (same for all RaiseFault policies)
+- [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy): `oauthV2.{policy_name}.failed`, for example, `oauthV2.Verify-API-Key-1.failed`
+- [Quota policy](/apigee/docs/api-platform/reference/policies/quota-policy) and [SpikeArrest policy](/apigee/docs/api-platform/reference/policies/spike-arrest-policy): `ratelimit.{policy_name}.failed`, for example, `ratelimit.Quota-1.failed`
+
+### Other available variables
+
+When an API proxy goes into an error state, the only available variables for use in conditions are:
+
+- The variables of the policy that failed.
+- The HTTP message variables that exist at the point of failure. For example, if an error is thrown in the response, a FaultRule in the `<TargetEndpoint>` could use HTTP data `response.status.code`, `message.content`, `error.content`, and so on. Or if a [Quota policy](/apigee/docs/api-platform/reference/policies/quota-policy) failed, you could use the variable `ratelimit.{quota_policy_name}.exceed.count`. Use the [Debug tool](/apigee/docs/api-platform/debug/trace-overview) and the [Policy reference](/apigee/docs/api-platform/reference/policies/reference-overview-policy) to help you figure out which variables and HTTP data are available.
+
+### More information
+
+- **Conditions**: [Conditions reference](/apigee/docs/api-platform/reference/conditions-reference) and [Flow variables and conditions](/apigee/docs/api-platform/fundamentals/flow-variables-and-conditions)
+
+  **Note:** If you use `<` or `>` operators in your conditions and you get a validation failure (bad XML), use the word versions of the operators, such as `LesserThan` or `GreaterThan`, as shown in the conditions reference topic.
+
+- **Errors**: [Policy error reference](/apigee/docs/api-platform/reference/policies/error-code-reference)
+
+- **Variables**: [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference), and see individual [Policy reference](/apigee/docs/api-platform/reference/policies/reference-overview-policy) pages for variables that are available with each policy.
+
+## Best practices for fault handling
+
+Fault handling is a major architectural design task for API proxy development. It's important to take the time to figure out how and when you're going to handle errors, determine what error messages will say, and design error message formats. After (or as) you figure those things out, then use these best practices to help you with your fault handling implementation.
+
+Here are some best practices in designing and building fault handling:
+
+- In FaultRules, you can specify any type of policy. The most common pattern is to use the [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) to set specific items in the pending error response. You can also use AssignMessage to set variables used for other purposes, for example, for variables referenced by logging policies that execute in the PostClientFlow, or in FlowHooks. Also consider logging a message, for example with the [MessageLogging policy](/apigee/docs/api-platform/reference/policies/message-logging-policy) or the [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy), if you want to log specific errors in specific fault conditions.
+
+- Do not specify RaiseFault policies as Steps within a FaultRule. It is better to use AssignMessage policies to set or alter message elements, including the payload, headers, or status code.
+
+- For each FaultRule, or for all but the last-evaluated FaultRule, provide an *outer* `<Condition>` attached as a child of the `<FaultRule>` element. The execution condition for a FaultRule with no explicit Condition specified, will implicitly evaluate to `true`. A `<Condition>` element attached as a child of a `<Step>` element is not used to determine whether the execution condition for the FaultRule evaluates to `true` or `false`. Step conditions are evaluated only after Apigee executes the FaultRule containing them. In a FaultRule, it's common to have multiple Steps with AssignMessage (or other) policies, each with a Step condition.
+
+- To handle errors in multiple policies of the same type (for example, multiple Quota policies), create one FaultRule per policy error you're likely to receive, and then distinguish between separate errors with Conditions attached to Steps. For example, create a FaultRule to handle an error in Quota policies, such as `QuotaViolation`, and a separate FaultRule for `InvalidApiKey`. (See the [Policy error reference](/apigee/docs/api-platform/reference/policies/error-code-reference) for policy errors. As you discover additional errors that need to be handled, you can go back later and add them to your FaultRules. It's okay to be iterative, though it does require proxy redeployment.) This approach allows you to catch the same type of error no matter which policy throws it, which makes your FaultRules XML efficient.
+
+  The inner Step conditions give you more fine-grained control. For example, if you're enforcing both individual developer quota and global quota with two policies in your request flow, set your *outer* FaultRule condition to get triggered on the `QuotaViolation` error (which is thrown when quota goes over in either case). Then set Step conditions to evaluate the specific `exceed.count` variables in both of your quota policies. Only the relevant error is sent to the client (developer quota overage or global quota overage). Here's an example of this configuration:
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+  <FaultRule name="over_quota">
+    <!-- This condition catches a QuotaViolation in *any* Quota policy -->
+    <Condition>fault.name = "QuotaViolation"</Condition>
+    <Step>
+      <Name>AM-developer-over-quota-fault</Name>
+      <Condition>ratelimit.developer-quota-policy.exceed.count GreaterThan 0</Condition>
+    </Step>
+    <Step>
+      <Name>AM-global-over-quota-fault</Name>
+      <Condition>ratelimit.global-quota-policy.exceed.count GreaterThan 0</Condition>
+    </Step>
+  </FaultRule>
+  ```
+
+  For another example, see <a href="https://discuss.google.dev/t/policy-fault-handling/7234" class="external">this discussion on Policy fault handling</a>.
+
+- To handle errors when you're using a single policy of one type, consider a single fault rule that gets executed when that one policy fails, and include multiple steps that map to each possible error. This keeps your XML simpler by using a single FaultRule rather than multiple FaultRules (one for each error type). For example, you can specify that different [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) steps execute in different conditions, like this:
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+  <FaultRule name="raise-fault-3">
+    <!-- This condition catches *any* error in the Verify-API-Key-1 policy. -->
+    <Condition>oauthV2.Verify-API-Key-1.failed = "true"</Condition>
+    <!-- This first step always executes, which handles errors you haven't mapped with inner conditions. -->
+    <Step>
+      <Name>AM-Generic-Key-Fault</Name>
+    </Step>
+    <Step>
+      <Name>AM-API-Key-NotFound</Name>
+      <Condition>fault.name = "FailedToResolveAPIKey"</Condition>
+    </Step>
+    <Step>
+      <Name>AM-API-Key-Invalid</Name>
+      <Condition>fault.name = "InvalidApiKey"</Condition>
+    </Step>
+  </FaultRule>
+  ```
+
+  **Note:** When using this pattern, consider including one step that will always execute (by not providing a condition for it). Why? Because it will run and provide a message for errors that you haven't mapped with inner conditions. **Put this unconditional step first**. That way, any specific error caught in a later step will take precedence in the response.
+
+- Add FaultRules where the errors will occur (client side `<ProxyEndpoint>` or target side `<TargetEndpoint>`). Include FaultRules for each policy that appears in each location.
+
+- When using RaiseFault policies in conjunction with FaultRules, coordinate the response data that's sent back when both the RaiseFault policy and a FaultRule return data. For example, if you have a RaiseFault policy that sets the HTTP status code, don't also configure an AssignMessage Step within a FaultRule that resets the status code. The worst that can happen is that the default status code gets returned to the client app.
+
+- The `<DefaultFaultRule>` element complements the `<FaultRules>` element to give you more control over policies that the proxy executes when it is handling a fault state. If you specify a `<DefaultFaultRule>`, it will execute if either or both of the following is true:
+
+  - No other FaultRule has executed. A special case here is if there is no `<FaultRules>` element configured at all.
+  - If the `<AlwaysEnforce>` child element of `<DefaultFaultRule>` is true.
+
+  Do not specify a rule-level `<Condition>` child element directly on a `<DefaultFaultRule>`, because Apigee doesn't evaluate conditions on `<DefaultFaultRule>` elements. If you want to conditionally execute or exclude a policy within a `<DefaultFaultRule>` based on some state of the request or pending error message (for example, if a specific header is present or missing), specify the `<Condition>` on the `<Step>` element inside the `<DefaultFaultRule>`.
+
+  Use a `<DefaultFaultRule>` with `<AlwaysEnforce>` set to `true`, if you have one or more policies that you want the proxy to always perform, irrespective of whether a prior FaultRule has executed. One possible scenario: suppose you want to inject a header into the response in all cases, whether the proxy request resulted in a fault or not, and whether or not the fault had been previously handled. Then you would attach an appropriate AssignMessage policy in the `<PostFlow>`/`<Response>` section, and also attach the same policy in the `<DefaultFaultRule>` with `<AlwaysEnforce>` set to `true`.
+
+### Pattern for centralized, reusable fault handling
+
+<a href="https://discuss.google.dev/t/an-error-handling-pattern-for-apigee-proxies/17553" class="external">An error-handling pattern for Apigee proxies</a> describes a pattern for centralized fault handling without code duplication.
+
+## Creating FaultRules
+
+To add a FaultRule you need to edit the XML configuration of the ProxyEndpoint or TargetEndpoint. You can use the Apigee UI to make this edit in the **Code** pane of the **Develop** view for an API proxy, or edit the XML file that defines the ProxyEndpoint or TargetEndpoint.
+
+If you create FaultRules in the Apigee UI, first create the policies you want to execute, then add them to the FaultRule configuration. (You'll get an error in the UI if you try to save a FaultRule that references a policy that hasn't been created yet.)
+
+### Adding policies to a FaultRule
+
+While you can put any policy in the FaultRule, you commonly use the [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) to generates a custom response message for an error condition. AssignMessage enables you to configure an HTTP response with payload, HTTP status code, and headers.
+
+**Note:** A policy used in a FaultRule is typically not used in the normal flow pipeline. Therefore, when using the Apigee UI to create a policy for a FaultRule, select the plus sign, **+**, next to **Policies** in the UI to add the policy:
+
+![The Policies bar includes a plus sign and an expander arrow.](/static/apigee/docs/api-platform/images/addPolicy_v1.png)
+
+The example below shows a typical [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) configuration:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-Invalid-Key">
+  <Set>
+      <Payload contentType="text/plain">That is an error.</Payload>
+      <StatusCode>401</StatusCode>
+  </Set>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</AssignMessage>
+```
+
+Notice that it does not specify an `<AssignTo>` element. This means it will assign to the ambient message, depending on where the policy is attached.
+
+You can now use this policy in your FaultRule. Notice how you reference the AssignMessage policy by name in the FaultRule:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ProxyEndpoint name="default">
+  ...
+  <FaultRules>
+    <FaultRule name="invalid_key_rule">
+      <Step>
+        <Name>AM-Invalid-Key</Name>
+      </Step>
+      <Condition>fault.name = "InvalidApiKey"</Condition>
+    </FaultRule>
+  </FaultRules>
+</ProxyEndpoint>
+```
+
+When you deploy the configuration above, the API proxy will execute the AssignMessage policy called `AM-Invalid-Key` whenever an app presents an invalid API key.
+
+You can execute multiple policies in a FaultRule, as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ProxyEndpoint name="default">
+  ...
+  <FaultRules>
+    <FaultRule name="invalid_key_rule">
+      <Step>
+        <Name>AM-Invalid-Key</Name>
+      </Step>
+      <Step>
+        <Name>policy2</Name>
+      </Step>
+      <Step>
+        <Name>policy3</Name>
+      </Step>
+      <Condition>fault.name = "InvalidApiKey"</Condition>
+    </FaultRule>
+  </FaultRules>
+</ProxyEndpoint>
+```
+
+The policies execute in the order defined. For example, you can use the [MessageLogging policy](/apigee/docs/api-platform/reference/policies/message-logging-policy), the [ExtractVariables policy](/apigee/docs/api-platform/reference/policies/extract-variables-policy), the [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy), or any other policy in the FaultRule. Note that processing of the FaultRule stops immediately if either of these situations occur:
+
+- Any policy in the FaultRule causes an error
+- Any of the policies in the FaultRule is of type RaiseFault
+
+### Defining the custom error message returned from a FaultRule
+
+As a best practice, you should define clear error responses from your APIs. In that way, you deliver consistent and helpful information to your clients.
+
+The following [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) example uses the `<Payload>` and `<StatusCode>` tags to define the custom error response sent back to the client on an InvalidApiKey error (see previous FaultRules example).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-Invalid-Key">
+  <Set>
+    <Payload contentType="text/plain">You have attempted to access a resource without the correct authorization.
+       Contact support at support@mycompany.com.</Payload>
+    <StatusCode>401</StatusCode>
+  </Set>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</AssignMessage>
+```
+
+This response includes:
+
+- The payload containing the error message and an email address for contacting support.
+- The HTTP status code returned in the response.
+
+### Creating a DefaultFaultRule
+
+A DefaultFaultRule acts as an exception handler for any error that is not explicitly handled by another FaultRule. If the conditions for all FaultRules do not match the error, then the DefaultFaultRule handles the error. Enable default fault handling by adding the `<DefaultFaultRule>` tag as a child element of a ProxyEndpoint or a TargetEndpoint.
+
+For example, the TargetEndpoint configuration below defines a DefaultFaultRule that invokes a policy named `AM-Return-Generic-Error`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<TargetEndpoint name="default">
+  ...
+  <FaultRules>
+    ...
+  </FaultRules>
+
+  <DefaultFaultRule name="fault-rule">
+    <Step>
+      <Name>AM-Return-Generic-Error</Name>
+    </Step>
+  </DefaultFaultRule>
+
+  <HTTPTargetConnection>
+    <URL>https://mytarget.example.net</URL>
+  </HTTPTargetConnection>
+</TargetEndpoint>
+```
+
+The DefaultFaultRule is typically used to return a generic error message for any unexpected error, such as a message that contains contact information for technical support. This default response serves the dual purpose of providing developer-friendly information while also obfuscating backend URLs or other information that might be used to compromise the system.
+
+For example, you define the following AssignMessage policy to return a generic error:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-Return-Generic-Error">
+  <Set>
+    <Payload type="text/plain">SERVICE UNAVAILABLE. PLEASE CONTACT SUPPORT: support@company.com.</Payload>
+  </Set>
+</AssignMessage>
+```
+
+Include the `<AlwaysEnforce>` element in the `<DefaultFaultRule>` tag to execute the DefaultFaultRule for every error, even if another FaultRule has already been executed. The DefaultFaultRule is always the last FaultRule to execute:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  <DefaultFaultRule name="fault-rule">
+    <Step>
+      <Name>AM-Return-Generic-Error</Name>
+    </Step>
+    <AlwaysEnforce>true</AlwaysEnforce>
+  </DefaultFaultRule>
+```
+
+One use of the DefaultFaultRule is to determine the type of error that occurs when you otherwise cannot determine it. For example, if your API proxy is failing due to an error that you cannot determine, you can use the DefaultFaultRule to invoke the following AssignMessage policy. This policy writes the `fault.name` value to a header named `Unhandled-Fault` in the response:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage name="AM-Set-Fault-Header">
+  <Set>
+    <Headers>
+      <Header name="Unhandled-Fault">{fault.name}</Header>
+    </Headers>
+  </Set>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</AssignMessage>
+```
+
+You can then view the header in the [Debug tool](/apigee/docs/api-platform/debug/trace-overview) or on the response to see what caused the error.
+
+### Adding message logging to the PostClientFlow
+
+The [PostClientFlow](/apigee/docs/api-platform/fundamentals/what-are-flows) is the only flow that executes after the proxy enters the error state. Only the [MessageLogging policy](/apigee/docs/api-platform/reference/policies/message-logging-policy) can be attached to this flow, which is executed after the response is sent back to the client. Although attaching the [MessageLogging policy](/apigee/docs/api-platform/reference/policies/message-logging-policy) to this flow is technically not error handling, you can use it to log information in the event of an error. Because it is executed regardless of whether the proxy succeeded or failed, you can put Message Logging policies in the PostClientFlow and be guaranteed that they always execute.
+
+## Handling policy faults within the current flow
+
+The examples shown so far all use a FaultRule on the ProxyEndpoint or TargetEndpoint to handle any policy errors as part of the error state. That is because the default value of the `continueOnError` element of a policy is `false`, meaning that when an error occurs in a policy, control is directed to the error state. Once in the error state, you cannot return control back to the normal pipeline and you typically return some form of error message to the calling app.
+
+However, if you set the `continueOnError` element to `true` for a policy, control stays in the current flow and the next policy in the pipeline executes after the policy that caused the error. The advantage to handling the error in the current flow is that you might have a way to recover from the error to complete processing of the request.
+
+Shown below is a [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy) named `verify-api-key` with the `continueOnError` element set to `true:`
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyAPIKey continueOnError="true" name="verify-api-key">
+  <DisplayName>Verify API Key</DisplayName>
+  <APIKey ref="request.queryparam.apikey"/>
+</VerifyAPIKey>
+```
+
+If the API key is missing or invalid, then the [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy) sets the `oauthV2.verify-api-key.failed` variable to `true`, but processing continues in the current flow.
+
+You then add VerifyAPIKey policy as a step in the PreFlow of the ProxyEndpoint:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ProxyEndpoint name="default">
+  ...
+  <PreFlow name="PreFlow">
+    <Request>
+      <Step>
+        <Name>verify-api-key</Name>
+      </Step>
+      <Step>
+        <Name>FaultInFlow</Name>
+        <Condition>oauthV2.verify-api-key.failed = "true"</Condition>
+      </Step>
+    </Request>
+    <Response/>
+  </PreFlow>
+</ProxyEndpoint>
+```
+
+Notice how the next step in the PreFlow uses a condition to test for the existence of an error. If an error occurred in the VerifyAPIKey policy, then the policy named `FaultInFlow` policy executes. Otherwise, the `FaultInFlow` policy is skipped. The `FaultInFlow` policy can do many things, such as logging the error, attempting to fix the error, or performing some other action.
+
+## Triggering an error by using the RaiseFault policy
+
+You can use the [RaiseFault policy](/apigee/docs/api-platform/reference/policies/raise-fault-policy) at any time in a flow to trigger an error. When a RaiseFault policy executes, it terminates the current flow and transfers control to the error state.
+
+One use of the RaiseFault policy is to test for a specific condition that another policy might not detect. In the example above, you added a `<Condition>` tag to a PreFlow `<Step>` tag that caused the policy `FaultInFlow` to execute if the condition is met. If `FaultInFlow` is a RaiseFault policy, then control transfers to the error state. Or, you might insert a RaiseFault policy in a flow to debug and test your FaultRules.
+
+When a RaiseFault policy triggers an error, you can use the following FaultRule and condition to process it:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name="raisefault_rule">
+  <Step>
+    <Name>POLICY-NAME-HERE</Name>
+  </Step>
+  <Condition>fault.name = "RaiseFault"</Condition>
+</FaultRule>
+```
+
+Note that the condition tests for a fault named `RaiseFault`. The RaiseFault policy always sets the value of `fault.name` to `RaiseFault`. You can also set custom variables within a RaiseFault policy. If you do that, then you can test those variables within the Condition elements.
+
+## Custom handling of HTTP error codes from the target server
+
+The examples shown in the previous sections apply to errors created by policies. However you can also create a custom response for transport-level errors, meaning HTTP errors returned from the target server. To control the response from an HTTP error, configure a TargetEndpoint to process HTTP response codes.
+
+By default, Apigee treats HTTP response codes in the `1xx-3xx` range as *success*, and HTTP response codes in the range `4xx-5xx` as *failure*. That means any response from the backend service with an HTTP response code `4xx-5xx` automatically invokes the error state, which then returns an error message directly to the requesting client.
+
+You can create custom handlers for any HTTP response codes. For example, you might not want to treat all HTTP response codes in the range `4xx-5xx` as "failure" but only `5xx`, or you might want to return custom error messages for HTTP response codes `400` and `500`.
+
+In the next example, you use the `success.codes` property to configure the TargetEndpoint to treat HTTP response codes `400` and `500` as a success, along with the default HTTP codes. By treating those codes as a success, the TargetEndpoint takes over the processing of the response message, instead of invoking the error state:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<TargetEndpoint name="default">
+  ...
+  <HTTPTargetConnection>
+    <Properties>
+          <Property name="success.codes">1xx,2xx,3xx,400,500</Property>
+    </Properties>
+    <URL>http://weather.yahooapis.com</URL>
+  </HTTPTargetConnection>
+</TargetEndpoint>
+```
+
+As you can see in this example, you can use wildcards to set the <span style="font-family:courier new,courier,monospace;">success.codes</span> property to a range of values..
+
+Setting the `success.codes` property overwrites the default values. Therefore, if you want to add HTTP code `400` to the list of default success codes, set this property as:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Property name="success.codes">1xx,2xx,3xx,400</Property>
+```
+
+But, if you only want HTTP code `400` to be treated as a success code, set the property as:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Property name="success.codes">400</Property>
+```
+
+You can now define custom handlers for HTTP response codes `400` and `500` to return a customized response message to the requesting app. The following TargetEndpoint uses the policy named `ReturnError` to handle HTTP `400` and `500` response codes:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<TargetEndpoint name="default">
+  <PreFlow name="PreFlow">
+    <Request/>
+    <Response>
+      <Step>
+        <Name>ReturnError</Name>
+        <Condition>(response.status.code = 400) or (response.status.code = 500)</Condition>
+      </Step>
+    </Response>
+  </PreFlow>
+
+  <HTTPTargetConnection>
+    <Properties>
+      <Property name="success.codes">1xx,2xx,3xx,400,500</Property>
+    </Properties>
+    <URL>http://weather.yahooapis.com</URL>
+  </HTTPTargetConnection>
+</TargetEndpoint>
+```
+
+This TargetEndpoint configuration causes the policy called `ReturnError` to handle the response whenever the TargetEndpoint encounters an HTTP response code of `400` OR `500`.
+
+## <span id="tax"></span>Fault taxonomy
+
+API Services organizes faults into the following categories and subcategories.
+
+| Category | Subcategory | Fault Name | Description |
+| --- | --- | --- | --- |
+| Messaging | Failures that occur during the message flow (not including policy failures) |  |  |
+|  | Custom faults | {fault_name} | Any faults explicitly handled by the API proxy using the RaiseFault policy |
+| Response codes | InternalServerError, NotFound | HTTP error codes 5xx , 4xx |  |
+| Routing failures | NoRoutesMatched | Failure in selecting a named TargetEndpoint for a request |  |
+| Classification failures | NotFound | Failures caused by a request URI that does not match any BasePath for any ProxyEndpoint configurations (that is, no API proxies match the URL in the client app's request) |  |
+| Transport | HTTP transport-level errors |  |  |
+|  | Connectivity | ConnectionRefused, ConnectionReset, ConnectionTimeout | Failures occur while establishing network or transport-level connections |
+| Request validations | ContentLengthMissing, HostHeaderMissing | Faults occur during semantics checks on every request |  |
+| Response validations | Faults occur during semantics checks on every response |  |  |
+| IO errors | SSLHandshakeError, ReadTimeout, ReadError, WriteTimeout, WriteError, ChunkError | Read/write errors at client or target endpoints, timeouts, TLS/SSL errors, and chunked errors |  |
+| System | Undefined runtime errors |  |  |
+|  | Memory | OutOfMemory, GCOverLimit | Memory-related failures |
+| Thread | RogueTaskTerminated | Failures such as termination of run-away tasks |  |
+| Policy | Faults for each policy type are defined in the Policy reference . |  |  |
+
+An error is always accompanied by a text description of the reason for the failure. When the system raises a fault, a set of attributes are populated to assist in troubleshooting. A fault includes the following information:
+
+- Reason
+- User-defined custom attributes

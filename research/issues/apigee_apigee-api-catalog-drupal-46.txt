@@ -1,0 +1,34 @@
+URL: https://github.com/apigee/apigee-api-catalog-drupal/issues/46
+TITLE: Refer workaround to users impacted by Apigee OAuth policy returning incorrect OAuth2.0 token_type
+STATE: open state_reason: None
+AUTHOR: arunz6161 association: NONE
+CREATED: 2019-10-01T22:52:17Z CLOSED: None
+LABELS: enhancement, SmartDocs
+MILESTONE: None
+--- BODY ---
+**Is your feature request related to a problem? Please describe.**
+As described on the following community [post](https://community.apigee.com/questions/46681/edge-generating-the-wrong-oauth20-token-type.html?childToView=65470#comment-65470), Apigee OAuth 2.0 Policy returns a non compliant token type causing downstream applications like SmartDocs and Swagger UI to  send "Authorization" header prefixed with BearerToken.
+
+**Describe the solution you'd like**
+Once doc bug 141752334 is fixed- we should redirect users to the same as a potential solution when they run in to problem described in the community post above.
+
+**Describe alternatives you've considered**
+None.
+
+**Additional context**
+None
+
+
+--- COMMENTS (4) ---
+
+### comment by cnovak (association=COLLABORATOR) at 2019-11-06T16:11:17Z
+The documentation about this issue is now explained on the [Edge OAuthV2 Policy page, Non-RFC-compliant behavior section](https://docs.apigee.com/api-platform/reference/policies/oauthv2-policy#non-rfc-compliant-behavior).
+
+### comment by cnovak (association=COLLABORATOR) at 2020-03-02T23:00:41Z
+This feature will be in the next release of SmartDocs Drupal Angular application. (b/150637717
+
+### comment by cnovak (association=COLLABORATOR) at 2020-04-23T17:02:46Z
+Here is an [example of a RFC compliant Apigee OAuth proxy](https://github.com/kurtkanaskie/oauth-compliant) for anyone looking for a solution.
+
+### comment by cnovak (association=COLLABORATOR) at 2020-12-08T19:02:44Z
+ doc bug b/141752334 is now fixed.

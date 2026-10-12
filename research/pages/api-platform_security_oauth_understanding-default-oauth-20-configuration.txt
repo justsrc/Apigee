@@ -1,0 +1,99 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The client credentials grant type defines a procedure for issuing access tokens in exchange for **app credentials**. These app credentials are the consumer key and secret pair that Apigee issues for each app that is registered in an organization. For more details, see [Implementing the authorization code grant type](/apigee/docs/api-platform/security/oauth/oauth-v2-policy-authorization-code-grant-type).
+
+## Add OAuth v2.0 to a new API proxy
+
+You can add OAuth verification to an API when you create a new API proxy in the Apigee UI.
+
+To add OAuth verification to an API:
+
+In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Proxy development <span aria-label="and then">\></span> API proxies** page.
+
+<a href="https://console.cloud.google.com/apigee/proxies" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to API proxies</a>
+
+Select your organization from the project picker in the Google Cloud pane. The organization name is the same as your Google Cloud project name.
+
+In the **API Proxies** pane, click **+ Create**.
+
+In the **Create a proxy** pane, under **Proxy template**, select **Reverse proxy (most common)**.
+
+Configure the proxy with the following:  
+
+| Name | Value |
+| --- | --- |
+| Proxy Name | helloworld_oauth2 |
+| Base Path | /hellooauth2 The Project Base Path is part of the URL used to make requests to the API proxy. |
+| Description | hello world protected by OAuth v2.0 |
+| Target (Existing API) | https://mocktarget.apigee.net/ip This defines the target URL that Apigee invokes on a request to the API proxy. This target just returns a simple response: Hello, Guest! . |
+
+Click **Next**.
+
+**Deploy (optional)**:
+
+- **Deployment environments**: Optional. Use the checkboxes to select one or more environments in which to deploy your proxy. If you prefer not to deploy the proxy at this point, leave the **Deployment environments** field empty. You can always deploy the proxy later.
+- **Service Account**: Optional. Attach a service account to your deployment to enable your proxy to access Google Cloud services, as specified in the service account's role and permissions.
+
+Click **Create**.
+
+In the **Proxy summary** pane for the **helloworld_apikey** proxy, click the **Develop** tab.
+
+In the **Policies** menu, click <span class="material-icons" aria-hidden="true" translate="no">control_point</span> **Add policy**.
+
+In the **Create policy** pane, under **Security**, select **Verify API Key**.
+
+In the **Verify API Key** pane, complete the required fields in the **Name** and **Display name** sections using the following values:
+
+- **Name**: Enter a policy name. For example, `VerifyAPIKey`.
+- **Display name**: Enter policy name for use in the UI. For example, `Verify API Key`.
+
+Click **Create**.
+
+Click <span class="material-icons" aria-hidden="true" translate="no">control_point</span> to add another policy.
+
+In the **Create policy** pane, under **Mediation**, select **Assign Message**.
+
+In the **Assign Message** pane, complete the required fields in the **Name** and **Display name** sections using the following values:
+
+- **Name**: Enter a policy name. For example, `AssignMessage`.
+- **Display name**: Enter policy name for use in the UI. For example, `Assign Message`.
+
+Click **Create**.
+
+Update the contents of the **Assign Message** policy to the following:
+
+**Note:** The policy name will change to `Remove Header Authorization` once you make this edit.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<AssignMessage async="false" continueOnError="false" enabled="true" name="remove-header-authorization">
+    <DisplayName>Remove Header Authorization</DisplayName>
+    <Remove>
+        <Headers>
+            <Header name="Authorization"/>
+        </Headers>
+    </Remove>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+    <AssignTo createNew="false" transport="http" type="request"/>
+</AssignMessage>
+```
+
+Add the `VerifyApiKey` and `Remove Header Authorization` policies.
+
+1.  In the **Proxy endpoints** menu, click **Preflow**.
+2.  In the **Request** pane of the visual editor, click <span class="material-icons" aria-hidden="true" translate="no">control_point</span> **Add policy step**.
+3.  In the **Add policy step pane**, select **Verify API Key**.
+4.  Click **Add**.
+5.  In the **Request** pane of the visual editor, click <span class="material-icons" aria-hidden="true" translate="no">control_point</span> **Add policy step**.
+6.  In the **Add policy step pane**, select **Remove Header Authorization**.
+7.  Click **Add**.
+
+Click **Save**.

@@ -1,0 +1,18 @@
+URL: https://github.com/apigee/api-platform-samples/issues/66
+TITLE: Error when deploying postman-oauth
+STATE: open state_reason: None
+AUTHOR: tjgragg association: NONE
+CREATED: 2016-03-28T19:06:40Z CLOSED: None
+LABELS: 
+MILESTONE: None
+--- BODY ---
+}Writing images/postman-oauth.png to ./postman-oauth.png
+Import failed to /v1/organizations/**{org_name}**/apis?action=import&name=images with status 400:
+{
+  "code" : "messaging.config.beans.InvalidBundle",
+  "message" : "Bundle is invalid. Unable to read/find APIProxy contents",
+  "contexts" : [ ]
+}
+
+
+--- COMMENTS (0) ---

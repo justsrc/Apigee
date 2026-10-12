@@ -1,0 +1,491 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/troubleshoot/troubleshooting-introduction" target="_blank">Apigee Edge</a> documentation.*</span>
+
+The act of troubleshooting is both an art and a science. The constant effort of Apigee technical support teams has been to demystify the art and expose the science behind problem identification and resolution.
+
+## What are playbooks?
+
+Developed in collaboration with ApigeeTechnical Support teams, Apigee troubleshooting **playbooks** are designed to provide quick and effective solutions to errors or other issues that you may encounter when working with Apigee products.
+
+## Audience
+
+Troubleshooting playbooks are intended for readers with a high-level understanding of Apigee and its architecture, as well as some understanding of basic concepts such as policies and analytics.
+
+Some problems can be diagnosed and solved only by Apigee hybrid users and may require knowledge of internal components such as Cassandra datastores, Message Processors, and Synchronizers.
+
+If you are on Apigee, then we clearly specify when you can perform the indicated troubleshooting steps and when you need to contact <a href="https://cloud.google.com/support-hub/" class="external">Google Cloud Customer Care</a> for assistance.
+
+## Playbooks
+
+This section describes the current playbooks.
+
+To filter this table, do one or more of the following: select a category, select a product, type a search term, or click a column heading to sort.
+
+Select category Apigee hybrid installation and upgrade Automated issue surfacing Cassandra Deployment Ingressgateway Logging Management/UI Network configuration Runtime Other Select product Apigee and Apigee hybrid Apigee hybrid only
+
+<div>
+
+Category
+
+</div>
+
+Playbook/Problem description
+
+Error message
+
+Playbook applicable for
+
+Cassandra
+
+[Cassandra TLS certificate verification failure](/apigee/docs/api-platform/troubleshoot/playbooks/cassandra/cassandra-tls-certificate-verification-failure)
+
+If the Apigee CA certificate does not match across clusters, then TLS certificate verification in Cassandra could fail.
+
+Apigee hybrid only
+
+Cassandra
+
+[Troubleshooting Cassandra restore](/apigee/docs/api-platform/troubleshoot/playbooks/cassandra/ts-cassandra-restore)
+
+During the Cassandra restoration in Apigee hybrid, you may encounter errors in the restore logs.
+
+Apigee hybrid only
+
+Automated issue surfacing
+
+[No network connectivity between runtime plane and control plane](/apigee/docs/api-platform/troubleshoot/playbooks/no-network-connectivity)
+
+Apigee API management requests fail:
+
+- API products, Developers, Apps do not get populated on the Apigee UI.
+- API proxy deployments do not complete.
+- Apigee API management requests fail.
+
+Apigee hybrid only
+
+Automated issue surfacing
+
+[Virtual host missing environment group](/apigee/docs/api-platform/troubleshoot/playbooks/vh-missing-env-group)
+
+After running `kubectl -n apigee get apigeeissues`, the AIS_VIRTUALHOST_MISSING_ENVGROUP error is displayed.
+
+Apigee hybrid only
+
+Automated issue surfacing
+
+[Virtual host missing selector](/apigee/docs/api-platform/troubleshoot/playbooks/vh-missing-selector)
+
+After running `kubectl -n apigee get apigeeissues`, the AIS_VIRTUALHOST_MISSING_SELECTOR error is displayed.
+
+Apigee hybrid only
+
+Automated issue surfacing
+
+[Ingress cert mismatch](/apigee/docs/api-platform/troubleshoot/playbooks/ingress-cert-mismatch)
+
+After running `kubectl -n apigee get apigeeissues`, the AIS_INGRESS_CERT_MISMATCH error is displayed.
+
+Apigee hybrid only
+
+Automated issue surfacing
+
+[Ingress cert expiry](/apigee/docs/api-platform/troubleshoot/playbooks/ingress-cert-expiry)
+
+After running `kubectl -n apigee get apigeeissues`, the AIS_INGRESS_CERT_EXPIREY error is displayed.
+
+Apigee hybrid only
+
+Automated issue surfacing
+
+[Ingress mTLS CA cert expiry](/apigee/docs/api-platform/troubleshoot/playbooks/ca-cert-expiry)
+
+After running `kubectl -n apigee get apigeeissues`, the AIS_INGRESS_MTLS_CA_CERT_EXPIREY error is displayed.
+
+Apigee hybrid only
+
+Automated issue surfacing
+
+[Ingress mTLS CA cert invalid](/apigee/docs/api-platform/troubleshoot/playbooks/ca-cert-invalid)
+
+After running `kubectl -n apigee get apigeeissues`, the AIS_INGRESS_MTLS_CA_CERT_INVALID error is displayed.
+
+Apigee hybrid only
+
+Cassandra
+
+[Cassandra data replication failure](/apigee/docs/api-platform/troubleshoot/playbooks/cassandra/cassandra-data-replication-failure)
+
+When replicating data during a multi-region expansion, the `CassandraDataReplication` status may show an error state and data replication may fail.
+
+Apigee hybrid only
+
+Cassandra
+
+[Cassandra Java heap space issues](/apigee/docs/api-platform/troubleshoot/playbooks/cassandra/cassandra-java-heap-space-issues)
+
+Cassandra heap issues may cause slowness in the Apigee hybrid proxy execution or even `Datastore` errors. Sometimes logs are an early indicator, even before the onset of symptoms.
+
+Apigee hybrid only
+
+Cassandra
+
+[Cassandra pods not starting in the secondary region](/apigee/docs/api-platform/troubleshoot/playbooks/cassandra/cassandra-pods-not-starting-secondary-region)
+
+Cassandra pods fail to start in one of the regions in a multi-region Hybrid setup. You may see a `node already exists` error message in the Cassandra pod logs, or a `FailedPreStopHook` warning in the Cassandra pod status.
+
+Apigee hybrid only
+
+Cassandra
+
+[Cassandra troubleshooting guide](/apigee/docs/api-platform/troubleshoot/playbooks/cassandra/ts-cassandra)
+
+When you use `kubectl` to view the pod states, you see that one or more Cassandra pods are stuck. This guide describes the diagnosis and resolution for problems with the Cassandra datastore.
+
+Apigee hybrid only
+
+Deployment
+
+[API proxy deployments fail with no active runtime pods warning](/apigee/docs/api-platform/troubleshoot/playbooks/deployment/no-active-runtime-pods-warning)
+
+The **No active runtime pods** warning is displayed in the **Details** dialog next to the error message **Deployment issues on `ENVIRONMENT`: `REVISION_NUMBER`** on the API proxy page.
+
+Apigee hybrid only
+
+Ingressgateway
+
+[API calls fail with timeout errors](/apigee/docs/api-platform/troubleshoot/playbooks/ingressgateway/api-calls-fail-timeout-errors)
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+curl: (7) Failed to connect to example.apis.com port 443: Operation timed out
+```
+
+**Note:** Sample error message as observed with `curl` command.
+
+Apigee hybrid only
+
+Ingressgateway
+
+[API Calls failing with TLS errors](/apigee/docs/api-platform/troubleshoot/playbooks/ingressgateway/api-calls-failing-tls-errors)
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+curl: (35) LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to example.apis.com:443
+```
+
+**Note:** Sample error message as observed with `curl` command.
+
+Apigee hybrid only
+
+Logging
+
+[Troubleshooting Apigee logs missing from Cloud Logging](/apigee/docs/api-platform/troubleshoot/playbooks/cloud-logging-issues)
+
+No error messages are known to be shown in this scenario.
+
+Apigee and Apigee hybrid
+
+Management/UI
+
+[Inconsistent/no data observed for entities in hybrid UI or through Management APIs](/apigee/docs/api-platform/troubleshoot/playbooks/management-ui/inconsistent-data-hybrid-ui-mgmt-api)
+
+No error messages are known to be shown in this scenario.
+
+Apigee hybrid only
+
+Network configuration
+
+[Access routing issues with Apigee](/apigee/docs/api-platform/troubleshoot/playbooks/network-configuration/access-routing-issues)
+
+External clients are not able to access/connect to Apigee in a desired manner. These include either network connectivity failures (TLS handshake fails) or `4xx/5xx` responses from Apigee.
+
+Apigee and Apigee hybrid
+
+Network configuration
+
+[Apigee connectivity issue with northbound Private Service Connect](/apigee/docs/api-platform/troubleshoot/playbooks/network-configuration/psc)
+
+The northbound Private Service Connect setup is not working as expected, and the network endpoint group status remains in `Pending`.
+
+Apigee only
+
+Network configuration
+
+[Apigee connectivity issues with southbound Private Service Connect targets](/apigee/docs/api-platform/troubleshoot/playbooks/network-configuration/connectivity-with-sb-psc-targets)
+
+A network connection issue or a TCP timeout between Apigee and the target service would show up as a `503` error response and would show an error similar to below if you create a debug session.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{"fault":{"faultstring":"The Service is temporarily unavailable","detail":{"errorcode":"messaging.adaptors.http.flow.ServiceUnavailable","reason":"TARGET_CONNECT_TIMEOUT"}}}
+```
+
+Apigee and Apigee hybrid
+
+Other
+
+[Expanding Istio property replica counts when draining nodes](/apigee/docs/api-platform/troubleshoot/playbooks/expand-replica-count-to-drain-istio)
+
+When draining Istio pods some nodes may not drain because they have a replica count of 1, while 3 or more replicas are required. In order to avoid this, you should set the minimum replica count for each property to at least 3.
+
+Apigee hybrid only
+
+Other
+
+[Message processor troubleshooting guide](/apigee/docs/api-platform/troubleshoot/playbooks/ts-message-processor)
+
+One or more apigee-runtime pods are not in the `Ready` state. When you use `kubectl` to describe a failed `apigee-runtime` pod, you see the error:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+Readiness probe failed: HTTP probe failed with statuscode: 500
+```
+
+Apigee hybrid only
+
+Other
+
+[Print build info](/apigee/docs/api-platform/troubleshoot/playbooks/ts-buildinfo)
+
+The `buildinfo` API returns information about the current build for a runtime component. This information may be useful if you need to contact support.
+
+Apigee hybrid only
+
+Other
+
+[StreamingPull errors 100%](/apigee/docs/api-platform/troubleshoot/playbooks/streaming-pull-error)
+
+If you see in your metrics dashboard that the method `google.pubsub.vl.Subscriber.StreamingPull` is failing with 100% errors, you can safely ignore the issue. This is expected behavior.
+
+Apigee hybrid only
+
+Deployment
+
+[Instance is not reporting status for environment group](/apigee/docs/api-platform/troubleshoot/playbooks/deployment/apigee-instance-not-reporting-status)
+
+Deployments of API proxies fail with Instance `INSTANCE_NAME` is not reporting status for environment group `ENV_GROUP_NAME` error in the Apigee hybrid UI.
+
+Apigee hybrid only
+
+Deployment
+
+[API proxy deployments fail with apigee-serving-cert is not found or expired](/apigee/docs/api-platform/troubleshoot/playbooks/deployment/apigee-serving-cert-not-found-or-expired)
+
+API proxy deployments fail with error messages in the `apigee-watcher` logs.
+
+Apigee hybrid only
+
+Ingressgateway
+
+[Expand Istio property replica counts to avoid problems when draining Istio nodes](/apigee/docs/api-platform/troubleshoot/playbooks/expand-replica-count-to-drain-istio)
+
+When draining Istio pods some nodes may not drain because they have a replica count of `1`, while `3` or more replicas are required. In order to avoid this, you should set the minimum replica count for each property to at least `3`.
+
+Apigee hybrid only
+
+Network configuration
+
+[No free IP address space troubleshooting](/apigee/docs/api-platform/troubleshoot/playbooks/network-configuration/no-free-ip-address-space)
+
+During Apigee provisioning, if you select a network CIDR range that is not completely free, you may see an error message.
+
+Apigee and Apigee hybrid
+
+Network configuration
+
+[503 Service Unavailable error with TARGET_CONNECT_TIMEOUT (Internet and VPC peering targets)](/apigee/docs/api-platform/troubleshoot/playbooks/runtime/vpc-503-target-connect-timeout)
+
+This document describes how to diagnose and correct "503 Service Unavailable" errors with TARGET_CONNECT_TIMEOUT when using internet or VPC peering targets.
+
+Apigee
+
+Network configuration
+
+[504 Gateway timeout - Target read timeout](/apigee/docs/api-platform/troubleshoot/playbooks/runtime/504-target-read-timeout)
+
+This document describes how to diagnose and correct "504 Gateway Timeout" errors with a TARGET_READ_TIMEOUT reason.
+
+Apigee and Apigee hybrid
+
+Runtime
+
+[API requests fail with TARGET CONNECT HOST NOT REACHABLE error](/apigee/docs/api-platform/troubleshoot/playbooks/runtime/target-connect-host-not-reachable)
+
+This document describes how to diagnose and resolve HTTP 503 response status code errors with a "TARGET_CONNECT_HOST_NOT_REACHABLE" reason.
+
+Apigee and Apigee hybrid
+
+Runtime
+
+[API requests fail with 502 Bad Gateway "Unexpected EOF at target" error](/apigee/docs/api-platform/troubleshoot/playbooks/runtime/unexpected-eof-at-target)
+
+This playbook describes how to diagnose and resolve 502 Bad Gateway Unexpected EOF errors.
+
+Apigee and Apigee hybrid
+
+Other
+
+[Troubleshooting Apigee hybrid stuck in creating or releasing state](/apigee/docs/api-platform/troubleshoot/playbooks/troubleshooting-apigee-hybrid)
+
+This document describes how to reset Apigee hybrid components when they are stuck in a `creating` or `releasing` state.
+
+Apigee hybrid only
+
+Apigee hybrid installation and upgrade
+
+[Cassandra Pods in CrashLoopBackOff Status](/apigee/docs/api-platform/troubleshoot/playbooks/hybrid/cassandra-pod-in-crashloopbackoff-status)
+
+Cassandra pods are stuck in a CrashLoopBackOff state after installation or upgrade.
+
+Apigee hybrid only
+
+Apigee hybrid installation and upgrade
+
+[Apigee Metrics pods in CrashLoopBackOff status](/apigee/docs/api-platform/troubleshoot/playbooks/hybrid/apigee-metrics-pods-in-crashloopbackoff)
+
+Apigee Metrics pods remain in a CrashLoopBackOff state after installation or upgrade.
+
+Apigee hybrid only
+
+Apigee hybrid installation and upgrade
+
+[Apigee ingress gateway pods show 1 of 2 containers running](/apigee/docs/api-platform/troubleshoot/playbooks/hybrid/apigee-ingressgateway)
+
+Your `apigee-ingressgateway` pods show only 1 of 2 containers running when you get the pod listing.
+
+Apigee hybrid only
+
+Apigee hybrid installation and upgrade
+
+[UDCA pod error](/apigee/docs/api-platform/troubleshoot/playbooks/hybrid/universal-data-collection-agent-pod-error)
+
+UDCA and Connect Agent pods throw a permission issue error.
+
+Apigee hybrid only
+
+Apigee hybrid installation and upgrade
+
+[Connection resets during TLS handshake for non-SNI clients](/apigee/docs/api-platform/troubleshoot/playbooks/hybrid/connection-resets-during-tls-handshake)
+
+Connection resets are observed during TLS handshake for non-SNI clients.
+
+Apigee hybrid only
+
+Apigee hybrid installation and upgrade
+
+[Insufficient Disk Space in Cassandra](/apigee/docs/api-platform/troubleshoot/playbooks/hybrid/insufficient-disk-space-cassandra)
+
+The Apigee hybrid installation process fails due to insufficient disk space for the Cassandra database.
+
+Apigee hybrid only
+
+Apigee hybrid installation and upgrade
+
+[Insufficient CPU](/apigee/docs/api-platform/troubleshoot/playbooks/hybrid/insufficient-cpu)
+
+When you use `kubectl` to view the pod states, you will see one or more pods in the **CrashLoopBackoff** or **FailedScheduling** state.
+
+Apigee hybrid only
+
+<div>
+
+</div>
+
+Send feedback
+
+<div class="devsite-floating-action-buttons">
+
+</div>
+
+Except as otherwise noted, the content of this page is licensed under the [Creative Commons Attribution 4.0 License](https://creativecommons.org/licenses/by/4.0/), and code samples are licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0). For details, see the [Google Developers Site Policies](https://developers.google.com/site-policies). Java is a registered trademark of Oracle and/or its affiliates.
+
+Last updated 2026-10-09 UTC.
+
+<div class="devsite-content-data">
+
+Need to tell us more?
+
+\[\[\["Easy to understand","easyToUnderstand","thumb-up"\],\["Solved my problem","solvedMyProblem","thumb-up"\],\["Other","otherUp","thumb-up"\]\],\[\["Hard to understand","hardToUnderstand","thumb-down"\],\["Incorrect information or sample code","incorrectInformationOrSampleCode","thumb-down"\],\["Missing the information/samples I need","missingTheInformationSamplesINeed","thumb-down"\],\["Other","otherDown","thumb-down"\]\],\["Last updated 2026-10-09 UTC."\],\[\],\[\]\]
+
+</div>
+
+- ### Products and pricing
+
+  - <a href="//cloud.google.com/products/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 1)" data-track-type="footer link" data-track-metadata-child_headline="products and pricing" data-track-metadata-position="footer" data-track-name="see all products" data-track-metadata-module="footer" data-track-metadata-eventdetail="cloud.google.com/products/">See all products</a>
+  - <a href="//cloud.google.com/pricing/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 2)" data-track-metadata-module="footer" data-track-name="google cloud pricing" data-track-metadata-child_headline="products and pricing" data-track-metadata-eventdetail="cloud.google.com/pricing/" data-track-metadata-position="footer" data-track-type="footer link">Google Cloud pricing</a>
+  - <a href="//cloud.google.com/marketplace/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 3)" data-track-name="google cloud marketplace" data-track-metadata-child_headline="resources" data-track-metadata-module="footer" data-track-type="footer link" data-track-metadata-eventdetail="cloud.google.com/marketplace/" data-track-metadata-position="footer">Google Cloud Marketplace</a>
+  - <a href="//cloud.google.com/contact/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 4)" data-track-metadata-module="footer" data-track-name="contact sales" data-track-metadata-position="footer" data-track-metadata-child_headline="engage" data-track-type="footer link" data-track-metadata-eventdetail="cloud.google.com/contact/">Contact sales</a>
+
+- ### Support
+
+  - <a href="//discuss.google.dev/c/google-cloud/14/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 1)" data-track-name="google cloud community" rel="noopener" target="_blank" data-track-metadata-module="footer" data-track-metadata-eventdetail="www.googlecloudcommunity.com" data-track-metadata-child_headline="engage" data-track-type="footer link" data-track-metadata-position="footer">Community forums</a>
+  - <a href="//cloud.google.com/support-hub/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 2)" data-track-type="footer link" data-track-metadata-eventdetail="cloud.google.com/support-hub/" data-track-name="support" data-track-metadata-module="footer" data-track-metadata-position="footer" data-track-metadata-child_headline="resources">Support</a>
+  - <a href="//docs.cloud.google.com/release-notes" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 3)" data-track-metadata-module="footer" data-track-type="footer link" data-track-metadata-eventdetail="cloud.google.com/release-notes/" data-track-metadata-position="footer" data-track-metadata-child_headline="resources" data-track-name="release notes">Release Notes</a>
+  - <a href="//status.cloud.google.com" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 4)" data-track-metadata-position="footer" data-track-metadata-eventdetail="status.cloud.google.com" data-track-type="footer link" data-track-metadata-child_headline="resources" data-track-metadata-module="footer" target="_blank" data-track-name="system status">System status</a>
+
+- ### Resources
+
+  - <a href="//github.com/googlecloudPlatform/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 1)" data-track-metadata-child_headline="resources" data-track-name="github" data-track-metadata-position="footer" data-track-metadata-module="footer" data-track-metadata-eventdetail="github.com/googlecloudPlatform/" data-track-type="footer link">GitHub</a>
+  - <a href="/docs/get-started/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 2)" data-track-metadata-eventdetail="cloud.google.com/docs/get-started/" data-track-name="google cloud quickstarts" data-track-metadata-module="footer" data-track-type="footer link" data-track-metadata-position="footer" data-track-metadata-child_headline="resources">Getting Started with Google Cloud</a>
+  - <a href="/docs/samples" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 3)" data-track-metadata-eventdetail="cloud.google.com/docs/samples" data-track-type="footer link" data-track-metadata-child_headline="resources" data-track-metadata-position="footer" data-track-metadata-module="footer" data-track-name="code samples">Code samples</a>
+  - <a href="/architecture/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 4)" data-track-name="cloud architecture center" data-track-metadata-module="footer" data-track-metadata-eventdetail="cloud.google.com/architecture/" data-track-type="footer link" data-track-metadata-position="footer" data-track-metadata-child_headline="resources">Cloud Architecture Center</a>
+  - <a href="//cloud.google.com/learn/training/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 5)" data-track-metadata-child_headline="resources" data-track-name="training" data-track-metadata-eventdetail="cloud.google.com/learn/training/" data-track-metadata-position="footer" data-track-metadata-module="footer" data-track-type="footer link">Training and Certification</a>
+
+- ### Engage
+
+  - <a href="//cloud.google.com/blog/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 1)" data-track-metadata-module="footer" data-track-name="blog" data-track-metadata-child_headline="engage" data-track-metadata-position="footer" data-track-type="footer link" data-track-metadata-eventdetail="cloud.google.com/blog/">Blog</a>
+  - <a href="//cloud.google.com/events/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 2)" data-track-metadata-eventdetail="cloud.google.com/events/" data-track-metadata-child_headline="engage" data-track-metadata-module="footer" data-track-name="events" data-track-metadata-position="footer" data-track-type="footer link">Events</a>
+  - <a href="//x.com/googlecloud" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 3)" data-track-name="follow on x" data-track-metadata-eventdetail="x.com/googlecloud" data-track-metadata-position="footer" target="_blank" data-track-metadata-child_headline="engage" data-track-type="footer link" data-track-metadata-module="footer" rel="noopener">X (Twitter)</a>
+  - <a href="//www.youtube.com/googlecloud" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 4)" data-track-metadata-eventdetail="www.youtube.com/googlecloud" data-track-name="google cloud on youtube" rel="noopener" target="_blank" data-track-metadata-module="footer" data-track-metadata-position="footer" data-track-type="footer link" data-track-metadata-child_headline="engage">Google Cloud on YouTube</a>
+  - <a href="//www.youtube.com/googlecloudplatform" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 5)" data-track-name="google cloud tech on youtube" data-track-metadata-module="footer" data-track-metadata-eventdetail="www.youtube.com/googlecloudplatform" target="_blank" data-track-type="footer link" data-track-metadata-position="footer" rel="noopener" data-track-metadata-child_headline="engage">Google Cloud Tech on YouTube</a>
+
+<div class="devsite-footer-utility nocontent" nosnippet="">
+
+<img src="https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/clouddocs/images/lockup-google-for-developers.svg" class="devsite-footer-sites-logo" loading="lazy" alt="Google Developers" />
+
+- <a href="https://developer.android.com/" class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Android Developers Link">Android</a>
+- <a href="https://developer.chrome.com/" class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Chrome Link">Chrome</a>
+- <a href="https://firebase.google.com/" class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Firebase Link">Firebase</a>
+- <a href="https://ai.google.com/" class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Google AI Link">Google AI</a>
+
+<!-- -->
+
+- <a href="//about.google/" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer About Google link" data-track-name="about google" data-track-metadata-position="footer" data-track-type="footer link" data-track-metadata-eventdetail="//about.google/" data-track-metadata-module="utility footer" target="_blank">About Google</a>
+- <a href="//policies.google.com/privacy" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Privacy link" data-track-type="footer link" data-track-metadata-module="utility footer" data-track-metadata-eventdetail="//policies.google.com/privacy" data-track-name="privacy" target="_blank" data-track-metadata-position="footer">Privacy</a>
+- <a href="//policies.google.com/terms?hl=en" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Site terms link" data-track-name="site terms" data-track-metadata-position="footer" target="_blank" data-track-type="footer link" data-track-metadata-module="utility footer" data-track-metadata-eventdetail="//www.google.com/intl/en/policies/terms/regional.html">Site terms</a>
+- <a href="//cloud.google.com/product-terms" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Google Cloud terms link" data-track-type="footer link" data-track-metadata-module="utility footer" data-track-metadata-eventdetail="//cloud.google.com/product-terms" data-track-name="google cloud terms" data-track-metadata-position="footer">Google Cloud terms</a>
+- <a href="#" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Manage cookies link" data-track-type="footer link" data-track-metadata-module="utility footer" aria-hidden="true" data-track-name="Manage cookies" data-track-metadata-position="footer" data-track-metadata-eventdetail="#">Manage cookies</a>
+- <a href="//cloud.google.com/sustainability" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Our third decade of climate action: join us link" data-track-metadata-position="footer" data-track-name="Our third decade of climate action: join us" data-track-metadata-module="utility footer" data-track-metadata-eventdetail="/sustainability/" data-track-type="footer link">Our third decade of climate action: join us</a>
+- <span class="devsite-footer-utility-description">Sign up for the Google Cloud newsletter</span> <a href="//cloud.google.com/newsletter/" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Subscribe link" data-track-name="subscribe" data-track-metadata-position="footer" data-track-metadata-module="utility footer" data-track-type="footer link" data-track-metadata-eventdetail="/newsletter/">Subscribe</a>
+
+<!-- -->
+
+- <span role="menuitem" lang="en">English</span>
+- <span role="menuitem" lang="de">Deutsch</span>
+- <span role="menuitem" lang="es">Español</span>
+- <span role="menuitem" lang="es_419">Español – América Latina</span>
+- <span role="menuitem" lang="fr">Français</span>
+- <span role="menuitem" lang="id">Indonesia</span>
+- <span role="menuitem" lang="it">Italiano</span>
+- <span role="menuitem" lang="pt">Português</span>
+- <span role="menuitem" lang="pt_br">Português – Brasil</span>
+- <span role="menuitem" lang="he">עברית</span>
+- <span role="menuitem" lang="zh_cn">中文 – 简体</span>
+- <span role="menuitem" lang="zh_tw">中文 – 繁體</span>
+- <span role="menuitem" lang="ja">日本語</span>
+- <span role="menuitem" lang="ko">한국어</span>
+
+</div>

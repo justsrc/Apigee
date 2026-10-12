@@ -1,0 +1,789 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee**, but not to **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+## Overview
+
+The PromptTokenLimit policy protects Large Language Model (LLM) backends from traffic surges by throttling the number of tokens in user prompts.
+
+The PromptTokenLimit policy is similar to the [SpikeArrest policy](/apigee/docs/api-platform/reference/policies/spike-arrest-policy); however; the SpikeArrest policy limits the number of requests, while the PromptTokenLimit policy limits the number of tokens within those requests. This policy is specifically tailored for LLM applications where the cost and performance are directly related to the number of tokens processed.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+#### The difference between PromptTokenLimit and LLMTokenQuota
+
+The PromptTokenLimit policy is used for operational traffic management to prevent sudden spikes in token usage. In contrast, the [LLMTokenQuota policy](/apigee/docs/api-platform/reference/policies/llm-token-quota-policy) is used to enforce consumption limits on client apps over longer periods (such as hours, days, or months) to manage costs and enforce business agreements.
+
+## `PromptTokenLimit` element
+
+Defines the PromptTokenLimit policy.
+
+| Default Value | See Default Policy tab, below |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex object |
+| Parent Element | N/A |
+| Child Elements | <Identifier> <Rate> (Required) <UseEffectiveCount> <UserPromptSource> <IgnoreUnresolvedVariables> |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+The `PromptTokenLimit` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PromptTokenLimit continueOnError="false" enabled="true" name="POLICY_NAME">
+  <DisplayName></DisplayName>
+  <Properties/>
+  <UserPromptSource>{jsonPath('$.contents[-1].parts[-1].text',request.content,true)}</UserPromptSource>
+  <Identifier ref=""/>
+  <Rate ref="">[pm|ps]</Rate>
+  <UseEffectiveCount>[false|true]</UseEffectiveCount>
+  <IgnoreUnresolvedVariables>[false|true]</IgnoreUnresolvedVariables>
+</PromptTokenLimit>
+      
+```
+
+</div>
+
+<div class="section">
+
+### Default Policy
+
+The following example shows the default settings when you add a PromptTokenLimit policy to your flow in the UI:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PromptTokenLimit continueOnError="false" enabled="true" name="PTL-limitTokens-1">
+  <DisplayName></DisplayName>
+  <Properties/>
+  <UserPromptSource>{jsonPath('$.contents[-1].parts[-1].text',request.content,true)}</UserPromptSource>
+  <Identifier ref=""/>
+  <Rate ref="">[pm|ps]</Rate>
+  <UseEffectiveCount>[false|true]</UseEffectiveCount>
+  <IgnoreUnresolvedVariables>[false|true]</IgnoreUnresolvedVariables>
+</PromptTokenLimit>
+      
+```
+
+</div>
+
+</div>
+
+This element has the following attributes that are common to all policies:
+
+**Attribute**
+
+**Default**
+
+**Required?**
+
+**Description**
+
+`name`
+
+N/A
+
+**Required**
+
+The internal name of the policy. The value of the `name` attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters.
+
+Optionally, use the `<DisplayName>` element to label the policy in the management UI proxy editor with a different, natural-language name.
+
+`continueOnError`
+
+false
+
+Optional
+
+Set to `false` to return an error when a policy fails. This is expected behavior for most policies. Set to `true` to have flow execution continue even after a policy fails. See also:
+
+- [Fault rules are triggered ONLY in an error state (about continueOnError)](/apigee/docs/api-platform/fundamentals/fault-handling#multiplefaultrulesandexecutionlogic-faultrulesaretriggeredonlyinanerrorstateaboutcontinueonerror)
+- [Handling faults within the current flow](/apigee/docs/api-platform/fundamentals/fault-handling#continueonerror)
+
+`enabled`
+
+true
+
+Optional
+
+Set to `true` to enforce the policy. Set to `false` to *turn off* the policy. The policy will not be enforced even if it remains attached to a flow.
+
+`async`  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray">not_interested</span></span>
+
+false
+
+Deprecated
+
+This attribute is deprecated.
+
+## Examples
+
+The following examples show some of the ways in which you can use the PromptTokenLimit policy:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Example 1
+
+Prompt Token limiting within a single replica.
+
+In this example, prompt token limiting occurs within a single replica and is not distributed across multiple message processors in a region.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PromptTokenLimit continueOnError="false" enabled="true" name="PTL-limitTokens-1">
+  <DisplayName></DisplayName>
+  <Properties/>
+  <UserPromptSource>{jsonPath('$.contents[-1].parts[-1].text',request.content,true)}</UserPromptSource>
+  <Identifier ref="request.url"/>
+  <Rate>1pm</Rate>
+  <UseEffectiveCount>false</UseEffectiveCount>
+</PromptTokenLimit>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+Distributed Token limiting.
+
+In this example, prompt token limiting is distributed across multiple replicas in a region, and a "sliding window" rate limiting algorithm is employed.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PromptTokenLimit continueOnError="false" enabled="true" name="PTL-limitTokens-1">
+  <DisplayName></DisplayName>
+  <Properties/>
+  <UserPromptSource>{jsonPath('$.contents[-1].parts[-1].text',request.content,true)}</UserPromptSource>
+  <Identifier ref="request.url"/>
+  <Rate>1pm</Rate>
+  <UseEffectiveCount>true</UseEffectiveCount>
+</PromptTokenLimit>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+Context window size token limiting per request.
+
+In this example, prompt token limiting occurs within a single replica and is not distributed across multiple message processors in a region. This specific configuration is used for context window size token limiting per request.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PromptTokenLimit continueOnError="false" enabled="true" name="PTL-limitTokens-1">
+  <DisplayName></DisplayName>
+  <Properties/>
+  <UserPromptSource>{jsonPath('$.messages',request.content,true)}</UserPromptSource>
+  <Identifier ref="messageid"/>
+  <Rate>1pm</Rate>
+  <UseEffectiveCount>false</UseEffectiveCount>
+</PromptTokenLimit>
+```
+
+</div>
+
+<div class="section">
+
+### Example 4
+
+Distributed Token limiting with default values.
+
+In this example, prompt token limiting occurs within a single replica and is not distributed across multiple message processors in a region. The user prompt source default value is used: `{jsonPath('$.messages',request.content,true)}`
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PromptTokenLimit continueOnError="false" enabled="true" name="PTL-limitTokens-1">
+  <DisplayName></DisplayName>
+  <Properties/>
+  <Identifier ref="messageid"/>
+  <Rate>1pm</Rate>
+  <UseEffectiveCount>false</UseEffectiveCount>
+</PromptTokenLimit>
+```
+
+</div>
+
+</div>
+
+## Child element reference
+
+This section describes the child elements of `<PromptTokenLimit>`.
+
+### `<DisplayName>`
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, more natural-sounding name.
+
+The `<DisplayName>` element is common to all policies.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional. If you omit `<DisplayName>`, the value of the policy's `name` attribute is used. |
+| **Type** | String |
+| **Parent Element** | \<`PolicyElement`\> |
+| **Child Elements** | None |
+
+The `<DisplayName>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>POLICY_DISPLAY_NAME</DisplayName>
+  ...
+</PolicyElement>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>My Validation Policy</DisplayName>
+</PolicyElement>
+```
+
+</div>
+
+</div>
+
+The `<DisplayName>` element has no attributes or child elements.
+
+### `<Identifier>`
+
+Lets you choose how to group the requests so that the PromptTokenLimit policy can be applied based on the client. For example, you can group requests by developer ID, in which case each developer's requests will count towards their own PromptTokenLimit rate and not all requests to the proxy.
+
+If you leave the `<Identifier>` element empty, one rate limit is enforced for all requests into that API proxy.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<PromptTokenLimit>`](/apigee/docs/api-platform/reference/policies/prompt-token-limit-policy#prompttokenlimit) |
+| **Child Elements** | None |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PromptTokenLimit
+  continueOnError="[false|true]"
+  enabled="[true|false]"
+  name="POLICY_NAME"
+>
+  <Identifier ref="FLOW_VARIABLE"/>
+</PromptTokenLimit>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example applies the PromptTokenLimit policy per developer ID:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PromptTokenLimit name="PTL-limitTokens-1">
+  <Identifier ref="developer.id"/>
+  <Rate>42pm</Rate/>
+  <UseEffectiveCount>true</UseEffectiveCount>
+</PromptTokenLimit>
+      
+```
+
+</div>
+
+</div>
+
+The following table describes the attributes of `<Identifier>`:
+
+| Attribute | Description | Default | Presence |
+|----|----|----|----|
+| `ref` | Identifies the variable by which PromptTokenLimit groups incoming requests. You can use any flow variable to indicate a unique client, such those available with the [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy). You can also set custom variables using the [JavaScript policy](/apigee/docs/api-platform/reference/policies/javascript-policy) or the [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy). | N/A | Required |
+
+### `<Rate>`
+
+Specifies the rate at which to limit token spikes (or bursts) by setting the number of tokens that are allowed in per minute or per second intervals. You can use this element in conjunction with [`<Identifier>`](/apigee/docs/api-platform/reference/policies/prompt-token-limit-policy#identifier) to smoothly throttle traffic at runtime by accepting values from the client. Use the [`<UseEffectiveCount>`](/apigee/docs/api-platform/reference/policies/prompt-token-limit-policy#useeffectivecount) element to set the rate limiting algorithm used by the policy.
+
+**Note:** The use of [`<UseEffectiveCount>`](/apigee/docs/api-platform/reference/policies/prompt-token-limit-policy#useeffectivecount) with a value or `false` is not supported for *any* Apigee organizations or for Apigee hybrid organizations running production workloads. For more information, see [`<UseEffectiveCount>`](/apigee/docs/api-platform/reference/policies/prompt-token-limit-policy#useeffectivecount).
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Required |
+| **Type** | Integer |
+| **Parent Element** | [`<PromptTokenLimit>`](/apigee/docs/api-platform/reference/policies/prompt-token-limit-policy#prompttokenlimit) |
+| **Child Elements** | None |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+You can specify rates in one of the following ways:
+
+- A static rate that you specify as the body of the `<Rate>` element
+- A variable value, which can be passed by the client; identify the name of the flow variable using the `ref` attribute
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PromptTokenLimit
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME"
+>
+  <Rate ref="FLOW_VARIABLE">RATE[pm|ps]</Rate>
+</PromptTokenLimit>
+```
+
+Valid rate values (either defined as a variable value or in the body of the element) must conform to the following format:
+
+- `int``ps` (number of tokens per second, smoothed into intervals of milliseconds)
+- `int``pm` (number of tokens per minute, smoothed into intervals of seconds)
+
+The value of `int` must be a positive, non-zero integer.
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets the rate to five tokens per second:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PromptTokenLimit name="PTL-Static-5ps">
+  <Rate>5ps</Rate>
+  <UseEffectiveCount>false</UseEffectiveCount>
+</PromptTokenLimit>
+        
+```
+
+The policy smoothes the rate to one token allowed every 200 *milliseconds* (1000/5).
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example sets the rate to 12 tokens per minute:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PromptTokenLimit name="PTL-Static-12pm">
+  <Rate>12pm</Rate>
+  <UseEffectiveCount>false</UseEffectiveCount>
+</PromptTokenLimit>
+```
+
+This example policy smoothes the rate to one token allowed every five *seconds* (60/12).
+
+</div>
+
+</div>
+
+The following table describes the attributes of `<Rate>`:
+
+| Attribute | Description | Presence | Default |
+| --- | --- | --- | --- |
+| ref | Identifies a flow variable that specifies the rate. This can be any flow variable, such as an HTTP query parameter, header, or message body content, or a value such as a KVM. For more information, see Flow variables reference . You can also use custom variables using the JavaScript policy or the AssignMessage policy . If you define both ref and the body of this element, the value of ref is applied and takes precedence when the flow variable is set in the request. (The reverse is true when the variable identified in ref is not set in the request.) For example: <Rate ref="request.header.custom_rate">1pm</Rate> In this example, if the client does not pass a custom_rate header, then the rate for the API proxy is 1 token per minute for all clients. If the client passes a custom_rate header, whose value is 10ps, for all clients on the proxy — until a request without the custom_rate header is sent. You can use <Identifier> to group requests to enforce custom rates for different types of clients. If you specify a value for ref but do not set the rate in the body of the <Rate> element and the client does not pass a value, then the PromptTokenLimit policy throws an error. | Optional | N/A |
+
+The following table describes the attributes of `Rate` defining the traffic throttling behavior:
+
+| Attribute | Description |
+|----|----|
+| `messagesPerPeriod` | Specifies the number of tokens allowed within a defined period. For example, if a policy is configured for '10ps' (10 tokens per second), the `messagesPerPeriod` value would be 10. |
+| `periodInMicroseconds` | Defines the time period, in microseconds, over which the `messagesPerPeriod` is calculated. For a '10ps' configuration, this value would be 1,000,000, which is equivalent to one second. |
+| `maxBurstMessageCount` | Represents the maximum number of tokens that can be allowed instantly or in a short burst at the beginning of a new interval. |
+
+**Note:** The values and calculations for these attributes can be affected by the number of MPs and whether the `UseEffectiveCount` setting is enabled. For instance, if you set a rate of '10ps' with 10 MPs and `UseEffectiveCount` is enabled, the effective rate for each MP is 1ps. The internal attributes of the individual MP are adjusted to reflect this. For example, the `messagesPerPeriod` attribute could be set to 1 and `periodInMicroseconds` to 1,000,000.
+
+### `<UseEffectiveCount>`
+
+This element lets you choose between distinct PromptTokenLimit algorithms by setting the value to `true` or `false`, as explained below:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### true
+
+If set to `true`, PromptTokenLimit is distributed in a region. That means request counts are synchronized across message processors (MPs) in a region. In addition, a "sliding window" rate limiting algorithm is employed. This algorithm provides consistent rate limit behavior and does not "smooth" the number of incoming requests that can be sent to the backend. If a burst of requests are sent in a short time interval, they are allowed as long as they do not exceed the configured rate limit, as set in the [`<Rate>`](/apigee/docs/api-platform/reference/policies/prompt-token-limit-policy#rate) element. For example:
+
+<div>
+
+</div>
+
+```
+<PromptTokenLimit name="Prompt-Token-Limit-1">
+  <Rate>12pm</Rate>
+  <Identifier ref="client_id" />
+  <UseEffectiveCount>true</UseEffectiveCount>
+</PromptTokenLimit>
+```
+
+</div>
+
+<div class="section">
+
+### false (default)
+
+**Note:** Although the default value is `false`, Apigee organizations should set this element to `true`.
+
+Rate smoothing is not supported for Apigee organizations.
+
+If set to `false` (the default), the PromptTokenLimit policy uses a "[token bucket](https://en.wikipedia.org/wiki/Token_bucket)" algorithm that smooths token spikes by dividing the rate limit that you specify into smaller intervals. A drawback of this approach is that multiple legitimate tokens coming in over a short time interval can potentially be denied.
+
+For example, say you enter a rate of 30pm (30 tokens per minute). In testing, you might think you could send 30 tokens in 1 second, as long as they came within a minute. But that's not how the policy enforces the setting. If you think about it, 30 tokens inside a 1-second period could be considered a mini spike in some environments.
+
+- **Per-minute** rates get smoothed into full requests allowed in intervals of **seconds**.
+
+  For example, 30pm gets smoothed like this:  
+  60 seconds (1 minute) / 30pm = 2-second intervals, or 1 token allowed every 2 seconds. A second token inside of 2 seconds will fail. Also, a 31st token within a minute will fail.
+
+- **Per-second** rates get smoothed into full requests allowed in intervals of **milliseconds**.
+
+  For example, 10ps gets smoothed like this:  
+  1000 milliseconds (1 second) / 10ps = 100-millisecond intervals, or 1 token allowed every 100 milliseconds. A second token inside of 100ms will fail. Also, an 11th token within a second will fail.
+
+**Note:** In rate smoothing, the number of tokens is always a whole number greater than zero. Smoothing never involves calculating fractions of tokens.
+
+</div>
+
+</div>
+
+|  |  |
+|----|----|
+| **Default Value** | False |
+| **Required?** | Optional |
+| **Type** | Boolean |
+| **Parent Element** | [`<PromptTokenLimit>`](/apigee/docs/api-platform/reference/policies/prompt-token-limit-policy#prompttokenlimit) |
+| **Child Elements** | None |
+
+The following table describes the attributes of the `<UseEffectiveCount>` element:
+
+| Attribute | Description | Default | Presence |
+|----|----|----|----|
+| `ref` | Identifies the variable that contains the value of `<UseEffectiveCount>`. This can be any flow variable, such as an HTTP query param, header, or message body content. For more information, see [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference). You can also set custom variables using the [JavaScript policy](/apigee/docs/api-platform/reference/policies/javascript-policy) or the [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy). | N/A | Optional |
+
+### `<UserPromptSource>`
+
+Provides the source for retrieving user prompt text. Use a [message template](/apigee/docs/api-platform/reference/message-template-intro).
+
+The message template should provide a single value of the user prompt text.
+
+For example, `{jsonPath('$.contents[-1].parts[-1].text',request.content,true)}`.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<PromptTokenLimit>`](/apigee/docs/api-platform/reference/policies/prompt-token-limit-policy#prompttokenlimit) |
+| **Child Elements** | None |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+```
+<PromptTokenLimit
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME">
+  <UserPromptSource>{jsonPath('$.contents[-1].parts[-1].text',request.content,true)}</UserPromptSource>
+</PromptTokenLimit>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+<div>
+
+</div>
+
+```
+<PromptTokenLimit name="Prompt-Token-Limit-1">
+  <UserPromptSource>{jsonPath('$.contents[-1].parts[-1].text',request.content,true)}</UserPromptSource>
+</PromptTokenLimit>
+```
+
+</div>
+
+</div>
+
+### `<IgnoreUnresolvedVariables>`
+
+Determines whether processing stops when an unresolved variable is encountered.
+
+Set to `true` to ignore unresolved variables and continue processing; otherwise `false`. The default value is `false`.
+
+|  |  |
+|----|----|
+| **Default Value** | False |
+| **Required?** | Optional |
+| **Type** | Boolean |
+| **Parent Element** | [`<PromptTokenLimit>`](/apigee/docs/api-platform/reference/policies/prompt-token-limit-policy#prompttokenlimit) |
+| **Child Elements** | None |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+```
+<PromptTokenLimit
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME">
+  <IgnoreUnresolvedVariables>[true|false]</IgnoreUnresolvedVariables>
+</PromptTokenLimit>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+<div>
+
+</div>
+
+```
+<PromptTokenLimit name="Prompt-Token-Limit-1">
+  <Rate>10ps</Rate>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</PromptTokenLimit>
+```
+
+</div>
+
+</div>
+
+## Flow variables
+
+When a PromptTokenLimit policy executes, the following flow variables are populated:
+
+| Variable | Type | Permission | Description |
+|----|----|----|----|
+| `ratelimit.``POLICY_NAME``.failed` | Boolean | Read-Only | This variable is `true` if the policy experienced an internal execution failure. This variable should **not** be used to check if a rate limit has been exceeded. It may be set to `true` under high load due to the policy's "fail-open" design. |
+| `ratelimit.``POLICY_NAME``.resolvedUserPrompt` | String | Read-Only | Returns the user prompt extracted. |
+| `ratelimit.``POLICY_NAME``.userPromptSource` | String | Read-Only | Returns the message template for user prompt specified in the policy. |
+| `ratelimit.``POLICY_NAME``.userPromptTokenCount` | String | Read-Only | Returns the token count of the extracted user prompt. |
+
+For more information, see [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference).
+
+## Error reference
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. You may also see [SpikeArrest policy errors](/apigee/docs/api-platform/reference/policies/spike-arrest-policy#errors). This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+**Tip:** Need help resolving an error? Click *build* in the Fix column for detailed troubleshooting information.
+
+Fault code
+
+HTTP status
+
+Apigee fault
+
+Cause
+
+Fix
+
+`policies.prompttokenlimit.FailedToExtractUserPrompt`
+
+`400`
+
+FALSE
+
+Unable to extract the user prompt from the API request.
+
+`policies.prompttokenlimit.PromptTokenLimitViolation`
+
+`429`
+
+FALSE
+
+PromptTokenLimit violation.
+
+`policies.prompttokenlimit.FailedToCalculateUserPromptTokens`
+
+`500`
+
+TRUE
+
+Tokens cannot be calculated for the user prompt.
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+**Tip:** Need help resolving an error? Click *build* in the Fix column for detailed troubleshooting information.
+
+Fault code
+
+HTTP status
+
+Apigee fault
+
+Cause
+
+Fix
+
+`policies.prompttokenlimit.MessageWeightNotSupported`
+
+500
+
+FALSE
+
+MessageWeight is not supported for the PromptTokenLimit policy.
+
+### Fault variables
+
+These variables are set when a runtime error occurs. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+| Variables | Where | Example |
+|----|----|----|
+| `ratelimit.``policy_name``.fault.name` | `fault_name` is the name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name Matches "PromptTokenLimitViolation"` |
+| `ratelimit.``policy_name``.failed` | `policy_name` is the user-specified name of the policy that threw the fault. | `ratelimit.PTL-PromptTokenLimitPolicy.failed = true` |
+
+### Example error response
+
+Shown below is an example error response:
+
+**Note:** For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{  
+   "fault":{  
+      "detail":{  
+         "errorcode":"policies.prompttokenlimit.PromptTokenLimitViolation"
+      },
+      "faultstring":"Prompt Token Limit Violation. Allowed rate : MessageRate{capacity=10, period=Minutes}"
+   }
+}
+```
+
+### Example fault rule
+
+Shown below is an example fault rule to handle a `PromptTokenLimitViolation` fault:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRules>
+    <FaultRule name="Prompt Token Limit Errors">
+        <Step>
+            <Name>Assign-Message-1</Name>
+        </Step>
+        <Condition>(fault.name Matches "PromptTokenLimitViolation")</Condition>
+    </FaultRule>
+</FaultRules>
+```
+
+The current HTTP status code for exceeding a rate limit set by a LLMTokenQuota or PromptTokenLimit policy is 429 (Too Many Requests).
+
+## Schemas
+
+Each policy type is defined by an XML schema (`.xsd`). For reference, <a href="https://github.com/apigee/api-platform-samples/tree/master/schemas/policy" class="external">policy schemas</a> are available on GitHub.
+
+## Related topics
+
+- [LLMTokenQuota policy](/apigee/docs/api-platform/reference/policies/llm-token-quota-policy): LLMTokenQuota policy, to limit response token quota usage.
+- [Rate-limiting](/apigee/docs/api-platform/develop/rate-limiting) for a rate limiting overview
+- [Comparing rate-limiting policies](/apigee/docs/api-platform/develop/comparing-quota-and-spike-arrest-policies)

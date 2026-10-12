@@ -1,0 +1,180 @@
+URL: https://github.com/apigee/apigee-deploy-maven-plugin/issues/213
+TITLE: Bundle activation issue for 1.x version if deployment takes more than 10 seconds
+STATE: closed state_reason: completed
+AUTHOR: vctrainings08 association: NONE
+CREATED: 2023-05-30T07:19:32Z CLOSED: 2023-08-31T20:49:03Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+Hi Team,
+
+Getting bundle activation issues if deployment takes more than 10 seconds and I found that sleep time is harcoded. Is there any way we can make it parameterized. 
+
+Code snippet is below from RestClient.java from 1.3.3.
+
+if (this.getProfile().isOverride()) {
+                for (final BundleActivationConfig config : deployment3.environment) {
+                    if (config.environment.equalsIgnoreCase(this.profile.getEnvironment())) {
+                        if (!config.state.equalsIgnoreCase("deployed")) {
+                            RestClient.log.info("Waiting to assert bundle activation.....");
+                            **Thread.sleep(10L);**
+                            final Long deployedRevision = this.getDeployedRevision(bundle);
+                            if (bundle.getRevision() != null && bundle.getRevision().equals(deployedRevision)) {
+                                RestClient.log.info("Deployed revision is: " + bundle.getRevision());
+                                return "deployed";
+                            }
+                            RestClient.log.error("Deployment failed to activate");
+                            throw new MojoExecutionException("Deployment failed: Bundle did not activate within expected time. Please check deployment status manually before trying again");
+                        }
+                        else {
+                            RestClient.log.info(PrintUtil.formatResponse(response, this.gson.toJson((Object)deployment3)));
+                        }
+                    }
+                }
+            }
+
+--- COMMENTS (28) ---
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-05-30T16:24:03Z
+@vctrainings08 - you can ignore that hardcoded value. Thats just used to get the deployment details and see if the deployment is completed and stable
+
+If you want to perform seamless deployment, you can do that using the "override" option and also in the pom profile, you can specify the delay needed using the `apigee.override.delay` property. More info available [here](https://github.com/apigee/apigee-deploy-maven-plugin/tree/1.x#note-2) and [here](https://github.com/apigee/apigee-deploy-maven-plugin/tree/1.x#note-3)
+
+### comment by vctrainings08 (association=NONE) at 2023-05-31T17:09:59Z
+I'm already using option as override with apigee.override.delay configured, but apigee.delay is commented though. Is apigee.delay required for proxy update with override (seamless deployment)?
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-05-31T17:19:11Z
+You can uncomment that and pass the delay you want. It works for override option. Try uncommenting it in your pom and pass a delay you want and see if that works. This is used for the Seamless deployment call
+
+### comment by vctrainings08 (association=NONE) at 2023-05-31T17:23:44Z
+Do we need both apigee.override.dealy and apigee.delay with proxy update options as override ?
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-05-31T17:24:52Z
+No - apigee.override.delay is enough
+But if you want to introduce some delay as you anticipate (more time taken which usually isnt the case), you can include apigee.delay too which is in milliseconds
+
+### comment by vctrainings08 (association=NONE) at 2023-05-31T17:39:33Z
+Okay but apigee.override.delay is already configured and still see message which in below exception,
+
+throw new MojoExecutionException("Deployment failed: Bundle did not activate within expected time. Please check deployment status manually before trying again");
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-05-31T17:42:22Z
+Is this happening just for this deployment or for any proxy/sharedflow deployment?
+
+### comment by vctrainings08 (association=NONE) at 2023-05-31T17:43:55Z
+It is happening for proxy/sharedflow everytime only on update with override.
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-05-31T17:44:50Z
+what do you mean by "update with override"? 
+are you passing both update and override in the options?
+
+update is used when you want to retain the same revision number with the new bundle
+override is used when you do a seamless deployment that will create a new revision
+
+You dont do both
+
+### comment by vctrainings08 (association=NONE) at 2023-05-31T17:45:28Z
+I mean existing proxy deployment with options override.
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-05-31T17:45:59Z
+Can you share your mvn command and the profile config from your pom you are calling from Maven?
+
+### comment by vctrainings08 (association=NONE) at 2023-05-31T17:52:59Z
+![image](https://github.com/apigee/apigee-deploy-maven-plugin/assets/121146311/f4eb10e9-63d1-4489-beef-e7b01397f5dc)
+
+mvn command:
+mvn install -Papigee -Dusername=**** -Dpassword=**** -Dorg=org_name -Denv=env_name -Dhosturl=apigee_ms_host -Doptions="override" -f pomfile
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-05-31T17:54:42Z
+Thank you. Can you confirm if its happening for all proxy deployments or just this one proxy?
+I dont see anything wrong with the config or the command
+
+### comment by vctrainings08 (association=NONE) at 2023-05-31T17:56:33Z
+It is happening intermittently for all the proxy/sharedflow deployments and issue is not coming post MS restart. Again after 3-4 days we're getting same issues. 
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-05-31T17:58:28Z
+Anything in the logs? I am suspecting something is wrong with the services.
+
+What happens when you try to deploy using the Management API directly? Does it work?
+
+### comment by vctrainings08 (association=NONE) at 2023-05-31T18:00:17Z
+Yes Management API works well directly but it took around 30 secs to deploy where as deployment through plugin is failing with activation issue.
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-05-31T18:25:20Z
+Can you also share the logs from the mvn command?
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-05-31T18:26:36Z
+Also - can you remove the delay from the pom profile and try? Have you always had that set to 30?
+
+### comment by vctrainings08 (association=NONE) at 2023-06-01T16:16:44Z
+I cannot provide logs. If I remove the delay then proxy traffic will be impacted correct. I set delay depends on environment and I usually set 10 during run time. Have you come across this issue and was it covered as part of your testing? 
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-06-01T16:19:13Z
+@vctrainings08 - no I have not come across this. Not sure why the deployment is taking that long either. Shouldn't ideally but it could be possible that the delay you are providing is a reason why its failing. Can you try deploying the proxy using the Management API without the delay?
+
+Do you get continuous traffic on the API which its being deployed?
+
+### comment by vctrainings08 (association=NONE) at 2023-06-02T13:26:04Z
+As per apigee documentation delay is needed to handle deployment with zero down time. https://docs.apigee.com/api-platform/deploy/deploy-api-proxies-using-management-api
+
+![image](https://github.com/apigee/apigee-deploy-maven-plugin/assets/121146311/350be054-ef54-4396-ba2d-abcb60609efb)
+
+For deployment plugin, we have apigee.delay and apigee.override.delay to enforce delay to handle traffic from existing deploy revision before activating new revision. Can I know which delay parameter will be passed to deployments API in plugin i.e., either apigee.delay or apigee.override.delay. 
+
+Also may I know at which scenario below exception will be raised.
+
+throw new MojoExecutionException("Deployment failed: Bundle did not activate within expected time. Please check deployment status manually before trying again");
+
+Right now I see 10L is configured for Thread.sleep. Is delay value should be less than 10 seconds always?
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-06-02T18:47:01Z
+`apigee.override.delay` is used for the seamless deployment
+`apigee.delay` is just used to include delays between any process (not widely used by all)
+
+That Thread.sleep(10) is only when the state in the deployment response is not equal to "deployed", then the plugin makes another call to get the deployment details. And in that call, if the deployed revision is not set, then it fails with that error as the proxy deployment is not activated
+
+Here is something you can do. Can you confirm you see logs like 
+```
+Waiting to assert bundle activation.....
+Deployment failed to activate
+```
+
+If you can provide some log trails, that will help me. You dont have to share the entire console output. Just share the logs where the Management API calls are being made
+
+Usually you dont have to set the override delay to 30, that is required only if you think there will be transactions that could be 30 seconds long. Usually its less than 5-10 seconds. 
+
+I would say, please change the value from 30 to something like 10 and see if that halps? 
+
+If you still continue to see errors, then pls check your Apigee logs to see why they take so long? Apigee deployments shouldnt take that long unless the proxy bundle is huge
+
+
+### comment by vctrainings08 (association=NONE) at 2023-06-03T06:48:41Z
+Thank you for the response. Mvn log is attached below
+
+![image](https://github.com/apigee/apigee-deploy-maven-plugin/assets/121146311/8ea55ad6-8d10-411e-9283-cc778fd93943)
+
+Seems plugin doesn't depend on delay since delay with 50sec deployment worked for me. Plugin completely depends on Thread sleep time and if deployment doesn't complete within 10 seconds then exception is coming. Please verify from your end once.
+
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-06-04T21:27:20Z
+@vctrainings08 - Yes, the delay is included only to upload the bundle but not for checking the deployment. Not sure why your proxy is taking that long to deploy. How big is this bundle (zip)? Are other proxies also taking this much time?
+
+Are you seeing this issue recently? If yes, what changed that this is occurring now?
+
+The delay is needed only to do the deployment. The activation part is just checking if the deployment is complete and its state is set to "deployed". If thats taking too much time. I would want you to check why its taking this long. We have many many customers using this plugin and no one has reported this issue. So am wondering if your setup is really slow and thats causing this issue.
+
+Its working for me on my end. I am using the public SaaS version. 
+
+### comment by vctrainings08 (association=NONE) at 2023-06-05T05:39:20Z
+Okay. Can we make the delay of 10sec which is hardcoded in plugin as parameter so that it won't be an issue even if MS takes more than 10 seconds to activate the bundle?
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-06-05T15:12:14Z
+@vctrainings08 - Can you pls respond to these questions
+1) Did you try updating the override delay to something lower (say 10) and try? What happened?
+2) Can you also try including `<apigee.delay>50</apigee.delay>` to your pom profile and see if that helps?
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-08-18T17:32:53Z
+Any other update? If the issue is not related to the plugin, can we close this?
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-08-31T20:49:03Z
+Closing due to inactivity

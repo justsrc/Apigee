@@ -1,0 +1,1462 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+As a developer working with Apigee, your primary development activities involve configuring API proxies that function as proxies for APIs or backend services. This document is a reference of all configuration elements available to you when building API proxies.
+
+If you are learning how to build API proxies, it is recommended that you begin with the topic [Building a simple API proxy](/apigee/docs/api-platform/fundamentals/build-simple-api-proxy).
+
+Edit your API proxy configuration using one of the following methods:
+
+- Use the Apigee [UI](/apigee/docs/api-platform/fundamentals/ui-overview) or [API](/apigee/docs/reference/apis/apigee/rest).
+- Download the API proxy configuration bundle, edit it manually, and upload the new configuration to Apigee, as described in [Downloading and uploading an API proxy configuration bundle](/apigee/docs/api-platform/fundamentals/download-api-proxies).
+
+## API proxy configuration directory structure
+
+The API proxy configuration directory structure is shown below:
+
+![Shows the directory structure in which apiproxy is the root. Directly under the apiproxy directory are the policies, proxies, resources, and targets directories, as well as the weatherapi.xml file.](/static/apigee/docs/api-platform/images/apiproxy2.png)
+
+An API proxy configuration consists of the following contents:
+
+|  |  |
+|----|----|
+| [Base configuration](#baseconfig) | Primary configuration settings for an API proxy. |
+| [ProxyEndpoint](#proxyendpoint) | Settings for the inbound HTTP connection (from requesting apps to Apigee), request and response flows, and policy attachments. |
+| [TargetEndpoint](#targetendpoint) | Settings for the outbound HTTP connection (from Apigee to the backend service), request and response flows, and policy attachments. |
+| [Flows](#flows) | ProxyEndpoint and TargetEndpoint request and response pipelines to which policies can be attached. |
+| [Policies](#policies) | XML-formatted configuration files that conform to the Apigee policy schemas. |
+| [Resources](#resources) | Scripts, JAR files, and XSLT files referenced by policies to execute custom logic. |
+
+## <span id="baseconfig"></span>Base configuration
+
+### `/apiproxy/weatherapi.xml`
+
+The base configuration for an API proxy, which defines the name of the API proxy. The name must be unique within an organization.
+
+Sample configuration:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<APIProxy name="weatherapi">
+</APIProxy>
+```
+
+### Base configuration elements
+
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Default</th>
+<th>Required?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code translate="no" dir="ltr">APIProxy</code></strong></td>
+<td colspan="3"></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">name</code></td>
+<td>The name of the API proxy, which must be unique within an organization. The characters you are allowed to use in the name are restricted to the following: <code translate="no" dir="ltr">A-Za-z0-9_-</code></td>
+<td>N/A</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">revision</code></td>
+<td>The revision number of the API proxy configuration. You do not need to explicitly set the revision number, since Apigee automatically tracks the current revision of the API proxy.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">ConfigurationVersion</code></td>
+<td>The version of the API proxy configuration schema to which this API proxy conforms. The only supported value currently is majorVersion 4 and minorVersion 0. This setting may be used in the future to enable evolution of the API proxy format.</td>
+<td>4.0</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Description</code></td>
+<td>A textual description of the API proxy. If provided, the description will display in the Apigee UI.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">DisplayName</code></td>
+<td>A user-friendly name that may be different from the <code translate="no" dir="ltr">name</code> attribute of the API proxy configuration.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Policies</code></td>
+<td>A list of policies in the <code translate="no" dir="ltr">/policies</code> directory of this API proxy. You will normally only see this element when the API proxy was created using the Apigee UI. This is simply a <em>manifest</em> setting, designed to provide visibility into the contents of the API proxy.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">ProxyEndpoints</code></td>
+<td>A list of proxy endpoints in the <code translate="no" dir="ltr">/proxies</code> directory of this API proxy. You will normally only see this element when the API proxy was created using the Apigee UI. This is simply a <em>manifest</em> setting, designed to provide visibility into the contents of the API proxy.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Resources</code></td>
+<td>A list of resources (JavaScript, Python, Java, XSLT) in the <code translate="no" dir="ltr">/resources</code> directory of this API proxy. You will normally only see this element when the API proxy was created using the Apigee UI. This is simply a <em>manifest</em> setting, designed to provide visibility into the contents of the API proxy.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Spec</code></td>
+<td>Identifies the OpenAPI Specification that is associated with the API proxy. The value is set to a URL or to a path in the specification store.<br />
+</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">TargetServers</code></td>
+<td>A list of target servers referenced in any target endpoints of this API proxy. You will normally only see this element when the API proxy was created using Apigee. This is simply a <em>manifest</em> setting, designed to provide visibility into the contents of the API proxy.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">TargetEndpoints</code></td>
+<td>A list of target endpoints in the <code translate="no" dir="ltr">/targets</code> directory of this API proxy. You will normally only see this element when the API proxy was created using the Apigee UI. This is simply a <em>manifest</em> setting, designed to provide visibility into the contents of the API proxy.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+
+## <span id="proxyendpoint"></span>ProxyEndpoint
+
+The following image shows the request/response flow:
+
+<img src="/static/apigee/docs/api-platform/images/proxy_endpoints.png" width="650" alt="Shows a client calling an HTTP service. The request goes through the proxy endpoint and then the target endpoint before being processed by the HTTP service. The response goes through the target endpoing and then the proxy endpoint before being returned to the client." />
+
+### `/apiproxy/proxies/default.xml`
+
+The ProxyEndpoint configuration defines the inbound (client-facing) interface for an API proxy. When you configure a proxy endpoint, you are setting up a network configuration that defines how client applications (*apps*) should invoke the proxied API.
+
+The following sample ProxyEndpoint configuration would be stored under `/apiproxy/proxies`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ProxyEndpoint name="default">
+  <PreFlow/>
+  <Flows/>
+  <PostFlow/>
+  <HTTPProxyConnection>
+    <BasePath>/weather</BasePath>
+    <Properties/>
+  </HTTPProxyConnection>
+  <FaultRules/>
+  <DefaultFaultRule/>
+  <RouteRule name="default">
+    <TargetEndpoint>default</TargetEndpoint>
+  </RouteRule>
+</ProxyEndpoint>
+```
+
+The required configuration elements in a basic proxy endpoint are:
+
+### ProxyEndpoint configuration elements
+
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Default</th>
+<th>Required?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code translate="no" dir="ltr">ProxyEndpoint</code></strong></td>
+<td colspan="3"></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">name</code></td>
+<td>The name of the proxy endpoint. Must be unique within the API proxy configuration, when (in rare cases) multiple proxy endpoints are defined. The characters you are allowed to use in the name are restricted to the following: <code translate="no" dir="ltr">A-Za-z0-9._\-$ %</code>.</td>
+<td>N/A</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong><code translate="no" dir="ltr">PreFlow</code></strong></td>
+<td>Defines the policies in the PreFlow flow of a request or response.</td>
+<td>N/A</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong><code translate="no" dir="ltr">Flows</code></strong></td>
+<td><div>
+Defines the policies in the conditional flows of a request or response.
+</div></td>
+<td>N/A</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong><code translate="no" dir="ltr">PostFlow</code></strong></td>
+<td><div>
+Defines the policies in the PostFlow flow of a request or response.
+</div></td>
+<td>N/A</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong><code translate="no" dir="ltr">HTTPProxyConnection</code></strong></td>
+<td colspan="3">Defines the network address and URI path associated with the API proxy.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">BasePath</code></td>
+<td><p>A required string that uniquely identifies the URI path used by Apigee to route incoming messages to the proper API proxy.</p>
+<p>The BasePath is a URI fragment (for example <code translate="no" dir="ltr">/weather</code>) appended to the base URL of an API proxy (for example, <code translate="no" dir="ltr">http://apifactory-test.apigee.net</code>). BasePath must be unique within an environment. Uniqueness is validated when an API proxy is generated or imported.</p>
+<p><strong>Using a wildcard in base paths</strong></p>
+<p>You can use one or more "*" wildcards in API proxy base paths. For example, a base path of <code translate="no" dir="ltr">/team/*/members</code> allows clients to call <code translate="no" dir="ltr">https://[host]/team/</code><strong><code translate="no" dir="ltr">blue</code></strong><code translate="no" dir="ltr">/members</code> and <code translate="no" dir="ltr">https://[host]/team/</code><strong><code translate="no" dir="ltr">green</code></strong><code translate="no" dir="ltr">/members</code> without you needing to create new API proxies to support new teams. Note that /**/ is not supported.</p>
+<p><strong>Important:</strong> Apigee does NOT support using a wildcard "*" as the first element of a base path. For example, this is NOT supported: <code translate="no" dir="ltr">/*/search</code>. Starting the base path with a "*" can lead to unexpected errors because of the way Apigee identifies valid paths.</p></td>
+<td>/</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Properties</code></td>
+<td>A set of optional HTTP configuration settings can be defined as properties of a <code translate="no" dir="ltr">&lt;ProxyEndpoint&gt;</code>. Available properties include the following:
+<ul>
+<li><p><strong><code translate="no" dir="ltr">request.queryparams.ignore.content.type.charset</code></strong></p>
+<p>Use the property <code translate="no" dir="ltr">request.queryparams.ignore.content.type.charset</code> to tell the proxy to ignore the <code translate="no" dir="ltr">charset</code> parameter of the <code translate="no" dir="ltr">Content-Type</code> header when processing the request URL. For example:</p>
+<div>
+&#10;</div>
+<pre translate="no" dir="ltr" data-is-upgraded=""><code>&lt;Properties&gt;
+  &lt;Property name=&quot;request.queryparams.ignore.content.type.charset&quot;&gt;true&lt;/Property&gt;
+&lt;/Properties&gt;</code></pre>
+<p>The following table shows example output depending on the setting of the <code translate="no" dir="ltr">charset</code> property and presence of the <code translate="no" dir="ltr">Content-Type</code> header's <code translate="no" dir="ltr">charset</code> parameter.</p>
+<table>
+<tbody>
+<tr>
+<th>Property setting</th>
+<th>Header value</th>
+<th>Example output</th>
+</tr>
+&#10;<tr>
+<td><code translate="no" dir="ltr">charset=false</code></td>
+<td><code translate="no" dir="ltr">charset</code> param not set</td>
+<td>john.doe+test@gmail.com</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">charset=false</code></td>
+<td><code translate="no" dir="ltr">charset=utf-8</code></td>
+<td>john.doe test@gmail.com</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">charset=true</code> and no <code translate="no" dir="ltr">charset</code> param in header.</td>
+<td><code translate="no" dir="ltr">charset</code> param not set</td>
+<td>john.doe+test@gmail.com</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">charset=true</code></td>
+<td><code translate="no" dir="ltr">charset=utf-8</code> param set</td>
+<td>john.doe+test@gmail.com</td>
+</tr>
+</tbody>
+</table></li>
+<li><p><strong><code translate="no" dir="ltr">request.payload.parse.limit</code></strong></p>
+<p>Use the property <code translate="no" dir="ltr">request.payload.parse.limit</code> to set the maximum payload size that can be processed in the request flow, in megabytes (M).</p>
+<p>For example:</p>
+<div>
+&#10;</div>
+<pre translate="no" dir="ltr" data-is-upgraded=""><code>&lt;Properties&gt;
+  &lt;Property name=&quot;request.payload.parse.limit&quot;&gt;30M&lt;/Property&gt;
+&lt;/Properties&gt;</code></pre>
+<p>The minimum configurable limit is 10M and the maximum configurable limit is 30M. If the property is not set, the default limit is 10M.</p>
+<p>For more information, see <a href="/apigee/docs/api-platform/fundamentals/best-practices-api-proxy-design-and-development#size">Message payload size</a>.</p></li>
+</ul></td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong><code translate="no" dir="ltr">FaultRules</code></strong></td>
+<td><div>
+Defines how the proxy endpoint reacts to an error. A fault rule specifies two items:
+</div>
+<ul>
+<li>A Condition that specifies the fault to be handled based on the pre-defined category, subcategory, or name of the fault</li>
+<li>One or more policies that define the behavior of the fault rule for the corresponding Condition</li>
+</ul>
+<p>See <a href="/apigee/docs/api-platform/fundamentals/fault-handling">Handling faults</a>.</p></td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong><code translate="no" dir="ltr">DefaultFaultRule</code></strong></td>
+<td><p>Handles any errors (system, transport, messaging or policy) that are not explicitly handled by another fault rule.</p>
+<p>See <a href="/apigee/docs/api-platform/fundamentals/fault-handling">Handling faults</a>.</p></td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong><code translate="no" dir="ltr">RouteRule</code></strong></td>
+<td colspan="3">Defines the destination of inbound request messages after processing by the ProxyEndpoint request pipeline. Usually, the RouteRule points to a named target endpoint, an IntegrationEndpoint, or an URL.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Name</code></td>
+<td>Required attribute, which provides a name for the RouteRule. The characters you are allowed to use in the name are restricted to the following: <code translate="no" dir="ltr">A-Za-z0-9._\-$ %</code>. For example, <code translate="no" dir="ltr">Cat2 %_</code> is a legal name.</td>
+<td>N/A</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Condition</code></td>
+<td>An optional conditional statement used for dynamic routing at runtime. Conditional RouteRules are useful, for example, to enable content-based routing to support backend versioning.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">TargetEndpoint</code></td>
+<td><p>An optional string that identifies a named TargetEndpoint configuration. A named target endpoint is any target endpoint defined in the same API proxy under the<code translate="no" dir="ltr">/targets</code> directory).</p>
+<p>By naming a target endpoint, you indicate where request messages should be forwarded after processing by the ProxyEndpoint request pipeline. Note that this is an optional setting.</p>
+<p>A proxy endpoint may call a URL directly. For example, a JavaScript or Java resource, functioning in the role of an HTTP client, may perform the basic duty of a target endpoint, which is to forward requests to a backend service.</p></td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">URL</code></td>
+<td>An optional string that defines an outbound network address called by the proxy endpoint, bypassing any TargetEndpoint configurations that might be stored under <code translate="no" dir="ltr">/targets</code></td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+
+### How to configure RouteRules
+
+A named target endpoint refers to a configuration file under `/apiproxy/targets` to which the RouteRule forwards a request after processing by the proxy endpoint.
+
+For example, the following RouteRule refers to the configuration `/apiproxy/targets/myTarget.xml`:
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<RouteRule name="default">
+  <TargetEndpoint>myTarget</TargetEndpoint>
+</RouteRule>
+```
+
+</div>
+
+### Direct URL invocation
+
+A proxy endpoint can also directly invoke a backend service. Direct URL invocation bypasses any named TargetEndpoint configuration under `/apiproxy/targets`). For this reason, TargetEndpoint is an optional API proxy configuration, although, in practice, direct invocation from the proxy endpoint is not recommended.
+
+For example, the following RouteRule makes an HTTP call to `http://api.mycompany.com/v2`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<RouteRule name="default">
+  <URL>http://api.mycompany.com/v2</URL>
+</RouteRule>
+```
+
+### Conditional routes
+
+RouteRules can be chained to support dynamic routing at runtime. Inbound requests can be routed to named TargetEndpoint configurations, directly to URLs, or to a combination of the two, based on HTTP headers, message content, query parameters, or contextual information such time of day, locale, etc.
+
+Conditional RouteRules work like other conditional statements on Apigee. See [Conditions reference](/apigee/docs/api-platform/reference/conditions-reference) and [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference).
+
+For example, the following RouteRule combination first evaluates the inbound request to verify the value of an HTTP header. If the HTTP header `routeTo` has the value `TargetEndpoint1`, then the request is forwarded to the target endpoint named `TargetEndpoint1`. If not, then the inbound request is forwarded to `http://api.mycompany.com/v2`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<RouteRule name="MyRoute">
+  <Condition>request.header.routeTo = "TargetEndpoint1"</Condition>
+  <TargetEndpoint>TargetEndpoint1</TargetEndpoint>
+</RouteRule>
+<RouteRule name="default">
+  <URL>http://api.mycompany.com/v2</URL>
+</RouteRule>
+```
+
+**Note:** **More dynamic routing**
+
+The Apigee community article <a href="https://discuss.google.dev/t/specifying-proxy-endpoint/6700.html" class="external">specifying proxy endpoint</a> shows dynamic routing to different world regions based on variables extracted from the request URI.
+
+### Null routes
+
+A null RouteRule can be defined to support scenarios in which the request message does not need to be forwarded to the target endpoint. This is useful when the proxy endpoint performs all of the necessary processing, for example by using JavaScript to call an external service or retrieving data from a lookup to the Apigee key/value store.
+
+For example, the following defines a null Route:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<RouteRule name="GoNowhere"/>
+```
+
+Conditional null Routes can be useful. In the following example, a null Route is configured to execute when an HTTP header `request.header.X-DoNothing` have a value other than `null`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<RouteRule name="DoNothingOnDemand">
+  <Condition>request.header.X-DoNothing != null</Condition>
+</RouteRule>
+```
+
+Remember, RouteRules can be chained, so a conditional null Route would typically be one component of a set of RouteRules designed to support conditional routing.
+
+A practical use of a conditional null Route would be in support of caching. By using the value of the variable that is set by the Cache policy, you can configure an API proxy to execute the null Route when an entry is served from the cache.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<RouteRule name="DoNothingUnlessTheCacheIsStale">
+  <Condition>lookupcache.LookupCache-1.cachehit is true</Condition>
+</RouteRule>
+```
+
+## <span id="targetendpoint"></span>TargetEndpoint
+
+<img src="/static/apigee/docs/api-platform/images/proxy_endpoints.png" width="650" alt="Shows a client calling an HTTP service. The request goes through the proxy endpoint and then the target endpoint before being processed by the HTTP service. The response goes through the target endpoing and then the proxy endpoint before being returned to the client." />
+
+A target endpoint is the outbound equivalent of a proxy endpoint. A target endpoint functions as client to a backend service or API—it sends requests and receives responses.
+
+An API proxy needn't have any target endpoints. Proxy endpoints can be configured to call URLs directly. An API proxy with no target endpoints usually contains a proxy endpoint that either directly calls a backend service, or that is configured to call a service using Java or JavaScript.
+
+### TargetEndpoint configuration
+
+### `/targets/default.xml`
+
+The target endpoint defines the outbound connection from Apigee to another service or resource.
+
+Here's a sample TargetEndpoint configuration:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<TargetEndpoint name="default">
+  <PreFlow/>
+  <Flows/>
+  <PostFlow/>
+  <EventFlow/>
+  <HTTPTargetConnection>
+    <URL>http://mocktarget.apigee.net</URL>
+    <SSLInfo/>
+    <Authentication/>
+  </HTTPTargetConnection>
+  <FaultRules/>
+  <DefaultFaultRule/>
+  <ScriptTarget/>
+  <LocalTargetConnection/>
+</TargetEndpoint>
+```
+
+### TargetEndpoint configuration elements
+
+A target endpoint can call a target in one of the following ways:
+
+- HTTPTargetConnection for HTTP or HTTPS calls
+- LocalTargetConnection for local proxy-to-proxy [chaining](/apigee/docs/api-platform/fundamentals/connecting-proxies-other-proxies)
+
+Configure only one of these in a target endpoint.
+
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Default</th>
+<th>Required?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code translate="no" dir="ltr">TargetEndpoint</code></strong></td>
+<td colspan="3"></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">name</code></td>
+<td>The name of the target endpoint, which must be unique within the API proxy configuration. The name of the target endpoint is used in the ProxyEndpoint RouteRule to direct requests for outbound processing. The characters you are allowed to use in the name are restricted to the following: <code translate="no" dir="ltr">A-Za-z0-9._\-$ %</code>.</td>
+<td>N/A</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong><code translate="no" dir="ltr">PreFlow</code></strong></td>
+<td>Defines the policies in the PreFlow flow of a request or response.</td>
+<td>N/A</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong><code translate="no" dir="ltr">Flows</code></strong></td>
+<td><div>
+Defines the policies in the conditional flows of a request or response.
+</div></td>
+<td>N/A</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong><code translate="no" dir="ltr">PostFlow</code></strong></td>
+<td><div>
+Defines the policies in the PostFlow flow of a request or response.
+</div></td>
+<td>N/A</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong><code translate="no" dir="ltr">EventFlow</code></strong></td>
+<td><div>
+Defines the policies in the EventFlow flow of a response. The EventFlow is used for streaming server-sent events. For more information, see <a href="/apigee/docs/api-platform/develop/server-sent-events">Streaming server-sent events</a>.
+</div></td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong><code translate="no" dir="ltr">HTTPTargetConnection</code></strong></td>
+<td colspan="3"><p>With its child elements, specifies a backend resource reached via HTTP.</p>
+<p>If you use HTTPTargetConnection, don't configure other types of target connections (ScriptTarget or LocalTargetConnection).</p>
+<strong>Note:</strong> The <code translate="no" dir="ltr">&lt;LocalTargetConnection&gt;</code> elements support the dynamic string substitution feature called <a href="/apigee/docs/api-platform/reference/message-template-intro">message templating</a>.
+<p>You can use the <code translate="no" dir="ltr">&lt;Authentication&gt;</code> child element to make authenticated calls to Google services or custom services running on certain Google Cloud products, such as <a href="https://cloud.google.com/functions" class="external">Cloud Functions</a> and <a href="https://cloud.google.com/run" class="external">Cloud Run</a>. Use of the <code translate="no" dir="ltr">&lt;Authentication&gt;</code> element requires setup and deployment steps described in <a href="/apigee/docs/api-platform/security/google-auth/overview">Using Google authentication</a>. With proper setup, the policy creates an authentication token for you and adds it to the service request. See also <a href="#authentication-element-usage"><code translate="no" dir="ltr">&lt;Authentication&gt;</code> element usage</a>.</p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">URL</code></td>
+<td>Defines the network address of the backend service to which the target endpoint forwards request messages.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">LoadBalancer</code></td>
+<td><p>Defines one or more named TargetServer configurations. Named TargetServer configurations can be used for load balancing defining 2 or more endpoint configuration connections.</p>
+<p>You can also use target servers to decouple API proxy configurations from concrete backend service endpoints URLs.</p></td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Properties</code></td>
+<td>A set of optional HTTP configuration settings can be defined as properties of a <code translate="no" dir="ltr">&lt;TargetEndpoint&gt;</code>.
+<p>Use the property <code translate="no" dir="ltr">response.payload.parse.limit</code> to set the maximum payload size that can be processed in the response flow, in megabytes (M).</p>
+<p>For example:</p>
+<div>
+&#10;</div>
+<pre translate="no" dir="ltr" data-is-upgraded=""><code>&lt;Properties&gt;
+  &lt;Property name=&quot;response.payload.parse.limit&quot;&gt;15M&lt;/Property&gt;
+&lt;/Properties&gt;</code></pre>
+<p>The minimum configurable limit is 10M and the maximum configurable limit is 30M. If the property is not set, the default limit is 10M.</p>
+<p>For more information, see <a href="/apigee/docs/api-platform/fundamentals/best-practices-api-proxy-design-and-development#size">Message payload size</a>.</p></td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">SSLInfo</code></td>
+<td>Optionally define TLS/SSL settings on a target endpoint to control the TLS/SSL connection between the API proxy and the target service. See <a href="#advancedtargetendpoint">TLS/SSL TargetEndpoint Configuration</a>.
+<strong>Note:</strong> The <code translate="no" dir="ltr">&lt;SSLInfo&gt;</code> element supports the dynamic string substitution feature called <a href="/apigee/docs/api-platform/reference/message-template-intro">message templating</a>.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong><code translate="no" dir="ltr">LocalTargetConnection</code></strong></td>
+<td colspan="3">With its child elements, specifies a resource to be reached locally, bypassing network characteristics such as load balancing and message processors.
+<p>To specify the target resource, include either the APIProxy child element (with the ProxyEndpoint element) or the Path child element.</p>
+<p>For more information, see <a href="/apigee/docs/api-platform/fundamentals/connecting-proxies-other-proxies">Chaining API proxies together</a>.</p>
+<p>If you use LocalTargetConnection, don't configure other types of target connections (HTTPTargetConnection or ScriptTarget).</p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">APIProxy</code></td>
+<td>Specifies the name of an API proxy to use as a target for requests. The target proxy must be in the same organization and environment as the proxy sending requests. This is an alternative to using the Path element.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">ProxyEndpoint</code></td>
+<td>Used with APIProxy to specify the name of the target proxy's proxy endpoint.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Path</code></td>
+<td>Specifies the endpoint path of an API proxy to use as a target for requests. The target proxy must be in the same organization and environment as the proxy sending requests. This is an alternative to using APIProxy.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong><code translate="no" dir="ltr">FaultRules</code></strong></td>
+<td><div>
+Defines how the target endpoint reacts to an error. A fault rule specifies two items:
+</div>
+<ul>
+<li>A Condition that specifies the fault to be handled based on the pre-defined category, subcategory, or name of the fault</li>
+<li>One or more policies that define the behavior of the fault rule for the corresponding Condition</li>
+</ul>
+<p>See <a href="/apigee/docs/api-platform/fundamentals/fault-handling">Handling faults</a>.</p></td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong><code translate="no" dir="ltr">DefaultFaultRule</code></strong></td>
+<td><p>Handles any errors (system, transport, messaging or policy) that are not explicitly handled by another FaultRule.</p>
+<p>See <a href="/apigee/docs/api-platform/fundamentals/fault-handling">Handling faults</a>.</p></td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+
+## `<Authentication>` element usage
+
+The use of the `<Authentication>` element in `<TargetEndpoint>` is identical to the usage of the `<Authentication>` element in the ServiceCallout policy. In both `<TargetEndpoint>` and ServiceCallout, `<Authentication>` is a subelement of `<HttpTargetConnection>`. For details, see [Authentication element](/apigee/docs/api-platform/reference/policies/service-callout-policy#authentication) in the [](/apigee/docs/api-platform/reference/policies/service-callout-policy)ServiceCallout policy reference.
+
+## `<Authentication>` element error reference
+
+If you are using the `<Authentication>` element, you can find possible error messages and troubleshooting tips for deployment and runtime errors in the [Errors](/apigee/docs/api-platform/reference/policies/service-callout-policy#errors) section of the ServiceCallout policy documentation.
+
+## `<Authentication>` element examples
+
+The following example shows how to call a service deployed on <a href="https://cloud.google.com/run" class="external">Cloud Run</a> as the target using the `Authentication` element to generate an OpenID Connect token needed to authenticate the call:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<TargetEndpoint name="TargetEndpoint-1">
+  <HTTPTargetConnection>
+      <Properties/>
+      <URL>https://cloudrun-hostname.a.run.app/test</URL>
+      <Authentication>
+          <GoogleIDToken>
+             <Audience>https://cloudrun-hostname.a.run.app/test</Audience>
+          </GoogleIDToken>
+     </Authentication>
+  </HTTPTargetConnection>
+</TargetEndpoint>
+```
+
+The following example shows how to call a TargetService that points to <a href="https://cloud.google.com/run" class="external">Cloud Run</a> using the `Authentication` element to generate an OpenID Connect token needed to authenticate the call. The `HeaderName` element adds the generated bearer token to a header named `X-Serverless-Authorization` that is sent to the target system. The `Authorization` header, if present, is left unmodified and also sent in the request.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<TargetEndpoint name="TargetEndpoint-1">
+   <HTTPTargetConnection>
+     <Authentication>
+        <HeaderName>X-Serverless-Authorization</HeaderName>
+        <GoogleIDToken>
+            <Audience ref="flow.variable.audience">https://cloudrun-hostname.a.run.app</Audience>
+        </GoogleIDToken>
+     </Authentication>
+      <LoadBalancer>
+         <Server name="cloud-run-target" />
+      </LoadBalancer>
+   </HTTPTargetConnection>
+</TargetEndpoint>
+```
+
+The following example shows how to call a TargetService that points to the Google <a href="https://cloud.google.com/secret-manager" class="external">Secret Manager</a> service. In this example, the GoogleAccessToken element is configured to generate a Google Auth Token to authenticate the target request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPTargetConnection>
+   <Authentication>
+      <GoogleAccessToken>
+        <Scopes>
+          <Scope>https://www.googleapis.com/auth/cloud-platform</Scope>
+        </Scopes>
+      </GoogleAccessToken>
+    </Authentication>
+    <URL>
+      https://secretmanager.googleapis.com/v1/projects/project-id/secrets/secret-id
+    </URL>
+</HTTPTargetConnection>
+```
+
+The following example shows how to automatically set the audience of the GoogleIDToken. When `useTargetUrl` is `true` and the referenced variable does not resolve to a valid variable, the URL of the target (excluding query params) is used as the audience. Suppose the request path is `/foobar` and the target server URL is `https://xyz.com`, the audience of the GoogleIDToken will automatically be set to `https://xyz.com/foobar`.
+
+**Apigee hybrid users:** If you use Apigee hybrid, note that the `useTargetUrl` attribute is available in Apigee hybrid version 1.8 and later versions.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<TargetEndpoint name="TargetEndpoint-1">
+  <HTTPTargetConnection>
+    <Authentication>
+      <GoogleIDToken>
+        <Audience ref='myvariable' useTargetUrl="true"/>
+      </GoogleIDToken>
+    </Authentication>
+    <LoadBalancer>
+      <Server name="TS" />
+    </LoadBalancer>
+  </HTTPTargetConnection>
+</TargetEndpoint>
+```
+
+## <span id="advancedtargetendpoint"></span>TLS/SSL TargetEndpoint configuration
+
+Target endpoints often need to manage HTTPS connections with heterogeneous backend infrastructure. For this reason, a number of TLS/SSL configuration settings are supported.
+
+**Note:** TLS (Transport Layer Security) is the updated version of the now-deprecated SSL (Secure Sockets Layer) specification. Because Apigee originally supported SSL, you may see some instances in the Apigee UI and in the Apigee configuration elements that use the term *SSL*. However, Apigee uses TLS exclusively.
+
+**Important:** Public Certificate Authorities (CAs) are discontinuing the inclusion of the `clientAuth` Extended Key Usage (EKU) in latest publicly-trusted SSL/TLS certificates. This industry-wide change affects Apigee mutual TLS (mTLS) configurations in [Apigee platform](https://console.cloud.google.com//apigee).
+
+Apigee requires the `clientAuth` EKU to be present in client certificates for mTLS handshakes. Without this EKU, mTLS connections will fail for both northbound (client to Apigee) and southbound (Apigee to backend) traffic. For a detailed explanation of the issue, timelines, and recommended solutions, refer to this [blog post](https://discuss.google.dev/t/navigating-the-industry-shift-in-client-authentication-for-apigee-mtls/289627).
+
+### TLS/SSL TargetEndpoint configuration elements
+
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Default</th>
+<th>Required?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code translate="no" dir="ltr">SSLInfo</code></strong></td>
+<td><p>The <code translate="no" dir="ltr">&lt;SSLInfo&gt;</code> block can be used for both one-way and two-way TLS/SSL.</p></td>
+<td colspan="2"></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Enabled</code></td>
+<td><p>When set to <code translate="no" dir="ltr">true</code>, specifies that the target connection should use the SSL protocol in accordance with any other parameters specified in this <code translate="no" dir="ltr">&lt;SSLInfo&gt;</code> block. When set to <code translate="no" dir="ltr">false</code>, specifies that the target connection should not use SSL.</p>
+<p>However, if the enclosing <code translate="no" dir="ltr">&lt;HTTPTargetConnection&gt;</code> block contains a <code translate="no" dir="ltr">&lt;URL&gt;</code> element that evaluates to a string that begins with <code translate="no" dir="ltr">https://</code>, then the SSL protocol will be used even if <code translate="no" dir="ltr">&lt;Enabled&gt;</code> is false. In this case, the entire <code translate="no" dir="ltr">&lt;SSLInfo&gt;</code> block is ignored.</p>
+<p>Conversely, if there is a <code translate="no" dir="ltr">&lt;URL&gt;</code> element that begins with <code translate="no" dir="ltr">http://</code>, then the SSL protocol will not be used even if <code translate="no" dir="ltr">&lt;Enabled&gt;</code> is true.</p></td>
+<td>false</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Enforce</code></td>
+<td><p>Enforces strict SSL between Apigee and the target backend.</p>
+<p>If set to <code translate="no" dir="ltr">true</code>, connections will fail for targets with invalid certs, expired certs, self-signed certs, certs with a hostname mismatch, and certs with an untrusted root. A failure code of <code translate="no" dir="ltr">4xx</code> or <code translate="no" dir="ltr">5xx</code> is returned.</p>
+<p>If unset, or set to <code translate="no" dir="ltr">false</code>, the result of connections to target backends with problematic certs depends upon the setting of <code translate="no" dir="ltr">&lt;IgnoreValidationErrors&gt;</code> (see below). A success response (<code translate="no" dir="ltr">2xx</code>) can occur under certain conditions, if <code translate="no" dir="ltr">&lt;IgnoreValidationErrors&gt;</code> is set to <code translate="no" dir="ltr">true</code>.</p>
+<p>You can override the <code translate="no" dir="ltr">Enforce</code> field at the environment level with the feature flag <code translate="no" dir="ltr">SSLInfo.Enforce</code>. See <a href="#environment-level-ssl-enforcement">Specifying environment-level SSL enforcement</a>.</p></td>
+<td><code translate="no" dir="ltr">false</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">TrustStore</code></td>
+<td><p>A keystore containing trusted root server certificates. Apigee will treat the remote peer as trusted if the certificate chain it sends terminates in a certificate that is contained in this keystore.</p></td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">ClientAuthEnabled</code></td>
+<td><p>If set to <code translate="no" dir="ltr">true</code>, enables two-way TLS (also known as mutual TLS or mTLS) between Apigee and the remote peer - either the API client, or the target backend.</p>
+<p>Enabling two-way TLS typically requires that you set up both a truststore and a keystore on Apigee.</p></td>
+<td><code translate="no" dir="ltr">false</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">KeyStore</code></td>
+<td>A keystore containing private keys used for outbound client authentication</td>
+<td>N/A</td>
+<td>Yes (if ClientAuthEnabled is true)</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">KeyAlias</code></td>
+<td>The key alias of the private key used for outbound client authentication</td>
+<td>N/A</td>
+<td>Yes (if ClientAuthEnabled is true)</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">IgnoreValidationErrors</code></td>
+<td><p>Indicates whether validation errors are ignored. If the backend system uses SNI and returns a cert with a subject Distinguished Name (DN) that does not match the hostname, there is no way to ignore the error and the connection fails.</p>
+<p><strong>Note</strong>: If <code translate="no" dir="ltr">&lt;Enforce&gt;</code> is set to <code translate="no" dir="ltr">true</code>, the value of <code translate="no" dir="ltr">&lt;IgnoreValidationErrors&gt;</code> is ignored.</p></td>
+<td><code translate="no" dir="ltr">false</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Ciphers</code></td>
+<td><p>Supported ciphers for outbound TLS/SSL. If no ciphers are specified, then all ciphers available for the JVM will be permitted.</p>
+<p>To restrict ciphers, add the following elements listing the supported ciphers:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="scdoc" data-syntax-guessed=""><code>&lt;Ciphers&gt;
+ &lt;Cipher&gt;TLS_RSA_WITH_3DES_EDE_CBC_SHA&lt;/Cipher&gt;
+ &lt;Cipher&gt;TLS_RSA_WITH_DES_CBC_SHA&lt;/Cipher&gt;
+&lt;/Ciphers&gt;</code></pre></td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Protocols</code></td>
+<td><p>Supported protocols for outbound TLS/SSL. If no protocols are specified, then all protocols available for the JVM will be permitted.</p>
+<p>To restrict protocols, specify them explicitly. For example, to allow only TLS v1.2 or TLS v1.3:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="Text only" data-syntax-guessed=""><code>&lt;Protocols&gt;
+ &lt;Protocol&gt;TLSv1.2&lt;/Protocol&gt;
+ &lt;Protocol&gt;TLSv1.3&lt;/Protocol&gt;
+&lt;/Protocols&gt;</code></pre>
+<strong>Note:</strong> TLS 1.0 is not supported for Apigee Hybrid for southbound connections.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">CommonName</code></td>
+<td><p>Apigee checks the value here against the CN (Common Name) or SANs (Subject Alternate Names) on the remote peer certificate.</p></td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+
+### Specifying environment-level SSL enforcement
+
+If `SSLInfo.Enforce` is set to `true` or `false`, the value specified overrides any granular enforcement options specified in `<SSLInfo>` blocks in TargetEndpoint or TargetServer configurations.
+
+If `SSLInfo.Enforce` is unset, SSL enforcement is determined by any values specified using the `<Enforce>` element within individual `<SSLInfo>` blocks. For more information, see [TLS/SSL TargetEndpoint configuration.](/apigee/docs/api-platform/reference/api-proxy-configuration-reference#tlsssltargetendpointconfiguration)
+
+In the following example, `SSLInfo.Enforce` is set to `true`. In the resulting output, you can see that SSL is enforced in the specified environment.
+
+**Note** The API call in the example does not preserve the settings of any previously specified feature flags. In this call, you must re-specify any settings that you want to preserve.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+VALUE=true
+curl -Ss -v -X PUT \
+    "https://apigee.googleapis.com/v1/organizations/MYORG/environments/MYENV" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer TOKEN" \
+    -d '{
+        "name": "MYENV",
+        "properties": {
+            "property": [{
+                "name": "features.SSLInfo.Enforce",
+                "value": "'"$VALUE"'"
+            }]
+        }
+    }'
+  
+```
+
+Output:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  ...
+  "properties": {
+    "property": [
+      {
+        "name": "features.SSLInfo.Enforce",
+        "value": "true"
+      }
+    ]
+  },
+  ...
+}
+```
+
+### Sample target endpoint with outbound client authentication enabled
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<TargetEndpoint name="default">
+  <HttpTargetConnection>
+        <URL>https://myservice.com</URL>
+    <SSLInfo>
+      <Enabled>true</Enabled>
+      <Enforce>true</Enforce>
+      <ClientAuthEnabled>true</ClientAuthEnabled>
+      <KeyStore>myKeystore</KeyStore>
+      <KeyAlias>myKey</KeyAlias>
+      <TrustStore>myTruststore</TrustStore>
+    </SSLInfo>
+  </HttpTargetConnection>
+</TargetEndpoint>
+```
+
+</div>
+
+For detailed instructions, see [Options for configuring TLS](/apigee/docs/api-platform/system-administration/options-configuring-tls).
+
+### Using flow variables to set TLS/SSL values dynamically
+
+You can also dynamically set TLS/SSL details to support flexible runtime requirements. For example, if your proxy connects to two potentially different targets (a test target and a production target), you can have your API proxy programmatically detect which environment it's calling and dynamically set references to the appropriate keystore and truststore. The <a href="https://discuss.google.dev/t/dynamic-sslinfo-for-targetendpoint-using-variable-reference/17544.html" class="external">Dynamic SSLInfo for TargetEndpoint using variable reference</a> Apigee Community article explains this scenario in more detail and provides deployable API proxy examples.
+
+In the following example of how the `<SSLInfo>` tag would be set in a TargetEndpoint configuration, the values can be supplied at runtime, for example, by a Java Callout, a JavaScript policy, or an [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy). Use whichever message variables contain the values you want to set.
+
+Variables are allowed in only the following elements.
+
+**Note:** These elements support the dynamic string substitution feature called [message templating](/apigee/docs/api-platform/reference/message-template-intro).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SSLInfo>
+    <Enabled>{myvars.ssl.enabled}</Enabled>
+    <ClientAuthEnabled>{myvars.ssl.client.auth.enabled}</ClientAuthEnabled>
+    <KeyStore>{myvars.ssl.keystore}</KeyStore>
+    <KeyAlias>{myvars.ssl.keyAlias}</KeyAlias>
+    <TrustStore>{myvars.ssl.trustStore}</TrustStore>
+</SSLInfo>
+```
+
+**Note:** Variable replacement of TLS/SSL values can only be used for a target endpoint. Any attempt to use variables in any other context, such as message logging, will cause validation failures.
+
+### Using references to set TLS/SSL values dynamically
+
+When configuring a target endpoint that uses HTTPS, you have to consider the case when the TLS/SSL cert expires, or a change to the system configuration requires you to update the cert.
+
+For more information, see [Handling expired certificates](/apigee/docs/api-platform/system-administration/options-configuring-tls#handling-expired-certificates).
+
+However, you can optionally configure the target endpoint to use a *reference* to the keystore or truststore instead. The advantage to using a reference is that you can update the reference to point to a different keystore or truststore to update the TLS/SSL cert without having to restart Message Processors.
+
+**Note:** You can only use a reference to the keystore and truststore; you cannot use a reference to the alias. When you change the reference to a keystore, ensure that the alias name of the cert is the same as in the old keystore.
+
+For example, shown below is a target endpoint that uses a reference to the keystore:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SSLInfo>
+  <Enabled>true</Enabled>
+  <ClientAuthEnabled>false</ClientAuthEnabled>
+  <KeyStore>ref://keystoreref</KeyStore>
+  <KeyAlias>myKeyAlias</KeyAlias>
+</SSLInfo>
+```
+
+Use the following POST API call to create the reference named `keystoreref`:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/{org}/environments/{env}/references" \
+  -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '<ResourceReference name="keystoreref">
+    <Refers>myTestKeystore</Refers>
+    <ResourceType>KeyStore</ResourceType>
+</ResourceReference>'
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+The reference specifies the name of the keystore and its type.
+
+Use the following GET API call to view the reference:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/{org}/environments/{env}/references/keystoreref" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/{org}/environments/{env}/references/keystoreref" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+To later change the reference to point to a different keystore, ensuring that the alias has the same name, use the following PUT call:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/{org}/environments/{env}/references/keystoreref" \
+  -X PUT \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '<ResourceReference name="keystoreref">
+    <Refers>myNewKeystore</Refers>
+    <ResourceType>KeyStore</ResourceType>
+  </ResourceReference>'
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+### TargetEndpoint with target load balancing
+
+Target endpoints support load balancing across multiple named target servers using three load balancing algorithms.
+
+For detailed instructions, refer to [Load balancing across backend servers](/apigee/docs/api-platform/deploy/load-balancing-across-backend-servers).
+
+## IntegrationEndpoint
+
+An IntegrationEndpoint is a target endpoint that specifically runs [Apigee integrations](/apigee/docs/api-platform/integration/what-is-apigee-integration). If you have configured an IntegrationEndpoint, Apigee sends the [request](/apigee/docs/api-platform/reference/variables-reference#request) object to Apigee's Integration Platform for execution. To run your integration, in addition to configuring the IntegrationEndpoint, you must also add the [SetIntegrationRequest policy](/apigee/docs/api-platform/reference/policies/set-integration-request-policy) in your proxy flow.
+
+You can configure your integration to execute either synchronously or asynchronously by setting the `<AsyncExecution>` element in the IntegrationEndpoint configuration. For more information, see [Synchronous vs Asynchronous execution](#ie-sync-async). After running the integration, Apigee saves the response in the [response message](/apigee/docs/api-platform/reference/variables-reference#response).
+
+**Note**: You need an authentication token to run the IntegrationEndpoint. However, there is no explicit `<Authentication>` element in the IntegrationEndpoint definition. Apigee adds an authentication token to the request under the hood. For the IntegrationEndpoint to successfully authenticate, you must deploy your API proxy with a service account that has the required IAM roles to run an integration. For information about the required roles, see [IAM roles for integrations](/apigee/docs/api-platform/integration/integrations-access-permissions#iam-roles-for-integrations). For more details on deploying an API proxy, see [Deploy on Apigee](/apigee/docs/api-platform/security/google-auth/overview#deploy-on-apigee-x).
+
+### Configuring IntegrationEndpoint
+
+To configure an integration endpoint as your target endpoint, add the IntegrationEndpoint element to your ProxyEndpoint configuration. The following is a sample ProxyEndpoint configuration:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ProxyEndpoint name="default">
+    <Description/>
+    <FaultRules/>
+    <PreFlow name="PreFlow">
+        <Request>
+            <Step>
+                <Name>my-set-integration-request-policy</Name>
+            </Step>
+        </Request>
+    </PreFlow>
+    <Flows/>
+    <PostFlow name="PostFlow"/>
+    <HTTPProxyConnection>
+        <BasePath>/integration-endpoint-test</BasePath>
+        <Properties/>
+    </HTTPProxyConnection>
+    <RouteRule name="default">
+        <IntegrationEndpoint>my-int-endpoint</IntegrationEndpoint>
+    </RouteRule>
+</ProxyEndpoint>
+```
+
+In the sample ProxyEndpoint configuration, Apigee performs the following tasks:
+
+1.  In the PreFlow, executes the policy named `my-set-integration-request-policy`, which sets the integration request object and integration flow variables.
+2.  Uses `my-int-endpoint` as the target endpoint, as specified in the `RouteRule`.
+3.  Reads the integration request object created by the `my-set-integration-request-policy`.
+4.  Sends the request to Apigee's Integration Platform using the request object and flow variables set by the SetIntegrationRequest policy.
+5.  Saves the response of the integration in the response message.
+
+The XML file containing the `<IntegrationEndpoint>` declaration will be available in the `APIGEE_BUNDLE_DIRECTORY``/apiproxy/integration-endpoints/` directory. If you create your API proxy using the `Develop > API Proxies > CREATE NEW > Integration target` option, Apigee stores the declaration in the `/apiproxy/integration-endpoints/default.xml` file. If you create the integration endpoint XML from the UI, you can provide a custom name for the XML file.
+
+The following example shows the declaration of the `<IntegrationEndpoint>` element in the XML file:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IntegrationEndpoint name="my-int-endpoint">
+    <AsyncExecution>false</AsyncExecution>
+</IntegrationEndpoint>
+```
+
+### IntegrationEndpoint configuration elements
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Default</th>
+<th>Required?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code translate="no" dir="ltr">IntegrationEndpoint</code></strong></td>
+<td colspan="3"></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">name</code></td>
+<td>The name of the IntegrationEndpoint. The characters you can use in the name are restricted to: <code translate="no" dir="ltr">A-Za-z0-9._\-$ %</code></td>
+<td>N/A</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">AsyncExecution</code></td>
+<td>A Boolean value that specifies if the integration should run in synchronous or asynchronous mode. For more information, see <a href="#ie-sync-async">Synchronous vs Asynchronous execution</a>.</td>
+<td>false</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+
+### Synchronous vs Asynchronous execution
+
+You can configure the integration to run in either synchronous or asynchronous mode. To understand the difference between synchronous and asynchronous execution modes, see [\<AsyncExecution\>](/apigee/docs/api-platform/reference/policies/integration-callout-policy#asyncexecution).
+
+Use the `<AsyncExecution>` element within the `</IntegrationEndpoint>` to specify synchronous or asynchronous execution. If you set `<AsyncExecution>` to `true`, the integration runs asynchronously. And if you set it to `false`, the integration runs synchronously.
+
+The following example sets the `AsyncExecution` to `true`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IntegrationEndpoint name="my-int-endpoint">
+    <AsyncExecution>true</AsyncExecution>
+</IntegrationEndpoint>
+```
+
+## <span id="policies"></span>Policies
+
+The `/policies` directory in an API proxy contains all policies available to be attached to Flows in the API proxy.
+
+### Policy configuration elements
+
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Default</th>
+<th>Required?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code translate="no" dir="ltr">Policy</code></strong></td>
+<td colspan="3"></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">name</code></td>
+<td><p>The internal name of the policy. Characters you can use in the name are restricted to: <code translate="no" dir="ltr">A-Za-z0-9._\-$ %</code>. However, the Apigee UI enforces additional restrictions, such as automatically removing characters that are not alphanumeric.</p>
+<p>Optionally, use the <code translate="no" dir="ltr">&lt;DisplayName&gt;</code> element to label the policy in the Apigee UI proxy editor with a different, natural-language name.</p></td>
+<td>N/A</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">enabled</code></td>
+<td><p>Set to <code translate="no" dir="ltr">true</code> to enforce the policy.</p>
+<p>Set to <code translate="no" dir="ltr">false</code> to <em>turn off</em> the policy. The policy will not be enforced even if it remains attached to a flow.</p></td>
+<td><code translate="no" dir="ltr">true</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">continueOnError</code></td>
+<td><p>Set to <code translate="no" dir="ltr">false</code> to return an error when a policy fails. This is expected behavior for most policies.</p>
+<p>Set to <code translate="no" dir="ltr">true</code> to have flow execution continue even after a policy fails.</p></td>
+<td><code translate="no" dir="ltr">false</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">async</code></td>
+<td><strong>Note</strong>: This attribute does not make the policy execute asynchronously. In most cases, leave this with the default of <code translate="no" dir="ltr">false</code>.
+<p>When set to <code translate="no" dir="ltr">true</code>, policy execution is offloaded to a different thread, leaving the main thread free to handle additional requests. When the offline processing is complete, the main thread comes back and finishes handling the message flow. In some cases, setting async to <code translate="no" dir="ltr">true</code> improves API proxy performance. However, overusing async can hurt performance with too much thread switching.</p>
+<p>To use asynchronous behavior in API proxies, see <a href="/apigee/docs/api-platform/reference/javascript-object-model">JavaScript object model</a>.</p></td>
+<td><code translate="no" dir="ltr">false</code></td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+
+### Policy attachment
+
+The following image shows the API proxy flows execution sequence:
+
+![shows a client calling an HTTP service. The request encounters the proxy endpoint and target endpoint, which each contain steps that trigger policies. After the HTTP service returns the response, the response is processed by the target endpoint and then the ProxyEndpoing before being returned to the client. As with the request, the response is processed by policies within steps.](/static/apigee/docs/api-platform/images/proxy_flow_diagram_steps2.png)
+
+As shown above:
+
+Policies are attached as processing steps to *Flows*. The policy's name is used to reference the policy to be enforced as a processing Step. The format of a policy attachment is the following:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Step><Name>MyPolicy</Name></Step>
+```
+
+Policies are enforced in the order in which they are attached to a Flow. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Step><Name>FirstPolicy</Name></Step>
+<Step><Name>SecondPolicy</Name></Step>
+```
+
+### Policy attachment configuration elements
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Default</th>
+<th>Required?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code translate="no" dir="ltr">Step</code></strong></td>
+<td colspan="3"></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Name</code></td>
+<td>The name of the policy to be executed by this Step definition.</td>
+<td>N/A</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Condition</code></td>
+<td>A conditional statement that determines whether the policy is enforced or not. If a policy has an associated condition, then the policy only executes if the conditional statement evaluates to true.</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+
+## <span id="flows"></span>Flows
+
+ProxyEndpoint and TargetEndpoint define a pipeline for request and response message processing. A processing pipeline consists of a request flow and a response flow. Each request flow and response flow is subdivided into a PreFlow, one or more optional *conditional* or *named* flows, and a PostFlow.
+
+- PreFlow: Always executes. Executes before any conditional Flows.
+- PostFlow: Always executes. Executes after any conditional Flows.
+
+Additionally, you can add a PostClientFlow to the proxy endpoint, which executes after the response is returned to the requesting client app. Only the [MessageLogging policy](/apigee/docs/api-platform/reference/policies/message-logging-policy) can be attached to this flow. PostClientFlow reduces API proxy latency and makes information available for logging that is not calculated until after the response is returned to the client, such as the `client.sent.start.timestamp` and `client.sent.end.timestamp`.The flow is used primarily for measuring the time interval between the start and end timestamps for the response message.
+
+Here's an example of a PostClientFlow with a message logging policy attached.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+  <PostFlow name="PostFlow">
+      <Request/>
+      <Response/>
+  </PostFlow>
+  <PostClientFlow>
+      <Request/>
+      <Response>
+          <Step>
+              <Name>Message-Logging-1</Name>
+          </Step>
+      </Response>
+  </PostClientFlow>
+  ...
+```
+
+The API proxy processing pipeline executes Flows in the following sequence:
+
+Request Pipeline:
+
+1.  Proxy Request PreFlow
+2.  Proxy Request Conditional Flows (Optional)
+3.  Proxy Request PostFlow
+4.  Target Request PreFlow
+5.  Target Request Conditional Flows (Optional)
+6.  Target Request PostFlow
+
+Response Pipeline:
+
+1.  Target Response PreFlow
+2.  Target Response Conditional Flows (Optional)
+3.  Target Response PostFlow
+4.  Proxy Response PreFlow
+5.  Proxy Response Conditional Flows (Optional)
+6.  Proxy Response PostFlow
+7.  PostClientFlow Response (Optional)
+
+Only those Flows with policy attachments need to be configured in ProxyEndpoint or TargetEndpoint configurations. PreFlow and PostFlow need only be specified in a ProxyEndpoint or TargetEndpoint configuration when a policy needs to be enforced during PreFlow or PostFlow processing.
+
+In contrast to conditional flows, the ordering of PreFlow and PostFlow elements is not important--the API proxy will always execute each at the appropriate point in the pipeline, regardless of where they appear in the Endpoint configuration.
+
+### Conditional flows
+
+Proxy endpoints and target endpoints support an unlimited number of conditional flows (also known as *named flows*).
+
+The API proxy tests for the condition specified in the conditional flow and, if the condition is met, the processing steps in the conditional flow are executed by the API proxy. If the condition is not met, then the processing steps in the conditional flow are bypassed. Conditional flows are evaluated in the order defined in the API proxy and the first one whose condition is met is executed.
+
+By defining conditional flows, you gain the ability to apply processing steps in an API proxy based on:
+
+- Request URI
+- HTTP verb (`GET`/`PUT`/`POST`/`DELETE`)
+- Value of a query param, header, and form param
+- Many other types of conditions
+
+For example, the following conditional flow specifies that it is executed only when the request resource path is `/accesstoken`. Any inbound request with the path `/accesstoken` causes this flow to be executed, along with any policies that are attached to the flow. If the request path does not include the suffix `/accesstoken`, then the flow does not execute (although another conditional flow might).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Flows>
+  <Flow name="TokenEndpoint">
+    <Condition>proxy.pathsuffix MatchesPath "/accesstoken"</Condition>
+    <Request>
+      <Step>
+        <Name>GenerateAccessToken</Name>
+      </Step>
+    </Request>
+  </Flow>
+</Flows>   
+```
+
+### Flow configuration elements
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Default</th>
+<th>Required?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code translate="no" dir="ltr">Flow</code></strong></td>
+<td colspan="3">A request or response processing pipeline defined by a proxy endpoint or target endpoint</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Name</code></td>
+<td>The unique name of the Flow.</td>
+<td>N/A</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Condition</code></td>
+<td>A conditional statement that evaluates one or more variables to evaluate to true or false. All Flows other than the predefined PreFlow and PostFlow types must define a condition for their execution. However, if you include a single flow <em>without</em> a condition at the end of a sequence of flows, it will act as the "Else" statement at the end of the sequence of flows.</td>
+<td>N/A</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Request</code></td>
+<td>The pipeline associated with Request message processing</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">Response</code></td>
+<td>The pipeline associated with Response message processing</td>
+<td>N/A</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+
+### Step processing
+
+The sequential ordering of conditional Flows is enforced by Apigee. Conditional Flows execute from top to bottom. The first conditional Flow whose condition evaluates to `true` is executed, and only one conditional Flow is executed.
+
+For example, in the following Flow configuration, any inbound request that does not include the path suffix `/first` or `/second` will cause the `ThirdFlow` to execute, enforcing the policy called `Return404`.
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Flows>
+  <Flow name="FirstFlow">
+    <Condition>proxy.pathsuffix MatchesPath "/first"</Condition>
+    <Request>
+      <Step><Name>FirstPolicy</Name></Step>
+    </Request>
+  </Flow>
+  <Flow name="SecondFlow">
+    <Condition>proxy.pathsuffix MatchesPath "/second"</Condition>
+    <Request>
+      <Step><Name>FirstPolicy</Name></Step>
+      <Step><Name>SecondPolicy</Name></Step>
+    </Request>
+  </Flow>
+  <Flow name="ThirdFlow">
+    <Request>
+      <Step><Name>Return404</Name></Step>
+    </Request>
+  </Flow>
+</Flows>
+```
+
+</div>
+
+## <span id="resources"></span>Resources
+
+"Resources" (resource files for use in API proxies) are scripts, code, and XSL transformations that can be attached to Flows using policies. These appear in the **Scripts** section of the API proxy editor in the Apigee UI.
+
+See [Managing resources](/apigee/docs/api-platform/develop/resource-files) for the supported resource types.
+
+Resources can be stored in an API proxy, an environment, or an organization. In each case, a resource is referenced by name in a Policy. Apigee resolves the name by moving from the API proxy, to environment, to organization level.
+
+A resource stored at the organization level can be referenced by Policies in any environment. A resource stored at the environment level can be referenced by Policies in that environment. A resource stored at the API proxy level can be referenced only by Policies in that API proxy.

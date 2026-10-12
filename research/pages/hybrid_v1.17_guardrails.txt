@@ -1,0 +1,40 @@
+# Apigee Ingressgateway
+ingressGateway:
+  image:
+    pullPolicy: Always
+
+## NOTE: The Guardrails config is below. The ingressgateway config above is for position reference only and is NOT required for Guardrails config.
+
+# Apigee Guardrails
+guardrails:
+  image:
+    url: "gcr.io/ng-hybrid/guardrails/apigee-watcher"
+    tag: "1.17.1"
+    pullPolicy: Always
+```
+
+### Using Kubernetes tolerations with Guardrails
+
+You can also add [tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) to Guardrails in your `overrides` file. If no tolerations are defined under the Guardrails `overrides` configuration, Guardrails will use any globally defined tolerations.
+
+For example, to include tolerations specifically in the Guardrails section of your `overrides` file, you would add something similar to the following stanza:
+
+<div>
+
+</div>
+
+``` devsite-disable
+
+  # Apigee Guardrails
+  guardrails:
+    image:
+      url: "gcr.io/ng-hybrid/guardrails/apigee-watcher"
+      tag: "1.17.1"
+      pullPolicy: Always
+    tolerations:
+    - key: "say"
+      operator: "Equal"
+      value: "taunt"
+      effect: "NoSchedule"
+  
+```

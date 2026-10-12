@@ -1,0 +1,405 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/troubleshoot/policies/runtime/service-callout-runtime-errors" target="_blank">Apigee Edge</a> documentation.*</span>
+
+**Note:** Was this troubleshooting playbook helpful? Please let us know by clicking <a href="" class="google-feedback" data-p="1636213" data-b="docsite" data-context="troubleshooting-feedback">Send Feedback</a> .
+
+## RequestVariableNotMessageType
+
+### Error code
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+steps.servicecallout.RequestVariableNotMessageType
+```
+
+### Error response body
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+    "fault": {
+        "faultstring": "ServiceCallout[POLICY_NAME]: request variable [VARIABLE_NAME] value is not of type Message",
+        "detail": {
+            "errorcode": "steps.servicecallout.RequestVariableNotMessageType"
+        }
+    }
+}
+```
+
+### Cause
+
+This error occurs if a variable specified in the `<Request>` element of the [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy) is not of type [`message`](/apigee/docs/api-platform/reference/variables-reference#message). If the variable is a string or any other non-message type, then you'll see this error.
+
+Message type variables represent entire HTTP requests and responses. The built-in flow variables `request`, `response`, and `message` are of type [`message`](/apigee/docs/api-platform/reference/variables-reference#message).
+
+### Diagnosis
+
+1.  Identify the ServiceCallout policy where the error occurred and the name of the variable whose type is incorrect. You can find both of these items in the `faultstring` element of the error response. For example, in the following `faultstring`, the policy name is `ExecuteGeocodingRequest` and the variable is `PostalCode`:
+
+    ` "faultstring": "ServiceCallout[`**`ExecuteGeocodingRequest`**`]: request variable `**`PostalCode`**` value is not of type Message"`
+
+2.  In the failed ServiceCallout policy XML, verify that the name of the variable set in the `<Request>` element matches the variable name identified in the fault string (step \#1 above). For example, the following policy specifies a request variable named `PostalCode`, which matches what's in the `faultstring`:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <ServiceCallout name="ExecuteGeocodingRequest">
+        <Request variable="PostalCode"/>
+        <Response>GeocodingResponse</Response>
+        <HTTPTargetConnection>
+            <URL>http://maps.googleapis.com/maps/api/geocode/json</URL>
+        </HTTPTargetConnection>
+    </ServiceCallout>
+    ```
+
+3.  Determine if this variable is of type message or not:
+
+    1.  Locate the code within the API Proxy bundle, where the variable was defined first.
+    2.  In most cases, you'll find that the problem variable is created and populated in another policy that executes before the ServiceCallout policy. For example, the Assign Message policy is commonly used to create and populate variables in an API proxy flow.
+    3.  Once you figure out the policy in which the variable is defined and populated first, you need to determine the type of that variable as follows:
+        - Check the value of the `type` attribute (if present).
+        - If the `type` attribute is not present, then the variable is considered to be a string.
+    4.  If the variable's type is non-message (such as a string), then that's the cause of the error. You can learn about common variables and their types in the [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference).
+
+As an example, assume the `PostalCode` variable referenced in the ServiceCallout policy was created in the following [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy). Note that `PostalCode` is assigned the value of the flow variable `request.queryparam.postalcode`. This value is a string, because there is no `type` attribute present in the variable assignment.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<AssignMessage name="GenerateGeocodingRequest">
+        <AssignTo createNew="true" type="request">GeocodingRequest</AssignTo>
+    <Set>
+        <QueryParams>
+            <QueryParam name="address">{request.queryparam.postalcode}</QueryParam>
+            <QueryParam name="region">{request.queryparam.country}</QueryParam>
+            <QueryParam name="sensor">false</QueryParam>
+        </QueryParams>
+        <Verb>GET</Verb>
+    </Set>
+    <AssignVariable>
+        <Name>PostalCode</Name>
+        <Ref>request.queryparam.postalcode</Ref>
+    </AssignVariable>
+    <AssignVariable>
+        <Name>Country</Name>
+        <Ref>request.queryparam.country</Ref>
+    </AssignVariable>
+</AssignMessage>
+```
+
+Now, recall that the `PostalCode` variable is used in the `<Request>` element of the [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy):
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ServiceCallout name="ExecuteGeocodingRequest">
+    <Request variable="PostalCode"/>
+    <Response>GeocodingResponse</Response>
+    <HTTPTargetConnection>
+        <URL>http://maps.googleapis.com/maps/api/geocode/json</URL>
+    </HTTPTargetConnection>
+</ServiceCallout>
+```
+
+Because `PostalCode` is not of type message (it's a string in this example), you receive the error code: `steps.servicecallout.RequestVariableNotMessageType`.
+
+### Resolution
+
+Ensure that the variable set in the `<Request>` element in the failed ServiceCallout policy is a [`message`](/apigee/docs/api-platform/reference/variables-reference#message) type flow variable that exists or alternatively you can create a new message type variable directly in the ServiceCallout policy (as explained in [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy)) and use it.
+
+To correct the policy, you have to modify the `<Request>` element to specify an existing or new variable that is of type message. For example, the variable `GeocodingRequest` that was set in the Assign Message policy is of type message, and would work just fine in the ServiceCallout policy. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ServiceCallout name="ExecuteGeocodingRequest">
+    <Request variable="GeocodingRequest"/>
+    <Response>GeocodingResponse</Response>
+    <HTTPTargetConnection>
+        <URL>http://maps.googleapis.com/maps/api/geocode/json</URL>
+    </HTTPTargetConnection>
+</ServiceCallout>
+```
+
+## RequestVariableNotRequestMessageType
+
+### Error code
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+steps.servicecallout.RequestVariableNotRequestMessageType
+```
+
+### Error response body
+
+<div>
+
+</div>
+
+```
+
+{
+    "fault": {
+        "faultstring": "ServiceCallout[policy_name]: request variable [variable_name] value is not of type Request Message",
+        "detail": {
+            "errorcode": "steps.servicecallout.RequestVariableNotRequestMessageType"
+        }
+    }
+}
+```
+
+### Cause
+
+This error occurs if a variable specified in the `<Request>` element of the [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy) is not of type [`message`](/apigee/docs/api-platform/reference/variables-reference#message). If the variable is a response message type, a string, or any other type, then you'll see this error.
+
+The [`message`](/apigee/docs/api-platform/reference/variables-reference#message) type variable represents entire HTTP requests and responses. The built-in flow variables `request`, `response`, and `message` are of type [`message`](/apigee/docs/api-platform/reference/variables-reference#message).
+
+### Diagnosis
+
+1.  Identify the ServiceCallout policy where the error occurred and the name of the variable whose type is incorrect. You can find both of these items in the `faultstring` element of the error response. For example, in the following `faultstring`, the policy name is `ExecuteGeocodingRequest` and the variable is `var_response`:
+
+    ` "faultstring": "ServiceCallout[`**`ExecuteGeocodingRequest`**`]: request variable `**`var_response`**` value is not of type Message"`
+
+2.  In the failed ServiceCallout policy XML, verify that the name of the variable set in the `<Request>` element matches the variable name identified in the fault string (step \#1 above). For example, the following policy specifies a request variable named `var_response`, which matches what's in the `faultstring`:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <ServiceCallout name="ExecuteGeocodingRequest">
+        <Request variable="var_response"/>
+        <Response>GeocodingResponse</Response>
+        <HTTPTargetConnection>
+            <URL>http://maps.googleapis.com/maps/api/geocode/json</URL>
+        </HTTPTargetConnection>
+    </ServiceCallout>
+    ```
+
+3.  Determine if the variable is of request message type or not:
+
+    1.  Locate the code within the API Proxy bundle, where the variable was defined first.
+    2.  In most cases, you'll find that the problem variable is created and populated in another policy that executes before the ServiceCallout policy. For example, the Assign Message policy is commonly used to create and populate variables in an API proxy flow.
+    3.  Once you figure out the policy in which the variable is defined and populated first, you need to determine the type of that variable as follows:
+        - Check the value of the `type` attribute (if present).
+        - If the `type` attribute is not present, then the variable is considered to be a string.
+    4.  If the variable's type is not of **request message** type, then that's the cause of the error. You can learn about common variables and their types in the [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference).
+
+As an example, assume the `var_response` variable referenced in the ServiceCallout policy was created in the following Assign Message policy. Note that `var_response` is given the type `response`. Therefore, the type of the `var_response` variable is response message.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<AssignMessage name="GenerateGeocodingRequest">
+        <AssignTo createNew="true" type="request">GeocodingRequest</AssignTo>
+    <AssignTo createNew="true" type="response">var_response</AssignTo>
+    <Set>
+        <QueryParams>
+            <QueryParam name="address">{request.queryparam.postalcode}</QueryParam>
+            <QueryParam name="region">{request.queryparam.country}</QueryParam>
+            <QueryParam name="sensor">false</QueryParam>
+        </QueryParams>
+        <Verb>GET</Verb>
+    </Set>
+    <AssignVariable>
+        <Name>PostalCode</Name>
+        <Ref>request.queryparam.postalcode</Ref>
+    </AssignVariable>
+    <AssignVariable>
+        <Name>Country</Name>
+        <Ref>request.queryparam.country</Ref>
+    </AssignVariable>
+</AssignMessage>
+```
+
+Recall that the `var_response` variable is used in the `<Request>` element of the ServiceCallout policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ServiceCallout name="ExecuteGeocodingRequest">
+    <Request variable="var_response"/>
+    <Response>GeocodingResponse</Response>
+    <HTTPTargetConnection>
+        <URL>http://maps.googleapis.com/maps/api/geocode/json</URL>
+    </HTTPTargetConnection>
+</ServiceCallout>
+```
+
+Because `var_response` is not of type request message (its type is response message), you receive the error code: `steps.servicecallout.RequestVariableNotRequestMessageType`.
+
+### Resolution
+
+Ensure that the variable set in the `<Request>` element in the failed ServiceCallout policy is a [`message`](/apigee/docs/api-platform/reference/variables-reference#message) type variable that exists or alternatively you can create a new request message type variable directly in the ServiceCallout policy (as explained in [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy)) and use it.
+
+To correct the policy, you have to modify the `<Request>` element to specify an existing or new variable that is of type request message, and it will work in the ServiceCallout policy. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ServiceCallout name="ExecuteGeocodingRequest">
+    <Request variable="GeocodingRequest"/>
+    <Response>GeocodingResponse</Response>
+    <HTTPTargetConnection>
+        <URL>http://maps.googleapis.com/maps/api/geocode/json</URL>
+    </HTTPTargetConnection>
+</ServiceCallout>
+```
+
+## ExecutionFailed
+
+### Error code
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+steps.servicecallout.ExecutionFailed
+```
+
+### Error response body
+
+<div>
+
+</div>
+
+```
+
+{
+    "fault": {
+        "faultstring": "Execution of ServiceCallout [policy_name] failed. Reason: Host not reachable",
+        "detail": {
+            "errorcode": "steps.servicecallout.ExecutionFailed"
+        }
+    }
+}
+```
+
+or
+
+<div>
+
+</div>
+
+```
+
+{
+    "fault": {
+        "faultstring": "Execution of ServiceCallout [policy_name] failed. Reason: ResponseCode [http_code] is treated as error",
+        "detail": {
+            "errorcode": "steps.servicecallout.ExecutionFailed"
+        }
+    }
+}
+```
+
+### Possible causes
+
+The possible causes for this error are:
+
+|  |  |
+|----|----|
+| **Cause** | **Description** |
+| [Invalid or malformed URL](#cause-invalid-or-malformed-url) | The target URL in the ServiceCallout policy is malformed or has an invalid or unreachable host name. |
+| [Backend server error](#cause-backend-server-error) | The backend server returns an error response of 4XX or 5XX. |
+
+### <span id="cause-invalid-or-malformed-url">Cause: Invalid or malformed URL</span>
+
+The target URL in the ServiceCallout policy is malformed or has an invalid or unreachable host name.
+
+### Diagnosis
+
+1.  Identify the ServiceCallout policy that caused the error. The policy name appears in the `faultstring` element of the error response. For example, in the following `faultstring`, the failed ServiceCallout policy's name is `ExecuteGeocodingRequest`.
+
+    `"faultstring": "ServiceCallout[`**`ExecuteGeocodingRequest`**`]"`
+
+2.  In the failed ServiceCallout policy, examine the `<URL>` element. If it is malformed or has an invalid or unreachable host name, then that's the cause for this error. For example, the following ServiceCallout policy specifies an invalid `<URL>`:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <ServiceCallout name="ExecuteGeocodingRequest">
+        <Request variable="GeocodingRequest"/>
+        <Response>GeocodingResponse</Response>
+        <HTTPTargetConnection>
+            <URL>http://</URL>
+        </HTTPTargetConnection>
+    </ServiceCallout>
+    ```
+
+    The `<URL>` element only has the protocol `http://`, but does not have a valid hostname; therefore, the ServiceCallout policy fails with the error: `Execution of ServiceCallout ExecuteGeocodingRequest failed. Reason: Host not reachable`.
+
+### Resolution
+
+Ensure that the `<URL>` element in the failed ServiceCallout policy has a valid URL with a reachable hostname.
+
+To correct the ServiceCallout policy shown above, you can modify the `<URL>` element to specify a valid URL:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ServiceCallout name="ExecuteGeocodingRequest">
+    <Request variable="GeocodingRequest"/>
+    <Response>GeocodingResponse</Response>
+    <HTTPTargetConnection>
+        <URL>http://maps.googleapis.com/maps/api/geocode/json</URL>
+    </HTTPTargetConnection>
+</ServiceCallout>
+```
+
+### <span id="cause-backend-server-error">Cause: Backend server error</span>
+
+The backend server returns an error response of 4XX or 5XX.
+
+### Diagnosis
+
+1.  Identify the ServiceCallout policy that caused the error. The policy name appears in the `faultstring` element of the error response. For example, in the following `faultstring`, the failed ServiceCallout policy's name is `ExecuteGeocodingRequest`.
+
+    `"faultstring": "ServiceCallout[`**`ExecuteGeocodingRequest`**`]`
+
+2.  Examine the `faultstring` in the error response body and check if there are any 4XX or 5XX response codes listed in the `Reason`. For example, the following faultstring clearly indicates that a response code 502 was returned from the backend server:
+
+    `"faultstring": "Execution of ServiceCallout ExecuteGeocodingRequest failed. Reason: ResponseCode 502 is treated as error"`
+
+### Resolution
+
+Once you determine the error response code, you can troubleshoot this issue just like you would any 4XX or 5XX error.

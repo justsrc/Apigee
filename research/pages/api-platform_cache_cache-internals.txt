@@ -1,0 +1,68 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This topic describes the workings of the cache beneath policies such as the [PopulateCache policy](/apigee/docs/api-platform/reference/policies/populate-cache-policy), [LookupCache policy](/apigee/docs/api-platform/reference/policies/lookup-cache-policy), [InvalidateCache policy](/apigee/docs/api-platform/reference/policies/invalidate-cache-policy), and [ResponseCache policy](/apigee/docs/api-platform/reference/policies/response-cache-policy).
+
+## About caches
+
+When a caching policy executes, a short-lived, L1 cache is created. After one second, if a cached item is not accessed, it is persisted in a database where it is available to all message processors deployed in an environment until the cache expires. You configure the expiration time directly in the cache policy.
+
+**Note:** [List](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.caches/list) and [delete](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.caches/delete) are the only cache API operations available.
+
+## In-memory and persistent cache levels
+
+Both the shared and environment caches are built on a two-level system made up of an in-memory level and a persistent level as shown in the following figure. Policies interact with both levels as a combined framework. Apigee manages the relationship between the levels.
+
+<img src="/static/apigee/docs/api-platform/images/cache-internals-image.svg" style="width:75.0%" alt="Caching policies interact with Level 1 Message Processors which interact with Level 2 persistent storage" />
+
+**Note:** For more information on the cache policies, see: [PopulateCache](/apigee/docs/api-platform/reference/policies/populate-cache-policy), [LookupCache](/apigee/docs/api-platform/reference/policies/lookup-cache-policy), [InvalidateCache](/apigee/docs/api-platform/reference/policies/invalidate-cache-policy), and [ResponseCache](/apigee/docs/api-platform/reference/policies/response-cache-policy).
+
+- **Level 1 is an in-memory cache (L1)** for fast access. Each message processing (MP) node has its own in-memory cache for the fastest response to requests.
+  - L1 is a short-lived (1 second), in-memory cache.
+  - As the memory limit is reached, Apigee removes cache entries from memory (although they are still kept in the L2 persistent cache) to ensure that memory remains available for other processes.
+  - L1 is provided with short-lived one-second cache to perform faster lookups for concurrent requests with the same cache key.
+- **Level 2 is a persistent cache (L2)** beneath the in-memory cache. All message processing nodes share a cache data store (Cassandra) for persisting cache entries.
+  - Cache entries persist here even after they are removed from L1 cache, such as when in-memory limits are reached.
+  - Because the persistent cache is shared across message processors (even in different regions), cache entries are available regardless of which node receives a request for the cached data.
+  - Only entries of a certain size may be cached, and other cache limits apply. See [Managing cache limits](#cachelimits).
+  - The cache content in L2 is encrypted with the AES-256 algorithm. Data is decrypted before being used by the runtime and is encrypted before being written into L2. So the encryption process is invisible to users.
+
+## How policies use the cache
+
+The following describes how Apigee handles cache entries as your caching policies do their work.
+
+- When a policy **writes a new entry** to the cache (PopulateCache or ResponseCache policy):
+  1.  Apigee writes the entry to the in-memory L1 cache on only the message processor that handled the request. If the memory limits on the message processor are reached before the entry expires, then Apigee removes the entry from L1 cache.
+  2.  Apigee also writes the entry to L2 cache.
+- When a policy **reads** from the cache (LookupCache or ResponseCache policy):
+  1.  Apigee looks first for the entry in the in-memory L1 cache of the message processor handling the request.
+  2.  If there is no corresponding in-memory entry, Apigee looks for the entry in the L2 persistent cache.
+  3.  If the entry is not in the persistent cache:
+      - [LookupCache policy](/apigee/docs/api-platform/reference/policies/lookup-cache-policy): No value is retrieved from the cache.
+      - [ResponseCache policy](/apigee/docs/api-platform/reference/policies/response-cache-policy): Apigee returns the actual response from the target to the client and stores the entry in cache until it expires or is invalidated.
+- When a policy **updates** or **invalidates** an existing cache entry ([InvalidateCache policy](/apigee/docs/api-platform/reference/policies/invalidate-cache-policy), [PopulateCache policy](/apigee/docs/api-platform/reference/policies/populate-cache-policy), or [ResponseCache policy](/apigee/docs/api-platform/reference/policies/response-cache-policy)):
+  1.  The message processor receiving the request deletes the entry from the one-second in-memory L1 cache and also deletes the entry from the L2 cache.
+  2.  After an update or invalidation, it is possible that the other message processors will still hold onto the in-memory L1 cache.
+  3.  Since L1 is configured to expire in one second, there is no delete/update event needed to remove the entry from L1.
+
+## Managing cache limits
+
+Through configuration, you can manage some aspects of the cache. The overall space available for in-memory cache is limited by system resources and is not configurable. The following constraints apply to cache:
+
+- **Cache limits**: [Various cache limits](/apigee/docs/api-platform/reference/limits) apply, such as name and value size, total number of caches, the number of items in a cache, and expiration.
+
+- **In-memory (L1) cache.** Memory limits for your cache are not configurable. Limits are set by Apigee for each message processor that hosts caches for multiple customers.
+
+  In a hosted cloud environment, where in-memory caches for all customer deployments are hosted across multiple shared message processors, each processor features an Apigee-configurable memory percentage threshold to ensure that caching does not consume all of the application's memory. As the threshold is crossed for a given message processor, cache entries are evicted from memory on a least-recently-used basis. Entries evicted from memory remain in L2 cache until they expire or are invalidated.
+
+- **Persistent (L2) cache.** Entries evicted from the in-memory cache remain in the persistent cache according to configurable time-to-live settings.
+
+## Configurable optimizations
+
+The following table lists settings you can use to optimize cache performance.
+
+| Setting    | Description                                   | Notes |
+|------------|-----------------------------------------------|-------|
+| Expiration | Specifies the time to live for cache entries. | None  |

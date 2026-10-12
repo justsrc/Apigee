@@ -1,0 +1,82 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups.attachments/create" class="section">
+
+- [HTTP request](#body.HTTP_TEMPLATE)
+- [Path parameters](#body.PATH_PARAMETERS)
+- [Request body](#body.request_body)
+- [Response body](#body.response_body)
+- [Authorization scopes](#body.aspect)
+- [Try it!](#try-it)
+
+<div id="google.cloud.apigee.v1.EnvironmentGroupAttachmentService.CreateEnvironmentGroupAttachment" class="section">
+
+</div>
+
+<div id="description" class="section">
+
+Creates a new attachment of an environment to an environment group.
+
+</div>
+
+<div id="body" class="section">
+
+<div id="body.HTTP_TEMPLATE" class="section">
+
+### HTTP request
+
+`POST https://apigee.googleapis.com/v1/{parent=organizations/*/envgroups/*}/attachments`
+
+The URL uses [gRPC Transcoding](https://google.aip.dev/127) syntax.
+
+</div>
+
+<div id="body.PATH_PARAMETERS" class="section">
+
+### Path parameters
+
+| Parameters |  |
+| --- | --- |
+| parent | string Required. EnvironmentGroup under which to create the attachment in the following format: organizations/{org}/envgroups/{envgroup} . Authorization requires the following IAM permission on the specified resource parent : apigee.envgroupattachments.create |
+
+</div>
+
+<div id="body.request_body" class="section">
+
+### Request body
+
+The request body contains an instance of [`EnvironmentGroupAttachment`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups.attachments#EnvironmentGroupAttachment).
+
+</div>
+
+<div id="body.response_body" class="section">
+
+### Response body
+
+If successful, the response body contains a newly created instance of [`Operation`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.operations#Operation).
+
+</div>
+
+<div id="body.aspect" class="section">
+
+### Authorization scopes
+
+Requires the following OAuth scope:
+
+- `https://www.googleapis.com/auth/cloud-platform`
+
+</div>
+
+</div>
+
+<div id="try-it" class="section">
+
+<div class="devsite-apix">
+
+<div class="apis-explorer" discovery-rest-url="https://apigee.googleapis.com/$discovery/rest?version=v1" method-id="apigee.organizations.envgroups.attachments.create" params="">
+
+</div>
+
+</div>
+
+</div>
+
+</div>

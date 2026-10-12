@@ -1,0 +1,751 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The XMLThreatProtection policy lets you address XML vulnerabilities and minimize attacks on your API. You can also use the policy to detect XML payload attacks based on configured limits. Screen against XML threats using the following approaches:
+
+- Detect corrupt or malformed messages before those messages are parsed
+- Evaluate message content for specific keywords or patterns to exclude
+
+**Note:** This policy executes only if the `Content-Type` of the request or response header is set to `application/xml.`
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+## Element reference
+
+The element reference describes the elements and attributes of the XMLThreatProtection policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<XMLThreatProtection async="false" continueOnError="false" enabled="true" name="XML-Threat-Protection-1">
+   <DisplayName>XML Threat Protection 1</DisplayName>
+   <NameLimits>
+      <Element>10</Element>
+      <Attribute>10</Attribute>
+      <NamespacePrefix>10</NamespacePrefix>
+      <ProcessingInstructionTarget>10</ProcessingInstructionTarget>
+   </NameLimits>
+   <Source>request</Source>
+   <StructureLimits>
+      <NodeDepth>5</NodeDepth>
+      <AttributeCountPerElement>2</AttributeCountPerElement>
+      <NamespaceCountPerElement>3</NamespaceCountPerElement>
+      <ChildCount includeComment="true" includeElement="true" includeProcessingInstruction="true" includeText="true">3</ChildCount>
+   </StructureLimits>
+   <ValueLimits>
+      <Text>15</Text>
+      <Attribute>10</Attribute>
+      <NamespaceURI>10</NamespaceURI>
+      <Comment>10</Comment>
+      <ProcessingInstructionData>10</ProcessingInstructionData>
+   </ValueLimits>
+</XMLThreatProtection>
+```
+
+## \<XMLThreatProtection\> attributes
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<XMLThreatProtection async="false" continueOnError="false" enabled="true" name="XML-Threat-Protection-1">
+```
+
+The following table describes attributes that are common to all policy parent elements:
+
+| Attribute | Description | Default | Presence |
+| --- | --- | --- | --- |
+| name | The internal name of the policy. The value of the name attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters. Optionally, use the <DisplayName> element to label the policy in the management UI proxy editor with a different, natural-language name. | N/A | Required |
+| continueOnError | Set to false to return an error when a policy fails. This is expected behavior for most policies. Set to true to have flow execution continue even after a policy fails. See also: Fault rules are triggered ONLY in an error state (about continueOnError) Handling faults within the current flow | false | Optional |
+| enabled | Set to true to enforce the policy. Set to false to turn off the policy. The policy will not be enforced even if it remains attached to a flow. | true | Optional |
+| async | This attribute is deprecated. | false | Deprecated |
+
+## \<DisplayName\> element
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, natural-language name.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+| Default | N/A If you omit this element, the value of the policy's name attribute is used. |
+| --- | --- |
+| Presence | Optional |
+| Type | String |
+
+## \<NameLimits\> element
+
+Specifies character limits to be checked and enforced by the policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<NameLimits>
+   <Element>10</Element>
+   <Attribute>10</Attribute>
+   <NamespacePrefix>10</NamespacePrefix>
+   <ProcessingInstructionTarget>10</ProcessingInstructionTarget>
+</NameLimits>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | N/A      |
+
+## \<NameLimits\>/\<Element\> element
+
+Specifies a limit on the maximum number of characters permitted in any element name in the XML document.
+
+For example, consider the following XML:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<book category="WEB">
+   <title>Learning XML</title>
+   <author>Erik T. Ray</author>
+   <year>2003</year>
+</book>
+```
+
+When analyzing the XML above, the `<Element>` element value in the policy snippet below will validate that element names (`book` , `title`, `author`, and `year)` do not exceed `10` characters.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<NameLimits>
+   <Element>10</Element>
+   <Attribute>10</Attribute>
+   <NamespacePrefix>10</NamespacePrefix>
+   <ProcessingInstructionTarget>10</ProcessingInstructionTarget>
+</NameLimits>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify a limit, the system applies a default value of `-1`, which the system equates to no limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## \<NameLimits\>/\<Attribute\> element
+
+Specifies a limit on the maximum number of characters permitted in any attribute name in the XML document.
+
+For example, consider the following XML:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<book category="WEB">
+   <title>Learning XML</title>
+   <author>Erik T. Ray</author>
+   <year>2003</year>
+</book>
+```
+
+When analyzing the XML above, the `<Attribute>` element value in the policy snippet below will validate that attribute name `category` does not exceed `10` characters.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<NameLimits>
+   <Element>10</Element>
+   <Attribute>10</Attribute>
+   <NamespacePrefix>10</NamespacePrefix>
+   <ProcessingInstructionTarget>10</ProcessingInstructionTarget>
+</NameLimits>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify a limit, the system applies a default value of `-1`, which the system equates to no limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## \<NameLimits\>/\<NamespacePrefix\> element
+
+Specifies a limit on the maximum number of characters permitted in the namespace prefix in the XML document.
+
+For example, consider the following XML:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ns1:myelem xmlns:ns1="http://ns1.com"/>
+```
+
+When analyzing the XML above, the `<NamespacePrefix>` element value in the policy snippet below will validate that the namespace prefix `ns1` does not exceed `10` characters.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<NameLimits>
+   <Element>10</Element>
+   <Attribute>10</Attribute>
+   <NamespacePrefix>10</NamespacePrefix>
+   <ProcessingInstructionTarget>10</ProcessingInstructionTarget>
+</NameLimits>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify a limit, the system applies a default value of `-1`, which the system equates to no limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## \<NameLimits\>/\<ProcessingInstructionTarget\> element
+
+Specifies a limit on the maximum number of characters permitted in the target of any processing instructions in the XML document.
+
+For example, consider the following XML:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml-stylesheet type="text/xsl" href="style.xsl"?>
+```
+
+When analyzing the XML above, the `<ProcessingInstructionTarget>` element value in the policy snippet below will validate that the processing instruction target `xml-stylesheet` does not exceed `10` characters.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<NameLimits>
+   <Element>10</Element>
+   <Attribute>10</Attribute>
+   <NamespacePrefix>10</NamespacePrefix>
+   <ProcessingInstructionTarget>10</ProcessingInstructionTarget>
+</NameLimits>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify a limit, the system applies a default value of `-1`, which the system equates to no limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## \<Source\> element
+
+Message to be screened for XML payload attacks. This is most commonly set to `request`, as you will typically need to validate inbound requests from client apps. When set to `message`, this element will automatically evaluate the request message when attached to the request flow and the response message when attached to the response flow.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Source>request</Source>
+```
+
+| Default: | request |
+| --- | --- |
+| Presence: | Optional |
+| Type: | String. Select from request , response , or message . |
+
+## \<StructuralLimits\> element
+
+Specifies structural limits to be checked and enforced by the policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<StructureLimits>
+   <NodeDepth>5</NodeDepth>
+   <AttributeCountPerElement>2</AttributeCountPerElement>
+   <NamespaceCountPerElement>3</NamespaceCountPerElement>
+   <ChildCount includeComment="true" includeElement="true" includeProcessingInstruction="true" includeText="true">3</ChildCount>
+</StructureLimits>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | N/A      |
+
+## \<StructuralLimits\>/\<NodeDepth\> element
+
+Specifies the maximum node depth allowed in the XML.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<StructureLimits>
+   <NodeDepth>5</NodeDepth>
+   <AttributeCountPerElement>2</AttributeCountPerElement>
+   <NamespaceCountPerElement>3</NamespaceCountPerElement>
+   <ChildCount includeComment="true" includeElement="true" includeProcessingInstruction="true" includeText="true">3</ChildCount>
+</StructureLimits>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify a limit, the system applies a default value of `-1`, which the system equates to no limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## \<StructuralLimits\>/\<AttributeCountPerElement\> element
+
+Specifies the maximum number of attributes allowed for any element.
+
+For example, consider the following XML:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<book category="WEB">
+   <title>Learning XML</title>
+   <author>Erik T. Ray</author>
+   <year>2003</year>
+</book>
+```
+
+When analyzing the XML above, the `<AttributeCountPerElement>` element value in the policy snippet below will validate that the elements `book`, `title`, `author`, and `year` do not have more than `2` attributes each. Note that attributes used for defining namespaces are not counted.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<StructureLimits>
+   <NodeDepth>5</NodeDepth>
+   <AttributeCountPerElement>2</AttributeCountPerElement>
+   <NamespaceCountPerElement>3</NamespaceCountPerElement>
+   <ChildCount includeComment="true" includeElement="true" includeProcessingInstruction="true" includeText="true">3</ChildCount>
+</StructureLimits>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify a limit, the system applies a default value of `-1`, which the system equates to no limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## \<StructuralLimits\>/\<NameSpaceCountPerElement\> element
+
+Specifies the maximum number of namespace definitions allowed for any element.
+
+For example, consider the following XML:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<e1 attr1="val1" attr2="val2">
+    <e2 xmlns="http://apigee.com" xmlns:yahoo="http://yahoo.com" one="1" yahoo:two="2"/>
+</e1>
+```
+
+When analyzing the XML above, the `<NamespaceCountPerElement>` element value in the policy snippet below will validate that the elements `e1` and `e2` do not have more than `2` namespace definitions each. In this case, <span style="font-family:courier new,courier,monospace;">\<e1\></span> has 0 namespace definitions and <span style="font-family:courier new,courier,monospace;">\<e2\></span> has 2 namespace definitions: `xmlns="http://apigee.com"` and `xmlns:yahoo="http://yahoo.com"`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<StructureLimits>
+   <NodeDepth>5</NodeDepth>
+   <AttributeCountPerElement>2</AttributeCountPerElement>
+   <NamespaceCountPerElement>3</NamespaceCountPerElement>
+   <ChildCount includeComment="true" includeElement="true" includeProcessingInstruction="true" includeText="true">3</ChildCount>
+</StructureLimits>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify a limit, the system applies a default value of `-1`, which the system equates to no limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## \<StructuralLimits\>/\<ChildCount\> element
+
+Specifies the maximum number of child elements allowed for any element.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<StructureLimits>
+   <NodeDepth>5</NodeDepth>
+   <AttributeCountPerElement>2</AttributeCountPerElement>
+   <NamespaceCountPerElement>3</NamespaceCountPerElement>
+   <ChildCount includeComment="true" includeElement="true" includeProcessingInstruction="true" includeText="true">3</ChildCount>
+</StructureLimits>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify a limit, the system applies a default value of `-1`, which the system equates to no limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+### Attributes
+
+|                               |         |          |
+|-------------------------------|---------|----------|
+| Attribute                     | Default | Presence |
+| includeComment                | true    | Optional |
+| includeElement                | true    | Optional |
+| includeProcessingInstructions | true    | Optional |
+| includeText                   | true    | Optional |
+
+## \<ValueLimits\> element
+
+Specifies character limits for values to be checked and enforced by the policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ValueLimits>
+   <Text>15</Text>
+   <Attribute>10</Attribute>
+   <NamespaceURI>10</NamespaceURI>
+   <Comment>10</Comment>
+   <ProcessingInstructionData>10</ProcessingInstructionData>
+</ValueLimits>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | N/A      |
+
+## \<ValueLimits\>/\<Text\> element
+
+Specifies a character limit for any text nodes present in the XML document.
+
+For example, consider the following XML:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<book category="WEB">
+   <title>Learning XML</title>
+   <author>Erik T. Ray</author>
+   <year>2003</year>
+</book>
+```
+
+When analyzing the XML above, the `<Text>` element value in the policy snippet below will validate that the element text values `Learning XML`, `Erik T. Ray,` and `2003` do not exceed `15` characters each.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ValueLimits>
+   <Text>15</Text>
+   <Attribute>10</Attribute>
+   <NamespaceURI>10</NamespaceURI>
+   <Comment>10</Comment>
+   <ProcessingInstructionData>10</ProcessingInstructionData>
+</ValueLimits>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify a limit, the system applies a default value of `-1`, which the system equates to no limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## \<ValueLimits\>/\<Attribute\> element
+
+Specifies a character limit for any attribute values present in the XML document.
+
+For example, consider the following XML:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<book category="WEB">
+   <title>Learning XML</title>
+   <author>Erik T. Ray</author>
+   <year>2003</year>
+</book>
+```
+
+When analyzing the XML above, the `<Attribute>` element value in the policy snippet below will validate that the attribute value `WEB` does not exceed `10` characters.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ValueLimits>
+   <Text>15</Text>
+   <Attribute>10</Attribute>
+   <NamespaceURI>10</NamespaceURI>
+   <Comment>10</Comment>
+   <ProcessingInstructionData>10</ProcessingInstructionData>
+</ValueLimits>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify a limit, the system applies a default value of `-1`, which the system equates to no limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## \<ValueLimits\>/\<NamespaceURI\> element
+
+Specifies a character limit for any namespace URIs present in the XML document.
+
+For example, consider the following XML:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ns1:myelem xmlns:ns1="http://ns1.com"/>
+```
+
+When analyzing the XML above, the `<NamespaceURI>` element value in the policy snippet below will validate that the namespace URI value `http://ns1.com` does not exceed `10` characters.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ValueLimits>
+   <Text>15</Text>
+   <Attribute>10</Attribute>
+   <NamespaceURI>10</NamespaceURI>
+   <Comment>10</Comment>
+   <ProcessingInstructionData>10</ProcessingInstructionData>
+</ValueLimits>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify a limit, the system applies a default value of `-1`, which the system equates to no limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## \<ValueLimits\>/\<Comment\> element
+
+Specifies a character limit for any comments present in the XML document.
+
+For example, consider the following XML:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<book category="WEB">
+   <!-- This is a comment -->
+   <title>Learning XML</title>
+   <author>Erik T. Ray</author>
+   <year>2003</year>
+</book>
+```
+
+When analyzing the XML above, the `<Comment>` element value in the policy snippet below will validate that the comment text `This is a comment` does not exceed `10` characters.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ValueLimits>
+   <Text>15</Text>
+   <Attribute>10</Attribute>
+   <NamespaceURI>10</NamespaceURI>
+   <Comment>10</Comment>
+   <ProcessingInstructionData>10</ProcessingInstructionData>
+</ValueLimits>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify a limit, the system applies a default value of `-1`, which the system equates to no limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## \<ValueLimits\>/\<ProcessingInstructionData\> element
+
+Specifies a character limit for any processing instruction text present in the XML document.
+
+For example, consider the following XML:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml-stylesheet type="text/xsl" href="style.xsl"?>
+```
+
+When analyzing the XML above, the `<ProcessingInstructionData>` element value in the policy snippet below will validate that the processing instruction text `type="text/xsl" href="style.xsl"` does not exceed `10` characters.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ValueLimits>
+   <Text>15</Text>
+   <Attribute>10</Attribute>
+   <NamespaceURI>10</NamespaceURI>
+   <Comment>10</Comment>
+   <ProcessingInstructionData>10</ProcessingInstructionData>
+</ValueLimits>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify a limit, the system applies a default value of `-1`, which the system equates to no limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## Error reference
+
+**Note:** This policy executes only if the `Content-Type` of the request or response header is set to `application/xml.`
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+| Fault code | HTTP status | Cause | Fix |
+| --- | --- | --- | --- |
+| steps.xmlthreatprotection.ExecutionFailed | 500 | The XMLThreatProtection policy can throw many different types of ExecutionFailed errors. Most of these errors occur when a specific threshold set in the policy is exceeded. These types of errors include: element name length , child count , node depth , attribute count , attribute name length , and many others. You can see the complete list in the XMLThreatProtection policy runtime error troubleshooting topic. | build |
+| steps.xmlthreatprotection.InvalidXMLPayload | 500 | This error occurs if the input message payload specified by the XMLThreatProtection policy's <Source> element is not a valid XML Document. | build |
+| steps.xmlthreatprotection.SourceUnavailable | 500 | This error occurs if the message variable specified in the <Source> element is either: Out of scope (not available in the specific flow where the policy is being executed) Is not one of the valid values request , response , or message | build |
+| steps.xmlthreatprotection.NonMessageVariable | 500 | This error occurs if the <Source> element is set to a variable which is not of type message . | build |
+
+### Deployment errors
+
+None.
+
+### Fault variables
+
+These variables are set when a runtime error occurs. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``fault_name``"` | `fault_name` is the name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name Matches "SourceUnavailable"` |
+| `xmlattack.``policy_name``.failed` | `policy_name` is the user-specified name of the policy that threw the fault. | `xmlattack.XPT-SecureRequest.failed = true` |
+
+### Example error response
+
+**Note:** For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "fault": {
+    "faultstring": "XMLThreatProtection[XPT-SecureRequest]: Execution failed. reason: XMLThreatProtection[XTP-SecureRequest]: Exceeded object entry name length at line 2",
+    "detail": {
+      "errorcode": "steps.xmlthreatprotection.ExecutionFailed"
+    }
+  }
+}
+```
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name="XML Threat Protection Policy Faults">
+    <Step>
+        <Name>AM-CustomErrorResponse</Name>
+        <Condition>(fault.name Matches "ExecutionFailed") </Condition>
+    </Step>
+    <Condition>(xmlattack.XPT-SecureRequest.failed = true) </Condition>
+</FaultRule>
+```
+
+## Schemas
+
+**Sample:** See our <a href="https://github.com/apigee/api-platform-samples/tree/master/schemas/policy" class="external">GitHub repository</a> samples for the most recent schemas.
+
+## Usage notes
+
+Any server that receives online data is subject to attack, whether malicious or unintentional. Some attacks take advantage of the flexibility of XML by constructing invalid documents that have the potential to compromise back-end systems. Corrupt or extremely complex XML documents can cause servers to allocate more memory than is available, tying up CPU and memory resources, crashing parsers, and generally disabling message processing and creating application-level denial-of-service attacks.
+
+### Threat protection error configuration
+
+**Important information if you are creating FaultRules for this policy:** By default, Apigee throws an HTTP 500 Internal Server Error status code and an ExecutionFailed error code if a message doesn't make it past a JSON or XML Threat Protection policy. You can change that error behavior with a new organization-level property. When setting org property `features.isPolicyHttpStatusEnabled` to true, the following behavior occurs:
+
+- Request: With a threat protection policy attached to any request flow, invalid messages return a **400 Bad Request status code**, along with a corresponding policy error code (rather than just ExecutionFailed).
+- Response: With a threat protection policy attached to any response flow, invalid messages still return a **500 Internal Server Error status code**, and one of the corresponding policy error codes is thrown (rather than just ExecutionFailed).
+
+Cloud customers must contact <a href="https://cloud.google.com/support-hub/" class="external">Google Cloud Customer Care</a> to set the organization property.
+
+**Warning:** When doing a PUT to update organization properties, be sure to include all existing properties in the call to prevent wiping them out.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+curl -u email:password -X POST -H "Content-type:application/xml" http://host:8080/v1/o/myorg -d \
+"<Organization type="trial" name="MyOrganization">
+    <Environments/>
+    <Properties>
+        <Property name="features.isPolicyHttpStatusEnabled">true</Property>
+        ...
+    </Properties>
+</Organization>"
+```
+
+## Related topics
+
+[JSON Threat Protection policy](/apigee/docs/api-platform/reference/policies/json-threat-protection-policy)
+
+[Regular Expression Protection policy](/apigee/docs/api-platform/reference/policies/regular-expression-protection)

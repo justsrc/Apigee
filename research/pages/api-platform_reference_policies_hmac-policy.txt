@@ -1,0 +1,391 @@
+[<span class="devsite-label" background="google-blue">Standard policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The HMAC policy computes and optionally verifies a Hash-based Message Authentication Code (HMAC). Sometimes known as Keyed Message Authentication Code or Keyed hash, HMAC uses a cryptographic hash function like SHA-1, SHA-224, SHA-256, SHA-384, SHA-512 or MD-5, applied to a "message," along with a secret key, to produce a signature or message authentication code on that message. The term "message" here refers to any stream of bytes. In the typical use of HMAC, a sender of a message sends a message and its HMAC to a receiver, and the receiver can use the HMAC along with the shared secret key to authenticate the message.
+
+This policy is a *Standard policy* and can be deployed to any environment type. For information on policy types and availability with each environment type, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+To learn more about HMAC, see [HMAC: Keyed-Hashing for Message Authentication (rfc2104)](https://tools.ietf.org/html/rfc2104).
+
+## Samples
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Generate HMAC
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HMAC name='HMAC-1'>
+
+  <Algorithm>SHA256</Algorithm>
+
+  <!-- the default encoding of the SecretKey is UTF-8 -->
+  <SecretKey encoding='base64' ref='private.secretkey'/>
+
+  <IgnoreUnresolvedVariables>true|false</IgnoreUnresolvedVariables> <!-- optional -->
+
+  <!--
+    The Message element accepts a template, which means the "message" the policy operates
+    on can include fixed and multiple variable parts, including newlines and static functions.
+    Whitespace, such as newlines and space characters, is significant.
+   -->
+  <Message>Fixed Part
+{a_variable}
+{timeFormatUTCMs(timeFormatString1,system.timestamp)}
+{nonce}</Message>
+
+  <!-- default encoding is base64 -->
+  <Output encoding='base16'>name_of_variable</Output>
+
+</HMAC>
+```
+
+</div>
+
+<div class="section">
+
+### Verify HMAC
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HMAC name='HMAC-1'>
+
+  <Algorithm>SHA256</Algorithm>
+
+  <!-- the default encoding of the SecretKey is UTF-8 -->
+  <SecretKey encoding='base16' ref='private.secretkey'/>
+
+  <IgnoreUnresolvedVariables>true|false</IgnoreUnresolvedVariables> <!-- optional -->
+
+  <!--
+     The Message element accepts a template. This policy verifies an HMAC on the request content.
+   -->
+  <Message>{request.content}</Message>
+
+  <!--
+    VerificationValue is optional.
+    Include it to perform an HMAC check.
+  -->
+  <VerificationValue encoding='base16' ref='expected_hmac_value'/>
+
+  <!-- default encoding of the output is base64 -->
+  <Output encoding='base16'>name_of_variable</Output>
+
+</HMAC>
+```
+
+Computation of a signature and verification of that signature follow exactly the same process. The HMAC policy computes an HMAC, and can optionally verify the computed signature against an expected value. The optional `VerificationValue` element (if present) directs the policy to check the computed value against a known or given value.
+
+</div>
+
+</div>
+
+------------------------------------------------------------------------
+
+## Element reference for HMAC
+
+The policy reference describes the elements and attributes of the HMAC policy.
+
+### Attributes that apply to the top-level element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HMAC name="HMAC" continueOnError="false" enabled="true" async="false">
+```
+
+The following attributes are common to all policy parent elements.
+
+| Attribute | Description | Default | Presence |
+| --- | --- | --- | --- |
+| name | The internal name of the policy. Characters you can use in the name are restricted to: A-Z0-9._\-$ % . However, the Apigee UI enforces additional restrictions, such as automatically removing characters that are not alphanumeric. Optionally, use the <DisplayName> element to label the policy in the Apigee UI proxy editor with a different, natural-language name. | N/A | Required |
+| continueOnError | Set to false to return an error when a policy fails. This is expected behavior for most policies. Set to true to have flow execution continue even after a policy fails. See also: Fault rules are triggered ONLY in an error state (about continueOnError) Handling faults within the current flow | false | Optional |
+| enabled | Set to true to enforce the policy. Set to false to "turn off" the policy. The policy will not be enforced even if it remains attached to a flow. | true | Optional |
+| async | This attribute is deprecated. | false | Deprecated |
+
+## \<Algorithm\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Algorithm>algorithm-name</Algorithm>
+```
+
+Specifies the hash algorithm to use when computing the HMAC.
+
+| Default | N/A |
+| --- | --- |
+| Presence | Required |
+| Type | String |
+| Valid values | SHA-1 , SHA-224 , SHA-256 , SHA-384 , SHA-512 , and MD-5 The policy configuration accepts algorithm names without distinguishing case, and with or without the dash between the letters and numbers. For example, SHA256 and SHA-256 and sha256 are equivalent. Security note: SHA-1 and MD-5 are included here for completeness, but Google recommends that people do not use these hashes. Google first demonstrated collision attacks against SHA-1 in 2017 , and recommends against using it; NIST also recommends that people stop using SHA-1 . The CMU Software Engineering Institute first recommended that people should avoid using the MD5 algorithm in any capacity, in 2008. |
+
+## \<DisplayName\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+Use in addition to the name attribute to label the policy in the Apigee UI proxy editor with a different, natural-language name.
+
+|  |  |
+|----|----|
+| **Default** | If you omit this element, the value of the policy's name attribute is used. |
+| **Presence** | Optional |
+| **Type** | String |
+
+## \<Message\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Message>message_template_here</Message>
+or
+<Message ref='variable_here'/>
+```
+
+Specifies the message payload to sign. This element's input supports [message templates](/apigee/docs/api-platform/reference/message-template-intro) (variable substitution) to allow additional items to be included at runtime, such as timestamps, nonces, lists of headers, or other information. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Message>Fixed Part
+    {a_variable}
+    {timeFormatUTCMs(timeFormatString1,system.timestamp)}
+    {nonce}
+</Message>
+```
+
+The message template can include fixed and variable parts, including newlines and static functions. Whitespace, such as newlines and space characters, is significant.
+
+|  |  |
+|----|----|
+| **Default** | N/A |
+| **Presence** | Required |
+| **Type** | String |
+| **Valid values** | Any string is valid for the text value. If you provide a `ref` attribute, it will take precedence over the text value. The policy evaluates either the text value or the referenced variable as a message template. |
+
+## \<Output\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Output encoding='encoding_name'>variable_name</Output>
+```
+
+Specifies the name of the variable that the policy should set with the computed HMAC value. Also specifies the encoding to use for the output.
+
+| Default | The default output variable is hmac.POLICYNAME.output . The default value for the encoding attribute is base64 . |
+| --- | --- |
+| Presence | Optional. If this element is not present, the policy sets the flow variable hmac.POLICYNAME.output , with a base64-encoded value. |
+| Type | String |
+| Valid values | For encoding, hex , base16 , base64 , base64url . The values are case insensitive; hex and base16 are synonyms. The text value of the Output element can be any valid flow variable name. |
+
+## \<SecretKey\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SecretKey encoding='encoding_name' ref='private.secretkey'/>
+```
+
+Specifies the secret key used to compute the HMAC. The key is obtained from the referenced variable, decoded according to the specific encoding.
+
+| Default | There is no default value for the referenced variable; the ref attribute is required. In the absence of an encoding attribute, by default the policy decodes the secret key string with UTF-8 to obtain the key bytes. |
+| --- | --- |
+| Presence | Required |
+| Type | String |
+| Valid values | For encoding , valid values are hex , base16 , base64 , utf8 . The default is UTF8. The values are case-insensitive, and dashes are insignificant. Base16 is the same as base-16 and bAse16 . Base16 and Hex are synonyms. Using an encoding attribute allows you to specify a key that includes bytes outside the range of UTF-8 printable characters. For example, suppose the policy configuration includes this: <SecretKey encoding='hex' ref='private.encodedsecretkey'/> And suppose private.encodedsecretkey holds the string 536563726574313233 . In this case, the key bytes will be decoded as: [53 65 63 72 65 74 31 32 33] (each byte represented in hex). As another example, if using encoding='base64' , and if private.encodedsecretkey holds the string U2VjcmV0MTIz , it will result in the same set of bytes for the key. With no encoding attribute, or with an encoding attribute of UTF8 , the string value Secret123 would result in the same set of bytes. This shows three different ways to represent the same key. |
+
+## \<VerificationValue\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerificationValue encoding='encoding_name' ref='variable_name'/>
+or
+<VerificationValue encoding='encoding_name'>string_value</VerificationValue>
+```
+
+(Optional) Specifies the verification value, as well as the encoding that was used to encode the verification value. The policy will use this encoding to decode the value.
+
+| Default | There is no default verification value. If the element is present but the encoding attribute is absent, the policy uses a default encoding of base64 |
+| --- | --- |
+| Presence | Optional |
+| Type | String |
+| Valid values | Valid values for the encoding attribute are: hex , base16 , base64 , base64url . The values are case insensitive; hex and base16 are synonyms. The encoding of the VerificationValue need not be the same as the encoding used for the Output element. |
+
+## \<IgnoreUnresolvedVariables\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IgnoreUnresolvedVariables>true|false</IgnoreUnresolvedVariables>
+```
+
+Set to `false` if you want the policy to throw an error when any referenced variable specified in the policy is unresolvable. Set to `true` to treat any unresolvable variable as an empty string (null).
+
+The IgnoreUnresolvedVariables boolean affects only variables that are referenced by the message template. While `SecretKey` and `VerificationValue` can reference a variable, both of those need to be resolvable, so the `ignore` setting does not apply to those.
+
+|                  |               |
+|------------------|---------------|
+| **Default**      | False         |
+| **Presence**     | Optional      |
+| **Type**         | Boolean       |
+| **Valid values** | true or false |
+
+## Flow variables
+
+The policy can set these variables during execution.
+
+|  |  |  |
+|----|----|----|
+| Variable | Description | Example |
+| `hmac.``policy_name``.message` | The policy sets this variable with the effective message, the result of evaluating the message template specified in the `Message` element. | `hmac.HMAC-Policy.message = "Hello, World"` |
+| `hmac.``policy_name``.output` | Gets the result of the HMAC computation, when the `Output` element does not specify a variable name. | `hmac.HMAC-Policy.output = /yyRjydfP+fBHTwXFgc5AZhLAg2kwCri+e35girrGw4=` |
+| `hmac.``policy_name``.outputencoding` | Gets the name of the output encoding. | `hmac.HMAC-Policy.outputencoding = base64` |
+
+## Common Issues
+
+At one level, the HMAC policy seems to be straightforward: provide a key and a message, and get a computed HMAC in response. It can be frustrating when using the policy if you obtain an unexpected HMAC value for a known message and key combination. This section will explain some usage notes to work through such problems.
+
+There are two common pitfalls that result in mismatched HMACs during verification: whitespace differences in the message, and differences in encoding and decoding. The latter applies to both the [`SecretKey` element](#secretkey) as well as the [`Output` element](#output).
+
+### Whitespace Differences
+
+Differences that may seem unimportant to a human, affect the output HMAC value. For example, suppose a secret key that can be represented as "Secret123". With UTF-8 decoding, the key bytes will be: `[53 65 63 72 65 74 31 32 33]`. Using that key to compute an HMAC-SHA256 on the message `abc` results in `a7938720fe5749d31076e6961360364c0cd271443f1b580779932c244293bc94`. Adding a single space to the message, so that it is `abc<SPACE>`, where `<SPACE>` implies an ASCII 32, results in an HMAC-SHA256 of `274669b2a85d2532da48e2ce3d8e52ee17346d1bcd1a606d87db1934b5ab294b`.
+
+Similarly, if the message is `abc<NEWLINE>`, where `<NEWLINE>` implies an ASCII 10, the HMAC is `0780370844ca07f896066837e8230d3b6a775f678a4ae03e6b5e864c674831f5`. Slight changes in the message result in very different HMAC values. This is by design. This is an intended and desired behavior of HMAC.
+
+The takeaway: It's important to ensure that the message body used to calculate the original HMAC and the message body used to verify the HMAC are exactly the same. If the verifier of an HMAC changes the message payload in any way, by adding any whitespace or reformatting the text, the calculated HMAC will change.
+
+Take special care when using a message template in the policy configuration. For example, this policy configuration fragment shows a potential problem:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HMAC name='HMAC-1'>
+    ...
+    <!-- the result of this message template will include surrounding whitespace -->
+    <Message>
+        {request.content}
+    </Message>
+    ...
+
+</HMAC>
+```
+
+The result of evaluating the message template within the `<Message>` element will include newlines and spaces surrounding the message content. This is probably not what is intended. A better configuration would look like this:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HMAC name='HMAC-1'>
+    ...
+    <Message>{request.content}</Message>
+    ...
+
+</HMAC>
+```
+
+### Differences in Encoding
+
+Different decodings of the same key material, results in different keys. Suppose a secret key that can be represented as "U2VjcmV0S2V5MTIz". With UTF-8 decoding, the key bytes as representated in base16 will be: `[55 32 56 6a 63 6d 56 30 53 32 56 35 4d 54 49 7a]`. With base64-decoding, the key bytes will be `[53 65 63 72 65 74 4b 65 79 31 32 33]`. Decoding the source material differently results in different keys, and that will result in different HMAC values.
+
+The takeaway: It's important to ensure that the key material used to calculate the original HMAC and the key used to verify the HMAC are exactly the same. This probably means ensuring that the same encoding of the key is used on both ends. In the HMAC policy, you can use the `encoding` attribute on the [`SecretKey`element](#secretkey) to specify the key encoding.
+
+Also consider encodings on the output. An HMAC-SHA256 expressed in base16 or hex encoding as `27f17e11c8ece93844c5eb5e55161d993368628a214f9a51c25d0185e8ea06e2` is the same as an HMAC-SHA256 expressed in base64 encoded form as `J/F+Ecjs6ThExeteVRYdmTNoYoohT5pRwl0BhejqBuI=`. They look different, but these two strings represent the same value. Ensure that the same encoding is used to encode the originally calculated HMAC, and the verifying HMAC. In the HMAC policy, you can use the `encoding` attribute on the [`Output`element](#output) to specify your desired output encoding, and the same attribute on the [`VerificationValue`element](#verificationvalue) to specify how to decode the verifier.
+
+## Error reference
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+| Fault code | HTTP status | Occurs when |
+| --- | --- | --- |
+| steps.hmac.UnresolvedVariable | 401 | This error occurs if a variable specified in the HMAC policy is either: Out of scope (not available in the specific flow where the policy is being executed) or Can't be resolved (is not defined) |
+| steps.hmac.HmacVerificationFailed | 401 | The HMAC verification failed; the verification value provided does not match the calculated value. |
+| steps.hmac.HmacCalculationFailed | 401 | The policy was unable to calculate the HMAC. |
+| steps.hmac.EmptySecretKey | 401 | The value of the secret key variable is empty. |
+| steps.hmac.EmptyVerificationValue | 401 | The variable holding the verification value is emtpy. |
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+| Error name | HTTP status | Occurs when |
+|----|----|----|
+| `steps.hmac.MissingConfigurationElement` | 401 | This error occurs when a required element or attribute is missing. |
+| `steps.hmac.InvalidValueForElement` | 401 | This error occurs if the value specified in the Algorithm element is not one of the following values: `SHA-1`, `SHA-224`, `SHA-256`, `SHA-512`, or `MD-5`. |
+| `steps.hmac.InvalidSecretInConfig` | 401 | This error occurs if there is a text value explicitly provided for `SecretKey`. |
+| `steps.hmac.InvalidVariableName` | 401 | This error occurs if the `SecretKey` variable does not contain the `private` prefix (`private.`). |
+
+### Fault variables
+
+These variables are set when a runtime error occurs. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``fault_name``"` | `fault_name` is the name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name Matches "UnresolvedVariable"` |
+| `hmac.``policy_name``.failed` | The policy sets this variable in the case of a failure. | `hmac.HMAC-Policy.failed = true` |
+
+### Example error response
+
+For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRules>
+    <FaultRule name="HMAC Policy Errors">
+        <Step>
+            <Name>AM-Unauthorized</Name>
+            <Condition>(fault.name Matches "HmacVerificationFailed")</Condition>
+        </Step>
+        <Condition>hmac.HMAC-1.failed = true</Condition>
+    </FaultRule>
+</FaultRules>
+```

@@ -1,0 +1,616 @@
+# Response codes:
+  response.status.code <= 599
+  response.status.code >=301 && response.status.code <=420
+
+# Requests/responses:
+  request.verb == "GET"
+  request.header.A == 'B' || request.queryparam.X == 'Y'
+
+# Query parameters:
+  request.queryparam.myparam == 'fish'
+  (request.queryparam.param1 == 'X' || request.queryparam.param2 == 'Y') && request.queryparam.param3 == 'Z'
+
+# Faults:
+  fault.code != 'messaging.runtime.RouteFailed'
+  fault.name == 'IPDeniedAccess'
+```
+
+For information about using custom variables, see <a href="https://discuss.google.dev/t/how-to-use-custom-attributes-in-apigee-edge/13234" class="external">How to use custom attributes in Apigee</a> in the <a href="https://discuss.google.dev/" class="external">Apigee Community</a>.
+
+### Predefined UI filters
+
+The Apigee UI provides a set of common filters so that you don't have to write your own custom filters. The predefined filters are as summarized in the following table.
+
+| Filter Name | Description |
+| --- | --- |
+| Response Time Greater Than | Checks for latency issues where: target.duration is the target latency , or the amount of time, in milliseconds, that a request takes to be sent to and received from the target (calculated as the difference between target.received.end.timestamp and target.sent.start.timestamp ) client.duration is the client latency , or the amount of time, in milliseconds, that a request takes to be sent to and received from the client (calculated as the difference between client.received.end.timestamp and client.sent.start.timestamp ) For example: target.duration > 420 && client.duration > 1000 For more information, see client and target in the Flow variables reference . |
+| Response Code | Checks if the HTTP response code matches the specified value; for example: response.status.code <= 599 Tip: If you are receiving errors, try using message.status.code instead of response.status.code . |
+| Header | Checks if the specified request header is equal to the specified value; for example: request.header.cache-control.1 == "16544" |
+| Path | Checks if the request matches the specified path. You can use wildcard matching in your value; for example: request.path == /myproxy/customer/4* |
+| Query Param | Checks if the specified request query parameter is equal to the specified value; for example: request.queryparam.lang == "language:en-us" |
+| Custom | Lets you insert your own expressions. You can use any objects in the Flow variables reference and the syntax in Conditions reference . In addition, you can use custom variables. For more information about creating custom filters, see Filter syntax . |
+|  |  |
+
+## Viewing debug sessions
+
+Apigee saves debug session data for **24 hours**. You cannot configure this value; after 24 hours, the data will no longer be available. Before that time, you can view the debug sessions.
+
+**Note**: If you want to save debug session data for future reference, Apigee recommends that you [download the debug session](#download).
+
+To view downloaded debug session data, use the [Offline Debug tool](/apigee/docs/api-platform/debug/offline-trace).
+
+View recent debug sessions using the Apigee UI or API, as described in the following sections.
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+To view debug sessions using the Google Cloud console
+
+1.  In the Google Cloud console, go to the **Proxy development <span aria-label="and then">\></span> API Proxies** page.
+
+    <a href="https://console.cloud.google.com/apigee/proxies" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to API Proxies</a>
+
+2.  Click the proxy that you want to debug.
+
+3.  Click the **Debug** tab.
+
+4.  The **Recent debug sessions** displays a list of debug sessions that are available.
+
+5.  Click the link for the session you want to view.
+
+</div>
+
+<div class="section">
+
+### API
+
+Using the API, you can:
+
+- [View all debug sessions](#view-api)
+- [View all transactions for a debug session](#view-transactions-api)
+- [View transaction data for a debug session](#view-transaction-api)
+
+**Note:** The [Debug session API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.debugsessions) does not indicate whether a debug session is active.
+
+#### View all debug sessions using the API
+
+To view all recent debug sessions defined for an API proxy revision in an environment, issue a GET request to the following resource:
+
+<div>
+
+</div>
+
+```
+https://apigee.googleapis.com/v1/organizations/org/environments/env/apis/api/revisions/rev/debugsessions
+```
+
+Optionally, you can specify one of the following query parameters to control the amount of data returned:
+
+- **pageSize**: Maximum number of debug sessions to list. The page size defaults to 25.
+- **pageToken**: Page token, returned from a previous call, that you can use to retrieve the next page.
+
+The following example demonstrates how to view the debug sessions for revision 1 of the `helloworld` API proxy in the `test` environment.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/myorg/environments/test/apis/helloworld/revisions/1/debugsessions" \
+-X GET \
+-H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+The response includes a `sessions` object that contains a list of currently active debug sessions, as shown in the following example:
+
+<div>
+
+</div>
+
+```
+{
+"sessions": [
+{
+"id": "a423ac73-0902-4cfa-4242-87a353a84d87",
+"timestamp_ms": 1566330186000
+},
+{
+"id": "f1eccbbe-1fa6-2424-83e4-3d063b47728a",
+"timestamp_ms": 1566330286000
+}
+]
+}
+```
+
+Only debug sessions that contain at least one transaction are included in the response; debug sessions that do not have any transactions are not included in this list.
+
+For more information, see [List Debug sessions API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.debugsessions/list).
+
+#### View all transactions for a debug session using the API
+
+To view a list of transactions for a debug session, issue a GET request to the following resource:
+
+<div>
+
+</div>
+
+```
+https://apigee.googleapis.com/v1/organizations/org/environments/env/apis/api/revisions/rev/debugsessions/debugsession/data
+```
+
+Where `debugsession` is the ID of a debug session returned when you [view debug sessions](#view-api).
+
+The following example demonstrates how to view the transactions for a debug session for revision 1 of the `helloworld` API in the `test` environment.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/myorg/environments/test/apis/helloworld/revisions/1/debugsessions/a423ac73-0902-4cfa-4242-87a353a84d87/data" \
+-X GET \
+-H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+The response includes an array of transaction IDs, as shown in the following example:
+
+<div>
+
+</div>
+
+```
+[
+"myorg-test-ver-5qxdb-64",
+"myorg-test-ver-5qxdb-65",
+"myorg-test-ver-5qxdb-66",
+"myorg-test-ver-5qxdb-67",
+"myorg-test-ver-5qxdb-68",
+"myorg-test-ver-5qxdb-69",
+"myorg-test-ver-5qxdb-70",
+"myorg-test-ver-5qxdb-71",
+"myorg-test-ver-5qxdb-72"
+]
+```
+
+For more information, see [List debug session data API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.debugsessions.data/list).
+
+#### Viewing transaction data for a debug session using the API
+
+To view transaction data for a debug session, issue a GET request to the following resource:
+
+<div>
+
+</div>
+
+```
+https://apigee.googleapis.com/v1/organizations/{org}/environments/{env}/apis/{api}/revisions/{rev}/debugsessions/{debugsession}/data/{transactionId}
+```
+
+Where `debugsession` is the ID of a debug session returned when you [view debug sessions](#view-api) and `transactionId` is the transaction ID returned when you [View a list of transactions for a debug session](#view-transactions-api).
+
+You cannot use this API to view an entire sessions' data at one time; to do that, you must use the UI, as described in [Downloading debug data](#download).
+
+The transaction data saved during a debug session is formatted in JSON. You can load this data in the [Offline Debug tool](/apigee/docs/api-platform/debug/offline-trace).
+
+The following example demonstrates how to download the transaction data for a debug session for revision 1 of the `helloworld` API in the `test` environment.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/myorg/environments/test/apis/helloworld/revisions/1/debugsessions/a423ac73-0902-4cfa-4242-87a353a84d87/data/myorg-test-ver-5qxdb-64" \
+-X GET \
+-H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+The response consists of a JSON payload that contains the data for the specified transaction, as described in [Download data structure](#download-structure).
+
+Debug data contains all information about the request and response for each part of the flow in a proprietary JSON format. You can save this data and later use it in the [Offline Debug tool](/apigee/docs/api-platform/debug/offline-trace).
+
+If no requests were added to the session before it ended, then the response will look like the following:
+
+<div>
+
+</div>
+
+```
+[]
+```
+
+For more information, see [Get debug session data API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.debugsessions.data/get).
+
+</div>
+
+</div>
+
+### Selecting view options in the UI
+
+This section describes how to select view options to filter what is shown in the UI.
+
+To choose the view options for the debug session, select or clear options from the **View options** pane. These view options are persisted across debug session for each user.
+
+<img src="/static/apigee/docs/api-platform/debug/images/view-options-v2.png" class="screenshot" style="width:40.0%" data-modal-dialog-id="view-options-v2" alt="Click for larger image" /> ![view options list](/static/apigee/docs/api-platform/debug/images/view-options-v2.png)
+
+|  |  |
+|----|----|
+| Option | Description |
+| Show disabled policies | Show any disabled policies. A policy can be disabled with the public API. See [API proxy configuration reference](/apigee/docs/api-platform/reference/api-proxy-configuration-reference). |
+| Show skipped policies | Show any policies that were skipped. A skipped policy occurs when policy was not executed because the step condition evaluated to false. See [Conditions with flow variables](/apigee/docs/api-platform/fundamentals/flow-variables-and-conditions) for more information. |
+| Show all FlowInfos | Represent transitions within a flow segment. |
+| Show all flow conditions | Represent the conditions that were evaluated for each flow. |
+
+## Share a debug session
+
+You can share a debug session with other users who have access to your organization and the necessary permissions. To do so, just send them the URL displayed in your browser when you are viewing the debug session. The link is only valid for 24 hours after the debug session is created.
+
+## Downloading debug session data
+
+You can download a file of raw debug results for offline viewing. The downloaded file shows the complete details of the debug session including the contents of all headers, variables, and policies.
+
+Debug session data is available to download or view in the UI for 24 hours only. After that point, Apigee deletes the session data.
+
+To view downloaded debug session data, use the [Offline Debug tool](/apigee/docs/api-platform/debug/offline-trace).
+
+**Note:**
+
+- You cannot use the Apigee API to view an entire sessions' data at one time; you can only use the API to view individual transaction data, as described in [Viewing debug sessions](#view).
+- Metadata is NOT included when downloading transactions via the Apigee API. It is necessary to manually add metadata in order to upload and view the transaction using [Offline Debug](/apigee/docs/api-platform/debug/offline-trace).
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+To download the current debug session in the Google Cloud console, click **Download** in the Debug view.
+
+**Note:** A debug session is deleted within 24 hours of the time it is completed, so if you want to view the debug session after that time, you need to download it before then.
+
+</div>
+
+<div class="section">
+
+### API
+
+To view the IDs of all transactions for the current debug session using the Apigee API, enter the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+    curl -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+         https://apigee.googleapis.com/v1/organizations/ORG/environments/ENV/apis/PROXY/revisions/REV/debugsessions/SESSION_ID/data
+```
+
+where `SESSION_ID` is the ID for the debug session you want to download.
+
+See [List the transaction IDs from a debug session](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.debugsessions.data/list).
+
+To get the debug data for a transaction using the Apigee API, enter the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+    curl -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+    https://apigee.googleapis.com/v1/organizations/ORG/environments/ENV/apis/PROXY/revisions/REV/debugsessions/SESSION_ID/data/TRANSACTION_ID
+```
+
+</div>
+
+</div>
+
+### Download data structure
+
+The download structure of the debug session data is different for the Apigee UI and Apigee API.
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+When you download data using the Apigee UI, the data structure:
+
+- Includes all transactions in the entire session
+- Stores transactions in a `Messages` array
+- Includes metadata about the session (as a `DebugSession` object)
+
+</div>
+
+<div class="section">
+
+### API
+
+You cannot use the Apigee API to view an entire sessions' data at one time; you can only use the API to view individual transaction data, as described in [Viewing debug sessions](#view).
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+"completed": true,
+"point": [
+  ...
+...
+}
+```
+
+### Download data examples
+
+**Note:** Metadata is NOT included when downloading transactions via the Apigee API. It is necessary to manually add metadata in order to upload and view the transaction using [Offline Debug](/apigee/docs/api-platform/debug/offline-trace).
+
+The following example highlights a `DebugSession` metadata object in the downloaded data. This object is following by the `Messages` array that contains the transactions in the session.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "DebugSession": {
+    "Retrieved": "2019-06-08T13:08:13.395Z",
+    "Organization": "myorg",
+    "Environment": "prod",
+    "API": "myproxy",
+    "Revision": "1",
+    "SessionId": "a2a271aa-4242-4ac6-97cb-aec8dcb115a9"
+  },
+  "Messages": [
+    {
+      "completed": true,
+      "point": [
+        {
+          "id": "Paused"
+        },
+        {
+          "id": "Resumed"
+        },
+        {
+          "id": "StateChange",
+          "results": [
+            {
+              "ActionResult": "DebugInfo",
+              "properties": {
+                "property": [
+                  {
+                    "name": "To",
+                    "value": "REQ_HEADERS_PARSED"
+                  },
+                  {
+                    "name": "From",
+                    "value": "REQ_START"
+                  }
+                ]
+              },
+              "timestamp": "8-6-19 13:08:37:718"
+            },
+            {
+              "ActionResult": "RequestMessage",
+              "headers": [
+                {
+                  "name": "accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "accept-encoding",
+                  "value": "gzip,gzip,deflate,br"
+                },
+                {
+                  "name": "content-length",
+                  "value": "0"
+                },
+                {
+                  "name": "host",
+                  "value": "myorg.example.domain.net"
+                },
+                {
+                  "name": "user-agent",
+                  "value": "Google-Apigee"
+                },
+                {
+                  "name": "x-b3-sampled",
+                  "value": "0"
+                },
+                {
+                  "name": "x-b3-spanid",
+                  "value": "d4ee579206759662"
+                },
+                {
+                  "name": "x-b3-traceid",
+                  "value": "adc1e171777c237dd4ee579206759662"
+                },
+                {
+                  "name": "x-forwarded-for",
+                  "value": "66.102.8.98"
+                },
+                {
+                  "name": "x-forwarded-proto",
+                  "value": "https"
+                },
+                {
+                  "name": "x-request-id",
+                  "value": "54e05cba-4242-4490-4242-60c45c156f90"
+                }
+              ],
+              "uRI": "/myproxy",
+              "verb": "GET"
+            }
+          ]
+        },
+        {
+          "id": "FlowInfo",
+          "results": [
+            {
+              "ActionResult": "DebugInfo",
+              "properties": {
+                "property": [
+                  {
+                    "name": "environment.name",
+                    "value": "prod"
+                  },
+                  {
+                    "name": "environment.qualifiedname",
+                    "value": "myorg__prod"
+                  },
+                  {
+                    "name": "environment.orgname",
+                    "value": "myorg"
+                  }
+                ]
+              },
+              "timestamp": "8-6-19 13:08:37:718"
+            }
+          ]
+        },
+        {
+          "id": "FlowInfo",
+          "results": [
+            {
+              "ActionResult": "DebugInfo",
+              "properties": {
+                "property": [
+                  {
+                    "name": "organization.name",
+                    "value": "myorg"
+                  }
+                ]
+              },
+              "timestamp": "8-6-19 13:08:37:718"
+            }
+          ]
+        },
+        {
+          "id": "FlowInfo",
+          "results": [
+            {
+              "ActionResult": "DebugInfo",
+              "properties": {
+                "property": [
+                  {
+                    "name": "apiproxy.qualifiedname",
+                    "value": "myproxy__1"
+                  },
+                  {
+                    "name": "apiproxy.basepath",
+                    "value": "/"
+                  },
+                  {
+                    "name": "apiproxy.revision",
+                    "value": "1"
+                  },
+                  {
+                    "name": "apiproxy.name",
+                    "value": "myproxy"
+                  }
+                ]
+              },
+              "timestamp": "8-6-19 13:08:37:718"
+            }
+          ]
+        },
+        ...
+      ...
+    }
+  ]
+}
+```
+
+If the debug session did not include any requests, then the `Message` array is empty, as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "DebugSession": {
+    "Retrieved": "2019-06-08T13:08:13.395Z",
+    "Organization": "myorg",
+    "Environment": "prod",
+    "API": "myproxy",
+    "Revision": "1",
+    "SessionId": "a2a271aa-4242-4ac6-97cb-aec8dcb115a9"
+  },
+"Messages": []
+}
+```
+
+</div>
+
+</div>
+
+## Deleting data for a debug session
+
+Delete data for a debug session using the Apigee UI or API, as described in the following sections.
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+To delete a debug session in the Google Cloud console:
+
+1.  On the **Debug** tab, click the row for the session you want to delete.
+2.  In the **Debug session** pane, click <span class="material-icons" aria-hidden="true" translate="no">delete</span> **Delete**.
+
+</div>
+
+<div class="section">
+
+### API
+
+**Caution:** You cannot delete individual transactions or specific debug sessions from the stored debug data. If you issue a deletion request, you delete all debug sessions and all the data associated with those sessions.
+
+To delete all debug session data using the API, issue a DELETE request to the following resource:
+
+<div>
+
+</div>
+
+```
+https://apigee.googleapis.com/v1/organizations/org/environments/env/apis/api/revisions/rev/debugsessions/debugsession/data
+```
+
+Where `debugsession` is the ID of a debug session returned when you [view debug sessions](#view).
+
+The following example demonstrates how to delete debug session data for revision 1 of the `helloworld` API in the `test` environment.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/myorg/environments/test/apis/helloworld/revisions/1/debugsessions/a423ac73-0902-4cfa-4242-87a353a84d87/data" \
+      -X DELETE \
+      -H "Authorization: Bearer $TOKEN"
+    
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+If successful, the response body will be empty.
+
+Debug session data is persisted for 24 hours only. If you do not explicitly delete it before that time, then Apigee deletes it for you.
+
+</div>
+
+</div>

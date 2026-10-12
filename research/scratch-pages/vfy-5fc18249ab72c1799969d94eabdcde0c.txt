@@ -1,0 +1,345 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This section describes how to create and edit environment groups, which includes adding environments or host names to a group, or removing them, with Apigee. For more information about what an environment group is and how it works, see [Environments and environment group overview](/apigee/docs/api-platform/fundamentals/environments-overview).
+
+## Creating environment groups
+
+You can create new environment groups using the Apigee UI or the [Apigee API](/apigee/docs/reference/apis/apigee/rest). This section describes how to do both.
+
+When you first create an environment group, it does not contain any environments. It does, however, define a default hostname: example.`group-name`. To add environments to an environment group, see [Adding environments to an environment group](#adding).
+
+**Apigee hybrid users:** Every environment group you create with an attached environment must be included in all override files where the environment is used.
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+To create a new environment group in the Apigee UI:
+
+In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Management <span aria-label="and then">\></span> Environments** page.
+
+<a href="https://console.cloud.google.com/apigee/environments" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Environments</a>
+
+In the **Environments** pane, select **Environment Groups**.
+
+Click **+ Create Environment Group**.
+
+Enter the following:
+
+**Environment group name**: A name for the environment group. The name must start and end with an alphanumeric character. It can have up to 63 characters consisting of alphanumeric characters and hyphens. The name must be different from any existing environment group name in your organization.
+
+**Hostnames**: A list of host names that can be used to call proxies. Each host name must be on a separate line.
+
+**Note:** The names assigned to an environment group must be unique to that group: they can't be used by other environment groups.
+
+You also have the option to click **Configure Google Load Balancer with these domains**. This opens the **Load balancing** page in the Cloud console, where you can configure load balancing for the host names.
+
+**Environments**: An optional list of environments to include in the environment group.
+
+Click **Create**.
+
+**Note:** This operation may take up to five minutes to complete.
+
+</div>
+
+<div class="section">
+
+### Apigee API
+
+To create a new environment group using the Apigee API, send a `POST` request to the [Create environment groups API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups/create). Before calling the API, be sure that you have a valid token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20).
+
+The following example `curl` command shows the syntax to create a new group:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -i $TOKEN -X POST \
+  https://apigee.googleapis.com/v1/organizations/ORG_NAME/envgroups?name=new-group-name
+```
+
+When specifying the new group's name, you must use only lower case letters, numbers, and hyphens (`a-z`, `A-Z`, and `-`). You cannot use upper case letters or any special characters other than hyphens. You must also start the name with a lower case letter.
+
+If you don't specify any additional parameters, this command creates a new group with no host names assigned to it.
+
+You can also assign host names when you create the group by specifying them as an array in the body of the request.
+
+The following example creates a new group `my-group` and assigns three new host names to the new group:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -i $TOKEN -X POST \
+  https://apigee.googleapis.com/v1/organizations/org_name/envgroups?name=my-group \
+  -d '{ \
+    "hostnames": ["server1.mycompany.com", "server2.mycompany.com", "10.1.142.8"] \
+  }'
+```
+
+You can later change the host names in the list by sending a `PATCH` request to the [Patch environment groups API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups/patch).
+
+</div>
+
+</div>
+
+## Adding environments to an environment group
+
+Environments that are not in a group cannot be accessed because there is no host name associated with them. Host names are defined on the environment group, not the environment. When you create an environment using the Apigee UI in Google Cloud console, you have the option to assign the environment to an existing environment group. For more information, see [Creating a new environment in the UI](/apigee/docs/api-platform/fundamentals/environments-working-with#creating-a-new-environment-in-the-ui).
+
+If you did not assign your environment to a group during environment creation, this section describes how to add an unassigned environment to an environment group using the Apigee UI or the Apigee API.
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+To add an environment to an environment group in the Apigee UI:
+
+1.  Create the environment, as described in [Creating environments](/apigee/docs/api-platform/fundamentals/environments-working-with#create).
+
+2.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Management <span aria-label="and then">\></span> Environments** page.
+
+    <a href="https://console.cloud.google.com/apigee/environments" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Environments</a>
+
+3.  In the **Environments** pane, select **Environment Groups**.
+
+4.  In the environment group row, click <span class="material-icons" aria-hidden="true" translate="no"> more_vert </span>**Actions**, and select **Edit**.
+
+5.  In the **Edit Environment Group** pane, under **Environments (Optional)**, select the environment you want to add to the environment group.
+
+6.  Click **Update**.
+
+**Note:** This operation may take up to five minutes to complete.
+
+</div>
+
+<div class="section">
+
+### Apigee API
+
+To add a new environment to an environment group using the Apigee API, send a `POST` request to the [Environment group attachment API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups.attachments), as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -H "Authorization: Bearer $TOKEN" -X POST
+  "https://apigee.googleapis.com/v1/organizations/my-org/envgroups/test-group/attachments"
+  -d '{
+    "name": "my-attachment",
+    "environment": "test"
+  }'
+```
+
+Where:
+
+- `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20).
+- The body of the request contains the name of the attachment as well as the name of the new environment.
+
+The body of the request contains an instance of an [EnvironmentGroupAttachment resource](/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups.attachments#EnvironmentGroupAttachment), which is a simple wrapper around a single environment.
+
+If successful, the response contains details about the new attachment, including the timestamp at which it was created; for example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "name": "my-attachment",
+  "environment": "test"
+  "createdAt": "42"
+}
+```
+
+</div>
+
+</div>
+
+## Removing an environment from an environment group
+
+You can remove an environment from an environment group with the Apigee UI or the Apigee API.
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+To remove an environment from an environment group in the Apigee UI:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Management <span aria-label="and then">\></span> Environments** page.
+
+    <a href="https://console.cloud.google.com/apigee/environments" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Environments</a>
+
+2.  In the **Environments** pane, select **Environment Groups**.
+
+3.  In the environment group row, click <span class="material-icons" aria-hidden="true" translate="no"> more_vert </span>**Actions**, and select **Edit**.
+
+4.  In the **Edit Environment Group** pane, under **Environments (Optional)**, deselect the environment you want to remove from the environment group.
+
+5.  Click **Update**.
+
+**Note:** This operation may take up to five minutes to complete.
+
+</div>
+
+<div class="section">
+
+### Apigee API
+
+To remove an environment from an environment group using the Apigee API, use the `delete` method in the [EnvironmentGroupAttachment](https://cloud.devsite.corp.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups.attachments) resource to delete the attachment corresponding to the environment.
+
+</div>
+
+</div>
+
+## Deleting an environment group
+
+You can delete an environment group using either the Apigee UI or the API.
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+To delete an environment group in the Apigee UI:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Management <span aria-label="and then">\></span> Environments** page.
+
+    <a href="https://console.cloud.google.com/apigee/environments" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Environments</a>
+
+2.  In the **Environments** pane, select **Environment Groups**.
+
+3.  In the environment group row, click <span class="material-icons" aria-hidden="true" translate="no"> more_vert </span>**Actions**, and select **Edit**.
+
+**Note:** This operation may take up to five minutes to complete.
+
+</div>
+
+<div class="section">
+
+### Apigee API
+
+To delete an environment group using the Apigee API, use the `delete` method in the [EnvironmentGroup](https://cloud.devsite.corp.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups) resource.
+
+</div>
+
+</div>
+
+## Adding host names to a group
+
+When you create a group, Apigee adds the default hostname `example.``GROUP_NAME`. You can add your host names to the group using the instructions in this section.
+
+The hostnames that you define on an environment group:
+
+- Must be unique across all environment groups in an organization; they cannot be used by more than one group
+- Do not support wildcards
+- Base paths must be unique within a host (no two proxies can have the same base path within a host)
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+To add a host name to an environment group in the Apigee UI:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Management <span aria-label="and then">\></span> Environments** page.
+
+    <a href="https://console.cloud.google.com/apigee/environments" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Environments</a>
+
+2.  In the **Environments** pane, select **Environment Groups**.
+
+3.  In the environment group row, click <span class="material-icons" aria-hidden="true" translate="no"> more_vert </span>**Actions**, and select **Edit**.
+
+4.  In the **Edit Environment Group** pane, under **Hostnames**, enter the host name name you want to add to the environment group.
+
+5.  Click **Update**.
+
+**Note:** This operation may take up to five minutes to complete.
+
+</div>
+
+<div class="section">
+
+### Apigee API
+
+To add host names to an environment group using the [Apigee API](/apigee/docs/reference/apis/apigee/rest), send a `PATCH` request to the [Patch environment groups API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups/patch). Be sure to set the `updateMask` parameter to `hostnames` and specify the entire list of host names that you want: the value of that field in your request *replaces* the existing list.
+
+The following example sets the host names for the test environment:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -H "Authorization: Bearer $TOKEN" -X PATCH
+  "https://apigee.googleapis.com/v1/organizations/my-org/envgroups/test-group?updateMask=hostnames"
+  -d '{
+    "name": "my-hostnames",
+    "hostnames": [
+      "test-1.example.com",
+      "test-2.example.com",
+      "test-3.example.com"
+    ]
+  }'
+```
+
+Where:
+
+- `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20).
+- The payload of the request specifies a name for the array of hostname attachments, plus the array of names themselves.
+
+If the request was successful, the response contains an [Operation resource](/apigee/docs/reference/apis/apigee/rest/v1/organizations.operations#Operation).
+
+</div>
+
+</div>
+
+### Determining whether the Cloud Load Balancer is configured for a hostname
+
+You can call a proxy with the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -v https://YOUR_ENV_GROUP_HOSTNAME/myproxy
+```
+
+where `YOUR_ENV_GROUP_HOSTNAME` is the hostname of an environment group that contains the environment in which the proxy is deployed. To do so, the [Cloud Load Balancer](https://cloud.google.com/load-balancing/docs/load-balancing-overview) must be configured for the environment group hostname. Usually, the Load Balancer is configured when Apigee is first [provisioned](/apigee/docs/api-platform/get-started/provisioning-intro). To determine whether the Load Balancer is configured for the hostname:
+
+1.  In the Google Cloud console, go to the **Apigee Management <span aria-label="and then">\></span> Environments <span aria-label="and then">\></span> Environment Groups** page.
+
+    <a href="https://console.cloud.google.com/apigee/environments/groups" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Environment Groups</a>
+
+2.  Click <span class="material-icons" aria-hidden="true" translate="no">more_vert</span> **More**, <span class="material-icons" aria-hidden="true" translate="no">edit</span>**Edit** next to an environment group.
+
+3.  Click **Configure Google Load Balancer with these domains** This opens the Google Cloud Platform Load balancing page.
+
+    <img src="/static/apigee/docs/api-platform/get-started/images/cloud-load-balancer.png" class="screenshot" alt="Load balancing page in the Google Cloud Platform" />
+
+4.  Click the name of the load balancer in the **Name** column. If Apigee was provisioned with the [Provisioning Wizard](/apigee/docs/api-platform/get-started/overview), the name of the load balancer will be `apigee-proxy-url-map`. If you don't see that name, contact the system administrator in your organization who provisioned Apigee.
+
+    When you click the name, the **Load balancer details** page is displayed:
+
+    <img src="/static/apigee/docs/api-platform/get-started/images/load-balancer-details.png" class="screenshot" alt="Load balancer details page in the Google Cloud Platform" />
+
+5.  In the **Frontend** table, click an SSL certificate in the **Certificate** column and look for an SSL certificate that matches the hostname:
+    - If the **Certificate type** is **MANAGED**, check whether the **DNS Hostnames** field of the certificate matches the hostname.
+    - If the certificate is not managed, you may need to download the certificate and check whether its Common Name matches the hostname.
+
+If you don't find the hostname in any certificate, contact your system administrator for further assistance.

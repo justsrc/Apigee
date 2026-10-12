@@ -1,0 +1,127 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.deployments/list" class="section">
+
+- [HTTP request](#body.HTTP_TEMPLATE)
+- [Path parameters](#body.PATH_PARAMETERS)
+- [Query parameters](#body.QUERY_PARAMETERS)
+- [Request body](#body.request_body)
+- [Response body](#body.response_body)
+- [Authorization scopes](#body.aspect)
+- [Try it!](#try-it)
+
+<div id="google.cloud.apigee.v1.DeploymentService.ListEnvironmentDeployments" class="section">
+
+</div>
+
+<div id="description" class="section">
+
+Lists all deployments of API proxies or shared flows in an environment.
+
+</div>
+
+<div id="body" class="section">
+
+<div id="body.HTTP_TEMPLATE" class="section">
+
+### HTTP request
+
+`GET https://apigee.googleapis.com/v1/{parent=organizations/*/environments/*}/deployments`
+
+The URL uses [gRPC Transcoding](https://google.aip.dev/127) syntax.
+
+</div>
+
+<div id="body.PATH_PARAMETERS" class="section">
+
+### Path parameters
+
+<table id="body.PATH_PARAMETERS-table" class="properties responsive fixed" style="width:25%;">
+<colgroup>
+<col style="width: 25%" />
+<col />
+</colgroup>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr id="body.PATH_PARAMETERS.parent">
+<td><code translate="no" dir="ltr">parent</code></td>
+<td><p><code class="apitype" translate="no" dir="ltr">string</code></p>
+<p>Required. Name of the environment for which to return deployment information in the following format: <code translate="no" dir="ltr">organizations/{org}/environments/{env}</code></p>
+<p>Authorization requires the following <a href="https://cloud.google.com/iam/docs/">IAM</a> permission on the specified resource <code translate="no" dir="ltr">parent</code>:</p>
+<ul>
+<li><code translate="no" dir="ltr">apigee.deployments.list</code></li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="body.QUERY_PARAMETERS" class="section">
+
+### Query parameters
+
+<table id="body.QUERY_PARAMETERS-table" class="properties responsive fixed" style="width:25%;">
+<colgroup>
+<col style="width: 25%" />
+<col />
+</colgroup>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr id="body.QUERY_PARAMETERS.shared_flows">
+<td><code translate="no" dir="ltr">sharedFlows</code></td>
+<td><p><code class="apitype" translate="no" dir="ltr">boolean</code></p>
+<p>Optional. Flag that specifies whether to return shared flow or API proxy deployments. Set to <code translate="no" dir="ltr">true</code> to return shared flow deployments; set to <code translate="no" dir="ltr">false</code> to return API proxy deployments. Defaults to <code translate="no" dir="ltr">false</code>.</p></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="body.request_body" class="section">
+
+### Request body
+
+The request body must be empty.
+
+</div>
+
+<div id="body.response_body" class="section">
+
+### Response body
+
+If successful, the response body contains an instance of [`ListDeploymentsResponse`](/apigee/docs/reference/apis/apigee/rest/v1/ListDeploymentsResponse).
+
+</div>
+
+<div id="body.aspect" class="section">
+
+### Authorization scopes
+
+Requires the following OAuth scope:
+
+- `https://www.googleapis.com/auth/cloud-platform`
+
+</div>
+
+</div>
+
+<div id="try-it" class="section">
+
+<div class="devsite-apix">
+
+<div class="apis-explorer" discovery-rest-url="https://apigee.googleapis.com/$discovery/rest?version=v1" method-id="apigee.organizations.environments.deployments.list" params="">
+
+</div>
+
+</div>
+
+</div>
+
+</div>

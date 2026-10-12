@@ -1,0 +1,138 @@
+<div id="NAME" class="section">
+
+NAME
+
+<span class="normalfont"> gcloud beta apigee - manage Apigee resources </span>
+
+</div>
+
+<div id="SYNOPSIS" class="section">
+
+SYNOPSIS
+
+<span class="normalfont"> `gcloud beta apigee` [`GROUP`](#GROUP) \[[`GCLOUD_WIDE_FLAG`](#GCLOUD-WIDE-FLAGS)` …`\] </span>
+
+</div>
+
+<div id="DESCRIPTION" class="section">
+
+DESCRIPTION
+
+`(BETA)` Manage Apigee resources.
+
+</div>
+
+<div id="EXAMPLES" class="section">
+
+EXAMPLES
+
+To list API proxies in the active Cloud Platform project, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee apis list
+```
+
+To deploy an API proxy named `hello-world` to the `test` environment, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee apis deploy --environment=test --api=hello-world
+```
+
+To get the status of that deployment, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee deployments describe --environment=test --api=hello-world
+```
+
+To undeploy that API proxy, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee apis undeploy --environment=test --api=hello-world
+```
+
+</div>
+
+<div id="GCLOUD-WIDE-FLAGS" class="section">
+
+GCLOUD WIDE FLAGS
+
+These flags are available to all commands: [`--help`](/sdk/gcloud/reference#--help).
+
+Run `$ `[`gcloud help`](/sdk/gcloud/reference) for details.
+
+</div>
+
+<div id="GROUP" class="section">
+
+GROUPS
+
+`GROUP` is one of the following:
+
+<span class="normalfont">[`apis`](/sdk/gcloud/reference/beta/apigee/apis)</span>  
+`(BETA)` Manage Apigee API proxies.
+
+<span class="normalfont">[`applications`](/sdk/gcloud/reference/beta/apigee/applications)</span>  
+`(BETA)` Manage third-party applications which call Apigee API proxies.
+
+<span class="normalfont">[`archives`](/sdk/gcloud/reference/beta/apigee/archives)</span>  
+`(BETA)` Manage Apigee archive deployments.
+
+<span class="normalfont">[`deployments`](/sdk/gcloud/reference/beta/apigee/deployments)</span>  
+`(BETA)` Manage deployments of Apigee API proxies in runtime environments.
+
+<span class="normalfont">[`developers`](/sdk/gcloud/reference/beta/apigee/developers)</span>  
+`(BETA)` Manage Apigee developers.
+
+<span class="normalfont">[`environments`](/sdk/gcloud/reference/beta/apigee/environments)</span>  
+`(BETA)` Manage Apigee environments.
+
+<span class="normalfont">[`operations`](/sdk/gcloud/reference/beta/apigee/operations)</span>  
+`(BETA)` Manage Apigee long running operations.
+
+<span class="normalfont">[`organizations`](/sdk/gcloud/reference/beta/apigee/organizations)</span>  
+`(BETA)` Manage Apigee organizations.
+
+<span class="normalfont">[`products`](/sdk/gcloud/reference/beta/apigee/products)</span>  
+`(BETA)` Manage Apigee API products.
+
+</div>
+
+<div id="NOTES" class="section">
+
+NOTES
+
+This command is currently in beta and might change without notice. These variants are also available:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud alpha apigee
+```
+
+</div>

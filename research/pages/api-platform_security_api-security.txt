@@ -1,0 +1,34 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+API security involves controlling access to your APIs, guarding against malicious message content, accessing and masking sensitive encrypted data at runtime, protecting your backend services against direct access, and other important safeguards.
+
+### [OAuth home](/apigee/docs/api-platform/security/oauth/oauth-home)
+
+Get links to introductory topics, examples, and how-to topics.
+
+### [Using SAML policies](/apigee/docs/api-platform/security/saml)
+
+Get an overview of Apigee's support for SAML, along with a pointer to the policy you'll need.
+
+### [Data-masking and hiding](/apigee/docs/api-platform/security/data-masking)
+
+Learn how to mask sensitive data such as credit card numbers or health information.
+
+### [Last-mile security](/apigee/docs/api-platform/security/last-mile-security)
+
+Learn how to protect yourself against threats to your backend resources.
+
+### [API keys](/apigee/docs/api-platform/security/api-keys)
+
+Get an introduction to the working of API keys, the simplest form of app-based security.
+
+### [Content-based security](/apigee/docs/api-platform/security/content-based-security)
+
+Learn about the Apigee policies you can use to protect your APIs against content-carried threats.
+
+### [Key Value Maps](/apigee/docs/api-platform/cache/key-value-maps) and [property sets](/apigee/docs/api-platform/cache/property-sets)
+
+Store data that shouldn't be hard-coded in your API proxy logic for retrieval at runtime, such as credentials, private keys, or tokens

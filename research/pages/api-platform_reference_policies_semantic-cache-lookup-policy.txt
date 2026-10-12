@@ -1,0 +1,602 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The SemanticCacheLookup policy is an advanced caching policy designed to optimize the performance of AI workloads, particularly those involving Large Language Models (LLMs).
+
+The policy uses the Vertex AI [Text embeddings API](/vertex-ai/generative-ai/docs/model-embeddings/get-text-embeddings) to generate embeddings for text and [Vector Search](/vertex-ai/docs/vector-search/overview) to find similar prompts based on semantic similarity, rather than exact matches.
+
+The SemanticCacheLookup policy reduces response times for repeated queries and optimizes costs by reducing call volume to LLMs.
+
+This policy works in conjunction with the [SemanticCachePopulate policy](/apigee/docs/api-platform/reference/policies/semantic-cache-populate-policy).
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+**Note:** If you have configured a forward proxy for your environment, the outbound calls this policy makes to Vertex AI are routed through the proxy. No policy-level configuration is required. This is applicable for Apigee and Apigee Hybrid 1.16.10 and later, and 1.17.0 and later. For more information, see [Configure forward proxying](/apigee/docs/api-platform/fundamentals/environments-overview#forward-proxying) (Apigee) or [Configure forward proxying for API proxies](/apigee/docs/hybrid/v1.17/forward-proxy) (Apigee Hybrid).
+
+## Before you begin
+
+Before you use the SemanticCacheLookup policy, complete the following tasks:
+
+- Create a Vertex AI project.
+- Create a Vector Search index.
+- Create a Vertex AI endpoint for the index.
+- Create a SemanticCachePopulate policy.
+
+For more information on completing these tasks, see [Get started with Semantic Caching policies](/apigee/docs/api-platform/tutorials/using-semantic-caching-policies).
+
+### Required roles
+
+To get the permissions that you need to apply and use the SemanticCacheLookup policy, ask your administrator to grant you the [AI Platform User](/iam/docs/roles-permissions/aiplatform#aiplatform.user) (`roles/aiplatform.user`) IAM role on the service account you use to deploy Apigee proxies. For more information about granting roles, see [Manage access to projects, folders, and organizations](/iam/docs/granting-changing-revoking-access).
+
+You might also be able to get the required permissions through [custom roles](/iam/docs/creating-custom-roles) or other [predefined roles](/iam/docs/roles-overview#predefined).
+
+### Enable APIs
+
+Enable the Compute Engine, Vertex AI, and Cloud Storage APIs, if any are not already enabled.
+
+**Roles required to enable APIs**
+
+To enable APIs, you need the `serviceusage.services.enable` permission. If you created the project, then you likely already have this permission through the Owner role (`roles/owner`). Otherwise, you can get this permission through the Service Usage Admin role (`roles/serviceusage.serviceUsageAdmin`). [Learn how to grant roles](/iam/docs/granting-changing-revoking-access).
+
+<a href="https://console.cloud.google.com/apis/enableflow?apiid=compute.googleapis.com,aiplatform.googleapis.com,storage.googleapis.com" class="button button-primary" target="console" data-track-type="commonIncludes" data-track-name="consoleLink" data-track-metadata-end-goal="enableAPI">Enable the APIs</a>
+
+## `<SemanticCacheLookup>` element
+
+Defines a SemanticCacheLookup policy.
+
+| Default Value | See Default Policy tab, below |
+| --- | --- |
+| Required? | Required |
+| Type | Complex object |
+| Parent Element | N/A |
+| Child Elements | <DisplayName> <IgnoreUnresolvedVariables> <UserPromptSource> <Embeddings> <SimilaritySearch> |
+
+The `<SemanticCacheLookup>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+The `<SemanticCacheLookup>` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SemanticCacheLookup async="false" continueOnError="false" enabled="true" name="SCL-lookup">
+  <DisplayName>SCL-lookup</DisplayName>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <UserPromptSource>{jsonPath('$.contents[-1].parts[-1].text',request.content,true)}</UserPromptSource>
+  <Embeddings>
+    <VertexAI>
+      <URL>https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{MODEL_ID}:predict</URL>
+    </VertexAI>
+  </Embeddings>
+  <SimilaritySearch>
+    <VertexAI>
+      <URL>https://{PUBLIC_DOMAIN_NAME}/v1/projects/{PROJECT_ID}/locations/{LOCATION}/indexEndpoints/{INDEX_ENDPOINT_ID}:findNeighbors</URL>
+      <DeployedIndexID>{DEPLOYED_INDEX_ID}</DeployedIndexID>
+      <Threshold>0.95</Threshold>
+      <DistanceMeasureType>DOT_PRODUCT_DISTANCE</DistanceMeasureType>
+    </VertexAI>
+  </SimilaritySearch>
+</SemanticCacheLookup>
+```
+
+</div>
+
+<div class="section">
+
+### Default Policy
+
+The following example shows the default settings when you add a SemanticCacheLookup policy to your flow in the Apigee UI:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SemanticCacheLookup async="false" continueOnError="false"enabled="true" name="SCL-lookup">
+  <DisplayName>SCL-lookup</DisplayName>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <UserPromptSource>{jsonPath('$.contents[-1].parts[-1].text',request.content,true)}</UserPromptSource>
+  <Embeddings>
+    <VertexAI>
+      <URL>https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{MODEL_ID}:predict
+      </URL>
+    </VertexAI>
+  </Embeddings>
+  <SimilaritySearch>
+    <VertexAI>
+      <URL>https://{PUBLIC_DOMAIN_NAME}/v1/projects/{PROJECT_ID}/locations/{LOCATION}/indexEndpoints/{INDEX_ENDPOINT_ID}:findNeighbors</URL>
+      <Threshold>0.9</Threshold>
+      <DeployedIndexID>{DEPLOYED_INDEX_ID}</DeployedIndexID>
+      <DistanceMeasureType>DOT_PRODUCT_DISTANCE</DistanceMeasureType>
+    </VertexAI>
+  </SimilaritySearch>
+</SemanticCacheLookup>
+```
+
+When you insert a new SemanticCacheLookup policy in the Apigee UI, the template contains stubs for all possible operations. See below for information on required elements.
+
+</div>
+
+</div>
+
+This element has the following attributes that are common to all policies:
+
+**Attribute**
+
+**Default**
+
+**Required?**
+
+**Description**
+
+`name`
+
+N/A
+
+**Required**
+
+The internal name of the policy. The value of the `name` attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters.
+
+Optionally, use the `<DisplayName>` element to label the policy in the management UI proxy editor with a different, natural-language name.
+
+`continueOnError`
+
+false
+
+Optional
+
+Set to `false` to return an error when a policy fails. This is expected behavior for most policies. Set to `true` to have flow execution continue even after a policy fails. See also:
+
+- [Fault rules are triggered ONLY in an error state (about continueOnError)](/apigee/docs/api-platform/fundamentals/fault-handling#multiplefaultrulesandexecutionlogic-faultrulesaretriggeredonlyinanerrorstateaboutcontinueonerror)
+- [Handling faults within the current flow](/apigee/docs/api-platform/fundamentals/fault-handling#continueonerror)
+
+`enabled`
+
+true
+
+Optional
+
+Set to `true` to enforce the policy. Set to `false` to *turn off* the policy. The policy will not be enforced even if it remains attached to a flow.
+
+`async`  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray">not_interested</span></span>
+
+false
+
+Deprecated
+
+This attribute is deprecated.
+
+The following table provides a high level description of the child elements of [`<SemanticCacheLookup>`](/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy#semanticcachelookup):
+
+| Child Element | Required? | Description |
+| --- | --- | --- |
+| <DisplayName> | Optional | The name of the policy. |
+| <IgnoreUnresolvedVariables> | Optional | Determines whether processing stops when a variable is unresolved. Set to true to ignore unresolved variables and continue processing. |
+| <UserPromptSource> | Optional | The location of the payload for the user prompt text to be extracted. Only string text values are supported. This field supports Apigee message template syntax, including the use of variables or JSON Path functions. For example: {jsonPath('$.contents[-1].parts[-1].text',request.content,true)} |
+| <Embeddings> | Required | Element containing the information required to generate embeddings. |
+| <SimilaritySearch> | Required | Element containing the information required to perform similarity searches. For more information, see Query public index to get nearest neighbors . |
+
+## Child element reference
+
+This section describes the child elements of [`<SemanticCacheLookup>`](/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy#semanticcachelookup).
+
+### `<DisplayName>`
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, more natural-sounding name.
+
+The `<DisplayName>` element is common to all policies.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional. If you omit `<DisplayName>`, the value of the policy's `name` attribute is used. |
+| **Type** | String |
+| **Parent Element** | \<`PolicyElement`\> |
+| **Child Elements** | None |
+
+The `<DisplayName>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>POLICY_DISPLAY_NAME</DisplayName>
+  ...
+</PolicyElement>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>My Validation Policy</DisplayName>
+</PolicyElement>
+```
+
+</div>
+
+</div>
+
+The `<DisplayName>` element has no attributes or child elements.
+
+### \<IgnoreUnresolvedVariables\>
+
+Determines whether processing stops when a variable is unresolved. Set to `true` to ignore unresolved variables and continue processing.
+
+`IgnoreUnresolvedVariables` is not applicable when [`<DefaultValue>`](/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy#default-policy) is provided.
+
+|  |  |
+|----|----|
+| **Default Value** | False |
+| **Required?** | Optional |
+| **Type** | Boolean |
+| **Parent Element** | [`<SemanticCacheLookup>`](/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy#semanticcachelookup) |
+| **Child Elements** | None |
+
+### `<UserPromptSource>`
+
+The location of the payload for the user prompt text to be extracted. Only string text values are supported.
+
+This field supports Apigee message template syntax, including the use of [variables](/apigee/docs/api-platform/reference/message-template-intro#use-curly-braces-to-denote-variables) or [JSON Path functions.](/apigee/docs/api-platform/reference/message-template-intro#json-path-function)
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{jsonPath('$.contents[-1].parts[-1].text',request.content,true)}
+```
+
+|  |  |
+|----|----|
+| **Default Value** | {jsonPath('\$.contents\[-1\].parts\[-1\].text',request.content,true)} |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<SemanticCacheLookup>`](/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy#semanticcachelookup) |
+| **Child Elements** | None |
+
+### `<Embeddings>`
+
+This element contains the information required to generate text embeddings.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<SemanticCacheLookup>`](/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy#semanticcachelookup) |
+| **Child Elements** | [`<VertexAI>`](/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy#embeddings-vertexai) |
+
+The `<Embeddings>` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Embeddings>
+  <VertexAI>
+    <URL>https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{MODEL_ID}:predict</URL>
+  </VertexAI>
+</Embeddings>
+```
+
+#### \<VertexAI\> (child of [`<Embeddings>`](/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy#embeddings))
+
+Contains the \<URL\> element for Vertex AI-specific attributes.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | String |
+| Parent Element | <Embeddings> |
+| Child Elements | <URL> |
+
+The `VertexAI` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VertexAI>
+  <URL>https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{MODEL_ID}:predict</URL>
+</VertexAI>
+```
+
+#### \<URL\> (child of [`<VertexAI>`](/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy#embeddings-vertexai))
+
+The URL used to generate text embeddings. See [Supported models](/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings#supported-models) for a list of models that provide text embeddings for the SemanticCacheLookup policy.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | String |
+| Parent Element | <VertexAI> |
+| Child Elements | None |
+
+The `URL` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<URL>https://{LOCATION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{MODEL_ID}:predict</URL>
+```
+
+The `URL` element supports the use of URL templating. If you wish, provide a variable in this element to hold the value of the URL, as shown in the following example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<URL>https://{URL_VARIABLE}</URL>
+```
+
+### `<SimilaritySearch>`
+
+This element contains the information required to perform similarity searches.
+
+The similarity search can run against a Vector Search index deployed on either a **public** endpoint or a **private** (Private Service Connect) endpoint. You must provide **exactly one** of the following transports in the `<VertexAI>` element:
+
+- [`<URL>`](#similaritysearchurl)—for a public endpoint, over REST (`:findNeighbors`).
+- [`<PrivateServiceConnect>`](#privateserviceconnect)—for a private endpoint, over gRPC. A private (Private Service Connect) deployed-index endpoint accepts only gRPC.
+
+For more information, see [Query public index to get nearest neighbors](/vertex-ai/docs/vector-search/query-index-public-endpoint) and [Semantic caching with a private (Private Service Connect) endpoint](/apigee/docs/api-platform/tutorials/using-semantic-caching-policies-psc).
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | String |
+| Parent Element | <SemanticCacheLookup> |
+| Child Elements | <VertexAI> |
+
+The `<SimilaritySearch>` element uses the following syntax.
+
+**Public endpoint (REST):**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SimilaritySearch>
+  <VertexAI>
+    <URL>https://{PUBLIC_DOMAIN_NAME}/v1/projects/{PROJECT_ID}/locations/{LOCATION}/indexEndpoints/{INDEX_ENDPOINT_ID}:findNeighbors</URL>
+    <Threshold>0.9</Threshold>
+    <DeployedIndexID>{DEPLOYED_INDEX_ID}</DeployedIndexID>
+    <DistanceMeasureType>DOT_PRODUCT_DISTANCE</DistanceMeasureType>
+  </VertexAI>
+</SimilaritySearch>
+```
+
+**Private endpoint (Private Service Connect, gRPC):**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SimilaritySearch>
+  <VertexAI>
+    <PrivateServiceConnect>
+      <GrpcEndpoint>grpc://{TARGET_HOST}:10000</GrpcEndpoint>
+    </PrivateServiceConnect>
+    <Threshold>0.9</Threshold>
+    <DeployedIndexID>{DEPLOYED_INDEX_ID}</DeployedIndexID>
+  </VertexAI>
+</SimilaritySearch>
+```
+
+#### \<VertexAI\> (child of [`<SimilaritySearch>`](/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy#similaritysearch))
+
+Contains the Vertex AI-specific attributes used to perform the similarity search. Provide **exactly one** of the following transports: a `<URL>` element (for a public endpoint, over REST) or a `<PrivateServiceConnect>` element (for a private endpoint, over gRPC).
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | String |
+| Parent Element | <SimilaritySearch> |
+| Child Elements | <URL> |
+
+For a public endpoint, the `VertexAI` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VertexAI>
+  <URL>https://{PUBLIC_DOMAIN_NAME}/v1/projects/{PROJECT_ID}/locations/{LOCATION}/indexEndpoints/{INDEX_ENDPOINT_ID}:findNeighbors</URL>
+  <Threshold>0.9</Threshold>
+  <DeployedIndexID>{DEPLOYED_INDEX_ID}</DeployedIndexID>
+  <DistanceMeasureType>DOT_PRODUCT_DISTANCE</DistanceMeasureType>
+</VertexAI>
+```
+
+For a private (Private Service Connect) endpoint, the `VertexAI` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VertexAI>
+  <PrivateServiceConnect>
+    <GrpcEndpoint>grpc://{TARGET_HOST}:10000</GrpcEndpoint>
+  </PrivateServiceConnect>
+  <Threshold>0.9</Threshold>
+  <DeployedIndexID>{DEPLOYED_INDEX_ID}</DeployedIndexID>
+</VertexAI>
+```
+
+The following table provides a high-level description of the child elements of [`<VertexAI>`](/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy#similaritysearch-vertexai).
+
+| Child Element | Required? | Description |
+| --- | --- | --- |
+| <URL> | Required (provide either <URL> or <PrivateServiceConnect> ) | String The URL used to perform similarity searches against a public Vector Search index endpoint, over REST ( :findNeighbors ). The highest matching data point, based on the similarity threshold, is the only data point used. The URL element supports the use of URL templating. If you wish, provide a variable in this element to hold the value of the URL, as shown in the following example: <URL>https://{URL_VARIABLE}</URL> |
+| <PrivateServiceConnect> | Required (provide either <URL> or <PrivateServiceConnect> ) | Complex object Contains the connection information used to perform similarity searches against a private Vector Search index deployed on a Private Service Connect endpoint. A private deployed-index endpoint accepts only gRPC. Note: The <PrivateServiceConnect> transport is supported on Apigee, and on Apigee Hybrid version 1.17.0 and later . This element contains a single child element, <GrpcEndpoint> : <PrivateServiceConnect> <GrpcEndpoint>grpc://{TARGET_HOST}:10000</GrpcEndpoint> </PrivateServiceConnect> The <GrpcEndpoint> element specifies the gRPC address of the private endpoint. The following rules apply: The format is grpc:// TARGET_HOST : PORT . The scheme must be grpc:// ; grpcs:// (TLS) is not supported in this version. TARGET_HOST is either the endpoint attachment IP address or a private DNS record in a peered Cloud DNS zone. The port is 10000 for Vector Search Private Service Connect data-plane endpoints. The gRPC hop is plaintext and unauthenticated; it is secured by network isolation. For more information, see Semantic caching with a private (Private Service Connect) endpoint . |
+| <Threshold> | Optional | String The value a nearest neighbor must reach to count as a match. <DistanceMeasureType> sets the direction of the comparison. The default value is 0.9, which suits DOT_PRODUCT_DISTANCE . See Choosing a threshold for your distance measure . |
+| <DeployedIndexID> | Required | String The ID of the index deployed on the index endpoint used for semantic caching. |
+| <DistanceMeasureType> | Optional | String The distance measure your Vertex AI Vector Search index was built with. It sets the direction of the <Threshold> comparison. Valid values are DOT_PRODUCT_DISTANCE , COSINE_DISTANCE , SQUARED_L2_DISTANCE and L1_DISTANCE , matched exactly. Any other value causes the deployment to fail. For what each measure computes, see Index configuration parameters . The default value is DOT_PRODUCT_DISTANCE . See Choosing a threshold for your distance measure . |
+
+#### Choosing a threshold for your distance measure
+
+The measure your index was built with decides the direction of the `<Threshold>` comparison: dot product is a similarity, so a larger value means a closer match, while the other three are distances, where a smaller value does. Set `<DistanceMeasureType>` to match your index, then tune the threshold for that measure.
+
+**Note:** [`<DistanceMeasureType>`](/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy#distancemeasuretype) is available in Apigee `1-18-0-apigee-4` and later, and in Apigee hybrid version 1.17.0 and later. On earlier versions the element is accepted and silently ignored, and the threshold is compared as though the measure were `DOT_PRODUCT_DISTANCE`. Check `semanticcache.lookup.``policy_name``.measure_type` in a debug session to confirm which measure the policy was applied to.
+
+| Distance measure                 | Cache threshold      |
+|----------------------------------|----------------------|
+| `DOT_PRODUCT_DISTANCE` (default) | `value >= threshold` |
+| `COSINE_DISTANCE`                | `value <= threshold` |
+| `SQUARED_L2_DISTANCE`            | `value <= threshold` |
+| `L1_DISTANCE`                    | `value <= threshold` |
+
+**Note:** Semantic caching strongly encourages all vectors to be normalized, which produces the most well-defined behavior. Using `L1_DISTANCE` with L2 normalization (`featureNormType: UNIT_L2_NORM`) is also discouraged, because the distance then scales with the square root of the embedding dimension count rather than falling in a fixed range.
+
+To find the measure your index was built with, run `gcloud ai indexes describe ``INDEX_ID`` --region=``REGION` and read the `distanceMeasureType` field. To confirm the policy applied it, send the same request twice and inspect `semanticcache.lookup.``policy_name``.measure_type` and `semanticcache.lookup.``policy_name``.nearest_neighbor_measure` in a debug session.
+
+## Flow variables
+
+Flow variables configure dynamic runtime behavior for policies and flows, based on HTTP headers or message content, or the context available in the Flow. For more information about flow variables, see [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference).
+
+This policy provides the following set of *read-only* flow variables during execution. You can use these flow variables with the [DataCapture policy](/apigee/docs/api-platform/reference/policies/data-capture-policy) to create custom analytics reports. For more information, see [Collecting customer data with the Data Capture policy](/apigee/docs/api-platform/analytics/using-data-capture).
+
+| Variable name | Description |
+|----|----|
+| `request.content` | Contains the full content of the incoming API request. |
+| `request.url` | Contains the URL of the incoming API request. |
+| `SemanticCacheLookup.``policy_name``.user_prompt` | Contains specific components extracted from the request prompt, which is used for generating embeddings or performing similarity searches. |
+| `SemanticCacheLookup.``policy_name``.embeddings_request` | Contains the request payload sent to the Vertex AI Embeddings API to generate text embeddings for the input text. |
+| `SemanticCacheLookup.``policy_name``.embeddings_response` | Contains the response from the Vertex AI Embeddings API, which includes the generated text embeddings. |
+| `SemanticCacheLookup.``policy_name``.dense_embeddings` | Contains the actual numerical embedding values generated by the Vertex AI Embeddings API. |
+| `SemanticCacheLookup.``policy_name``.is_nearest_neighbor_hit` | Specifies whether a nearest neighbor was found in the vector database for the given request and datapoint meets similarity threshold. |
+| `SemanticCacheLookup.``policy_name``.cache_hit` | Specifies whether the response was found in the semantic cache. |
+| `SemanticCacheLookup.``policy_name``.cached_llm_response` | Contains the response retrieved from the semantic cache (if a cache hit occurred). |
+| `semanticcache.lookup.``policy_name``.nearest_neighbor_measure` | Contains the raw value the Vector Search index returned for the nearest neighbor. Set on both hits and misses whenever a neighbor was returned. |
+| `semanticcache.lookup.``policy_name``.measure_type` | Contains the distance measure the policy applied, including when it fell back to the default. Set on both hits and misses whenever a neighbor was returned. |
+
+## Error reference
+
+This section describes the fault codes and error messages that Apigee returns and the fault variables that Apigee sets, specific to the `<SemanticCacheLookup>` policy. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors.%20%20html) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors occur when the policy executes.
+
+| Fault code | HTTP status | Cause |
+|----|----|----|
+| `steps.semanticcache.lookup.MessageTemplateExtractionFailed` | `400` | Failed to extract data from the request using the JSON Path expression. |
+| `steps.semanticcache.lookup.FailedToExtractUserPrompt` | `500` | Unable to extract the user prompt from the API request. |
+| `steps.semanticcache.lookup.EmbeddingsServiceUnavailable` | `400` | The Vertex AI Embeddings service is currently unavailable. |
+| `steps.semanticcache.lookup.EmbeddingsAPIFailed` | `400` | The Vertex AI Embeddings service failed. |
+| `steps.semanticcache.lookup.VectorSearchServiceUnavailable` | `400` | The Vertex AI Vector Search service is currently unavailable. |
+| `steps.semanticcache.lookup.VectorSearchAPIFailed` | `400` | The Vertex AI Vector Search service failed. |
+| `steps.semanticcache.lookup.AuthenticationFailure` | `500` | The service account doesn't have required permissions. |
+| `steps.semanticcache.lookup.InternalError` | `500` | An unexpected error occurred within the SemanticCacheLookup policy. |
+| `steps.semanticcache.lookup.CalloutError` | `500` | The Vertex AI service call failed. |
+
+### Deployment errors
+
+These errors occur when you deploy a proxy containing this policy.
+
+| Error name | Cause |
+|----|----|
+| `The Embeddings/VertexAI element is required.` | Occurs if the \<VertexAI\> element in \<Embeddings\> is empty. |
+| `The SimilaritySearch/VertexAI element is required.` | Occurs if the \<VertexAI\> element in \<SimilaritySearch\> is empty. |
+| `Embeddings/VertexAI cannot have both URL and PrivateServiceConnect elements.` | Occurs if both the \<URL\> and \<PrivateServiceConnect\> elements in \<Embeddings\> are specified. |
+| `SimilaritySearch/VertexAI cannot have both URL and PrivateServiceConnect elements.` | Occurs if both the \<URL\> and \<PrivateServiceConnect\> elements in \<SimilaritySearch\> are specified. |
+| `Embeddings/VertexAI/URL or Embeddings/PrivateServiceConnect/GrpcEndpoint element is required.` | Occurs if neither the \<URL\> element nor the \<GrpcEndpoint\> element in \<Embeddings\> is specified. |
+| `SimilaritySearch/VertexAI/URL or SimilaritySearch/PrivateServiceConnect/GrpcEndpoint element is required.` | Occurs if neither the \<URL\> element nor the \<GrpcEndpoint\> element in \<SimilaritySearch\> is specified. |
+| `The Embeddings/VertexAI/PrivateServiceConnect element is not supported. Use URL instead.` | Occurs if the \<PrivateServiceConnect\> element is used in \<Embeddings\>. |
+| `Embeddings URL {url} is invalid.` | Occurs if the \<URL\> element in \<Embeddings\> is empty or invalid. |
+| `The SimilaritySearch URL {url} is invalid.` | Occurs if the \<URL\> element in \<SimilaritySearch\> is empty or invalid. |
+| `The scheme {http-scheme} of Embeddings URL {url} must be one of http, https.` | Occurs if the Embeddings \<URL\> element's `http` scheme is invalid. |
+| `The scheme {http-scheme} of SimilaritySearch URL {url} must be one of http, https.` | Occurs if the SimilaritySearch \<URL\> element's `http` scheme is invalid. |
+| `The SimilaritySearch /VertexAI/PrivateServiceConnect/GrpcEndpoint {grpc-endpoint} must be in the format "grpc://TARGET_HOST:PORT".` | Occurs if the \<GrpcEndpoint\> element in \<SimilaritySearch\> is not in the format `grpc://TARGET_HOST:PORT`. |
+| `The scheme {grpc-scheme} of SimilaritySearch /VertexAI/PrivateServiceConnect/GrpcEndpoint {grpc-endpoint} must be "grpc".` | Occurs if the SimilaritySearch \<GrpcEndpoint\> element's `grpc` scheme is invalid. |
+| `SimilaritySearch/Threshold element must not be NaN.` | Occurs if the \<Threshold\> element in \<SimilaritySearch\> is `NaN`. `Infinity` and `-Infinity` are permitted. |
+| `Invalid DistanceMeasureType {value}. Supported values are DOT_PRODUCT_DISTANCE, COSINE_DISTANCE, SQUARED_L2_DISTANCE and L1_DISTANCE` | Occurs if the \<DistanceMeasureType\> element in \<SimilaritySearch\> is not one of the four supported values. Matching is exact. See [Index configuration parameters](/vertex-ai/docs/vector-search/configuring-indexes). |
+| `SimilaritySearch/DeployedIndexID element is required.` | Occurs if the \<DeployedIndexID\> element in \<SimilaritySearch\> is empty. |
+| `SimilaritySearch/DeployedIndexID element must not contain spaces.` | Occurs if the \<DeployedIndexID\> element in \<SimilaritySearch\> contains spaces. |
+
+### Fault variables
+
+This policy sets these variables when it triggers an error at runtime. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``FAULT_NAME``"` | `FAULT_NAME` is the name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name Matches "UnresolvedVariable"` |
+| `semanticcachelookup.``POLICY_NAME``.failed` | `POLICY_NAME` is the user-specified name of the policy that threw the fault. | `semanticcachelookup.SC-lookup.failed = true` |
+
+### Example error response
+
+**Note:** For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "fault": {
+    "faultstring": "SemanticCacheLookup[SC-lookup]: unable to resolve variable [variable_name]",
+    "detail": {
+      "errorcode": "steps.semanticcachelookup.UnresolvedVariable"
+    }
+  }
+}
+```
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name="SemanticCacheLookup Faults">
+    <Step>
+        <Name>SCL-CustomSetVariableErrorResponse</Name>
+        <Condition>(fault.name = "SetVariableFailed")</Condition>
+    </Step>
+    <Condition>(semanticcachelookup.failed = true)</Condition>
+</FaultRule>
+```
+
+## Schemas
+
+Each policy type is defined by an XML schema (`.xsd`). For reference, [policy schemas](https://github.com/apigee/api-platform-samples/tree/master/schemas/policy) are available on GitHub.

@@ -1,0 +1,97 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.revisions/updateApiProxyRevision" class="section">
+
+- [HTTP request](#body.HTTP_TEMPLATE)
+- [Path parameters](#body.PATH_PARAMETERS)
+- [Query parameters](#body.QUERY_PARAMETERS)
+- [Request body](#body.request_body)
+- [Response body](#body.response_body)
+- [Authorization scopes](#body.aspect)
+- [Try it!](#try-it)
+
+<div id="google.cloud.apigee.v1.ApiProxyService.UpdateApiProxyRevision" class="section">
+
+</div>
+
+<div id="description" class="section">
+
+Updates an existing API proxy revision by uploading the API proxy configuration bundle as a zip file from your local machine.
+
+You can update only API proxy revisions that have never been deployed. After deployment, an API proxy revision becomes immutable, even if it is undeployed.
+
+Set the `Content-Type` header to either `multipart/form-data` or `application/octet-stream`.
+
+</div>
+
+<div id="body" class="section">
+
+<div id="body.HTTP_TEMPLATE" class="section">
+
+### HTTP request
+
+`POST https://apigee.googleapis.com/v1/{name=organizations/*/apis/*/revisions/*}`
+
+The URL uses [gRPC Transcoding](https://google.aip.dev/127) syntax.
+
+</div>
+
+<div id="body.PATH_PARAMETERS" class="section">
+
+### Path parameters
+
+| Parameters |  |
+| --- | --- |
+| name | string Required. API proxy revision to update in the following format: organizations/{org}/apis/{api}/revisions/{rev} If the API Proxy resource has the space attribute set, IAM permissions are checked against the Space resource path. To learn more, read the Apigee Spaces Overview . Authorization requires the following IAM permission on the specified resource name : apigee.proxyrevisions.update |
+
+</div>
+
+<div id="body.QUERY_PARAMETERS" class="section">
+
+### Query parameters
+
+| Parameters |  |
+| --- | --- |
+| validate | boolean Ignored. All uploads are validated regardless of the value of this field. Maintained for compatibility with Apigee Edge API. |
+
+</div>
+
+<div id="body.request_body" class="section">
+
+### Request body
+
+The request body contains an instance of [`HttpBody`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.keystores.aliases#HttpBody).
+
+</div>
+
+<div id="body.response_body" class="section">
+
+### Response body
+
+If successful, the response body contains an instance of [`ApiProxyRevision`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.revisions#ApiProxyRevision).
+
+</div>
+
+<div id="body.aspect" class="section">
+
+### Authorization scopes
+
+Requires the following OAuth scope:
+
+- `https://www.googleapis.com/auth/cloud-platform`
+
+</div>
+
+</div>
+
+<div id="try-it" class="section">
+
+<div class="devsite-apix">
+
+<div class="apis-explorer" discovery-rest-url="https://apigee.googleapis.com/$discovery/rest?version=v1" method-id="apigee.organizations.apis.revisions.updateApiProxyRevision" params="">
+
+</div>
+
+</div>
+
+</div>
+
+</div>

@@ -1,0 +1,765 @@
+## Supported platforms
+
+### Apigee's policy for Kubernetes version support
+
+For each hybrid minor release:
+
+- At least one version of the Kubernetes platform overlaps with the previous minor release of Apigee hybrid.
+
+- Platform versions are supported for at most three hybrid minor releases (for example, v1.9, v1.10, and v1.11) or until that version is no longer supported (EOL) by the vendor, whichever comes first.
+
+- New platform versions are typically added in hybrid minor releases (x.y). When new platform versions are added in a minor release, they may also be added to the previous minor versions of Apigee hybrid in a patch release.
+
+- When support for a new Kubernetes version is added, the lowest version supported in the previous minor release of Apigee hybrid may be dropped in the new patches.
+
+  <img src="/static/apigee/docs/images/version-support.png" class="screenshot" style="width:25.0%" alt="Overlap: v1.25.x is in hybrid v1.9 and v1.10. Dropped: v1.12.x is in hybrid v1.9, but not in v1.10. Added: v1.15.x is in hybrid v1.10, but not in hybrid v1.9." />
+
+At the time of release, Apigee hybrid was compatible with the versions of the platforms listed in the following table. Over time, these versions will reach an EOL date and are no longer supported as indicated with an EOL symbol <img src="/static/apigee/docs/images/not-supported.svg" title="EOL - not supported" width="15" alt="not supported" />. It is your responsibility to ensure that you are using a supported version.
+
+Apigee hybrid is compatible with the following versions of these platforms:
+
+<div class="section">
+
+### Supported versions
+
+|  | 1.14 | 1.15 | 1.16 | 1.17 |  |
+| --- | --- | --- | --- | --- | --- |
+| GKE on Google Cloud | 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.33.x 1.34.x 1.35.x 1.36.x |  |
+| Google Distributed Cloud (software only) on VMware (3) | 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.33.x 1.34.x 1.35.x 1.36.x |  |
+| Google Distributed Cloud (software only) on bare metal | 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.33.x 1.34.x 1.35.x 1.36.x |  |
+| EKS | 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.33.x 1.34.x 1.35.x 1.36.x |  |
+| AKS | 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.34.x 1.35.x 1.36.x |  |
+| OpenShift (7) | 4.13 4.14 4.15 4.16 4.17 4.18 4.19 (≥ v1.14.4)(11) 4.20 (≥ v1.14.4)(11) 4.21 (≥ v1.14.4)(11) 4.22 (≥ v1.14.4)(11) | 4.16 4.17 4.18 4.19 (≥ v1.15.2)(10) 4.20 (≥ v1.15.2)(10) 4.21 (≥ v1.15.2)(10) 4.22 (≥ v1.15.2)(10) | 4.16 4.18 4.19 4.20 4.21 4.22 | 4.20 4.21 4.22 |  |
+| Rancher Kubernetes Engine (RKE) | v1.27.x 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | v1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.33.x 1.34.x 1.35.x 1.36.x |  |
+| Components | 1.14 | 1.15 | 1.16 | 1.17 |  |
+| Cloud Service Mesh | 1.22.x (2) | 1.22.x (2) | 1.22.x (2) | 1.22.x (2) |  |
+| JDK | JDK 11 | JDK 11 | JDK 11 | JDK 17 |  |
+| cert-manager | 1.15.x (8) 1.16.x (8) 1.17.x (8) | 1.16.x (8) 1.17.x (8) | 1.16.x (8) 1.17.x (8) 1.18.x (9) 1.19.x (9) | 1.17.x (8) 1.18.x (9) 1.19.x (9) |  |
+| Cassandra | 4.0 | 4.0 | 4.0 | 4.0 |  |
+| Kubernetes | 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.33.x 1.34.x 1.35.x 1.36.x |  |
+| kubectl | 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.33.x 1.34.x 1.35.x 1.36.x |  |
+| Helm | 3.14.2 through 3.x.x | 3.14.2 through 3.x.x | 3.17.0 through 3.x.x | 3.17.0 through 3.x.x |  |
+| Secret Store CSI driver | 1.4.6+ | 1.4.6+ | 1.4.6+ | 1.4.6+ |  |
+| Vault | 1.17.2 | 1.17.2 | 1.17.2 | 1.19.0+ |  |
+| (1) The official EOL dates for Apigee hybrid versions 1.13 and older have been reached. Regular monthly patches are no longer available. These releases are no longer officially supported except for customers with explicit and official exceptions for continued support. Other customers must upgrade . (2) Cloud Service Mesh is automatically installed with Apigee hybrid 1.9 and newer . (3) Vault is not certified on Google Distributed Cloud for VMware. (4) Support available with Apigee hybrid version 1.10.5 and newer . (5) Support available with Apigee hybrid version 1.11.2 and newer . (6) Support available with Apigee hybrid version 1.12.1 and newer . (7) Apigee hybrid is tested and certified on OpenShift using the Kubernetes version bundled with each specific OCP version . (8) Some versions of cert-manager have an issue where the webhook TLS server may fail to automatically renew its CA certificate. To avoid this, Apigee recommends using: Hybrid v1.13 : use cert-manager version 1.15.3 +. Hybrid v1.14: use cert-manager versions 1.15.3 + or 1.16.0 +. Hybrid v1.15: use cert-manager versions 1.16.0 + or 1.17.2 +. Hybrid v1.16: use cert-manager versions 1.16.0 +, 1.17.2 +, 1.18.0 + or 1.19.0 +. See Known Issue 465834046 for cert-manager releases 1.18 and 1.19. Hybrid v1.17: use cert-manager versions 1.17.2 +, 1.18.0 + or 1.19.0 +. See Known Issue 465834046 for cert-manager releases 1.18 and 1.19. (9) cert-manager release 1.18 introduces a change to the default private key rotation policy that may cause traffic interruptions. See Known Issue 465834046 for a workaround. (10) Support for OpenShift 4.19, 4.20, 4.21, & 4.22 available with Apigee hybrid version 1.15.2 and newer. (11) Support for OpenShift 4.19, 4.20, 4.21, & 4.22 available with Apigee hybrid version 1.14.4 and newer. |  |  |  |  |  |
+
+**Note:** Hybrid installations are not currently supported on Autopilot clusters.
+
+</div>
+
+<div class="section">
+
+### Unsupported versions
+
+|  | 1.6 (1) | 1.7 (1) | 1.8 (1) | 1.9 (1) | 1.10 (1) | 1.11 (1) | 1.12 (1) | 1.13 (1) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| GKE on Google Cloud | 1.19.x 1.20.x 1.21.x | 1.20.x 1.21.x 1.22.x (≥ 1.7.2) 1.23.x (≥ 1.7.2) | 1.21.x (≤ 1.8.3) 1.22.x (≤ 1.8.3) 1.23.x (≤ 1.8.4) 1.24.x (≥ 1.8.4) 1.25.x (≥ 1.8.4) | 1.23.x 1.24.x 1.25.x 1.26.x (≥ 1.9.2) | 1.24.x 1.25.x 1.26.x 1.27.x (≥ 1.10.5)(6) 1.28.x (≥ 1.10.5)(6) | 1.25.x 1.26.x 1.27.x 1.28.x (≥ 1.11.2)(7) 1.29.x (≥ 1.11.2)(7) | 1.26.x 1.27.x 1.28.x 1.29.x (≥ 1.12.1)(8) | 1.27.x 1.28.x 1.29.x 1.30.x |
+| Google Distributed Cloud (software only) on VMware (3) | 1.7.x 1.8.x 1.9.3+ 1.10.x | 1.9.x 1.10.x 1.11.x (3) (≥ 1.7.2) 1.12.x (≥ 1.7.2) | 1.10.x 1.11.x 1.12.x 1.13.x 1.14.x 1.15.x (K8s v1.26.x) | 1.12.x 1.13.x 1.14.x 1.15.x (K8s v1.26.x) | 1.13.x 1.14.x 1.15.x (K8s v1.26.x) 1.16.x (K8s v1.27.x) 1.27.x (≥ 1.10.5)(6) 1.28.x (≥ 1.10.5)(6) | 1.14.x 1.15.x (K8s v1.26.x) 1.16.x (K8s v1.27.x) 1.28.x (≥ 1.11.2)(7) 1.29.x (≥ 1.11.2)(7) | 1.15.x (K8s v1.26.x) 1.16.x (K8s v1.27.x) 1.28.x 1.29.x (≥ 1.12.1)(8) | 1.16.x (K8s v1.27.x) 1.28.x 1.29.x 1.30.x |
+| Google Distributed Cloud (software only) on bare metal | 1.7.x 1.8.2+ 1.9.3+ 1.10.x | 1.9.x 1.10.x 1.11.x (≥ 1.7.2) 1.12.x (≥ 1.7.2) | 1.10.x 1.11.x 1.12.x 1.13.x 1.14.x 1.15.x | 1.12.x 1.13.x 1.14.x 1.15.x | 1.13.x 1.14.x (K8s v1.25.x) 1.15.x (K8s v1.26.x) 1.16.x (K8s v1.27.x) 1.27.x (≥ 1.10.5)(6) 1.28.x (≥ 1.10.5)(6) | 1.14.x 1.15.x (K8s v1.26.x) 1.16.x (K8s v1.27.x) 1.28.x (≥ 1.11.2)(7) 1.29.x (≥ 1.11.2)(7) | 1.15.x (K8s v1.26.x) 1.16.x (K8s v1.27.x) 1.28.x 1.29.x (≥ 1.12.1)(8) | 1.16.x (K8s v1.27.x) 1.28.x 1.29.x 1.30.x |
+| EKS | 1.19.x 1.20.x 1.21.x | 1.21.x 1.22.x (≥ 1.7.2) 1.23.x (≥ 1.7.2) | 1.22.x (≤ 1.8.3) 1.23.x (≤ 1.8.4) 1.24.x (≥ 1.8.4) 1.25.x (≥ 1.8.4) | 1.23.x 1.24.x 1.25.x 1.26.x | 1.24.x 1.25.x 1.26.x 1.27.x (≥ 1.10.5)(6) 1.28.x (≥ 1.10.5)(6) | 1.25.x 1.26.x 1.27.x 1.28.x (≥ 1.11.2)(7) 1.29.x (≥ 1.11.2)(7) | 1.26.x 1.27.x 1.28.x 1.29.x (≥ 1.12.1)(8) | 1.27.x 1.28.x 1.29.x 1.30.x |
+| AKS | 1.19.x 1.20.x 1.21.x | 1.21.x 1.22.x (≥ 1.7.2) 1.23.x (≥ 1.7.2) | 1.22.x (≤ 1.8.3) 1.23.x (≤ 1.8.4) 1.24.x (≥ 1.8.4) 1.25.x (≥ 1.8.4) | 1.23.x 1.24.x 1.25.x 1.26.x (≥ 1.9.2) | 1.24.x 1.25.x 1.26.x 1.27.x (≥ 1.10.5)(6) 1.28.x (≥ 1.10.5)(6) | 1.25.x 1.26.x 1.27.x 1.28.x (≥ 1.11.2)(7) 1.29.x (≥ 1.11.2)(7) | 1.26.x 1.27.x 1.28.x 1.29.x (≥ 1.12.1)(8) | 1.27.x 1.28.x 1.29.x 1.30.x |
+| OpenShift (7) | 4.6 4.7 4.8 | 4.7 4.8 | 4.8 4.9 4.10 | 4.10 4.11 | 4.11 4.12 4.14 (≥ 1.10.5)(6) 4.15 (≥ 1.10.5)(6) | 4.12 4.13 4.14 4.15 (≥ 1.11.2)(7) 4.16 (≥ 1.11.2)(7) | 4.12 4.13 4.14 4.15 4.16 (≥ 1.12.1)(8) | 4.12 4.13 4.14 4.15 4.16 |
+| Rancher Kubernetes Engine (RKE) | N/A | N/A | N/A | 1.3.8 | v1.26.2+rke2r1 1.27.x (≥ 1.10.5)(6) 1.28.x (≥ 1.10.5)(6) | v1.26.2+rke2r1 v1.27.x 1.28.x (≥ 1.11.2)(7) 1.29.x (≥ 1.11.2)(7) | v1.26.2+rke2r1 v1.27.x 1.28.x 1.29.x (≥ 1.12.1)(8) | v1.26.2+rke2r1 v1.27.x 1.28.x 1.29.x 1.30.x |
+| Components | 1.6 (1) | 1.7 (1) | 1.8 (1) | 1.9 (1) | 1.10 (1) | 1.11 (1) | 1.12 (1) | 1.13 (1) |
+| Cloud Service Mesh | 1.9.x 1.10.x 1.12.x 1.13.x | 1.10.x 1.11.x 1.12.x 1.13.x (≥ 1.7.2) 1.14.x 1.15.x (≥ 1.7.6) | 1.11.x 1.12.x 1.13.x 1.14.x 1.15.x | 1.17.x (2) | 1.17.x (2) | 1.17.x (v1.11.0 - v1.11.1) (2) 1.18.x (≥ 1.11.2)(7) (2) | 1.18.x (2) | 1.19.x (2) |
+| JDK | JDK 11 | JDK 11 | JDK 11 | JDK 11 | JDK 11 | JDK 11 | JDK 11 | JDK 11 |
+| cert-manager | 1.5.4 | 1.7.x | 1.7.x 1.8.x 1.9.x 1.10.x 1.11.x | 1.10.x 1.11.x | 1.10.x 1.11.x 1.12.x | 1.11.x 1.12.x 1.13.x | 1.11.x 1.12.x 1.13.x | 1.15.x (8) 1.16.x (8) 1.17.x (8) |
+| Cassandra | 3.11 | 3.11 | 3.11 | 3.11 | 3.11 | 3.11 | 4.0 | 4.0 |
+| Kubernetes |  |  |  | 1.23.x 1.24.x 1.25.x | 1.24.x 1.25.x 1.26.x | 1.25.x 1.26.x 1.27.x | 1.26.x 1.27.x 1.28.x 1.29.x | 1.27.x 1.28.x 1.29.x 1.30.x |
+| kubectl |  |  |  |  | 1.24.x 1.25.x 1.26.x | 1.25.x 1.26.x 1.27.x | 1.26.x 1.27.x 1.28.x 1.29.x | 1.27.x 1.28.x 1.29.x 1.30.x |
+| Helm |  |  |  |  | 3.10+ | 3.10+ | 3.14.2 through 3.x.x | 3.14.2 through 3.x.x |
+| Secret Store CSI driver |  |  |  |  |  | 1.3.4+ | 1.4.1+ | 1.4.6+ |
+| Vault |  |  |  |  |  | 1.13.x | 1.15.2 | 1.15.2 |
+| (1) The official EOL dates for Apigee hybrid versions 1.13 and older have been reached. Regular monthly patches are no longer available. These releases are no longer officially supported except for customers with explicit and official exceptions for continued support. Other customers must upgrade . (2) Cloud Service Mesh is automatically installed with Apigee hybrid 1.9 and newer . (3) Vault is not certified on Google Distributed Cloud for VMware. (4) Support available with Apigee hybrid version 1.10.5 and newer . (5) Support available with Apigee hybrid version 1.11.2 and newer . (6) Support available with Apigee hybrid version 1.12.1 and newer . (7) Apigee hybrid is tested and certified on OpenShift using the Kubernetes version bundled with each specific OCP version . (8) Some versions of cert-manager have an issue where the webhook TLS server may fail to automatically renew its CA certificate. To avoid this, Apigee recommends using: Hybrid v1.13 : use cert-manager version 1.15.3 +. Hybrid v1.14: use cert-manager versions 1.15.3 + or 1.16.0 +. Hybrid v1.15: use cert-manager versions 1.16.0 + or 1.17.2 +. Hybrid v1.16: use cert-manager versions 1.16.0 +, 1.17.2 +, 1.18.0 + or 1.19.0 +. See Known Issue 465834046 for cert-manager releases 1.18 and 1.19. Hybrid v1.17: use cert-manager versions 1.17.2 +, 1.18.0 + or 1.19.0 +. See Known Issue 465834046 for cert-manager releases 1.18 and 1.19. (9) cert-manager release 1.18 introduces a change to the default private key rotation policy that may cause traffic interruptions. See Known Issue 465834046 for a workaround. (10) Support for OpenShift 4.19, 4.20, 4.21, & 4.22 available with Apigee hybrid version 1.15.2 and newer. (11) Support for OpenShift 4.19, 4.20, 4.21, & 4.22 available with Apigee hybrid version 1.14.4 and newer. |  |  |  |  |  |  |  |  |
+
+**Note:** Hybrid installations are not currently supported on Autopilot clusters.
+
+</div>
+
+## Supported versions
+
+Support for Apigee hybrid follows the [Runtime plane version support policy](/apigee/docs/release/apigee-release-process#runtime-plane-version-support-policy). The policy states that Apigee hybrid minor versions are supported for at most 12 months from their original release.
+
+The following table shows the supported versions of Apigee hybrid and the scheduled end-of-life (EOL) date for a version.
+
+Version
+
+Release date
+
+Scheduled EOL date
+
+### [1.17](/apigee/docs/hybrid/v1.17/what-is-hybrid)
+
+2026-09-14
+
+\-
+
+### [1.16](/apigee/docs/hybrid/v1.16/what-is-hybrid)
+
+2025-12-19
+
+\-
+
+### [1.15](/apigee/docs/hybrid/v1.15/what-is-hybrid)
+
+2025-06-04
+
+2027-09-14
+
+### [1.14](/apigee/docs/hybrid/v1.14/what-is-hybrid)
+
+2024-12-16
+
+2026-12-19
+
+## Unsupported versions
+
+If you are on an unsupported version of Apigee hybrid, then you must upgrade to a supported version. For information on how to upgrade, see [Upgrading Apigee hybrid](/apigee/docs/hybrid/latest/upgrade).
+
+The following table shows the unsupported versions of Apigee hybrid and their end-of-life (EOL) date.
+
+Version
+
+Release date
+
+EOL date
+
+### [1.13](/apigee/docs/hybrid/v1.13/what-is-hybrid)
+
+2024-08-23
+
+2025-12-19  
+Apigee hybrid v1.13 is EOL and no longer supported except for customers with explicit and official exceptions for continued support. Other customers must upgrade.  
+Regular monthly patches for 1.13.x are no longer released.
+
+### [1.12](/apigee/docs/hybrid/v1.12/what-is-hybrid)
+
+2024-04-17
+
+2025-05-01  
+Apigee hybrid v1.12 is EOL and no longer supported except for customers with explicit and official exceptions for continued support. Other customers must upgrade.  
+Regular monthly patches for 1.12.x are no longer released.
+
+### [1.11](/apigee/docs/hybrid/v1.11/what-is-hybrid)
+
+2023-11-17
+
+2025-04-16  
+Apigee hybrid v1.11 is EOL and no longer supported except for customers with explicit and official exceptions for continued support. Other customers must upgrade.  
+Regular monthly patches for 1.11.x are no longer released.
+
+### [1.10](/apigee/docs/hybrid/v1.10/what-is-hybrid)
+
+2023-06-30
+
+2024-06-30  
+Apigee hybrid v1.10 is EOL and no longer supported except for customers with explicit and official exceptions for continued support. Other customers must upgrade.  
+Regular monthly patches for 1.10.x are no longer released.
+
+### [1.9](/apigee/docs/hybrid/v1.9/what-is-hybrid)
+
+2023-02-01
+
+2024-02-01  
+Apigee hybrid v1.9 is EOL and no longer supported except for customers with explicit and official exceptions for continued support. Other customers must upgrade.  
+Regular monthly patches for 1.9.x are no longer released.
+
+### [1.8](/apigee/docs/hybrid/v1.8/what-is-hybrid)
+
+2022-08-17
+
+2023-08-17  
+Apigee hybrid v1.8 is EOL and no longer supported except for customers with explicit and official exceptions for continued support. Other customers must upgrade.  
+Regular monthly patches for 1.8.x are no longer released.
+
+### [1.7](/apigee/docs/hybrid/v1.7/what-is-hybrid)
+
+2022-04-18
+
+2023-04-18
+
+### [1.6](/apigee/docs/hybrid/v1.6/what-is-hybrid)
+
+2021-09-13
+
+2022-09-13
+
+### [1.5](/apigee/docs/hybrid/v1.5/what-is-hybrid)
+
+2021-06-18
+
+2022-06-18
+
+### [1.4](/apigee/docs/hybrid/v1.4/what-is-hybrid)
+
+2020-12-17
+
+2021-09-17
+
+### [1.3](/apigee/docs/hybrid/v1.3/what-is-hybrid)
+
+2020-07-30
+
+2021-04-30
+
+### [1.2](/apigee/docs/hybrid/v1.2/what-is-hybrid)
+
+2020-04-30
+
+2021-01-30
+
+### [1.1](/apigee/docs/hybrid/v1.1/what-is-hybrid)
+
+2020-01-27
+
+2020-10-27
+
+## Release history
+
+Apigee hybrid release numbers consist of the following:
+
+- [Major release number](/apigee/docs/release/apigee-release-process#major): A major release may contain new features and enhancements, cumulative bug fixes, security vulnerability mitigation, configuration changes, and infrastructure/architecture changes.
+- [Minor release number](/apigee/docs/release/apigee-release-process#minor): A minor release may contain existing feature enhancements, cumulative bug fixes, and security vulnerability mitigation.
+- [Patch release number](/apigee/docs/release/apigee-release-process#patch): A patch release may contain bug fixes and targeted minor security vulnerability mitigation.
+
+For example: Apigee hybrid v`1.15.8` (`major.minor.patch`)
+
+**Note:** Releases that have reached the EOL dates are no longer supported.
+
+For more information about releases, timing, and support, see [Release versioning and cadence](/apigee/docs/release/apigee-release-process#release-versioning-and-cadence).
+
+The following table lists Apigee hybrid patch release information with links to release notes.
+
+Version
+
+Patch
+
+Patch release date
+
+Minor version EOL date
+
+### [1.17](/apigee/docs/hybrid/release-notes#hybrid_v1170)
+
+[1.17.1](/apigee/docs/hybrid/release-notes#v1171)
+
+[1.17.0](/apigee/docs/hybrid/release-notes#hybrid_v1170)
+
+2026-09-30
+
+2026-09-14
+
+\-
+
+### [1.16](/apigee/docs/hybrid/release-notes#hybrid_v1160)
+
+[1.16.10](/apigee/docs/hybrid/release-notes#v11610)
+
+[1.16.9](/apigee/docs/hybrid/release-notes#v1169)
+
+[1.16.8](/apigee/docs/hybrid/release-notes#v1168)
+
+[1.16.7](/apigee/docs/hybrid/release-notes#v1167)
+
+[1.16.6](/apigee/docs/hybrid/release-notes#v1166)
+
+[1.16.5](/apigee/docs/hybrid/release-notes#v1165)
+
+[1.16.4](/apigee/docs/hybrid/release-notes#v1164)
+
+[1.16.3](/apigee/docs/hybrid/release-notes#v1163)
+
+[1.16.2](/apigee/docs/hybrid/release-notes#v1162)
+
+[1.16.1](/apigee/docs/hybrid/release-notes#v1161)
+
+[v1.16.0-hotfix.1](/apigee/docs/hybrid/release-notes#hybrid_1160-hotfix1)
+
+2026-09-17
+
+2026-08-11
+
+2026-07-24
+
+2026-07-10
+
+2026-06-19
+
+2026-06-08
+
+2026-05-21
+
+2026-05-19
+
+2026-05-13
+
+2026-04-20
+
+2026-02-06
+
+\-
+
+### [1.15](/apigee/docs/hybrid/release-notes#hybrid_v1150)
+
+[1.15.8](/apigee/docs/hybrid/release-notes#v1158)
+
+[1.15.7](/apigee/docs/hybrid/release-notes#v1157)
+
+[1.15.6](/apigee/docs/hybrid/release-notes#v1156)
+
+[1.15.5](/apigee/docs/hybrid/release-notes#v1155)
+
+[1.15.4](/apigee/docs/hybrid/release-notes#v1154)
+
+[1.15.3](/apigee/docs/hybrid/release-notes#v1153)
+
+[1.15.2](/apigee/docs/hybrid/release-notes#hybrid_v1152)
+
+[1.15.1](/apigee/docs/hybrid/release-notes#hybrid_v1151)
+
+2026-09-24
+
+2026-07-31
+
+2026-07-15
+
+2026-07-03
+
+2026-05-30
+
+2026-05-06
+
+2026-03-11
+
+2025-10-09
+
+2027-09-14
+
+### [1.14](/apigee/docs/hybrid/release-notes#hybrid_v1140)
+
+[1.14.9](/apigee/docs/hybrid/release-notes#v1149)
+
+[1.14.8](/apigee/docs/hybrid/release-notes#v1148)
+
+[1.14.7](/apigee/docs/hybrid/release-notes#v1147)
+
+[1.14.6](/apigee/docs/hybrid/release-notes#v1146)
+
+[1.14.5](/apigee/docs/hybrid/release-notes#v1145)
+
+[1.14.4](/apigee/docs/hybrid/release-notes#v1144)
+
+[1.14.3](/apigee/docs/hybrid/release-notes#hybrid_v1143)
+
+[1.14.2-hotfix.1](/apigee/docs/hybrid/release-notes#hybrid_1142-hotfix1)
+
+[1.14.2](/apigee/docs/hybrid/release-notes#hybrid_v1142)
+
+[1.14.1](/apigee/docs/hybrid/release-notes#hybrid_v1141)
+
+[1.14.0-hotfix.1](/apigee/docs/hybrid/release-notes#hybrid_1140-hotfix1)
+
+2026-10-07
+
+2026-08-26
+
+2026-07-23
+
+2026-06-16
+
+2026-05-22
+
+2026-04-27
+
+2025-09-29
+
+2025-05-15
+
+2025-05-02
+
+2025-03-01
+
+2025-01-09
+
+2026-12-19
+
+### [1.13](/apigee/docs/hybrid/release-notes#hybrid_v1130)
+
+[1.13.4](/apigee/docs/hybrid/release-notes#hybrid_v1134)
+
+[1.13.3](/apigee/docs/hybrid/release-notes#hybrid_v1133)
+
+[1.13.2](/apigee/docs/hybrid/release-notes#hybrid_v1132)
+
+[1.13.1](/apigee/docs/hybrid/release-notes#hybrid_v1131)
+
+[1.13.0-hotfix.1](/apigee/docs/hybrid/release-notes#hybrid_1130-hotfix1)
+
+2025-07-09
+
+2025-03-01
+
+2024-11-12
+
+2024-10-04
+
+2024-09-05
+
+2025-12-19
+
+### [1.12](/apigee/docs/hybrid/release-notes#hybrid_v1120)
+
+[1.12.4](/apigee/docs/hybrid/release-notes#hybrid_v1124)
+
+[1.12.3](/apigee/docs/hybrid/release-notes#hybrid_v1123)
+
+[1.12.2](/apigee/docs/hybrid/release-notes#hybrid_v1122)
+
+[1.12.1-hotfix.1](/apigee/docs/hybrid/release-notes#hybrid_1121-hotfix1)
+
+[1.12.1](/apigee/docs/hybrid/release-notes#hybrid_v1121)
+
+[1.12.0-hotfix.1](/apigee/docs/hybrid/release-notes#hybrid_1120-hotfix1)
+
+2025-03-01
+
+2024-11-01
+
+2024-09-13
+
+2024-07-30
+
+2024-06-28
+
+2024-05-28
+
+2025-05-01
+
+### [1.11](/apigee/docs/hybrid/release-notes#hybrid_v111)
+
+[1.11.2-hotfix.3](/apigee/docs/hybrid/release-notes#hybrid_1112-hotfix3)
+
+[1.11.2-hotfix.2](/apigee/docs/hybrid/release-notes#hybrid_1112-hotfix2)
+
+[1.11.2-hotfix.1](/apigee/docs/hybrid/release-notes#hybrid_1112-hotfix1)
+
+[1.11.2](/apigee/docs/hybrid/release-notes#hybrid_v1112)
+
+[1.11.1-hotfix.1](/apigee/docs/hybrid/release-notes#hybrid_1111-hotfix1)
+
+[1.11.1](/apigee/docs/hybrid/release-notes#hybrid_v1111)
+
+2025-04-14
+
+2024-07-31
+
+2024-06-28
+
+2024-06-10
+
+2024-02-09
+
+2023-12-21
+
+2025-04-16
+
+### [1.10](/apigee/docs/hybrid/release-notes#hybrid_v110)
+
+[1.10.5-hotfix.1](/apigee/docs/hybrid/release-notes#hybrid_1105-hotfix1)
+
+[1.10.5](/apigee/docs/hybrid/release-notes#hybrid_v1105)
+
+[1.10.4-hotfix.1](/apigee/docs/hybrid/release-notes#hybrid_1104-hotfix1)
+
+[1.10.4](/apigee/docs/hybrid/release-notes#hybrid_v1104)
+
+[1.10.3-hotfix.4](/apigee/docs/hybrid/release-notes#hybrid_1103-hotfix4)
+
+[1.10.3-hotfix.3](/apigee/docs/hybrid/release-notes#hybrid_1103-hotfix3)
+
+[1.10.3-hotfix.2](/apigee/docs/hybrid/release-notes#hybrid_1103-hotfix2)
+
+[1.10.3-hotfix.1](/apigee/docs/hybrid/release-notes#hybrid_1103-hotfix1)
+
+[1.10.3](/apigee/docs/hybrid/release-notes#hybrid_v1103)
+
+[1.10.2](/apigee/docs/hybrid/release-notes#hybrid_v1102)
+
+[1.10.1](/apigee/docs/hybrid/release-notes#hybrid_v1101)
+
+2024-06-28
+
+2024-06-14
+
+2024-02-09
+
+2023-12-18
+
+2023-12-01
+
+2023-10-17
+
+2023-10-13
+
+2023-09-14
+
+2023-08-31
+
+2023-07-31
+
+2023-07-13
+
+2024-06-30
+
+### [1.9](/apigee/docs/hybrid/release-notes#hybrid_v190)
+
+[1.9.4-hotfix.1](/apigee/docs/hybrid/release-notes#hybrid_v194-hotfix1)
+
+[1.9.4](/apigee/docs/hybrid/release-notes#hybrid_v194)
+
+[1.9.3](/apigee/docs/hybrid/release-notes#hybrid_v193)
+
+[1.9.2](/apigee/docs/hybrid/release-notes#hybrid_v192)
+
+[1.9.1](/apigee/docs/hybrid/release-notes#hybrid_v191)
+
+2023-10-13
+
+2023-06-02
+
+2023-05-02
+
+2023-03-20
+
+2024-02-01
+
+### [1.8](/apigee/docs/hybrid/release-notes#hybrid_v180)
+
+[1.8.8](/apigee/docs/hybrid/release-notes#hybrid_v188)
+
+[1.8.7](/apigee/docs/hybrid/release-notes#hybrid_v187)
+
+[1.8.6](/apigee/docs/hybrid/release-notes#hybrid_v186)
+
+[1.8.5](/apigee/docs/hybrid/release-notes#hybrid_v185)
+
+[1.8.4](/apigee/docs/hybrid/release-notes#hybrid_v184)
+
+[1.8.3](/apigee/docs/hybrid/release-notes#hybrid_v183)
+
+[1.8.2](/apigee/docs/hybrid/release-notes#hybrid_v182)
+
+[1.8.1](/apigee/docs/hybrid/release-notes#hybrid_v181)
+
+2023-06-12
+
+2023-05-08
+
+2023-04-03
+
+2023-02-24
+
+2023-01-26
+
+2022-12-05
+
+2022-10-27
+
+2022-09-29
+
+2023-08-17
+
+### [1.7](/apigee/docs/hybrid/release-notes#apigee_hybrid_v170)
+
+[1.7.6](/apigee/docs/hybrid/release-notes#hybrid_v176)
+
+[1.7.5](/apigee/docs/hybrid/release-notes#hybrid_v175)
+
+[1.7.4](/apigee/docs/hybrid/release-notes#hybrid_v174)
+
+[1.7.3](/apigee/docs/hybrid/release-notes#hybrid_v173)
+
+[1.7.2](/apigee/docs/hybrid/release-notes#hybrid_v172)
+
+[1.7.1](/apigee/docs/hybrid/release-notes#hybrid_v171)
+
+2023-02-14
+
+2022-11-02
+
+2022-09-02
+
+2022-07-29
+
+2022-06-24
+
+2022-06-02
+
+2023-04-18
+
+### [1.6](/apigee/docs/release/notes/apigee-release-notes#september-13,-2021---apigee-hybrid-v1.6.0)
+
+[1.6.9](/apigee/docs/hybrid/release-notes#hybrid_v169)
+
+[1.6.8](/apigee/docs/hybrid/release-notes#hybrid_v168)
+
+[1.6.7](/apigee/docs/hybrid/release-notes#hybrid_v167)
+
+[1.6.6](/apigee/docs/hybrid/release-notes#hybrid_v166)
+
+[1.6.5](/apigee/docs/hybrid/release-notes#hybrid_v165)
+
+[1.6.4](/apigee/docs/hybrid/release-notes#hybrid_v164)
+
+[1.6.3](/apigee/docs/release/notes/apigee-release-notes#december-15,-2021---apigee-hybrid-v1.6.3)
+
+[1.6.2 hotfix](/apigee/docs/release/notes/apigee-release-notes#november-22,-2021---apigee-hybrid-v1.6.2-hotfix.1)
+
+[1.6.2](/apigee/docs/release/notes/apigee-release-notes#november-3,-2021---apigee-hybrid-v1.6.2)
+
+[1.6.1](/apigee/docs/release/notes/apigee-release-notes#october-28,-2021---apigee-hybrid-v1.6.1)
+
+2022-07-08
+
+2022-05-31
+
+2022-05-11
+
+2022-03-24
+
+2022-02-28
+
+2022-01-31
+
+2021-12-15
+
+2021-11-22
+
+2021-11-03
+
+2021-10-28
+
+2022-09-13
+
+### [1.5](/apigee/docs/release/notes/apigee-release-notes#june-18,-2021---apigee-hybrid-v1.5.0)
+
+[1.5.10](/apigee/docs/hybrid/release-notes#hybrid_v1510)
+
+[1.5.9](/apigee/docs/hybrid/release-notes#hybrid_v159)
+
+[1.5.8](/apigee/docs/hybrid/release-notes#hybrid_v158)
+
+[1.5.7](/apigee/docs/hybrid/release-notes#hybrid_v157)
+
+[1.5.6](/apigee/docs/release/notes/apigee-release-notes#december-9,-2021---apigee-hybrid-v1.5.6)
+
+[1.5.5 hotfix](/apigee/docs/release/notes/apigee-release-notes#november-22,-2021---apigee-hybrid-v1.5.5-hotfix.1)
+
+[1.5.5](/apigee/docs/release/notes/apigee-release-notes#october-21,-2021---apigee-hybrid-v1.5.5)
+
+[1.5.4](/apigee/docs/release/notes/apigee-release-notes#september-23,-2021---apigee-hybrid-v1.5.4)
+
+[1.5.3](/apigee/docs/release/notes/apigee-release-notes#august-6,-2021---apigee-hybrid-v1.5.3)
+
+[1.5.2](/apigee/docs/release/notes/apigee-release-notes#july-23,-2021---apigee-hybrid-v1.5.2)
+
+[1.5.1](/apigee/docs/release/notes/apigee-release-notes#july-2,-2021---apigee-hybrid-v1.5.1)
+
+2022-04-22
+
+2022-03-24
+
+2022-03-01
+
+2022-01-28
+
+2021-12-09
+
+2021-11-22
+
+2021-10-21
+
+2021-09-23
+
+2021-08-06
+
+2021-07-23
+
+2021-07-02
+
+2022-06-18
+
+### [1.4](/apigee/docs/release/notes/apigee-release-notes#december-17,-2020---apigee-hybrid-v1.4.0)
+
+[1.4.5](/apigee/docs/release/notes/apigee-release-notes#september-23,-2021---apigee-hybrid-v1.4.5)
+
+[1.4.4](/apigee/docs/release/notes/apigee-release-notes#june-9,-2021---apigee-hybrid-v1.4.4-deprecated)
+
+[1.4.3](/apigee/docs/release/notes/apigee-release-notes#may-3,-2021---apigee-hybrid-v1.4.3)
+
+[1.4.2](/apigee/docs/release/notes/apigee-release-notes#march-1,-2021---apigee-hybrid-v1.4.2-deprecated)
+
+[1.4.1](/apigee/docs/release/notes/apigee-release-notes#february-1,-2021---apigee-hybrid-v1.4.1-deprecated)
+
+2021-09-23
+
+2021-06-09
+
+2021-05-03
+
+2021-03-01
+
+2021-02-01
+
+2021-09-17
+
+### [1.3](/apigee/docs/release/notes/apigee-release-notes#july-30,-2020---apigee-hybrid-v1.3.0-deprecated)
+
+[1.3.6](/apigee/docs/release/notes/apigee-release-notes#february-26,-2021---apigee-hybrid-v1.3.6-deprecated)
+
+[1.3.5](/apigee/docs/release/notes/apigee-release-notes#january-25,-2021---apigee-hybrid-v1.3.5-deprecated)
+
+[1.3.4](/apigee/docs/release/notes/apigee-release-notes#december-3,-2020---apigee-hybrid-v1.3.4-deprecated)
+
+[1.3.3](/apigee/docs/release/notes/apigee-release-notes#september-20,-2020---apigee-hybrid-v1.3.3-deprecated)
+
+[1.3.2](/apigee/docs/release/notes/apigee-release-notes#august-27,-2020---apigee-hybrid-v1.3.2-deprecated)
+
+[1.3.1](/apigee/docs/release/notes/apigee-release-notes#august-24,-2020---apigee-hybrid-v1.3.1-deprecated)
+
+2021-02-26
+
+2021-01-25
+
+2020-12-03
+
+2020-09-20
+
+2020-08-27
+
+2020-08-24
+
+2021-04-30
+
+### [1.2](/apigee/docs/release/notes/apigee-release-notes#april-3,-2020---apigee-hybrid-v1.2.0-deprecated)
+
+—
+
+—
+
+2021-01-30
+
+### [1.1](/apigee/docs/release/notes/apigee-release-notes#january-27,-2020---apigee-hybrid-v1.1.0-deprecated)
+
+—
+
+—
+
+2020-10-27
+
+### [1.0](/apigee/docs/release/notes/apigee-release-notes#november-20,-2019---apigee-hybrid-v1.0.0-deprecated)
+
+—
+
+—
+
+2019-11-20

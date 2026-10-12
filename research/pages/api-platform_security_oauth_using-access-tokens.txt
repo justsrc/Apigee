@@ -1,0 +1,69 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+When you call an API proxy on Apigee that has OAuth security, Apigee is responsible for verifying access tokens. Think of Apigee as the gatekeeper -- no API call can pass through that does not have an access token that can be verified.
+
+**Tip:** When verifying an access token, if you happen to see this error: "Invalid API call as no apiproduct match found", go to this [Apigee Community article](https://discuss.google.dev/t/oauth2-0-access-token-verification-throws-invalid-api-call-as-no-apiproduct-match-found-error/17064) for details on the cause of this error and steps to correct it.
+
+## Adding a VerifyAccessToken policy
+
+To configure token verification, place an [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy) with the **VerifyAccessToken** operation at the very beginning of the API proxy flow (the beginning of the ProxyEndpoint Preflow). If placed there, access tokens will be verified before any other processing takes place, and if a token is rejected, Apigee stops processing and returns an error back to the client.
+
+To access the API proxies page using the Apigee UI:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Proxy development** <span aria-label="and then">\></span> **API proxies** page.
+
+    <a href="https://console.cloud.google.com/apigee/proxies" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to API proxies</a>
+
+2.  From the list, select the proxy you wish to protect.
+
+3.  In the proxy details page, click the **Develop** tab.
+
+4.  In the navigation menu, under **Proxy endpoints**, **default**, click **PreFlow**. Typically, the endpoint you want is called **default**, although it is possible to create multiple proxy endpoints. If you do have multiple endpoints, you will probably want to follow these steps to perform token verification on each one. <img src="/static/apigee/docs/api-platform/images/preflow_nav.png" class="screenshot" style="width:50.0%" alt="Navigation menu" />
+
+5.  In the proxy flow editor, click <span class="material-icons" aria-hidden="true" translate="no">control_point</span> **Add policy step**.
+
+    <img src="/static/apigee/docs/api-platform/images/proxyfloweditor.png" class="screenshot" style="width:50.0%" alt="Select PreFlow for an endpoint listed under Proxy Endpoints." />
+
+6.  In the **Add policy step** dialog, select **Create new policy**.
+
+7.  From the policy list, under **Security**, select **OAuth v2.0**.
+
+8.  Optionally, change the policy name and display name. For example, for better readability, you might change the **Display name** and **Name** both to **VerifyAccessToken**.
+
+9.  Click **Add**.
+
+The default policy is already configured with the VerifyAccessToken operation, so you do not have to do anything further:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OAuthV2 async="false" continueOnError="false" enabled="true" name="OAuth-v20-1">
+    <DisplayName>OAuth v2.0 1</DisplayName>
+    <FaultRules/>
+    <Properties/>
+    <Attributes/>
+    <ExternalAuthorization>false</ExternalAuthorization>
+    <Operation>VerifyAccessToken</Operation>
+    <SupportedGrantTypes/>
+    <GenerateResponse enabled="true"/>
+    <Tokens/>
+</OAuthV2>
+```
+
+**Note:** By default, VerifyAccessToken expects the access token to be sent in an Authorization header as a Bearer token. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+-H "Authorization: Bearer Rft3dqrs56Blirls56a"
+```
+
+You can change this default in the `<AccessToken> ` element in the OAuthV2 policy, as explained in the [OAuthV2 policy documentation](/apigee/docs/api-platform/reference/policies/oauthv2-policy#accesstokenelement).

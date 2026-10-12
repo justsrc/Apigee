@@ -1,0 +1,65 @@
+URL: https://github.com/apigee/apigeecli/issues/540
+TITLE: "apigeecli kvms export --org=$ORG" only exports proxy KVMs
+STATE: closed state_reason: completed
+AUTHOR: kurtkanaskie association: COLLABORATOR
+CREATED: 2024-09-16T16:01:32Z CLOSED: 2024-09-17T03:22:40Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+The command implies it exports all KVMs
+
+```
+apigeecli kvms 
+Manage Key Value Maps
+
+Usage:
+  apigeecli kvms [command]
+
+Available Commands:
+  create      Create a KV Map
+  delete      Delete a KV map
+  entries     Manage Key Value Map Entries
+  export      Export all KV Map entries for all KV Maps
+  import      Import KVM Entries from a folder containing KVM files
+  list        Returns a list of KVMs
+
+Flags:
+  -h, --help            help for kvms
+  -o, --org string      Apigee organization name
+  -r, --region string   Apigee control plane region name; default is https://apigee.googleapis.com
+
+```
+
+How do I export org level KVMs using `apigeecli kvms export`?
+
+Work around is to use KVMs list and export for each KVM
+kvms entries export --org=$ORG --map=org-config-private
+
+
+--- COMMENTS (2) ---
+
+### comment by srinandan (association=CONTRIBUTOR) at 2024-09-16T17:51:52Z
+You are correct, `export` only exports a specific scope. You can export all org scoped kvms or proxy kvms for a proxy or env kvms for a specific environment. But nothing to export all KVMs. 
+
+### comment by kurtkanaskie (association=COLLABORATOR) at 2024-09-16T18:45:59Z
+But I'm not able to export all org scoped KVMs.
+
+It's due to: https://github.com/apigee/apigeecli/blob/96575cf5956bc9b30cad030e9d538f81192cfcc9/internal/cmd/kvm/expkvm.go#L54
+```
+		// return all kvm entries from all proxies
+		if env == "" && proxyName == "" {
+			return kvm.ExportAllEntries()
+		}
+```
+If I remove that block, it exports all org KVMs.
+
+But then there's no way to export all proxy KVMs unless we use something like
+`kvms export --org=$ORG --proxy=*`
+and change to use
+```
+		// return all kvm entries from all proxies
+		if env == "" && proxyName == "*" {
+			return kvm.ExportAllEntries()
+		}
+```
+which works.

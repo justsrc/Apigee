@@ -1,0 +1,222 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/synchronizer-access.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/synchronizer-access.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/synchronizer-access.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/synchronizer-access.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/synchronizer-access.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/synchronizer-access.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/synchronizer-access.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/synchronizer-access.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/synchronizer-access.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/synchronizer-access.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/synchronizer-access.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/synchronizer-access.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/synchronizer-access.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/synchronizer-access.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/synchronizer-access.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/synchronizer-access.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/synchronizer-access.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/synchronizer-access.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+This section describes the Synchronizer.
+
+## Synchronizer overview
+
+In Apigee hybrid, the Synchronizer's primary job is to poll and download the runtime contracts which are supplied by the management plane. Information communicated by contract includes API proxies, API products, caches, and virtual hosts. Synchronizer by default stores environment configuration data in the Cassandra database.
+
+Synchronizer instances running in the runtime-plane are expected to poll the management plane on a regular basis, download the contracts and make the same available to local runtime instances.
+
+One Synchronizer can support many Message Processors deployed in the same pod.
+
+## Enable Synchronizer access
+
+You must grant the [Synchronizer](/apigee/docs/hybrid/v1.17/what-is-hybrid#synchronizer) permission to pull down Apigee artifacts, such as proxy bundles and resources from the management plane. You must call an Apigee API to authorize the Synchronizer to pull artifacts down from the management plane to the runtime plane.
+
+1.  Ensure that you have enabled the Apigee API as explained in the Google Cloud setup steps. For details, see [Enable APIs](https://docs.cloud.google.com/apigee/docs/hybrid/v1.17/precog-enableapi).
+
+2.  Locate the **write-enabled Google Cloud service account key** (a JSON file) that you downloaded as part of [Create service accounts and credentials](/apigee/docs/hybrid/v1.17/install-service-accounts). The service account has the **Apigee Org Admin** role and is the one named "apigee-org-admin". If you did not previously create this service account, you must do so before continuing.
+
+3.  Use the Apigee Org Admin service account key to generate an OAuth 2.0 access token. This token is required to authenticate the [Apigee APIs](/apigee/docs/reference/apis/apigee/rest).
+
+    Use <a href="/sdk/docs" target="_blank">gcloud</a> to obtain an OAuth 2.0 access token, passing the service account credentials JSON file that you downloaded using `GOOGLE_APPLICATION_CREDENTIALS` environment variable:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    export GOOGLE_APPLICATION_CREDENTIALS=your_sa_credentials_file.json
+    gcloud auth application-default print-access-token
+    ```
+
+    An OAuth2.0 token is returned.
+
+    For more information, see <a href="/sdk/gcloud/reference/beta/auth/application-default/print-access-token" target="_blank">gcloud beta auth application-default print-access-token</a>.
+
+4.  Copy the OAuth 2.0 token returned and store it in a variable, such as `TOKEN`. For example:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    export TOKEN=ya29....Ts13inj3LrqMJlztwygtM
+    ```
+
+5.  Call the [setSyncAuthorization](/apigee/docs/reference/apis/apigee/rest/v1/organizations/setSyncAuthorization) API to enable the required permissions for Synchronizer:
+
+    **TIP:** If your are using Terraform, you can use the <a href="https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/apigee_sync_authorization" class="external"><code translate="no" dir="ltr">google_apigee_sync_authorization</code> Terraform attribute</a> instead of calling the `setSyncAuthorization` API.
+
+    **IMPORTANT:** Be sure that the service account name that you add to this API has the **Apigee Synchronizer Manager** role. For more information about service accounts, see [Create service accounts and credentials](/apigee/docs/hybrid/v1.17/install-service-accounts).
+
+    <div class="section">
+
+    ### No data residency
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    curl -X POST -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type:application/json" \
+      "https://apigee.googleapis.com/v1/organizations/YOUR_ORG_NAME:setSyncAuthorization" \
+       -d '{"identities":["serviceAccount:SYNCHRONIZER_MANAGER_SERVICE_ACCOUNT_NAME"]}'
+    ```
+
+    Where:
+
+    - `YOUR_ORG_NAME`: The name of the hybrid organization.
+    - `SYNCHRONIZER_MANAGER_SERVICE_ACCOUNT_NAME`: The name of a service account with the **Apigee Synchronizer Manager** role. The name is formed like an email address. For example: `my-synchronizer-manager-service_account@my_project_id.iam.gserviceaccount.com`
+
+    Example:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    curl -X POST -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type:application/json" \
+      "https://apigee.googleapis.com/v1/organizations/my_org:setSyncAuthorization" \
+       -d '{"identities":["serviceAccount:my-synchronizer-manager-service_account@my_project_id.iam.gserviceaccount.com"]}'
+    ```
+
+    </div>
+
+    <div class="section">
+
+    ### Data residency
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    curl -X POST -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type:application/json" \
+      "https://CONTROL_PLANE_LOCATION-apigee.googleapis.com/v1/organizations/YOUR_ORG_NAME:setSyncAuthorization" \
+       -d '{"identities":["serviceAccount:SYNCHRONIZER_MANAGER_SERVICE_ACCOUNT_NAME"]}'
+    ```
+
+    Where:
+
+    - `YOUR_ORG_NAME`: The name of the hybrid organization.
+    - `CONTROL_PLANE_LOCATION`: The location for your control plane data if your hybrid installation uses [data residency](/apigee/docs/api-platform/get-started/drz-concepts). This is location where customer core content like proxy bundles are stored. For a list see [Available Apigee API control plane regions](https://cloud.devsite.corp.google.com/apigee/docs/locations#available-apigee-api-control-plane-regions).
+    - `SYNCHRONIZER_MANAGER_SERVICE_ACCOUNT_NAME`: The name of a service account with the **Apigee Synchronizer Manager** role. The name is formed like an email address. For example: `my-synchronizer-manager-service_account@my_project_id.iam.gserviceaccount.com`
+
+    Example:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    curl -X POST -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type:application/json" \
+      "https://us-apigee.googleapis.com/v1/organizations/my_org:setSyncAuthorization" \
+       -d '{"identities":["serviceAccount:my-synchronizer-manager-service_account@my_project_id.iam.gserviceaccount.com"]}'
+    ```
+
+    </div>
+
+    For more information on this API, see [setSyncAuthorization](/apigee/docs/reference/apis/apigee/rest/v1/organizations/setSyncAuthorization) API.
+
+6.  To verify that the service account was set, call the following API to get a list of service accounts:
+
+    <div class="section">
+
+    ### No data residency
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    curl -X POST -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type:application/json" \
+      "https://apigee.googleapis.com/v1/organizations/your_org_name:getSyncAuthorization" \
+       -d ''
+    ```
+
+    </div>
+
+    <div class="section">
+
+    ### Data residency
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    curl -X POST -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type:application/json" \
+      "https://CONTROL_PLANE_LOCATION-apigee.googleapis.com/v1/organizations/your_org_name:getSyncAuthorization" \
+       -d ''
+    ```
+
+    </div>
+
+    The output looks similar to the following:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    {
+       "identities":[
+          "serviceAccount:my-synchronizer-manager-service_account@my_project_id.iam.gserviceaccount.com"
+       ],
+       "etag":"BwWJgyS8I4w="
+    }
+    ```

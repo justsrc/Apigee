@@ -1,0 +1,2213 @@
+[<span class="devsite-label" background="google-blue">Standard policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The HTTPModifier policy changes an existing request or response message.
+
+The policy lets you perform the following actions on those messages:
+
+- [Add](#add) new form parameters, headers, or query parameters to a message
+- [Remove](#remove) headers, query parameters, and form parameters from a message
+- [Set](#set) the value of existing properties in a message
+
+With HTTPModifier, you can add, change, or remove properties of either the request or response. You can alternatively use HTTPModifier to create a custom request or response message and pass it to an alternative target, as described in [Create custom request messages](#customrequests).
+
+HTTPModifier provides a subset of the [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) functionality. See [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) for additional functionality including assigning variables, modifying payloads, and copying values from the message.
+
+The HTTPModifier policy can create flow variables with the following child elements:
+
+- [`<Add>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#add)
+- [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set)
+- [`<Remove>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#remove)
+- [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#assignto)
+
+The order in which you organize the [`<Add>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#add), [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set), and [`<Remove>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#remove) elements is important. The policy executes those actions in the order in which they appear in the policy configuration. If you need to remove all headers, then set a specific header, you should include the [`<Remove>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#remove) element before the [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set) element.
+
+This policy is a *Standard policy* and can be deployed to any environment type. For information on policy types and availability with each environment type, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+<div class="section expandable">
+
+## Use cases
+
+There are many situations in which you might want to modify a request or a response message during processing by Apigee. For example:
+
+- Define a default value for a query string parameter or other type of input.
+- Strip HTTP headers from a request message before the message is forwarded to the backend service.
+- Add HTTP headers before a response is sent to the consumer app.
+- Generate customized request or response messages. For example, you might use an external callout to invoke a remote API from an API proxy. You can use the HTTPModifier policy to create a custom request message and assign it to a variable. Then, use an external callout to send that message to the remote API.
+- Add headers to requests and responses for debugging and troubleshooting.
+
+</div>
+
+## `<HTTPModifier>` element
+
+Defines an HTTPModifier policy.
+
+| Default Value | See Default Policy tab, below |
+| --- | --- |
+| Required? | Required |
+| Type | Complex object |
+| Parent Element | N/A |
+| Child Elements | <Add> <AssignTo> <DisplayName> <IgnoreUnresolvedVariables> <Remove> <Set> |
+
+The `<HTTPModifier>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+The `<HTTPModifier>` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <!-- All HTTPModifier child elements are optional -->
+  <Add>
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+    <Headers>
+      <Header name="HEADER_NAME">HEADER_VALUE</Header>
+      ...
+    </Headers>
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+  </Add>
+
+  <AssignTo createNew="[true|false]" transport="http"
+    type="[request|response]">DESTINATION_VARIABLE_NAME</AssignTo>
+
+  <DisplayName>POLICY_DISPLAY_NAME</DisplayName>
+
+  <IgnoreUnresolvedVariables>[true|false]</IgnoreUnresolvedVariables>
+
+  <!-- Can also be empty to remove everything from the message (<Remove/>) -->
+  <Remove>
+    <!-- Can also be an empty array to remove all FormParams (<FormParams/>) -->
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+    <!-- Can also be an empty array to remove all Headers (<Headers/>) -->
+    <Headers>
+      <Header name="HEADER_NAME">HEADER_VALUE</Header>
+      ...
+    </Headers>
+    <!-- Can also be an empty array to remove all QueryParams (<QueryParams/>) -->
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+  </Remove>
+
+  <Set>
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+    <Headers>
+      <Header name="HEADER_NAME">HEADER_VALUE</Header>
+      ...
+    </Headers>
+    <Path>PATH</Path>
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+    <StatusCode>HTTP_STATUS_CODE or {variable}</StatusCode>
+    <Verb>[GET|POST|PUT|PATCH|DELETE|{variable}]</Verb>
+    <Version>[1.0|1.1|{variable}]</Verb>
+  </Set>
+
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Default Policy
+
+The following example shows the default settings when you add an HTTPModifier policy to your flow in the Apigee UI:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier continueOnError="false" enabled="true" name="http-modifier-default">
+  <DisplayName>HTTP Modifier-1</DisplayName>
+  <Properties/>
+  <Remove>
+    <Headers>
+      <Header name="h1"/>
+    </Headers>
+    <QueryParams>
+      <QueryParam name="q1"/>
+    </QueryParams>
+    <FormParams>
+      <FormParam name="f1"/>
+    </FormParams>
+  </Remove>
+  <Add>
+    <Headers/>
+    <QueryParams/>
+    <FormParams/>
+  </Add>
+  <Set>
+    <Headers/>
+    <QueryParams/>
+    <FormParams/>
+    <!-- <Verb>GET</Verb> -->
+    <Path/>
+  </Set>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <AssignTo createNew="false" transport="http" type="request"/>
+</HTTPModifier>
+```
+
+When you insert a new HTTPModifier policy in the Apigee UI, the template contains stubs for all possible operations. Typically, you select which operations you want to perform with this policy and remove the rest of the child elements. For example, if you want to perform an add operation, use the `<Add>` element and remove `<Remove>` and other child elements from the policy to make it more readable.
+
+</div>
+
+</div>
+
+This element has the following attributes that are common to all policies:
+
+**Attribute**
+
+**Default**
+
+**Required?**
+
+**Description**
+
+`name`
+
+N/A
+
+**Required**
+
+The internal name of the policy. The value of the `name` attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters.
+
+Optionally, use the `<DisplayName>` element to label the policy in the management UI proxy editor with a different, natural-language name.
+
+`continueOnError`
+
+false
+
+Optional
+
+Set to `false` to return an error when a policy fails. This is expected behavior for most policies. Set to `true` to have flow execution continue even after a policy fails. See also:
+
+- [Fault rules are triggered ONLY in an error state (about continueOnError)](/apigee/docs/api-platform/fundamentals/fault-handling#multiplefaultrulesandexecutionlogic-faultrulesaretriggeredonlyinanerrorstateaboutcontinueonerror)
+- [Handling faults within the current flow](/apigee/docs/api-platform/fundamentals/fault-handling#continueonerror)
+
+`enabled`
+
+true
+
+Optional
+
+Set to `true` to enforce the policy. Set to `false` to *turn off* the policy. The policy will not be enforced even if it remains attached to a flow.
+
+`async`  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray">not_interested</span></span>
+
+false
+
+Deprecated
+
+This attribute is deprecated.
+
+The following table provides a high-level description of the child elements of [`<HTTPModifier>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#httpmodifier):
+
+| Child Element | Required? | Description |
+| --- | --- | --- |
+| Common operations |  |  |
+| <Add> | Optional | Adds information to the message object that is specified by the <AssignTo> element. <Add> adds headers or parameters to the message that don't exist in the original message. Note that <Set> also provides this functionality. To overwrite existing headers or parameters, use the <Set> element. |
+| <Remove> | Optional | Deletes the specified elements from the message variable specified in the <AssignTo> element. |
+| <Set> | Optional | Replaces values of existing properties on the request or response, which is specified by the <AssignTo> element. <Set> overwrites headers or parameters that already exist in the original message or adds new if they don't. |
+| Other child elements |  |  |
+| <AssignTo> | Optional | Specifies which message the HTTPModifier policy operates on. This can be the standard request or response, or it can be a new custom message. |
+| <IgnoreUnresolvedVariables> | Optional | Determines whether processing stops when an unresolved variable is encountered. |
+
+Each of these child elements is described in the sections that follow.
+
+## Examples
+
+The following examples show some of the ways in which you can use the HTTPModifier policy:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### 1: Add header
+
+The following example adds a header to the request with the [`<Add>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#add) element. The VerifyAPIKey variable in this example is generated by the [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy):
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-add-headers-1">
+  <Add>
+    <Headers>
+      <Header name="partner-id">{verifyapikey.VAK-1.developer.app.partner-id}</Header>
+    </Headers>
+  </Add>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### 2: Modify response
+
+The following example modifies an existing response object by adding a header to it:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-modify-response">
+  <Set>
+    <Headers>
+      <Header name="Cache-Hit">{lookupcache.LookupCache-1.cachehit}</Header>
+    </Headers>
+  </Set>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <AssignTo>response</AssignTo>
+</HTTPModifier>
+```
+
+This example does not create a new message. Instead, it modifies an existing response message by adding an HTTP header.
+
+Because this example specifies `response` as the variable name in the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#assignto) element, this policy modifies the response object that was originally set with data returned by the target server.
+
+The HTTP header added to the response message by this policy is derived from a variable populated by the [LookupCache policy](/apigee/docs/api-platform/reference/policies/lookup-cache-policy). Therefore the response message modified by this HTTPModifier policy contains an HTTP header that indicates whether the results have been pulled from the cache or not. Setting headers in the response can be handy for debugging and troubleshooting.
+
+**Tip:** This pattern of setting headers for debugging and troubleshooting is a common practice. You can see what header value was sent back by inspecting the response with the Debug tool or other means.
+
+</div>
+
+<div class="section">
+
+### 3: Remove query param
+
+The following example removes the `apikey` query parameter from the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-remove-query-param">
+  <Remove>
+    <QueryParams>
+      <QueryParam name="apikey"/>
+    </QueryParams>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+It's a best practice to strip the `apikey` query parameter from the request message when you use the [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy) for user authentication. You do this to prevent sensitive key information from being passed to the backend target.
+
+</div>
+
+</div>
+
+## Child element reference
+
+This section describes the child elements of [`<HTTPModifier>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#httpmodifier).
+
+### `<Add>`
+
+Adds information to the request or response, which is specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#assignto) element.
+
+The `<Add>` element adds new properties on the message that don't exist in the original message. Note that [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set) also provides this functionality. To change the values of *existing* properties, use the [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set) element.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex type |
+| Parent Element | <HTTPModifier> |
+| Child Elements | <FormParams> <Headers> <QueryParams> |
+
+The `<Add>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Add>
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+    <Headers>
+      <Header name="HEADER_NAME">HEADER_VALUE</Header>
+      ...
+    </Headers>
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+  </Add>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example uses the [`<FormParams>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#add-formparams) element to get the values of three query string parameters from the initial request and set them as form parameters on the target endpoint request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-add-formparams-3">
+  <Add>
+    <FormParams>
+      <FormParam name="username">{request.queryparam.name}</FormParam>
+      <FormParam name="zip_code">{request.queryparam.zipCode}</FormParam>
+      <FormParam name="default_language">{request.queryparam.lang}</FormParam>
+    </FormParams>
+  </Add>
+  <Remove>
+    <QueryParams/>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example uses the [`<Headers>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#add-headers) element to add a `partner-id` header to the request that will be sent to the target endpoint:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-add-headers-1">
+  <Add>
+    <Headers>
+      <Header name="partner-id">{verifyapikey.VAK-1.developer.app.partner-id}</Header>
+    </Headers>
+  </Add>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+The following example uses the [`<QueryParams>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#add-queryparams) element to add a single query parameter with a static value to the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-add-queryparams-1">
+  <Add>
+    <QueryParams>
+      <QueryParam name="myParam">42</QueryParam>
+    </QueryParams>
+  </Add>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+This example uses `<Add>` in the request preflow. If you look at the results in a tool such as the [Debug tool](/apigee/docs/api-platform/debug/trace-overview), the request to `https://example-target.com/get` becomes `https://example-target.com/get?myParam=42`.
+
+</div>
+
+</div>
+
+The child elements of `<Add>` support dynamic string substitution, known as [message templating](/apigee/docs/api-platform/reference/message-template-intro).
+
+#### `<FormParams>` (child of [`<Add>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#add))
+
+Adds new form parameters to the request message. This element has no effect on a response message.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <FormParam> elements |
+| Parent Element | <Add> |
+| Child Elements | <FormParam> |
+
+The `<FormParams>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Add>
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+  <AssignTo createNew="[true|false]" transport="http"
+    type="[request|response]">DESTINATION_VARIABLE_NAME</AssignTo>
+  </Add>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example adds a single form parameter (`answer`) and a static value (`42`) to the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-add-formparams-1">
+  <Add>
+    <FormParams>
+      <FormParam name="answer">42</FormParam>
+    </FormParams>
+  </Add>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example gets the value of the `name` query parameter and adds it to the request as a form parameter, and then removes the query parameter:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-Swap-QueryParam-to-FormParams">
+  <Add>
+    <FormParam name="name">{request.queryparam.name}
+  </Add>
+  <Remove>
+    <QueryParam name="name"/>
+  </Remove>
+</HTTPModifier>
+```
+
+Note that this example does not specify a target with `<AssignTo>`. This policy adds the parameter to the request only.
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+The following example adds multiple form parameters to the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-add-formparams-3">
+  <Add>
+    <FormParams>
+      <FormParam name="username">{request.queryparam.name}</FormParam>
+      <FormParam name="zip_code">{request.queryparam.zipCode}</FormParam>
+      <FormParam name="default_language">{request.queryparam.lang}</FormParam>
+    </FormParams>
+  </Add>
+  <Remove>
+    <QueryParams/>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+This example gets the query string parameters from the originating request and adds them as form parameters with different names. Then it removes the original query parameters. Apigee will send the modified request to the target endpoint.
+
+You can use the [Debug tool](/apigee/docs/api-platform/debug/trace-overview) to look at the flow. You'll see that the body of the request contains the URL-encoded form data, which was originally passed in as query string parameters:
+
+<div>
+
+</div>
+
+```
+username=nick&zip_code=90210&default_language=en
+```
+
+</div>
+
+</div>
+
+You can use `<FormParams>` only when the following criteria are met:
+
+- HTTP verbs: `GET`, `POST`
+- Message type: Request
+- One (or both) of the following:
+  - Form data: Set to some value, or `""` (the empty string). For example, with `curl`, add `-d ""` to your request.
+  - `Content-Length` header: Set to 0 (if no data is in the original request; otherwise, the current length, in bytes). For example, with `curl` add `-H "Content-Length: 0"` to your request.
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -vL -X POST -d "" -H "Content-Type: application/x-www-form-urlencoded"
+  https://ahamilton-eval-test.apigee.net/am-test
+```
+
+When you add `<FormParams>`, Apigee sets the request's `Content-Type` header to `application/x-www-form-urlencoded` before sending the message to the target service.
+
+#### `<Headers>` (child of [`<Add>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#add))
+
+Adds new headers to the specified request or response, which is specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#assignto) element.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <Header> elements |
+| Parent Element | <Add> |
+| Child Elements | <Header> |
+
+The `<Headers>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Add>
+    <Headers>
+      <Header name="HEADER_NAME">HEADER_VALUE</Header>
+      ...
+    </Headers>
+  </Add>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example adds a `partner-id` header to the request message, and assigns the value of the `verifyapikey.VAK-1.developer.app.partner-id` flow variable to that header.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-add-headers-1">
+  <Add>
+    <Headers>
+      <Header name="partner-id">{verifyapikey.VAK-1.developer.app.partner-id}</Header>
+    </Headers>
+  </Add>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+</div>
+
+#### `<QueryParams>` (child of [`<Add>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#add))
+
+Adds new query parameters to the request. This element has no effect on a response.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <QueryParam> elements |
+| Parent Element | <Add> |
+| Child Elements | <QueryParam> |
+
+The `<QueryParams>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Add>
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+  </Add>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example adds the query parameter `myParam` to the request and assigns the value `42` to it:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-add-queryparams-1">
+  <Add>
+    <QueryParams>
+      <QueryParam name="myParam">42</QueryParam>
+    </QueryParams>
+  </Add>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+</div>
+
+You can use `<QueryParams>` only when the following criteria are met:
+
+- HTTP verbs: `GET`, `POST`
+- Message type: Request
+
+In addition, you can only set query parameters when the `<AssignTo>` element's `type` attribute is a request message. Setting them on the response has no effect.
+
+If you define an empty array of query parameters in your policy (`<Add><QueryParams/></Add>`), the policy does not add any query parameters. This is the same as omitting `<QueryParams>`.
+
+### `<AssignTo>`
+
+Determines which object the HTTPModifier policy operates on. The options are:
+
+- **Request message:** The [`request`](/apigee/docs/api-platform/reference/variables-reference#request) received by the API proxy
+- **Response message:** The [`response`](/apigee/docs/api-platform/reference/variables-reference#response) returned from the target server
+- **Custom message:** A custom request or response object
+
+Note that in some cases, you cannot change the object on which the HTTPModifier policy acts. For example, you cannot use [`<Add>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#add) or [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set) to add or change query parameters (`<QueryParams>`) or form parameters (`<FormParams>`) on the response. You can only manipulate query parameters and form parameters on the request.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<HTTPModifier>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#httpmodifier) |
+| **Child Elements** | None |
+
+If you do not specify `<AssignTo>`, or if you specify the `<AssignTo>` element but do not specify a text value for the element, the policy acts on the default request or response, which is based on where the policy executes. If the policy executes in the request flow, it affects the request message. If it executes in the response flow, the policy affects the response by default.
+
+The `<AssignTo>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <AssignTo createNew="[true|false]" transport="http"
+    type="[request|response]">DESTINATION_VARIABLE_NAME</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example specifies no message in the text of the `<AssignTo>`. That implies that the policy will act on either the `request` or `response` message, depending on where the policy executes.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="assignto-1">
+  <AssignTo createNew="false" transport="http" type="request"/>-- no-op -->
+  ...
+</HTTPModifier>
+```
+
+If you specify `createNew="false"`, and do not explicitly provide a message name, the other attributes of `<AssignTo>` are irrelevant. In this case, you may wish to omit the `<AssignTo>` element completely.
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example creates a new request object, over-writing the existing object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="assignto-2">
+  <AssignTo createNew="true" transport="http" type="request"/>
+  ...
+</HTTPModifier>
+```
+
+When you create a new request or response object, the other elements of the HTTPModifier policy (such as [`<Add>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#add) and [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set) act on that new request object.
+
+You can access the new request object in other policies later in the flow, or send the new request object to an external service with a [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy).
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+The following example creates a new request object named `MyRequestObject`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="assignto-3">
+  <AssignTo createNew="true" transport="http" type="request">MyRequestObject</AssignTo>
+  ...
+</HTTPModifier>
+```
+
+When you create a new request or response object, the other elements of the HTTPModifier policy (such as [`<Add>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#add) and [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set) act on that new request object.
+
+You can access the new request object by name in other policies later in the flow, or send the new request object to an external service with a [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy).
+
+</div>
+
+</div>
+
+The following table describes the attributes of `<AssignTo>`:
+
+<span id="hm_assignto_attributes"></span>
+
+| Attribute | Description | Required? | Type |
+| --- | --- | --- | --- |
+| createNew | Determines whether this policy creates a new message when assigning values. If true , then the policy creates a new variable of the type specified by type (either request or response ). If you do not specify the name of the new variable, then the policy creates a new request or response object, based on the value of type . Caution : When creating a new request or response object, the existing request or response object is deleted and replaced by the new one, meaning all information in the object is lost. If false , then the policy responds in one of two ways: If <AssignTo> can resolve the variable name to a request or response, then it continues processing. For example, if the policy is in a request flow, the variable is the request object. If the policy is in a response, the variable is the response object. If <AssignTo> cannot be resolved, or resolves to a non-message type, then the policy throws an error. If createNew is not specified, the policy responds in one of two ways: If <AssignTo> resolves to a message, then processing advances to the next step. If <AssignTo> cannot be resolved, or resolves to a non-message type, a new variable of type specified in type is created. | Optional | Boolean |
+| transport | Specifies the transport type for the request or response message type. The default value is http (the only supported value). | Optional | String |
+| type | Specifies the type of the new message, when createNew is true . Valid values are request or response . The default value is request . If you omit this attribute, then Apigee creates either a request or a response, depending on where in the flow this policy executes. | Optional | String |
+
+### `<DisplayName>`
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, more natural-sounding name.
+
+The `<DisplayName>` element is common to all policies.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional. If you omit `<DisplayName>`, the value of the policy's `name` attribute is used. |
+| **Type** | String |
+| **Parent Element** | \<`PolicyElement`\> |
+| **Child Elements** | None |
+
+The `<DisplayName>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>POLICY_DISPLAY_NAME</DisplayName>
+  ...
+</PolicyElement>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>My Validation Policy</DisplayName>
+</PolicyElement>
+```
+
+</div>
+
+</div>
+
+The `<DisplayName>` element has no attributes or child elements.
+
+### `<IgnoreUnresolvedVariables>`
+
+Determines whether processing stops when an unresolved variable is encountered.
+
+|  |  |
+|----|----|
+| **Default Value** | False |
+| **Required?** | Optional |
+| **Type** | Boolean |
+| **Parent Element** | [`<HTTPModifier>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#httpmodifier) |
+| **Child Elements** | None |
+
+Set to `true` to ignore unresolved variables and continue processing; otherwise `false`. The default value is `false`.
+
+Setting `<IgnoreUnresolvedVariables>` to `true` is different from setting the [`<HTTPModifier>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#httpmodifier)'s `continueOnError` to `true` in that it is specific to setting and getting values of variables. If you set `continueOnError` to `true`, then Apigee ignores all errors, not just errors encountered when using variables.
+
+The `<IgnoreUnresolvedVariables>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <IgnoreUnresolvedVariables>[true|false]</IgnoreUnresolvedVariables>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets `<IgnoreUnresolvedVariables>` to `true`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-Set-Headers">
+  <Set>
+    <Headers>
+      <Header name='new-header'>{possibly-defined-variable}<Header>
+    </Headers>
+  </Set>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</HTTPModifier>
+```
+
+Because `<IgnoreUnresolvedVariables>` is set to `true`, if the `possibly-defined-variable` variable is not defined, this policy will not throw a fault.
+
+</div>
+
+</div>
+
+### `<Remove>`
+
+Removes headers, query parameters, or form parameters from a message. An empty tag removes all corresponding parameters including headers, formparams, and queryparams.
+
+The affected message can be a request or a response. You specify which message `<Remove>` acts on by using the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#assignto) element.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex type |
+| Parent Element | <HTTPModifier> |
+| Child Elements | <FormParams> <Headers> <QueryParams> |
+
+A common use case for `<Remove>` is to delete a query parameter or header that contains sensitive information from the incoming request object, to avoid passing it to the backend server.
+
+The `<Remove>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <!-- Can also be empty to remove everything from the message (<Remove/>) -->
+  <Remove>
+    <!-- Can also be an empty array to remove all FormParams (<FormParams/>) -->
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+    <!-- Can also be an empty array to remove all Headers (<Headers/>) -->
+    <Headers>
+      <Header name="HEADER_NAME">HEADER_VALUE</Header>
+      ...
+    </Headers>
+    <!-- Can also be an empty array to remove all QueryParams (<QueryParams/>) -->
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+  </Remove>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example removes all form parameters and a query parameter from the `request` object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-remove-2">
+  <Remove>
+    <!-- Empty (<FormParams/>) removes all form parameters -->
+    <FormParams/>
+    <QueryParams>
+      <QueryParam name="qp1"/>
+    </QueryParams>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example removes everything from a message object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-remove-3">
+  <Remove/>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+Typically you would do this only if you were going to use the [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set) element to set some replacement values into the message.
+
+</div>
+
+</div>
+
+#### `<FormParams>` (child of [`<Remove>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#remove))
+
+Removes the specified form parameters from the request. This element has no effect on a response.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <FormParam> elements or an empty array |
+| Parent Element | <Remove> |
+| Child Elements | <FormParam> |
+
+The `<FormParams>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <!-- Can also be empty to remove everything from the message (<Remove/>) -->
+  <Remove>
+    <!-- Can also be an empty array to remove all FormParams (<FormParams/>) -->
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+  </Remove>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example removes three form parameters from the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-remove-formparams-1">
+  <Remove>
+    <FormParams>
+      <FormParam name="form_param_1"/>
+      <FormParam name="form_param_2"/>
+      <FormParam name="form_param_3"/>
+    </FormParams>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example removes all form parameters from the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-remove-formparams-2">
+  <Remove>
+    <FormParams/>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+If there are multiple form params with the same name, use the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-remove-formparams-3">
+  <Remove>
+    <FormParams>
+      <FormParam name="f1"/>
+      <FormParam name="f2"/>
+      <FormParam name="f3.2"/>
+    </FormParams>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+This example removes `f1`, `f2`, and the second value of `f3`. If `f3` has only one value, then it is not removed.
+
+</div>
+
+</div>
+
+You can use `<FormParams>` only when the following criteria are met:
+
+- Message type: Request
+- `Content-Type`: `application/x-www-form-urlencoded`
+
+#### `<Headers>` (child of [`<Remove>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#remove))
+
+Removes the specified HTTP headers from the request or response, which is specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#assignto) element.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <Header> elements or an empty array |
+| Parent Element | <Remove> |
+| Child Elements | <Header> |
+
+The `<Headers>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <!-- Can also be empty to remove everything from the message (<Remove/>) -->
+  <Remove>
+    <!-- Can also be an empty array to remove all Headers (<Headers/>) -->
+    <Headers>
+      <Header name="HEADER_NAME">HEADER_VALUE</Header>
+      ...
+    </Headers>
+  </Remove>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example removes the `user-agent` header from the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-remove-one-header">
+  <Remove>
+    <Headers>
+      <Header name="user-agent"/>
+    </Headers>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example removes all headers from the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-remove-all-headers">
+  <Remove>
+    <Headers/>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+If there are multiple headers with the same name, use the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-remove-headers-3">
+  <Remove>
+    <Headers>
+      <Header name="h1"/>
+      <Header name="h2"/>
+      <Header name="h3.2"/>
+    </Headers>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+This example removes `h1`, `h2`, and the second value of `h3` from the request. If `h3` has only one value, then it is not removed.
+
+</div>
+
+</div>
+
+#### `<QueryParams>` (child of [`<Remove>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#remove))
+
+Removes the specified query parameters from the request. This element has no effect on a response.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <QueryParam> elements or an empty array |
+| Parent Element | <Remove> |
+| Child Elements | <QueryParam> |
+
+The `<QueryParams>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <!-- Can also be empty to remove everything from the message (<Remove/>) -->
+  <Remove>
+    <!-- Can also be an empty array to remove all QueryParams (<QueryParams/>) -->
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+  </Remove>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example removes a single query parameter from the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-remove-queryparams-1">
+  <Remove>
+      <QueryParams>
+        <QueryParam name="qp1"/>
+      </QueryParams>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example removes all query parameters from the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-remove-queryparams-2">
+  &tl;Remove>
+      <QueryParams/>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+If there are multiple query params with the same name, use the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-remove-queryparams-3">
+  <Remove>
+      <QueryParams>
+        <QueryParam name="qp1"/>
+        <QueryParam name="qp2"/>
+        <QueryParam name="qp3.2"/>
+      </QueryParams>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+This example removes `qp1`, `qp2`, and the second value of `qp3` from the request. If `qp3` has only one value, then it is not removed.
+
+</div>
+
+<div class="section">
+
+### Example 4
+
+The following example removes the `apikey` query parameter from the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-remove-query-param">
+  <Remove>
+    <QueryParams>
+      <QueryParam name="apikey"/>
+    </QueryParams>
+  </Remove>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+</div>
+
+You can use `<QueryParams>` only when the following criteria are met:
+
+- HTTP verbs: `GET`, `POST`
+- Message type: Request
+
+### `<Set>`
+
+Sets information in the request or response message, which is specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#assignto) element. `<Set>` overwrites headers or query or form parameters that already exist in the original message or adds new if they don't.
+
+Headers and query and form parameters in an HTTP message may hold multiple values. To add additional values for a header or parameter, use the [`<Add>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#add) element instead.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex type |
+| Parent Element | <HTTPModifier> |
+| Child Elements | <FormParams> <Headers> <Path> <QueryParams> <StatusCode> <Verb> <Version> |
+
+**Note**: The sub-elements of `<Set>` support the dynamic string substitution feature called [message templating](/apigee/docs/api-platform/reference/message-template-intro).
+
+The `<Set>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Set>
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+    <Headers>
+      <Header name="HEADER_NAME">HEADER_VALUE</Header>
+      ...
+    </Headers>
+    <Path>PATH</Path>
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+    <StatusCode>HTTP_STATUS_CODE or {variable}</StatusCode>
+    <Verb>[GET|POST|PUT|PATCH|DELETE|{variable}]</Verb>
+    <Version>[1.0|1.1|{variable}]</Verb>
+  </Set>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+The following example sets a specific header. When this policy is attached in the Request flow, it will allow the upstream system to receive an additional header that was not included in the original inbound request.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-Set-Header">
+  <Set>
+    <Headers>
+        <Header name="authenticated-developer">{verifyapikey.VAK-1.developer.id}</Header>
+    </Headers>
+  </Set>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+</div>
+
+#### `<FormParams>` (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set))
+
+Overwrites existing form parameters on a request and replaces them with the new values that you specify with this element. This element has no effect on a response.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <FormParam> elements |
+| Parent Element | <Set> |
+| Child Elements | <FormParam> |
+
+The `<FormParams>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Set>
+    <FormParams>
+      <FormParam name="FORMPARAM_NAME">FORMPARAM_VALUE</FormParam>
+      ...
+    </FormParams>
+  </Set>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets a form parameter called `myparam` to the value of the `request.header.myparam` variable in a new, custom request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-set-formparams-1">
+  <Set>
+    <FormParams>
+      <FormParam name="myparam">{request.header.myparam}</FormParam>
+    </FormParams>
+  </Set>
+  <AssignTo createNew="true" transport="http" type="request>>MyCustomRequest</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+</div>
+
+You can use `<FormParams>` only when the following criteria are met:
+
+- HTTP verb: `POST`
+- Message type: Request
+
+If you define empty form parameters in your policy (`<Add><FormParams/></Add>`), the policy does not add any form parameters. This is the same as omitting the `<FormParams>`.
+
+`<Set>` changes the `Content-Type` of the message to `application/x-www-form-urlencoded` before sending it to the target endpoint.
+
+#### `<Headers>` (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set))
+
+Overwrites existing HTTP headers in the request or response, which is specified by the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#assignto) element.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <Header> elements |
+| Parent Element | <Set> |
+| Child Elements | <Header> |
+
+The `<Headers>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Set>
+    <Headers>
+      <Header name="HEADER_NAME">HEADER_VALUE</Header>
+      ...
+    </Headers>
+  </Set>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets the `x-ratelimit-remaining` header to the value of the `ratelimit.Quota-1.available.count` variable:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-Set-RateLimit-Header">
+  <Set>
+    <Headers>
+      <Header name="X-RateLimit-Remaining">{ratelimit.Quota-1.available.count}</Header>
+    </Headers>
+  </Set>
+  <AssignTo>response</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+</div>
+
+If you define empty headers in your policy (`<Set><Headers/></Set>`), the policy does not set any headers. This will have the same effect as omitting `<Headers>`.
+
+#### `<Path>` (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set))
+
+**Note**:
+
+This element isn't currently working as designed to override/rewrite a proxy's target URL.
+
+Sometimes you may need to send a message to a URL other than the URL defined in an API proxy's `TargetEndpoint`. (You can't override `target.url` in the `ProxyEndpoint`, because Apigee sets the variable in the `TargetEndpoint`).
+
+#### `<QueryParams>` (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set))
+
+Overwrites existing query parameters in the request with new values. This element has no effect on a response.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <QueryParam> elements |
+| Parent Element | <Set> |
+| Child Elements | <QueryParam> |
+
+The `<QueryParams>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Set>
+    <QueryParams>
+      <QueryParam name="QUERYPARAM_NAME">QUERYPARAM_VALUE</QueryParam>
+      ...
+    </QueryParams>
+  </Set>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets the `address` query parameter to the value of the `request.header.address` variable:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-set-queryparams-1">
+  <Set>
+    <QueryParams>
+      <QueryParam name="address">{request.header.address}</QueryParam>
+    </QueryParams>
+  </Set>
+</HTTPModifier>
+```
+
+</div>
+
+</div>
+
+You can use `<QueryParams>` only when the following criteria are met:
+
+- HTTP verbs: `GET`, `POST`
+- Message type: Request
+
+If you define empty query parameters in your policy (`<Set><QueryParams/></Set>`), the policy does not set any query parameters. This is the same as omitting `<QueryParams>`.
+
+#### `<StatusCode>` (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set))
+
+Sets the status code on the response. This element has no effect on a request.
+
+|  |  |
+|----|----|
+| **Default Value** | '200' (when [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#assignto)'s `createNew` attribute is set to 'true') |
+| **Required?** | Optional |
+| **Type** | String or `VARIABLE` |
+| **Parent Element** | [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set) |
+| **Child Elements** | None |
+
+The `<StatusCode>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Set>
+    <StatusCode>HTTP_STATUS_CODE or {variable}</StatusCode>
+  </Set>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets a simple status code:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-set-statuscode-404">
+  <Set>
+    <StatusCode>404<<StatusCode>
+  </Set>
+  <AssignTo>response</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The content of `<StatusCode>` is treated as a message template. This means a variable name wrapped in curly braces will be replaced at runtime with the value of the referenced variable, as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="set-statuscode-2">
+  <Set>
+    <StatusCode>{calloutresponse.status.code}</StatusCode>
+  </Set>
+  <AssignTo>response</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+</div>
+
+You can use `<StatusCode>` only when the following criteria are met:
+
+- Message type: Response
+
+#### `<Verb>` (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set))
+
+Sets the HTTP verb on the request. This element has no effect on a response.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional |
+| **Type** | String or `VARIABLE` |
+| **Parent Element** | [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set) |
+| **Child Elements** | None |
+
+The `<Verb>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Set>
+    <Verb>[GET|POST|PUT|PATCH|DELETE|{variable}]</Verb>
+  </Set>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets a simple verb on the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-set-verb-1">
+  <Set>
+    <Verb>POST</Verb>
+  </Set>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The content of `<Verb>` is treated as a message template. This means a variable name wrapped in curly braces will be replaced at runtime with the value of the referenced variable.
+
+The following example uses a variable to populate a verb:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-set-verb-to-dynamic-value">
+  <Set>
+    <Verb>{my_variable}</Verb>
+  </Set>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+</div>
+
+</div>
+
+You can use `<Verb>` only when the following criteria are met:
+
+- Message type: Request
+
+#### `<Version>` (child of [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set))
+
+Sets the HTTP version on a request. This element has no effect on a response.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional |
+| **Type** | String or `VARIABLE` |
+| **Parent Element** | [`<Set>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set) |
+| **Child Elements** | None |
+
+The `<Version>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier
+    continueOnError="[false|true]"
+    enabled="[true|false]"
+    name="POLICY_NAME" >
+  <Set>
+    <Version>[1.0|1.1|{variable}]</Verb>
+  </Set>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example sets the version number to `1.1`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-set-version-1">
+  <Set>
+    <Version>1.1</Version>
+  </Set>
+</HTTPModifier>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following uses a variable in curly braces to set the version number:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-set-version-2">
+  <Set>
+    <Version>{my_version}</Version>
+  </Set>
+  <AssignTo>request</AssignTo>
+</HTTPModifier>
+```
+
+The content of `<Version>` is treated as a message template. This means a variable name wrapped in curly braces will be replaced at runtime with the value of the referenced variable.
+
+</div>
+
+</div>
+
+You can use `<Version>` only when the following criteria are met:
+
+- Message type: Request
+
+## Create custom request messages
+
+You can use HTTPModifier to create a custom request message. After you create a custom request, you can use it in the following ways:
+
+- Access its variables in other policies
+- Pass it to an external service
+
+**Note**: You cannot pass a custom request message to the target endpoint in the flow. Apigee only passes the *original request* (with any modifications you might have made) to the target endpoint.
+
+To create a custom request message, use the [`<AssignTo>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#assignto) element in your HTTPModifier policy. Set `createNew` to `true` and specify the name of the new message in the body of the element, as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="assignto-3">
+    <AssignTo createNew="true" transport="http" type="request">MyRequestObject</AssignTo>
+    ...
+  </HTTPModifier>
+```
+
+By default, Apigee does nothing with the custom request message. After creating it, Apigee will continue through the flow with the original request. To use the custom request, add a policy such that uses the request message and explicitly reference the newly created request message in the configuration for that policy. This would allow you to pass the custom request to an external service endpoint.
+
+The following examples create custom request messages:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Example 1
+
+The following example creates a custom request object with HTTPModifier:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HTTPModifier-3">
+  <AssignTo createNew="true" type="request">MyCustomRequest</AssignTo>
+  <Set>
+    <QueryParams>
+      <QueryParam name="address">{request.queryparam.addy}</QueryParam>
+    </QueryParams>
+    <Verb>GET</Verb>
+  </Set>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+</HTTPModifier>
+```
+
+This example:
+
+- Creates a new request message object called `MyCustomRequest`.
+- On MyCustomRequest, this policy:
+  - Sets the `address` query parameter on the custom message to the value of the incoming request's `addy` query parameter.
+  - Sets the HTTP verb to `GET`.
+- Sets [`<IgnoreUnresolvedVariables>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#ignoreunresolvedvariables) to `false`. When `<IgnoreUnresolvedVariables>` is `false`, if one of the variables referenced in the policy configuration does not exist, Apigee will enter [fault state](/apigee/docs/api-platform/fundamentals/fault-handling#howerrorsoccur) in the API flow.
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+Here's another example demonstrating how to create a custom request object with HTTPModifier:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HTTPModifier-2">
+  <AssignTo createNew="true" type="request">partner.request</AssignTo>
+  <Set>
+    <Verb>POST</Verb>
+  </Set>
+</HTTPModifier>
+```
+
+This example creates a new custom request called `partner.request`. It then sets the [`<Verb>`](/apigee/docs/api-platform/reference/policies/http-modifier-policy#set-verb) on the new request.
+
+</div>
+
+</div>
+
+You can access the various properties of a custom message in another HTTPModifier policy that occurs later in the flow. The following example gets the value of a header from a named custom response, and places it into a new header in the request message:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPModifier name="HM-Set-Header">
+  <AssignTo>request</AssignTo>
+  <Set>
+    <Headers>
+      <Header name="injected-approval-id">{MyCalloutResponse.header.approval-id}</Header>
+    </Headers>
+  </Set>
+</HTTPModifier>
+```
+
+## Error codes
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+**Tip:** Need help resolving an error? Click *build* in the **Fix** column for detailed troubleshooting information.
+
+| Fault code | HTTP status | Cause | Fix |
+|----|----|----|----|
+| `entities.UnresolvedVariable` | `500` | Message Template Variable in Undefined or out of scope. |  |
+| `steps.httpmodifier.InvalidStatusCode` | `500` | The resolved value of the status code is not valid. See the fault string for more information. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/http-modifier-runtime-errors#unresolvedvariable) |
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+**Tip:** Need help resolving an error? Click *build* next to the error's cause description to visit the troubleshooting page.
+
+| Error name | Cause | Fix |
+|----|----|----|
+| `InvalidIndex` | If the index specified in the `<Remove>` elements of the `HTTPModifier` policy is `0` or a negative number, then deployment of the API Proxy fails. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/http-modifier-deployment-errors#invalidindex) |
+
+### Fault variables
+
+These variables are set when this policy triggers an error at runtime. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `httpmodifier.``POLICY_NAME``.failed` | `POLICY_NAME` is the user-specified name of the policy that threw the fault. | `httpmodifier.HM-SetResponse.failed = true` |
+
+### Example error response
+
+**Note:** For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+   "fault":{
+      "detail":{
+         "errorcode":"steps.httpmodifier.InvalidStatusCode"
+      },
+      "faultstring":"HTTPModifier[HM-SetResponse]: Invalid status code bad_request"
+   }
+}
+```
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name="HTTPModifier Faults">
+    <Step>
+        <Name>HM-CustomNonMessageTypeErrorResponse</Name>
+        <Condition>(fault.name Matches "InvalidStatusCode")</Condition>
+    </Step>
+    <Condition>(httpmodifier.failed = true)</Condition>
+</FaultRule>
+```
+
+## Schemas
+
+Each policy type is defined by an XML schema (`.xsd`). For reference, [policy schemas](https://github.com/apigee/api-platform-samples/tree/master/schemas/policy) are available on GitHub.

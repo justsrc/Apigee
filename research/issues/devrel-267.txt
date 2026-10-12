@@ -1,0 +1,408 @@
+URL: https://github.com/apigee/devrel/issues/267
+TITLE: deploy.sh (references/gcp-sa-auth-shared-flow) doesn't create shared flow in apigee x
+STATE: closed state_reason: completed
+AUTHOR: RezaRahmati association: NONE
+CREATED: 2021-05-03T14:11:48Z CLOSED: 2021-05-11T11:36:48Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+I followed steps and ran `./deploy.sh --googleapi ~/sa/pcb-poc-pcm-44136b3c3ae9.json` on apigee x, it creates a proxy and kvm, but it doesn't create any shared flow.
+
+![image](https://user-images.githubusercontent.com/10086092/116887108-e90ac100-abf7-11eb-8b50-e2a247aef7d1.png)
+
+![image](https://user-images.githubusercontent.com/10086092/116887128-ef00a200-abf7-11eb-995d-0b523b51022b.png)
+
+![image](https://user-images.githubusercontent.com/10086092/116887148-f758dd00-abf7-11eb-89b8-43e6fad78e52.png)
+
+
+Please see the log for execution:
+```
+deploy
+[INFO] using local directory: /Users/rrahmat/src/devrel/references/gcp-sa-auth-shared-flow
+[INFO] Preparing config /Users/rrahmat/src/devrel/references/gcp-sa-auth-shared-flow/deploy-1620050230-29207/edge.json
+[INFO] X/hybrid patch: adding kvm: gcp-sa-devrel
+{
+  "name": "gcp-sa-devrel",
+  "encrypted": true
+}
+[INFO] kvm admin status 404
+[INFO] using local directory: /Users/rrahmat/src/devrel/tools/apigee-sackmesser/cmd/deploy/../../../../references/kvm-admin-api
+[INFO] Configuring API Proxy
+[INFO] Scanning for projects...
+[INFO]
+[INFO] -----------------------< apigee:apigee-deployer >-----------------------
+[INFO] Building kvm-admin-v1 v1
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO]
+[INFO] --- maven-clean-plugin:2.5:clean (auto-clean-init) @ apigee-deployer ---
+[INFO]
+[INFO] --- maven-resources-plugin:2.6:copy-resources (copy-resources) @ apigee-deployer ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 20 resources
+[INFO]
+[INFO] --- apigee-edge-maven-plugin:2.1.0:configure (configure-bundle-step) @ apigee-deployer ---
+[INFO] No config.json found. Skipping package configuration.
+[INFO]
+
+=============Checking for node.js app================
+
+
+[INFO]
+
+=============Now zipping the App Bundle================
+
+
+[INFO]
+[INFO] --- maven-install-plugin:2.4:install (default-install) @ apigee-deployer ---
+[INFO] Installing /Users/rrahmat/src/devrel/references/gcp-sa-auth-shared-flow/deploy-1620050231-6433/pom.xml to /Users/rrahmat/.m2/repository/apigee/apigee-deployer/v1/apigee-deployer-v1.pom
+[INFO]
+[INFO] --- apigee-config-maven-plugin:2.1.1:references (create-config-references) @ apigee-deployer ---
+[INFO] ************************************************************************
+[INFO] Apigee Reference
+[INFO] ************************************************************************
+[INFO] Skipping Reference (default action)
+[INFO]
+[INFO] --- apigee-config-maven-plugin:2.1.1:targetservers (create-config-targetserver) @ apigee-deployer ---
+[INFO] ************************************************************************
+[INFO] Apigee Target Servers
+[INFO] ************************************************************************
+[INFO] Skipping Target Servers (default action)
+[INFO]
+[INFO] --- apigee-config-maven-plugin:2.1.1:keystores (create-config-keystores) @ apigee-deployer ---
+[INFO] ************************************************************************
+[INFO] Apigee Keystore
+[INFO] ************************************************************************
+[INFO] Skipping Keystore (default action)
+[INFO]
+[INFO] --- apigee-config-maven-plugin:2.1.1:aliases (create-config-aliases) @ apigee-deployer ---
+[INFO] ************************************************************************
+[INFO] Apigee Alias
+[INFO] ************************************************************************
+[INFO] Skipping Alias (default action)
+[INFO]
+[INFO] --- apigee-config-maven-plugin:2.1.1:keyvaluemaps (create-config-kvm) @ apigee-deployer ---
+[INFO] ************************************************************************
+[INFO] Apigee KVM
+[INFO] ************************************************************************
+[INFO] Skipping KVM (default action)
+[INFO]
+[INFO] --- apigee-config-maven-plugin:2.1.1:resourcefiles (create-config-resourcefiles) @ apigee-deployer ---
+[INFO] ************************************************************************
+[INFO] Apigee Resource File
+[INFO] ************************************************************************
+[INFO] Skipping Resource File (default action)
+[INFO]
+[INFO] --- apigee-config-maven-plugin:2.1.1:apiproducts (create-config-apiproduct) @ apigee-deployer ---
+[INFO] ************************************************************************
+[INFO] Apigee API Product
+[INFO] ************************************************************************
+[INFO] Skipping API Products (default action)
+[INFO]
+[INFO] --- apigee-config-maven-plugin:2.1.1:developers (create-config-developer) @ apigee-deployer ---
+[INFO] ************************************************************************
+[INFO] Apigee Developer
+[INFO] ************************************************************************
+[INFO] Skipping Developers (default action)
+[INFO]
+[INFO] --- apigee-config-maven-plugin:2.1.1:apps (create-config-app) @ apigee-deployer ---
+[INFO] ************************************************************************
+[INFO] Apigee App
+[INFO] ************************************************************************
+[INFO] Skipping Apps (default action)
+[INFO]
+[INFO] --- apigee-config-maven-plugin:2.1.1:reports (create-config-reports) @ apigee-deployer ---
+[INFO] ************************************************************************
+[INFO] Apigee Custom Report
+[INFO] ************************************************************************
+[INFO] Skipping Custom Report (default action)
+[INFO]
+[INFO] --- apigee-config-maven-plugin:2.1.1:flowhooks (create-config-flowhooks) @ apigee-deployer ---
+[INFO] ************************************************************************
+[INFO] Apigee Flow Hook
+[INFO] ************************************************************************
+[INFO] Skipping Flow Hooks (default action)
+[INFO]
+[INFO] --- apigee-edge-maven-plugin:2.1.0:deploy (deploy-bundle-step) @ apigee-deployer ---
+[INFO]
+
+=============Initializing Maven Deployment================
+
+
+[INFO]
+
+=============Importing App================
+
+
+[INFO] Using the bearer token
+[INFO]
+
+
+Request prepared for the server
+ **************************
+POST  https://apigee.googleapis.com/v1/organizations/pcb-poc-pcm/apis?action=import&name=kvm-admin-v1
+accept: [application/json]
+accept-encoding: [gzip]
+authorization: [Bearer [Not shown in log]
+x-goog-api-format-version: 2
+content-type: multipart/form-data; boundary=__END_OF_PART__
+ [Request body contains data, not shown]
+
+[INFO]
+
+
+Response returned by the server
+ **************************
+200  OK
+cache-control: [private]
+content-encoding: [gzip]
+content-type: [application/json; charset=UTF-8]
+date: [Mon, 03 May 2021 13:57:12 GMT]
+transfer-encoding: [chunked]
+x-frame-options: [SAMEORIGIN]
+alt-svc: [h3-29=":443"; ma=2592000,h3-T051=":443"; ma=2592000,h3-Q050=":443"; ma=2592000,h3-Q046=":443"; ma=2592000,h3-Q043=":443"; ma=2592000,quic=":443"; ma=2592000; v="46,43"]
+server: [ESF]
+x-content-type-options: [nosniff]
+vary: [Referer, X-Origin, Origin]
+x-xss-protection: [0]
+{
+  "configurationVersion": {
+    "majorVersion": 4,
+    "minorVersion": 0
+  },
+  "createdAt": 1620050231738,
+  "lastModifiedAt": 1620050231738,
+  "policies": [
+    "RF-403",
+    "RF-401",
+    "RF-404",
+    "KV-PostEntryDynamic",
+    "EV-ParseRequestBody",
+    "AM-SetResponse",
+    "AM-OriginalRequest",
+    "KV-GetEntryDynamic",
+    "RF-500",
+    "EV-PathParameters",
+    "KV-DeleteEntryDynamic",
+    "RF-404Entry",
+    "JS-IAMPermission",
+    "SpikeArrest",
+    "AM-IAMPermissionCheck",
+    "EV-AvailablePermissions"
+  ],
+  "proxyEndpoints": [
+    "default"
+  ],
+  "resources": [
+    "jsc://JS-IAMPermission.js"
+  ],
+  "revision": "1",
+  "targetEndpoints": [
+    "default"
+  ],
+  "type": "Application"
+}
+[INFO]
+
+=============Activating Bundle================
+
+
+[INFO] Using the bearer token
+[INFO]
+
+
+Request prepared for the server
+ **************************
+POST  https://apigee.googleapis.com/v1/organizations/pcb-poc-pcm/environments/eval/apis/kvm-admin-v1/revisions/1/deployments
+accept: [application/json]
+accept-encoding: [gzip]
+authorization: [Bearer [Not shown in log]
+x-goog-api-format-version: 2
+content-type: application/x-www-form-urlencoded; charset=UTF-8
+ [Request body]
+override=true
+[INFO] Getting Deployment Info for Revision: 1
+[INFO] Using the bearer token
+[INFO]
+
+
+Request prepared for the server
+ **************************
+GET  https://apigee.googleapis.com/v1/organizations/pcb-poc-pcm/environments/eval/apis/kvm-admin-v1/revisions/1/deployments
+accept: [application/json]
+accept-encoding: [gzip]
+authorization: [Bearer [Not shown in log]
+x-goog-api-format-version: 2
+[INFO] Getting Deployment Info for Revision: 1
+[INFO] Using the bearer token
+[INFO]
+
+
+Request prepared for the server
+ **************************
+GET  https://apigee.googleapis.com/v1/organizations/pcb-poc-pcm/environments/eval/apis/kvm-admin-v1/revisions/1/deployments
+accept: [application/json]
+accept-encoding: [gzip]
+authorization: [Bearer [Not shown in log]
+x-goog-api-format-version: 2
+[INFO] Getting Deployment Info for Revision: 1
+[INFO] Using the bearer token
+[INFO]
+
+
+Request prepared for the server
+ **************************
+GET  https://apigee.googleapis.com/v1/organizations/pcb-poc-pcm/environments/eval/apis/kvm-admin-v1/revisions/1/deployments
+accept: [application/json]
+accept-encoding: [gzip]
+authorization: [Bearer [Not shown in log]
+x-goog-api-format-version: 2
+[INFO] Getting Deployment Info for Revision: 1
+[INFO] Using the bearer token
+[INFO]
+
+
+Request prepared for the server
+ **************************
+GET  https://apigee.googleapis.com/v1/organizations/pcb-poc-pcm/environments/eval/apis/kvm-admin-v1/revisions/1/deployments
+accept: [application/json]
+accept-encoding: [gzip]
+authorization: [Bearer [Not shown in log]
+x-goog-api-format-version: 2
+[INFO] Getting Deployment Info for Revision: 1
+[INFO] Using the bearer token
+[INFO]
+
+
+Request prepared for the server
+ **************************
+GET  https://apigee.googleapis.com/v1/organizations/pcb-poc-pcm/environments/eval/apis/kvm-admin-v1/revisions/1/deployments
+accept: [application/json]
+accept-encoding: [gzip]
+authorization: [Bearer [Not shown in log]
+x-goog-api-format-version: 2
+[INFO] Getting Deployment Info for Revision: 1
+[INFO] Using the bearer token
+[INFO]
+
+
+Request prepared for the server
+ **************************
+GET  https://apigee.googleapis.com/v1/organizations/pcb-poc-pcm/environments/eval/apis/kvm-admin-v1/revisions/1/deployments
+accept: [application/json]
+accept-encoding: [gzip]
+authorization: [Bearer [Not shown in log]
+x-goog-api-format-version: 2
+[INFO] Getting Deployment Info for Revision: 1
+[INFO] Using the bearer token
+[INFO]
+
+
+Request prepared for the server
+ **************************
+GET  https://apigee.googleapis.com/v1/organizations/pcb-poc-pcm/environments/eval/apis/kvm-admin-v1/revisions/1/deployments
+accept: [application/json]
+accept-encoding: [gzip]
+authorization: [Bearer [Not shown in log]
+x-goog-api-format-version: 2
+[INFO] Getting Deployment Info for Revision: 1
+[INFO] Using the bearer token
+[INFO]
+
+
+Request prepared for the server
+ **************************
+GET  https://apigee.googleapis.com/v1/organizations/pcb-poc-pcm/environments/eval/apis/kvm-admin-v1/revisions/1/deployments
+accept: [application/json]
+accept-encoding: [gzip]
+authorization: [Bearer [Not shown in log]
+x-goog-api-format-version: 2
+[INFO] Getting Deployment Info for Revision: 1
+[INFO] Using the bearer token
+[INFO]
+
+
+Request prepared for the server
+ **************************
+GET  https://apigee.googleapis.com/v1/organizations/pcb-poc-pcm/environments/eval/apis/kvm-admin-v1/revisions/1/deployments
+accept: [application/json]
+accept-encoding: [gzip]
+authorization: [Bearer [Not shown in log]
+x-goog-api-format-version: 2
+[INFO] Getting Deployment Info for Revision: 1
+[INFO] Using the bearer token
+[INFO]
+
+
+Request prepared for the server
+ **************************
+GET  https://apigee.googleapis.com/v1/organizations/pcb-poc-pcm/environments/eval/apis/kvm-admin-v1/revisions/1/deployments
+accept: [application/json]
+accept-encoding: [gzip]
+authorization: [Bearer [Not shown in log]
+x-goog-api-format-version: 2
+[INFO] Getting Deployment Info for Revision: 1
+[INFO] Using the bearer token
+[INFO]
+
+
+Request prepared for the server
+ **************************
+GET  https://apigee.googleapis.com/v1/organizations/pcb-poc-pcm/environments/eval/apis/kvm-admin-v1/revisions/1/deployments
+accept: [application/json]
+accept-encoding: [gzip]
+authorization: [Bearer [Not shown in log]
+x-goog-api-format-version: 2
+[INFO] Getting Deployment Info for Revision: 1
+[INFO] Using the bearer token
+[INFO]
+
+
+Request prepared for the server
+ **************************
+GET  https://apigee.googleapis.com/v1/organizations/pcb-poc-pcm/environments/eval/apis/kvm-admin-v1/revisions/1/deployments
+accept: [application/json]
+accept-encoding: [gzip]
+authorization: [Bearer [Not shown in log]
+x-goog-api-format-version: 2
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:10 min
+[INFO] Finished at: 2021-05-03T09:58:22-04:00
+[INFO] ------------------------------------------------------------------------
+[INFO] removing /Users/rrahmat/src/devrel/references/gcp-sa-auth-shared-flow/deploy-1620050231-6433
+[INFO] adding entry: "apigee@iam.gserviceaccount.com"
+[INFO] removing /Users/rrahmat/src/devrel/references/gcp-sa-auth-shared-flow/deploy-1620050230-29207
+```
+
+--- COMMENTS (5) ---
+
+### comment by danistrebel (association=COLLABORATOR) at 2021-05-04T06:58:10Z
+Hi @RezaRahmati thanks for reporting this. My assumption is that the KVM admin proxy is not reachable from your machine or that the `APIGEE_X_HOSTNAME` does not correspond to the hostname that you have on your eval env group. Can you please check if this solves your issue. You can rerun the deploy.sh without having to clean up first.
+
+I also added a small fix to provide some debug logging when this occurs. This is part of PR #269
+
+### comment by RezaRahmati (association=NONE) at 2021-05-04T12:50:16Z
+@danistrebel, Thanks for reply. I am using eval version, on eval proxies are only accessible from vm machine, so this could be the reason. and even on vm we can't run it directly, for example we run proxies like this
+```
+curl -i -k   -H "Host: myproject-eval.apigee.net"   https://10.21.94.2/hello-world
+```
+
+Is there any steps to manually create the shared flow?
+
+### comment by RezaRahmati (association=NONE) at 2021-05-04T14:19:39Z
+@danistrebel what I did is I zipped the `sharedflowbundle` under gcp-sa-auth-shared-flow and imported it in the shared flows in apigee, is that OK?
+
+### comment by danistrebel (association=COLLABORATOR) at 2021-05-05T05:55:13Z
+Hi Reza, Uploading the shared flow via the UI is perfectly reasonable. 
+
+If in the future you still wanted to use the KVM to hold your Service Account key it would require you call the KVM admin proxy.  Most likely the simplest way would be: 
+
+1. add an additional hostname to your env group called: `10-21-94-2.nip.io` (your internal IP as hostname, see nip.io for how this works)
+1. set your APIGEE_X_HOSTNAME variable to `10-21-94-2.nip.io`
+1. Run the deploy again from the VM in your private network
+
+
+### comment by danistrebel (association=COLLABORATOR) at 2021-05-11T11:36:48Z
+@RezaRahmati thanks for the 👍 .
+I am going to close this issue. Feel free to re-open if you have any remaining issues.

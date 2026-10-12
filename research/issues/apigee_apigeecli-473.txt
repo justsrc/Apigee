@@ -1,0 +1,150 @@
+URL: https://github.com/apigee/apigeecli/issues/473
+TITLE: misleading error message from apigeecli
+STATE: closed state_reason: completed
+AUTHOR: dfong association: NONE
+CREATED: 2024-05-28T18:18:31Z CLOSED: 2024-05-31T00:08:15Z
+LABELS: enhancement
+MILESTONE: None
+--- BODY ---
+when i call apigeecli like this in some cases, i get a misleading error message.
+
+{
+  "error": {
+    "code": 400,
+    "message": "generic::failed_precondition: revision organizations/djfong-autopush-ngsaas/apis/apiproduct-operations-oauth2/revisions/3 is currently deployed in default-dev",
+    "status": "FAILED_PRECONDITION",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.RequestInfo",
+        "requestId": "6610285562074376271"
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.DebugInfo",
+        "detail": "[ORIGINAL ERROR] generic::failed_precondition: generic::failed_precondition: generic::failed_precondition: revision organizations/djfong-autopush-ngsaas/apis/apiproduct-operations-oauth2/revisions/3 is currently deployed in default-dev [google.rpc.error_details_ext] { message: \"generic::failed_precondition: revision organizations/djfong-autopush-ngsaas/apis/apiproduct-operations-oauth2/revisions/3 is currently deployed in default-dev\" details { [type.googleapis.com/google.rpc.RequestInfo] { request_id: \"6610285562074376271\" } } }"
+      }
+    ]
+  }
+}
+
+Error: Bad Request - malformed request syntax
+Usage:
+  apigeecli apis delete [flags]
+
+Flags:
+  -h, --help          help for delete
+  -n, --name string   API proxy name
+  -v, --rev int       API Proxy revision (default -1)
+
+Global Flags:
+  -a, --account string   Path Service Account private key in JSON
+      --api api          Sets the control plane API. Must be one of prod, or staging; default is prod (default )
+      --default-token    Use Google default application credentials access token
+      --disable-check    Disable check for newer versions
+      --metadata-token   Metadata OAuth2 access token
+      --no-output        Disable printing all statements to stdout
+      --no-warnings      Disable printing warnings to stderr
+  -o, --org string       Apigee organization name
+      --print-output     Control printing of info log statements (default true)
+  -r, --region string    Apigee control plane region name; default is https://apigee.googleapis.com
+  -t, --token string     Google OAuth Token
+Steps to reproduce the behavior:
+
+apigeecli apis delete --name apiproduct-operations-oauth2 --org djfong-autopush-ngsaas --token ... --disable-check --api staging
+
+Expected behavior
+
+give a meaningful error message, perhaps something like "Error: delete precondition not met" etc.
+
+the actual error message is doubly misleading, because it says "syntax error" rather than the real API error,
+and because it prints the Usage message which makes it look like there was a syntax error in the CLI arguments,
+in which case the error should have been caught before calling the API.
+
+Additional context
+
+on a cloudtop VM. i got this from trying to run a script from the apigee-samples repo:  clean-apiproduct-operations.sh from the apiproduct-operations subdir.
+
+
+--- COMMENTS (7) ---
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2024-05-29T23:45:26Z
+Thats because its returning a `400` response code. You typically use a 400 code for an incorrect request. 
+
+### comment by kurtkanaskie (association=COLLABORATOR) at 2024-05-30T15:33:38Z
+The reason being you cannot delete a deployed proxy, it must be un-deployed first, as per the API: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis/delete
+
+So the steps are:
+```
+apigeecli apis listdeploy --name=proxy-name --org=$ORG
+{
+  "deployments": [
+    {
+      "environment": "dev",
+      "apiProxy": "proxy-name",
+      "revision": "11",
+      "deployStartTime": "1716921280190",
+      "proxyDeploymentType": "EXTENSIBLE"
+    }
+  ]
+}
+```
+Get the revision, undeploy then delete
+```
+apigeecli apis undeploy --name=proxy-name --rev=11 --org=$ORG --env=dev --safeundeploy=false
+{}
+apigeecli apis delete --name=proxy-name --org=$ORG
+{}
+```
+
+
+
+
+### comment by dfong (association=NONE) at 2024-05-30T15:58:30Z
+in this issue, the problem is not the fact that there was an error, but the fact that the resulting error message was misleading.  misleading in the sense that it attributes the failure to the wrong cause.  the usage message is the opposite of helpful in this case.
+
+### comment by kurtkanaskie (association=COLLABORATOR) at 2024-05-30T17:21:50Z
+I understand, but that's the same error message from the Apigee API.
+I guess it requires a bit of interpretation of the error message.
+```
+"message": "generic::failed_precondition: revision organizations/djfong-autopush-ngsaas/apis/apiproduct-operations-oauth2/revisions/3 is currently deployed in default-dev"
+"status": "FAILED_PRECONDITION",
+```
+
+### comment by dfong (association=NONE) at 2024-05-30T19:38:37Z
+Sai Saran and Kurt, thanks for your responses.
+
+> I understand, but that's the same error message from the Apigee API.
+
+speaking as a user, the API error message "failed precondition ... is currently deployed" is meaningful and helpful.
+the usage message for apigeecli is not helpful.  it misleads the reader into thinking that the problem was an incorrect flag it also tends to hide the "real" error message.
+
+the part about "Error: Bad Request - malformed request syntax" seems regrettable, because it reinforces the incorrect idea that the problem lies in the apigeecli syntax.  it might be less misleading to include the 400 in the message, to make it clear that it's merely restating the stock meaning of the error code.  eg, "Error: 400 Bad Request".
+
+> I guess it requires a bit of interpretation of the error message.
+
+i think it'd be easier for the user to interpret the output, without the apigeecli usage message.  more generally, i don't think it's appropriate to print the usage message after a failed API call.  if there's an error with the CLI flags, it should have been printed and failed the command before any API calls were made.
+
+### comment by kurtkanaskie (association=COLLABORATOR) at 2024-05-30T20:12:27Z
+Thanks for your input!
+
+> the part about "Error: Bad Request - malformed request syntax" seems regrettable, because it reinforces the incorrect idea that the problem lies in the apigeecli syntax. it might be less misleading to include the 400 in the message, to make it clear that it's merely restating the stock meaning of the error code. eg, "Error: 400 Bad Request".
+
+The code maps HTTP error codes to generic messages [getErrorMessage](https://github.com/apigee/apigeecli/blob/b59f1601674d0c04d4ebaecb010ae25c117d8abb/internal/apiclient/httpclient.go#L474), perhaps that should be embellished to include preconditions.
+
+> i think it'd be easier for the user to interpret the output, without the apigeecli usage message. more generally, i don't think it's appropriate to print the usage message after a failed API call.
+
+Agree
+
+>  if there's an error with the CLI flags, it should have been printed and failed the command before any API calls were made.
+
+When a CLI flag is incorrect it does say so and return error before doing anything
+```
+apigeecli apis undeploy --name=access-control --rev=11 --org=$ORG --env=dev --safeundeploy=yes
+Error: invalid argument "yes" for "--safeundeploy" flag: strconv.ParseBool: parsing "yes": invalid syntax
+```
+
+Thanks again for your input!
+
+
+
+### comment by srinandan (association=CONTRIBUTOR) at 2024-05-30T23:40:56Z
+I have a method to silence usage if the error is returned **after** the parameters have been validated. That is, if there is a ~200 OK result, then usage is not shown.

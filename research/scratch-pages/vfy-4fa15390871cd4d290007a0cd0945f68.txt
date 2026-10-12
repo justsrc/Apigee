@@ -1,0 +1,153 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.apps/list" class="section">
+
+- [HTTP request](#body.HTTP_TEMPLATE)
+- [Path parameters](#body.PATH_PARAMETERS)
+- [Query parameters](#body.QUERY_PARAMETERS)
+- [Request body](#body.request_body)
+- [Response body](#body.response_body)
+  - [JSON representation](#body.ListAppsResponse.SCHEMA_REPRESENTATION)
+- [Authorization scopes](#body.aspect)
+- [Try it!](#try-it)
+
+<div id="google.cloud.apigee.v1.Apps.ListApps" class="section">
+
+</div>
+
+<div id="description" class="section">
+
+Lists IDs of apps within an organization that have the specified app status (approved or revoked) or are of the specified app type (developer or company).
+
+</div>
+
+<div id="body" class="section">
+
+<div id="body.HTTP_TEMPLATE" class="section">
+
+### HTTP request
+
+`GET https://apigee.googleapis.com/v1/{parent=organizations/*}/apps`
+
+The URL uses [gRPC Transcoding](https://google.aip.dev/127) syntax.
+
+</div>
+
+<div id="body.PATH_PARAMETERS" class="section">
+
+### Path parameters
+
+| Parameters |  |
+| --- | --- |
+| parent | string Required. Resource path of the parent in the following format: organizations/{org} Authorization requires the following IAM permission on the specified resource parent : apigee.apps.list |
+
+</div>
+
+<div id="body.QUERY_PARAMETERS" class="section">
+
+### Query parameters
+
+| Parameters |  |
+| --- | --- |
+| status | string Optional. Filter by the status of the app. Valid values are approved or revoked . Defaults to approved . |
+| apptype | string Optional. 'apptype' is no longer available. Use a 'filter' instead. |
+| includeCred | boolean Optional. Flag that specifies whether to include credentials in the response. |
+| startKey | string Returns the list of apps starting from the specified app ID. |
+| rows | string ( int64 format) Optional. Maximum number of app IDs to return. Defaults to 1000, which is also the upper limit. To get more than 1000, use pagination with 'pageSize' and 'pageToken' parameters. |
+| expand | boolean Optional. Flag that specifies whether to return an expanded list of apps for the organization. Defaults to false . |
+| ids | string Optional. Comma-separated list of app IDs on which to filter. |
+| keyStatus | string Optional. Key status of the app. Valid values include approved or revoked . Defaults to approved . |
+| apiProduct | string API product. |
+| pageSize | integer Optional. Count of apps a single page can have in the response. If unspecified, at most 1000 apps will be returned. The maximum value is 1000; values above 1000 will be coerced to 1000. "pageSize" is supported from ver 1.10.0 and above. |
+| pageToken | string Optional. The starting index record for listing the developers. "pageToken" is supported from ver 1.10.0 and above. |
+| filter | string Optional. The filter expression to be used to get the list of apps, where filtering can be done on developerEmail, apiProduct, consumerKey, status, appId, appName, appType and appGroup. Examples: "developerEmail=foo@bar.com", "appType=AppGroup", or "appType=Developer" "filter" is supported from ver 1.10.0 and above. |
+
+</div>
+
+<div id="body.request_body" class="section">
+
+### Request body
+
+The request body must be empty.
+
+</div>
+
+<div id="body.response_body" class="section">
+
+### Response body
+
+<div id="body.ListAppsResponse" class="section">
+
+<div id="body.ListAppsResponse.description" class="section">
+
+If successful, the response body contains data with the following structure:
+
+</div>
+
+<div id="body.ListAppsResponse.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;app&quot;: [
+    {
+      object (App)
+    }
+  ],
+  &quot;nextPageToken&quot;: string,
+  &quot;totalSize&quot;: integer
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="body.ListAppsResponse.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| app[] | object ( App ) |
+| nextPageToken | string Token that can be sent as nextPageToken to retrieve the next page. If this field is omitted, there are no subsequent pages. |
+| totalSize | integer Total count of Apps. |
+
+</div>
+
+</div>
+
+</div>
+
+<div id="body.aspect" class="section">
+
+### Authorization scopes
+
+Requires the following OAuth scope:
+
+- `https://www.googleapis.com/auth/cloud-platform`
+
+</div>
+
+</div>
+
+<div id="try-it" class="section">
+
+<div class="devsite-apix">
+
+<div class="apis-explorer" discovery-rest-url="https://apigee.googleapis.com/$discovery/rest?version=v1" method-id="apigee.organizations.apps.list" params="">
+
+</div>
+
+</div>
+
+</div>
+
+</div>

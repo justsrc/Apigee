@@ -1,0 +1,17 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+Every policy document includes an error reference section that describes the fault codes and error messages that are returned and fault variables that are set by Apigee when the policy triggers an error. The error reference section includes:
+
+- Runtime errors
+- Deployment errors
+- Fault variables
+- Examples
+
+This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+For a current list of all policies, see [Policy reference](/apigee/docs/api-platform/reference/policies/reference-overview-policy).
+
+Refer to the individual policy documents for error codes specific to that policy. For example, see [AssignMessage policy, Error codes](/apigee/docs/api-platform/reference/policies/assign-message-policy#errorreference).

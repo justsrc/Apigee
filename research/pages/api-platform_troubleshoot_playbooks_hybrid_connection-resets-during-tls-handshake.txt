@@ -1,0 +1,344 @@
+## Symptom
+
+Your client application may experience connection reset, connection refused, or similar errors during the TLS handshake when calling the Apigee endpoint.
+
+## Error messages
+
+- Postman or Node.js clients may see ECONRESET error messages.
+
+- Curl may show **Connection reset by peer** when making HTTPS calls directly to the Apigee Ingress IP address. For example:
+
+  <div>
+
+  </div>
+
+  ``` devsite-disable-click-to-copy
+
+  curl https://1.2.3.4/basepath -H "Host: your.apigee.domain" -kv
+  * Connected to 1.2.3.4 (1.2.3.4) port 443
+  * (304) (OUT), TLS handshake, Client hello (1):
+  * Recv failure: Connection reset by peer
+  * Closing connection 
+  ```
+
+- Other clients may display different errors. However, the pattern would be the same; the client is unable to establish a connection fully during the TLS handshake.
+
+## Possible causes
+
+Apigee Hybrid's Ingress Gateway is [Server Name Indication (SNI)](https://en.wikipedia.org/wiki/Server_Name_Indication) enabled by default. This issue can occur if your client is not SNI enabled and there is no wildcard Apigee route configured to enable non-SNI clients. This results in no default TLS server certificate being sent to the client, and an Apigee ingress TCP reset occurs.
+
+**Note:** The client in this context refers to the entity connecting to Apigee ingress,which may not always be the end client application. For example, if the end client uses a proxy or WAF in front of Apigee, and that proxy/WAF connects to Apigee, then the proxy/WAF would be considered as the client to Apigee.
+
+### Diagnosis
+
+Determine if your client is SNI enabled. If you already know that it's not SNI enabled, proceed to step 4 to validate the Apigee Hybrid configuration.
+
+Review the Apigee Ingress access logs for signs of client requests without the SNI server name, and check if virtual hosts are not configured with a default certificate for non-SNI clients.
+
+- Get a listing of your `apigee-ingressgateway` pods with the following command:
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+  kubectl -n apigee get pods -l app=apigee-ingressgateway
+  ```
+
+  Sample output
+
+  <div>
+
+  </div>
+
+  ``` devsite-disable-click-to-copy
+
+  NAME                                                              READY   STATUS    RESTARTS   AGE
+  apigee-ingressgateway-ext-ingress-myorg-hyb-8f2c412-dvrcp         2/2     Running   0          46h
+  apigee-ingressgateway-ext-ingress-myorg-hyb-8f2c412-wg26k         2/2     Running   0          46h
+  ```
+
+- Get the logs for an `apigee-ingressgateway` pod.
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+  kubectl -n apigee logs APIGEE_INGRESSGATEWAY_POD
+  ```
+
+  Where `APIGEE_INGRESSGATEWAY_POD` is an `apigee-ingressgateway` pod listed in the previous command output.
+
+- An access log may look like the following:
+
+  <div>
+
+  </div>
+
+  ``` devsite-disable-click-to-copy
+
+  {
+    "request_time": 1,
+    "tls_protocol": null,
+    "upstream_service_time": null,
+    "request_method": null,
+    "request_protocol": null,
+    "upstream_response_time": null,
+    "bytes_sent": 0,
+    "start_time": "2025-05-19T04:46:20.117Z",
+    "bytes_received": 0,
+    "host": null,
+    "upstream_cluster": null,
+    "upstream_address": null,
+    "remote_address": "10.138.0.28:19432",
+    "request_path": null,
+    "request_id": null,
+    "user_agent": null,
+    "status_details": "filter_chain_not_found",
+    "request": "- - -",
+    "status": 0,
+    "x_forwarded_for": null,
+    "apigee_dynamic_data": null,
+    "upstream_response_flags": "NR",
+    "sni_host": null
+  }
+  ```
+
+- Analyzing the preceding log, you can infer the following:
+  1.  `"sni_host": null`: The client is not SNI enabled as there is no SNI host name. For ex ample, `api-test.mydomain.com` is associated with this request.
+  2.  ` "status_details": "filter_chain_not_found" `: Server certificates are selected based on a `filter chain` which is based on the `sni_host`. If no `sni_host` exists and no default is configured, the `filter chain` cannot be found. This means no server certificate is returned, as seen in the example client request.
+  3.  ` "status": 0`: There's no status code as the connection was reset.
+
+Instead of reviewing logs, a more precise way to check if a client is SNI enabled would be to take a packet capture in front of Apigee Ingress or on Apigee Ingress itself. This will help determine if the client is sending the SNI header for the TLS handshake.
+
+1.  To run on Apigee Ingressin Google Kubernetes Engine, you would require SSH to the node running the ingress gateway and install [toolbox](/container-optimized-os/docs/how-to/toolbox) and tcpdump.
+
+    **Note:** The process for running a packet capture may vary depending on the platform where Apigee Hybrid is installed.
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    tcpdump -n -i any -s 0 'host IP_Address' -w FILE_NAME
+    ```
+
+    Where `FILE_NAME` is the name of the file, including path, where you want the packet capture output saved.
+
+2.  Analyse the packet capture using [Wireshark](https://www.wireshark.org/) or a similar tool.
+
+3.  Here's a sample analysis of a packet capture using Wireshark taken on Apigee Ingress. .
+    - In the packet capture output, message \#83 indicates that the Client (source) sent a "Client Hello" message to Apigee Ingress (destination). ![client-hello.png](https://docs.cloud.google.com/apigee/docs/api-platform/troubleshoot/playbooks/images/client-hello.png)
+    - When you select the **Client Hello** message and examine the **Handshake Protocol: Client Hello**, you will see that the **Extension: server_name** is missing. ![client-hello-extension.png](https://docs.cloud.google.com/apigee/docs/api-platform/troubleshoot/playbooks/images/client-hello-extension.png)
+    - As an example, an SNI enabled client will show **Extension: server_name** in the output as shown in the following example. ![client-hello-extension-sni.png](https://docs.cloud.google.com/apigee/docs/api-platform/troubleshoot/playbooks/images/client-hello-extension-sni.png)
+    - This confirms that the client did not send the **server_name** to Apigee Ingress.
+    - Since no SNI **server_name** is included in the **Client Hello** message, no server certificate is returned, and Apigee Ingress closes the connection with an RST packet.
+
+Check if non-SNI clients are supported by testing an Apigee endpoint with a tool like [OpenSSL](https://www.openssl.org/) to send requests with or without the SNI header.al.
+
+1.  Check if non-SNI clients are enabled.
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    openssl s_client -connect api-test.mydomain.com:443 -noservername
+    ```
+
+    Example Output
+
+    <div>
+
+    </div>
+
+    ``` devsite-disable-click-to-copy
+
+    Connecting to 1.2.3.4
+    CONNECTED(00000005)
+    write:errno=54
+    ---
+    no peer certificate available
+    ---
+    No client certificate CA names sent
+    ---
+    SSL handshake has read 0 bytes and written 299 bytes
+    Verification: OK
+    ---
+    New, (NONE), Cipher is (NONE)
+    This TLS version forbids renegotiation.
+    Compression: NONE
+    Expansion: NONE
+    No ALPN negotiated
+    Early data was not sent
+    Verify return code: 0 (ok)
+    ---
+    ```
+
+2.  The response above shows **no peer certificate available** which means SNI clients are not enabled within the Apigee route, as we passed the **-noservername** option in the command. If a peer certificate was returned while using the **-noservername** flag, this would indicate a wildcard route is configured.
+    **Note:** Older versions of OpenSSL are non-SNI by default and require the `-servername` option to send the SNI header.
+
+Review the current Apigee route configuration to see if a wildcard route is configured and enabled on the virtual host.
+
+1.  Get a list of the defined Apigee routes with the following command:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    kubectl -n apigee get apigeeroutes 
+    ```
+
+    Sample output
+
+    <div>
+
+    </div>
+
+    ``` devsite-disable-click-to-copy
+
+    NAME                                  STATE     AGE
+    myorg-hyb-dev-grp-000-33620d0         running   2d1h
+    non-sni                               running   17s
+    ```
+
+2.  Check each Apigee route for hostnames that include a wildcard.
+
+    For each Apigee route, execute the provided command to retrieve a JSON array of its defined hostnames. A wildcard route will be indicated by an asterisk (`*`) within the output.
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    kubectl -n apigee get apigeeroute APIGEE_ROUTE_NAME
+    ```
+
+    Example for `myorg-hyb-dev-grp-000-33620d0` route:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    kubectl -n apigee get apigeeroute myorg-hyb-dev-grp-000-33620d0 -o jsonpath='{.spec.hostnames}'
+    ```
+
+    Sample output
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    ["api-test.mydomain.com"]
+    ```
+
+    Example for `non-sni` route:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    kubectl -n apigee get apigeeroute non-sni -o jsonpath='{.spec.hostnames}'
+    ```
+
+    Sample output
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    ["*"]
+    ```
+
+    The `non-sni` apigeeroute is a wildcard route as it contains (`*`) as a hostname.
+
+3.  If a wildcard route is configured, then non-SNI clients are enabled.
+
+4.  For the wildcard route, make sure the `enableNonSniClient` flag is set to true. The following command runs on the wildcard route with `non-sni` client.
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    kubectl -n apigee get apigeeroute non-sni -o jsonpath='{.spec.enableNonSniClient}'
+    ```
+
+    Sample output
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    true
+    ```
+
+5.  If the wildcard route exists and non-SNI clients are enabled, review the virtual host configuration in the `overrides.yaml` file to make sure that the wildcard route is listed in the `additionalGateways`.
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    virtualhosts:
+    - name: dev-grp
+      selector:
+        app: apigee-ingressgateway
+        ingress_name: ext-ingress
+      sslCertPath: ./certs/keystore_dev-grp.pem
+      sslKeyPath: ./certs/keystore_dev-grp.key
+      additionalGateways: ["non-sni"]
+      
+    ```
+
+6.  The `additionalGateways` will show up in the Apigee route defined by your virtual host configuration. Use the following command to confirm your configured `additionalGateway` is showing up in the Apigee route configuration.
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+      kubectl -n apigee get apigeeroute APIGEE_ROUTE_NAME -o jsonpath='{.spec.additionalGateways}
+    ```
+
+    For example, the `myorg-hyb-dev-grp-000-33620d0` route should show the `non-sni` route as an `additionalGateway`.
+
+    <div>
+
+    </div>
+
+    ```
+
+      kubectl -n apigee get apigeeroute myorg-hyb-dev-grp-000-33620d0 -o jsonpath='{.spec.additionalGateways}'
+    ```
+
+    Sample output
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    ["non-sni"]
+    ```
+
+### Resolution
+
+If the diagnostic steps indicate that your client is a non-SNI enabled client and non-SNI clients are not enabled or properly configured in your Apigee Hybrid installation, follow the [enable non-SNI clients](/apigee/docs/hybrid/v1.14/enable-non-sni) documentation to allow traffic from non-SNI clients.
+
+## Must gather diagnostic information
+
+If the problem persists even after following the preceding instructions, gather the following diagnostic information and then contact [Google Cloud Customer Care](/apigee/docs/api-platform/troubleshoot/playbooks/hybrid/support-hub):
+
+- `Overrides.yaml`
+- Output of the following commands
+  - `kubectl -n apigee get apigeeroutes`
+  - For each of the stated routes, run: `kubectl -n apigee describe apigeeroute `
+- Environment Group(s) exhibiting the issue

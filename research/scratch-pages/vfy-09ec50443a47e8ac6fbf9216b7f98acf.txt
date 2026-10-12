@@ -1,0 +1,414 @@
+<div id="NAME" class="section">
+
+NAME
+
+<span class="normalfont"> gcloud apigee products update - update an existing Apigee API product </span>
+
+</div>
+
+<div id="SYNOPSIS" class="section">
+
+SYNOPSIS
+
+<span class="normalfont"> `gcloud apigee products update` ([`PRODUCT`](#PRODUCT) : <span class="flag">[`--organization`](#--organization)=`ORGANIZATION`)</span> \[<span class="flag">[`--display-name`](#--display-name)=`SET_DISPLAYNAME`\]</span> \[<span class="flag">[`--all-apis`](#--all-apis)</span>     \| <span class="flag">[`--add-api`](#--add-api)=\[`API`,</span><span class="flag">…\]</span> <span class="flag">[`--remove-api`](#--remove-api)=\[`API`,</span><span class="flag">…\]\]</span> \[<span class="flag">[`--all-environments`](#--all-environments)</span>     \| <span class="flag">[`--add-environment`](#--add-environment)=\[`ENVIRONMENT`,</span><span class="flag">…\]</span> <span class="flag">[`--remove-environment`](#--remove-environment)=\[`ENVIRONMENT`,</span><span class="flag">…\]\]</span> \[<span class="flag">[`--all-resources`](#--all-resources)</span>     \| <span class="flag">[`--add-resource`](#--add-resource)=\[`RESOURCE`\#…\]</span> <span class="flag">[`--remove-resource`](#--remove-resource)=\[`RESOURCE`\#…\]\]</span> \[<span class="flag">[`--automatic-approval`](#--automatic-approval)</span>     \| <span class="flag">[`--manual-approval`](#--manual-approval)\]</span> \[<span class="flag">[`--clear-attributes`](#--clear-attributes)</span>     \| <span class="flag">[`--add-attribute`](#--add-attribute)=\[`NAME`=`VALUE`,</span><span class="flag">…\]</span> <span class="flag">[`--remove-attribute`](#--remove-attribute)=\[`NAME`,</span><span class="flag">…\]\]</span> \[<span class="flag">[`--clear-description`](#--clear-description)</span>     \| <span class="flag">[`--description`](#--description)=`SET_DESCRIPTION`\]</span> \[<span class="flag">[`--clear-oauth-scopes`](#--clear-oauth-scopes)</span>     \| <span class="flag">[`--add-oauth-scope`](#--add-oauth-scope)=\[`OAUTH-SCOPE`,</span><span class="flag">…\]</span> <span class="flag">[`--remove-oauth-scope`](#--remove-oauth-scope)=\[`OAUTH-SCOPE`,</span><span class="flag">…\]\]</span> \[<span class="flag">[`--clear-quota`](#--clear-quota)</span>     \| <span class="flag">[`--quota`](#--quota)=`QUOTA`</span> <span class="flag">[`--quota-interval`](#--quota-interval)=`QUOTA_INTERVAL`</span> <span class="flag">[`--quota-unit`](#--quota-unit)=`QUOTA_UNIT`\]</span> \[<span class="flag">[`--internal-access`](#--internal-access)</span>     \| <span class="flag">[`--private-access`](#--private-access)</span>     \| <span class="flag">[`--public-access`](#--public-access)\]</span> \[[`GCLOUD_WIDE_FLAG`](#GCLOUD-WIDE-FLAGS)` …`\] </span>
+
+</div>
+
+<div id="DESCRIPTION" class="section">
+
+DESCRIPTION
+
+Update an existing Apigee API product.
+
+`gcloud apigee products update` applies a set of modifications to an existing API product.
+
+To create a new API product, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee products create
+```
+
+</div>
+
+<div id="EXAMPLES" class="section">
+
+EXAMPLES
+
+To update the display name of the API product with the internal name `my-prod`, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee products update my-prod --display-name="Example Project"
+```
+
+To update the description of the API product, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee products update my-prod --description="This API is famous for appearing in a YouTube video."
+```
+
+To remove the API product's description, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee products update my-prod --clear-description
+```
+
+To remove manual approval requirements from the API and change its access level to public, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee products update my-prod --public-access --automatic-approval
+```
+
+To impose a quota of 45 calls per minute per application on the API product, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee products update my-prod --quota=45 --quota-interval=1 --quota-unit=minute
+```
+
+To remove a quota on the API product and switch it to unlisted access with manual approval, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee products update my-prod --manual-approval --private-access --clear-quota
+```
+
+To set the API product's custom attribute `foo` to the value `bar`, updating that attribute if it exists and creating it if it doesn't, and remove the attribute `baz` if it exists, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee products update my-prod --add-attribute="foo=bar" --remove-attribute=baz
+```
+
+To update the list of API proxies included in the API product, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee products update my-prod --add-api=NEW_ONE,NEW_TWO --remove-api=OLD_ONE,OLD_TWO
+```
+
+To switch the API product to including all `test` environment APIs no matter what API proxy or resource they expose, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee products update my-prod --add-environment=test --all-apis --all-resources
+```
+
+To update the list of API resources included in the API product, and output the updated API product as a JSON object, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee products update my-prod --add-resource="NEW_ONE#NEW_TWO" --remove-resource="OLD_ONE#OLD_TWO" --format=json
+```
+
+</div>
+
+<div id="POSITIONAL-ARGUMENTS" class="section">
+
+POSITIONAL ARGUMENTS
+
+<span class="normalfont"> API product resource - API product to be updated. To get a list of available API products, run: </span>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee products list
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+The arguments in this group can be used to specify the attributes of this resource.
+```
+
+This must be specified.
+
+<span class="normalfont">`PRODUCT`</span>  
+ID of the API product or fully qualified identifier for the API product.
+
+To set the `product` attribute:
+
+- provide the argument `PRODUCT` on the command line.
+
+This positional argument must be specified if any of the other arguments in this group are specified.
+
+<span class="normalfont">`--organization`=`ORGANIZATION`</span>  
+Apigee organization containing the API product. If unspecified, the Cloud Platform project's associated organization will be used.
+
+To set the `organization` attribute:
+
+- provide the argument `PRODUCT` on the command line with a fully specified name;
+- provide the argument `--organization` on the command line;
+- set the property \[project\] or provide the argument \[--project\] on the command line, using a Cloud Platform project with an associated Apigee organization.
+
+</div>
+
+<div id="FLAGS" class="section">
+
+FLAGS
+
+<span class="normalfont">`--display-name`=`SET_DISPLAYNAME`</span>
+
+Name to be displayed in the UI or developer portal to developers registering for API access.
+
+<span class="normalfont"> At most one of these can be specified: </span>
+
+<span class="normalfont">`--all-apis`</span>
+
+Include all deployed API proxies in the product, so long as they match the other parameters.
+
+<span class="normalfont"> Or at least one of these can be specified: </span>
+
+<span class="normalfont"> API proxies to which this API product is bound. Only those API proxies will be accessible through the API product. </span>
+
+The API proxy names must already be deployed to the bound environments, or creation of the API product will fail. To get a list of deployed API proxies, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee deployments list
+```
+
+To deploy an API proxy, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee apis deploy.
+```
+
+<span class="normalfont">`--add-api`=\[`API`,…\]</span>
+
+Adds a new API to the set of APIs.
+
+<span class="normalfont">`--remove-api`=\[`API`,…\]</span>
+
+Removes an existing API from the set of APIs.
+
+<span class="normalfont"> At most one of these can be specified: </span>
+
+<span class="normalfont">`--all-environments`</span>
+
+Make all environments accessible through this API product.
+
+<span class="normalfont"> Or at least one of these can be specified: </span>
+
+<span class="normalfont"> Environments to which the API product is bound. Requests to environments that are not listed are rejected, preventing developers from accessing those resources even if they can access the same API proxies in another environment. </span>
+
+For example, this can be used to prevent applications with access to production APIs from accessing the alpha or beta versions of those APIs.
+
+To get a list of available environments, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee environments list
+```
+
+<span class="normalfont">`--add-environment`=\[`ENVIRONMENT`,…\]</span>
+
+Adds a new environment to the set of environments.
+
+<span class="normalfont">`--remove-environment`=\[`ENVIRONMENT`,…\]</span>
+
+Removes an existing environment from the set of environments.
+
+<span class="normalfont"> At most one of these can be specified: </span>
+
+<span class="normalfont">`--all-resources`</span>
+
+Include all deployed API resources in the product, so long as they match the other parameters.
+
+<span class="normalfont"> Or at least one of these can be specified: </span>
+
+<span class="normalfont"> API resources to be bundled in the API product. </span>
+
+By default, the resource paths are mapped from the `proxy.pathsuffix` variable.
+
+The proxy path suffix is defined as the URI fragment following the ProxyEndpoint base path. For example, if `/forecastrss` is given as an element of this list, and the base path defined for the API proxy is `/weather`, then only requests to `/weather/forecastrss` are permitted by the API product.
+
+Proxy paths can use asterisks as wildcards; `/**` indicates that all sub-URIs are included, whereas a single asterisk indicates that only URIs one level down are included.
+
+By default, `/` supports the same resources as `/**` as well as the base path defined by the API proxy.
+
+For example, if the base path of the API proxy is `/v1/weatherapikey`, then the API product supports requests to `/v1/weatherapikey` and to any sub-URIs, such as `/v1/weatherapikey/forecastrss`, `/v1/weatherapikey/region/CA`, and so on.
+
+The API proxy resources must already be deployed to the bound environments, or creation of the API product will fail.
+
+<span class="normalfont">`--add-resource`=\[`RESOURCE`\#…\]</span>
+
+Adds a new resource to the set of resources.
+
+<span class="normalfont">`--remove-resource`=\[`RESOURCE`\#…\]</span>
+
+Removes an existing resource from the set of resources.
+
+<span class="normalfont"> At most one of these can be specified: </span>
+
+<span class="normalfont">`--automatic-approval`</span>  
+Allow developers to generate approved consumer keys without waiting for approval.
+
+<span class="normalfont">`--manual-approval`</span>  
+Require manual approval of developer requests to access this API product before their consumer keys can be used.
+
+<span class="normalfont"> At most one of these can be specified: </span>
+
+<span class="normalfont">`--clear-attributes`</span>
+
+Removes all attributes.
+
+<span class="normalfont"> Or at least one of these can be specified: </span>
+
+Key-value attribute pairs that may be used to extend the default API product profile with customer-specific metadata. Up to 17 attributes can be specified.
+
+<span class="normalfont">`--add-attribute`=\[`NAME`=`VALUE`,…\]</span>
+
+Adds a new attribute to the set of attributes.
+
+<span class="normalfont">`--remove-attribute`=\[`NAME`,…\]</span>
+
+Removes an existing attribute from the set of attributes.
+
+<span class="normalfont"> At most one of these can be specified: </span>
+
+<span class="normalfont">`--clear-description`</span>  
+Remove the API product's description.
+
+<span class="normalfont">`--description`=`SET_DESCRIPTION`</span>  
+Overview of the API product. Include key information about the API product that is not captured by other fields.
+
+<span class="normalfont"> At most one of these can be specified: </span>
+
+<span class="normalfont">`--clear-oauth-scopes`</span>
+
+Removes all OAuth scopes.
+
+<span class="normalfont"> Or at least one of these can be specified: </span>
+
+Comma-separated list of OAuth scopes that are validated at runtime. Apigee validates that the scopes in any access token presented match the scopes defined in the OAuth policy assoicated with the API product.
+
+<span class="normalfont">`--add-oauth-scope`=\[`OAUTH-SCOPE`,…\]</span>
+
+Adds a new OAuth scope to the set of OAuth scopes.
+
+<span class="normalfont">`--remove-oauth-scope`=\[`OAUTH-SCOPE`,…\]</span>
+
+Removes an existing OAuth scope from the set of OAuth scopes.
+
+<span class="normalfont"> At most one of these can be specified: </span>
+
+<span class="normalfont">`--clear-quota`</span>
+
+Remove any quota currently imposed on the API product.
+
+<span class="normalfont"> Or at least one of these can be specified: </span>
+
+To impose a quota limit on calls to the API product, specify all of the following:
+
+<span class="normalfont">`--quota`=`QUOTA`</span>
+
+Number of request messages permitted per app by this API product for the specified `--quota-interval` and `--quota-unit`.
+
+For example, `--quota=50`, `--quota-interval=12`, and `--quota-unit=hour` means 50 requests are allowed every 12 hours.
+
+<span class="normalfont">`--quota-interval`=`QUOTA_INTERVAL`</span>
+
+Time interval over which the number of request messages is calculated.
+
+<span class="normalfont">`--quota-unit`=`QUOTA_UNIT`</span>
+
+Time unit for `--quota-interval`. `QUOTA_UNIT` must be one of: `minute`, `hour`, `day`, `month`.
+
+<span class="normalfont"> At most one of these can be specified: </span>
+
+<span class="normalfont">`--internal-access`</span>  
+Prevent external access to this API product.
+
+<span class="normalfont">`--private-access`</span>  
+Hide this API product in the developer portal but make it accessible by external developers.
+
+<span class="normalfont">`--public-access`</span>  
+Make this API product visible to developers in the Apigee developer portal.
+
+</div>
+
+<div id="GCLOUD-WIDE-FLAGS" class="section">
+
+GCLOUD WIDE FLAGS
+
+These flags are available to all commands: [`--access-token-file`](/sdk/gcloud/reference#--access-token-file), [`--account`](/sdk/gcloud/reference#--account), [`--billing-project`](/sdk/gcloud/reference#--billing-project), [`--configuration`](/sdk/gcloud/reference#--configuration), [`--flags-file`](/sdk/gcloud/reference#--flags-file), [`--flatten`](/sdk/gcloud/reference#--flatten), [`--format`](/sdk/gcloud/reference#--format), [`--help`](/sdk/gcloud/reference#--help), [`--impersonate-service-account`](/sdk/gcloud/reference#--impersonate-service-account), [`--log-http`](/sdk/gcloud/reference#--log-http), [`--project`](/sdk/gcloud/reference#--project), [`--quiet`](/sdk/gcloud/reference#--quiet), [`--trace-token`](/sdk/gcloud/reference#--trace-token), [`--user-output-enabled`](/sdk/gcloud/reference#--user-output-enabled), [`--verbosity`](/sdk/gcloud/reference#--verbosity).
+
+Run `$ `[`gcloud help`](/sdk/gcloud/reference) for details.
+
+</div>
+
+<div id="NOTES" class="section">
+
+NOTES
+
+These variants are also available:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud alpha apigee products update
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee products update
+```
+
+</div>

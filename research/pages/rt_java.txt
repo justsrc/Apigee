@@ -1,0 +1,85 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/troubleshoot/policies/runtime/java-callout-runtime-errors" target="_blank">Apigee Edge</a> documentation.*</span>
+
+**Note:** Was this troubleshooting playbook helpful? Please let us know by clicking <a href="" class="google-feedback" data-p="1636213" data-b="docsite" data-context="troubleshooting-feedback">Send Feedback</a> .
+
+## ExecutionError
+
+### Error Code
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+steps.javacallout.ExecutionError
+```
+
+### Error response body
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "fault": {
+    "faultstring": "Execution returned an error result",
+    "detail": {
+      "errorcode": "flow.execution.ExecutionReturnedFailure"
+    }
+  }
+}
+```
+
+### Cause
+
+This error occurs if Java code throws an exception or returns *null* during the execution of a [JavaCallout policy](/apigee/docs/api-platform/reference/policies/java-callout-policy).
+
+### Diagnosis
+
+1.  Start a [trace session](/apigee/docs/api-platform/debug/trace) to capture the error and identify which [JavaCallout policy](/apigee/docs/api-platform/reference/policies/java-callout-policy) has failed.
+
+    <img src="/static/apigee/docs/api-platform/images/java-callout-runtime-error-1.png" width="700" />
+
+2.  Examine the [JavaCallout policy](/apigee/docs/api-platform/reference/policies/java-callout-policy) and the resource that is used. In the above example, the [JavaCallout policy](/apigee/docs/api-platform/reference/policies/java-callout-policy) uses a resource named `hello.jar`, as shown below:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    <JavaCallout name="hello-java">
+       <ClassName>com.apigeesample.HelloJava</ClassName>
+       <ResourceURL>java://hello.jar</ResourceURL>
+    </JavaCallout>
+    ```
+
+3.  Capture and store the Java exception in a flow variable by modifying the source code, as described in [Handling errors in JavaCallout policies](/apigee/docs/api-platform/develop/how-handle-java-callout-errors).
+
+4.  Compile and replace the affected resource (JAR file) with the updated Java artifact.
+
+5.  Deploy the API Proxy as a new revision and make the API call.
+
+6.  Start another trace session.
+
+    <img src="/static/apigee/docs/api-platform/images/java-callout-runtime-error-2.png" width="800" />
+
+7.  Notice that a stack trace is available in the `JAVA_STACKTRACE` variable. The stack trace lists the actual exception and the Java source file and line number at which the error is being thrown.
+
+8.  Use this information to fix the issue in the Java code.
+
+9.  In this example, the [JavaCallout policy](/apigee/docs/api-platform/reference/policies/java-callout-policy) failed due to an ArithmeticException (division by zero) in the `JavaError.java` file at line \#25.
+
+### Resolution
+
+1.  Depending on the exception thrown, fix the issue in the relevant Java source file(s). a. In the example shown above, the issue was caused by an arithmetic error (division by zero). Go to the specific source file and line number indicated by the stack trace.
+
+    <img src="/static/apigee/docs/api-platform/images/java-callout-runtime-error-3.png" width="800" />
+
+    b\. Since you cannot perform division by zero, remove the complete else block containing the faulty line of code to resolve the problem.
+
+2.  Replace the relevant JAR file containing the modified files at the appropriate level (API proxy, environment or organization), where it previously existed.
+
+3.  Save and deploy the API proxy as a new revision.

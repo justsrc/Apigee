@@ -1,0 +1,19 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+**Note:** The following videos were recorded with a previous version of the Apigee UI; however, the concepts are still valid.
+
+Watch the following videos to learn more about OAuth.
+
+| Video | Description |
+|----|----|
+| <a href="https://www.youtube.com/watch?v=zn94GhcdgHc" target="_blank">Why do you need OAuth 2.0?</a> | Learn how to secure your APIs using OAuth 2.0 using the Apigee API management platform. |
+| <a href="https://www.youtube.com/watch?v=ctamLL-WO0I" target="_blank">Introduction to OAuth 2.0</a> | Learn about the basic features of OAuth 2.0 using Apige API management platform. |
+| <a href="https://www.youtube.com/watch?v=CvhkTg-F_0g" target="_blank">Advantages of using OAuth 2.0 with Apigee</a> | Learn about the main advantages of using OAuth 2.0 with Apigee, including speed, scale, visibility, and so on. |
+| <a href="https://www.youtube.com/watch?v=-nYqNnReW3A" target="_blank">Introduction to OAuth 2.0 grant types</a> | Learn about OAuth 2.0 grant types available with Apigee API management platform. |
+| <a href="https://www.youtube.com/watch?v=O0AKpCjTXJU" target="_blank">Introduction to OAuth 2.0 client credentials grant type</a> | Learn about OAuth 2.0 client credentials grant type available with Apigee API management platform. |
+| <a href="https://www.youtube.com/watch?v=xVChpGsHar0" target="_blank">Introduction to OAuth 2.0 resource owner password credentials grant type</a> | Learn about OAuth 2.0 resource owner password credentials grant type available with Apigee API management platform. |
+| <a href="https://www.youtube.com/watch?v=zkVhYGA-TNQ" target="_blank">Secure your APIs using OAuth 2.0 resource owner password credentials grant type</a> | Learn how to secure your APIs using OAuth 2.0 resource owner password credentials grant type available with Apigee API management platform. |
+| <a href="https://www.youtube.com/watch?v=hZbyR8L-IIs" target="_blank">Secure your APIs using OAuth 2.0 authorization code grant type</a> | Learn how to secure your APIs using OAuth 2.0 authorization code grant type available with Apigee API management platform. |

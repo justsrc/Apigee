@@ -1,0 +1,73 @@
+# An error occurred.
+
+<div class="submessage">
+
+Unable to execute JavaScript.
+
+</div>
+
+</div>
+
+</div>
+
+A shared flow attached to a proxy via a flow hook provides a great place for logic that enforces broad policy requirements. For example, imagine that you have one team managing a single set of security requirements for multiple teams that represent different lines of businesses (LOBs). Each LOB team can develop APIs according to their own requirements, and without needing to account for the broader security requirements. The security team can implement those security requirements in a shared flow, then attach the flow to the Apigee environment using a flow hook. Because the shared flow isn't part of proxy code, the security team can revise it as needed without interfering with LOB code.
+
+Shared flows attached via flow hooks execute at that position for **every API proxy deployed to the proxy hook's environment**. For this reason, the ability to use flow hooks is available only to administrators of an Apigee organization.
+
+For more about shared flows, see [Creating reusable shared flows](/apigee/docs/api-platform/fundamentals/shared-flows).
+
+You attach a shared flow to a flow hook using the Apigee UI or [Flowhooks API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.flowhooks). You can attach at most one shared flow to a flow hook at each of the following places:
+
+- **Pre-proxy flow hook** for logic that needs to be enforced BEFORE a proxy endpoint executes.
+
+  For example, you could have logic for enforcing security across all the APIs in an environment.
+
+- **Pre-target flow hook** for logic that needs to be enforced BEFORE a target endpoint executes.
+
+  For example, you could implement logging before the request reaches the backend. You could also enforce mediation by removing certain fields from the request.
+
+- **Post-target flow hook** for logic that needs to be enforced AFTER the target response executes.
+
+  This will be enforced right after the response comes back from the backend. You can use it to log the backend response or perform some mediation by removing sensitive fields from the backend response.
+
+- **Post-proxy flow hook** for logic that needs to be enforced AFTER the proxy endpoint and right before the response is sent out to the client.
+
+  This could include some enforcement logic for CORS, logging the response, or performing some mashup or formatting.
+
+<img src="/static/apigee/docs/api-platform/images/flow-hook-3.png" style="width:100.0%" />
+
+### Attaching a shared flow to a flow hook
+
+To attach a shared flow to a flow hook, you must be an administrator in the organization containing the shared flow.
+
+**Note:** Attaching a shared flow to a flow hook is an action that has a very broad effect. The attached shared flow will execute at the flow hook's point **for every proxy deployed to that environment**.
+
+To attach a shared flow to a flow hook:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Management <span aria-label="and then">\></span> Environments** page.
+
+    <a href="https://console.cloud.google.com/apigee/environments" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Environments</a>
+
+2.  Select the organization containing your shared flow. See [Switching between your organizations](/apigee/docs/api-platform/get-started/switch-org).
+
+    The shared flow will be available to any API proxies and shared flows deployed to an environment from this organization. It won't be available from outside this organization.
+
+3.  Select the environment you wish to edit from the list of available environments.
+
+4.  Click the **Flow hooks** tab on the **Environment details** page.
+
+    The **Flow hooks** view displays.
+
+5.  In the list of flow hooks, identify the flow hook to which you want to attach the shared flow. The flow hook you choose depends upon where you want the shared flow to be executed.
+    | Flow hook location | Description |
+    |----|----|
+    | Pre-proxy | Executes *before* a proxy endpoint executes |
+    | Pre-target | Executes *before* a target endpoint executes |
+    | Post-target | Executes *after* the target response executes |
+    | Post-proxy | Executes *after* the proxy endpoint and right before the response is sent out to the client |
+
+6.  In the list box of the flow hook you chose, select the shared flow that you want to attach.
+
+7.  Attach shared flows to other flow hooks as needed.
+
+8.  Click **Save** to attach the selected shared flows to the flow hooks.

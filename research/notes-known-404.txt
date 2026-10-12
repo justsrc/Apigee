@@ -1,0 +1,59 @@
+# URLs that returned 404 during research, checked 2026-10-11.
+#
+# Kept because a dead link is evidence. Most of these were plausible-looking paths that
+# an agent guessed from a naming pattern. Recording them is how the project avoids
+# reintroducing the same guess later, and it is a fair sample of how often guessing URLs
+# works in this documentation set: 22 of the first 39 paths tried failed.
+#
+# Re-check with: python3 research/build_doc_index.py --check-known
+#
+# Note on the OPDK host: Edge for Private Cloud paths carry the release in the slug, so a
+# path verified at one release can 404 at another even though the topic exists.
+
+# Guessed by pattern, wrong. The real pages are basic-authentication-policy and
+# extract-variables-policy under reference/policies.
+https://cloud.google.com/apigee/docs/api-platform/reference/policies/basic-auth-policy
+https://cloud.google.com/apigee/docs/api-platform/reference/policies/extract-intent-policy
+https://cloud.google.com/apigee/docs/api-platform/reference/policies/flow-conditions
+https://cloud.google.com/apigee/docs/api-platform/reference/policies/target-endpoint-configuration
+https://cloud.google.com/apigee/docs/api-platform/reference/policies/overview
+
+# Debugging moved. debug-codelets and debug-message do not exist at these paths.
+https://cloud.google.com/apigee/docs/api-platform/debug/debug-codelets
+https://cloud.google.com/apigee/docs/api-platform/debug/debug-message
+https://cloud.google.com/apigee/docs/api-platform/troubleshoot/debug-runtime-errors
+
+# Deployment docs live under a different prefix than guessed.
+https://cloud.google.com/apigee/docs/api-platform/deploy/import-export-lint
+https://cloud.google.com/apigee/docs/api-platform/deploy/deployment-basics
+https://cloud.google.com/apigee/docs/api-platform/deploy/create-and-deploy-proxy
+https://cloud.google.com/apigee/docs/api-platform/deploy/cicd-considerations
+https://cloud.google.com/apigee/docs/api-platform/proxy-development/deploy/versions
+https://cloud.google.com/apigee/docs/api-platform/proxy-development/deploy/manage-api-versions
+https://cloud.google.com/apigee/docs/api-platform/proxy-development/deploy/create-proxy-version
+
+# Proxy-development paths that do not exist under this prefix.
+https://cloud.google.com/apigee/docs/api-platform/proxy-development/policies/overview
+https://cloud.google.com/apigee/docs/api-platform/proxy-development/policies/custom-policies
+https://cloud.google.com/apigee/docs/api-platform/proxy-development/sharedflows/shared-flows
+https://cloud.google.com/apigee/docs/api-platform/proxy-development/sharedflows/flow-hooks
+https://cloud.google.com/apigee/docs/api-platform/proxy-development/targets/target-endpoints
+https://cloud.google.com/apigee/docs/api-platform/proxy-development/endpoints/endpoint-configuration
+https://cloud.google.com/apigee/docs/api-platform/proxy-development/flows/flow-variables
+https://cloud.google.com/apigee/docs/api-platform/proxy-development/policies/quota-examples
+https://cloud.google.com/apigee/docs/api-platform/key-value-map-overview
+
+# Security, monitoring, reporting and performance paths that do not exist here.
+https://cloud.google.com/apigee/docs/api-platform/security/verify-jwt
+https://cloud.google.com/apigee/docs/api-platform/security/oauth/user-flow
+https://cloud.google.com/apigee/docs/api-platform/monitoring/api-monitoring-overview
+https://cloud.google.com/apigee/docs/api-platform/monitoring/debug
+https://cloud.google.com/apigee/docs/api-platform/reports/analytics-dashboards
+https://cloud.google.com/apigee/docs/api-platform/performance/optimization
+
+# OPDK: the slug carries the release, so these are 4.53.00 slugs that do not exist
+# at 4.53.01. The topics are real and the correct slugs are nginx-45301 and
+# rollback-45301.
+https://docs.apigee.com/private-cloud/v4.53.01/nginx-45300
+https://docs.apigee.com/private-cloud/v4.53.01/rollback-45300
+https://docs.apigee.com/private-cloud/v4.53.01/update-apigee-edge-45300-45301

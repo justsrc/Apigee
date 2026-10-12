@@ -1,0 +1,6037 @@
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html 
+      lang="en"
+      dir="ltr">
+  <head>
+    <meta name="google-signin-client-id" content="157101835696-ooapojlodmuabs2do2vuhhnf90bccmoi.apps.googleusercontent.com"><meta name="google-signin-scope"
+          content="profile email"><meta property="og:site_name" content="Apigee Docs">
+    <meta property="og:type" content="website"><meta name="theme-color" content="#dd3303"><meta charset="utf-8">
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <link rel="manifest" href="/_pwa/apigee/manifest.json"
+          crossorigin="use-credentials">
+    <link rel="preconnect" href="//www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="//fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="//www.google-analytics.com" crossorigin><link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,400,400italic,500,500italic,700,700italic|Roboto+Mono:400,500,700&display=swap">
+      <link rel="stylesheet"
+            href="//fonts.googleapis.com/css2?family=Material+Icons&family=Material+Symbols+Outlined&display=block"><link rel="stylesheet" href="https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/apigee/css/app.css">
+      <link rel="shortcut icon" href="https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/apigee/images/favicon.png">
+    <link rel="apple-touch-icon" href="https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/apigee/images/touchicon-180.png"><link rel="canonical" href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies"><link rel="search" type="application/opensearchdescription+xml"
+            title="Apigee Docs" href="https://docs.apigee.com/s/opensearch.xml">
+      <link rel="alternate" hreflang="en"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies" /><link rel="alternate" hreflang="x-default" href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies" /><link rel="alternate" hreflang="ar"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=ar" /><link rel="alternate" hreflang="bn"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=bn" /><link rel="alternate" hreflang="zh-Hans"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=zh-cn" /><link rel="alternate" hreflang="zh-Hant"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=zh-tw" /><link rel="alternate" hreflang="fa"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=fa" /><link rel="alternate" hreflang="fr"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=fr" /><link rel="alternate" hreflang="de"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=de" /><link rel="alternate" hreflang="he"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=he" /><link rel="alternate" hreflang="hi"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=hi" /><link rel="alternate" hreflang="id"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=id" /><link rel="alternate" hreflang="it"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=it" /><link rel="alternate" hreflang="ja"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=ja" /><link rel="alternate" hreflang="ko"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=ko" /><link rel="alternate" hreflang="pl"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=pl" /><link rel="alternate" hreflang="pt-BR"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=pt-br" /><link rel="alternate" hreflang="ru"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=ru" /><link rel="alternate" hreflang="es-419"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=es-419" /><link rel="alternate" hreflang="th"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=th" /><link rel="alternate" hreflang="tr"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=tr" /><link rel="alternate" hreflang="vi"
+          href="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies?hl=vi" /><title>Comparing Quota and SpikeArrest policies &nbsp;|&nbsp; Apigee Edge &nbsp;|&nbsp; Apigee Docs</title>
+
+<meta property="og:title" content="Comparing Quota and SpikeArrest policies &nbsp;|&nbsp; Apigee Edge &nbsp;|&nbsp; Apigee Docs"><meta property="og:url" content="https://docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies"><meta property="og:locale" content="en"><script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    
+    "headline": "Comparing Quota and SpikeArrest policies"
+  }
+</script>
+  
+    
+    
+    
+    
+    
+    
+    
+  
+
+    </head>
+  <body class="color-scheme--light"
+        template="page"
+        theme="apigee-theme"
+        type="article"
+        
+        
+        
+        layout="docs"
+        
+        
+        
+        
+        
+        display-toc
+        pending>
+  
+    <devsite-progress type="indeterminate" id="app-progress"></devsite-progress>
+  
+  
+    <a href="#main-content" class="skip-link button">
+      
+      Skip to main content
+    </a>
+    <section class="devsite-wrapper">
+      <devsite-cookie-notification-bar></devsite-cookie-notification-bar>
+        <devsite-header role="banner">
+  
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="devsite-header--inner" data-nosnippet>
+  <div class="devsite-top-logo-row-wrapper-wrapper">
+    <div class="devsite-top-logo-row-wrapper">
+      <div class="devsite-top-logo-row">
+        <button type="button" id="devsite-hamburger-menu"
+          class="devsite-header-icon-button button-flat material-icons gc-analytics-event"
+          data-category="Site-Wide Custom Events"
+          data-label="Navigation menu button"
+          visually-hidden
+          aria-label="Open menu">
+        </button>
+        
+<div class="devsite-product-name-wrapper">
+
+  <a href="/" class="devsite-site-logo-link gc-analytics-event"
+   data-category="Site-Wide Custom Events" data-label="Site logo" track-type="globalNav"
+   track-name="apigeeDocs" track-metadata-position="nav"
+   track-metadata-eventDetail="nav">
+  
+  <picture>
+    
+    <img src="https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/apigee/images/lockup.svg" class="devsite-site-logo" alt="Apigee Docs">
+  </picture>
+  
+</a>
+
+
+
+</div>
+        <div class="devsite-top-logo-row-middle">
+          <div class="devsite-header-upper-tabs">
+            
+              
+              
+  <devsite-tabs class="upper-tabs">
+
+    <nav class="devsite-tabs-wrapper" aria-label="Upper tabs">
+      
+        
+          <tab  class="devsite-active">
+            
+    <a href="https://docs.apigee.com/api-platform/get-started/get-started"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/api-platform/get-started/get-started"
+    
+       track-type="nav"
+       track-metadata-position="nav - apigee edge"
+       track-metadata-module="primary nav"
+       aria-label="Apigee Edge, selected" 
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Apigee Edge"
+         
+           track-name="apigee edge"
+         
+       >
+    Apigee Edge
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab class="devsite-dropdown
+    
+    
+    
+    ">
+  
+    <a href="https://docs.apigee.com/private-cloud"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/private-cloud"
+    
+       track-type="nav"
+       track-metadata-position="nav - private cloud"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Private Cloud"
+         
+           track-name="private cloud"
+         
+       >
+    Private Cloud
+  
+    </a>
+    
+      <button
+         aria-haspopup="menu"
+         aria-expanded="false"
+         aria-label="Dropdown menu for Private Cloud"
+         track-type="nav"
+         track-metadata-eventdetail="https://docs.apigee.com/private-cloud"
+         track-metadata-position="nav - private cloud"
+         track-metadata-module="primary nav"
+         
+          
+            data-category="Site-Wide Custom Events"
+          
+            data-label="Tab: Private Cloud"
+          
+            track-name="private cloud"
+          
+        
+         class="devsite-tabs-dropdown-toggle devsite-icon devsite-icon-arrow-drop-down"></button>
+    
+  
+  <div class="devsite-tabs-dropdown" role="menu" aria-label="submenu" hidden>
+    <div class="devsite-tabs-dropdown-content">
+      
+      
+        <div class="devsite-tabs-dropdown-column
+                    ">
+          
+            <ul class="devsite-tabs-dropdown-section
+                       ">
+              
+                <li class="devsite-nav-title" role="heading" tooltip>Latest</li>
+              
+              
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.53.01/installation-requirements"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.53.01/installation-requirements"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.53.01
+                    </div>
+                    
+                  </a>
+                </li>
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.53.00/installation-requirements"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.53.00/installation-requirements"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.53.00
+                    </div>
+                    
+                  </a>
+                </li>
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.52.02/installation-requirements"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.52.02/installation-requirements"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.52.02
+                    </div>
+                    
+                  </a>
+                </li>
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.52.01/installation-requirements"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.52.01/installation-requirements"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.52.01
+                    </div>
+                    
+                  </a>
+                </li>
+              
+            </ul>
+          
+            <ul class="devsite-tabs-dropdown-section
+                       ">
+              
+                <li class="devsite-nav-title" role="heading" tooltip>End-of-life</li>
+              
+              
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.52.00/installation-requirements"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.52.00/installation-requirements"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.52.00
+                    </div>
+                    
+                  </a>
+                </li>
+              
+            </ul>
+          
+            <ul class="devsite-tabs-dropdown-section
+                       ">
+              
+                <li class="devsite-nav-title" role="heading" tooltip>Deprecated/Unsupported</li>
+              
+              
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.51.00/installation-requirements"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.51.00/installation-requirements"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.51.00
+                    </div>
+                    
+                  </a>
+                </li>
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.50.00"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.50.00"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.50.00
+                    </div>
+                    
+                  </a>
+                </li>
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.19.06"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.19.06"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.19.06
+                    </div>
+                    
+                  </a>
+                </li>
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.19.01"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.19.01"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.19.01
+                    </div>
+                    
+                  </a>
+                </li>
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.18.05"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.18.05"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.18.05
+                    </div>
+                    
+                  </a>
+                </li>
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.18.01"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.18.01"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.18.01
+                    </div>
+                    
+                  </a>
+                </li>
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.17.09"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.17.09"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.17.09
+                    </div>
+                    
+                  </a>
+                </li>
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.17.05"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.17.05"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.17.05
+                    </div>
+                    
+                  </a>
+                </li>
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.17.01"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.17.01"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.17.01
+                    </div>
+                    
+                  </a>
+                </li>
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.16.09"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.16.09"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.16.09
+                    </div>
+                    
+                  </a>
+                </li>
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.16.05"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.16.05"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.16.05
+                    </div>
+                    
+                  </a>
+                </li>
+              
+                <li class="devsite-nav-item">
+                  <a href="https://docs.apigee.com/private-cloud/v4.16.01"
+                    
+                     track-type="nav"
+                     track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.16.01"
+                     track-metadata-position="nav - private cloud"
+                     track-metadata-module="tertiary nav"
+                     
+                       track-metadata-module_headline="latest"
+                     
+                     tooltip
+                  >
+                    
+                    <div class="devsite-nav-item-title">
+                      v4.16.01
+                    </div>
+                    
+                  </a>
+                </li>
+              
+            </ul>
+          
+        </div>
+      
+    </div>
+  </div>
+</tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://docs.apigee.com/private-cloud/v4.53.01"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/private-cloud/v4.53.01"
+    
+       track-type="nav"
+       track-metadata-position="nav - apigee on gdc air-gapped"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Apigee on GDC air-gapped"
+         
+           track-name="apigee on gdc air-gapped"
+         
+       >
+    Apigee on GDC air-gapped
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://docs.apigee.com/api-monitoring"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/api-monitoring"
+    
+       track-type="nav"
+       track-metadata-position="nav - api monitoring"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: API Monitoring"
+         
+           track-name="api monitoring"
+         
+       >
+    API Monitoring
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://docs.apigee.com/sense/what-apigee-sense"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/sense/what-apigee-sense"
+    
+       track-type="nav"
+       track-metadata-position="nav - sense"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Sense"
+         
+           track-name="sense"
+         
+       >
+    Sense
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://apidocs.apigee.com"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://apidocs.apigee.com"
+    
+       track-type="nav"
+       track-metadata-position="nav - apis"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: APIs"
+         
+           track-name="apis"
+         
+       >
+    APIs
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://docs.apigee.com/api-platform/troubleshoot/support"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/api-platform/troubleshoot/support"
+    
+       track-type="nav"
+       track-metadata-position="nav - troubleshooting"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Troubleshooting"
+         
+           track-name="troubleshooting"
+         
+       >
+    Troubleshooting
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://docs.apigee.com/release/notes/apigee-release-notes"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/release/notes/apigee-release-notes"
+    
+       track-type="nav"
+       track-metadata-position="nav - releases"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Releases"
+         
+           track-name="releases"
+         
+       >
+    Releases
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://apigee.com/api-management/#/pricing"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://apigee.com/api-management/#/pricing"
+    
+       track-type="nav"
+       track-metadata-position="nav - pricing"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Pricing"
+         
+           track-name="pricing"
+         
+       >
+    Pricing
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://discuss.google.dev/c/google-cloud/cloud-apigee/104"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://discuss.google.dev/c/google-cloud/cloud-apigee/104"
+    
+       track-type="nav"
+       track-metadata-position="nav - community"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Community"
+         
+           track-name="community"
+         
+       >
+    Community
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+    </nav>
+
+  </devsite-tabs>
+
+            
+           </div>
+          
+<devsite-search
+    enable-signin
+    enable-search
+    enable-suggestions
+      enable-query-completion
+    
+    enable-search-summaries
+    project-name="Apigee Edge"
+    tenant-name="Apigee Docs"
+    
+    
+    
+    
+    
+    >
+  <form class="devsite-search-form" action="https://docs.apigee.com/s/results" method="GET">
+    <div class="devsite-search-container">
+      <button type="button"
+              search-open
+              class="devsite-search-button devsite-header-icon-button button-flat material-icons"
+              
+              aria-label="Open search"></button>
+      <div class="devsite-searchbox">
+        <input
+          aria-activedescendant=""
+          aria-autocomplete="list"
+          
+          aria-label="Search"
+          aria-expanded="false"
+          aria-haspopup="listbox"
+          autocomplete="off"
+          class="devsite-search-field devsite-search-query"
+          name="q"
+          
+          placeholder="Search"
+          role="combobox"
+          type="text"
+          value=""
+          >
+          <div class="devsite-search-image material-icons" aria-hidden="true">
+            
+              <svg class="devsite-search-ai-image" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <g clip-path="url(#clip0_6641_386)">
+                    <path d="M19.6 21L13.3 14.7C12.8 15.1 12.225 15.4167 11.575 15.65C10.925 15.8833 10.2333 16 9.5 16C7.68333 16 6.14167 15.375 4.875 14.125C3.625 12.8583 3 11.3167 3 9.5C3 7.68333 3.625 6.15 4.875 4.9C6.14167 3.63333 7.68333 3 9.5 3C10.0167 3 10.5167 3.05833 11 3.175C11.4833 3.275 11.9417 3.43333 12.375 3.65L10.825 5.2C10.6083 5.13333 10.3917 5.08333 10.175 5.05C9.95833 5.01667 9.73333 5 9.5 5C8.25 5 7.18333 5.44167 6.3 6.325C5.43333 7.19167 5 8.25 5 9.5C5 10.75 5.43333 11.8167 6.3 12.7C7.18333 13.5667 8.25 14 9.5 14C10.6667 14 11.6667 13.625 12.5 12.875C13.35 12.1083 13.8417 11.15 13.975 10H15.975C15.925 10.6333 15.7833 11.2333 15.55 11.8C15.3333 12.3667 15.05 12.8667 14.7 13.3L21 19.6L19.6 21ZM17.5 12C17.5 10.4667 16.9667 9.16667 15.9 8.1C14.8333 7.03333 13.5333 6.5 12 6.5C13.5333 6.5 14.8333 5.96667 15.9 4.9C16.9667 3.83333 17.5 2.53333 17.5 0.999999C17.5 2.53333 18.0333 3.83333 19.1 4.9C20.1667 5.96667 21.4667 6.5 23 6.5C21.4667 6.5 20.1667 7.03333 19.1 8.1C18.0333 9.16667 17.5 10.4667 17.5 12Z" fill="#5F6368"/>
+                  </g>
+                <defs>
+                <clipPath id="clip0_6641_386">
+                <rect width="24" height="24" fill="white"/>
+                </clipPath>
+                </defs>
+              </svg>
+            
+          </div>
+          <div class="devsite-search-shortcut-icon-container" aria-hidden="true">
+            <kbd class="devsite-search-shortcut-icon">/</kbd>
+          </div>
+      </div>
+    </div>
+  </form>
+  <button type="button"
+          search-close
+          class="devsite-search-button devsite-header-icon-button button-flat material-icons"
+          
+          aria-label="Close search"></button>
+</devsite-search>
+
+        </div>
+
+        
+
+          
+
+          
+
+          
+
+          
+
+          
+<devsite-language-selector>
+  <ul role="presentation">
+    
+    
+    <li role="presentation">
+      <a role="menuitem" lang="en"
+        >English</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="de"
+        >Deutsch</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="es_419"
+        >Español – América Latina</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="fr"
+        >Français</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="id"
+        >Indonesia</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="it"
+        >Italiano</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="pl"
+        >Polski</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="pt_br"
+        >Português – Brasil</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="vi"
+        >Tiếng Việt</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="tr"
+        >Türkçe</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="ru"
+        >Русский</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="he"
+        >עברית</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="ar"
+        >العربيّة</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="fa"
+        >فارسی</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="hi"
+        >हिंदी</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="bn"
+        >বাংলা</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="th"
+        >ภาษาไทย</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="zh_cn"
+        >中文 – 简体</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="zh_tw"
+        >中文 – 繁體</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="ja"
+        >日本語</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="ko"
+        >한국어</a>
+    </li>
+    
+  </ul>
+</devsite-language-selector>
+
+
+          
+
+        
+
+        
+          <devsite-user 
+                        
+                        
+                        
+                        id="devsite-user">
+            
+              
+              <span class="button devsite-top-button" aria-hidden="true" visually-hidden>Sign in</span>
+            
+          </devsite-user>
+        
+        
+        
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="devsite-collapsible-section
+    ">
+    <div class="devsite-header-background">
+      
+        
+          <div class="devsite-product-id-row"
+           >
+            <div class="devsite-product-description-row">
+              
+                
+                <div class="devsite-product-id">
+                  
+                  
+                  
+                    <ul class="devsite-breadcrumb-list"
+  >
+  
+  <li class="devsite-breadcrumb-item
+             ">
+    
+    
+    
+      
+        
+  <a href="https://docs.apigee.com/api-platform/get-started/get-started"
+      
+        class="devsite-breadcrumb-link gc-analytics-event"
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Lower Header"
+      
+        data-value="1"
+      
+        track-type="globalNav"
+      
+        track-name="breadcrumb"
+      
+        track-metadata-position="1"
+      
+        track-metadata-eventdetail=""
+      
+    >
+    
+          Apigee Edge
+        
+  </a>
+  
+      
+    
+  </li>
+  
+</ul>
+                </div>
+                
+              
+              
+            </div>
+            
+          </div>
+          
+        
+      
+      
+        <div class="devsite-doc-set-nav-row">
+          
+          
+            
+            
+  <devsite-tabs class="lower-tabs">
+
+    <nav class="devsite-tabs-wrapper" aria-label="Lower tabs">
+      
+        
+          <tab  >
+            
+    <a href="https://docs.apigee.com/api-platform/get-started/get-started"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/api-platform/get-started/get-started"
+    
+       track-type="nav"
+       track-metadata-position="nav - get started"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Get started"
+         
+           track-name="get started"
+         
+       >
+    Get started
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  class="devsite-active">
+            
+    <a href="https://docs.apigee.com/api-platform/get-started/learn-edge"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/api-platform/get-started/learn-edge"
+    
+       track-type="nav"
+       track-metadata-position="nav - develop"
+       track-metadata-module="primary nav"
+       aria-label="Develop, selected" 
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Develop"
+         
+           track-name="develop"
+         
+       >
+    Develop
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://docs.apigee.com/api-platform/publish/publishing-overview"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/api-platform/publish/publishing-overview"
+    
+       track-type="nav"
+       track-metadata-position="nav - publish"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Publish"
+         
+           track-name="publish"
+         
+       >
+    Publish
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://docs.apigee.com/api-platform/analytics/analytics-services-overview"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/api-platform/analytics/analytics-services-overview"
+    
+       track-type="nav"
+       track-metadata-position="nav - analyze"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Analyze"
+         
+           track-name="analyze"
+         
+       >
+    Analyze
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://docs.apigee.com/api-platform/monetization/basics-monetization"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/api-platform/monetization/basics-monetization"
+    
+       track-type="nav"
+       track-metadata-position="nav - monetize"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Monetize"
+         
+           track-name="monetize"
+         
+       >
+    Monetize
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://docs.apigee.com/api-platform/system-administration/service-requests"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/api-platform/system-administration/service-requests"
+    
+       track-type="nav"
+       track-metadata-position="nav - administer"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Administer"
+         
+           track-name="administer"
+         
+       >
+    Administer
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://docs.apigee.com/api-platform/integrations/apigee-edge-uapim-overview"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/api-platform/integrations/apigee-edge-uapim-overview"
+    
+       track-type="nav"
+       track-metadata-position="nav - integrate"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Integrate"
+         
+           track-name="integrate"
+         
+       >
+    Integrate
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://docs.apigee.com/api-platform/reference/apigee-reference"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/api-platform/reference/apigee-reference"
+    
+       track-type="nav"
+       track-metadata-position="nav - reference"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Reference"
+         
+           track-name="reference"
+         
+       >
+    Reference
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://docs.apigee.com/api-platform/faq/edge-network-design-firewalls"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/api-platform/faq/edge-network-design-firewalls"
+    
+       track-type="nav"
+       track-metadata-position="nav - faqs"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: FAQs"
+         
+           track-name="faqs"
+         
+       >
+    FAQs
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://docs.apigee.com/how-to-guides/how-to-guides-introduction"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/how-to-guides/how-to-guides-introduction"
+    
+       track-type="nav"
+       track-metadata-position="nav - how-to guides"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: How-to guides"
+         
+           track-name="how-to guides"
+         
+       >
+    How-to guides
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+        
+          <tab  >
+            
+    <a href="https://docs.apigee.com/api-platform/troubleshoot/support"
+    class="devsite-tabs-content gc-analytics-event "
+      track-metadata-eventdetail="https://docs.apigee.com/api-platform/troubleshoot/support"
+    
+       track-type="nav"
+       track-metadata-position="nav - support"
+       track-metadata-module="primary nav"
+       
+       
+         
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Tab: Support"
+         
+           track-name="support"
+         
+       >
+    Support
+  
+    </a>
+    
+  
+          </tab>
+        
+      
+    </nav>
+
+  </devsite-tabs>
+
+          
+          
+        </div>
+      
+    </div>
+  </div>
+
+</div>
+
+
+
+  
+
+  
+</devsite-header>
+        <devsite-book-nav scrollbars >
+          
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="devsite-book-nav-filter"
+     >
+  <span class="filter-list-icon material-icons" aria-hidden="true"></span>
+  <input type="text"
+         placeholder="Filter"
+         
+         aria-label="Type to filter"
+         role="searchbox">
+  
+  <span class="filter-clear-button hidden"
+        data-title="Clear filter"
+        aria-label="Clear filter"
+        role="button"
+        tabindex="0"></span>
+</div>
+
+<nav class="devsite-book-nav devsite-nav nocontent" data-nosnippet
+     aria-label="Side menu">
+  <div class="devsite-mobile-header">
+    <button type="button"
+            id="devsite-close-nav"
+            class="devsite-header-icon-button button-flat material-icons gc-analytics-event"
+            data-category="Site-Wide Custom Events"
+            data-label="Close navigation"
+            aria-label="Close navigation">
+    </button>
+    <div class="devsite-product-name-wrapper">
+
+  <a href="/" class="devsite-site-logo-link gc-analytics-event"
+   data-category="Site-Wide Custom Events" data-label="Site logo" track-type="globalNav"
+   track-name="apigeeDocs" track-metadata-position="nav"
+   track-metadata-eventDetail="nav">
+  
+  <picture>
+    
+    <img src="https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/apigee/images/lockup.svg" class="devsite-site-logo" alt="Apigee Docs">
+  </picture>
+  
+</a>
+
+
+</div>
+  </div>
+
+  <div class="devsite-book-nav-wrapper">
+    <div class="devsite-mobile-nav-top">
+      
+        <ul class="devsite-nav-list">
+          
+            <li class="devsite-nav-item">
+              
+  
+  <a href="/api-platform/get-started/get-started"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              devsite-nav-active"
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Apigee Edge"
+      
+        track-name="apigee edge"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Apigee Edge"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Apigee Edge
+   </span>
+    
+  
+  </a>
+  
+
+  
+              
+                <ul class="devsite-nav-responsive-tabs">
+                  
+                    
+                    
+                    
+                    <li class="devsite-nav-item">
+                      
+  
+  <a href="/api-platform/get-started/get-started"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Get started"
+      
+        track-name="get started"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Get started"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Get started
+   </span>
+    
+  
+  </a>
+  
+
+  
+                    </li>
+                  
+                    
+                    
+                    
+                    <li class="devsite-nav-item">
+                      
+  
+  <a href="/api-platform/get-started/learn-edge"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              devsite-nav-active"
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Develop"
+      
+        track-name="develop"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Develop"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip menu="_book">
+      Develop
+   </span>
+    
+  
+  </a>
+  
+
+  
+                    </li>
+                  
+                    
+                    
+                    
+                    <li class="devsite-nav-item">
+                      
+  
+  <a href="/api-platform/publish/publishing-overview"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Publish"
+      
+        track-name="publish"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Publish"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Publish
+   </span>
+    
+  
+  </a>
+  
+
+  
+                    </li>
+                  
+                    
+                    
+                    
+                    <li class="devsite-nav-item">
+                      
+  
+  <a href="/api-platform/analytics/analytics-services-overview"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Analyze"
+      
+        track-name="analyze"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Analyze"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Analyze
+   </span>
+    
+  
+  </a>
+  
+
+  
+                    </li>
+                  
+                    
+                    
+                    
+                    <li class="devsite-nav-item">
+                      
+  
+  <a href="/api-platform/monetization/basics-monetization"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Monetize"
+      
+        track-name="monetize"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Monetize"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Monetize
+   </span>
+    
+  
+  </a>
+  
+
+  
+                    </li>
+                  
+                    
+                    
+                    
+                    <li class="devsite-nav-item">
+                      
+  
+  <a href="/api-platform/system-administration/service-requests"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Administer"
+      
+        track-name="administer"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Administer"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Administer
+   </span>
+    
+  
+  </a>
+  
+
+  
+                    </li>
+                  
+                    
+                    
+                    
+                    <li class="devsite-nav-item">
+                      
+  
+  <a href="/api-platform/integrations/apigee-edge-uapim-overview"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Integrate"
+      
+        track-name="integrate"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Integrate"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Integrate
+   </span>
+    
+  
+  </a>
+  
+
+  
+                    </li>
+                  
+                    
+                    
+                    
+                    <li class="devsite-nav-item">
+                      
+  
+  <a href="/api-platform/reference/apigee-reference"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Reference"
+      
+        track-name="reference"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Reference"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Reference
+   </span>
+    
+  
+  </a>
+  
+
+  
+                    </li>
+                  
+                    
+                    
+                    
+                    <li class="devsite-nav-item">
+                      
+  
+  <a href="/api-platform/faq/edge-network-design-firewalls"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: FAQs"
+      
+        track-name="faqs"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: FAQs"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      FAQs
+   </span>
+    
+  
+  </a>
+  
+
+  
+                    </li>
+                  
+                    
+                    
+                    
+                    <li class="devsite-nav-item">
+                      
+  
+  <a href="/how-to-guides/how-to-guides-introduction"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: How-to guides"
+      
+        track-name="how-to guides"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: How-to guides"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      How-to guides
+   </span>
+    
+  
+  </a>
+  
+
+  
+                    </li>
+                  
+                    
+                    
+                    
+                    <li class="devsite-nav-item">
+                      
+  
+  <a href="/api-platform/troubleshoot/support"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Support"
+      
+        track-name="support"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Support"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Support
+   </span>
+    
+  
+  </a>
+  
+
+  
+                    </li>
+                  
+                </ul>
+              
+            </li>
+          
+            <li class="devsite-nav-item">
+              
+  
+  <a href="/private-cloud"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Private Cloud"
+      
+        track-name="private cloud"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Private Cloud"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Private Cloud
+   </span>
+    
+  
+  </a>
+  
+
+  
+    <ul class="devsite-nav-responsive-tabs devsite-nav-has-menu
+               ">
+      
+<li class="devsite-nav-item">
+
+  
+  <span
+    
+       class="devsite-nav-title"
+       tooltip
+    
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Private Cloud"
+      
+        track-name="private cloud"
+      
+    >
+  
+    <span class="devsite-nav-text" tooltip menu="Private Cloud">
+      More
+   </span>
+    
+    <span class="devsite-nav-icon material-icons" data-icon="forward"
+          menu="Private Cloud">
+    </span>
+    
+  
+  </span>
+  
+
+</li>
+
+    </ul>
+  
+              
+            </li>
+          
+            <li class="devsite-nav-item">
+              
+  
+  <a href="/private-cloud/v4.53.01"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Apigee on GDC air-gapped"
+      
+        track-name="apigee on gdc air-gapped"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Apigee on GDC air-gapped"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Apigee on GDC air-gapped
+   </span>
+    
+  
+  </a>
+  
+
+  
+              
+            </li>
+          
+            <li class="devsite-nav-item">
+              
+  
+  <a href="/api-monitoring"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: API Monitoring"
+      
+        track-name="api monitoring"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: API Monitoring"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      API Monitoring
+   </span>
+    
+  
+  </a>
+  
+
+  
+              
+            </li>
+          
+            <li class="devsite-nav-item">
+              
+  
+  <a href="/sense/what-apigee-sense"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Sense"
+      
+        track-name="sense"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Sense"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Sense
+   </span>
+    
+  
+  </a>
+  
+
+  
+              
+            </li>
+          
+            <li class="devsite-nav-item">
+              
+  
+  <a href="https://apidocs.apigee.com"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: APIs"
+      
+        track-name="apis"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: APIs"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      APIs
+   </span>
+    
+  
+  </a>
+  
+
+  
+              
+            </li>
+          
+            <li class="devsite-nav-item">
+              
+  
+  <a href="/api-platform/troubleshoot/support"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Troubleshooting"
+      
+        track-name="troubleshooting"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Troubleshooting"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Troubleshooting
+   </span>
+    
+  
+  </a>
+  
+
+  
+              
+            </li>
+          
+            <li class="devsite-nav-item">
+              
+  
+  <a href="/release/notes/apigee-release-notes"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Releases"
+      
+        track-name="releases"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Releases"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Releases
+   </span>
+    
+  
+  </a>
+  
+
+  
+              
+            </li>
+          
+            <li class="devsite-nav-item">
+              
+  
+  <a href="https://apigee.com/api-management/#/pricing"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Pricing"
+      
+        track-name="pricing"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Pricing"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Pricing
+   </span>
+    
+  
+  </a>
+  
+
+  
+              
+            </li>
+          
+            <li class="devsite-nav-item">
+              
+  
+  <a href="https://discuss.google.dev/c/google-cloud/cloud-apigee/104"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Tab: Community"
+      
+        track-name="community"
+      
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: Community"
+     track-type="globalNav"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      Community
+   </span>
+    
+  
+  </a>
+  
+
+  
+              
+            </li>
+          
+          
+          
+        </ul>
+      
+    </div>
+    
+      <div class="devsite-mobile-nav-bottom">
+        
+          
+          <ul class="devsite-nav-list" menu="_book">
+            <li class="devsite-nav-item
+           devsite-nav-divider
+           devsite-nav-heading"><div class="devsite-nav-title devsite-nav-title-no-path">
+        <span class="devsite-nav-text" tooltip>Developer resources</span>
+      </div></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/get-started/learn-edge"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Learn Edge</span></a></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Samples</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/samples/using-samples"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Use the sample API proxies</span></a></li><li class="devsite-nav-item"><a href="/api-platform/samples/samples-reference"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Samples list</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>API proxy cookbook</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/samples/cookbook/api-proxy-cookbook-patterns"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Cookbook patterns</span></a></li><li class="devsite-nav-item"><a href="/api-platform/samples/cookbook/using-policy-composition"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Use policy composition</span></a></li><li class="devsite-nav-item"><a href="/api-platform/samples/cookbook/programming-api-proxies-javascript"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Program API proxies with JavaScript</span></a></li><li class="devsite-nav-item"><a href="/api-platform/samples/cookbook/how-create-java-callout"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>How to create a Java callout</span></a></li><li class="devsite-nav-item"><a href="/api-platform/samples/cookbook/how-handle-java-callout-errors"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>How to handle Java Callout errors</span></a></li><li class="devsite-nav-item"><a href="/api-platform/samples/cookbook/how-use-properties-java-callout"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>How to use properties in a Java callout</span></a></li><li class="devsite-nav-item"><a href="/api-platform/samples/cookbook/use-java-customize-api"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Another Java callout sample</span></a></li><li class="devsite-nav-item"><a href="/api-platform/samples/mock-target-api"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Mock Target API</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/fundamentals/apigee-edge-command-line-tools"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Command-line tools</span></a></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/fundamentals/migrating-data-apigee-trial-org"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Migrating data from an Apigee Evaluation org</span></a></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-divider
+           devsite-nav-heading"><div class="devsite-nav-title devsite-nav-title-no-path">
+        <span class="devsite-nav-text" tooltip>Build proxies</span>
+      </div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Fundamentals</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/fundamentals/apigee-edge-organization-structure"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Understand organizations</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/understanding-apis-and-api-proxies"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Understand APIs and API proxies</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/download-api-proxies"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Download API proxies</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/build-simple-api-proxy"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Build a simple API proxy</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/best-practices-api-proxy-design-and-development"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Best practices</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Define the URL that clients see</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/fundamentals/understanding-routes"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Understand routes</span></a></li><li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>About virtual hosts</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/fundamentals/virtual-hosts"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/faq-configuring-virtual-hosts-edge-cloud"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Configuring Virtual Hosts FAQ</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/configuring-virtual-hosts"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Configuring virtual hosts</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/configuring-virtual-hosts-cloud"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Configuring virtual hosts for the Cloud</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/configuring-virtual-hosts-private-cloud"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Configuring virtual hosts for the Private Cloud</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/virtual-host-property-reference"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Virtual host property reference</span></a></li></ul></div></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Flows and flow variables</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/fundamentals/what-are-flows"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Control proxies with flows</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/flow-configurations"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Configure flows</span></a></li><li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Flow variables</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/fundamentals/introduction-flow-variables"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/understanding-handling-request-response-data"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>request and response flow variables</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/message-variables"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>message flow variable</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/flow-variables-and-conditions"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Conditions with flow variables</span></a></li></ul></div></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Handle faults</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/fundamentals/fault-handling"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Introduction</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/what-you-need-know-about-policy-errors"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>About policy errors</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Reusable shared flows</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/fundamentals/shared-flows"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/flow-hooks"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Attach a shared flow using a flow hook</span></a></li><li class="devsite-nav-item"><a href="/api-platform/fundamentals/connecting-proxies-other-proxies"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Chain API proxies together</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-divider
+           devsite-nav-heading"><div class="devsite-nav-title devsite-nav-title-no-path">
+        <span class="devsite-nav-text" tooltip>Add features to a proxy</span>
+      </div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>What&#39;s a policy?</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/develop/policy-attachment-and-enforcement"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span></a></li><li class="devsite-nav-item"><a href="/api-platform/develop/attaching-and-configuring-policies-management-ui"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Attach and configure policies in the UI</span></a></li><li class="devsite-nav-item"><a href="/api-platform/develop/attaching-and-configuring-policies-xml-files"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Attach and configure policies in XML files</span></a></li><li class="devsite-nav-item"><a href="/api-platform/develop/attaching-policy-proxyendpoint-or-targetendpoint-flow"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Attach a policy to a ProxyEndpoint or TargetEndpoint Flow</span></a></li><li class="devsite-nav-item"><a href="/api-platform/develop/resource-files"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Manage resources</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Secure a proxy</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/security/api-security"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span></a></li><li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Tutorials</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/tutorials/secure-calls-your-api-through-api-key-validation"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Secure an API proxy with API keys</span></a></li><li class="devsite-nav-item"><a href="/api-platform/tutorials/secure-calls-your-api-through-oauth-20-client-credentials"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Secure an API with OAuth</span></a></li></ul></div></li><li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>OAuth2</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/security/oauth/oauth-home"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/oauth-introduction"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Introduction</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/oauth2-videos"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Videos</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/oauth-20-client-credentials-grant-type"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Client credentials grant type</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/oauth-v2-policy-authorization-code-grant-type"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Auth code grant type</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/implementing-password-grant-type"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Password grant type</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/understanding-default-oauth-20-configuration"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Configure a new API proxy</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/registering-client-apps"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Register client apps</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/obtaining-developer-keys"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Obtain client credentials</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/configuring-oauth-endpoints-and-policies"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Understand OAuth endpoints</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/access-tokens"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Request tokens and codes</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/customizing-access-tokens"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Customize tokens and codes</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/validating-and-invalidating-access-tokens"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Revoke and approve tokens</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/enable-retrieval-and-revocation-oauth-20-access-tokens-end-user-id-app-id-or-both"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Revoke tokens by end user ID and app ID</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/revoking-and-approving-consumer-ids"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Revoke and approve consumer keys</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/sending-access-token"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Send an access token</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/using-access-tokens"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Verify access tokens</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/working-scopes"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Work with OAuth2 scopes</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/use-third-party-oauth-system"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Use third-party OAuth tokens</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/hashing-tokens"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Hash tokens for extra security</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/oauth/advanced-oauth-20-topics"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Advanced topics</span></a></li><li class="devsite-nav-item"><a href="/api-platform/reference/policies/oauthv2-policy"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>OAuthV2 policy</span></a></li><li class="devsite-nav-item"><a href="/api-platform/reference/policies/get-oauth-v2-info-policy"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>GetOAuthV2Info policy</span></a></li><li class="devsite-nav-item"><a href="/api-platform/reference/policies/set-oauth-v2-info-policy"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>SetOAuthV2Info policy</span></a></li></ul></div></li><li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>API keys</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/security/api-keys"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/setting-api-key-validation"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Set up API key validation</span></a></li></ul></div></li><li class="devsite-nav-item"><a href="/api-platform/security/saml"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Use SAML policies in an API proxy</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/content-based-security"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Content-based security</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/data-masking"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Masking and hiding data</span></a></li><li class="devsite-nav-item"><a href="/api-platform/security/last-mile-security"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Last-mile security</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Limit request traffic</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/develop/rate-limiting"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Rate-limiting</span></a></li><li class="devsite-nav-item"><a href="/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Compare rate-limiting policies</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Caching and persistence</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/cache/caching-edge"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span></a></li><li class="devsite-nav-item"><a href="/api-platform/cache/cache-videos"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Videos</span></a></li><li class="devsite-nav-item"><a href="/api-platform/cache/persistence-tools"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Persistence tools</span></a></li><li class="devsite-nav-item"><a href="/api-platform/cache/optimize-performance-using-cache"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Example: General purpose caching</span></a></li><li class="devsite-nav-item"><a href="/api-platform/cache/http-response-caching"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Support for HTTP response headers</span></a></li><li class="devsite-nav-item"><a href="/api-platform/cache/manage-caches-environment"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Create and edit an environment cache</span></a></li><li class="devsite-nav-item"><a href="/api-platform/cache/key-value-maps"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Work with key value maps</span></a></li><li class="devsite-nav-item"><a href="/api-platform/cache/creating-and-editing-environment-keyvalue-maps"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Create and edit environment key value maps</span></a></li><li class="devsite-nav-item"><a href="/api-platform/cache/cache-internals"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Cache internals</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/develop/shaping-and-converting-messages"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Shape, access, and convert messages</span></a></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/develop/incorporating-procedural-code-api-proxy"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Incorporate procedural code</span></a></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Integrate external resources with extensions</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/extensions/extensions-overview"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>What are extensions?</span></a></li><li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Tutorial: Using extensions</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/tutorials/add-extension/intro"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Introduction</span></a></li><li class="devsite-nav-item"><a href="/api-platform/tutorials/add-extension/add-new-extension"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Step 1: Add an extension</span></a></li><li class="devsite-nav-item"><a href="/api-platform/tutorials/add-extension/configure-for-testing"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Step 2: Configure and deploy</span></a></li><li class="devsite-nav-item"><a href="/api-platform/tutorials/add-extension/extension-callout-policy"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Step 3: Add an ExtensionCallout policy</span></a></li><li class="devsite-nav-item"><a href="/api-platform/tutorials/add-extension/proxy-deployment"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Step 4: Deploy your proxy</span></a></li><li class="devsite-nav-item"><a href="/api-platform/tutorials/add-extension/xtra-credit"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Step 5: Log a message flow variable</span></a></li></ul></div></li><li class="devsite-nav-item"><a href="/api-platform/extensions/configuring-an-extension"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Adding and configuring an extension</span></a></li><li class="devsite-nav-item"><a href="/api-platform/extensions/debugging-an-extension"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Debugging an extension</span></a></li><li class="devsite-nav-item"><a href="/api-platform/extensions/viewing-extension-logs"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Viewing extension logs</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/develop/adding-cors-support-api-proxy"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Add CORS support</span></a></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Expose a SOAP service as an API proxy</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/develop/exposing-soap-service-api-proxy"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span></a></li><li class="devsite-nav-item"><a href="/api-platform/tutorials/proxy-soap-service"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Proxy a SOAP service</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/develop/enabling-streaming"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Stream requests and responses</span></a></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-divider
+           devsite-nav-heading"><div class="devsite-nav-title devsite-nav-title-no-path">
+        <span class="devsite-nav-text" tooltip>Deploy API proxies</span>
+      </div></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/deploy/understanding-deployment"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>About deployment</span></a></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/deploy/deploying-proxies-ui"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Deploy proxies in the UI</span></a></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/deploy/deploying-proxies-command-line"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Deploy proxies from the command line</span></a></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/deploy/deploy-api-proxies-using-management-api"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Deploy proxies using the management API</span></a></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/deploy/load-balancing-across-backend-servers"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Load balancing across backend servers</span></a></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-divider
+           devsite-nav-heading"><div class="devsite-nav-title devsite-nav-title-no-path">
+        <span class="devsite-nav-text" tooltip>Deploy Node.js services</span>
+      </div></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/nodejs/node-overview"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview of Node.js on Apigee Edge</span></a></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Hosted Targets</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/hosted-targets/hosted-targets-overview"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span></a></li><li class="devsite-nav-item"><a href="/api-platform/hosted-targets/hosted-targets-tutorials"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Tutorials</span></a></li><li class="devsite-nav-item"><a href="/api-platform/hosted-targets/hosted-targets-tasks"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Tasks</span></a></li><li class="devsite-nav-item"><a href="/api-platform/hosted-targets/hosted-targets-reference"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Reference</span></a></li><li class="devsite-nav-item"><a href="/api-platform/hosted-targets/troubleshooting"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Troubleshooting</span></a></li><li class="devsite-nav-item"><a href="/api-platform/hosted-targets/hosted-targets-faq"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>FAQ</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Traditional (Retired)</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/nodejs/overview-nodejs-apigee-edge"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/nodejs/getting-started-nodejs-apigee-edge"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Get started with Node.js on Apigee Edge</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/nodejs/deploying-standalone-nodejs-app"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Deploy a standalone Node.js app</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/nodejs/adding-nodejs-existing-api-proxy"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Add Node.js to an existing API proxy</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/nodejs/debugging-nodejs-proxies"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Debug and troubleshooting Node.js proxies</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/nodejs/understanding-edge-support-nodejs-modules"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>About Edge support for Node.js modules</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Use apigee-access (Retired)</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/nodejs/using-apigee-access"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Introduction</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/nodejs/access-flow-variables-nodejs"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Access flow variables</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/nodejs/access-cache-nodejs"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Access the cache</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/nodejs/accessing-quota-service-nodejs"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Access the quota service</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/nodejs/accessing-key-value-maps-nodejs"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Access key value maps in Node.js</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/nodejs/using-secure-store"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Using the secure store (vaults)</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li></ul></div></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-divider
+           devsite-nav-heading"><div class="devsite-nav-title devsite-nav-title-no-path">
+        <span class="devsite-nav-text" tooltip>Debug</span>
+      </div></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/debug/using-trace-tool-0"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Use the Trace tool</span></a></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/debug/using-offline-trace-tool"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Use the Offline Trace tool</span></a></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/analytics/using-performance-metrics"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Use performance metrics</span></a></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/debug/view-api-history"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Audits: API, Product, &amp; org history</span></a></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-divider
+           devsite-nav-heading"><div class="devsite-nav-title devsite-nav-title-no-path">
+        <span class="devsite-nav-text" tooltip>Envoy Adapter</span>
+      </div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>v2.0.x</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v2.0.x/concepts"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Concepts</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v2.0.x/getting-started"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Getting started</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v2.0.x/example-edge"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Apigee Edge example</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v2.0.x/operation"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Operation</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v2.0.x/reference"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Reference</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v2.0.x/troubleshooting"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Troubleshooting</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>v1.4.x</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.4.x/concepts"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Concepts</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.4.x/getting-started"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Getting started</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.4.x/example-edge"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Apigee Edge example</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.4.x/operation"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Operation</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.4.x/reference"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Reference</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.4.x/troubleshooting"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Troubleshooting</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>v1.3.x</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.3.x/concepts"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Concepts</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.3.x/getting-started"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Getting started</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.3.x/example-edge"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Apigee Edge example</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.3.x/operation"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Operation</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.3.x/reference"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Reference</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.3.x/troubleshooting"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Troubleshooting</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>v1.2.x</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.2.x/concepts"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Concepts</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.2.x/getting-started"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Getting started</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.2.x/example-edge"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Apigee Edge example</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.2.x/operation"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Operation</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.2.x/reference"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Reference</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.2.x/troubleshooting"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Troubleshooting</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>v1.1.x</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.1.x/concepts"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Concepts</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.1.x/getting-started"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Getting started</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.1.x/example-edge"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Apigee Edge example</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.1.x/operation"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Operation</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.1.x/reference"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Reference</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.1.x/troubleshooting"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Troubleshooting</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>v1.0.x</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.0.x/concepts"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Concepts</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.0.x/getting-started"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Getting started</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.0.x/example-edge"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Apigee Edge example</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.0.x/operation"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Operation</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.0.x/reference"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Reference</span></a></li><li class="devsite-nav-item"><a href="/api-platform/envoy-adapter/v1.0.x/troubleshooting"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Troubleshooting</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item"><a href="/release/notes/apigee-adapter-for-envoy-release-notes"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Release notes</span></a></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-divider
+           devsite-nav-heading"><div class="devsite-nav-title devsite-nav-title-no-path">
+        <span class="devsite-nav-text" tooltip>Microgateway</span>
+      </div></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/microgateway/edge-microgateway-home"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Edge Microgateway home</span></a></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/microgateway/edge-microgateway-videos"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Videos</span></a></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Version 3.3.x</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.3.x/overview-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.3.x/installing-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Installing</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.3.x/setting-and-configuring-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Getting started</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.3.x/operation-and-configuration-reference-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Operating</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.3.x/cli-reference-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Command line reference</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.3.x/use-plugins"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Using plugins</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.3.x/develop-custom-plugins"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Developing custom plugins</span></a></li><li class="devsite-nav-item"><a href="/api-platform/integrations/kubernetes/k8s-introduction"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Running in Kubernetes</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.3.x/docker"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Running in a Docker container</span></a></li><li class="devsite-nav-item"><a href="/api-platform/istio-adapter/concepts"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Using the Istio adapter</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Version 3.2.x</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.2.x/overview-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.2.x/installing-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Installing</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.2.x/setting-and-configuring-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Getting started</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.2.x/operation-and-configuration-reference-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Operating</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.2.x/cli-reference-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Command line reference</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.2.x/use-plugins"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Using plugins</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.2.x/develop-custom-plugins"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Developing custom plugins</span></a></li><li class="devsite-nav-item"><a href="/api-platform/integrations/kubernetes/k8s-introduction"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Running in Kubernetes</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.2.x/docker"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Running in a Docker container</span></a></li><li class="devsite-nav-item"><a href="/api-platform/istio-adapter/concepts"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Using the Istio adapter</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Version 3.1.5 - 3.1.8 (Unsupported)</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.5/overview-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.5/installing-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Installing</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.5/setting-and-configuring-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Getting started</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.5/operation-and-configuration-reference-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Operating</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.5/cli-reference-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Command line reference</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.5/use-plugins"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Using plugins</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.5/develop-custom-plugins"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Developing custom plugins</span></a></li><li class="devsite-nav-item"><a href="/api-platform/integrations/kubernetes/k8s-introduction"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Running in Kubernetes</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.5/docker"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Running in a Docker container</span></a></li><li class="devsite-nav-item"><a href="/api-platform/istio-adapter/concepts"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Using the Istio adapter</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Version 3.1.0 - 3.1.4 (Unsupported)</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.x/overview-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.x/installing-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Installing</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.x/setting-and-configuring-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Getting started</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.x/operation-and-configuration-reference-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Operating</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.x/cli-reference-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Command line reference</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.x/use-plugins"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Using plugins</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.x/develop-custom-plugins"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Developing custom plugins</span></a></li><li class="devsite-nav-item"><a href="/api-platform/integrations/kubernetes/k8s-introduction"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Running in Kubernetes</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.1.x/docker"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Running in a Docker container</span></a></li><li class="devsite-nav-item"><a href="/api-platform/istio-adapter/concepts"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Using the Istio adapter</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Version 3.0.x (Unsupported)</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.0.x/overview-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.0.x/installing-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Installing</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.0.x/setting-and-configuring-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Getting started</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.0.x/operation-and-configuration-reference-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Operating</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.0.x/cli-reference-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Command line reference</span></a></li><li class="devsite-nav-item"><a href="/api-platform/integrations/kubernetes/k8s-introduction"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Running in Kubernetes</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.0.x/docker"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Running in a Docker container</span></a></li><li class="devsite-nav-item"><a href="/api-platform/istio-adapter/concepts"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Using the Istio adapter</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.0.x/use-plugins"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Using plugins</span></a></li><li class="devsite-nav-item"><a href="/api-platform/microgateway/3.0.x/develop-custom-plugins"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Developing custom plugins</span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item
+           devsite-nav-expandable"><div class="devsite-expandable-nav">
+      <a class="devsite-nav-toggle" aria-hidden="true"></a><div class="devsite-nav-title devsite-nav-title-no-path" tabindex="0" role="button">
+        <span class="devsite-nav-text" tooltip>Version 2.5.x (Unsupported)</span>
+      </div><ul class="devsite-nav-section"><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/microgateway/2.5.x/overview-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Overview</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/microgateway/2.5.x/installing-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Installing</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/microgateway/2.5.x/setting-and-configuring-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Getting started</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/microgateway/2.5.x/operation-and-configuration-reference-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Operating</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/microgateway/2.5.x/cli-reference-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Command line reference</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/integrations/kubernetes/k8s-introduction"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Running in Kubernetes</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/microgateway/2.5.x/docker"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Running in a Docker container</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/istio-adapter/concepts"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Using the Istio adapter</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/microgateway/2.5.x/use-plugins"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Using plugins</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li><li class="devsite-nav-item
+           devsite-nav-deprecated"><a href="/api-platform/microgateway/2.5.x/develop-custom-plugins"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Developing custom plugins</span><span class="devsite-nav-icon material-icons"
+        data-icon="deprecated"
+        data-title="Deprecated"
+        aria-hidden="true"></span></a></li></ul></div></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/microgateway/error-code-reference-edge-microgateway"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Error reference</span></a></li>
+
+  <li class="devsite-nav-item"><a href="/api-platform/faq/edge-microgateway-faq"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>FAQ</span></a></li>
+
+  <li class="devsite-nav-item"><a href="/release/notes/edge-microgateway-release-notes-0"
+        class="devsite-nav-title"
+      ><span class="devsite-nav-text" tooltip>Release notes</span></a></li>
+          </ul>
+        
+        
+          
+    
+  
+    
+      
+      <ul class="devsite-nav-list" menu="Private Cloud"
+          aria-label="Side menu" hidden>
+        
+          
+            
+              
+<li class="devsite-nav-item devsite-nav-heading">
+
+  
+  <span
+    
+       class="devsite-nav-title"
+       tooltip
+    
+    >
+  
+    <span class="devsite-nav-text" tooltip >
+      Latest
+   </span>
+    
+  
+  </span>
+  
+
+</li>
+
+            
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.53.01/installation-requirements"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.53.01"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.53.01
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.53.00/installation-requirements"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.53.00"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.53.00
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.52.02/installation-requirements"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.52.02"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.52.02
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.52.01/installation-requirements"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.52.01"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.52.01
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+          
+            
+              
+<li class="devsite-nav-item devsite-nav-heading">
+
+  
+  <span
+    
+       class="devsite-nav-title"
+       tooltip
+    
+    >
+  
+    <span class="devsite-nav-text" tooltip >
+      End-of-life
+   </span>
+    
+  
+  </span>
+  
+
+</li>
+
+            
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.52.00/installation-requirements"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.52.00"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.52.00
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+          
+            
+              
+<li class="devsite-nav-item devsite-nav-heading">
+
+  
+  <span
+    
+       class="devsite-nav-title"
+       tooltip
+    
+    >
+  
+    <span class="devsite-nav-text" tooltip >
+      Deprecated/Unsupported
+   </span>
+    
+  
+  </span>
+  
+
+</li>
+
+            
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.51.00/installation-requirements"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.51.00"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.51.00
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.50.00"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.50.00"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.50.00
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.19.06"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.19.06"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.19.06
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.19.01"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.19.01"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.19.01
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.18.05"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.18.05"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.18.05
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.18.01"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.18.01"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.18.01
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.17.09"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.17.09"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.17.09
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.17.05"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.17.05"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.17.05
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.17.01"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.17.01"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.17.01
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.16.09"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.16.09"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.16.09
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.16.05"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.16.05"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.16.05
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+              
+<li class="devsite-nav-item">
+
+  
+  <a href="/private-cloud/v4.16.01"
+    
+       class="devsite-nav-title gc-analytics-event
+              
+              "
+    
+
+    
+     data-category="Site-Wide Custom Events"
+     data-label="Responsive Tab: v4.16.01"
+     track-type="navMenu"
+     track-metadata-eventDetail="globalMenu"
+     track-metadata-position="nav">
+  
+    <span class="devsite-nav-text" tooltip >
+      v4.16.01
+   </span>
+    
+  
+  </a>
+  
+
+</li>
+
+            
+          
+        
+      </ul>
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+        
+        
+          
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+        
+      </div>
+    
+  </div>
+</nav>
+          
+        </devsite-book-nav>
+      
+      <section id="gc-wrapper">
+        <main role="main" id="main-content" class="devsite-main-content"
+            
+              has-book-nav
+              has-sidebar
+            >
+          <div class="devsite-sidebar">
+            <div class="devsite-sidebar-content">
+                
+                <devsite-toc class="devsite-nav"
+                            role="navigation"
+                            aria-label="On this page"
+                            depth="2"
+                            scrollbars
+                            data-nosnippet
+                  ></devsite-toc>
+                <devsite-recommendations-sidebar class="nocontent devsite-nav" data-nosnippet>
+                </devsite-recommendations-sidebar>
+            </div>
+          </div>
+          <devsite-content>
+            
+              
+
+
+
+
+
+
+
+
+
+
+<article class="devsite-article"><style>
+      /* Styles inlined from /css/custom.css */
+p.hybrid, li.hybrid {
+  border-style: none none none solid;
+  border-color: #ffab40;
+  padding-left: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  background-color: #f8e6cb;
+}
+
+      </style>
+  
+  
+  
+  
+  
+
+  <div class="devsite-article-meta nocontent" role="navigation" data-nosnippet>
+    
+    
+    <ul class="devsite-breadcrumb-list"
+  
+    aria-label="Breadcrumb">
+  
+  <li class="devsite-breadcrumb-item
+             ">
+    
+    
+    
+      
+        
+  <a href="https://docs.apigee.com/"
+      
+        class="devsite-breadcrumb-link gc-analytics-event"
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Breadcrumbs"
+      
+        data-value="1"
+      
+        track-type="globalNav"
+      
+        track-name="breadcrumb"
+      
+        track-metadata-position="1"
+      
+        track-metadata-eventdetail="Apigee Edge"
+      
+    >
+    
+          Apigee Edge
+        
+  </a>
+  
+      
+    
+  </li>
+  
+  <li class="devsite-breadcrumb-item
+             ">
+    
+      
+      <div class="devsite-breadcrumb-guillemet material-icons" aria-hidden="true"></div>
+    
+    
+    
+      
+        
+  <a href="https://docs.apigee.com/api-platform/get-started/learn-edge"
+      
+        class="devsite-breadcrumb-link gc-analytics-event"
+      
+        data-category="Site-Wide Custom Events"
+      
+        data-label="Breadcrumbs"
+      
+        data-value="2"
+      
+        track-type="globalNav"
+      
+        track-name="breadcrumb"
+      
+        track-metadata-position="2"
+      
+        track-metadata-eventdetail=""
+      
+    >
+    
+          Develop
+        
+  </a>
+  
+      
+    
+  </li>
+  
+</ul>
+    
+      
+    <devsite-thumb-rating position="header">
+    </devsite-thumb-rating>
+  
+    
+  </div>
+  
+    <devsite-feedback
+  position="header"
+  project-name="Apigee Edge"
+  product-id="1636213"
+  bucket="docsite"
+  context=""
+  version="t-devsite-webserver-20261006-r00-rc02.480918341592349554"
+  data-label="Send Feedback Button"
+  track-type="feedback"
+  track-name="sendFeedbackLink"
+  track-metadata-position="header"
+  class="nocontent"
+  data-nosnippet
+  
+    disable-product-feedback
+  
+  
+  
+    project-icon="https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/apigee/images/touchicon-180.png"
+  
+  
+  
+  >
+
+  <button>
+  
+    
+    Send feedback
+  
+  </button>
+</devsite-feedback>
+  
+    <h1 class="devsite-page-title" tabindex="-1">
+      Comparing Quota and SpikeArrest policies<devsite-actions hidden data-nosnippet>
+    <devsite-llm-tools></devsite-llm-tools></devsite-actions>
+  
+      
+    </h1>
+  <div class="devsite-page-title-meta"><devsite-view-release-notes></devsite-view-release-notes></div>
+  
+
+  <devsite-toc class="devsite-nav"
+    depth="2"
+    devsite-toc-embedded
+    >
+  </devsite-toc>
+  
+    
+  <div class="devsite-article-body clearfix
+  ">
+
+  
+    
+    
+      
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p style="text-align: right;"><span style="background-color: #f0f0f0; font-size:10pt">
+  You're viewing <b>Apigee Edge</b> documentation.<br/>
+  <a href="http://cloud.google.com/apigee/docs/api-platform/develop/comparing-quota-and-spike-arrest-policies" data-title="The link may not always point to
+   the exact same topic in Apigee X. If the link does not take you to the information you are looking for, the information or feature
+      is not applicable to Apigee X, or it's moved to a page on a related topic.">Go to the
+     <b>Apigee X</b> documentation</a>.</span> <span data-title="The link may not always point to
+     the exact same topic in Apigee X. If the link does not take you to the information you are looking for, the information or feature
+        is not applicable to Apigee X, or it's moved to a page on a related topic." class="material-symbols-outlined">info</span></p>
+      
+
+  <p>Quota and SpikeArrest policies &#8212; wondering which one to use to
+  best meet your rate limiting needs? See the comparison chart below.</p>
+
+  <table width="100%">
+    <tbody>
+      <tr>
+        <th scope="col"> </th>
+
+        <th scope="col" width="30%">Quota</th>
+
+        <th scope="col" width="30%">SpikeArrest</th>
+      </tr>
+
+      <tr>
+        <td>Use it to:</td>
+
+        <td>Limit the number of connections apps can make to your API proxy's target backend over a
+        specific period of time.</td>
+
+        <td>Protect your API proxy's target backend against severe traffic spikes and denial of
+        service attacks.</td>
+      </tr>
+
+      <tr>
+        <td>Don't use it to:</td>
+
+        <td>
+          <p>Don't use it to protect your API proxy's target backend against traffic spikes.</p>
+
+          <p>For that, use the SpikeArrest policy.</p>
+        </td>
+
+        <td>
+          <p>Don't use it to count and limit the number of connections apps can make to your API
+          proxy's target backend over a specific period of time.</p>
+
+          <p>For that, use the Quota policy.</p>
+        </td>
+
+      </tr>
+
+      <tr>
+        <td>Stores a count?</td>
+
+        <td>Yes</td>
+
+        <td>No</td>
+      </tr>
+
+      <tr>
+        <td>Best practices for attaching the policy:</td>
+
+        <td>
+          <p>Attach it to the <strong>ProxyEndpoint Request PreFlow</strong>, generally after the
+          authentication of the user.</p>
+
+          <p>This enables the policy to check the quota counter at the entry point of your API
+          proxy.</p>
+        </td>
+
+        <td>
+          <p>Attach it to the <strong>ProxyEndpoint Request PreFlow</strong>, generally at the very
+          beginning of the flow.</p>
+
+          <p>This provides spike protection at the entry point of your API proxy.</p>
+        </td>
+      </tr>
+
+      <tr>
+        <td>HTTP status code when limit has been reached:</td>
+
+        <td>
+          <p><code translate="no" dir="ltr">500</code> (Internal Server Error) *</p>
+        </td>
+
+        <td>
+          <p><code translate="no" dir="ltr">500</code> (Internal Server Error) *</p>
+        </td>
+      </tr>
+
+      <tr>
+        <td>Good to know:</td>
+
+        <td>
+          <ul>
+            <li>Quota counter is stored in Cassandra.</li>
+
+            <li>Configure the policy to synchronize the counter asynchronously to save
+            resources.</li>
+
+            <li>Asynchronous counter synchronization may cause a delay in the rate limiting
+            response, which may allow calls slightly in excess of the limit you've set.</li>
+          </ul>
+        </td>
+
+        <td>
+          <ul>
+            <li>Performs throttling based on the time at which the last traffic was received. This
+            time is stored per message processor.</li>
+
+            <li>If you specify a rate limit of 100 calls per second, only 1 call every 1/100 second
+            (10 ms) will be allowed on the message processor. A second call within 10 ms will be
+            rejected.</li>
+
+            <li>Even with a high rate limit per second, nearly simultaneous requests may result in
+            rejections.</li>
+          </ul>
+        </td>
+      </tr>
+
+      <tr>
+        <td>Get more details:</td>
+
+        <td><a href="/api-platform/reference/policies/quota-policy">Quota policy</a></td>
+
+        <td><a href="/api-platform/reference/policies/spike-arrest-policy">SpikeArrest
+        policy</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>* For the <a href="/api-platform/reference/policies/quota-policy">Quota policy</a> and <a href="/api-platform/reference/policies/spike-arrest-policy">SpikeArrest policy</a>,
+  the default HTTP status code for exceeding the rate limit is a generic
+  <code translate="no" dir="ltr">500 Internal Server Error</code>.
+  You can change the status code for those policies to
+  <code translate="no" dir="ltr">429 Too Many Requests</code> by adding an
+  organization-level property (<code translate="no" dir="ltr">features.isHTTPStatusTooManyRequestEnabled</code>).
+  If you're a Cloud customer, contact <a href="/api-platform/troubleshoot/support">Apigee Edge Support</a> to have the property enabled.</p>
+
+  <aside class="note">
+    <b>Private Cloud:</b> If you're an Edge for Private Cloud customer, set this property with the
+    following API call:
+
+    <p><b>Note</b>: When updating properties, you must pass all existing properties to the API,
+    even if they are not being changed. If you omit properties in the payload, the properties are
+    removed.</p>
+    <div></div><devsite-code><pre class="devsite-click-to-copy" translate="no" dir="ltr" is-upgraded syntax="Carbon" syntax-guessed><span class="devsite-syntax-nx">curl</span><span class="devsite-syntax-w"> </span><span class="devsite-syntax-o">-</span><span class="devsite-syntax-nx">u</span><span class="devsite-syntax-w"> </span><span class="devsite-syntax-nx">email</span><span class="devsite-syntax-p">:</span><span class="devsite-syntax-nx">password</span><span class="devsite-syntax-w"> </span><span class="devsite-syntax-o">-</span><span class="devsite-syntax-nx">X</span><span class="devsite-syntax-w"> </span><span class="devsite-syntax-nx">POST</span><span class="devsite-syntax-w"> </span><span class="devsite-syntax-o">-</span><span class="devsite-syntax-nx">H</span><span class="devsite-syntax-w"> </span><span class="devsite-syntax-s">"Content-type:application/xml"</span><span class="devsite-syntax-w"> </span><span class="devsite-syntax-nx">http</span><span class="devsite-syntax-p">:</span><span class="devsite-syntax-c1">//host:8080/v1/o/myorg -d \</span>
+<span class="devsite-syntax-s">"&lt;Organization type="</span><span class="devsite-syntax-nx">trial</span><span class="devsite-syntax-s">" name="</span><span class="devsite-syntax-nx">MyOrganization</span><span class="devsite-syntax-s">"</span>&gt;
+<span class="devsite-syntax-s">    &lt;DisplayName&gt;MyOrganization&lt;/DisplayName&gt;</span>
+<span class="devsite-syntax-s">    &lt;Environments/&gt;</span>
+<span class="devsite-syntax-s">    &lt;Properties&gt;</span>
+<span class="devsite-syntax-s">        &lt;Property name="</span><span class="devsite-syntax-nx">features</span><span class="devsite-syntax-p">.</span><span class="devsite-syntax-nx">isHTTPStatusTooManyRequestEnabled</span><span class="devsite-syntax-s">"&gt;true&lt;/Property&gt;</span>
+<span class="devsite-syntax-s">    &lt;/Properties&gt;</span>
+&lt;<span class="devsite-syntax-s">/Organization&gt;"</span></pre></devsite-code>
+  </aside>
+
+  
+  
+  
+
+  
+</div>
+
+  
+    
+    
+      
+    <devsite-thumb-rating position="footer">
+    </devsite-thumb-rating>
+  
+       
+         <devsite-feedback
+  position="footer"
+  project-name="Apigee Edge"
+  product-id="1636213"
+  bucket="docsite"
+  context=""
+  version="t-devsite-webserver-20261006-r00-rc02.480918341592349554"
+  data-label="Send Feedback Button"
+  track-type="feedback"
+  track-name="sendFeedbackLink"
+  track-metadata-position="footer"
+  class="nocontent"
+  data-nosnippet
+  
+    disable-product-feedback
+  
+  
+  
+    project-icon="https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/apigee/images/touchicon-180.png"
+  
+  
+  
+  >
+
+  <button>
+  
+    
+    Send feedback
+  
+  </button>
+</devsite-feedback>
+       
+    
+    
+  
+
+  <div class="devsite-floating-action-buttons"></div></article>
+
+
+<devsite-content-footer class="nocontent" data-nosnippet>
+  <p>Except as otherwise noted, the content of this page is licensed under the <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 License</a>, and code samples are licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 License</a>. For details, see the <a href="https://developers.google.com/site-policies">Google Developers Site Policies</a>. Java is a registered trademark of Oracle and/or its affiliates.</p>
+  <p>Last updated 2026-10-09 UTC.</p>
+</devsite-content-footer>
+
+
+<devsite-notification
+>
+</devsite-notification>
+
+
+  
+<div class="devsite-content-data">
+  
+    
+    
+    <template class="devsite-thumb-rating-feedback">
+      <devsite-feedback
+  position="thumb-rating"
+  project-name="Apigee Edge"
+  product-id="1636213"
+  bucket="docsite"
+  context=""
+  version="t-devsite-webserver-20261006-r00-rc02.480918341592349554"
+  data-label="Send Feedback Button"
+  track-type="feedback"
+  track-name="sendFeedbackLink"
+  track-metadata-position="thumb-rating"
+  class="nocontent"
+  data-nosnippet
+  
+    disable-product-feedback
+  
+  
+  
+    project-icon="https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/apigee/images/touchicon-180.png"
+  
+  
+  
+  >
+
+  <button>
+  
+    Need to tell us more?
+  
+  </button>
+</devsite-feedback>
+    </template>
+  
+  
+    <template class="devsite-content-data-template">
+      [[["Easy to understand","easyToUnderstand","thumb-up"],["Solved my problem","solvedMyProblem","thumb-up"],["Other","otherUp","thumb-up"]],[["Missing the information I need","missingTheInformationINeed","thumb-down"],["Too complicated / too many steps","tooComplicatedTooManySteps","thumb-down"],["Out of date","outOfDate","thumb-down"],["Samples / code issue","samplesCodeIssue","thumb-down"],["Other","otherDown","thumb-down"]],["Last updated 2026-10-09 UTC."],[],[]]
+    </template>
+  
+</div>
+            
+          </devsite-content>
+        </main>
+        <devsite-footer-promos class="devsite-footer">
+          
+            
+          
+        </devsite-footer-promos>
+        <devsite-footer-linkboxes class="devsite-footer">
+          
+            
+<nav class="devsite-footer-linkboxes nocontent"
+     aria-label="Footer links"
+     data-nosnippet>
+  
+  <ul class="devsite-footer-linkboxes-list">
+    
+    <li class="devsite-footer-linkbox ">
+    <h3 class="devsite-footer-linkbox-heading no-link">About Apigee</h3>
+      <ul class="devsite-footer-linkbox-list">
+        
+        <li class="devsite-footer-linkbox-item">
+          
+          <a href="//apigee.com/about/apigee#block-bean-about-apigee-contact-us-header"
+             class="devsite-footer-linkbox-link gc-analytics-event"
+             data-category="Site-Wide Custom Events"
+            
+             data-label="Footer Link (index 1)"
+            >
+            
+          
+            We're part of Google
+          
+          </a>
+          
+          
+        </li>
+        
+        <li class="devsite-footer-linkbox-item">
+          
+          <a href="//apigee.com/api-management/#/events"
+             class="devsite-footer-linkbox-link gc-analytics-event"
+             data-category="Site-Wide Custom Events"
+            
+             data-label="Footer Link (index 2)"
+            >
+            
+          
+            Events
+          
+          </a>
+          
+          
+        </li>
+        
+        <li class="devsite-footer-linkbox-item">
+          
+          <a href="//apigee.com/about/partners/"
+             class="devsite-footer-linkbox-link gc-analytics-event"
+             data-category="Site-Wide Custom Events"
+            
+             data-label="Footer Link (index 3)"
+            >
+            
+          
+            Partners
+          
+          </a>
+          
+          
+        </li>
+        
+        <li class="devsite-footer-linkbox-item">
+          
+          <a href="//apigee.com/api-management/#/resources"
+             class="devsite-footer-linkbox-link gc-analytics-event"
+             data-category="Site-Wide Custom Events"
+            
+             data-label="Footer Link (index 4)"
+            >
+            
+              
+              
+            
+          
+            eBooks and webcasts
+          
+          </a>
+          
+          
+        </li>
+        
+      </ul>
+    </li>
+    
+    <li class="devsite-footer-linkbox ">
+    <h3 class="devsite-footer-linkbox-heading no-link">Community and support</h3>
+      <ul class="devsite-footer-linkbox-list">
+        
+        <li class="devsite-footer-linkbox-item">
+          
+          <a href="//community.apigee.com/index.html"
+             class="devsite-footer-linkbox-link gc-analytics-event"
+             data-category="Site-Wide Custom Events"
+            
+             data-label="Footer Link (index 1)"
+            >
+            
+          
+            Community
+          
+          </a>
+          
+          
+        </li>
+        
+        <li class="devsite-footer-linkbox-item">
+          
+          <a href="//support.apigee.com"
+             class="devsite-footer-linkbox-link gc-analytics-event"
+             data-category="Site-Wide Custom Events"
+            
+             data-label="Footer Link (index 2)"
+            >
+            
+          
+            Support overview
+          
+          </a>
+          
+          
+        </li>
+        
+        <li class="devsite-footer-linkbox-item">
+          
+          <a href="//status.apigee.com"
+             class="devsite-footer-linkbox-link gc-analytics-event"
+             data-category="Site-Wide Custom Events"
+            
+             data-label="Footer Link (index 3)"
+            >
+            
+          
+            Status
+          
+          </a>
+          
+          
+        </li>
+        
+        <li class="devsite-footer-linkbox-item">
+          
+          <a href="//apigee.com/about/support/portal/"
+             class="devsite-footer-linkbox-link gc-analytics-event"
+             data-category="Site-Wide Custom Events"
+            
+             data-label="Footer Link (index 4)"
+            >
+            
+              
+              
+            
+          
+            Support portal
+          
+          </a>
+          
+          
+        </li>
+        
+      </ul>
+    </li>
+    
+    <li class="devsite-footer-linkbox ">
+    <h3 class="devsite-footer-linkbox-heading no-link">Resources</h3>
+      <ul class="devsite-footer-linkbox-list">
+        
+        <li class="devsite-footer-linkbox-item">
+          
+          <a href="//apigee.com/api-management/"
+             class="devsite-footer-linkbox-link gc-analytics-event"
+             data-category="Site-Wide Custom Events"
+            
+             data-label="Footer Link (index 1)"
+            >
+            
+          
+            Developer overview
+          
+          </a>
+          
+          
+        </li>
+        
+        <li class="devsite-footer-linkbox-item">
+          
+          <a href="//www.youtube.com/playlist?list=PLIXjuPlujxxxe3iTmLtgfIBgpMo7iD7fk"
+             class="devsite-footer-linkbox-link gc-analytics-event"
+             data-category="Site-Wide Custom Events"
+            
+             data-label="Footer Link (index 2)"
+            >
+            
+          
+            4-minute videos for developers
+          
+          </a>
+          
+          
+        </li>
+        
+        <li class="devsite-footer-linkbox-item">
+          
+          <a href="//apigee.com/about/blog/"
+             class="devsite-footer-linkbox-link gc-analytics-event"
+             data-category="Site-Wide Custom Events"
+            
+             data-label="Footer Link (index 3)"
+            >
+            
+              
+              
+            
+          
+            Apigee blog
+          
+          </a>
+          
+          
+        </li>
+        
+      </ul>
+    </li>
+    
+  </ul>
+  
+</nav>
+          
+        </devsite-footer-linkboxes>
+        <devsite-footer-utility class="devsite-footer">
+          
+            
+
+<div class="devsite-footer-utility nocontent" data-nosnippet>
+  
+  
+  <nav class="devsite-footer-sites" aria-label="Other Google Developers websites">
+    <a href="https://developers.google.com/"
+       class="devsite-footer-sites-logo-link gc-analytics-event"
+       data-category="Site-Wide Custom Events"
+       data-label="Footer Google Developers Link">
+      <picture>
+        
+        <img class="devsite-footer-sites-logo"
+             src="https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/apigee/images/lockup-google-for-developers.svg"
+             loading="lazy"
+             alt="Google Developers">
+      </picture>
+    </a>
+    <ul class="devsite-footer-sites-list">
+      
+      <li class="devsite-footer-sites-item">
+        <a href="//developer.android.com"
+           class="devsite-footer-sites-link
+                  gc-analytics-event"
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Footer Android Link"
+         
+         >
+          Android
+        </a>
+      </li>
+      
+      <li class="devsite-footer-sites-item">
+        <a href="//developer.chrome.com/home"
+           class="devsite-footer-sites-link
+                  gc-analytics-event"
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Footer Chrome Link"
+         
+         >
+          Chrome
+        </a>
+      </li>
+      
+      <li class="devsite-footer-sites-item">
+        <a href="//firebase.google.com"
+           class="devsite-footer-sites-link
+                  gc-analytics-event"
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Footer Firebase Link"
+         
+         >
+          Firebase
+        </a>
+      </li>
+      
+      <li class="devsite-footer-sites-item">
+        <a href="//cloud.google.com"
+           class="devsite-footer-sites-link
+                  gc-analytics-event"
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Footer Google Cloud Platform Link"
+         
+         >
+          Google Cloud Platform
+        </a>
+      </li>
+      
+      <li class="devsite-footer-sites-item">
+        <a href="//developers.google.com/products/"
+           class="devsite-footer-sites-link
+                  gc-analytics-event"
+           data-category="Site-Wide Custom Events"
+         
+           data-label="Footer All products Link"
+         
+         >
+          All products
+        </a>
+      </li>
+      
+    </ul>
+  </nav>
+  
+
+  
+  <nav class="devsite-footer-utility-links" aria-label="Utility links">
+    
+    <ul class="devsite-footer-utility-list">
+      
+      <li class="devsite-footer-utility-item
+                 ">
+        
+        
+        <a class="devsite-footer-utility-link gc-analytics-event"
+           href="//policies.google.com/privacy"
+           data-category="Site-Wide Custom Events"
+           data-label="Footer Privacy link"
+         >
+          Privacy
+        </a>
+        
+      </li>
+      
+      <li class="devsite-footer-utility-item
+                 ">
+        
+        
+        <a class="devsite-footer-utility-link gc-analytics-event"
+           href="//policies.google.com/terms"
+           data-category="Site-Wide Custom Events"
+           data-label="Footer Site terms link"
+         >
+          Site terms
+        </a>
+        
+      </li>
+      
+      <li class="devsite-footer-utility-item
+                 ">
+        
+        
+        <a class="devsite-footer-utility-link gc-analytics-event"
+           href="//cloud.google.com/product-terms"
+           data-category="Site-Wide Custom Events"
+           data-label="Footer Google Cloud terms link"
+         >
+          Google Cloud terms
+        </a>
+        
+      </li>
+      
+      <li class="devsite-footer-utility-item
+                 glue-cookie-notification-bar-control">
+        
+        
+        <a class="devsite-footer-utility-link gc-analytics-event"
+           href="#"
+           data-category="Site-Wide Custom Events"
+           data-label="Footer Manage cookies link"
+         
+           aria-hidden="true"
+         >
+          Manage cookies
+        </a>
+        
+      </li>
+      
+    </ul>
+    
+    
+<devsite-language-selector>
+  <ul role="presentation">
+    
+    
+    <li role="presentation">
+      <a role="menuitem" lang="en"
+        >English</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="de"
+        >Deutsch</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="es_419"
+        >Español – América Latina</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="fr"
+        >Français</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="id"
+        >Indonesia</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="it"
+        >Italiano</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="pl"
+        >Polski</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="pt_br"
+        >Português – Brasil</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="vi"
+        >Tiếng Việt</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="tr"
+        >Türkçe</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="ru"
+        >Русский</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="he"
+        >עברית</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="ar"
+        >العربيّة</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="fa"
+        >فارسی</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="hi"
+        >हिंदी</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="bn"
+        >বাংলা</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="th"
+        >ภาษาไทย</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="zh_cn"
+        >中文 – 简体</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="zh_tw"
+        >中文 – 繁體</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="ja"
+        >日本語</a>
+    </li>
+    
+    <li role="presentation">
+      <a role="menuitem" lang="ko"
+        >한국어</a>
+    </li>
+    
+  </ul>
+</devsite-language-selector>
+
+  </nav>
+</div>
+          
+        </devsite-footer-utility>
+        <devsite-panel>
+          
+        </devsite-panel>
+        
+      </section>
+      </section>
+    <devsite-sitemask></devsite-sitemask>
+    <devsite-snackbar></devsite-snackbar>
+    <devsite-tooltip ></devsite-tooltip>
+    <devsite-heading-link></devsite-heading-link>
+    <devsite-analytics>
+      
+        <script type="application/json" analytics>[]</script>
+<script type="application/json" tag-management>{&#34;at&#34;: &#34;True&#34;, &#34;ga4&#34;: [], &#34;ga4p&#34;: [], &#34;gtm&#34;: [{&#34;id&#34;: &#34;GTM-N52333&#34;, &#34;purpose&#34;: 0}], &#34;parameters&#34;: {&#34;internalUser&#34;: &#34;False&#34;, &#34;language&#34;: {&#34;machineTranslated&#34;: &#34;False&#34;, &#34;requested&#34;: &#34;en&#34;, &#34;served&#34;: &#34;en&#34;}, &#34;pageType&#34;: &#34;article&#34;, &#34;projectName&#34;: &#34;Apigee Edge&#34;, &#34;signedIn&#34;: &#34;False&#34;, &#34;tenant&#34;: &#34;apigee&#34;, &#34;recommendations&#34;: {&#34;sourcePage&#34;: &#34;&#34;, &#34;sourceType&#34;: 0, &#34;sourceRank&#34;: 0, &#34;sourceIdenticalDescriptions&#34;: 0, &#34;sourceTitleWords&#34;: 0, &#34;sourceDescriptionWords&#34;: 0, &#34;experiment&#34;: &#34;&#34;}, &#34;experiment&#34;: {&#34;ids&#34;: &#34;&#34;}}}</script>
+      
+    </devsite-analytics>
+    
+    
+    
+    
+<script nonce="nSsmcIbEsJXOcqDprLb44MmoCkijN1">
+  
+  (function(d,e,v,s,i,t,E){d['GoogleDevelopersObject']=i;
+    t=e.createElement(v);t.async=1;t.src=s;E=e.getElementsByTagName(v)[0];
+    E.parentNode.insertBefore(t,E);})(window, document, 'script',
+    'https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/apigee/js/app_loader.js', '[10,"en",null,"/js/devsite_app_module.js","https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31","https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/apigee","https://apigee-dot-devsite-v2-prod-3p.appspot.com",null,null,["/_pwa/apigee/manifest.json","https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/images/video-placeholder.svg","https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/apigee/images/favicon.png","https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/apigee/images/lockup.svg","https://fonts.googleapis.com/css?family=Roboto:300,400,400italic,500,500italic,700,700italic|Roboto+Mono:400,500,700&display=swap"],1,null,[1,6,8,12,14,17,21,25,50,52,63,70,75,76,80,87,91,92,93,97,98,100,101,102,103,104,105,107,108,109,110,112,113,116,117,118,120,122,124,125,126,127,129,130,131,132,133,134,135,136,138,140,141,147,148,149,151,152,156,157,158,159,161,163,164,168,169,170,179,180,182,183,186,191,193,196],"AIzaSyCNm9YxQumEXwGJgTDjxoxXK6m1F-9720Q","AIzaSyCc76DZePGtoyUjqKrLdsMGk_ry7sljLbY","docs.apigee.com","AIzaSyB9bqgQ2t11WJsOX8qNsCQ6U-w91mmqF-I","AIzaSyAdYnStPdzjcJJtQ0mvIaeaMKj7_t6J_Fg",null,null,null,["MiscFeatureFlags__fix_lower_breadcrumbs","Profiles__enable_stripe_subscription_management","Cloud__enable_free_trial_server_call","Concierge__enable_devsite_llm_tools","Concierge__enable_remove_info_panel_tags","DevPro__enable_firebase_workspaces_card","Profiles__enable_developer_profile_pages_as_content","Profiles__enable_auto_apply_credits","DevPro__enable_devsite_captcha","Profiles__enable_complete_playlist_endpoint","Cloud__enable_cloud_shell","Profiles__enable_user_type","MiscFeatureFlags__enable_explicit_template_dependencies","MiscFeatureFlags__enable_project_variables","Cloud__enable_cloudx_experiment_ids","MiscFeatureFlags__developers_footer_image","MiscFeatureFlags__remove_cross_domain_tracking_params","Cloud__cache_serialized_dynamic_content","Profiles__enable_callout_notifications","DevPro__enable_free_benefits","Search__enable_dynamic_content_confidential_banner","Analytics__enable_devpro_interaction_logging","CloudShell__cloud_code_overflow_menu","MiscFeatureFlags__enable_variable_operator","DevPro__enable_g1_ineligible_redirect","Analytics__enable_clearcut_logging","Concierge__enable_actions_menu","Profiles__enable_awarding_url","Profiles__enable_targeted_hero","MiscFeatureFlags__enable_explain_this_code","Profiles__enable_purchase_prompts","MiscFeatureFlags__enable_view_transitions","Profiles__enable_profile_collections","MiscFeatureFlags__enable_firebase_utm","DevPro__enable_vertex_credit_card","MiscFeatureFlags__developers_footer_dark_image","Profiles__enable_public_developer_profiles","DevPro__enable_enterprise","Search__enable_page_map","Profiles__enable_recognition_badges","MiscFeatureFlags__enable_appearance_cookies","Search__enable_suggestions_from_borg","Cloud__enable_cloud_shell_fte_user_flow","DevPro__enable_embed_profile_creation","CloudShell__cloud_shell_button","MiscFeatureFlags__gdp_dashboard_reskin_enabled","Experiments__reqs_query_experiments","Profiles__enable_join_program_group_endpoint","Profiles__enable_developer_profile_benefits_ui_redesign","Profiles__enable_completequiz_endpoint","DevPro__enable_devpro_offers","DevPro__enable_payments_init","DevPro__enable_google_payments_buyflow","Profiles__require_profile_eligibility_for_signin","DevPro__enable_code_assist","SignIn__enable_l1_signup_flow","Cloud__enable_cloud_dlp_service","MiscFeatureFlags__enable_variable_operator_index_yaml","DevPro__enable_credits_banner","Profiles__enable_page_saving","Cloud__fast_free_trial","Profiles__enable_playlist_community_acl","DevPro__enable_g1_integration","TpcFeatures__enable_unmirrored_page_left_nav","Profiles__enable_completecodelab_endpoint","DevPro__enable_nvidia_credits_card","DevPro__enable_developer_subscriptions","AIStudioInteractionsToggle__interactions_are_default","Search__enable_ai_search_summaries_for_all","DevPro__remove_eu_tax_intake_form","EngEduTelemetry__enable_engedu_telemetry","Search__enable_ai_eligibility_checks","Cloud__enable_legacy_calculator_redirect","DevPro__enable_cloud_innovators_plus","MiscFeatureFlags__enable_framebox_badge_methods","Concierge__enable_pushui","Profiles__enable_release_notes_notifications","TpcFeatures__proxy_prod_host","BookNav__enable_tenant_cache_key","DevPro__enable_google_one_card","Profiles__enable_dashboard_curated_recommendations","Profiles__enable_developer_profiles_callout"],null,null,"AIzaSyA58TaKli1DculwmAmbpzLVGuWc8eCQgQc","https://developerscontentserving-pa.googleapis.com","AIzaSyDWBU60w0P9hEkr29kkksYs8Z7gvZ8u_wc","https://developerscontentsearch-pa.googleapis.com",2,4,null,"https://developerprofiles-pa.googleapis.com",[10,"apigee","Apigee Docs","docs.apigee.com",null,"apigee-dot-devsite-v2-prod-3p.appspot.com",null,null,[null,1,null,null,null,null,null,null,null,null,null,[1],null,null,null,null,null,null,[1],null,null,null,null,null,null,null,null,null,null,null,[1]],null,[20,null,null,null,null,null,"/images/lockup.svg","/images/touchicon-180.png",null,null,null,1,null,null,null,null,null,null,null,null,null,1,null,null,null,"/images/lockup-dark-theme.svg",[]],[],null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,[1,22],null,[[],[1,1]],[[null,null,null,null,["UA-4084158-30"],["GTM-N52333"],null,null,null,null,[["UA-4084158-30",1]],[["GTM-N52333",1]],1],null,[[4,2],[3,1]]],null,4],null,null,1,1,"https://developerscontentinsights-pa.googleapis.com","AIzaSyC11xEGtFhkmSh_iF6l_itbxnFz2GrIBOg","AIzaSyAXJ10nRF73mmdSDINgkCNX5bbd2KPcWm8","https://developers.googleapis.com",null,null,"AIzaSyCjP0KOnHfv8mwe38sfzZJMOnqE3HvrD4A",null,null,"https://developers.googleapis.com"]')
+  
+</script>
+
+    <devsite-a11y-announce></devsite-a11y-announce>
+  </body>
+</html>

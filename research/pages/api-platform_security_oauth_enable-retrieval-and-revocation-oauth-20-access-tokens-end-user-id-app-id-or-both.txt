@@ -1,0 +1,136 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+You can revoke OAuth 2.0 access tokens by end user ID, app ID, or both using the [RevokeOAuthV2](/apigee/docs/api-platform/reference/policies/revoke-oauth-v2-policy) policy. By end user, we mean the user of the app that is calling the API.
+
+**Warning:** OAuth tokens are cached for three minutes (180 seconds); therefore, a revoked token may still succeed for up to three minutes, until its cache limit expires.
+
+## When to store the user ID in an access token
+
+User IDs are not included in access tokens by default. Sometimes, it is useful to store the user ID in an access token. For example:
+
+- A feature for your website or app where users can see which third-party apps they have authorized, and to provide an option to revoke access to those apps.
+- A feature that allows an authorized user to revoke all access tokens associated with a specific Developer App.
+
+## About OAuth access tokens
+
+By default, when Apigee generates an OAuth 2.0 access token, the token has the format shown below:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+ "issued_at" : "1421847736581",
+ "application_name" : "a68d01f8-b15c-4be3-b800-ceae8c456f5a",
+ "scope" : "READ",
+ "status" : "approved",
+ "api_product_list" : "[PremiumWeatherAPI]",
+ "expires_in" : "3599", //--in seconds
+ "developer.email" : "tesla@weathersample.com",
+ "organization_id" : "0",
+ "token_type" : "BearerToken",
+ "client_id" : "k3nJyFJIA3p62DWOkLO6OJNi87GYXFmP",
+ "access_token" : "7S22UqXGJDTuUADGzJzjXzXSaGJL",
+ "organization_name" : "myorg",
+ "refresh_token_expires_in" : "0", //--in seconds
+ "refresh_count" : "0"
+}
+```
+
+Note the following:
+
+- The <span style="font-family:courier new,courier,monospace;">application_name</span> field contains the UUID of the app associated with the token. If you enable revocation of OAuth 2.0 access tokens by app ID, then this is the app ID you use.
+- The <span style="font-family:courier new,courier,monospace;">access_token</span> field contains the OAuth 2.0 access token value.
+- There is no field for end user ID in the default OAuth access token.
+
+To revoke OAuth 2.0 access tokens by end user ID, you have to configure the OAuth 2.0 policy to include the user ID in the token. After you configure the policy to include the end user ID in the token, it is included as the `app_enduser` field, as shown below:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+ "issued_at" : "1421847736581",
+ "application_name" : "a68d01f8-b15c-4be3-b800-ceae8c456f5a",
+ "scope" : "READ",
+ "app_enduser" : "6ZG094fgnjNf02EK",
+ "status" : "approved",
+ "api_product_list" : "[PremiumWeatherAPI]",
+ "expires_in" : "3599", //--in seconds
+ "developer.email" : "tesla@weathersample.com",
+ "organization_id" : "0",
+ "token_type" : "BearerToken",
+ "client_id" : "k3nJyFJIA3p62DWOkLO6OJNi87GYXFmP",
+ "access_token" : "7S22UqXGJDTuUADGzJzjXzXSaGJL",
+ "organization_name" : "myorg",
+ "refresh_token_expires_in" : "0", //--in seconds
+ "refresh_count" : "0"
+}
+```
+
+## Configuring the policies
+
+To revoke tokens by user ID, you must first configure the OAuth 2.0 policy to add the user ID to the access token. By including end user IDs in access tokens, you will then be able to revoke tokens by end user ID.
+
+To configure the policy to include an end user ID in an access token, you must specify the input variable that contains the end user ID. Use the `<AppEndUser>` tag to specify the variable:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OAuthV2 async="false" continueOnError="false" enabled="true" name="GenerateAccessTokenClient">
+  <DisplayName>OAuth 2.0.0 1</DisplayName>
+  <ExternalAuthorization>false</ExternalAuthorization>
+  <Operation>GenerateAccessToken</Operation>
+  <SupportedGrantTypes>
+    <GrantType>client_credentials</GrantType>
+  </SupportedGrantTypes>
+  <GenerateResponse enabled="true"/>
+  <GrantType>request.queryparam.grant_type</GrantType>
+  <AppEndUser>request.header.appuserID</AppEndUser>
+  <ExpiresIn>960000</ExpiresIn>
+</OAuthV2>
+```
+
+Here is an example `RevokeOAuthV2` policy configured to revoke access by `EndUserId`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RevokeOAuthV2 continueOnError="false" enabled="true" name="GetOAuthV2Info-1">
+    <DisplayName>Get OAuth v2.0 Info 1</DisplayName>
+    <EndUserId ref="request.header.appuserID"></EndUserId>
+    <Cascade>false</Cascade>
+</RevokeOAuthV2>
+```
+
+See also [Revoke OAuth V2 policy](/apigee/docs/api-platform/reference/policies/revoke-oauth-v2-policy#developer-app-id).
+
+The following example command generates a token and passes the user ID in `appuserID` header:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+curl -H "appuserID:6ZG094fgnjNf02EK" \
+-H "Content-Type: application/x-www-form-urlencoded" \
+  -H "Authorization: Basic c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ" \
+  -X POST "https://apitest.acme.com/oauth/token" \
+  -d "grant_type=client_credentials"
+```
+
+You can pass information as part of a request in other ways. For example, as an alternative, you can:
+
+- Use a form parameter variable: <span style="font-family:courier new,courier,monospace;">request.formparam.appuserID</span>
+- Use a flow variable providing the end user ID

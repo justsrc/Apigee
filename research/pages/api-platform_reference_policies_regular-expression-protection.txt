@@ -1,0 +1,715 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The RegularExpressionProtection policy extracts information from a message (for example, URI path, query parameter, header, form parameter, variable, XML payload, or JSON payload) and compares the value to regular expressions designed to identify threats. If any regular expression comparison evaluates to true, the policy throws a fault.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+**Note:** Instructions on this page assume a proficiency with regular expressions. You can find regular expression examples and other guidance for using regular expressions in Apigee in [Pattern matching with conditionals](/apigee/docs/api-platform/fundamentals/flow-variables-and-conditions#patternmatching).
+
+### Samples
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### GitHub
+
+The <a href="https://github.com/apigee/api-platform-samples/tree/master/sample-proxies/regex-protection" class="external">regex-protection sample on GitHub</a> illustrates how to trap potential SQL injection attacks issued through a query parameter that might contain malicious code in a `<script>` tag. The sample also illustrates a good practice of setting a generic 400 error status to prevent hackers from gaining any useful information from the response.
+
+</div>
+
+<div class="section">
+
+### JavaScript include attack protection
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<RegularExpressionProtection name="JsonPathRegExProtection">
+    <Source>request</Source>
+    <JSONPayload escapeSlashCharacter="true">
+       <JSONPath>
+          <Expression>$</Expression>
+          <Pattern><![CDATA[ <\s*script\b[^>]*>[^<]+<\s*\/\s*script\s*> ]]></Pattern>
+       </JSONPath>
+    </JSONPayload>
+ </RegularExpressionProtection>
+```
+
+The sample above illustrates how to use the RegularExpressionProtection policy to evaluate JSON payloads for JavaScript include attacks. Specifically, the content extracted by `<JSONPath>`/`<Expression>` is evaluated against the regular expression in `<JSONPath>`/`<Pattern>`.
+
+If the regular expression in your `<JSONPath>`/`<Pattern>` includes XML-reserved characters (", &, ', \<, or \>), you must wrap it in a CDATA (character data) section, as shown in the sample above, or XML-encode the reserved characters: for example, by replacing `<` with `&lt;` and `>` with `&gt;`.
+
+Additionally, if your regular expression includes forward slashes (/), you must escape them by setting the `<JSONPayload>` `escapeSlashCharacter` attribute to `true`.
+
+</div>
+
+<div class="section">
+
+### Case insensitive matching
+
+It's a common use case to do case-insensitive matching. Here's an example of how you can accomplish that in a regular expression using the construct `(?i)`. In this example, for instance, `DELETE`, `delete`, and `Delete` will evaluate to true.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Pattern>[\s]*(?i)((delete)|(exec)|(drop\s*table)|(insert)|(shutdown)|(update)|(\bor\b))</Pattern>
+```
+
+</div>
+
+<div class="section">
+
+### Form parameter checks
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<RegularExpressionProtection name="REP-Formparam">
+  <Source>request</Source>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <FormParam name="firstname">
+    <Pattern><![CDATA[[-+=$%&]]]></Pattern>
+  </FormParam>
+  <FormParam name="lastname">
+    <Pattern><![CDATA[[-+=$%&]]]></Pattern>
+  </FormParam>
+</RegularExpressionProtection>
+```
+
+This RegularExpressionProtection policy configuration will evaluate form parameters for the occurrence of special chatacters, within the set `[-+=$%&]`. This policy will have an effect only when the content-type header in the request is `application/x-www-form-urlencoded`. The policy configuration uses a CDATA (character data) section to wrap the regular expressions, because of the presence of the & character, which is special in XML.
+
+</div>
+
+</div>
+
+------------------------------------------------------------------------
+
+## About the Regular Expression Protection policy
+
+Apigee enables you to configure *regular expressions* that can be evaluated against API traffic at runtime to identify common content-level threats that follow certain patterns.
+
+A *regular expression*, or *regex* for short, is a set of strings that specify a pattern in a string. Regular expressions enable content to be programmatically evaluated for patterns. Regular expressions can be used, for example, to evaluate an email address to ensure that it is properly structured. For more information, see <a href="https://docs.oracle.com/javase/tutorial/essential/regex/intro.html" class="external">Regular Expressions</a> in the Java Tutorials.
+
+The most common usage of RegularExpressionProtection is the evaluation of JSON and XML payloads for malicious content.
+
+No regular expression can eliminate all content-based attacks, and multiple mechanisms should be combined to enable defense-in-depth. This section describes some recommended patterns for excluding content.
+
+### Example exclusion patterns
+
+Regular expressions must be XML-encoded in the policy's XML configuration file. See also [Antipattern: Use greedy quantifiers in the RegularExpressionProtection policy](/apigee/docs/api-platform/antipatterns/greedy-quantifiers).
+
+| Name | Regular Expression |
+| --- | --- |
+| SQL Injection | [\s]*((delete)\|(exec)\|(drop\s*table)\|(insert)\|(shutdown)\|(update)\|(\bor\b)) |
+| Server-Side Include Injection | <!--#(include\|exec\|echo\|config\|printenv)\s+.* XML encoded: &lt;!--#(include\|exec\|echo\|config\|printenv)\s+.* |
+| XPath Abbreviated Syntax Injection | (/(@?[\w_?\w:\*]+(\[[^]]+\])*)?)+ |
+| XPath Expanded Syntax Injection | /?(ancestor(-or-self)?\|descendant(-or-self)?\|following(-sibling)) |
+| JavaScript Injection | <\s*script\b[^>]*>[^<]+<\s*/\s*script\s*> XML encoded: &lt;\s*script\b[^&gt;]*&gt;[^&lt;]+&lt;\s*/\s*script\s*&gt; |
+
+### Set the Content-Type header in a request with an XML or JSON payload
+
+The payload of the Regular Expression Protection policy can include the following elements:
+
+- `<XMLPayload>` element: Specifies that information needs to be extracted from an XML payload and evaluated against the regular expression provided.
+
+  If you use `<XMLPayload>` in the policy, the `Content-Type` header of the request must be an XML content-type such as `application/xml` or `text/xml`.
+
+- `<JSONPayload>` element: Specifies that information needs to be extracted from a JSON payload and evaluated against the regular expression provided.
+
+  If you use `<JSONPayload>` in the policy, the `Content-Type` header of the request must be a JSON content-type such as `application/json`.
+
+Typically you design an API to accept either XML or JSON. However, there could be a scenario where the API accepted both. You could then define a Regular Expression Protection policy that uses both the `<XMLPayload>` and `<JSONPayload>` elements. Only one element would apply for a specific request based on the value of the `Content-Type` header.
+
+## Element reference
+
+The element reference describes the elements and attributes of the RegularExpressionProtection policy.
+
+**NOTE:** In this topic "`REGEX PATTERN`" stands in for a valid Regular Expression pattern used to perform the desired matching. Apigee follows the same Regex rules as the classes in the <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" class="external">java.util.regex package</a> in the Java language.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<RegularExpressionProtection async="false" continueOnError="false" enabled="true" name="Regular-Expression-Protection-1">
+   <DisplayName>Regular Expression Protection 1</DisplayName>
+   <Source>response</Source>
+   <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+   <URIPath>
+     <Pattern>REGEX PATTERN</Pattern>
+     <Pattern>REGEX PATTERN</Pattern>
+   </URIPath>
+   <QueryParam name="a-query-param">
+     <Pattern>REGEX PATTERN</Pattern>
+     <Pattern>REGEX PATTERN</Pattern>
+   </QueryParam>
+   <Header name="a-header">
+     <Pattern>REGEX PATTERN</Pattern>
+     <Pattern>REGEX PATTERN</Pattern>
+   </Header>
+   <FormParam name="a-form-param">
+     <Pattern>REGEX PATTERN</Pattern>
+     <Pattern>REGEX PATTERN</Pattern>
+   </FormParam>
+   <Variable name="request.content">
+     <Pattern>REGEX PATTERN</Pattern>
+     <Pattern>REGEX PATTERN</Pattern>
+   </Variable>
+   <XMLPayload>
+     <Namespaces>
+       <Namespace prefix="apigee">http://www.apigee.com</Namespace>
+     </Namespaces>
+     <XPath>
+       <Expression>/apigee:Greeting/apigee:User</Expression>
+       <Type>string</Type>
+       <Pattern>REGEX PATTERN</Pattern>
+       <Pattern>REGEX PATTERN</Pattern>
+     </XPath>
+   </XMLPayload>
+   <JSONPayload>
+     <JSONPath>
+       <Expression>$.store.book[*].author</Expression>
+       <Pattern>REGEX PATTERN</Pattern>
+       <Pattern>REGEX PATTERN</Pattern>
+     </JSONPath>
+    </JSONPayload>
+</RegularExpressionProtection>
+```
+
+## \<RegularExpressionProtection\> attributes
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<RegularExpressionProtection async="false" continueOnError="false" enabled="true" name="Regular-Expression-Protection-1">
+```
+
+The following table describes attributes that are common to all policy parent elements:
+
+| Attribute | Description | Default | Presence |
+| --- | --- | --- | --- |
+| name | The internal name of the policy. The value of the name attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters. Optionally, use the <DisplayName> element to label the policy in the management UI proxy editor with a different, natural-language name. | N/A | Required |
+| continueOnError | Set to false to return an error when a policy fails. This is expected behavior for most policies. Set to true to have flow execution continue even after a policy fails. See also: Fault rules are triggered ONLY in an error state (about continueOnError) Handling faults within the current flow | false | Optional |
+| enabled | Set to true to enforce the policy. Set to false to turn off the policy. The policy will not be enforced even if it remains attached to a flow. | true | Optional |
+| async | This attribute is deprecated. | false | Deprecated |
+
+## \<DisplayName\> element
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, natural-language name.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+| Default | N/A If you omit this element, the value of the policy's name attribute is used. |
+| --- | --- |
+| Presence | Optional |
+| Type | String |
+
+## \<Source\> element
+
+Indicates the message from which information needs to be extracted.
+
+If the `<Source>` element is omitted, the value defaults to `message`. For example, `<Source>message</Source>`. When set to `message`, the policy uses the request message as source when attached to a request flow. Likewise, the policy uses the response message when attached to a response flow.
+
+If the source message cannot be resolved or if it resolves to a non-message type, the policy returns an error.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Source>response</Source>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+## \<IgnoreUnresolvedVariables\> element
+
+Determines whether the policy returns an error when it encounters a variable that is unresolvable.
+
+If set to `false` (the default), the policy returns an error when an unresolvable variable is encountered. If set to `true`, the unresolved variable is treated as empty string (Null).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | false    |
+| **Presence:** | Optional |
+| **Type:**     | Boolean  |
+
+## \<URIPath\> element
+
+Specifies that information needs to be extracted from the request URI path and evaluated against the regular expressions provided. You must provide at least one `<Pattern>` element specifying a regular expression pattern to match.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<URIPath>
+  <Pattern>REGEX PATTERN</Pattern>
+  <Pattern>REGEX PATTERN</Pattern>
+</URIPath>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | N/A      |
+
+## \<QueryParam\> element
+
+Specifies that information needs to be extracted from the request query parameter and evaluated against the regular expressions provided. You must provide at least one `<Pattern>` element specifying a regular expression pattern to match.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<QueryParam name="a-query-param">
+  <Pattern>REGEX PATTERN</Pattern>
+  <Pattern>REGEX PATTERN</Pattern>
+</QueryParam>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | N/A      |
+
+### Attributes
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| name | Name of the request query parameter from which information needs to be extracted for evaluation against the regular expressions provided. | N/A | Required |
+
+## \<Header\> element
+
+Specifies that information needs to be extracted from the request and response headers and evaluated against the regular expressions provided. You must provide at least one `<Pattern>` element specifying a regular expression pattern to match.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Header name="a-header">
+  <Pattern>REGEX PATTERN</Pattern>
+  <Pattern>REGEX PATTERN</Pattern>
+</Header>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | N/A      |
+
+### Attributes
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| name | Name of the request and response header from which information needs to be extracted for evaluation against the regular expressions provided. | N/A | Required |
+
+## \<FormParam\> element
+
+Specifies that information needs to be extracted from the request form parameter and evaluated against the regular expressions provided. You must provide at least one `<Pattern>` element specifying a regular expression pattern to match.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FormParam name="a-form-param">
+   <Pattern>REGEX PATTERN</Pattern>
+   <Pattern>REGEX PATTERN</Pattern>
+</FormParam>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | N/A      |
+
+### Attributes
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| name | Name of the request form parameter from which information needs to be extracted for evaluation against the regular expressions provided. | N/A | Required |
+
+## \<Variable\> element
+
+Specifies that information needs to be extracted from the given variable and evaluated against the regular expressions provided.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Variable name="request.content">
+   <Pattern>REGEX PATTERN</Pattern>
+   <Pattern>REGEX PATTERN</Pattern>
+</Variable>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | N/A      |
+
+### Attributes
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| name | Name of the variable from which information needs to be extracted for evaluation against the regular expressions provided. | N/A | Required |
+
+## \<XMLPayload\> element
+
+Specifies that information needs to be extracted from an XML payload and evaluated against the regular expressions provided.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<XMLPayload>
+   <Namespaces>
+      <Namespace prefix="apigee">http://www.apigee.com</Namespace>
+   </Namespaces>
+   <XPath>
+      <Expression>/apigee:Greeting/apigee:User</Expression>
+      <Type>string</Type>
+      <Pattern>REGEX PATTERN</Pattern>
+      <Pattern>REGEX PATTERN</Pattern>
+   </XPath>
+</XMLPayload>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | N/A      |
+
+## \<XMLPayload\>/\<Namespaces\> element
+
+Specifies the namespaces to be used in the XPath evaluation.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<XMLPayload>
+   <Namespaces>
+      <Namespace prefix="apigee">http://www.apigee.com</Namespace>
+   </Namespaces>
+   <XPath>
+      <Expression>/apigee:Greeting/apigee:User</Expression>
+      <Type>string</Type>
+      <Pattern>REGEX PATTERN</Pattern>
+      <Pattern>REGEX PATTERN</Pattern>
+   </XPath>
+</XMLPayload>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+## \<XMLPayload\>/\<Namespaces\>/\<Namespace\> element
+
+Specifies each namespace to be used in the XPath evaluation.  
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Namespaces>
+   <Namespace prefix="apigee">http://www.apigee.com</Namespace>
+</Namespaces>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+### Attributes
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| prefix | Provides a prefix to help qualify a given namespace. | N/A | Required |
+
+## \<XMLPayload\>/\<XPath\> element
+
+Specifies the XPath to be evaluated.  
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<XPath>
+   <Expression>/apigee:Greeting/apigee:User</Expression>
+   <Type>string</Type>
+   <Pattern>REGEX PATTERN</Pattern>
+   <Pattern>REGEX PATTERN</Pattern>
+</XPath>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | N/A      |
+
+## \<XMLPayload\>/\<XPath\>/\<Expression\> element
+
+Specifies the XPath expression defined for the variable. Only XPath 1.0 expressions are supported. For example, `<Expression>/company/employee[@age>=$request.header.age]</Expression>` extracts details for employees whose age is greater than or equal to the value specified in `request.header.age`.  
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<XPath>
+   <Expression>/apigee:Greeting/apigee:User</Expression>
+   <Type>string</Type>
+   <Pattern>REGEX PATTERN</Pattern>
+   <Pattern>REGEX PATTERN</Pattern>
+</XPath>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+## \<XMLPayload\>/\<XPath\>/\<Type\> element
+
+Specifies the desired output data type.
+
+Usually you will use "string" or "nodeset". Use "string" if you are certain that your xpath query will result in at most one value, or if you want to check at most one value. If your xpath query may return multiple values, specify "nodeset" to check all the values.
+
+For example, consider the XPath expression `//*/@*`. It matches all attributes on all elements. If you specify "string" as the `Type`, Apigee will coerce the result of this query to a single string; it will be the value of one of the attributes on one of the elements in the XML document, but which attribute and which element is not defined. Apigee will then perform pattern matching against the value of just that single attribute. This is probably not what you want.
+
+Conversely, if you specify "nodeset" as the `Type` for that XPath expression, Apigee will perform pattern matching against each of the attribute values on each element in the XML document.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<XPath>
+   <Expression>/apigee:Greeting/apigee:User</Expression>
+   <Type>string</Type>
+   <Pattern>REGEX PATTERN</Pattern>
+   <Pattern>REGEX PATTERN</Pattern>
+</XPath>
+```
+
+|  |  |
+|----|----|
+| **Default:** | string |
+| **Presence:** | Optional |
+| **Type:** | String |
+| **Valid values:** | One of these keywords: `string`, `boolean`, `int`, `long`, `float`, `double`, and `nodeset`. |
+
+## \<XMLPayload\>/\<XPath\>/\<Pattern\> element
+
+Defines the regular expression pattern. If a regular expression in your`<Pattern>` element includes XML-reserved characters (", &, ', \<, or .), you must XML-encode it before you include it.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<XPath>
+   <Expression>/apigee:Greeting/apigee:User</Expression>
+   <Type>string</Type>
+   <Pattern>REGEX PATTERN</Pattern>
+   <Pattern>REGEX PATTERN</Pattern>
+</XPath>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Required |
+| **Type:**     | String   |
+
+## \<JSONPayload\> element
+
+Specifies that information needs to be extracted from a JSON payload and evaluated against the regular expressions provided.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<JSONPayload>
+   <JSONPath>
+      <Expression>$.store.book[*].author</Expression>
+      <Pattern>REGEX PATTERN</Pattern>
+      <Pattern>REGEX PATTERN</Pattern>
+   </JSONPath>
+</JSONPayload>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | N/A      |
+
+### Attributes
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| escapeSlashCharacter | Set to `true` to escape any forward slash (/) characters in the regular expressions in `<JSONPath>`/`<Pattern>`. | true | Optional |
+
+## \<JSONPayload\>/\<JSONPath\>/\<Expression\> element
+
+Specifies the JSONPath expression defined for the variable.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<JSONPath>
+   <Expression>$.store.book[*].author</Expression>
+   <Pattern>REGEX PATTERN</Pattern>
+   <Pattern>REGEX PATTERN</Pattern>
+</JSONPath>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+## \<JSONPayload\>/\<JSONPath\>/\<Pattern\> element
+
+Defines the regular expression pattern. If a regular expression in your `<Pattern>` element includes XML-reserved characters (", &, ', \<, or .), you must XML-encode it before you include it.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<JSONPath>
+   <Expression>$.store.book[*].author</Expression>
+   <Pattern>REGEX PATTERN</Pattern>
+   <Pattern>REGEX PATTERN</Pattern>
+</JSONPath>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Required |
+| **Type:**     | String   |
+
+## Error reference
+
+This section describes the error codes and messages returned and fault variables set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. If you want to capture an error and raise your own custom error, set the `continueOnError="true"` attribute on the policy root element. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+**Tip:** Need help resolving an error? Click *build* in the Fix column for detailed troubleshooting information.
+
+| Error Code | Message |
+|----|----|
+|  |  |
+| `ExecutionFailed` | `Failed to execute the RegularExpressionProtection StepDefinition {0}. Reason: {1}` |
+| `InstantiationFailed` | `Failed to instantiate the RegularExpressionProtection StepDefinition {0}` |
+| `NonMessageVariable` | `Variable {0} does not resolve to a Message` |
+| `SourceMessageNotAvailable` | `{0} message is not available for RegularExpressionProtection StepDefinition {1}` |
+| `ThreatDetected` | `Regular Expression Threat Detected in {0}: regex: {1} input: {2}` |
+| `VariableResolutionFailed` | `Failed to resolve variable {0}` |
+
+### Deployment errors
+
+**Tip:** Need help resolving an error? Click *build* in the Fix column for detailed troubleshooting information.
+
+| Error Code | Message | Fix |
+|----|----|----|
+|  |  |  |
+| `CannotBeConvertedToNodeset` | `RegularExpressionProtection {0}: Result of xpath {1} cannot be converted to nodeset. Context {2}` | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/regular-expression-protection-deployment-errors#cannotbeconvertedtonodeset) |
+| `DuplicatePrefix` | `RegularExpressionProtection {0}: Duplicate prefix {1}` | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/regular-expression-protection-deployment-errors#duplicateprefix) |
+| `EmptyJSONPathExpression` | `RegularExpressionProtection {0}: Empty JSONPath expression` | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/regular-expression-protection-deployment-errors#emptyjsonpathexpression) |
+| `EmptyXPathExpression` | `RegularExpressionProtection {0}: Empty XPath expression` | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/regular-expression-protection-deployment-errors#emptyxpathexpression) |
+| `InvalidRegularExpression` | `RegularExpressionProtection {0}: Invalid Regular Expression {1}, Context {2}` | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/regular-expression-protection-deployment-errors#invalidregularexpression) |
+| `JSONPathCompilationFailed` | `RegularExpressionProtection {0}: Failed to compile jsonpath {1}. Context {2}` | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/regular-expression-protection-deployment-errors#jsonpathcompilationfailed) |
+| `NONEmptyPrefixMappedToEmptyURI` | `RegularExpressionProtection {0}: Non-empty prefix {1} cannot be mapped to empty uri` | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/regular-expression-protection-deployment-errors#nonemptyprefixmappedtoemptyuri) |
+| `NoPatternsToEnforce` | `RegularExpressionProtection {0}: No patterns to enforce in {1}` | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/regular-expression-protection-deployment-errors#nopatternstoenforce) |
+| `NothingToEnforce` | `RegularExpressionProtection {0}: at least one of URIPath, QueryParam, Header, FormParam, XMLPayload, JSONPayload is mandatory` | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/regular-expression-protection-deployment-errors#nothingtoenforce) |
+| `XPathCompilationFailed` | `RegularExpressionProtection {0}: Failed to compile xpath {1}. Context {2}` | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/regular-expression-protection-deployment-errors#xpathcompilationfailed) |
+
+### Fault variables
+
+These variables are set when this policy triggers an error. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``fault_name``"` | `fault_name` is the name of the fault, as listed in the table above. | `fault.name Matches "ThreatDetected"` |
+| `regularexpressionprotection.``policy_name``.failed` | `policy_name` is the user-specified name of the policy that threw the fault. | `regularexpressionprotection.Regular-Expressions-Protection-1.failed = true` |
+
+## Schemas
+
+**Sample:** See our <a href="https://github.com/apigee/api-platform-samples/tree/master/schemas/policy" class="external">GitHub repository</a> samples for the most recent schemas.
+
+## Related topics
+
+[JSON Threat Protection policy](/apigee/docs/api-platform/reference/policies/json-threat-protection-policy)
+
+[XML Threat Protection policy](/apigee/docs/api-platform/reference/policies/xml-threat-protection-policy)

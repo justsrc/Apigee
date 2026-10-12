@@ -1,0 +1,21 @@
+URL: https://github.com/apigee/api-platform-samples/issues/58
+TITLE: Unable to deploy oauth-advanced proxy
+STATE: open state_reason: None
+AUTHOR: sudheehegde association: NONE
+CREATED: 2015-10-16T18:02:46Z CLOSED: None
+LABELS: 
+MILESTONE: None
+--- BODY ---
+Import failed to /v1/organizations/nielsendevjam/apis?action=import&name=oauth-advanced with status 400:
+{
+  "code" : "messaging.config.beans.InvalidBundle",
+  "message" : "Bundle is invalid. Unable to read/find APIProxy contents",
+  "contexts" : [ ]
+}
+
+
+--- COMMENTS (1) ---
+
+### comment by tjgragg (association=NONE) at 2016-03-28T19:08:59Z
+Bump- still an issue.
+

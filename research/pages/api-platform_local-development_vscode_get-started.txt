@@ -1,0 +1,29 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+**Before you start**:
+
+- Ensure that you have followed the steps described in [Set up Apigee API Management in Cloud Code](/apigee/docs/api-platform/local-development/setup), including [installing the Apigee Emulator](/apigee/docs/api-platform/local-development/vscode/manage-apigee-emulator#install).
+- Learn more about API proxies in [Understanding APIs and API proxies](/apigee/docs/api-platform/fundamentals/understanding-apis-and-api-proxies).
+
+Build your first Apigee API proxy using Cloud Code.
+
+1.  [Create an Apigee workspace](/apigee/docs/api-platform/local-development/vscode/tutorial-create-workspace) to set up the directory structure required for local development with Apigee.
+
+2.  [Create an API proxy](/apigee/docs/api-platform/local-development/vscode/tutorial-create-proxy). You'll connect your API proxy to a mock target endpoint so you can see how it works.
+
+3.  [Configure and deploy an environment](/apigee/docs/api-platform/local-development/vscode/tutorial-deploy) that includes your new API proxy.
+
+4.  [Test your API](/apigee/docs/api-platform/local-development/vscode/tutorial-test). Learn how to build and export test resources and authenticate using an API key to test your API.
+
+5.  [Change your target endpoint](/apigee/docs/api-platform/local-development/vscode/tutorial-change-target-endpoint) so your API proxy returns XML data.
+
+6.  [Attach a policy](/apigee/docs/api-platform/local-development/vscode/tutorial-attach-policy) to convert the response from XML to JSON.
+
+7.  [Deploy to an Apigee environment](/apigee/docs/api-platform/local-development/vscode/tutorial-deploy-apigee).
+
+8.  [Promote an archive to production](/apigee/docs/api-platform/local-development/vscode/tutorial-promote).
+
+<a href="/apigee/docs/api-platform/local-development/vscode/tutorial-create-workspace" class="button button-primary">(NEXT) Step 1: Create an Apigee workspace</a> <a href="/apigee/docs/api-platform/local-development/vscode/tutorial-create-proxy" class="button">2</a> <a href="/apigee/docs/api-platform/local-development/vscode/tutorial-deploy" class="button">3</a> <a href="/apigee/docs/api-platform/local-development/vscode/tutorial-test" class="button">4</a> <a href="/apigee/docs/api-platform/local-development/vscode/tutorial-change-target-endpoint" class="button">5</a> <a href="/apigee/docs/api-platform/local-development/vscode/tutorial-attach-policy" class="button">6</a> <a href="/apigee/docs/api-platform/local-development/vscode/tutorial-deploy-apigee" class="button">7</a> <a href="/apigee/docs/api-platform/local-development/vscode/tutorial-promote" class="button">8</a>

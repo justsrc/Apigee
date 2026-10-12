@@ -1,0 +1,1 @@
+This page has been moved. Please see the new [SAML policies overview](/apigee/docs/api-platform/reference/policies/saml-assertion-policies-overview).

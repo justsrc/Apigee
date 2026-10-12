@@ -1,0 +1,118 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This topic describes how Apigee handles HTTP/1.1 caching headers when you're using the ResponseCache policy. Apigee currently supports a subset of the HTTP/1.1 caching headers and directives (unsupported features are listed in this topic) received from backend target (origin) servers.
+
+In addition, with certain headers Apigee takes action based on their directives. In some cases, these HTTP/1.1 cache headers override whatever behavior is specified in the ResponseCache policy. For example, if the `Cache-Control` header is returned from a backend server, you can have the header's `s-maxage` directive potentially override other expiration settings in the policy.
+
+**Note:** The [HTTP/1.1 specification](https://www.w3.org/Protocols/rfc2616/rfc2616.html) describes standard caching headers and control mechanisms that support caching along the HTTP request/response chain. These headers and mechanisms provide information about cached resources. They also help servers determine how to manage cached data. The specification itself contains detailed information about [caching in HTTP](https://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html#sec13). There are also many blogs, articles, and other resources available on the Internet that explain HTTP caching.
+
+**Note:** **Using headers to influence cache keys and cache entry TTL** You can have Apigee use response headers when constructing response cache keys and setting cache entry TTL. To do this, you use these flag elements of the ResponseCache policy:
+
+- `<UseResponseCacheHeaders>` -- When this is set to `true`, Apigee will consider HTTP response headers used when setting the "time to live" (TTL) of the response in the cache. For details, see "Setting cache entry expiration" and `<UseResponseCacheHeaders>` in [Response Cache policy](/apigee/docs/api-platform/reference/policies/response-cache-policy).
+- `<UseAcceptHeader>` -- When this is set to `true`, Apigee will use response `Accept` headers to augment the cache key. For more, see `<UseAcceptHeader>` in [Response Cache policy](/apigee/docs/api-platform/reference/policies/response-cache-policy).
+
+| Header | Support |
+|----|----|
+| [Cache-Control](#cache-control) | Supported on responses returned from backend origin servers, but not client requests. Apigee supports a subset of directives. |
+| [Expires](#expires) | Supported. Can be overridden. |
+| [Entity Tags](#Entity_Tag_support_) (ETags) | Specific behavior for [If-Match](#If-Match_header_support) and [If-None-Match](#If-None-Match). |
+| [If-Modified-Since](#The_If-Modified-Since_header) | On GET requests, header is passed to the origin server even if a valid cache entry exists. |
+| [Accept-Encoding](#Accept-Encoding) | Apigee sends either compressed or uncompressed responses depending on the incoming headers. |
+
+## Cache-Control
+
+Apigee supports the `Cache-Control` header only on responses returned from backend origin servers (the HTTP/1.1 spec allows `Cache-Control` headers in both client requests and origin server responses). Origin servers can include both target endpoints defined in an Apigee API proxy and those created using TargetServer API calls.
+
+### Cache-Control support limitations
+
+Apigee supports a subset of `Cache-Control` response header capabilities defined in the HTTP/1.1 specification. Please note the following:
+
+- Apigee does not support `Cache-Control` headers that arrive with inbound client requests.
+- Apigee supports only the notion of public caches. (According to the HTTP specification, `Cache-Control` can either be public (shared) or private (single user).)
+- Apigee supports only a subset of `Cache-Control` response directives in the HTTP/1.1 specification. See [Support for Cache-Control response header directives](#responseDirectives) for details.
+
+### Support for Cache-Control response header directives
+
+Apigee supports a subset directives from the HTTP/1.1 specification on responses from origin servers. The following table describes Apigee support for HTTP Cache-Control response header directives.
+
+For more detailed information on the directives listed here, see [Cache-Control](https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9) in the HTTP/1.1 specification.
+
+| Cache-Control directive | How Apigee processes the directive |
+| --- | --- |
+| cache-extension | Not supported. |
+| max-age | If your ResponseCache policy sets the <UseResponseCacheHeaders> element to true , the response can be cached for the number of seconds specified by this directive. This directive is overridden by the s-maxage directive and overrides the Expires header. It can also be overridden by the policy's <ExpirySettings> element. For more, see "Setting cache entry expiration" and <UseResponseCacheHeaders> in Response Cache policy . Note: Content cached with the ResponseCache policy will retain the max-age value set by its origin. This means that when retrieved from the cache, the content might be older than its max-age value suggests (older than the client knows). |
+| must-revalidate | Not supported. All cache entries are deleted by Apigee as soon as they expire. |
+| no-cache | Apigee caches the origin response, but it must be revalidated with the origin server before being used to satisfy any subsequent client requests. This rule allows the origin to return a 304 Not Modified response in order to indicate that the response should be returned from cache, thus saving the processing required to return the entire response. If the origin server returns a full response, it replaces the existing cache entry. Any field names specified with this directive are ignored. Note: The HTTP/1.0 header, Pragma: no-cache is treated as equivalent to Cache-Control: no-cache . |
+| no-store | Not supported. |
+| no-transform | Not supported. |
+| private | Not supported. If this directive is received, the origin response is not cached. Any field names are ignored. |
+| proxy-revalidate | Not supported. All cache entries are deleted by Apigee as soon as they expire. |
+| public | Apigee caches the origin response, even when other directives indicate otherwise. Per the HTTP/1.1 specification, the only exception to this rule is if the response includes an Authorization header. |
+| s-maxage | If your ResponseCache policy sets the <UseResponseCacheHeaders> element to true , the response can be cached for the number of seconds specified by this directive. This directive is overrides the max-age directive and the Expires header. It can be overridden by the policy's <ExpirySettings> element. For more, see "Setting cache entry expiration" and <UseResponseCacheHeaders> in Response Cache policy . Note: Content cached with the ResponseCache policy will retain the s-maxage value set by its origin. This means that when retrieved from the cache, the content might be older than its s-maxage value suggests (older than the client knows). |
+
+## Expires
+
+When the `UseResponseCacheHeaders` flag in the ResponseCache policy is set to `true`, Apigee can use the `Expires` header to determine the time to live (TTL) of a cached entry. This header specifies a date/time after which a response's cache entry is considered stale. This header allows servers to signal when it's okay to return a cached value based on a time stamp.
+
+**Note:** The `Cache-Control` header directives `max-age` and `s-maxage` take precedence over and override the `Expires` header. For more, see "Setting cache entry expiration" and `<UseResponseCacheHeaders>` in [Response Cache policy](/apigee/docs/api-platform/reference/policies/response-cache-policy).
+
+Acceptable date formats for the `Expires` header are described in the HTTP/1.1 specification. For example:
+
+Expires: Thu, 01 Dec 1994 16:00:00 GMT
+
+For detailed information on HTTP date/time formats, see [Date/Time Formats](https://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3) in the HTTP/1.1 specification.
+
+**Note:** While section 14.21 of the specification indicates that an `Expires` value of more than one year in the future means that a cache entry never expires, Apigee interprets such a value to mean that the entry should be cached until the specified date and time.
+
+For more information on `Expires` header, see [Header Field Definitions](https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9) in the HTTP/1.1 specification.
+
+## ETag
+
+An entity tag (ETag) is an identifier associated with a requested resource. Using an ETag, a server can determine if the requested resource and the associated cached resource match. For example, the server could re-cache the response if it doesn't match what's currently cached. It could return the cached resource if the ETags match.
+
+When a target endpoint sends a response back to Apigee with an ETag, Apigee caches the ETag along with the response.
+
+You can read more about Entity Tags in [Protocol Parameters](https://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11) in the HTTP/1.1 specification.
+
+### If-Match
+
+With the `If-Match` request header, a cached entity is current if the ETag in the header matches the cached ETag. Any requests other than GET that specify an `If-Match` header are passed on to the origin server to ensure that any origin caching facilities have a chance to process the request.
+
+You can read more about `If-Match` in [Header Field Definitions](https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9) in the HTTP/1.1 specification.
+
+If Apigee receives an inbound GET request from a client that includes an `If-Match` header:
+
+| If | Then |
+| --- | --- |
+| The If-Match header specifies one or more ETags | Apigee retrieves any unexpired cache entries for the specified resource and compares any strong ETags on those cached entries with those specified in the If-Match header. If a match is found, the cache entry is returned. If not, the request is passed to the origin server. |
+| The If-Match header specifies "*" | The request is passed on to the origin server to ensure that any origin caching facilities have a chance to process the request |
+| A cache entry with the same request URI is found, but it contains only weak ETags | The entry must be revalidated by the origin server before being returned to the client |
+| The ETags comes from the origin server. | The ETag is returned unchanged to the client |
+
+### If-None-Match
+
+With the `If-None-Match` header, a cached entity is current if the ETag in the header *does not match* the cached ETag. Requests other than a GET that contain this header are passed to the origin server.
+
+If Apigee receives an inbound GET request with this header:
+
+| If | Then |
+| --- | --- |
+| The If-None-Match header specifies one or more ETags | Apigee retrieves any unexpired cache entries for the specified URI and compares any strong ETags on those cached entries with those specified in the If-None-Match header. If a match is found, Apigee returns a 304 Not Modified status. If no match is found, Apigee passes the request to the origin server. |
+| The If-None-Match header specifies "*" and an unexpired cached entry for the requested URI exists | Apigee returns a 304 Not Modified status |
+| A cache entry with the same request URI is found but contains only weak ETags | The entry must be revalidated by the origin server before Apigee returns it to the client |
+| Apigee receives an ETag from an origin server | The ETag is returned unchanged to the client |
+
+## If-Modified-Since
+
+If Apigee receives an `If-Modified-Since` header in a GET request, it is passed along to the origin server even if a valid cache entry exists.
+
+This ensures that any updates to a resource that did not pass through Apigee are accounted for. If the origin server returns a new entity, then Apigee replaces the existing cache entry with the new value. If the server returns a 304 Not Modified status, Apigee returns the response value if the cached response's `Last-Modified` header indicates that it has not changed.
+
+## Accept-Encoding
+
+When an incoming request includes the header `Accept-Encoding` with values of `gzip`, `deflate` or `compress`, the origin server responds with compressed data. When subsequent requests come without the `Accept-Encoding` headers, they expect an uncompressed response. Apigee's response caching mechanism is capable of sending both compressed and uncompressed responses depending on the incoming headers without going back to the origin server.
+
+You can have Accept header values appended to cache keys to make the keys more meaningful for each cached item. For more details, see "Configuring a cache key" in [Response Cache policy](/apigee/docs/api-platform/reference/policies/response-cache-policy).

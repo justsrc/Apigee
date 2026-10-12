@@ -1,0 +1,1628 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The ServiceCallout policy lets you call to another service from your API proxy flow. You can make callouts to either an external service (such as an external RESTful service endpoint) or internal services (such as an API proxy in the same organization and environment).
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+- In an external use case, you make a callout to a third-party API that's external to your proxy. The response from the third-party API is parsed and inserted in your API's response message, enriching and *mashing up* the data for app end users. You can also make a request using the ServiceCallout policy in the request flow, then pass the information in the response to the TargetEndpoint of the API proxy.
+- In another use case, you call a proxy that's in the same organization and environment as the one you're calling from. For example, you might find this useful when you have a proxy that offers some discrete low-level functionality that one or more other proxies will consume. For example, a proxy that exposes create/read/update/delete operations with a backend data store could be the target proxy for multiple other proxies that expose the data to clients.
+
+The policy supports requests over HTTP and HTTPS.
+
+### <span id="Samples"></span>Samples
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Local call to an internal proxy
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<LocalTargetConnection>
+    <APIProxy>data-manager</APIProxy>
+    <ProxyEndpoint>default</ProxyEndpoint>
+</LocalTargetConnection>
+```
+
+This example creates a callout to a local API proxy (that is, one in the same organization and environment) called `data-manager`, specifying its proxy endpoint whose name is `default`.
+
+</div>
+
+<div class="section">
+
+### URL as a variable
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPTargetConnection>
+    <URL>http://example.com/{request.myResourcePath}</URL>
+</HTTPTargetConnection>
+```
+
+This example uses a variable in the URL to dynamically populate the URL of the target. The protocol portion of the URL, `http://`, cannot be specified by a variable. Also, you must use separate variables for the domain portion of the URL and for the rest of the URL.
+
+</div>
+
+<div class="section">
+
+### Google geocoding / define request
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ServiceCallout name="ServiceCallout-GeocodingRequest1">
+    <DisplayName>Inline request message</DisplayName>
+    <Request variable="authenticationRequest">
+      <Set>
+        <QueryParams>
+          <QueryParam name="address">{request.queryparam.postalcode}</QueryParam>
+          <QueryParam name="region">{request.queryparam.country}</QueryParam>
+          <QueryParam name="sensor">false</QueryParam>
+        </QueryParams>
+      </Set>
+    </Request>
+    <Response>GeocodingResponse</Response>
+    <Timeout>30000</Timeout>
+    <HTTPTargetConnection>
+      <URL>https://maps.googleapis.com/maps/api/geocode/json</URL>
+    </HTTPTargetConnection>
+</ServiceCallout>
+```
+
+Instead of using a policy such as the [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) to create the request object, you can define it directly in the ServiceCallout policy. In this example, the ServiceCallout policy sets the values of three query parameters passed to the external service. You can create an entire request message in the ServiceCallout policy that specifies a payload, encoding type such as `application/xml`, headers, form parameters, etc.
+
+Here's another example where the request is formed before reaching the ServiceCallout policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ServiceCallout name="ServiceCallout-GeocodingRequest2">
+    <Request clearPayload="false" variable="GeocodingRequest"/>
+    <Response>GeocodingResponse</Response>
+    <Timeout>30000</Timeout>
+    <HTTPTargetConnection>
+      <URL>https://maps.googleapis.com/maps/api/geocode/json</URL>
+    </HTTPTargetConnection>
+</ServiceCallout>
+```
+
+The content of the request message is extracted from a variable called `GeocodingRequest` (which could be populated, for example, by an AssignMessage policy). The response message is assigned to the variable called `GeocodingResponse`, where it is a available to be parsed by an [ExtractVariables policy](/apigee/docs/api-platform/reference/policies/extract-variables-policy) or by custom code written in JavaScript or Java. The policy waits 30 seconds for the response from the Google Geocoding API before timing out.
+
+</div>
+
+<div class="section">
+
+### Call target servers
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ServiceCallout async="false" continueOnError="false" enabled="true" name="service-callout">
+    <DisplayName>service-callout</DisplayName>
+    <Properties/>
+    <Request clearPayload="true" variable="myRequest">
+        <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+    </Request>
+    <Response>myResponse</Response>
+    <HTTPTargetConnection>
+        <LoadBalancer>
+            <Algorithm>RoundRobin</Algorithm>
+            <Server name="httpbin"/>
+            <Server name="yahoo"/>
+        </LoadBalancer>
+        <Path>/get</Path>
+    </HTTPTargetConnection>
+</ServiceCallout>
+```
+
+This policy uses the LoadBalancer attribute to call target servers and do load balancing across them. In this example, load is distributed across two target servers named `httpbin` and `yahoo`. For information about setting up Target Servers for your proxy and configuring load balancing, see [Load balancing across backend servers](/apigee/docs/api-platform/deploy/load-balancing-across-backend-servers).
+
+</div>
+
+</div>
+
+------------------------------------------------------------------------
+
+**Note:** If you are using Apigee hybrid v1.14 or newer and your organization is entitled to use the [`Enhanced per-environment proxy limits`](/apigee/docs/hybrid/v1.14/enhanced-proxy-limits) feature, you must set the [`enhanceProxyLimits`](/apigee/docs/hybrid/v1.14/config-prop-ref#enhanceproxylimits) property to `true` in your `overrides.yaml` file in order to use the ServiceCallout policy.
+
+## About the ServiceCallout policy
+
+There are many scenarios where you can use a ServiceCallout policy in your API proxy. For example, you can configure an API proxy to make calls to an external service to deliver geolocation data, customer reviews, items from a partner’s retail catalog, and so on.
+
+A callout is typically used with two other policies: AssignMessage and ExtractVariables.
+
+- **Request**: AssignMessage populates the request message sent to the remote service.
+
+- **Response**: ExtractVariables parses the response and extracts specific content.
+
+  **Note:** The request and response message headers in a ServiceCallout are already available as variables, as described in the [Flow Variables](#flowvariables) section. You do not need to extract those with the ExtractVariables policy.
+
+The typical ServiceCallout policy composition involves:
+
+1.  [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy): Creates a request message, populates HTTP headers, query parameters, sets the HTTP verb, etc.
+
+2.  ServiceCallout policy: References a message created by the AssignMessage policy, defines a target URL for the external call, and defines a name for the response object that the target service returns.
+
+    For improved performance, you can also cache ServiceCallout responses, as described in [How can I store the results of the ServiceCallout policy in cache? and later, retrieve it from cache?](https://discuss.google.dev/t/how-can-i-store-the-results-of-the-servicecallout-policy-in-cache-and-later-retrieve-it-from-cache/10944.html)
+
+3.  [ExtractVariables policy](/apigee/docs/api-platform/reference/policies/extract-variables-policy): Typically defines a JSONPath or XPath expression that parses the message generated by the ServiceCallout. The policy then sets variables containing the values parsed from the ServiceCallout response.
+
+**Note:** An alternative approach to ServiceCallout is an HTTPClient written in JavaScript using the [JavaScript object model](/apigee/docs/api-platform/reference/javascript-object-model).
+
+## Custom error handling
+
+**Sample:** **Learn by doing!**  
+This [Learn Apigee](https://github.com/apigee/api-platform-samples/tree/master/learn-edge/service-callout-2) example shows you how to check the HTTP code in a ServiceCallout response and throw a custom exception based on the value of the code. The example returns a custom error message when the target service returns a `404` status. Just clone the repository and follow the instructions in that topic. The example illustrates a common pattern for handling ServiceCallout errors.
+
+## Element reference
+
+Following are elements and attributes you can configure on this policy:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ServiceCallout async="false" continueOnError="false" enabled="true" name="Service-Callout-1">
+    <DisplayName>Custom label used in UI</DisplayName>
+    <Request clearPayload="true" variable="myRequest">
+        <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+        <Remove>
+            <StatusCode/>
+            <Path/>
+            <Version/>
+            <Verb/>
+         </Remove>
+         <Copy>
+            <StatusCode/>
+            <Path/>
+            <Version/>
+            <Verb/>
+        </Copy>
+        <Add>
+            <Headers/>
+            <QueryParams/>
+            <FormParams/>
+        </Add>
+        <Set>
+            <Headers/>
+            <QueryParams/>
+            <FormParams/>
+            <Payload/>
+            <StatusCode/>
+            <Path/>
+            <Version/>
+            <Verb/>
+        </Set>
+    </Request>
+    <Response>calloutResponse</Response>
+    <Timeout>30000</Timeout>
+    <HTTPTargetConnection>
+        <URL>http://example.com</URL>
+        <LoadBalancer/>
+        <SSLInfo/>
+        <Properties/>
+        <Authentication>
+          <HeaderName ref="{variable}">STRING</HeaderName>
+          <GoogleAccessToken>
+            <Scopes>
+              <Scope>https://www.googleapis.com/auth/cloud-platform</Scope>
+            </Scopes>
+            <LifetimeInSeconds ref="{variable}">3600</LifetimeInSeconds>
+          </GoogleAccessToken>
+        </Authentication>
+        <Authentication>
+          <HeaderName ref="{variable}">STRING</HeaderName>
+          <GoogleIDToken>
+            <Audience ref="{variable}" useTargetUrl="BOOLEAN">{hostname}</Audience>
+            <IncludeEmail ref="{variable}">true</IncludeEmail>
+          </GoogleIDToken>
+        </Authentication>
+    </HTTPTargetConnection>
+    <LocalTargetConnection>
+        <APIProxy/>
+        <ProxyEndpoint/>
+        <Path/>
+    </LocalTargetConnection>
+</ServiceCallout>
+```
+
+## \<ServiceCallout\> attributes
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ServiceCallout async="false" continueOnError="false" enabled="true" name="Service-Callout-1">
+```
+
+The following table describes attributes that are common to all policy parent elements:
+
+<table width="650">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<tbody>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Default</th>
+<th>Presence</th>
+</tr>
+&#10;<tr>
+<td><code translate="no" dir="ltr">name</code></td>
+<td><p>The internal name of the policy. The value of the <code translate="no" dir="ltr">name</code> attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters.</p>
+<p>Optionally, use the <code translate="no" dir="ltr">&lt;DisplayName&gt;</code> element to label the policy in the management UI proxy editor with a different, natural-language name.</p></td>
+<td>N/A</td>
+<td>Required</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">continueOnError</code></td>
+<td><p>Set to <code translate="no" dir="ltr">false</code> to return an error when a policy fails. This is expected behavior for most policies.</p>
+<p>Set to <code translate="no" dir="ltr">true</code> to have flow execution continue even after a policy fails. See also:</p>
+<ul>
+<li><a href="/apigee/docs/api-platform/fundamentals/fault-handling#multiplefaultrulesandexecutionlogic-faultrulesaretriggeredonlyinanerrorstateaboutcontinueonerror">Fault rules are triggered ONLY in an error state (about continueOnError)</a></li>
+<li><a href="/apigee/docs/api-platform/fundamentals/fault-handling#continueonerror">Handling faults within the current flow</a></li>
+</ul></td>
+<td>false</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">enabled</code></td>
+<td><p>Set to <code translate="no" dir="ltr">true</code> to enforce the policy.</p>
+<p>Set to <code translate="no" dir="ltr">false</code> to <em>turn off</em> the policy. The policy will not be enforced even if it remains attached to a flow.</p></td>
+<td>true</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">async</code></td>
+<td><p>This attribute is deprecated.</p></td>
+<td>false</td>
+<td>Deprecated</td>
+</tr>
+</tbody>
+</table>
+
+## \<DisplayName\> element
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, natural-language name.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<th width="75" scope="row">Default</th>
+<td><p>N/A</p>
+<p>If you omit this element, the value of the policy's <code translate="no" dir="ltr">name</code> attribute is used.</p></td>
+</tr>
+<tr>
+<th scope="row">Presence</th>
+<td>Optional</td>
+</tr>
+<tr>
+<th scope="row">Type</th>
+<td>String</td>
+</tr>
+</tbody>
+</table>
+
+## \<Request\> element
+
+Specifies the variable containing the request message that gets sent from the API proxy to the other service. The variable can be created by a previous policy in the flow, or you can create it inline in the ServiceCallout policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Request clearPayload="true" variable="myRequest">
+    <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+    <Remove>
+        <StatusCode/>
+        <Path/>
+        <Version/>
+        <Verb/>
+    </Remove>
+    <Copy>
+        <StatusCode/>
+        <Path/>
+        <Version/>
+        <Verb/>
+    </Copy>
+    <Add>
+        <Headers/>
+        <QueryParams/>
+        <FormParams/>
+    </Add>
+    <Set>
+        <Headers/>
+        <QueryParams/>
+        <FormParams/>
+        <Payload/>
+        <StatusCode/>
+        <Path/>
+        <Version/>
+        <Verb/>
+    </Set>
+</Request>
+```
+
+The syntax for the <span style="font-family:courier new,courier,monospace;">\<Remove\></span>, <span style="font-family:courier new,courier,monospace;">\<Copy\></span>, <span style="font-family:courier new,courier,monospace;">\<Add\></span>, and <span style="font-family:courier new,courier,monospace;">\<Set\></span> tags is the same as for the [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy).
+
+The sub-elements of `<Set>` and `<Add>` support the variable string substitution feature called [message templating](/apigee/docs/api-platform/reference/message-template-intro).
+
+The policy returns an error if the request message cannot be resolved or is of an invalid request message type.
+
+In the simplest example, you pass a variable containing the request message that was populated earlier in the flow of the API proxy:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Request clearPayload="true" variable="myRequest"/>
+```
+
+Or you can populate the request message sent to the external service in the ServiceCallout policy itself:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Request>
+  <Set>
+    <Headers>
+      <Header name="Accept">application/json</Header>
+    </Headers>
+    <Verb>POST</Verb>
+    <Payload contentType="application/json">{"message":"my test message"}</Payload>
+  </Set>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+</Request>
+```
+
+<table class="columns">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td width="150"><strong>Default</strong></td>
+<td>If you omit the Request element, or any of its attributes, Apigee assigns the following <strong>default values</strong>:
+<p><span style="font-family:courier new,courier,monospace;">&lt;Request clearPayload="true" variable="servicecallout.request"/&gt;</span></p>
+<p>Let's look at what these default values mean. First, <code translate="no" dir="ltr">clearPayload=true</code> means that a new request object is created each time the ServiceCallout policy executes. This means that the request and the request URI path are never reused. Second, the default variable name, <code translate="no" dir="ltr">servicecallout.request</code>, is a reserved name that is assigned to the request if you do not supply a name.</p>
+<p>It's important to know about this default name if you are using <a href="/apigee/docs/api-platform/security/data-masking">data masking</a> -- if you omit the variable name, you need to add <code translate="no" dir="ltr">servicecallout.request</code> to your mask configuration. For example, if you wanted to mask the Authorization header so that it does not appear in Debug sessions, you would add the following to your masking configuration to capture the default name:</p>
+<p><code translate="no" dir="ltr">servicecallout.request.header.Authorization</code>.</p></td>
+</tr>
+<tr>
+<td><strong>Presence</strong></td>
+<td>Optional.</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+
+### Attributes
+
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<tbody>
+<tr>
+<th scope="col">Attribute</th>
+<th scope="col">Description</th>
+<th scope="col">Default</th>
+<th scope="col">Presence</th>
+</tr>
+&#10;<tr>
+<td><span style="font-family:courier new,courier,monospace;">variable</span></td>
+<td><p>Name of the variable that will contain the request message.</p></td>
+<td><code translate="no" dir="ltr">servicecallout.request</code></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><span style="font-family:courier new,courier,monospace;">clearPayload</span></td>
+<td><p>If <code translate="no" dir="ltr">true</code>, the variable containing the request message is cleared after the request is sent to the HTTP target to free up the memory used by the request message.</p>
+<p>Set the <span style="font-family:courier new,courier,monospace;">clearPayload</span> option to false only if the request message is required after the ServiceCallout is executed.</p></td>
+<td>true</td>
+<td>Optional</td>
+</tr>
+</tbody>
+</table>
+
+### \<Request\>/\<IgnoreUnresolvedVariables\> element
+
+When set to <span style="font-family:courier new,courier,monospace;">true</span>, the policy ignores any unresolved variable error in the request.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Request clearPayload="true" variable="myRequest">
+    <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+</Request>
+```
+
+|              |          |
+|--------------|----------|
+| **Default**  | false    |
+| **Presence** | Optional |
+| **Type**     | Boolean  |
+
+## \<Response\> element
+
+Include this element when the API proxy logic requires the response from the remote call for further processing.
+
+When this element is present, it specifies the name of the variable that will contain the response message received from the external service. The response from the target is assigned to the variable only when the entire response is read successfully by the policy. If the remote call fails for any reason, the policy returns an error.
+
+If this element is omitted, the API proxy does not wait for a response; API Proxy flow execution continues with any subsequent flow steps. Also, to state the obvious, with no `Response` element, the response from the target is not available for processing by subsequent steps, and there is no way for the proxy flow to detect a failure in the remote call. A common use for omitting the `Response` element when using ServiceCallout: to log messages to an external system.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+ <Response>calloutResponse</Response>
+```
+
+|              |          |
+|--------------|----------|
+| **Default**  | NA       |
+| **Presence** | Optional |
+| **Type**     | String   |
+
+## \<Timeout\> element
+
+The time in milliseconds that the ServiceCallout policy will wait for a response from the target. You cannot set this value dynamically at runtime. If the ServiceCallout hits a timeout, an HTTP 500 is returned, the policy fails, and the API proxy goes into an error state, as described in [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Timeout>30000</Timeout>
+```
+
+|  |  |
+|----|----|
+| **Default** | 55000 milliseconds (55 seconds), the default HTTP timeout setting for Apigee |
+| **Presence** | Optional |
+| **Type** | Integer |
+
+## \<HTTPTargetConnection\> element
+
+Provides transport details such as URL, TLS/SSL, and HTTP properties. See the `<TargetEndpoint>` configuration reference.
+
+**Note:** You can use flow variables to construct the URL in an `<HttpTargetConnection>` element.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPTargetConnection>
+    <URL>http://example.com</URL>
+    <LoadBalancer/>
+    <SSLInfo/>
+    <Properties/>
+</HTTPTargetConnection>
+```
+
+|              |          |
+|--------------|----------|
+| **Default**  | N/A      |
+| **Presence** | Required |
+| **Type**     | N/A      |
+
+### \<HTTPTargetConnection\>/\<Authentication\> element
+
+**Apigee hybrid users:** If you are using Apigee hybrid, note that this feature is only supported for Apigee hybrid v1.6.x and later versions.
+
+Generates <a href="https://developers.google.com/identity/protocols/oauth2" class="external">Google OAuth 2.0</a> or Google-issued <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" class="external">OpenID Connect</a> tokens to make authenticated calls to Google services and custom services running on certain Google Cloud products, such as <a href="https://cloud.google.com/functions" class="external">Cloud Functions</a> and <a href="https://cloud.google.com/run" class="external">Cloud Run</a>. Use of this element requires setup and deployment steps described in [Using Google authentication](/apigee/docs/api-platform/security/google-auth/overview). With proper setup, the policy creates an authentication token for you and adds it to the service request.
+
+The child elements, `GoogleAccessToken` and `GoogleIDToken`, let you configure the policy to generate either Google OAuth or OpenID Connect tokens. You need to pick one of these child elements depending on the type of service you wish to call.
+
+The ServiceCallout policy only supports calling HTTP-based services.
+
+<table class="cyan">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td width="150"><strong>Default</strong></td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Required?</strong></td>
+<td>Optional.</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>Complex type</td>
+</tr>
+<tr>
+<td><strong>Parent Element</strong></td>
+<td><a href="#httptargetconnection"><code translate="no" dir="ltr">&lt;HTTPTargetConnection&gt;</code></a></td>
+</tr>
+<tr>
+<td><strong>Child Elements</strong></td>
+<td><a href="#headername"><code translate="no" dir="ltr">&lt;HeaderName&gt;</code></a><br />
+<a href="#googleaccesstoken"><code translate="no" dir="ltr">&lt;GoogleAccessToken&gt;</code></a><br />
+<a href="#googleidtoken"><code translate="no" dir="ltr">&lt;GoogleIDToken&gt;</code></a></td>
+</tr>
+</tbody>
+</table>
+
+The `Authentication` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ServiceCallout>
+...
+  <HTTPTargetConnection>
+    <Authentication>
+      <HeaderName ref="FLOW_VARIABLE">STRING</HeaderName>
+      <GoogleAccessToken>
+        <Scopes>
+          <Scope>SCOPE</Scope>
+          ...
+        </Scopes>
+        <!-- NOTE: The default value for LifetimeInSeconds is 3600. Change the default only
+        if you want to limit the risk of leaked access tokens or improve performance. -->
+        <LifetimeInSeconds ref="{variable}">INTEGER</LifetimeInSeconds>
+      </GoogleAccessToken>
+
+    --OR--
+      <HeaderName ref="FLOW_VARIABLE">STRING</HeaderName>
+      <GoogleIDToken>
+        <Audience ref="{variable}" useTargetUrl="BOOLEAN">STRING</Audience>
+        <IncludeEmail ref="{variable}">BOOLEAN</IncludeEmail>
+      </GoogleIDToken>
+    </Authentication>
+  </HTTPTargetConnection>
+</ServiceCallout>
+```
+
+</div>
+
+<div class="section">
+
+### Using GoogleAccessToken
+
+The following example shows the `GoogleAccessToken` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Authentication>
+  <GoogleAccessToken>
+    <Scopes>
+      <Scope>https://www.googleapis.com/auth/cloud-platform</Scope>
+    </Scopes>
+  </GoogleAccessToken>
+</Authentication>
+```
+
+</div>
+
+<div class="section">
+
+### Using GoogleIDToken
+
+The following example shows the `GoogleIDToken` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Authentication>
+  <GoogleIDToken>
+      <Audience>https://httpserver0-bar.run.app</Audience>
+      <IncludeEmail>false</IncludeEmail>
+  </GoogleIDToken>
+</Authentication>
+```
+
+</div>
+
+<div class="section">
+
+### Using HeaderName
+
+The following example shows the `HeaderName` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  <Authentication>
+    <HeaderName>X-Serverless-Authorization</HeaderName>
+    <GoogleAccessToken>
+      <Scopes>
+        <Scope>"https://www.googleapis.com/auth/cloud-platform"</Scope>
+      </Scopes>
+    </GoogleAccessToken>
+  </Authentication>
+```
+
+</div>
+
+<div class="section">
+
+### Using LifetimeInSeconds
+
+The following example shows the `HeaderName` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  <Authentication>
+    <GoogleAccessToken>
+      <Scopes>
+        <Scope>"https://www.googleapis.com/auth/cloud-platform"</Scope>
+      </Scopes>
+      <LifetimeInSeconds ref="variable">3600</LifetimeInSeconds>
+    </GoogleAccessToken>
+  </Authentication>
+```
+
+</div>
+
+#### Attributes
+
+None.
+
+#### HeaderName child element
+
+By default, when an Authentication configuration is present, Apigee generates a bearer token and injects it into the `Authorization` header in the message sent to the target system. The `HeaderName` element allows you to specify the name of a different header to hold that bearer token. This feature is particularly useful when the target is a Cloud Run service that uses the `X-Serverless-Authorization` header. The `Authorization` header, if present, is left unmodified and also sent in the request.
+
+|                    |                                       |
+|--------------------|---------------------------------------|
+| **Default**        | N/A                                   |
+| **Required?**      | No                                    |
+| **Type**           | String                                |
+| **Parent Element** | [`<Authentication>`](#authentication) |
+| **Child Elements** | None                                  |
+
+The `HeaderName` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ServiceCallout>
+...
+  <Authentication>
+    <HeaderName ref="FLOW_VARIABLE">STRING</HeaderName>
+    <GoogleAccessToken>
+      ...
+    </GoogleAccessToken>
+  </Authentication>
+  ...
+</ServiceCallout>
+```
+
+</div>
+
+<div class="section">
+
+### With static string
+
+In this example, the generated bearer token is added, by default, to a header named `X-Serverless-Authorization` that is sent to the target system. The `Authorization` header, if present, is left unmodified and also sent in the request.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Authentication>
+  <HeaderName>X-Serverless-Authorization</HeaderName>
+  <GoogleAccessToken>
+    <Scopes>
+      <Scope>https://www.googleapis.com/auth/cloud-platform</Scope>
+    </Scopes>
+  </GoogleAccessToken>
+</Authentication>
+```
+
+</div>
+
+<div class="section">
+
+### With variable reference
+
+In this example, the generated bearer token is added, by default, to a header named `X-Serverless-Authorization` that is sent to the target system. If `my-variable` has a value, that value is used instead of the default string. The `Authorization` header, if present, is left unmodified and also sent in the request.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Authentication>
+  <HeaderName ref='my-variable'>X-Serverless-Authorization</HeaderName>
+  <GoogleAccessToken>
+    <Scopes>
+      <Scope>https://www.googleapis.com/auth/cloud-platform</Scope>
+    </Scopes>
+  </GoogleAccessToken>
+</Authentication>
+```
+
+</div>
+
+#### GoogleAccessToken child element
+
+Generates <a href="https://developers.google.com/identity/protocols/oauth2" class="external">Google OAuth 2.0</a> tokens to make authenticated calls to Google services. Google OAuth tokens can be used to call many kinds of Google services, such as <a href="https://cloud.google.com/logging" class="external">Cloud Logging</a> and <a href="https://cloud.google.com/secret-manager" class="external">Secret Manager</a>.
+
+<table class="cyan">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td width="150"><strong>Default</strong></td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Required?</strong></td>
+<td>Either the <code translate="no" dir="ltr">GoogleAccessToken</code> or <code translate="no" dir="ltr">GoogleIDToken</code> child element must be present.</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Parent Element</strong></td>
+<td><a href="#authentication"><code translate="no" dir="ltr">&lt;Authentication&gt;</code></a></td>
+</tr>
+<tr>
+<td><strong>Child Elements</strong></td>
+<td><a href="#scopes"><code translate="no" dir="ltr">&lt;Scopes&gt;</code></a><br />
+<a href="#lifetimeinseconds"><code translate="no" dir="ltr">&lt;LifetimeInSeconds&gt;</code></a></td>
+</tr>
+</tbody>
+</table>
+
+The `GoogleAccessToken` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ServiceCallout>
+...
+  <Authentication>
+    <GoogleAccessToken>
+      <Scopes>
+        <Scope>SCOPE_1</Scope>
+        ...
+      </Scopes>
+      <!-- NOTE: The default value for LifetimeInSeconds is 3600. We do not recommend changing
+      the default unless you want to limit the risk of leaked access tokens or improve performance. -->
+      <LifetimeInSeconds ref="FLOW_VARIABLE">INTEGER</LifetimeInSeconds>
+    </GoogleAccessToken>
+  </Authentication>
+  ...
+</ServiceCallout>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example shows the `GoogleAccessToken` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Authentication>
+  <GoogleAccessToken>
+    <Scopes>
+      <Scope>https://www.googleapis.com/auth/cloud-platform</Scope>
+    </Scopes>
+  </GoogleAccessToken>
+</Authentication>
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+The following example shows how to connect to the secret manager to retrieve a secret using the ServiceCallout policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ServiceCallout name="ServiceCallout-sm">
+  <Response>SecretManagerResponse</Response>
+  <Timeout>30000</Timeout>
+  <HTTPTargetConnection>
+    <Authentication>
+      <GoogleAccessToken>
+        <Scopes>
+          <Scope>https://www.googleapis.com/auth/cloud-platform</Scope>
+        </Scopes>
+      </GoogleAccessToken>
+    </Authentication>
+    <URL>
+      https://secretmanager.googleapis.com/v1/projects/project-id/secrets/secret-id
+    </URL>
+  </HTTPTargetConnection>
+</ServiceCallout>
+```
+
+</div>
+
+<div class="section">
+
+### Example 3
+
+The following example shows how to make a callout to Cloud run from the ServiceCallout policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ServiceCallout name="ServiceCallout-CloudRun">
+  <Response>CloudRunResponse</Response>
+  <Timeout>30000</Timeout>
+  <HTTPTargetConnection>
+    <Authentication>
+      <GoogleIDToken>
+        <Audience>https://cloudrun-hostname.a.run.app/test</Audience>
+      </GoogleIDToken>
+    </Authentication>
+    <URL>https://cloudrun-hostname.a.run.app/test</URL>
+  </HTTPTargetConnection>
+</ServiceCallout>
+```
+
+</div>
+
+#### Scopes child element
+
+Identifies the scopes to be included in the OAuth 2.0 access token. For more information, see <a href="https://developers.google.com/identity/protocols/googlescopes" class="external">OAuth 2.0 Scopes for Google APIs</a>. You can add one or more `<Scope>` child elements under this element.
+
+|                    |                                             |
+|--------------------|---------------------------------------------|
+| **Default**        | N/A                                         |
+| **Required?**      | Required                                    |
+| **Type**           | String                                      |
+| **Parent Element** | [`<GoogleAccessToken>`](#googleaccesstoken) |
+| **Child Elements** | [`<Scope>`](#scope)                         |
+
+#### Scope child element
+
+Specifies a valid Google API scope. For more information, see <a href="https://developers.google.com/identity/protocols/googlescopes" class="external">OAuth 2.0 Scopes for Google APIs</a>.
+
+|                    |                                 |
+|--------------------|---------------------------------|
+| **Default**        | N/A                             |
+| **Required?**      | At least one value is required. |
+| **Type**           | String                          |
+| **Parent Element** | [`<Scopes>`](#scopes)           |
+| **Child Elements** | None.                           |
+
+#### LifetimeInSeconds child element
+
+Specifies the lifetime duration of the access token in seconds.
+
+**Note:** The default value for LifetimeInSeconds is 3600. We do not recommend changing the default unless you want to limit the risk of leaked access tokens or improve performance.
+
+|                    |                                             |
+|--------------------|---------------------------------------------|
+| **Default**        | 3600                                        |
+| **Required?**      | Optional                                    |
+| **Type**           | Integer                                     |
+| **Parent Element** | [`<GoogleAccessToken>`](#googleaccesstoken) |
+| **Child Elements** | None.                                       |
+
+#### GoogleIDToken child element
+
+Generates Google-issued <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" class="external">OpenID Connect</a> tokens to make authenticated calls to Google services.
+
+<table class="cyan">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td width="150"><strong>Default</strong></td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Required?</strong></td>
+<td>Either the <code translate="no" dir="ltr">GoogleAccessToken</code> or <code translate="no" dir="ltr">GoogleIDToken</code> child element must be present.</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Parent Element</strong></td>
+<td><a href="#authentication"><code translate="no" dir="ltr">&lt;Authentication&gt;</code></a></td>
+</tr>
+<tr>
+<td><strong>Child Elements</strong></td>
+<td><a href="#audience"><code translate="no" dir="ltr">&lt;Audience&gt;</code></a><br />
+<a href="#includeemail"><code translate="no" dir="ltr">&lt;IncludeEmail&gt;</code></a></td>
+</tr>
+</tbody>
+</table>
+
+The `GoogleIDToken` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ServiceCallout>
+...
+  <Authentication>
+    <GoogleIDToken>
+        <Audience ref="{variable}" useTargetUrl="BOOLEAN">STRING</Audience>
+        <IncludeEmail ref="{variable}">BOOLEAN</IncludeEmail>
+    </GoogleIDToken>
+  </Authentication>
+</ServiceCallout>
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example shows the `GoogleIDToken` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Authentication>
+  <GoogleIDToken>
+      <Audience>https://httpserver0-bar.run.app</Audience>
+      <IncludeEmail>true</IncludeEmail>
+  </GoogleIDToken>
+</Authentication>
+```
+
+</div>
+
+#### Audience child element
+
+The audience for the generated authentication token, such as the API or account that the token grants access to.
+
+If the value of `Audience` is empty or the `ref` variable does not resolve to a valid value, and `useTargetUrl` is `true`, then the URL of the target (excluding any query parameters) is used as the audience. By default, `useTargetUrl` is `false`.
+
+**Apigee hybrid users:** If you use Apigee hybrid, note that the `useTargetUrl` attribute is available in Apigee hybrid version 1.8 and later versions.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Audience>explicit-audience-value-here</Audience>
+
+or:
+
+<Audience ref='variable-name-here'/>
+
+or:
+
+<Audience ref='variable-name-here' useTargetUrl='true'/>
+
+or:
+
+<Audience useTargetUrl='true'/>
+```
+
+|                    |                                     |
+|--------------------|-------------------------------------|
+| **Default**        | N/A                                 |
+| **Required?**      | Required                            |
+| **Type**           | String                              |
+| **Parent Element** | [`<GoogleIDToken>`](#googleidtoken) |
+| **Child Elements** | None.                               |
+
+#### IncludeEmail child element
+
+If set to `true`, the generated authentication token will contain the service account `email` and `email_verified` claims.
+
+|                    |                                     |
+|--------------------|-------------------------------------|
+| **Default**        | false                               |
+| **Required?**      | Optional                            |
+| **Type**           | Boolean                             |
+| **Parent Element** | [`<GoogleIDToken>`](#googleidtoken) |
+| **Child Elements** | None.                               |
+
+### \<HTTPTargetConnection\>/\<URL\> element
+
+The URL to the service being called:
+
+The `<URL>` element supports the variable string substitution feature called [message templating](/apigee/docs/api-platform/reference/message-template-intro).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPTargetConnection>
+    <URL>http://example.com</URL>
+</HTTPTargetConnection>
+```
+
+You can supply part of the URL dynamically with a variable. However, the protocol portion of the URL, <span style="font-family:courier new,courier,monospace;">http://</span> below, cannot be specified by a variable. In the next example, you use a variable to specify the value of a query parameter:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<URL>http://example.com/forecastrss?w=${request.header.woeid}</URL>
+```
+
+Or, set a portion of the URL path with a variable:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<URL>http://example.com/{request.resourcePath}?w=${request.header.woeid}</URL>
+```
+
+If you want to use a variable to specify the domain and port of the URL, then use one variable for the domain and port only, and a second variable for any other part of the URL:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<URL>http://{request.dom_port}/{request.resourcePath}</URL>
+```
+
+|              |          |
+|--------------|----------|
+| **Default**  | N/A      |
+| **Presence** | Required |
+| **Type**     | String   |
+
+### \<HTTPTargetConnection\>/\<SSLInfo\> element
+
+The TLS/SSL configuration to the backend service. For help on TLS/SSL configuration, see [Options for configuring TLS](/apigee/docs/api-platform/system-administration/options-configuring-tls) and "TLS/SSL TargetEndpoint Configuration" in [API proxy configuration reference](/apigee/docs/api-platform/reference/api-proxy-configuration-reference).
+
+**Note:** Specify the `KeyStore` name in the `SSLInfo` element as a reference in the form `ref://mykeystoreref`. Using a reference, rather than a direct name or flow variable, is recommended. See [About setting the \<KeyStore\> and \<TrustStore\> elements.](/apigee/docs/api-platform/system-administration/options-configuring-tls#about-setting-the-%3Ckeystore%3E-and-%3Ctruststore%3E-elements)
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPTargetConnection>
+    <URL>https://example.com</URL>
+    <SSLInfo>
+        <Enabled>true</Enabled>
+        <ClientAuthEnabled>true</ClientAuthEnabled>
+        <KeyStore>ref://mykeystoreref</KeyStore>  ## Use of a reference is recommended
+        <KeyAlias>myKey</KeyAlias>
+        <TrustStore>myTruststore</TrustStore>
+        <Ciphers/>
+        <Protocols/>
+    </SSLInfo>
+</HTTPTargetConnection>
+```
+
+|              |          |
+|--------------|----------|
+| **Default**  | N/A      |
+| **Presence** | Optional |
+| **Type**     | N/A      |
+
+### \<HTTPTargetConnection\>/\<Properties\> element
+
+HTTP transport properties to the backend service. For more information, see [Endpoint properties reference](/apigee/docs/api-platform/reference/endpoint-properties-reference).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPTargetConnection>
+    <URL>http://example.com</URL>
+    <Properties>
+        <Property name="allow.http10">true</Property>
+        <Property name="request.retain.headers">
+          User-Agent,Referer,Accept-Language
+        </Property>
+    </Properties>
+</HTTPTargetConnection>
+```
+
+|              |          |
+|--------------|----------|
+| **Default**  | N/A      |
+| **Presence** | Optional |
+| **Type**     | N/A      |
+
+### \<HTTPTargetConnection\>/\<LoadBalancer\> element
+
+Call one or more target servers and do load balancing on them. See the **Call target servers** sample in the [Samples section](#Samples). See also [Load balancing across backend servers](/apigee/docs/api-platform/deploy/load-balancing-across-backend-servers). See also [Target Endpoint/Server callout](https://discuss.google.dev/t/target-endpoint-server-callout/1743.html) that discusses ways to call target servers from both the ServiceCallout policy and using Route Rules.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<HTTPTargetConnection> <LoadBalancer> <Algorithm>RoundRobin</Algorithm> <Server name="httpbin"/> <Server name="yahoo"/> </LoadBalancer> <Path>/get</Path> </HTTPTargetConnection>
+```
+
+<table class="columns">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Default</strong></td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Presence</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>N/A<br />
+</td>
+</tr>
+</tbody>
+</table>
+
+## \<LocalTargetConnection\> element
+
+Specifies a local proxy -- that is, a proxy in the same organization and environment -- as the target of service callouts.
+
+To further specify the target, use either the [`<APIProxy>`](#apiproxy) and [`<ProxyEndpoint>`](#proxyendpoint) elements, or the [`<Path>`](#localtargetconnection-path) element.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<LocalTargetConnection>
+   <APIProxy/>
+   <ProxyEndpoint/>
+   <Path/>
+</LocalTargetConnection>
+```
+
+|              |          |
+|--------------|----------|
+| **Default**  | N/A      |
+| **Presence** | Required |
+| **Type**     | N/A      |
+
+### \<LocalTargetConnection\>/\<APIProxy\> element
+
+The name of an API proxy that is the target of a local call. The proxy must be in the same organization and environment as the proxy making the call.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<LocalTargetConnection>
+   <APIProxy>data-manager</APIProxy>
+   <ProxyEndpoint>default</ProxyEndpoint>
+</LocalTargetConnection>
+```
+
+Along with the `<APIProxy>` element, include the `<ProxyEndpoint>` element to specify the name of the proxy endpoint that should be targeted for the call.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<LocalTargetConnection>
+   <APIProxy/>
+   <ProxyEndpoint/>
+</LocalTargetConnection>
+```
+
+|              |          |
+|--------------|----------|
+| **Default**  | N/A      |
+| **Presence** | Required |
+| **Type**     | String   |
+
+### \<LocalTargetConnection\>/\<ProxyEndpoint\> element
+
+The name of the proxy endpoint that should be the target of calls. This is a proxy endpoint in the API proxy specified with the `<APIProxy>` element.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<LocalTargetConnection>
+   <APIProxy>data-manager</APIProxy>
+   <ProxyEndpoint>default</ProxyEndpoint>
+</LocalTargetConnection>
+```
+
+|              |          |
+|--------------|----------|
+| **Default**  | N/A      |
+| **Presence** | Optional |
+| **Type**     | N/A      |
+
+### \<LocalTargetConnection\>/\<Path\> element
+
+A path to the endpoint that is being targeted. The endpoint must refer to a proxy in the same organization and environment as the proxy making the call.
+
+Use this instead of a `<APIProxy>/<ProxyEndpoint>` pair when you don't know -- or can't rely on -- the proxy name. The path might be a reliable target.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<LocalTargetConnection>
+   <Path>/data-manager</Path>
+</LocalTargetConnection>
+```
+
+|              |          |
+|--------------|----------|
+| **Default**  | N/A      |
+| **Presence** | Optional |
+| **Type**     | N/A      |
+
+## Schemas
+
+**Sample:** See our [GitHub repository](https://github.com/apigee/api-platform-samples/tree/master/schemas/policy) samples for the most recent schemas.
+
+## Flow variables
+
+Flow variables enable dynamic behavior of policies and Flows at runtime, based on HTTP headers, message content, or Flow context. The following predefined Flow variables are available after a ServiceCallout policy executes. For more information about Flow variables, see [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference).
+
+ServiceCallouts have their own request and response, and you can access that data through variables. Because the main message is using the `request.*` and `response.*` variable prefixes, use the `myrequest.*` and `calloutResponse.*` prefixes (the defaults in the ServiceCallout configuration) to get message data specific to the ServiceCallout. The first example in the following table shows how you'd get HTTP headers in the ServiceCallout.
+
+<table class="fixed">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p>Following is an example of getting ServiceCallout request and response headers similar to how you would get headers from the main request and response.</p>
+<p><em><code translate="no" dir="ltr">calloutResponse</code></em><code translate="no" dir="ltr">.header.</code><em><code translate="no" dir="ltr">HeaderName</code></em></p>
+<p><em><code translate="no" dir="ltr">myRequest</code></em><code translate="no" dir="ltr">.header.</code><em><code translate="no" dir="ltr">HeaderName</code></em></p>
+<p>where <em>calloutResponse</em> is the variable name for the Response in the Service Callout, and <em>myRequest</em> is the variable name for the Request. For example:</p>
+<p><code translate="no" dir="ltr">calloutResponse.header.Content-Length</code></p>
+<p>returns the Content-Length header of the ServiceCallout response.</p></td>
+<td><p><strong>Scope</strong>: From the ServiceCallout forward<br />
+<strong>Type</strong>: String<br />
+<strong>Permission</strong>: Read/Write</p>
+<p>A message header in the ServiceCallout request or response. For example, if the API proxy target is http://example.com, and the ServiceCallout target is http://mocktarget.apigee.net, these variables are the headers for the callout to http://mocktarget.apigee.net.</p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">servicecallout.requesturi</code></td>
+<td><p><strong>Scope</strong>: From the ServiceCallout request forward<br />
+<strong>Type</strong>: String<br />
+<strong>Permission</strong>: Read/Write</p>
+<p>The TargetEndpoint URI for a ServiceCallout policy. The URI is the TargetEndpoint URL without the protocol and domain specification.</p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">servicecallout.{policy-name}.target.url</code></td>
+<td><p><strong>Scope</strong>: From the ServiceCallout request forward<br />
+<strong>Type</strong>: String<br />
+<strong>Permission</strong>: Read/Write</p>
+<p>The target URL for a the ServiceCallout.</p></td>
+</tr>
+<tr>
+<td><p><code translate="no" dir="ltr">calloutResponse.content</code></p>
+<p>where <code translate="no" dir="ltr">calloutResponse</code> is the <code translate="no" dir="ltr">&lt;Response&gt;</code>variable name in the ServiceCallout configuration.</p></td>
+<td><p><strong>Scope</strong>: From the ServiceCallout response forward<br />
+<strong>Type</strong>: String<br />
+<strong>Permission</strong>: Read/Write</p>
+<p>The response body from the ServiceCallout.</p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">servicecallout.{policy-name}.expectedcn</code></td>
+<td><p><strong>Scope</strong>: From the ServiceCallout request forward<br />
+<strong>Type</strong>: String<br />
+<strong>Permission</strong>: Read/Write</p>
+<p>The expected Common Name of the TargetEndpoint as referred to in a ServiceCallout policy. This is meaningful only when the TargetEndpoint refers to a TLS/SSL endpoint.</p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">servicecallout.{policy-name}.failed</code></td>
+<td><p><strong>Scope</strong>: From the ServiceCallout response forward<br />
+<strong>Type</strong>: Boolean<br />
+<strong>Permission</strong>: Read/Write</p>
+<p>Boolean indicating if the policy succeeded, false, or failed, true.</p></td>
+</tr>
+</tbody>
+</table>
+
+## Errors
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+**Tip:** Need help resolving an error? Click *build* in the Fix column for detailed troubleshooting information.
+
+<table class="fixed">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" width="25%">Fault code</th>
+<th scope="col" width="10%">HTTP status</th>
+<th scope="col" width="60%">Cause</th>
+<th scope="col" width="5%">Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code translate="no" dir="ltr">steps.servicecallout.ExecutionFailed</code></td>
+<td><code translate="no" dir="ltr">500</code></td>
+<td><p>This error can occur when:</p>
+<ul>
+<li>The policy is asked to handle input that is malformed or otherwise invalid.</li>
+<li>The backend target service returns an error status (by default, <code translate="no" dir="ltr">4xx</code> or <code translate="no" dir="ltr">5xx</code>).</li>
+</ul></td>
+<td><a href="/apigee/docs/api-platform/troubleshoot/policies/runtime/service-callout-runtime-errors#executionfailed"><em>build</em></a></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.servicecallout.RequestVariableNotMessageType</code></td>
+<td><code translate="no" dir="ltr">500</code></td>
+<td>The <code translate="no" dir="ltr">Request</code> variable specified in the policy is not of type <code translate="no" dir="ltr">Message</code>. For example, if it's a string or other non-message type, you'll see this error.</td>
+<td><a href="/apigee/docs/api-platform/troubleshoot/policies/runtime/service-callout-runtime-errors#requestvariablenotmessagetype"><em>build</em></a></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.servicecallout.RequestVariableNotRequestMessageType</code></td>
+<td><code translate="no" dir="ltr">500</code></td>
+<td>The <code translate="no" dir="ltr">Request</code> variable specified in the policy is not of type <code translate="no" dir="ltr">RequestMessage</code>. For example, if it's a Response type, you'll see this error.</td>
+<td><a href="/apigee/docs/api-platform/troubleshoot/policies/runtime/service-callout-runtime-errors#requestvariablenotrequestmessagetype"><em>build</em></a></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">googletoken.EmptyIDTokenAudience</code></td>
+<td><code translate="no" dir="ltr">500</code></td>
+<td><p><code translate="no" dir="ltr">&lt;GoogleIDToken&gt;</code> is enabled but <code translate="no" dir="ltr">useTargetUrl</code> is set to false and no value is provided to <code translate="no" dir="ltr">&lt;Audience&gt;</code> either directly or through reference at the time of error.</p></td>
+<td></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">messaging.adaptors.http.filter.GoogleTokenGenerationFailure</code></td>
+<td><code translate="no" dir="ltr">500</code></td>
+<td>This error can happen if the API proxy is configured with the &lt;Authentication&gt; element. Possible causes include:
+<ul>
+<li>The service account deployed with the proxy:
+<ul>
+<li>does not exist in your project</li>
+<li>has been disabled</li>
+<li>(Apigee hybrid only) has not granted the <strong>roles/iam.serviceAccountTokenCreator</strong> role on the <code translate="no" dir="ltr">apigee-runtime</code> service account.</li>
+</ul></li>
+<li>The <code translate="no" dir="ltr">IAMCredentials</code> API is disabled in the source project of the <code translate="no" dir="ltr">apigee-runtime</code> service account.</li>
+</ul>
+The <code translate="no" dir="ltr">&lt;GoogleAccessToken&gt;</code> element is used and one or more invalid scopes are provided. For example, look for typos or empty scopes.
+<p>For Apigee hybrid only, check the runtime container's log and search for <code translate="no" dir="ltr">GoogleTokenGenerationFailure</code> to find more detailed error messages that may help with debugging the problem.</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+**Tip:** Need help fixing an error? Click *build* in the Fix column for detailed troubleshooting information.
+
+<table class="fixed">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" width="25%">Error name</th>
+<th scope="col" width="65%">Cause</th>
+<th scope="col" width="10%">Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code translate="no" dir="ltr">URLMissing</code></td>
+<td>The <code translate="no" dir="ltr">&lt;URL&gt;</code> element inside <code translate="no" dir="ltr">&lt;HTTPTargetConnection&gt;</code> is missing or empty.</td>
+<td><a href="/apigee/docs/api-platform/troubleshoot/policies/deployment/service-callout-deployment-errors#urlmissing"><em>build</em></a></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">ConnectionInfoMissing</code></td>
+<td>This error happens if the policy does not have an <code translate="no" dir="ltr">&lt;HTTPTargetConnection&gt;</code> or <code translate="no" dir="ltr">&lt;LocalTargetConnection&gt;</code> element.</td>
+<td><a href="/apigee/docs/api-platform/troubleshoot/policies/deployment/service-callout-deployment-errors#connectioninfomissing"><em>build</em></a></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">InvalidTimeoutValue</code></td>
+<td>This error happens if the <code translate="no" dir="ltr">&lt;Timeout&gt;</code> value is negative or zero.</td>
+<td><a href="/apigee/docs/api-platform/troubleshoot/policies/deployment/service-callout-deployment-errors#invalidtimeoutvalue"><em>build</em></a></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">FAILED_PRECONDITION</code></td>
+<td>This error happens if the service account is missing when the proxy is configured with the &lt;Authentication&gt; tag.
+<p>For example:</p>
+<div>
+&#10;</div>
+<pre translate="no" dir="ltr" data-is-upgraded=""><code>Deployment of \&quot;organizations/foo/apis/apiproxy/revisions/1\&quot; requires a service
+          account identity, but one was not provided with the request.</code></pre></td>
+<td></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">PERMISSION_DENIED</code></td>
+<td>This error happens if there is a permission problem with the service account if the proxy is configured with the &lt;Authentication&gt; tag. Possible causes:
+<ul>
+<li>The service account does not exist.</li>
+<li>The service account was not created in the same Google Cloud project as the Apigee organization.</li>
+<li>The deployer does have <strong>iam.serviceAccounts.actAs</strong> permission on the service account. For details, see <a href="/apigee/docs/api-platform/security/google-auth/overview#about-service-account-permissions">About service account permissions</a>.</li>
+</ul></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+### Fault variables
+
+These variables are set when a runtime error occurs. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``fault_name``"` | `fault_name` is the name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name = "RequestVariableNotMessageType"` |
+| `servicecallout.``policy_name``.failed` | `policy_name` is the user-specified name of the policy that threw the fault. | `servicecallout.SC-GetUserData.failed = true` |
+
+### Example error response
+
+**Note:** For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+   "fault":{
+      "detail":{
+         "errorcode":"steps.servicecallout.RequestVariableNotMessageType"
+      },
+      "faultstring":"ServiceCallout[ServiceCalloutGetMockResponse]:
+            request variable data_str value is not of type Message"
+   }
+}
+```
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name="RequestVariableNotMessageType">
+    <Step>
+        <Name>AM-RequestVariableNotMessageType</Name>
+    </Step>
+    <Condition>(fault.name = "RequestVariableNotMessageType")</Condition>
+</FaultRule>
+```
+
+## Related topics
+
+- Generate or modify messages: [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy)
+- Extract variables: [ExtractVariables policy](/apigee/docs/api-platform/reference/policies/extract-variables-policy)
+- Variables: [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference)
+- TLS/SSL configuration
+  - [Options for configuring TLS](/apigee/docs/api-platform/system-administration/options-configuring-tls)
+  - "TLS/SSL TargetEndpoint Configuration" in [API proxy configuration reference](/apigee/docs/api-platform/reference/api-proxy-configuration-reference)
+- HTTP transport properties: [Endpoint properties reference](/apigee/docs/api-platform/reference/endpoint-properties-reference)
+- Alternative to ServiceCallout: HTTPClient written in JavaScript, see [JavaScript object model](/apigee/docs/api-platform/reference/javascript-object-model).

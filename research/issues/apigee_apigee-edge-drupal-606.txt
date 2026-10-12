@@ -1,0 +1,156 @@
+URL: https://github.com/apigee/apigee-edge-drupal/issues/606
+TITLE: Drupal Dev portal to Apigee Edge OAuth connection not working
+STATE: closed state_reason: completed
+AUTHOR: dattasharma540 association: NONE
+CREATED: 2021-07-17T02:39:57Z CLOSED: 2021-08-06T07:33:14Z
+LABELS: bug
+MILESTONE: None
+--- BODY ---
+Hi,
+
+I am trying to connect to Apigee Edge from Drupal Developer portal. I can use Basic auth to connect successfully but it is being deprecated. I configured OAuth, following instructions at https://www.drupal.org/docs/contributed-modules/apigee-edge/configure-the-connection-to-apigee.
+
+Drupal is connecting to OAuth endpoint on Apigee, receiving access token. It is also requesting and receiving refresh token, however it seems to enter a loop, requesting refresh token repeatedly and finally exhausting. I get this error in the end "Failed to connect to Apigee Edge. Error message: Too many restarts in plugin client"
+
+Apigee Trace shows lot of requests for refresh tokens within a span 2-3 seconds.
+
+Used Kickstart guide to install Drupal 8 based Apigee Developer Portal following instructions here https://www.drupal.org/docs/contributed-modules/apigee-developer-portal-kickstart/use-kickstart-with-apigee-edge-for
+
+**Apigee policy to get access token**
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OAuthV2 name="GetAccessToken-Passwd">
+<Operation>GenerateAccessToken</Operation>
+<ExpiresIn>1800000</ExpiresIn>
+<!-- 30 minutes -->
+<RefreshTokenExpiresIn>1800000</RefreshTokenExpiresIn>
+<!-- 30 minutes -->
+<SupportedGrantTypes>
+<GrantType>password</GrantType>
+</SupportedGrantTypes>
+<GenerateResponse enabled="true"/>
+</OAuthV2>
+
+**Apigee policy to get refresh token**
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OAuthV2 name="RefreshAccessToken">
+<Operation>RefreshAccessToken</Operation>
+<GenerateResponse enabled="true"/>
+<ExpiresIn>1800000</ExpiresIn>
+<!-- 30 minutes -->
+<RefreshTokenExpiresIn>1800000</RefreshTokenExpiresIn>
+<!-- 30 minutes -->
+</OAuthV2>
+
+
+**Sample CURL request**
+curl -i -X POST -H 'Content-Type: application/x-www-form-urlencoded' -H 'Authorization: Basic [client-id:client-secret  base64 encoded]' -d 'grant_type=password&username=xyz&password=zzzz'  [oauth-endpoint]
+
+**Response**
+HTTP/1.1 200 OK
+date: Sat, 17 Jul 2021 02:25:15 GMT
+content-type: application/json
+content-length: 691
+
+{
+  "refresh_token_expires_in" : "1799",
+  "refresh_token_status" : "approved",
+  "api_product_list" : "[product1]",
+  "api_product_list_json" : [ "product1" ],
+  "organization_name" : "api-nonprod",
+  "developer.email" : "abc@xyz.com",
+  "token_type" : "BearerToken",
+  "issued_at" : "1626488715532",
+  "client_id" : "gLE44zg9Ec6bm9q5K0TXADYEHAsvqrHs",
+  "access_token" : "CXZaASSIJ07vDGylZzcG0BmkicG2",
+  "refresh_token" : "K2GSECB1UdvJILWEbqyhqgr0evmvggBM",
+  "application_name" : "46024b16-8aa0-4a29-94f4-08804f3efd2a",
+  "scope" : "",
+  "refresh_token_issued_at" : "1626488715532",
+  "expires_in" : "1799",
+  "refresh_count" : "0",
+  "status" : "approved"
+}
+
+Thank you
+
+--- COMMENTS (5) ---
+
+### comment by phdhiren (association=CONTRIBUTOR) at 2021-07-20T09:37:16Z
+@dattasharma540 
+
+Can you please share more parameter like version of the Edge module and output of `composer show`?
+What parameter you're  for `Authorization server`, `client secret` and `client id` while changing to OAuth which is mentioned in https://www.drupal.org/docs/contributed-modules/apigee-edge/configure-the-connection-to-apigee#configuring-oauth2-authentication-for-apigee-edge
+
+### comment by dattasharma540 (association=NONE) at 2021-07-20T18:48:58Z
+@phdhiren 
+
+We are using Apigee version 4.50.00.00 (Edge for private cloud). 
+
+Here is debug info from Drupal "Apigee Edge general settings" page when I test the connection.
+Password is not printed here.
+
+```
+{
+    "endpoint": "http:\/\/APIGEE-MGMTAPI-HOST:8080\/v1",
+    "organization": "my-org",
+    "username": "my-email",
+    "authorization_server": "https:\/\/APIGEE-OAUTH-HOST\/v1\/oauth2\/password",
+    "client_id": "gLE44zg9Ec6bm9q5K0TXADYEHAsvqrHs",
+    "client_secret": "***client-secret***"
+}
+{
+    "auth_type": "oauth",
+    "key_provider": "Drupal\\key\\Plugin\\KeyProvider\\ConfigKeyProvider"
+}
+{
+    "http_client_connect_timeout": 30,
+    "http_client_timeout": 30,
+    "http_client_proxy": ""
+}
+Http\Client\Common\Exception\LoopException: Too many restarts in plugin client in /var/www/devportal/vendor/php-http/client-common/src/PluginChain.php:58
+Stack trace:
+#0 /var/www/devportal/vendor/apigee/apigee-client-php/src/HttpClient/Plugin/RetryOauthAuthenticationPlugin.php(65): Http\Client\Common\PluginChain->__invoke(Object(GuzzleHttp\Psr7\Request))
+#1 /var/www/devportal/vendor/php-http/httplug/src/Promise/HttpRejectedPromise.php(30): Apigee\Edge\HttpClient\Plugin\RetryOauthAuthenticationPlugin->Apigee\Edge\HttpClient\Plugin\{closure}(Object(Apigee\Edge\Exception\OauthAccessTokenAuthenticationException))
+#2 /var/www/devportal/vendor/apigee/apigee-client-php/src/HttpClient/Plugin/RetryOauthAuthenticationPlugin.php(71): Http\Client\Promise\HttpRejectedPromise->then(Object(Closure), Object(Closure))
+#3 /var/www/devportal/vendor/php-http/client-common/src/PluginChain.php(48): Apigee\Edge\HttpClient\Plugin\RetryOauthAuthenticationPlugin->handleRequest(Object(GuzzleHttp\Psr7\Request), Object(Closure), Object(Http\Client\Common\PluginChain))
+```
+
+
+**Results of composer show** 
+[composer-show.txt](https://github.com/apigee/apigee-edge-drupal/files/6850555/composer-show.txt)
+
+
+
+### comment by dattasharma540 (association=NONE) at 2021-07-20T18:59:21Z
+Apigee Trace shows Drupal attempting multiple calls. First one is Get Access token. Subsequent calls are all Refresh token. 
+
+Refresh token response
+```
+{
+  "refresh_token_expires_in" : "1799",
+  "refresh_token_status" : "approved",
+  "api_product_list" : "[product_v1]",
+  "api_product_list_json" : [ "product_v1" ],
+  "old_access_token_life_time" : "43",
+  "organization_name" : "my-org",
+  "developer.email" : "my-email",
+  "token_type" : "BearerToken",
+  "issued_at" : "1626807310602",
+  "client_id" : "gLE44zg9Ec6bm9q5K0TXADYEHAsvqrHs",
+  "access_token" : "O8sVcm8X9HIm1NuIHhaf9pvbhnK9",
+  "refresh_token" : "58V3iz.....
+```
+
+![image](https://user-images.githubusercontent.com/81440848/126379885-761e6370-d86f-4bed-8658-015260573aed.png)
+
+
+### comment by mxr576 (association=CONTRIBUTOR) at 2021-08-05T14:59:25Z
+>     "authorization_server": "https:\/\/APIGEE-OAUTH-HOST\/v1\/oauth2\/password",
+
+Are you sure that this is the correct authorization server? It is usually `https://HOST/oauth/token`. like https://login.apigee.com/oauth/token in the public cloud.
+
+IIRC Automatic retires happens when the Apigee backend returns HTTP > 400. 
+
+### comment by phdhiren (association=CONTRIBUTOR) at 2021-08-06T07:33:13Z
+Runtime OAuth not supported with Apigee Edge. Basic Auth is not deprecated for OPDK yet. Please use Basic Auth for now. 
+Tracking the same at https://github.com/apigee/apigee-edge-drupal/issues/608

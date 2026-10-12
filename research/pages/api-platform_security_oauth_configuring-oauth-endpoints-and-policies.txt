@@ -1,0 +1,67 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+To do its job as an OAuth2 authorization server, Apigee needs to expose endpoints where clients can request tokens and auth codes. This topic offers a quick introduction to these endpoints, and shows you how to set them up in Apigee.
+
+## What is an OAuth2 endpoint?
+
+An OAuth2 endpoint is a URL that clients call to request OAuth tokens (or auth codes). Here's an example request for an access token:
+
+<div>
+
+</div>
+
+``` terminal
+
+$ curl -i -H "ContentType: x-www-form-urlencoded" \
+-X POST "https://apitest.acme.com/oauth/client_credential/accesstoken" \
+-d "grant_type=client_credentials" \
+-H "Authorization: Basic c3FIOG9vSGV4VHo4QzAySVg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ"
+```
+
+You need an OAuthV2 policy to process this request. As you can infer from the above example request, the policy must support the "client credentials" grant type, and execute on the path `/oauth/client_credentials/accesstoken`.
+
+This is a sample OAuthV2 policy that is configured to accept the `client_credentials` grant type. For information on optional configuration elements that you can configure with this policy, see [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OAuthV2 name="GenerateAccessToken">
+    <Operation>GenerateAccessToken</Operation>
+    <ExpiresIn>1800000</ExpiresIn> <!-- 30 minutes -->
+    <SupportedGrantTypes>
+      <GrantType>client_credentials</GrantType>
+    </SupportedGrantTypes>
+    <GenerateResponse enabled="true"/>
+</OAuthV2>
+```
+
+Here's a sample endpoint configuration for generating an access token. It'll execute the GenerateAccessToken policy, which must be configured to support the client_credentials grant type.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+       <Flow name="generate-access-token">
+            <Request>
+                <Step>
+                    <Name>GenerateAccessToken</Name>
+                </Step>
+            </Request>
+            <Response/>
+            <Condition>(proxy.pathsuffix MatchesPath "/token") and (request.verb = "POST")</Condition>
+        </Flow>
+...
+```
+
+If the client provides the correct credentials, the policy generates and returns a token; otherwise, it returns an error.
+
+## Related topics
+
+For detailed information on all of the supported grant types and sample code, see [Get OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/access-tokens)

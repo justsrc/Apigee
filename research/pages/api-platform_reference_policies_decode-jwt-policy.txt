@@ -1,0 +1,194 @@
+[<span class="devsite-label" background="google-blue">Standard policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The DecodeJWT policy decodes a JWT without verifying the signature on the JWT. This is most useful when used in concert with the [VerifyJWT policy](/apigee/docs/api-platform/reference/policies/verify-jwt-policy), when the value of a claim from within the JWT must be known before verifying the signature of the JWT.
+
+The JWT Decode policy works regardless of the algorithm that was used to sign the JWT. See [JWS and JWT policies overview](/apigee/docs/api-platform/reference/policies/jwt-policies-overview) for a detailed introduction.
+
+This policy is a *Standard policy* and can be deployed to any environment type. For information on policy types and availability with each environment type, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+### Sample: Decode a JWT
+
+The policy shown below decodes a JWT found in the flow variable **var.jwt**. This variable must be present and contain a viable (decodable) JWT. The policy can obtain the JWT from any flow variable.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DecodeJWT name="JWT-Decode-HS256">
+    <DisplayName>JWT Verify HS256</DisplayName>
+    <Source>var.jwt</Source>
+</DecodeJWT>
+```
+
+The policy writes its output to context variables so that subsequent policies or conditions in the API proxy can examine those values. See [Flow variables](#flow-variables) for a list of the variables set by this policy.
+
+## Element reference for Decode JWT
+
+The policy reference describes the elements and attributes of the Decode JWT policy.
+
+### Attributes that apply to the top-level element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DecodeJWT name="JWT" continueOnError="false" enabled="true" async="false">
+```
+
+The following attributes are common to all policy parent elements.
+
+| Attribute | Description | Default | Presence |
+| --- | --- | --- | --- |
+| name | The internal name of the policy. Characters you can use in the name are restricted to: A-Z0-9._\-$ % . However, the Apigee UI enforces additional restrictions, such as automatically removing characters that are not alphanumeric. Optionally, use the <displayname></displayname> element to label the policy in the Apigee UI proxy editor with a different, natural-language name. | N/A | Required |
+| continueOnError | Set to false to return an error when a policy fails. This is expected behavior for most policies. Set to true to have flow execution continue even after a policy fails. | false | Optional |
+| enabled | Set to true to enforce the policy. Set to false to "turn off" the policy. The policy will not be enforced even if it remains attached to a flow. | true | Optional |
+| async | This attribute is deprecated. | false | Deprecated |
+
+## \<DisplayName\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+Use in addition to the name attribute to label the policy in the Apigee UI proxy editor with a different, natural-language name.
+
+|  |  |
+|----|----|
+| **Default** | If you omit this element, the value of the policy's name attribute is used. |
+| **Presence** | Optional |
+| **Type** | String |
+
+## \<Source\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Source>jwt-variable</Source>
+```
+
+If present, specifies the flow variable in which the policy expects to find the JWT to decode.
+
+**Note:** By default, the JWT is retrieved from the variable **request.header.authorization**. In this case, Apigee looks for the JWT in the request Authorization header. If you pass the JWT in the Authorization header, you do not need to include the Source element in the policy; however, you **must** include **Bearer** in the auth header. For example, you would pass the JWT in the Authorization header like this:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+curl -v http://52.200.92.187:9001/doctest-jwt/verify-rs256 -H "Authorization: Bearer <your JWT>"
+```
+
+You can configure to policy to retrieve the JWT from a form or query parameter variable or any other variable. If the variable does not exist or if the policy otherwise can't find the JWT, the policy returns an error.
+
+|  |  |
+|----|----|
+| **Default** | `request.header.authorization` (See the note above for important information about the default). |
+| **Presence** | Optional |
+| **Type** | String |
+| **Valid values** | An Apigee flow variable name |
+
+## Flow variables
+
+Upon success, the **Verify JWT** and **Decode JWT** policies set context variables according to this pattern:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+jwt.{policy_name}.{variable_name}
+```
+
+For example, if the policy name is `jwt-parse-token` , then the policy will store the subject specified in the JWT to the context variable named `jwt.jwt-parse-token.decoded.claim.sub`. (For backward compatibility, it will also be available in `jwt.jwt-parse-token.claim.subject`)
+
+| Variable name | Description |
+| --- | --- |
+| claim.audience | The JWT audience claim. This value may be a string, or an array of strings. |
+| claim.expiry | The expiration date/time, expressed in milliseconds since epoch. |
+| claim.issuedat | The Date the token was issued, expressed in milliseconds since epoch. |
+| claim.issuer | The JWT issuer claim. |
+| claim.notbefore | If the JWT includes a nbf claim, this variable will contain the value, expressed in milliseconds since epoch. |
+| claim.subject | The JWT subject claim. |
+| claim. name | The value of the named claim (standard or additional) in the payload. One of these will be set for every claim in the payload. |
+| decoded.claim. name | The JSON-parsable value of the named claim (standard or additional) in the payload. One variable is set for every claim in the payload. For example, you can use decoded.claim.iat to retrieve the issued-at time of the JWT, expressed in seconds since epoch. While you can also use the claim. name flow variables, this is the recommended variable to use to access a claim. |
+| decoded.header. name | The JSON-parsable value of a header in the payload. One variable is set for every header in the payload. While you can also use the header. name flow variables, this is the recommended variable to use to access a header. |
+| expiry_formatted | The expiration date/time, formatted as a human-readable string. Example: 2017-09-28T21:30:45.000+0000 |
+| header.algorithm | The signing algorithm used on the JWT. For example, RS256, HS384, and so on. See (Algorithm) Header Parameter for more. |
+| header.kid | The Key ID, if added when the JWT was generated. See also "Using a JSON Web Key Set (JWKS)" at JWT policies overview to verify a JWT. See (Key ID) Header Parameter for more. |
+| header.type | Will be set to JWT . |
+| header. name | The value of the named header (standard or additional). One of these will be set for every additional header in the header portion of the JWT. |
+| header-json | The header in JSON format. |
+| is_expired | true or false |
+| payload-claim-names | An array of claims supported by the JWT. |
+| payload-json | The payload in JSON format. |
+| seconds_remaining | The number of seconds before the token will expire. If the token is expired, this number will be negative. |
+| time_remaining_formatted | The time remaining before the token will expire, formatted as a human-readable string. Example: 00:59:59.926 |
+| valid | In the case of VerifyJWT, this variable will be true when the signature is verified, and the current time is before the token expiry, and after the token notBefore value, if they are present. Otherwise false. In the case of DecodeJWT, this variable is not set. |
+
+## Error reference
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+| Fault code | HTTP status | Cause | Fix |
+|----|----|----|----|
+| `steps.jwt.FailedToDecode` | `401` | Occurs when the policy is unable to decode the JWT. The JWT may be malformed, invalid or otherwise not decodable. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/decode-JWT-runtime-errors#failedtodecode) |
+| `steps.jwt.FailedToResolveVariable` | `401` | Occurs when the flow variable specified in the ` <Source>` element of the policy does not exist. |  |
+| `steps.jwt.InvalidToken` | `401` | Occurs when the flow variable specified in the ` <Source>` element of the policy is out of scope or can't be resolved. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/decode-JWT-runtime-errors#invalidtoken) |
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+| Error name | Cause | Fix |
+|----|----|----|
+| `InvalidEmptyElement` | Occurs when the flow variable containing the JWT to be decoded is not specified in the `<Source>` element of the policy. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/decode-JWT-deployment-errors#invalidemptyelement) |
+
+### Fault variables
+
+These variables are set when a runtime error occurs. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``fault_name``"` | `fault_name` is the name of the fault, as listed in the [Runtime errors](/apigee/docs/api-platform/reference/policies/decode-jwt-policy#decode-jwt-runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name Matches "InvalidToken"` |
+| `JWT.failed` | All JWT policies set the same variable in the case of a failure. | `JWT.failed = true` |
+
+### Example error response
+
+For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+    <FaultRules>
+        <FaultRule name="JWT Policy Errors">
+            <Step>
+                <Name>JavaScript-1</Name>
+                <Condition>(fault.name Matches "InvalidToken")</Condition>
+            </Step>
+            <Condition>JWT.failed=true</Condition>
+        </FaultRule>
+    </FaultRules>
+    
+```

@@ -1,0 +1,506 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The MessageLogging policy lets you log custom messages to [Cloud Logging](https://cloud.google.com/logging) or syslog. You can use the information in the logs for various tasks, such as tracking down problems in the API runtime environment.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+There are two ways to use the MessageLogging policy:
+
+- The [`<CloudLogging>`](#cloudloggingelement) element logs messages to Logging. To use this method, you need to enable the Cloud Logging API for your Google Cloud project. For more information about enabling APIs for a Google Cloud project, see [Enabling and Disabling Services](/service-usage/docs/enable-disable).
+- The [`<Syslog>`](#syslog-element) element logs messages to syslog, a standard protocol for sending system log or event messages to a specific server. To use this method, you must have a syslog server available. If you don't, you can use public log management services, such a Splunk, Sumo Logic, and Loggly. See [Configuring third-party log management services](#thirdparty).
+
+**Note:** You *cannot* use both the `<CloudLogging>` element and the `<Syslog>` element in the same policy.
+
+## `<MessageLogging>` element
+
+Defines a `<MessageLogging>` policy.
+
+| Default value | See Default Policy tab, below |
+| --- | --- |
+| Required? | Required |
+| Type | TYPE |
+| Parent Element | n/a |
+| Child Elements | <CloudLogging> <Syslog> <logLevel> |
+
+The `<MessageLogging>` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MessageLogging continueOnError="false" enabled="true" name="Message-Logging-1">
+    <DisplayName>Message Logging-1</DisplayName>
+    <Syslog>
+<!-- Note: You cannot use both the <Syslog> element and the <CloudLogging> element in the same policy. -->
+        <Message>Some message for syslog</Message>
+        <Host>localhost</Host>
+        <Port>514</Port>
+    </Syslog>
+    <CloudLogging>
+<!-- Note: You cannot use both the <CloudLogging> and the <Syslog> element in the same policy. -->
+        <LogName>projects/{organization.name}/logs/{log.id}</LogName>
+        <Message contentType="application/json">{"{message.queryparam.key}": "{message.queryparam.value}"}</Message>
+        <Labels>
+            <Label>
+                <Key>key1</Key>
+                <Value>value1</Value>
+            </Label>
+            <Label>
+                <Key>key2</Key>
+                <Value>value2</Value>
+            </Label>
+        </Labels>
+        <ResourceType>api</ResourceType>
+        <Endpoint>regional-endpoint</Endpoint>
+    </CloudLogging>
+    <logLevel>ALERT</logLevel>
+</MessageLogging>
+```
+
+This element has the following attributes that are common to all policies:
+
+**Attribute**
+
+**Default**
+
+**Required?**
+
+**Description**
+
+`name`
+
+N/A
+
+**Required**
+
+The internal name of the policy. The value of the `name` attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters.
+
+Optionally, use the `<DisplayName>` element to label the policy in the management UI proxy editor with a different, natural-language name.
+
+`continueOnError`
+
+false
+
+Optional
+
+Set to `false` to return an error when a policy fails. This is expected behavior for most policies. Set to `true` to have flow execution continue even after a policy fails. See also:
+
+- [Fault rules are triggered ONLY in an error state (about continueOnError)](/apigee/docs/api-platform/fundamentals/fault-handling#multiplefaultrulesandexecutionlogic-faultrulesaretriggeredonlyinanerrorstateaboutcontinueonerror)
+- [Handling faults within the current flow](/apigee/docs/api-platform/fundamentals/fault-handling#continueonerror)
+
+`enabled`
+
+true
+
+Optional
+
+Set to `true` to enforce the policy. Set to `false` to *turn off* the policy. The policy will not be enforced even if it remains attached to a flow.
+
+`async`  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray">not_interested</span></span>
+
+false
+
+Deprecated
+
+This attribute is deprecated.
+
+The following table provides a high-level description of the child elements of `<MessageLogging>`:
+
+| Field Name | Field Description |
+|----|----|
+| [`CloudLogging`](#cloudloggingelement) | Configure messages to be logged to Cloud Logging. |
+| [`Syslog`](#syslog-element) | Configure messages to be logged to `syslog`. |
+
+## Samples
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### CloudLogging
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<MessageLogging name="LogToCloudLogging">
+    <CloudLogging>
+        <LogName>projects/{organization.name}/logs/{log.id}</LogName>
+        <Message contentType="application/json">{"{message.queryparam.key}": "{message.queryparam.value}"}</Message>
+        <Labels>
+            <Label>
+                <Key>key1</Key>
+                <Value>value1</Value>
+            </Label>
+            <Label>
+                <Key>key2</Key>
+                <Value>value2</Value>
+            </Label>
+        </Labels>
+        <ResourceType>api</ResourceType>
+        <Endpoint>logging.us.rep.googleapis.com:443</Endpoint>
+    </CloudLogging>
+</MessageLogging>
+```
+
+This example illustrates the use of [message templates](/apigee/docs/api-platform/reference/message-template-intro). Since the `Message` element contains the flow variables
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+{"{message.queryparam.key}": "{message.queryparam.value}"}
+```
+
+when someone calls the proxy with the values `message.queryparam.key = "fruit"` and `message.queryparam.value = "apple"`, the resulting log entry would be `{"fruit": "apple"}`.
+
+</div>
+
+<div class="section">
+
+### Syslog
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<MessageLogging name="LogToSyslog">
+  <Syslog>
+    <Message>[3f509b58 tag="{organization.name}.{apiproxy.name}.{environment.name}"] Weather request for WOEID {request.queryparam.w}.</Message>
+    <Host>logs-01.loggly.com</Host>
+    <Port>514</Port>
+    <Protocol>TCP</Protocol>
+    <FormatMessage>true</FormatMessage>
+    <DateFormat>yyMMdd-HH:mm:ss.SSS</DateFormat>
+  </Syslog>
+  <logLevel>ALERT</logLevel>
+</MessageLogging>
+```
+
+In this example, suppose that you need to log information about each request message that your API receives from consumer apps. The value `3f509b58` represents a key value specific to the loggly service. If you have a loggly account, substitute your loggly key. The log message that is generated will be populated with four values: the organization, API proxy, and environment name associated with the transaction, along with the value for a query parameter on the request message. The format of timestamps will be similar to `230704-13:42:17.376`, as per the format specified in the `DateFormat` element.
+
+**Note:** `Host` and `Port` elements cannot refer to variables. They must contain static values.
+
+</div>
+
+<div class="section">
+
+### Syslog over TLS/SSL
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<MessageLogging name="LogToSyslog">
+  <Syslog>
+    <Message>[3f509b58 tag="{organization.name}.{apiproxy.name}.{environment.name}"] Weather request for WOEID {request.queryparam.w}.</Message>
+    <Host>logs-01.loggly.com</Host>
+    <Port>6514</Port>
+    <Protocol>TCP</Protocol>
+    <FormatMessage>true</FormatMessage>
+    <SSLInfo>
+        <Enabled>true</Enabled>
+    </SSLInfo>
+  </Syslog>
+  <logLevel>WARN</logLevel>
+</MessageLogging>
+```
+
+You can send messages to third-party message logging providers over TLS/SSL by adding the `<SSLInfo>` block.
+
+</div>
+
+</div>
+
+## Child element reference
+
+The following sections describe the child elements of \<MessageLogging\>.
+
+### `<CloudLogging>`
+
+Use the `<CloudLogging>` element to log messages to Cloud Logging.
+
+**Note:** To use `<CloudLogging>` you need to enable the Cloud Logging API for your Google Cloud project. To enable APIs for a Google Cloud project, see [Enabling and Disabling Services](/service-usage/docs/enable-disable). The `<CloudLogging>` element of the MessageLogging policy is available in Apigee and Apigee Hybrid versions v1.7.0 and later.
+
+| Field Name | Required? | Description |
+| --- | --- | --- |
+| LogName | Yes | Name of the log. The log name should be in the format projects/{PROJECT_ID}/logs/{LOG_ID} . You can use variables in place of {PROJECT_ID} and {LOG_ID} . Note: LogName specifies the resource name of a Cloud Logging log to send the log entry to. Through the use of variables, the MessageLogging policy allows you to dynamically insert a different and unique name value for each LogName entry; however we advise against this practice, and recommend that you not dynamically create unique log names with values that can change from request to request, as it can cause high cardinality issues. Instead, we recommend you use a fixed, meaningful name from a fixed set of names for the LogName. |
+| Message | Yes | The message to be logged. The message has an attribute contentType , whose value can either be text/plain or application/json for text and JSON messages respectively. See the Samples . Note: Response variables will not be available in PostClientFlow following an Error Flow. Use a message . to log response information for both error and success situations. See also Usage notes . Note: The <Message> element supports the dynamic string substitution feature called message templating . |
+| Label | No | Label to be attached to the log message, if any. These will be in the form of a key-value pair like the following: <Label> <Key>key1</Key> <Value>value1</Value> </Label> |
+| ResourceType | No (defaults to global) | Represents the monitored resource that is generating the logs. |
+
+### Authentication for Cloud Logging
+
+To use the `<CloudLogging>` element, you must deploy your API proxy to use Google authentication. Apigee will use credentials corresponding to the identity of the service account you specify in the outbound requests to Cloud Logging. For more details, see [Using Google Authentication](/apigee/docs/api-platform/security/google-auth/overview).
+
+The service account that you attach to your API proxy at deployment time must have a role with the [logging.logEntries.create](/logging/docs/access-control#permissions_and_roles) permission. Unless you need finer grained control, we recommend using the more inclusive predefined role [roles/logging.logWriter](/logging/docs/access-control#permissions_and_roles) for the service account. For more information about Identity and Access Management (Identity and Access Management (IAM)) roles for `<CloudLogging>`, see the [Access control guide](https://cloud.google.com/logging/docs/access-control).
+
+**Warning:** If you disable the service account used for API runtime traffic, Cloud Logging stops functioning. In this case, API runtime traffic continues to process normally, but no logging errors or alerts are reported. Ensure that the service account remains enabled and has the necessary permissions to write to Cloud Logging.
+
+#### Proxy deployment in Apigee Hybrid
+
+If you are using Hybrid, the [runtime service account](/apigee/docs/api-platform/security/google-auth/overview#about-service-account-permissions) you create for Hybrid must impersonate the proxy service account to make authenticated calls on its behalf. As a result, the Hybrid runtime service account must have the `iam.serviceAccountTokenCreator` role for the proxy service account.
+
+### \<Syslog\>
+
+Use the `<Syslog>` element to configure messages to be logged to `syslog`. When you use the `<Syslog>`, an API proxy forwards log messages from Apigee to a remote syslog server. To use this method, you must have a syslog server available. If you don't, public log management services, such a Splunk, Sumo Logic, and Loggly, are available. see [Configuring third-party log management services](#thirdparty).
+
+| Field Name | Required? | Field Description |
+| --- | --- | --- |
+| Message | Yes | The message to be logged. The message has an attribute contentType , whose value can either be text/plain or application/json for text and JSON messages respectively. See the Samples . Note: The <Message> element supports the dynamic string substitution feature called message templating . Note: Response variables will not be available in PostClientFlow following an Error Flow. Use a message . to log response information for both error and success situations. See also Usage notes . |
+| Host | No | The hostname or IP address of the server where the syslog should be sent. If you don't include this element, the default is localhost. |
+| Port | No | Port where the syslog is running. If you don't include this element, the default is 514. |
+| Protocol | No | TCP or UDP (default). While UDP is more performant, the TCP protocol guarantees message log delivery to the syslog server. For sending syslog messages over TLS/SSL, only TCP is supported. |
+| FormatMessage | No, but <FormatMessage>true</FormatMessage> is required for use with Loggly. | true or false (default) This element lets you control the format of Apigee-generated content prepended to the message. If set to true, the syslog message is prepended by a fixed number of characters, which lets you filter out that information from messages. Here's an example for the fixed format: <14>1 2023-03-20T09:24:39.039+0000 e49cd3a9-4cf6-48a7-abb9-7ftfe4d97d00 Apigee - - - Message starts here The Apigee-generated information includes: <14> - A priority score (see the Syslog Protocol ) based on the log level and facility level of the message. 1 - The current syslog version. Date with a UTC offset (UTC = +0000). Message processor UUID. "Apigee - - - " If set to false (default), the message is not prepended with those fixed characters. Note: If you set <FormatMessage>false</FormatMessage> , the log message still includes the priority score and the date. To format the log message to only include the message body, set <PayloadOnly>true</PayloadOnly> . See PayloadOnly . |
+| PayloadOnly | No | true or false (default) This element sets the format of Apigee-generated messages to contain only the body of the syslog message, without the prepended characters specified by FormatMessage . If you don't include this element or leave it empty, the default value is false . See FormatMessage . Note: setting <PayloadOnly>true</PayloadOnly> overrides the setting of FormatMessage. |
+| DateFormat | No | A formatting template string to use to format the timestamp for each log message. By default, Apigee uses yyyy-MM-dd'T'HH:mm:ss.SSSZ . The behavior of this template is described in the documentation for Java's SimpleDateFormat class . According to that definition, yyyy in the format string will be replaced with a 4-digit year, MM will be replaced with a 2-digit month number, and so on. |
+| SSLInfo | No | Lets you log messages through SSL/TLS. Use with sub-element <Enabled>true</Enabled> . If you don't include this element or leave it empty, the default value is false (no TLS/SSL). <SSLInfo> <Enabled>true</Enabled> </SSLInfo> You can configure the <SSLInfo> tag the same as you can on a TargetEndpoint, including enabling two-way TLS/SSL, as described in API proxy configuration reference . Only the TCP protocol is supported. |
+
+### \<logLevel\>
+
+Valid values for the `<logLevel>` element are: `INFO` (default), `ALERT`, `WARN`, `ERROR`.
+
+Sets a specific level of information to be included in the message log.
+
+If you're using the FormatMessage element (setting it to true), your `<logLevel>` setting affects the calculated priority score (the number inside the angle brackets) in the Apigee-generated information prepended to the message.
+
+## <span id="usagenotes"></span>Usage notes
+
+When attaching a [MessageLogging policy](/apigee/docs/api-platform/reference/policies/message-logging-policy) to an API proxy flow, consider placing it in the ProxyEndpoint response, in a special flow called PostClientFlow. The PostClientFlow executes after the response is sent to the requesting client, which ensures that all metrics are available for logging. For details on using PostClientFlow, see [API proxy configuration reference](/apigee/docs/api-platform/reference/api-proxy-configuration-reference).
+
+**Note:** It's important to note that the **response** flow variable is not available in the PostClientFlow once processing enters the error state. Instead, you can use the **message** variable to set values in the MessageLogging policy in the PostClientFlow, ensuring that they will be set whether or not the error state was the previous context. For more information and examples, see [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference).
+
+The PostClientFlow is special in two ways:
+
+1.  It only executed as part of the response flow.
+2.  It is the only flow executed after the proxy enters the error state.
+
+Because it is executed regardless of whether the proxy succeeded or failed, you can put MessageLogging policies in the PostClientFlow and be guaranteed that they always execute.
+
+The following Debug image shows a MessageLogging policy executing as part of the PostClientFlow, after the DefaultFaultRule executes:
+
+![](/static/apigee/docs/api-platform/images/postClientFlow.png)
+
+In this example, the Verify API Key policy caused the fault because of an invalid key.
+
+Shown below is the ProxyEndpoint definition that includes the PostClientFlow:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ProxyEndpoint name="default">
+  ...
+  <PostClientFlow>
+    <Response>
+      <Step>
+        <Name>Message-Logging-1</Name>
+      </Step>
+    </Response>
+  </PostClientFlow>
+  ...
+</ProxyEndpoint>
+```
+
+Apigee logs messages as simple text, and you can configure logging to include variables, such as the date and time when the request or response was received, the user identity on the request, the source IP address from which the request was sent, and so on.
+
+Apigee logs messages asynchronously: the response is returned while the logs are still being written. As a result, no latency is introduced to your API by blocking callouts. There might be occasions when a log is not written without an error being returned, but these events are rare.
+
+The MessageLogging policy writes logged messages in memory to a buffer. The message logger reads messages from the buffer and then writes to the destination that you configure. Each destination has its own buffer.
+
+**Note:** **Proxy calls succeed when logging fails**
+
+Because message logging is first written to the buffer, the API proxy will continue successful execution even if message logging ultimately fails (for example, if there's a connection failure to the destination).
+
+If the write rate to the buffer increases beyond the read rate, the buffer overflows and logging will fail. If this happens, you might find one of the following messages in the log file:
+
+- Using `<CloudLogging>`:
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+  steps.messagelogging.TooManyPendingLoggingRequest
+  ```
+
+- Using `<Syslog>`:
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+  Log message size exceeded. Increase the max message size setting
+  ```
+
+Increase the `max.log.message.size.in.kb` property (default value = 128 KB) in the `message-logging.properties` file.
+
+**Note:** The [response message variables](/apigee/docs/api-platform/reference/variables-reference#response) in Apigee are not available from the Error Flow. These variables are also not available in PostClientFlow if the preceding flow was the Error Flow. If you want to log response information from the PostClientFlow, use the [`message`](/apigee/docs/api-platform/reference/variables-reference#message). You can use this object to get at headers and other information from the response whether or not there was an error. See [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference) for more information and an example.
+
+### Default values for variables in message template
+
+Default values can be specified for each variable in the message template separately. For example, if the variable `request.header.id` cannot be resolved, then its value is replaced with the value `unknown`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Message>This is a test message. id = {request.header.id:unknown}</Message>
+```
+
+A common default value can be specified for all the unresolved variables by setting the `defaultVariableValue` attribute on the `Message` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Message defaultVariableValue="unknown">This is a test message. id = {request.header.id}</Message>
+```
+
+**Note:** The default variable value cannot contain spaces.
+
+### Configuring third-party log management services
+
+The MessageLogging policy lets you send syslog messages to third-party log management services, such as Splunk, Sumo Logic, and Loggly. If you want to send syslog to one of those services, see that service's documentation to configure the service's host, port, and protocol, then set the Syslog element on this policy accordingly.
+
+See the following documentation for third-party log management configuration:
+
+- <a href="https://docs.splunk.com/Documentation/Splunk/6.2.0/Data/SyslogTCP" target="_blank">Splunk</a> (select the product version)  
+  Also see this Apigee Community post: [Log messages into Splunk](https://www.googlecloudcommunity.com/gc/Cloud-Product-Articles/Log-messages-into-Splunk/ta-p/77060)
+- <a href="https://help.sumologic.com/docs/send-data/installed-collectors/sources/syslog-source/" target="_blank">Sumo Logic</a>
+  - Also see this Apigee Community post: [Setting up Logging with Sumo Logic](https://www.googlecloudcommunity.com/gc/Apigee/Setting-up-Logging-with-Sumo-Logic-which-Host-should-I-use/td-p/41574)
+  - For a complete example using Sumo Logic as the logging service, see the following Apigee Community post. The solution uses a single JavaScript policy to make HTTP POST requests to Sumo Logic HTTP Source Collector: [Logging to Sumo Logic using JavaScript and HTTP](https://www.googlecloudcommunity.com/gc/Cloud-Product-Articles/Logging-to-Sumo-Logic-using-JavaScript-and-HTTP/ta-p/77319)
+- [Loggly](https://www.loggly.com/docs/streaming-syslog-without-using-files/)  
+  When using Loggly, `<FormatMessage>true</FormatMessage>` is required in the policy as a child of the `<Syslog>` element.  
+  Also see this Apigee Community post for more information about message logging to Loggly: [Log Messages into Loggly](https://www.googlecloudcommunity.com/gc/Cloud-Product-Articles/Log-Messages-into-Loggly/ta-p/77088)
+
+## Error reference
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+Fault code
+
+HTTP status
+
+Cause
+
+`steps.messagelogging.StepDefinitionExecutionFailed`
+
+`500`
+
+See fault string.
+
+`steps.messagelogging.InvalidGoogleCloudLogName`
+
+`500`
+
+This error is thrown when the `LogName` does not evaluate to the valid format of projects/{project}/logs/{logid}.
+
+`steps.messagelogging.InvalidJsonMessage`
+
+`500`
+
+This error is thrown when the `contentType` attributes value has been chosen as `application/json` but the actual message value is not a valid JSON string,
+
+`steps.messagelogging.TooManyPendingLoggingRequest`
+
+`500`
+
+This error is thrown when there are more than 2500 pending requests that are yet to be written to Cloud Logging. The 2500 limit is for each Apigee runtime pod. For example, if the traffic is distributed over two instances of Apigee runtime pods, the effective limit is 5000 requests.
+
+\-
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+**Tip:** Need help resolving an error? Click *build* in the Fix column for detailed troubleshooting information.
+
+| Error name | Cause | Fix |
+|----|----|----|
+| `InvalidProtocol` | The deployment of the `MessageLogging` policy can fail with this error if the protocol specified within the `<Protocol>` element is not valid. The valid protocols are TCP and UDP. For sending syslog messages over TLS/SSL, only TCP is supported. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/message-logging-deployment-errors#invalidprotocol) |
+| `InvalidPort` | The deployment of the `MessageLogging` policy can fail with this error if the port number is not specified within the `<Port>` element or if it is not valid. The port number must be an integer greater than zero. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/message-logging-deployment-errors#invalidport) |
+
+### Fault variables
+
+These variables are set when a runtime error occurs. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+**Note:** **Proxy calls succeed when logging fails**
+
+There's a difference between policy errors and message logging errors. The flow variables here are populated only when the policy itself fails, not when message logging fails. Because message logging is first written to buffer, the API proxy will continue successful execution even if message logging ultimately fails (for example, if there's a connection failure to the external syslog provider). Be sure to check your logs on a regular basis to make sure logging is happening as expected.
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``fault_name``"` | `fault_name` is the name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name Matches "StepDefinitionExecutionFailed"` |
+| `messagelogging.``policy_name``.failed` | `policy_name` is the user-specified name of the policy that threw the fault. | `messagelogging.ML-LogMessages.failed = true` |
+
+### Example error response
+
+**Note:** For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{  
+   "fault":{
+      "detail":{
+         "errorcode":"steps.messagelogging.StepDefinitionExecutionFailed"
+      },
+      "faultstring":"Execution failed"
+   }
+}
+```
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name="MessageLogging">
+    <Step>
+        <Name>ML-LogMessages</Name>
+        <Condition>(fault.name Matches "StepDefinitionExecutionFailed") </Condition>
+    </Step>
+    <Condition>(messagelogging.ML-LogMessages.failed = true) </Condition>
+</FaultRule>
+```
+
+## Flow variables
+
+The following variables are populated on policy failure.
+
+- `messagelogging.failed`
+- `messagelogging.{stepdefinition-name}.failed`
+
+**Note:** **Proxy calls succeed when logging fails**
+
+There's a difference between policy errors and message logging errors. The flow variables here are populated only when the policy itself fails, not when message logging fails. Because message logging is first written to the buffer, the API proxy will continue successful execution even if message logging ultimately fails (for example, if there's a connection failure to the external syslog provider). Be sure to check your logs on a regular basis to make sure logging is happening as expected.
+
+## Related topics
+
+- Variables exposed by Apigee: [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference)

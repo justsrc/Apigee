@@ -1,0 +1,29 @@
+URL: https://github.com/apigee/microgateway-plugins/issues/92
+TITLE: ApiKey caching is not using the cache expiry mechanism
+STATE: open state_reason: None
+AUTHOR: eschult2001 association: NONE
+CREATED: 2019-01-04T19:40:19Z CLOSED: None
+LABELS: 
+MILESTONE: None
+--- BODY ---
+[feature request] 
+
+In apikeys (and same code in oauth and oauthv2) 
+https://github.com/apigee/microgateway-plugins/blob/94751da5776c89a2132d76ce9580591be665dd7b/apikeys/index.js#L201
+
+A distinct expiration time is known but not passed to the cache.   This could benefit
+  - less IPC transfer for objects that are expired
+  - simpler cache retrieval logic (memored already checks the TTL on retrieval)
+  - proactively evicting stale JWTs from cache making room for more active apiKeys
+
+
+
+--- COMMENTS (2) ---
+
+### comment by srinandan (association=CONTRIBUTOR) at 2019-01-05T20:10:29Z
+When an apikey is presented to MG, it invokes /edgemicro-auth/verifyApikey. The response from verifyApiKey is a JWT. At the moment, the JWT expiry is set to 1 minute (but easily customizable). The current logic stores the api key in cache for as long as the JWT expiry is set to.
+
+I'm happy to add a TTL for the cache itself, but remember there are two dials to operate - a JWT expiry and the cache TTL.
+
+### comment by srinandan (association=CONTRIBUTOR) at 2019-01-05T23:20:25Z
+Here is the PR: https://github.com/apigee/microgateway-plugins/pull/93

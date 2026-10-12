@@ -1,0 +1,478 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The JavaScript policy lets you add custom JavaScript code that executes in the context of the API proxy flow. This policy lets you implement custom behavior not otherwise covered by Apigee policies.
+
+In your custom JavaScript code, you can use the objects, methods, and properties of the Apigee [JavaScript object model](/apigee/docs/api-platform/reference/javascript-object-model). You can get, set, and remove variables in the proxy flow context, execute custom logic, perform fault handling, extract data from requests or responses, and dynamically edit the backend target URL. You can also use basic cryptographic functions that are available in the object model.
+
+The JavaScript policy lets you specify a JavaScript source file to execute, or you can include JavaScript code directly in the policy's configuration using the `<Source>` element. Either way, the JavaScript code executes when the step where the policy is attached executes.
+
+For the source file option, the source code is always stored in a standard location in the proxy bundle: `apiproxy/resources/jsc`. Or, you can store the source code in a resource file at the environment or organization level. For instructions, see [Resource files](/apigee/docs/api-platform/develop/resource-files). You can also upload JavaScript using the Apigee UI proxy editor.
+
+JavaScript source files must have a `.js` extension. Apigee supports JavaScript running on the Rhino JavaScript engine 1.7.13.
+
+Apigee does not recommend using the JavaScript policy for the following:
+
+- **Logging.** The [MessageLogging policy](/apigee/docs/api-platform/reference/policies/message-logging-policy) is better suited for logging with third-party logging platforms such as Splunk, Sumo, and Loggly. This policy also improves API proxy performance by executing in the PostClientFlow after the response returns to the client.
+- **Replacing Apigee policies.** The JavaScript policy does not replace the capabilities of Apigee policies. If the capabilities you need are available in an Apigee policy, use that policy instead of implementing a custom JavaScript solution. Custom JavaScript code might not match the performance and optimization of Apigee policies.
+- **To perform system calls.** The security model does not permit system calls from the JavaScript policy. For example, internal file system reads or writes, current user information, process lists, or CPU/memory utilization are not permitted. Although some calls might be functional, they are unsupported and subject to active disablement at any time. For forward compatibility, avoid making these calls in your code.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+### Samples
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Rewrite the target URL
+
+A common use case involves extracting data from a request body, storing it in a flow variable, and then using that flow variable elsewhere in the proxy flow. For example, suppose a user enters their name in an HTML form and submits it. To extract the form data and dynamically add it to the backend service URL, use a JavaScript policy.
+
+**Note:** To try this example, create a new proxy in the proxy editor. When you create the proxy, provide a backend service URL, for example, `http://www.example.com`. This example dynamically rewrites the backend URL. If you need to create a new proxy, see the getting started tutorial.
+
+1.  In the Apigee UI, open the proxy you created in the proxy editor.
+
+2.  Select the **Develop** tab.
+
+3.  From the New menu, select **New Script**.
+
+4.  In the dialog, select JavaScript and name the script `js-example`.
+
+5.  Paste the following code in the code editor and save the proxy. The `context` object is available to JavaScript code anywhere in the proxy flow. It obtains flow-specific constants, calls useful `get`/`set` methods, and performs other operations. This object is part of the Apigee [JavaScript object model](/apigee/docs/api-platform/reference/javascript-object-model). The `target.url` flow variable is a built-in, read/write variable accessible in the Target Request flow. When you set that variable with the API URL, Apigee calls that backend URL. This rewrites the original target URL, which was the URL you specified when you created the proxy (for example, `http://www.example.com`).
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    if (context.flow=="PROXY_REQ_FLOW") {
+         var username = context.getVariable("request.formparam.user");
+         context.setVariable("info.username", username);
+    }
+
+    if (context.flow=="TARGET_REQ_FLOW") {
+         context.setVariable("request.verb", "GET");
+         var name = context.getVariable("info.username");
+         var url = "http://mocktarget.apigee.net/"
+         context.setVariable("target.url", url + "?user=" + name);
+    }
+    ```
+
+6.  From the New Policy menu, select **JavaScript**.
+
+7.  Name the policy `target-rewrite`. Accept the defaults, and save the policy.
+
+8.  After you select the **Proxy Endpoint Preflow** in the **Navigator**, the policy is added to that flow.
+
+9.  In the **Navigator**, select **Target Endpoint PreFlow**.
+
+10. In the **Navigator**, drag the JavaScript policy onto the Request side of the **Target Endpoint** in the flow editor.
+
+11. Save.
+
+12. Substitute your organization name and proxy name when you call the API:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+curl -i -H 'Content-Type: application/x-www-form-urlencoded' -X POST -d 'user=Will' http://myorg-test.apigee.net/js-example
+```
+
+Examine the XML definition for the JavaScript policy used in this example. The `<ResourceURL>` element specifies the JavaScript source file to execute. This pattern applies to any JavaScript source file: `jsc://filename.js`. If your JavaScript code requires includes, use one or more `<IncludeURL>` elements, as described later in this document.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Javascript async="false" continueOnError="false" enabled="true" timeLimit="200" name="target-rewrite">
+    <DisplayName>target-rewrite</DisplayName>
+    <Properties/>
+    <ResourceURL>jsc://js-example.js</ResourceURL>
+</Javascript>
+```
+
+</div>
+
+<div class="section">
+
+### Retrieve property value from JavaScript
+
+You can add a `<Property>` element in the configuration and then retrieve its value with JavaScript at runtime.
+
+Use the element's `name` attribute to specify the name for accessing the property from JavaScript code. The `<Property>` element's value (the value between the opening and closing tags) is the literal value JavaScript receives.
+
+In JavaScript, you retrieve the policy property value by accessing it as a property of the `Properties` object, as follows:
+
+- Configure the property. The property value is the variable name `response.status.code`.
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+  <Javascript async="false" continueOnError="false" enabled="true" timeLimit="200" name="JavascriptURLRewrite">
+      <DisplayName>JavascriptURLRewrite</DisplayName>
+      <Properties>
+          <Property name="source">response.status.code</Property>
+      </Properties>
+      <ResourceURL>jsc://JavascriptURLRewrite.js</ResourceURL>
+  </Javascript>
+  ```
+
+- Retrieve the property using JavaScript. The `getVariable` function then uses the retrieved variable name to retrieve the variable's value.
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+  var responseCode = properties.source; // Returns "response.status.code"
+  var value = context.getVariable(responseCode); // Get the value of response.status.code
+  context.setVariable("response.header.x-target-response-code", value);
+  ```
+
+</div>
+
+</div>
+
+Within a JavaScript policy, accessing `request.content.asJSON` in read-only mode converts large integers to exponential notation in the message body. This overwrites the message with the converted values.
+
+## Element reference
+
+The element reference describes the elements and attributes of the JavaScript policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Javascript async="false"
+        continueOnError="false" enabled="true" timeLimit="200"
+        name="JavaScript-1">
+    <DisplayName>JavaScript 1</DisplayName>
+    <Properties>
+        <Property name="propName">propertyValue</Property>
+    </Properties>
+    <SSLInfo>
+        <Enabled>trueFalse</Enabled>
+        <ClientAuthEnabled>trueFalse</ClientAuthEnabled>
+        <KeyStore>ref://keystoreRef</KeyStore>
+        <KeyAlias>keyAlias</KeyAlias>
+        <TrustStore>ref://truststoreRef</TrustStore>
+    </SSLInfo>
+    <IncludeURL>jsc://a-javascript-library-file</IncludeURL>
+    <ResourceURL>jsc://my-javascript-source-file</ResourceURL>
+    <Source>insert_js_code_here</Source>
+</Javascript>
+```
+
+## \<Javascript\> Attributes
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+< languageVersion="VERSION_1_3" Javascript name="Javascript-1" enabled="true" continueOnError="false" async="false" timeLimit="200">
+```
+
+| Attribute | Description | Default | Presence |
+| --- | --- | --- | --- |
+| languageVersion | Specifies the version of the JavaScript language the code is written in. Values include VERSION_DEFAULT , VERSION_1_0 , VERSION_1_1 , VERSION_1_2 , VERSION_1_3 , VERSION_1_4 , VERSION_1_5 , VERSION_1_6 , VERSION_1_7 , VERSION_1_8 , and VERSION_ES6 . | VERSION_DEFAULT | Optional |
+| timeLimit | Specifies the maximum time (in milliseconds) a script can execute. For example, if a 200 ms limit is exceeded, the policy throws this error: Javascript. policy_name failed with error: Javascript runtime exceeded limit of 200ms . Note: For free trial accounts, execution time is limited to 200 ms. | N/A | Required |
+
+The following table describes attributes that are common to all policy parent elements:
+
+| Attribute | Description | Default | Presence |
+| --- | --- | --- | --- |
+| name | The internal name of the policy. The value of the name attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters. Optionally, use the <DisplayName> element to label the policy in the management UI proxy editor with a different, natural-language name. | N/A | Required |
+| continueOnError | Set to false to return an error when a policy fails. This is expected behavior for most policies. Set to true to have flow execution continue even after a policy fails. See also: Fault rules are triggered ONLY in an error state (about continueOnError) Handling faults within the current flow | false | Optional |
+| enabled | Set to true to enforce the policy. Set to false to turn off the policy. The policy will not be enforced even if it remains attached to a flow. | true | Optional |
+| async | This attribute is deprecated. | false | Deprecated |
+
+## \<DisplayName\> element
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, natural-language name.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+| Default | N/A If you omit this element, the value of the policy's name attribute is used. |
+| --- | --- |
+| Presence | Optional |
+| Type | String |
+
+## \<IncludeURL\> element
+
+Specifies a JavaScript library file to load as a dependency for the main JavaScript file specified with the `<ResourceURL>` or `<Source>` element. The policy evaluates the scripts in the order in which they are listed in the policy. Your code can use the objects, methods, and properties of the [JavaScript object model](/apigee/docs/api-platform/reference/javascript-object-model).
+
+Include more than one JavaScript dependency resource using additional `<IncludeURL>` elements.
+
+**Warning:** If your JavaScript files are stored at the proxy or environment level, ensure you upload them correctly with `cURL` using the `-F` option or as a file attachment through a REST client. The `Content-Type` is `multipart/form-data`. For more information, see [Managing resources](/apigee/docs/api-platform/develop/resource-files).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IncludeURL>jsc://my-javascript-dependency.js</IncludeURL>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | None     |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+## \<Property\> element
+
+Specifies a property you can access from JavaScript code at runtime.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Properties>
+    <Property name="propName">propertyValue</Property>
+</Properties>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | None     |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+### Attributes
+
+| Attribute | Description                         | Default | Presence |
+|-----------|-------------------------------------|---------|----------|
+| name      | Specifies the name of the property. | N/A     | Required |
+
+### Example
+
+See the example in the [Samples](#samples) section.
+
+## \<ResourceURL\> element
+
+Specifies the main JavaScript file that executes in the API flow. You can store this file at the API proxy scope (under `/apiproxy/resources/jsc` in the API proxy bundle or in the **Scripts** section of the API proxy editor's **Navigator** pane). Alternatively, store it at the organization or environment scopes for reuse across multiple API proxies, as described in [Managing resources](/apigee/docs/api-platform/develop/resource-files). Your code can use the objects, methods, and properties of the [JavaScript object model](/apigee/docs/api-platform/reference/javascript-object-model).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ResourceURL>jsc://my-javascript.js</ResourceURL>
+```
+
+|  |  |
+|----|----|
+| **Default:** | None |
+| **Presence:** | Either `<ResourceURL>` or `<Source>` is required. If both `<ResourceURL>` and `<Source>` are present, the policy ignores `<ResourceURL>`. |
+| **Type:** | String |
+
+### Example
+
+See the example in the [Samples](#samples) section.
+
+## \<Source\> element
+
+You can insert JavaScript directly into the policy's XML configuration. The inserted JavaScript code executes when the policy executes in the API flow.
+
+|  |  |
+|----|----|
+| **Default:** | None |
+| **Presence:** | Either `<ResourceURL>` or `<Source>` is required. If both `<ResourceURL>` and `<Source>` are present, the policy ignores `<ResourceURL>`. |
+| **Type:** | String |
+
+### Example
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Javascript name='JS-ParseJsonHeaderFullString' timeLimit='200' >
+  <Properties>
+    <Property name='inboundHeaderName'>specialheader</Property>
+    <Property name='outboundVariableName'>json_stringified</Property>
+  </Properties>
+  <Source>
+var varname = 'request.header.' + properties.inboundHeaderName + '.values.string';
+var h = context.getVariable(varname);
+if (h) {
+  h = JSON.parse(h);
+  h.augmented = (new Date()).valueOf();
+  var v = JSON.stringify(h, null, 2) + '\n';
+  // further indent
+  var r = new RegExp('^(\S*)','mg');
+  v= v.replace(r,'    $1');
+  context.setVariable(properties.outboundVariableName, v);
+}
+  </Source>
+</Javascript>
+```
+
+## \<SSLInfo\> element
+
+Specifies the properties used to configure TLS for all HTTP client instances created by the JavaScript policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+    <SSLInfo>
+        <Enabled>trueFalse</Enabled>
+        <ClientAuthEnabled>trueFalse</ClientAuthEnabled>
+        <KeyStore>ref://keystoreRef</KeyStore>
+        <KeyAlias>keyAlias</KeyAlias>
+        <TrustStore>ref://truststoreRef</TrustStore>
+    </SSLInfo>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | None     |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+The process of configuring TLS for an HTTP client is the same process used to configure TLS for a TargetEndpoint/TargetServer. See [Options for configuring TLS](/apigee/docs/api-platform/system-administration/options-configuring-tls) for more information.
+
+## Use JavaScript to handle errors
+
+You can use the JavaScript policy to handle and return errors. For a discussion on this topic, see [Correct way to return an error from a JavaScript policy](https://discuss.google.dev/t/correct-way-to-return-error-from-javascript-policy/12402) in the <a href="https://discuss.google.dev/" class="external">Apigee Community</a>. Note that community posts and comments do not necessarily represent best practices recommended by Apigee.
+
+## Debug JavaScript policy code
+
+Use the `print()` function to output debug information to the transaction output panel in the [Debug tool](/apigee/docs/api-platform/debug/trace-overview). For details and examples, see [Debug JavaScript with print() statements](/apigee/docs/api-platform/reference/javascript-object-model#debug).
+
+To view print statements in the Debug tool:
+
+1.  Open the [Debug tool](/apigee/docs/api-platform/debug/trace-overview) and start a trace session for a proxy that contains your JavaScript policy.
+
+2.  Call the proxy.
+
+3.  In the **Debug Tool**, click the JavaScript policy, then the **Properties** tab to see the "stepExecution-stdout" property showing the print statement output.
+
+    ![Output from Properties tab in the Debug tool, displaying print statements.](/static/apigee/docs/api-platform/images/output-transactions.png)
+
+4.  Your print statements appear in this panel.
+
+## Flow Variables
+
+This policy does not populate any variables by default. However, you can set and get flow variables in your JavaScript code by calling methods on the `context` object. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+context.setVariable("response.header.X-Apigee-Target", context.getVariable("target.name"))
+```
+
+The `context` object is part of the Apigee [JavaScript object model](/apigee/docs/api-platform/reference/javascript-object-model).
+
+## Error reference
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+**Tip:** Need help resolving an error? Click *build* in the Fix column for detailed troubleshooting information.
+
+| Fault code | HTTP status | Cause | Fix |
+|----|----|----|----|
+| `steps.javascript.ScriptExecutionFailed` | `500` | The `JavaScript` policy can throw many different types of `ScriptExecutionFailed` errors. Commonly seen types of errors include [RangeError](/apigee/docs/api-platform/troubleshoot/policies/runtime/javascript-runtime-errors#range_error), [ReferenceError](/apigee/docs/api-platform/troubleshoot/policies/runtime/javascript-runtime-errors#reference_error), [SyntaxError](/apigee/docs/api-platform/troubleshoot/policies/runtime/javascript-runtime-errors#syntax_error), [TypeError](/apigee/docs/api-platform/troubleshoot/policies/runtime/javascript-runtime-errors#type_error), and [URIError](/apigee/docs/api-platform/troubleshoot/policies/runtime/javascript-runtime-errors#uri_error). | [*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/javascript-runtime-errors#scriptexecutionfailed) |
+| `steps.javascript.ScriptExecutionFailedLineNumber` | `500` | An error occurred in the `JavaScript` code. See the fault string for details. | N/A |
+| `steps.javascript.ScriptSecurityError` | `500` | A security error occurred when the `JavaScript` executed. See the fault string for details. | N/A |
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+**Tip:** Need help resolving an error? Click *build* next to the error's cause description to visit the troubleshooting page.
+
+| Error name | Cause | Fix |
+|----|----|----|
+| `InvalidResourceUrlFormat` | If the format of the resource URL specified within the `<ResourceURL>` or the `<IncludeURL>` element of the `JavaScript` policy is invalid, then the deployment of the API proxy fails. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/javascript-deployment-errors#invalidresourceurlformat) |
+| `InvalidResourceUrlReference` | If the `<ResourceURL>` or the `<IncludeURL>` elements refer to a `JavaScript` file that does not exist, then the deployment of the API proxy fails. The referenced source file must exist either the API proxy, environment, or organization level. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/javascript-deployment-errors#invalidresourceurlreference) |
+| `WrongResourceType` | This error occurs during deployment if the `<ResourceURL>` or the `<IncludeURL>` elements of the `JavaScript` policy refer to any resource type other than **jsc** (`JavaScript` file). | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/javascript-deployment-errors#wrongresourcetype) |
+| `NoResourceURLOrSource` | The deployment of the `JavaScript` policy can fail with this error if the `<ResourceURL>` element is not declared or if the resource URL is not defined within this element. `<ResourceURL>` element is a mandatory element. Or, The `<IncludeURL>` element is declared but the resource URL is not defined within this element. The `<IncludeURL>` element is optional but if declared, the resource URL must be specified within the `<IncludeURL>` element. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/javascript-deployment-errors#noresourceurlorsource) |
+
+### Fault variables
+
+These variables are set when this policy triggers an error at runtime. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``fault_name``"` | `fault_name` is the name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name Matches "ScriptExecutionFailed"` |
+| `javascript.``policy_name``.failed` | `policy_name` is the user-specified name of the policy that threw the fault. | `javascript.JavaScript-1.failed = true` |
+
+### Example error response
+
+**Note:** For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "fault": {
+    "faultstring": "Execution of SetResponse failed with error: Javascript runtime error: "ReferenceError: "status" is not defined. (setresponse.js:6)\"",
+    "detail": {
+      "errorcode": "steps.javascript.ScriptExecutionFailed"
+    }
+  }
+}
+```
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name="JavaScript Policy Faults">
+    <Step>
+        <Name>AM-CustomErrorResponse</Name>
+        <Condition>(fault.name Matches "ScriptExecutionFailed") </Condition>
+    </Step>
+    <Condition>(javascript.JavaScript-1.failed = true) </Condition>
+</FaultRule>
+```
+
+## Schema
+
+Each policy type is defined by an XML schema (`.xsd`). For reference, [policy schemas](https://github.com/apigee/api-platform-samples/tree/master/schemas/policy) are available on GitHub.
+
+## Related topics
+
+- [JavaScript object model](/apigee/docs/api-platform/reference/javascript-object-model)
+
+## Apigee Community articles
+
+You can find these related articles in the <a href="https://discuss.google.dev/" class="external">Apigee Community</a>:
+
+- [How to handle multi-value headers in JavaScript](https://discuss.google.dev/t/how-to-handle-multi-value-headers-in-javascript/17458.html)

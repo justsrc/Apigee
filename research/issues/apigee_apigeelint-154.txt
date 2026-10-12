@@ -1,0 +1,138 @@
+URL: https://github.com/apigee/apigeelint/issues/154
+TITLE: PO008 | Naming requirement violates Apigee's default behavior
+STATE: closed state_reason: completed
+AUTHOR: karsten-wagner association: NONE
+CREATED: 2020-03-23T09:11:23Z CLOSED: 2022-05-02T14:26:11Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+Rule PO008 is requesting developers to use a file name for their policies that matches the policy's display name. This is inconsistent to Apigee's default behavior when exporting code.
+
+When you develop a new proxy via the Apigee Management UI and then download the proxy revision, the file names of the policies match the technical names of the policies, not the display names.
+
+I have verified behavior by modifying downloaded code as per the rule PO008 requirement, then uploading to Apigee and downloaded again. The upload was working (so no issue if you do follow the rule), but downloaded result again contains the technical names of the policies as file names.
+So whenever you are up- and downloading code via the Management UI, you would end up in the need to modify the file names over and over again.
+
+As a consequence I would rather suggest to drop rule PO008 from the standard set of rules (for backward compatibility) and to implement a new rule that checks for matching file name with the technical name of a policy.
+
+--- COMMENTS (12) ---
+
+### comment by karsten-wagner (association=NONE) at 2020-08-13T16:04:38Z
+Would you consider to drop this rule? Based on the Apigee Naming Conventions, the Display Name should actually tell a human what this policy is all about.
+See: https://docs.apigee.com/api-platform/fundamentals/best-practices-api-proxy-design-and-development#developmentstandards-namingconventions
+"DisplayName should accurately describe the policy’s function to someone who has never worked with that API proxy before."
+
+Requesting to have the display name to be the same as the technical name (which in turn has to be the same as the file name), is violating that Apigee convention in my point of view...
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2020-09-11T21:51:19Z
+I don't understand the issue here. 
+"use a filename that matches the policy name" seems like a good hygiene thing to follow. 
+
+It seems like you are suggesting that Apigee changes either the filename or the displayname of a policy, during import followed by an export. If that is your claim, then I am surprised to hear that. I read the English description of what you're saying, and I believe I understand what you wrote, and also... my observations do not align with that. In my experience, Apigee does not modify the policy filename and does not explicitly modify the displayname.  YOU can use Apigee UI to do those things, but as far as I know, Apigee does not perform those modifications automatically. 
+
+If you think Apigee itself is changing either the policy name or the displayname automatically, then... I think that is a bug in Apigee (and probably a serious one).  If so, can you provide a clear set of commands to run (curl commands) that will demonstrate this behavior? 
+
+> I would rather suggest to drop rule PO008 from the standard set of rules (for backward compatibility) and to implement a new rule that checks for matching file name with the technical name of a policy.
+
+I like this idea.  In fact, that's basically how it works if there is no DisplayName element. The existing PO008 checks that the filename of each policy matches the DisplayName.  If there is no DisplayName element, then PO008 checks that the policy filename matches the name= attribute on the policy, which is the behavior I think you are suggesting. 
+
+My practice is to simply not use DisplayName at all.  It just confuses me. It feels redundant to the name= attribute.  So I just use the attribute, and PO008 makes sure that the attribute aligns with the policy filename. 
+
+@ssvaidyanathan & @kurtkanaskie  - what do you think?  Is there a better way to check that the policy {filename, DisplayName, name attribute} all match?  Should we modify PO008 to check BOTH the name attribute (which is always required),  AND the DisplayName element, if it is present?
+
+Should we disable PO008 and implement PO006 to just check the name= attribute? 
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2020-09-11T23:04:14Z
+I have a branch (https://github.com/DinoChiesa/apigeelint/tree/PO006-policy-name-attr) that
+
+- modifies PO008 to check `DisplayName` ONLY.  It no longer will consider the name= attribute
+- introduces PO006 to check `name=` attribute ONLY.  It does not consider DisplayName. 
+ 
+People could use PO008 and PO006 together, or could exclude one of those rules, as they wish.  If they use them both, then the linter would insure that all three of {filename, DisplayName, name=} have the same value.
+
+I can submit this as a PR if we think this is the right thing. Your opinions are appreciated.
+
+### comment by kurtkanaskie (association=CONTRIBUTOR) at 2020-09-14T13:47:49Z
+"My practice is to simply not use DisplayName at all. It just confuses me."
+How do you do that, if I create a policy without a Display Name in the UI, I get this but the policy isn't accessible and I can't save.
+
+![Screen Shot 2020-09-14 at 9 46 37 AM](https://user-images.githubusercontent.com/16242090/93093925-435a1000-f66f-11ea-8d5f-deb19c7a435a.png)
+
+
+### comment by kurtkanaskie (association=CONTRIBUTOR) at 2020-09-14T13:52:17Z
+@karsten-wagner you can exclude the use of that rule by using `apigeelint -e PO008 ...`
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2020-09-14T14:30:06Z
+Kurt, I mean I use this
+```
+<AssignMessage name='AM-DemoVariables'>
+  <AssignVariable>
+   ..
+```
+
+instead of this
+```
+<AssignMessage name='AM-DemoVariables'>
+  <DisplayName>AssignMessage for my Demo Variables</DisplayName>
+  <AssignVariable>
+ ...
+```
+
+Specifically I omit the `DisplayName` element. 
+
+### comment by kurtkanaskie (association=CONTRIBUTOR) at 2020-09-14T16:19:11Z
+Dino, that's what I tried in the UI and resulted in the screenshot above, turns out you can create the policy and then remove the DisplayName, but deleting the Display Name in the create dialog doesn't work.
+
+### comment by karsten-wagner (association=NONE) at 2020-09-14T16:53:48Z
+Thanks for picking this up.
+
+Since something may have been lost in translation, the following reads as:
+FileName = the name of the file that stores XML code of a single policy (on your local disk)
+DisplayName = the XML tag inside the policy that is called "<DisplayName>"
+PolicyName = the "name" attribute of a the XML tag that defines a policy (e.g. "<AssignMessage name='AM-DemoVariables'>")
+
+At the moment I feel forced to have {FileName == DisplayName == PolicyName}. If this is the case, I wonder why a DisplayName exists at all. From the [Apigee Docs](https://docs.apigee.com/api-platform/fundamentals/best-practices-api-proxy-design-and-development#developmentstandards-namingconventions) I have rather understood that the DisplayName should be "human readable", while the technical names serve the purpose for the machine to identify the policy. Some of the common naming conventions recommend to have a prefix, which explains the type of the policy (e.g. "AM" = "AssignMessage"). This helps in other places of the code (e.g. proxy/target definitions) to better understand what type of action is performed.
+Omitting the DisplayName for very technical oriented teams may be feasible. It ends up in the same behavior as setting {DisplayName == PolicyName}. So far so good...
+
+In my team we feel the "human readable" part of the name should be somehow similar as the technical name, but would usually also contain spaces (no Pascal Case) and not contain the policy prefix (because you see the icon in the UI). So a typical policy could look like this:
+```text
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<AssignMessage name="AM-SetOkResponse" continueOnError="false" enabled="true">
+    <DisplayName>Set default OK response message</DisplayName>
+  <Set>
+    <StatusCode>200</StatusCode>
+    <ReasonPhrase>OK</ReasonPhrase>
+    <Payload contentType="text/plain">Hello World!</Payload>
+  </Set>
+</AssignMessage>
+```
+
+We would then set {FileName == PolicyName}, so explicitly "AM-SetOkResponse.xml". As a consequence the current rule PO008 complains the FileName does not match the DisplayName of "Set default OK response message".  
+
+The Apigee behavior on downloading a proxy bundle ensures {Filename == PolicyName}. Uploading manually created policies where {Filename != PolicyName} is possible. Here I see it more as a hygiene factor to have both the same to ease up navigation in your IDE. Once you download this bundle again, then {Filename == PolicyName} - so Apigee ignores whatever FileName you have provided and upon download the FileName always matches the PolicyName. (i.e. if I set FileName to foo.xml, then upload and finally download above example, then FileName would be "AM-SetOkResponse.xml" in the downloaded ZIP file n my experience.)
+
+Given the default behavior of Apigee to set {FileName == PolicyName}, I do not see the value add of rule PO008 and therefore have suggested to drop it.
+At the moment we are doing what @kurtkanaskie has recommended and execute `apigeelint -e PO008 ...`.
+
+I like the approach suggested by @DinoChiesa in having both rules checking one part of the chain. This way teams can decide to use PO006, PO008, or both.
+
+For us it would mean to always execute with `-e PO008`, so I wonder if there could be a config file to select what rules are active (similar to defining your own gitleaks profile)?! The other way could be to to offer the new code of PO008 as custom plugin for teams to activate on their own, but I realize in this discussion there seem to be some friends of using both rules :-)
+
+### comment by kurtkanaskie (association=CONTRIBUTOR) at 2020-09-14T17:30:52Z
+Thanks @karsten-wagner for your thorough explanation of how Apigee changes the filename upon upload and download of a proxy bundle. I wasn't aware of that subtlety. 
+
+I like the notion of specifying what rules to apply, rather than just exclude. 
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2020-09-15T20:04:24Z
+Thanks Karsten, for weighing in. 
+I propose to submit the PR that changes PO008 in the way I described (check DisplayName only) and also implement PO006 in the way I described (check name= attribute only).  
+
+Separately, we can talk about how to implement a feature request for apigeelint that it would accept configuration from a file.  Maybe implicitly (as eslint does with .eslintrc). I like that idea, and  I think it should be handled separately from this ticket. 
+
+You all can vote and give feedback on the PR.  https://github.com/apigee/apigeelint/pull/191 
+
+### comment by karsten-wagner (association=NONE) at 2022-05-02T14:26:11Z
+Changes have been merged quite a while ago... Not sure if I should, but for hygiene closing this issue. Thanks all for the nice discussion.
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2022-06-07T21:57:25Z
+Thank you!

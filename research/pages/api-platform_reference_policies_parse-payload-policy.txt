@@ -1,0 +1,166 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The `ParsePayload` policy extracts logical operations from structured request payloads (such as JSON-RPC 2.0) into message flow variables. This functionality enables the proxy admin to implement conditional routing logic directly based on client request contents rather than basic resource paths or query parameters.
+
+**Note:** The `ParsePayload` policy is available in Apigee `1-17-0-apigee-7` and later, and in Apigee Hybrid version 1.16.1 and later.
+
+**Warning:** The `ParsePayload` policy does not support message streaming. Using this policy with streaming enabled on the request or response will cause errors. See [Payload with Streaming Antipattern](/apigee/docs/api-platform/antipatterns/payload-with-streaming) for more information.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+## `<ParsePayload>` element
+
+Specifies validation parsing properties applied toward application logic evaluation cycles.
+
+| Required? | Required |
+| --- | --- |
+| Parent Element | n/a |
+| Child Elements | <Source> <PayloadType> <Protocol> |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+The `ParsePayload` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ParsePayload continueOnError="[false|true]" enabled="[true|false]" name="policy_name">
+    <Source>request</Source>
+    <PayloadType>JSON-RPC-2.0</PayloadType>
+    <Protocol>MCP</Protocol>
+</ParsePayload>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+The following example shows a standard configuration for the `ParsePayload` policy:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ParsePayload continueOnError="false" enabled="true" name="parse-payload-mcp">
+    <Source>request</Source>
+    <PayloadType>JSON-RPC-2.0</PayloadType>
+    <Protocol>MCP</Protocol>
+</ParsePayload>
+```
+
+</div>
+
+</div>
+
+## `<Source>`
+
+Indicates the request/response container context processed immediately through runtime evaluations.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Source>request</Source>
+```
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| N/A | Text node value. Must be `request` or `response`. | `request` | Optional |
+
+## `<PayloadType>`
+
+Governs overall evaluation structures recognized regarding data processing requirements.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PayloadType>JSON-RPC-2.0</PayloadType>
+```
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| N/A | Text node value. Supported values: `JSON-RPC-2.0`. | N/A | Required |
+
+## `<Protocol>`
+
+Determines formatting behaviors corresponding precisely with target interface declarations.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Protocol>MCP</Protocol>
+```
+
+|           |                                          |         |          |
+|-----------|------------------------------------------|---------|----------|
+| Attribute | Description                              | Default | Presence |
+| N/A       | Text node value. Supported value: `MCP`. | N/A     | Required |
+
+## Extracted Flow Variables
+
+After the policy executes successfully, it populates flow variables prefixed with the policy instance name. These variables follow the pattern `parsepayload.``policyName``.``suffix`, where `policyName` is the value of the `name` attribute in the policy XML configuration. This naming convention is consistent with other Apigee policies such as VerifyAPIKey and allows multiple `ParsePayload` policies in the same proxy to maintain distinct variable namespaces.
+
+For a policy named `parse-payload-mcp`, the following variables are set:
+
+| Variable Name | Description |
+| --- | --- |
+| parsepayload.parse-payload-mcp.operation | Constructed execution identifier. For tools/call , it is tools/call/{name} (e.g., tools/call/get_weather ), distinguishing the specific tool being invoked. For tools/list , it is tools/list , used when listing available tools without targeting a specific one. |
+| parsepayload.parse-payload-mcp.json-rpc.request.method | The method field from the JSON-RPC request (e.g., tools/call or tools/list ). |
+| parsepayload.parse-payload-mcp.json-rpc.request.id | The id field from the JSON-RPC request. |
+| parsepayload.parse-payload-mcp.json-rpc.request.params.name | The name field inside params (populated for tools/call to identify the tool). |
+| parsepayload.parse-payload-mcp.json-rpc.request.params.arguments.{arg_name} | Arguments passed in the arguments object. String values are stored directly; nested objects or arrays are stored as serialized JSON strings. |
+
+### Example
+
+For the following JSON-RPC request payload with simple arguments:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "jsonrpc": "2.0",
+  "id": "req_001",
+  "method": "tools/call",
+  "params": {
+    "name": "get_weather",
+    "arguments": {
+      "location": "San Francisco, CA",
+      "forecast_days": 3
+    }
+  }
+}
+```
+
+The policy populates the following variables:
+
+| Variable | Value |
+|----|----|
+| `parsepayload.parse-payload-mcp.operation` | `tools/call/get_weather` |
+| `parsepayload.parse-payload-mcp.json-rpc.request.method` | `tools/call` |
+| `parsepayload.parse-payload-mcp.json-rpc.request.id` | `req_001` |
+| `parsepayload.parse-payload-mcp.json-rpc.request.params.name` | `get_weather` |
+| `parsepayload.parse-payload-mcp.json-rpc.request.params.arguments.location` | `San Francisco, CA` |
+| `parsepayload.parse-payload-mcp.json-rpc.request.params.arguments.forecast_days` | `3` |

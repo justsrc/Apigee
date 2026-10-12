@@ -1,0 +1,1602 @@
+[<span class="devsite-label" background="google-blue">Standard policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The VerifyJWT policy verifies a signed JWT or decrypts and verifies an encrypted JWT received from clients or other systems. This policy also extracts the claims into context variables so that subsequent policies or conditions can examine those values to make authorization or routing decisions. See [JWS and JWT policies overview](/apigee/docs/api-platform/reference/policies/jwt-policies-overview) for a detailed introduction.
+
+When this policy executes, in the case of a signed JWT, Apigee verifies the signature of the JWT using the provided verification key. In the case of an encrypted JWT, Apigee decrypts the JWT using the decryption key. In either case, Apigee subsequently verifies that the JWT is valid according to the expiry and not-before times if they are present. The policy can optionally also verify the values of specific claims on the JWT, such as the subject, the issuer, the audience, or the value of additional claims.
+
+**Note:** If the policy configuration provides a certificate as the source of the public key, the runtime does not check the trust chain of the certificate and does not check the expiry of the certificate. The public key contained within the certificate is treated as valid and trusted.
+
+If the JWT is verified and valid, then all of the claims contained within the JWT are extracted into context variables for use by subsequent policies or conditions, and the request is allowed to proceed. If the JWT signature cannot be verified or if the JWT is invalid because of one of the timestamps, all processing stops and an error is returned in the response.
+
+Whether the policy verifies a signed or encrypted JWT depends on the element you use to specify the algorithm that verifies the JWT:
+
+- If you use the [`<Algorithm>`](#algorithm) element, the policy [verifies a signed JWT](#verify-a-signed-jwt).
+- If you use the [`<Algorithms>`](#algorithms) element, the policy [verifies an encrypted JWT](#verify-an-encrypted-jwt).
+
+This policy is a *Standard policy* and can be deployed to any environment type. For information on policy types and availability with each environment type, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+To learn about the parts of a JWT and how they are encrypted and signed, refer to [RFC7519](https://tools.ietf.org/html/rfc7519).
+
+## Verify a Signed JWT
+
+This section explains how to verify a signed JWT. For a signed JWT, use the [`<Algorithm>`](#algorithm) element to specify the algorithm for signing the key.
+
+### Samples for a signed JWT
+
+The following samples illustrate how to verify a signed JWT.
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### HS256 algorithm
+
+This example policy verifies a JWT that was signed with the HS256 encryption algorithm, HMAC using a SHA-256 checksum. The JWT is passed in the proxy request by using a form parameter named `jwt`. The key is contained in a variable named `private.secretkey`. See the video above for a complete example, including how to make a request to the policy.
+
+The policy configuration includes the information Apigee needs to decode and evaluate the JWT, such as where to find the JWT (in a flow variable specified in the Source element), the required signing algorithm, where to find the secret key (stored in an Apigee flow variable, which could have been retrieved from the Apigee KVM, for example), and a set of required claims and their values.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyJWT name="JWT-Verify-HS256">
+    <DisplayName>JWT Verify HS256</DisplayName>
+    <Algorithm>HS256</Algorithm>
+    <Source>request.formparam.jwt</Source>
+    <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+    <SecretKey encoding="base64">
+        <Value ref="private.secretkey"/>
+    </SecretKey>
+    <Subject>monty-pythons-flying-circus</Subject>
+    <Issuer>urn://apigee-edge-JWT-policy-test</Issuer>
+    <Audience>fans</Audience>
+    <AdditionalClaims>
+        <Claim name="show">And now for something completely different.</Claim>
+    </AdditionalClaims>
+</VerifyJWT>
+```
+
+The policy writes its output to context variables so that subsequent policies or conditions in the API proxy can examine those values. See [Flow variables](#flow-variables) for a list of the variables set by this policy.
+
+</div>
+
+<div class="section">
+
+### RS256 algorithm
+
+**Note:** Use this same example to verify a JWT for the PS256 or ES256 algorithm. Just change the value of `<Algorithm>RS256</Algorithm>` to `PS256` or `ES256`. For `ES256` you also have to specify the a key compatible with the algorithm. For more on the key requirements, see [About signature encryption algorithms](/apigee/docs/api-platform/reference/policies/jwt-policies-overview#about-signature-encryption-algorithms).
+
+This example policy verifies a JWT that was signed with the RS256 algorithm. To verify, you need to provide the public key. The JWT is passed in the proxy request by using a form parameter named `jwt`. The public key is contained in a variable named `public.publickey`. See the video above for a complete example, including how to make a request to the policy.
+
+See the Element reference for details on the requirements and options for each element in this sample policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyJWT name="JWT-Verify-RS256">
+    <Algorithm>RS256</Algorithm>
+    <Source>request.formparam.jwt</Source>
+    <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+    <PublicKey>
+        <Value ref="public.publickey"/>
+    </PublicKey>
+    <Subject>apigee-seattle-hatrack-montage</Subject>
+    <Issuer>urn://apigee-edge-JWT-policy-test</Issuer>
+    <Audience>urn://c60511c0-12a2-473c-80fd-42528eb65a6a</Audience>
+    <AdditionalClaims>
+        <Claim name="show">And now for something completely different.</Claim>
+    </AdditionalClaims>
+</VerifyJWT>
+```
+
+For the above configuration, a JWT with this header …
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "typ" : "JWT",
+  "alg" : "RS256"
+}
+```
+
+And this payload …
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "sub" : "apigee-seattle-hatrack-montage",
+  "iss" : "urn://apigee-edge-JWT-policy-test",
+  "aud" : "urn://c60511c0-12a2-473c-80fd-42528eb65a6a",
+  "show": "And now for something completely different."
+}
+```
+
+… will be deemed as valid, if the signature can be verified with the provided public key.
+
+A JWT with the same header but with this payload …
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "sub" : "monty-pythons-flying-circus",
+  "iss" : "urn://apigee-edge-JWT-policy-test",
+  "aud" : "urn://c60511c0-12a2-473c-80fd-42528eb65a6a",
+  "show": "And now for something completely different."
+}
+```
+
+… will be determined to be invalid, even if the signature can be verified, because the "sub" claim included in the JWT does not match the required value of the "Subject" element as specified in the policy configuration.
+
+The policy writes its output to context variables so that subsequent policies or conditions in the API proxy can examine those values. See [Flow variables](#flow-variables) for a list of the variables set by this policy.
+
+</div>
+
+</div>
+
+The samples above use the `<Algorithm>` element, so they verify a signed JWT. The `<PrivateKey>` element specifies the key used to sign the JWT. There are other key elements as well. Which one you use depends on the algorithm specified by the value of `<Algorithm>`, as described in the next section.
+
+### Setting the key elements to verify a signed JWT
+
+The following elements specify the key used to verify a signed JWT:
+
+- [`<SecretKey>`](#secretkey)
+- [`<PublicKey>`](#publickey)
+
+Which element you use depends on the chosen algorithm, as shown in the following table:
+
+**Note:** The RS\*, PS\*, and ES\* algorithms all use the same elements to specify the key, but the ES\* key data is different than that used by the RS\* and PS\* algorithms.
+
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>Key elements</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HS*</td>
+<td><div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="Text only" data-syntax-guessed=""><code>&lt;SecretKey encoding=&quot;base16|hex|base64|base64url&quot;&gt;
+  &lt;Value ref=&quot;private.secretkey&quot;/&gt;
+&lt;/SecretKey&gt;</code></pre></td>
+<td></td>
+</tr>
+<tr>
+<td>RS*, ES*, PS*</td>
+<td><div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="scdoc" data-syntax-guessed=""><code>&lt;PublicKey&gt;
+  &lt;Value ref=&quot;rsa_public_key_or_value&quot;/&gt;
+&lt;/PublicKey&gt;</code></pre>
+<p>or:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="scdoc" data-syntax-guessed=""><code>&lt;PublicKey&gt;
+  &lt;Certificate ref=&quot;signed_cert_val_ref&quot;/&gt;
+&lt;/PublicKey&gt;</code></pre>
+<p>or:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="scdoc" data-syntax-guessed=""><code>&lt;PublicKey&gt;
+  &lt;JWKS ref=&quot;jwks_val_or_ref&quot;/&gt;
+&lt;/PublicKey&gt;</code></pre></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="3"><sup>*</sup>For more on the key requirements, see <a href="/apigee/docs/api-platform/reference/policies/jwt-policies-overview#about-signature-encryption-algorithms">About signature encryption algorithms</a>.</td>
+</tr>
+</tbody>
+</table>
+
+## Verify an encrypted JWT
+
+This section explains how to verify an encrypted JWT. For an encrypted JWT, use the [`<Algorithms>`](#algorithms) element to specify the algorithms for signing the key and content.
+
+### Sample for an encrypted JWT
+
+The following sample shows how to verify an encrypted JWT (with `<Type>` set to `Encrypted`), in which:
+
+- The key is encrypted with the RSA-OAEP-256 algorithm.
+- The content is encrypted with the A128GCM algorithm.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyJWT name="vjwt-1">
+  <Algorithms>
+    <Key>RSA-OAEP-256</Key>
+    <Content>A128GCM</Content>
+  </Algorithms>
+  <Type>Encrypted</Type> 
+  <PrivateKey>
+    <Value ref="private.rsa_privatekey"/>
+  </PrivateKey>
+  <Subject>subject@example.com</Subject>
+  <Issuer>urn://apigee</Issuer>
+  <AdditionalHeaders>
+    <Claim name="moniker">Harvey</Claim>
+  </AdditionalHeaders>
+  <TimeAllowance>30s</TimeAllowance>
+  <Source>input_var</Source>
+</VerifyJWT>
+```
+
+The sample above uses the `<Algorithms>` element, so it verifies an encrypted JWT. The `<PrivateKey>` element specifies the key that will be used to decrypt the JWT. There are other key elements as well. Which one you use depends on the algorithm specified by the value of `<Algorithms>`, as described in the next section.
+
+### Setting the key elements to verify an encrypted JWT
+
+The following elements specify the key used to verify an encrypted JWT:
+
+- [`<PrivateKey>`](#privatekey)
+- [`<SecretKey>`](#secretkey)
+- [`<PasswordKey>`](#passwordkey)
+- [`<DirectKey>`](#directkey)
+
+Which element you use depends on the chosen key encyryption algorithm, as shown in the following table:
+
+Algorithm
+
+Key elements
+
+RSA-OAEP-256
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PrivateKey>
+  <Value ref="private.rsa_privatekey"/>
+</PrivateKey>
+```
+
+**Note:** The variable you specify must resolve to an RSA private key in PEM-encoded form.
+
+- ECDH-ES
+- ECDH-ES+A128KW
+- ECDH-ES+A192KW
+- ECDH-ES+A256KW
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PrivateKey>
+  <Value ref="private.ec_privatekey"/>
+</PrivateKey>
+```
+
+**Note:** The variable you specify must resolve to an elliptic curve private key in PEM-encoded form.
+
+- A128KW
+- A192KW
+- A256KW
+- A128GCMKW
+- A192GCMKW
+- A256GCMKW
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SecretKey encoding="base16|hex|base64|base64url">
+  <Value ref="private.flow-variable-name-here"/>
+</SecretKey>
+```
+
+- PBES2-HS256+A128KW
+- PBES2-HS384+A192KW
+- PBES2-HS512+A256KW
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PasswordKey>
+  <Value ref="private.password-key"/>
+  <SaltLength>
+  <PBKDF2Iterations>
+</PasswordKey>
+```
+
+dir
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DirectKey>
+  <Value encoding="base16|hex|base64|base64url" ref="private.directkey"/>
+</DirectKey>
+```
+
+For more on the key requirements, see [About signature encryption algorithms](/apigee/docs/api-platform/reference/policies/jwt-policies-overview#about-signature-encryption-algorithms).
+
+## Element reference
+
+The policy reference describes the elements and attributes of the Verify JWT policy.
+
+**Note:** Configuration will differ somewhat depending on the encryption algorithm you use. Refer to the [Samples](#Samples) for examples that demonstrate configurations for specific use cases.
+
+### Attributes that apply to the top-level element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyJWT name="JWT" continueOnError="false" enabled="true" async="false">
+```
+
+The following attributes are common to all policy parent elements.
+
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<tbody>
+<tr>
+<th><strong>Attribute</strong></th>
+<th><strong>Description</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Presence</strong></th>
+</tr>
+&#10;<tr>
+<td>name</td>
+<td>The internal name of the policy. Characters you can use in the name are restricted to: <code translate="no" dir="ltr">A-Z0-9._\-$ %</code>. However, the Apigee UI enforces additional restrictions, such as automatically removing characters that are not alphanumeric.
+<p>Optionally, use the <code translate="no" dir="ltr">&lt;displayname&gt;&lt;/displayname&gt;</code> element to label the policy in the management UI proxy editor with a different, natural-language name.</p></td>
+<td>N/A</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>continueOnError</td>
+<td>Set to <code translate="no" dir="ltr">false</code> to return an error when a policy fails. This is expected behavior for most policies.
+<p>Set to <code translate="no" dir="ltr">true</code> to have flow execution continue even after a policy fails.</p></td>
+<td>false</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td>enabled</td>
+<td>Set to <code translate="no" dir="ltr">true</code> to enforce the policy.
+<p>Set to <code translate="no" dir="ltr">false</code> to "turn off" the policy. The policy will not be enforced even if it remains attached to a flow.</p></td>
+<td>true</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td>async</td>
+<td>This attribute is deprecated.</td>
+<td>false</td>
+<td>Deprecated</td>
+</tr>
+</tbody>
+</table>
+
+## \<DisplayName\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+Use in addition to the name attribute to label the policy in the management UI proxy editor with a different, natural-language name.
+
+|  |  |
+|----|----|
+| **Default** | If you omit this element, the value of the policy's name attribute is used. |
+| **Presence** | Optional |
+| **Type** | String |
+
+## \<Algorithm\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Algorithm>HS256</Algorithm>
+```
+
+Specifies the cryptographic algorithm used to verify the token. Use the `<Algorithm>` element to verify a signed JWT.
+
+RS\*/PS\*/ES\* algorithms employ a public/secret key pair, while HS\* algorithms employ a shared secret. See also [About signature encryption algorithms](/apigee/docs/api-platform/reference/policies/jwt-policies-overview#about-signature-encryption-algorithms).
+
+**Note:** Use exactly one of the elements `<Algorithm>` and `<Algorithms>`.
+
+You can specify multiple values separated by commas. For example "HS256, HS512" or "RS256, PS256". However, you cannot combine HS\* algorithms with any others or ES\* algorithms with any others because they require a specific key type. You can combine RS\* and PS\* algorithms.
+
+|  |  |
+|----|----|
+| **Default** | N/A |
+| **Presence** | Required |
+| **Type** | String of comma-separated values |
+| **Valid values** | HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512 |
+
+## \<Algorithms\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Algorithms>
+    <Key>key-algorithm</Key>
+    <Content>content-algorithm</Content>
+</Algorithm>
+```
+
+Use the `<Algorithms>` element to verify an encrypted JWT. This element specifies the cryptographic algorithm for key encryption that must have been used when the encrypted JWT was created. It also optionally specifies the algorithm for content encryption.
+
+**Note:** Use exactly one of the elements `<Algorithm>` and `<Algorithms>`.
+
+|              |                                           |
+|--------------|-------------------------------------------|
+| **Default**  | N/A                                       |
+| **Presence** | Required, when verifying an encrypted JWT |
+| **Type**     | Complex                                   |
+
+### Child elements of `<Algorithms>`
+
+The following table provides a high-level description of the child elements of `<Algorithms>`:
+
+| Child Element | Required? | Description |
+|----|----|----|
+| `<Key>` | Required | Specifies the encryption algorithm for the key. |
+| `<Content>` | Optional | Specifies the encryption algorithm for the content. |
+
+Verification will fail if:
+
+- The algorithm asserted in the `alg` property in the header of the encrypted JWT is different than the key encryption algorithm specified here in the `<Key>` element.
+- The policy specifies a `<Content>` element, and the algorithm asserted in the `enc` property in the header of the encrypted JWT is different than that specified in the `<Content>` element.
+
+For example, to verify an encrypted JWT and check that the key algorithm is `RSA-OAEP-256`, and that the content algorithm is `A128GCM`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  <Algorithms>
+    <Key>RSA-OAEP-256</Key>
+    <Content>A128GCM</Content>
+  </Algorithms>
+```
+
+Conversely, to verify an encrypted JWT and check that the key algorithm is `RSA-OAEP-256`, and not enforce a constraint on the content algorithm:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  <Algorithms>
+    <Key>RSA-OAEP-256</Key>
+  </Algorithms>
+```
+
+#### Key encryption algorithms
+
+The following table lists the available algorithms for key encryption, as well as the type of key you must specify to verify a JWT using that key encryption algorithm.
+
+Value of `<Key>` (key encryption algorithm)
+
+Key element required for verification
+
+dir
+
+[`<DirectKey>`](#directkey)
+
+RSA-OAEP-256
+
+[`<PrivateKey>`](#privatekey)
+
+- A128KW
+- A192KW
+- A256KW
+- A128GCMKW
+- A192GCMKW
+- A256GCMKW
+
+[`<SecretKey>`](#secretkeyid)
+
+- PBES2-HS256+A128KW
+- PBES2-HS384+A192KW
+- PBES2-HS512+A256KW
+
+[`<PasswordKey>`](#passwordkey)
+
+- ECDH-ES
+- ECDH-ES+A128KW
+- ECDH-ES+A192KW
+- ECDH-ES+A256KW
+
+[`<PrivateKey>`](#privatekey)
+
+See [Verify an encrypted JWT](#sample-encrypted) for an example in which the key encryption algorithm is `RSA-OAEP-256`, so you use the [`<PrivateKey>`](#privatekey) element.
+
+#### Content encryption algorithms
+
+The VerifyJWT policy does not require that you specify an algorithm for content encryption. If you wish to specify the algorithm used for content encryption, do so with the [\<Content\> child](#algorithms-child) of the [\<Algorithms\>](#algorithms) element.
+
+Regardless of the key encryption algorithm, the following algorithms - all symmetric and AES-based - are supported for content encryption:
+
+- A128CBC-HS256
+- A192CBC-HS384
+- A256CBC-HS512
+- A128GCM
+- A192GCM
+- A256GCM
+
+## \<Audience\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Audience>audience-here</Audience>
+
+or:
+
+<Audience ref='variable-name-here'/>
+```
+
+The policy verifies that the audience claim in the JWT matches the value specified in the configuration. If there is no match, the policy throws an error. This claim identifies the recipients that the JWT is intended for. This is one of the registered claims mentioned in [RFC7519](https://tools.ietf.org/html/rfc7519).
+
+|                  |                                                         |
+|------------------|---------------------------------------------------------|
+| **Default**      | N/A                                                     |
+| **Presence**     | Optional                                                |
+| **Type**         | String                                                  |
+| **Valid values** | A flow variable or string that identifies the audience. |
+
+## <span id="AdditionalClaims"></span>\<AdditionalClaims/Claim\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AdditionalClaims>
+    <Claim name='claim1'>explicit-value-of-claim-here</Claim>
+    <Claim name='claim2' ref='variable-name-here'/>
+    <Claim name='claim3' ref='variable-name-here' type='boolean'/>
+</AdditionalClaims>
+
+or:
+
+<AdditionalClaims ref='claim_payload'/>
+```
+
+Validates that the JWT payload contains the specified additional claim(s) and that the asserted claim values match.
+
+The `<Claim>` element supports the dynamic string substitution feature called [message templating](/apigee/docs/api-platform/reference/message-template-intro).
+
+An additional claim uses a name that is not one of the standard, registered JWT claim names. The value of a additional claim can be a string, a number, a boolean, a map, or an array. A map is simply a set of name/value pairs. The value for a claim of any of these types can be specified explicitly in the policy configuration, or indirectly via a reference to a flow variable.
+
+**Note:** Do not use any of the registered claim names in this element. The registered claims are specified in [RFC7519](https://tools.ietf.org/html/rfc7519). They include: "iss", "sub", "aud", "iat", "exp", "nbf", and "jti".
+
+|  |  |
+|----|----|
+| **Default** | N/A |
+| **Presence** | Optional |
+| **Type** | String, number, boolean, or map |
+| **Array** | Set to **true** to indicate if the value is an array of types. Default: false |
+| **Valid values** | Any value that you want to use for an additional claim. |
+
+The `<Claim>` element takes these attributes:
+
+- **name** - (Required) The name of the claim.
+  **Note:** Do not use any of the registered claim names in this element. The registered claims are specified in [RFC7519](https://tools.ietf.org/html/rfc7519). They include: "iss", "sub", "aud", "iat", "exp", "nbf", and "jti".
+- **ref** - (Optional) The name of a flow variable. If present, the policy will use the value of this variable as the claim. If both a **ref** attribute and an explicit claim value are specified, the explicit value is the default, and is used if the referenced flow variable is unresolved.
+- **type** - (Optional) One of: string (default), number, boolean, or map
+- **array** - (Optional) Set to **true** to indicate if the value is an array of types. Default: false.
+
+When you include the `<Claim>` element, the claim names are set statically when you configure the policy. Alternatively, you can pass a JSON object to specify the claim names. Because the JSON object is passed as a variable, the claim names are determined at runtime.
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AdditionalClaims ref='json_claims'/>
+```
+
+Where the variable `json_claims` contains a JSON object in the form:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "sub" : "person@example.com",
+  "iss" : "urn://secure-issuer@example.com",
+  "non-registered-claim" : {
+    "This-is-a-thing" : 817,
+    "https://example.com/foobar" : { "p": 42, "q": false }
+  }
+}
+```
+
+## \<AdditionalHeaders/Claim\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AdditionalHeaders>
+    <Claim name='claim1'>explicit-value-of-claim-here</Claim>
+    <Claim name='claim2' ref='variable-name-here'/>
+    <Claim name='claim3' ref='variable-name-here' type='boolean'/>
+    <Claim name='claim4' ref='variable-name' type='string' array='true'/>
+</AdditionalHeaders>
+```
+
+Validates that the JWT header contains the specified additional claim name/value pair(s) and that the asserted claim values match.
+
+The `<Claim>` element supports the dynamic string substitution feature called [message templating](/apigee/docs/api-platform/reference/message-template-intro).
+
+An additionl claim uses a name that is not one of the standard, registered JWT claim names. The value of an additional claim can be a string, a number, a boolean, a map, or an array. A map is simply a set of name/value pairs. The value for a claim of any of these types can be specified explicitly in the policy configuration, or indirectly via a reference to a flow variable.
+
+**Note:** Do not use any of the registered claim names in this element. The registered claims are specified in [RFC7519](https://tools.ietf.org/html/rfc7519). They include: "iss", "sub", "aud", "iat", "exp", "nbf", and "jti".
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Default</strong></td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Presence</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td><p>String (default), number, boolean, or map.</p>
+<p>The type defaults to String if no type is specified.</p></td>
+</tr>
+<tr>
+<td><strong>Array</strong></td>
+<td>Set to <strong>true</strong> to indicate if the value is an array of types. Default: false</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td>Any value that you want to use for an additional claim.</td>
+</tr>
+</tbody>
+</table>
+
+The `<Claim>` element takes these attributes:
+
+- **name** - (Required) The name of the claim.
+  **Note:** Do not use any of the registered claim names in this element. The registered claims are specified in [RFC7519](https://tools.ietf.org/html/rfc7519). They include: "iss", "sub", "aud", "iat", "exp", "nbf", and "jti".
+- **ref** - (Optional) The name of a flow variable. If present, the policy will use the value of this variable as the claim. If both a **ref** attribute and an explicit claim value are specified, the explicit value is the default, and is used if the referenced flow variable is unresolved.
+- **type** - (Optional) One of: string (default), number, boolean, or map
+- **array** - (Optional) Set to **true** to indicate if the value is an array of types. Default: false.
+
+## \<CustomClaims\>
+
+**Note:** Currently, a CustomClaims element is inserted when you add a new GenerateJWT policy through the UI. This element is not functional and is ignored. The correct element to use instead is [\<AdditionalClaims\>](#AdditionalClaims). The UI will be updated to insert the correct elements at a later time.
+
+## \<Id\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Id>explicit-jti-value-here</Id>
+ -or-
+<Id ref='variable-name-here'/>
+ -or-
+<Id/>
+```
+
+Verifies that the JWT has the specific **jti** claim. When the text value and ref attribute are both empty, the policy will generate a jti containing a random UUID. The JWT ID (jti) claim is a unique identifier for the JWT. For more information on jti, refer to [RFC7519](https://tools.ietf.org/html/rfc7519).
+
+|  |  |
+|----|----|
+| **Default** | N/A |
+| **Presence** | Optional |
+| **Type** | String, or reference. |
+| **Valid values** | Either a string or the name of a flow variable containing the ID. |
+
+## \<IgnoreCriticalHeaders\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IgnoreCriticalHeaders>true|false</IgnoreCriticalHeaders>
+```
+
+Set to false if you want the policy to throw an error when any header listed in the **crit** header of the JWT is not listed in the `<KnownHeaders>` element. Set to true to cause the VerifyJWT policy to ignore the **crit** header.
+
+One reason to set this element to true is if you are in a testing environment and are not yet ready to handle a failure on a missing header.
+
+|                  |               |
+|------------------|---------------|
+| **Default**      | false         |
+| **Presence**     | Optional      |
+| **Type**         | Boolean       |
+| **Valid values** | true or false |
+
+## \<IgnoreIssuedAt\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IgnoreIssuedAt>true|false</IgnoreIssuedAt>
+```
+
+Set to false (default) if you want the policy to throw an error when a JWT contains an `iat` (Issued at) claim that specifies a time in the future. Set to true to cause the policy to ignore `iat` during verification.
+
+|                  |               |
+|------------------|---------------|
+| **Default**      | false         |
+| **Presence**     | Optional      |
+| **Type**         | Boolean       |
+| **Valid values** | true or false |
+
+## \<IgnoreUnresolvedVariables\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IgnoreUnresolvedVariables>true|false</IgnoreUnresolvedVariables>
+```
+
+Set to false if you want the policy to throw an error when any referenced variable specified in the policy is unresolvable. Set to true to treat any unresolvable variable as an empty string (null).
+
+|                  |               |
+|------------------|---------------|
+| **Default**      | false         |
+| **Presence**     | Optional      |
+| **Type**         | Boolean       |
+| **Valid values** | true or false |
+
+## \<Issuer\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyJWT name='VJWT-29'>
+  ...
+  <!-- verify that the iss claim matches a hard-coded value -->
+  <Issuer>issuer-string-here</Issuer>
+
+  or:
+
+  <!-- verify that the iss claim matches the value contained in a variable -->
+  <Issuer ref='variable-containing-issuer'/>
+
+  or:
+
+  <!-- verify via a variable; fallback to a hard-coded value if the variable is empty -->
+  <Issuer ref='variable-containing-issuer'>fallback-value-here</Issuer>
+```
+
+The policy verifies that the issuer in the JWT (the `iss` claim) matches the string specified in the configuration element. The `iss` claim is one of the registered claims mentioned in [IETF RFC 7519](https://tools.ietf.org/html/rfc7519).
+
+|                  |                      |
+|------------------|----------------------|
+| **Default**      | N/A                  |
+| **Presence**     | Optional             |
+| **Type**         | String, or reference |
+| **Valid values** | Any                  |
+
+## \<KnownHeaders\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<KnownHeaders>a,b,c</KnownHeaders>
+
+or:
+
+<KnownHeaders ref='variable_containing_headers'/>
+```
+
+The [GenerateJWT policy](/apigee/docs/api-platform/reference/policies/generate-jwt-policy) uses the `<CriticalHeaders>` element to populate the **crit** header in a JWT. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "typ": "...",
+  "alg" : "...",
+  "crit" : [ "a", "b", "c" ],
+}
+```
+
+The VerifyJWT policy examines **crit** header in the JWT, if it exists, and for each header listed it checks that the `<KnownHeaders>` element also lists that header. The `<KnownHeaders>` element can contain a superset of the items listed in **crit**. It is only necessary that all the headers listed in **crit** are listed in the `<KnownHeaders>` element. Any header that the policy finds in **crit** that is not also listed in `<KnownHeaders>` causes the VerifyJWT policy to fail.
+
+You can optionally configure the VerifyJWT policy to ignore the **crit** header by setting the `<IgnoreCriticalHeaders>` element to `true`.
+
+**Note:** The VerifyJWT policy does not actually handle or process the headers listed by the `<KnownHeaders>` element. It is left for you later in the proxy or the backend to actually handle those headers.
+
+|  |  |
+|----|----|
+| **Default** | N/A |
+| **Presence** | Optional |
+| **Type** | Comma separated array of strings |
+| **Valid values** | Either an array or the name of a variable containing the array. |
+
+## \<MaxLifespan\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  <VerifyJWT name='VJWT-62'>
+  ...
+  <!-- hard-coded lifespan of 5 minutes -->
+  <MaxLifespan>5m</MaxLifespan>
+
+  or:
+
+  <!-- refer to a variable -->
+  <MaxLifespan ref='variable-here'/>
+
+  or:
+
+  <!-- attribute telling the policy to use iat rather than nbf -->
+  <MaxLifespan useIssueTime='true'>1h</MaxLifespan>
+
+  or:
+
+  <!-- useIssueTime and ref, and hard-coded fallback value. -->
+  <MaxLifespan useIssueTime='true' ref='variable-here'>1h</MaxLifespan>
+  ...
+  
+```
+
+Configures the VerifyJWT policy to check that the lifespan of a token does not exceed a specified threshold. You can specify the threshold by using a number followed by a character, denoting the number of seconds, minutes, hours, days, or weeks. The following characters are valid:
+
+- `s` - seconds
+- `m` - minutes
+- `h` - hours
+- `d` - days
+- `w` - weeks
+
+For example, you can specify one of the following values: 120s, 10m, 1h, 7d, 3w.
+
+The policy computes the actual lifespan of the token by subtracting the not-before value `(nbf)` from the expiry value `(exp)`. If either `exp` or `nbf` is missing, the policy throws a fault. If the token lifespan exceeds the specified timespan, the policy throws a fault.
+
+You can set the optional attribute `useIssueTime` to `true` to use the `iat` value instead of the `nbf` value when computing the token lifespan.
+
+The use of the `MaxLifespan` element is optional. If you use this element, you can use it only once.
+
+## \<PrivateKey\>
+
+Use this element to specify the private key that can be used to verify a JWT encrypted with an asymmetric algorithm. A description of possible child elements follows.
+
+### \<Password\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PrivateKey>
+  <Password ref="private.privatekey-password"/>
+</PrivateKey>
+```
+
+A child of the `<PrivateKey>` element. Specifies the password the policy should use to decrypt the private key, if necessary, when verifying an encrypted JWT. Use the `ref` attribute to pass the password in a flow variable.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Default</strong></td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Presence</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td>A flow variable reference.
+<p><strong>Note:</strong> You must specify a flow variable. Apigee will reject as invalid a policy configuration in which the password is specified in plaintext. The flow variable must have the prefix "private". For example, <code translate="no" dir="ltr">private.mypassword</code></p></td>
+</tr>
+</tbody>
+</table>
+
+### \<Value\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PrivateKey>
+  <Value ref="private.variable-name-here"/>
+</PrivateKey>
+```
+
+Child of the `<PrivateKey>` element. Specifies a PEM-encoded private key that the policy will use to verify an encrypted JWT. Use the `ref` attribute to pass the key in a flow variable.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Default</strong></td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Presence</strong></td>
+<td>Required to verify a JWT that has been encrypted using an asymmetric key encryption algorithm.</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td>A flow variable containing a string representing a PEM-encoded RSA private key value.
+<p>Note: The flow variable must have the prefix "private". For example, <code translate="no" dir="ltr">private.mykey</code></p></td>
+</tr>
+</tbody>
+</table>
+
+## \<PublicKey\>
+
+Specifies the source for the public key used to verify a JWT signed with an asymmetric algorithm. Support algorithms include RS256/RS384/RS512, PS256/PS384/PS512, or ES256/ES384/ES512. A description of the possible child elements follows.
+
+### \<Certificate\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PublicKey>
+  <Certificate ref="signed_public.cert"/>
+</PublicKey>
+
+-or-
+
+<PublicKey>
+  <Certificate>
+-----BEGIN CERTIFICATE-----
+certificate data
+-----END CERTIFICATE-----
+  </Certificate>
+</PublicKey>
+```
+
+A child of the `<PublicKey>` element. Specifies the signed certificate used as the source of the public key. Use the `ref` attribute to pass the signed certificate in a flow variable, or specify the PEM-encoded certificate directly. Make sure to align the certificate data on the left as shown in the reference example.
+
+|  |  |
+|----|----|
+| **Default** | N/A |
+| **Presence** | Optional. To verify a JWT signed with an asymmetric algorithm, you must use the `<Certificate>`, the `<JWKS>`, or the `<Value>` element to supply the public key. |
+| **Type** | String |
+| **Valid values** | A flow variable or string. |
+
+### \<JWKS\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  <PublicKey>
+    <JWKS …  > … </JWKS>
+  </PublicKey>
+```
+
+A child of the `<PublicKey>` element. Specifies a JWKS as a source of public keys. This will be a list of keys following the format described in <a href="https://tools.ietf.org/html/rfc7517" class="external">IETF RFC 7517 - JSON Web Key (JWK)</a>.
+
+If the inbound JWT bears a key ID which is present in the JWKS, then the policy will use the correct public key to verify the JWT signature. For details about this feature, see [Using a JSON Web Key Set (JWKS) to verify a JWT](/apigee/docs/api-platform/reference/policies/jwt-policies-overview#usingajsonwebkeysetjwkstoverifyajwt).
+
+If you fetch the value from a public URL, Apigee caches the JWKS for a period of 300 seconds. When the cache expires, Apigee fetches the JWKS again.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Default</strong></td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Presence</strong></td>
+<td>Optional. To verify a JWT signed with an asymmetric algorithm, you must use the <code translate="no" dir="ltr">&lt;Certificate&gt;</code>, the <code translate="no" dir="ltr">&lt;JWKS&gt;</code>, or the <code translate="no" dir="ltr">&lt;Value&gt;</code> element to supply the public key.</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td><p>You can specify the JWKS in one of four ways:</p>
+<ul>
+<li><p>Literally, as a text value:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="Text only" data-syntax-guessed=""><code>  &lt;PublicKey&gt;
+    &lt;JWKS&gt;{
+      &quot;keys&quot;: [
+        {&quot;kty&quot;:&quot;RSA&quot;,&quot;e&quot;:&quot;AQAB&quot;,&quot;kid&quot;:&quot;b3918c88&quot;,&quot;n&quot;:&quot;jxdm...&quot;},
+        {&quot;kty&quot;:&quot;RSA&quot;,&quot;e&quot;:&quot;AQAB&quot;,&quot;kid&quot;:&quot;24f094d4&quot;,&quot;n&quot;:&quot;kWRdbgMQ...&quot;}
+      ]
+    }
+    &lt;/JWKS&gt;
+  &lt;/PublicKey&gt;</code></pre></li>
+<li><p>Indirectly, with the <code translate="no" dir="ltr">ref</code> attribute, specifying a flow variable:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="GDScript" data-syntax-guessed=""><code>  &lt;PublicKey&gt;
+    &lt;JWKS ref=&quot;variable-containing-jwks-content&quot;/&gt;
+  &lt;/PublicKey&gt;</code></pre>
+<p>The referenced variable should contain a string that represents a JWKS.</p></li>
+<li><p>Indirectly via a static uri, with the <code translate="no" dir="ltr">uri</code> attribute:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="Text only" data-syntax-guessed=""><code>  &lt;PublicKey&gt;
+    &lt;JWKS uri=&quot;uri-that-returns-a-jwks&quot;/&gt;
+  &lt;/PublicKey&gt;</code></pre></li>
+<li><p>Indirectly via a dynamically-determined uri, with the <code translate="no" dir="ltr">uriRef</code> attribute:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="GDScript" data-syntax-guessed=""><code>  &lt;PublicKey&gt;
+    &lt;JWKS uriRef=&quot;variable-containing-a-uri-that-returns-a-jwks&quot;/&gt;
+  &lt;/PublicKey&gt;</code></pre></li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+### \<Value\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PublicKey>
+  <Value ref="public.publickeyorcert"/>
+</PublicKey>
+
+-or-
+
+<PublicKey>
+  <Value>
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAw2kPrRzcufvUNHvTH/WW
+...YOUR PUBLIC KEY MATERIAL HERE....d1lH8MfUyRXmpmnNxJHAC2F73IyN
+ZmkDb/DRW5onclGzxQITBFP3S6JXd4LNESJcTp705ec1cQ9Wp2Kl+nKrKyv1E5Xx
+DQIDAQAB
+-----END PUBLIC KEY-----
+  </Value>
+</PublicKey>
+```
+
+A child of the `<PublicKey>` element. Specifies the public key to use to verify the signature on a signed JWT. Use the `ref` attribute to pass the key in a flow variable, or specify the PEM-encoded key directly. Make sure to align the public key on the left as shown in the reference example.
+
+|  |  |
+|----|----|
+| **Default** | N/A |
+| **Presence** | Optional. To verify a JWT signed with an asymmetric algorithm, you must use the `<Certificate>`, the `<JWKS>`, or the `<Value>` element to supply the public key. |
+| **Type** | String |
+| **Valid values** | A flow variable or string. |
+
+## \<RequiredClaims\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyJWT name='VJWT-1'>
+  ...
+  <!-- Directly specify the names of the claims to require -->
+  <RequiredClaims>sub,iss,exp</RequiredClaims>
+
+  -or-
+
+  <!-- Specify the claim names indirectly, via a context variable -->
+  <RequiredClaims ref='claims_to_require'/>
+  ...
+</VerifyJWT>
+```
+
+The `<RequiredClaims>` element is optional. It specifies a comma-separated list of names of claims that must be present in the JWT payload, when verifying a JWT. The element ensures that the presented JWT contains the required claims but does not validate the contents of the claims. If any of the listed claims are not present, the VerifyJWT policy will throw a fault at runtime.
+
+|                  |                                        |
+|------------------|----------------------------------------|
+| **Default**      | N/A                                    |
+| **Presence**     | Optional                               |
+| **Type**         | String                                 |
+| **Valid values** | A comma-separated list of claim names. |
+
+## \<SecretKey\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SecretKey encoding="base16|hex|base64|base64url" >
+  <Value ref="private.your-variable-name"/>
+</SecretKey>
+  
+```
+
+The SecretKey element is optional. It specifies the secret key to use when verifying a signed JWT that uses a symmetric (HS\*) algorithm or when verifying an encrypted JWT that uses a symmetric (AES) algorithm for key encryption.
+
+### Children of `<SecretKey>`
+
+The following table provides a description of the child elements and attributes of `<SecretKey>`:
+
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Child</th>
+<th>Presence</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>encoding (attribute)</td>
+<td>Optional</td>
+<td><p>Specifies how the key is encoded in the referenced variable. By default, when no <code translate="no" dir="ltr">encoding</code> attribute is present, the encoding of the key is treated as UTF-8. Valid values for the attribute are: hex, base16, base64, or base64url. The encoding values hex and base16 are synonyms.</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy devsite-code-highlight" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="Text only" data-syntax-guessed=""><code>&lt;SecretKey encoding=&quot;hex&quot; &gt;
+  &lt;Value ref=&quot;private.secretkey&quot;/&gt;
+&lt;/SecretKey&gt;</code></pre>
+<p>In the above example, because the encoding is <code translate="no" dir="ltr">hex</code>, if the contents of the variable <code translate="no" dir="ltr">private.secretkey</code> is <code translate="no" dir="ltr">494c6f766541504973</code>, the key will be decoded as a set of 9 bytes, which in hex will be <code translate="no" dir="ltr">49 4c 6f 76 65 41 50 49 73</code>.</p>
+<strong>Note:</strong> Apigee enforces a minimum key strength. See the documentation for the <code translate="no" dir="ltr">Value</code> element for details.</td>
+</tr>
+<tr>
+<td>Value (element)</td>
+<td>Required</td>
+<td><p>An encoded secret key. Specifies the secret key that will be used to verify the payload. Use the <code translate="no" dir="ltr">ref</code> attribute to provide the key indirectly via a variable, such as <code translate="no" dir="ltr">private.secret-key</code> .</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy devsite-code-highlight" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="GDScript" data-syntax-guessed=""><code>&lt;SecretKey&gt;
+  &lt;Value ref=&quot;private.my-secret-variable&quot;/&gt;
+&lt;/SecretKey&gt;</code></pre>
+<strong>Note:</strong> The variable name must include the <strong>private</strong> prefix as shown in the example above.
+<p>Apigee enforces a minimum key strength for the HS256/HS384/HS512 algorithms. The minimum key length for HS256 is 32 bytes, for HS384 it is 48 bytes, and for HS512 it is 64 bytes. Using a lower-strength key causes a runtime error.</p></td>
+</tr>
+</tbody>
+</table>
+
+## \<Source\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Source>jwt-variable</Source>
+```
+
+If present, specifies the flow variable in which the policy expects to find the JWT to verify.
+
+With this element, you can configure the policy to retrieve the JWT from a form or query parameter variable or any other variable. When this element is present, the policy will not strip any `Bearer` prefix that may be present. If the variable does not exist or if the policy does not find a JWT in the specified variable, the policy returns an error.
+
+By default, when no `<Source>` element is present, the policy retrieves the JWT by reading the variable `request.header.authorization` and stripping the `Bearer` prefix. If you pass the JWT in the Authorization header as a bearer token (with the `Bearer` prefix), do not specify the `<Source>` element in the policy configuration. For example, you would use no `<Source>` element in the policy configuration if you pass the JWT in the Authorization header like this:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+curl -v https://api-endpoint/proxy1_basepath/api1 -H "Authorization: Bearer eyJhbGciOiJ..."
+```
+
+|  |  |
+|----|----|
+| **Default** | `request.header.authorization` (See the note above for important information about the default). |
+| **Presence** | Optional |
+| **Type** | String |
+| **Valid values** | An Apigee flow variable name. |
+
+## \<Subject\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyJWT name='VJWT-8'>
+  ...
+  <!-- verify that the sub claim matches a hard-coded value -->
+  <Subject>subject-string-here</Subject>
+
+  or:
+
+  <!-- verify that the sub claim matches the value contained in a variable -->
+  <Subject ref='variable-containing-subject'/>
+
+  or:
+
+  <!-- verify via a variable; fallback to a hard-coded value if the variable is empty -->
+  <Subject ref='variable-containing-subject'>fallback-value-here</Subject>
+```
+
+The policy verifies that the subject in the JWT (the `sub` claim) matches the string specified in the policy configuration. The `sub` claim is one of the registered claims described in [RFC7519](https://tools.ietf.org/html/rfc7519).
+
+|                  |                                           |
+|------------------|-------------------------------------------|
+| **Default**      | N/A                                       |
+| **Presence**     | Optional                                  |
+| **Type**         | String                                    |
+| **Valid values** | Any value uniquely identifying a subject. |
+
+## \<TimeAllowance\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyJWT name='VJWT-23'>
+  ...
+  <!-- configure a hard-coded time allowance of 20 seconds -->
+  <TimeAllowance>20s</TimeAllowance>
+
+  or:
+
+  <!-- refer to a variable containing the time allowance -->
+  <TimeAllowance ref='variable-containing-time-allowance'/>
+
+  or:
+
+  <!-- refer to a variable; fallback to a hard-coded value if the variable is empty -->
+  <TimeAllowance ref='variable-containing-allowance'>30s</TimeAllowance>
+  
+```
+
+The "grace period" for times, to account for clock skew between the issuer and verifier of a JWT. This will apply to both the expiry (the `exp` claim) as well as the not-before-time (the `nbf` claim). For example, if the time allowance is configured to be `30s`, then an expired JWT would be treated as still valid, for 30 seconds after the asserted expiry. The not-before-time will be evaluated similarly.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Default</strong></td>
+<td>0 seconds (no grace period)</td>
+</tr>
+<tr>
+<td><strong>Presence</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td>A timespan expression, or a reference to a flow variable containing an expression. Time spans can be specified by a positive integer followed by one character indicating a time unit, as follows:
+<ul>
+<li>s = seconds</li>
+<li>m = minutes</li>
+<li>h = hours</li>
+<li>d = days</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<Type\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Type>type-string-here</Type>
+```
+
+Describes whether the policy verifies a signed JWT or an encrypted JWT. The `<Type>` element is optional. You can use it to inform readers of the configuration whether the policy generates a signed or an encrypted JWT.
+
+- If the `<Type>` element is present:
+  - If the value of `<Type>` is `Signed`, the policy verifies a signed JWT, and the [`<Algorithm>`](#algorithm) element must be present.
+  - If the value of `<Type>` is `Encrypted`, the policy verifies an encrypted JWT, and the [`<Algorithms>`](#algorithms) element must be present.
+- If the `<Type>` element is absent:
+  - If the `<Algorithm>` element is present, the policy assumes `<Type>` is `Signed`.
+  - If the `<Algorithms>` element is present, the policy assumes `<Type>` is `Encrypted`.
+- If neither `<Algorithm>` nor `<Algorithms>` is present, the configuration is invalid.
+
+|                  |                                |
+|------------------|--------------------------------|
+| **Default**      | N/A                            |
+| **Presence**     | Optional                       |
+| **Type**         | String                         |
+| **Valid values** | Either `Signed` or `Encrypted` |
+
+## Flow variables
+
+Upon success, the **Verify JWT** and **Decode JWT** policies set context variables according to this pattern:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+jwt.{policy_name}.{variable_name}
+```
+
+For example, if the policy name is `jwt-parse-token` , then the policy will store the subject specified in the JWT to the context variable named `jwt.jwt-parse-token.decoded.claim.sub`. (For backward compatibility, it will also be available in `jwt.jwt-parse-token.claim.subject`)
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Variable name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code translate="no" dir="ltr">claim.audience</code></td>
+<td>The JWT audience claim. This value may be a string, or an array of strings.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">claim.expiry</code></td>
+<td>The expiration date/time, expressed in milliseconds since epoch.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">claim.issuedat</code></td>
+<td>The Date the token was issued, expressed in milliseconds since epoch.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">claim.issuer</code></td>
+<td>The JWT issuer claim.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">claim.notbefore</code></td>
+<td>If the JWT includes a nbf claim, this variable will contain the value, expressed in milliseconds since epoch.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">claim.subject</code></td>
+<td>The JWT subject claim.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">claim.</code><em><code translate="no" dir="ltr">name</code></em></td>
+<td>The value of the named claim (standard or additional) in the payload. One of these will be set for every claim in the payload.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">decoded.claim.</code><em><code translate="no" dir="ltr">name</code></em></td>
+<td>The JSON-parsable value of the named claim (standard or additional) in the payload. One variable is set for every claim in the payload. For example, you can use <code translate="no" dir="ltr">decoded.claim.iat</code> to retrieve the issued-at time of the JWT, expressed in seconds since epoch. While you can also use the <code translate="no" dir="ltr">claim.</code><em><code translate="no" dir="ltr">name</code></em> flow variables, this is the recommended variable to use to access a claim.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">decoded.header.</code><em><code translate="no" dir="ltr">name</code></em></td>
+<td>The JSON-parsable value of a header in the payload. One variable is set for every header in the payload. While you can also use the <code translate="no" dir="ltr">header.</code><em><code translate="no" dir="ltr">name</code></em> flow variables, this is the recommended variable to use to access a header.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">expiry_formatted</code></td>
+<td>The expiration date/time, formatted as a human-readable string. Example: 2017-09-28T21:30:45.000+0000</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">header.algorithm</code></td>
+<td>The signing algorithm used on the JWT. For example, RS256, HS384, and so on. See <a href="https://tools.ietf.org/html/rfc7515#section-4.1.1" class="external">(Algorithm) Header Parameter</a> for more.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">header.kid</code></td>
+<td>The Key ID, if added when the JWT was generated. See also "Using a JSON Web Key Set (JWKS)" at <a href="/apigee/docs/api-platform/reference/policies/jwt-policies-overview">JWT policies overview</a> to verify a JWT. See <a href="https://tools.ietf.org/html/rfc7515#section-4.1.4" class="external">(Key ID) Header Parameter</a> for more.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">header.type</code></td>
+<td>Will be set to <code translate="no" dir="ltr">JWT</code>.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">header.</code><em><code translate="no" dir="ltr">name</code></em></td>
+<td>The value of the named header (standard or additional). One of these will be set for every additional header in the header portion of the JWT.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">header-json</code></td>
+<td>The header in JSON format.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">is_expired</code></td>
+<td>true or false</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">payload-claim-names</code></td>
+<td>An array of claims supported by the JWT.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">payload-json</code></td>
+<td><div>
+The payload in JSON format.
+</div></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">seconds_remaining</code></td>
+<td>The number of seconds before the token will expire. If the token is expired, this number will be negative.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">time_remaining_formatted</code></td>
+<td>The time remaining before the token will expire, formatted as a human-readable string. Example: 00:59:59.926</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">valid</code></td>
+<td>In the case of VerifyJWT, this variable will be true when the signature is verified, and the current time is before the token expiry, and after the token notBefore value, if they are present. Otherwise false.
+<p>In the case of DecodeJWT, this variable is not set.</p></td>
+</tr>
+</tbody>
+</table>
+
+## Error reference
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+| Fault code | HTTP status | Occurs when |
+|----|----|----|
+| `steps.jwt.AlgorithmInTokenNotPresentInConfiguration` | `401` | Occurs when the verification policy has multiple algorithms. |
+| `steps.jwt.AlgorithmMismatch` | `401` | The algorithm specified in the `Generate` policy did not match the one expected in the `Verify` policy. The algorithms specified must match. |
+| `steps.jwt.FailedToDecode` | `401` | The policy was unable to decode the JWT. The JWT is possibly corrupted. |
+| `steps.jwt.GenerationFailed` | `401` | The policy was unable to generate the JWT. |
+| `steps.jwt.InsufficientKeyLength` | `401` | For a key less than 32 bytes for the HS256 algorithm, less than 48 bytes for the HS386 algortithm, and less than 64 bytes for the HS512 algorithm. |
+| `steps.jwt.InvalidClaim` | `401` | For a missing claim or claim mismatch, or a missing header or header mismatch. |
+| `steps.jwt.InvalidConfiguration` | `401` | Both the `<Algorithm>` and `<Algorithms>` elements are present. |
+| `steps.jwt.InvalidCurve` | `401` | The curve specified by the key is not valid for the Elliptic Curve algorithm. |
+| `steps.jwt.InvalidIterationCount` | `401` | The iteration count that was used in the encrypted JWT is not equal to the iteration count specified in the VerifyJWT policy configuration. This applies only to JWT that use `<PasswordKey>`. |
+| `steps.jwt.InvalidJsonFormat` | `401` | Invalid JSON found in the header or payload. |
+| `steps.jwt.InvalidKeyConfiguration` | `401` | `JWKS` in the `<PublicKey>` element is invalid. The reason could be that the JWKS URI endpoint is not reachable from the Apigee instance. Test connectivity to the endpoint by creating a passthrough proxy and using the JWKS endpoint as a target. |
+| `steps.jwt.InvalidSaltLength` | `401` | The salt length that was used in the encrypted JWT is not equal to the salt length specified in the VerifyJWT policy configuration. This applies only to JWT that use `<PasswordKey>`. |
+| `steps.jwt.InvalidPasswordKey` | `401` | The specified key specified did not meet the requirements. |
+| `steps.jwt.InvalidPrivateKey` | `401` | The specified key specified did not meet the requirements. |
+| `steps.jwt.InvalidPublicKey` | `401` | The specified key specified did not meet the requirements. |
+| `steps.jwt.InvalidSecretKey` | `401` | The specified key specified did not meet the requirements. |
+| `steps.jwt.InvalidToken` | `401` | This error occurs when the JWT signature verification fails. |
+| `steps.jwt.JwtAudienceMismatch` | `401` | The audience claim failed on token verification. |
+| `steps.jwt.JwtIssuerMismatch` | `401` | The issuer claim failed on token verification. |
+| `steps.jwt.JwtSubjectMismatch` | `401` | The subject claim failed on token verification. |
+| `steps.jwt.KeyIdMissing` | `401` | The `Verify` policy uses a JWKS as a source for public keys, but the signed JWT does not include a `kid` property in the header. |
+| `steps.jwt.KeyParsingFailed` | `401` | The public key could not be parsed from the given key information. |
+| `steps.jwt.NoAlgorithmFoundInHeader` | `401` | Occurs when the JWT contains no algorithm header. |
+| `steps.jwt.NoMatchingPublicKey` | `401` | The `Verify` policy uses a JWKS as a source for public keys, but the `kid` in the signed JWT is not listed in the JWKS. |
+| `steps.jwt.SigningFailed` | `401` | In GenerateJWT, for a key less than the minimum size for the HS384 or HS512 algorithms |
+| `steps.jwt.TokenExpired` | `401` | The policy attempts to verify an expired token. |
+| `steps.jwt.TokenNotYetValid` | `401` | The token is not yet valid. |
+| `steps.jwt.UnhandledCriticalHeader` | `401` | A header found by the Verify JWT policy in the `crit` header is not listed in `KnownHeaders`. |
+| `steps.jwt.UnknownException` | `401` | An unknown exception occurred. |
+| `steps.jwt.WrongKeyType` | `401` | Wrong type of key specified. For example, if you specify an RSA key for an Elliptic Curve algorithm, or a curve key for an RSA algorithm. |
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+**Tip:** Need help resolving an error? Click *build* in the Fix column for detailed troubleshooting information.
+
+| Error name | Cause | Fix |
+|----|----|----|
+| `InvalidNameForAdditionalClaim` | The deployment will fail if the claim used in the child element `<Claim>` of the `<AdditionalClaims>` element is one of the following registered names: `kid`, `iss`, `sub`, `aud`, `iat`, `exp`, `nbf`, or `jti`. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/verify-JWT-deployment-errors#invalidnameforadditionalclaim) |
+| `InvalidTypeForAdditionalClaim` | If the claim used in the child element `<Claim>` of the `<AdditionalClaims>` element is not of type `string`, `number`, `boolean`, or `map`, the deployment will fail. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/verify-JWT-deployment-errors#invalidtypeforadditionalclaim) |
+| `MissingNameForAdditionalClaim` | If the name of the claim is not specified in the child element `<Claim>` of the `<AdditionalClaims>` element, the deployment will fail. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/verify-JWT-deployment-errors#missingnameforadditionalclaim) |
+| `InvalidNameForAdditionalHeader` | This error ccurs when the name of the claim used in the child element `<Claim>` of the `<AdditionalClaims>` element is either `alg` or `typ`. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/verify-JWT-deployment-errors#invalidnameforadditionalheader) |
+| `InvalidTypeForAdditionalHeader` | If the type of claim used in the child element `<Claim>` of the `<AdditionalClaims>` element is not of type `string`, `number`, `boolean`, or `map`, the deployment will fail. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/verify-JWT-deployment-errors#invalidtypeforadditionalheader) |
+| `InvalidValueOfArrayAttribute` | This error occurs when the value of the array attribute in the child element `<Claim>` of the `<AdditionalClaims>` element is not set to `true` or `false`. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/verify-JWT-deployment-errors#invalidvalueofarrayattribute) |
+| `InvalidValueForElement` | If the value specified in the `<Algorithm>` element is not a supported value, the deployment will fail. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/verify-JWT-deployment-errors#invalidvalueforelement) |
+| `MissingConfigurationElement` | This error will occur if the `<PrivateKey>` element is not used with RSA family algorithms or the `<SecretKey>` element is not used with HS Family algorithms. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/verify-JWT-deployment-errors#missingconfigurationelement) |
+| `InvalidKeyConfiguration` | If the child element `<Value>` is not defined in the `<PrivateKey>` or `<SecretKey>` elements, the deployment will fail. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/verify-JWT-deployment-errors#invalidkeyconfiguration) |
+| `EmptyElementForKeyConfiguration` | If the ref attribute of the child element `<Value>` of the `<PrivateKey>` or `<SecretKey>` elements is empty or unspecified, the deployment will fail. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/verify-JWT-deployment-errors#emptyelementforkeyconfiguration) |
+| `InvalidConfigurationForVerify` | This error occurs if the `<Id>` element is defined within the `<SecretKey>` element. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/verify-JWT-deployment-errors#invalidconfigurationforverify) |
+| `InvalidEmptyElement` | This error occurs if the `<Source>` element of the Verify JWT policy is empty. If present, it must be defined with an Apigee flow variable name. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/verify-JWT-deployment-errors#invalidemptyelement) |
+| `InvalidPublicKeyValue` | If the value used in the child element `<JWKS>` of the `<PublicKey>` element does not use a valid format as specified in [RFC 7517](https://tools.ietf.org/html/rfc7517), the deployment will fail. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/verify-JWT-deployment-errors#invalidpublickeyvalue) |
+| `InvalidConfigurationForActionAndAlgorithm` | If the `<PrivateKey>` element is used with HS Family algorithms or the `<SecretKey>` element is used with RSA Family algorithms, the deployment will fail. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/verify-JWT-deployment-errors#invalidconfigurationforactionandalgorithm) |
+
+### Fault variables
+
+These variables are set when a runtime error occurs. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``fault_name``"` | `fault_name` is the name of the fault, as listed in the [Runtime errors](/apigee/docs/api-platform/reference/policies/decode-jwt-policy#decode-jwt-runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name Matches "InvalidToken"` |
+| `JWT.failed` | All JWT policies set the same variable in the case of a failure. | `JWT.failed = true` |
+
+### Example error response
+
+For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+    <FaultRules>
+        <FaultRule name="JWT Policy Errors">
+            <Step>
+                <Name>JavaScript-1</Name>
+                <Condition>(fault.name Matches "InvalidToken")</Condition>
+            </Step>
+            <Condition>JWT.failed=true</Condition>
+        </FaultRule>
+    </FaultRules>
+    
+```

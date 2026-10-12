@@ -1,0 +1,79 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.apps.keys.create" class="section">
+
+- [Resource: DeveloperAppKey](#DeveloperAppKey)
+  - [JSON representation](#DeveloperAppKey.SCHEMA_REPRESENTATION)
+- [Methods](#METHODS_SUMMARY)
+
+<div id="DeveloperAppKey" class="section">
+
+## Resource: DeveloperAppKey
+
+<div id="DeveloperAppKey.description" class="section">
+
+</div>
+
+<div id="DeveloperAppKey.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;apiProducts&quot;: array,
+  &quot;attributes&quot;: [
+    {
+      object (Attribute)
+    }
+  ],
+  &quot;consumerKey&quot;: string,
+  &quot;consumerSecret&quot;: string,
+  &quot;expiresAt&quot;: string,
+  &quot;issuedAt&quot;: string,
+  &quot;scopes&quot;: [
+    string
+  ],
+  &quot;status&quot;: string,
+  &quot;expiresInSeconds&quot;: string
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="DeveloperAppKey.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| apiProducts | array ( ListValue format) List of API products for which the credential can be used. Note : Do not specify the list of API products when creating a consumer key and secret for a developer app. Instead, use the keys.updateDeveloperAppKey API to make the association after the consumer key and secret are created. |
+| attributes[] | object ( Attribute ) List of attributes associated with the credential. |
+| consumerKey | string Consumer key. |
+| consumerSecret | string Secret key. |
+| expiresAt | string ( int64 format) Time the developer app expires in milliseconds since epoch. |
+| issuedAt | string ( int64 format) Time the developer app was created in milliseconds since epoch. |
+| scopes[] | string Scopes to apply to the app. The specified scope names must already be defined for the API product that you associate with the app. |
+| status | string Status of the credential. Valid values include approved or revoked . |
+| expiresInSeconds | string ( int64 format) Input only. Expiration time, in seconds, for the consumer key. If not set or left to the default value of -1 , the API key never expires. The expiration time can't be updated after it is set. |
+
+</div>
+
+</div>
+
+<div id="METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | Creates a custom consumer key and secret for a developer app. |
+
+</div>
+
+</div>

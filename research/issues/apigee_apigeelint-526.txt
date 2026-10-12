@@ -1,0 +1,196 @@
+URL: https://github.com/apigee/apigeelint/issues/526
+TITLE: TD012 & TD015 - TargetEndpoint HTTPTargetConnection should have exactly one SSLInfo & Missing MaxFailures element within LoadBalancer
+STATE: closed state_reason: completed
+AUTHOR: PratMoha association: NONE
+CREATED: 2025-05-25T23:42:52Z CLOSED: 2025-06-04T00:43:12Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+Hi Team,
+
+I'm facing 2 warnings (screenshot below) from Apigee linter which seems to be false positive.
+
+![Image](https://github.com/user-attachments/assets/d836d636-6301-42a0-93fd-19394351f70b)
+
+We usually define the SSLInfo in the edge.json file in the target server section, hence the same is not declared again in the load balancer segment. Is it logically correct for the linter to expect the value for SSLInfo in the target connection?
+
+On the 2nd warning, it seems linter is highlighting the "Missing MaxFailures element within LoadBalancer", but based on the anti-pattern scenarios best practices(point number 3 https://cloud.google.com/apigee/docs/api-platform/antipatterns/load-balancing-maxfailures) 
+
+```
+If there's some constraint such that only one TargetServer and if the HealthMonitor is not used, then don't specify MaxFailures in the LoadBalancer configuration.
+
+The default value of MaxFailures is 0. This means that Apigee always tries to connect to the target for each request and never removes the target server from the rotation.
+```
+Could we add a use-case that if there is only one server in the load balancer then max-failure warning should be supressed?
+
+Regards,
+Pratyush
+
+
+--- COMMENTS (10) ---
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2025-05-25T23:44:43Z
+@PratMoha - can you share the TargetEndpoint config used in your proxy thats being linted here?
+
+### comment by PratMoha (association=NONE) at 2025-05-26T06:53:52Z
+@ssvaidyanathan ,
+
+Thank you for your swift response. Below is one of the example on how I'm defining the HTTPTargetConnection here server mocktarget-apigee is defined in edge.json inside target server array as defined below.
+
+```
+<HTTPTargetConnection>
+        <Properties>
+            <Property name="success.codes">1XX,2XX,3XX</Property>
+        </Properties>
+        <LoadBalancer>
+            <Server name="mocktarget-apigee"/>
+        </LoadBalancer>
+    </HTTPTargetConnection>
+```
+
+```
+"targetServers": [
+        {
+          "name": "mocktarget-apigee",
+          "host": "mocktarget.apigee.net",
+          "isEnabled": true,
+          "port": 443,
+          "sSLInfo": {
+            "enabled": "true",
+            "enforce": "true"
+          }
+        }
+      ]
+```
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2025-05-26T15:56:39Z
+@PratMoha - The SSLInfo needed is just a warning. We recommend that you add it to the TargetEndpoint config as well. If you do not want that to show up, you can include that rule to the exclude set when running the apigeelint command for this proxy. 
+
+Reg the code I was asking - was for the 2nd issue you mentioned reg MaxFailures. Can you share that pls?
+
+### comment by kacperillo (association=NONE) at 2025-05-30T11:33:44Z
+Hello, I just have exactly the same issue:
+
+1. This is my TargetEndpoint configuration:
+```
+<TargetEndpoint name="default">
+  <HTTPTargetConnection>
+    <LoadBalancer>
+      <Server name="PETSTORE" />
+    </LoadBalancer>
+    <Path>{propertyset.paths.petstore}</Path>
+  </HTTPTargetConnection>
+</TargetEndpoint>
+```
+
+I get the linting warning: "**TargetEndpoint HTTPTargetConnection should have exactly one SSLInfo**".
+So I added SSLInfo to the configuration:
+```
+<TargetEndpoint name="default">
+  <HTTPTargetConnection>
+    <SSLInfo>
+      <Enabled>true</Enabled>
+    </SSLInfo>
+    <LoadBalancer>
+      <Server name="PETSTORE" />
+    </LoadBalancer>
+    <Path>{propertyset.paths.petstore}</Path>
+  </HTTPTargetConnection>
+</TargetEndpoint>
+```
+
+And then I get another warning: "**When using a LoadBalancer, the SSLInfo should be configured in the TargetServer, not under HTTPTargetConnection**", which is in contradiction to the first one. So in each situation there is a warning. 
+
+
+2. Regarding the "Missing MaxFailures element within LoadBalancer" warning I confirm - I have only one server specified in LoadBalancer and the apigeelint requires MaxFailures to be included, however the Google documentation defines it as antipatern: "_Having single TargetServer in a LoadBalancer configuration of the TargetEndpoint or Service Callout policy with MaxFailures set to a non-zero value is not recommended as it can have adverse implications._"
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2025-05-30T16:07:53Z
+> And then I get another warning: "When using a LoadBalancer, the SSLInfo should be configured in the TargetServer, not under HTTPTargetConnection", which is in contradiction to the first one. So in each situation there is a warning.
+
+ok that's for sure wrong.  I'll have a look.
+
+>  "Missing MaxFailures element within LoadBalancer" warning I confirm - I have only one server specified in LoadBalancer and the apigeelint requires MaxFailures to be included, however the Google documentation defines it as antipatern: "Having single TargetServer in a LoadBalancer configuration of the TargetEndpoint or Service Callout policy with MaxFailures set to a non-zero value is not recommended as it can have adverse implications."
+
+Yes, I'm inclined to keep this warning, as it is an anti-pattern.
+
+WDYT?
+
+### comment by PratMoha (association=NONE) at 2025-05-31T06:32:43Z
+Hi @DinoChiesa,
+
+For TD012, this also gets flagged in Advanced API Security to add a SSLInfo section to the target httpconnection, even when the same is defined in the target server.
+
+For TD015, as per the best practice for anti-pattern mention in the docs https://cloud.google.com/apigee/docs/api-platform/antipatterns/load-balancing-maxfailures
+
+```
+If there's some constraint such that only one TargetServer and if the HealthMonitor is not used, then don't specify MaxFailures in the LoadBalancer configuration.
+
+The default value of MaxFailures is 0. This means that Apigee always tries to connect to the target for each request and never removes the target server from the rotation.
+
+```
+
+I have seen a common practice of defining a single server being used by many of my clients as they have a load balancer behind Apigee.
+
+Kindly give your suggestions.
+
+### comment by PratMoha (association=NONE) at 2025-06-02T21:34:34Z
+> [@PratMoha](https://github.com/PratMoha) - The SSLInfo needed is just a warning. We recommend that you add it to the TargetEndpoint config as well. If you do not want that to show up, you can include that rule to the exclude set when running the apigeelint command for this proxy.
+> 
+> Reg the code I was asking - was for the 2nd issue you mentioned reg MaxFailures. Can you share that pls?
+
+@ssvaidyanathan,
+The same code shared above is for the maxfailure issue as well. If there is a single LoadBalancer in the HTTPTargetConnection, then the apigee linter is throwing up the warning Missing MaxFailure element in the loadbalancer, and if I set it to Zero, then it complains to be a positive integer.
+But Apigee best practice document says as below:
+
+```
+If there's some constraint such that only one TargetServer and if the HealthMonitor is not used, then don't specify MaxFailures in the LoadBalancer configuration.
+
+The default value of MaxFailures is 0. This means that Apigee always tries to connect to the target for each request and never removes the target server from the rotation.
+```
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2025-06-03T00:52:10Z
+Thanks for reporting these things and engaging in the discussion.  This is helpful. We want to do the right thing and make sure the linter  gives good advice. 
+
+For "When using a LoadBalancer, the SSLInfo should be configured in the TargetServer, not under HTTPTargetConnection": this warning is issued by plugin TD006.  In fact this is the only thing TD006 does. I still think configuring SSLInfo in the TargetServer is  the right thing to do.  In other words, I think in general the recommendation is correct: specify SSLInfo in the TargetServer.  But the plugin isn't checking that. It's checking the proxy. (TargetEndpoint).  And it has no way to check the referred TargetServer - in other words it has no way to check that SSLInfo is configured in the TargetServer, per the recommendation.  The design of the plugin is sort of broken - it assumes that if there is an SSLInfo under HTTPTargetConnection, then it is NOT present in the TargetServer. But that  is not a valid assumption. 
+
+OK, so what do we do about that?   I see some options.
+
+1. Do nothing. Keep the warning _as is_ .  If people want to disable it, they can do so with the command-line switch (`-e TD006`), or a directive in the XML (`  <!-- apigeelint disable=TD006 --> `), or in the `.apigeelintrc` file.   This is ok, if mildly annoying. 
+2. Modify the warning so that Apigeelint emits it in all cases in which there is a LoadBalancer, whether or not there is an SSLInfo under HTTPTargetConnection.  This is accurate advice ("you should put SSLInfo in your TargetServer") but , during a scan of the proxy definition is sort of the wrong place to _offer that advice_.  So this seems like a bad idea I think. 
+3. Omit (or demote) the warning.  Drop TD006 from the list of built-in plugins, and relegate it to an example "External Plugin".  In other words it's disabled by default, and people will need to take action in order to enable it.   This might be the best option. 
+
+That brings us to TD012, a related issue. The warning here is "TargetEndpoint HTTPTargetConnection should have exactly one SSLInfo".  This is a good idea, a good recommendation, (a) when not using a LoadBalancer, and (b) when using a LoadBalancer but not all of the targetservers have SSLInfo defined.  Apigeelint cannot check case (b), because TargetServers are not present in the proxy definition.  So, the right thing here seems to be , to alter TD012 so that it flags a missing SSLInfo if and only if there is no LoadBalancer.    
+
+> Regarding the fact that this condition "also gets flagged in Advanced API Security..."  That seems like a bug in Adv API Sec.  We don't have control over that. I suggest you connect with Google support and file a bug.  Adv API Sec **IS** able to see the TargetServers, and so it WILL have the complete information to tell you whether you have SSLInfo configured appropriately or not, and it SHOULD issue warnings only when appropriate. 
+
+Regarding TD015.  "Missing MaxFailures element within LoadBalancer".  I can modify it such that if there is only one server in the load balancer then apigeelint will not issue this warning.  
+
+----
+
+So this is what I propose for changes: 
+
+1. Demote TD006 to an External Plugin. 
+2. Modify TD012 to fire if and only if there is no LoadBalancer
+3. Modify TD015 so that it does not complain about a missing MaxFailures if there is a single server.
+
+What do you all think?
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2025-06-03T01:12:52Z
+> * Do nothing. Keep the warning _as is_ .  If people want to disable it, they can do so with the command-line switch (`-e TD006`), or a directive in the XML (` <!-- apigeelint disable=TD006 -->`), or in the `.apigeelintrc` file.   This is ok, if mildly annoying.
+> * Modify the warning so that Apigeelint emits it in all cases in which there is a LoadBalancer, whether or not there is an SSLInfo under HTTPTargetConnection.  This is accurate advice ("you should put SSLInfo in your TargetServer") but , during a scan of the proxy definition is sort of the wrong place to _offer that advice_.  So this seems like a bad idea I think.
+> * Omit (or demote) the warning.  Drop TD006 from the list of built-in plugins, and relegate it to an example "External Plugin".  In other words it's disabled by default, and people will need to take action in order to enable it.   This might be the best option.
+
+I vote for 1 but what we could do is warn with a different message? Warn about not having SSLInfo in the proxy but making sure one does in the TargetServer configuration. With this its backward compatible for users who are relying on this plugin. 
+
+> 2\. Modify TD012 to fire if and only if there is no LoadBalancer
+
+I feel TD006 and TD012 will become redundant if we use it for LoadBalancers. So lets do what you proposed which checks only if there is a URL configured (https)
+
+> 3\. Modify TD015 so that it does not complain about a missing MaxFailures if there is a single server.
+
+Yes - lets warn only if there are more than one server
+
+
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2025-06-04T00:43:12Z
+Fixed in v2.67.0

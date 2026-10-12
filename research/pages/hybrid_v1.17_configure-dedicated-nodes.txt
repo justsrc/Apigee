@@ -1,0 +1,257 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/configure-dedicated-nodes.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/configure-dedicated-nodes.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+## About node pools
+
+A <a href="https://cloud.google.com/kubernetes-engine/docs/concepts/node-pools" class="external">node pool</a> is a group of nodes within a cluster that all have the same configuration. Typically, you define separate node pools when you have pods with differing resource requirements. For example, the `apigee-cassandra` pods require persistent storage, while the other Apigee hybrid pods do not.
+
+This topic discusses how to configure dedicated node pools for a hybrid installation.
+
+## Using the default nodeSelectors
+
+The best practice is to set up two dedicated node pools: one for the Cassandra pods and one for all the other runtime pods. Using default <a href="https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector" class="external">nodeSelector</a> configurations, the installer will assign the Cassandra pods to a *stateful* node pool named `apigee-data` and all the other pods to a *stateless* node pool named `apigee-runtime`. All you have to do is create node pools with these names, and Apigee hybrid handles the pod scheduling details for you:
+
+| Default node pool name | Description            |
+|------------------------|------------------------|
+| `apigee-data`          | A stateful node pool.  |
+| `apigee-runtime`       | A stateless node pool. |
+
+Following is the default `nodeSelector` configuration. The `apigeeData` property specifies a node pool for the Cassandra pods. The `apigeeRuntime` specifies the node pool for all the other pods. You can override these default settings in your overrides file, as explained later in this topic:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+nodeSelector:
+  requiredForScheduling: true
+  apigeeRuntime:
+    key: "cloud.google.com/gke-nodepool"
+    value: "apigee-runtime"
+  apigeeData:
+    key: "cloud.google.com/gke-nodepool"
+    value: "apigee-data"
+```
+
+To ensure your pods are scheduled on the correct nodes, create two node pools with the names `apigee-data` and `apigee-runtime`.
+
+See:
+
+- [`nodeSelector.apigeeRuntime.key`](/apigee/docs/hybrid/v1.17/config-prop-ref#nodeselector-apigeeruntime-key).
+- [`nodeSelector.apigeeRuntime.value`](/apigee/docs/hybrid/v1.17/config-prop-ref#nodeselector-apigeeruntime-value).
+- [`nodeselector.apigeeData.key`](/apigee/docs/hybrid/v1.17/config-prop-ref#nodeselector-apigeedata-key).
+- [`nodeSelector.apigeeData.value`](/apigee/docs/hybrid/v1.17/config-prop-ref#nodeselector-apigeedata-value).
+
+## The requiredForScheduling property
+
+The `nodeSelector` config section has a property called `requiredForScheduling`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+nodeSelector:
+  requiredForScheduling: false
+  apigeeRuntime:
+    key: "cloud.google.com/gke-nodepool"
+    value: "apigee-runtime"
+  apigeeData:
+    key: "cloud.google.com/gke-nodepool"
+    value: "apigee-data"
+```
+
+If set to `false`, underlying pods will be scheduled whether or not node pools are defined with the required names. This means that if you forget to create node pools or if you accidentally name a node pool other than `apigee-runtime` or `apigee-data`, the hybrid runtime installation will succeed. Kubernetes will decide where to run your pods.
+
+If you set `requiredForScheduling` to `true` (the default), the installation will fail unless there are node pools that match the configured `nodeSelector` keys and values.
+
+**Note:** The best practice is to set this value to `requiredForScheduling:true` for a production environment.
+
+See [` nodeSelector.requiredForScheduling`](/apigee/docs/hybrid/v1.17/config-prop-ref#nodeselector-requiredforscheduling).
+
+## Using custom node pool names
+
+If you don't want to use node pools with the default names, you can create node pools with custom names and specify those names in the `nodeSelector` stanza. For example, the following configuration assigns the Cassandra pods to the pool named `my-cassandra-pool` and all other pods to the pool named `my-runtime-pool`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+nodeSelector:
+  requiredForScheduling: false
+  apigeeRuntime:
+    key: "cloud.google.com/gke-nodepool"
+    value: "my-runtime-pool"
+  apigeeData:
+    key: "cloud.google.com/gke-nodepool"
+    value: "my-cassandra-pool"
+```
+
+## Overriding the node pool for specific components on GKE
+
+You can also override node pool configurations at the individual component level. For example, the following configuration assigns the node pool with the value `apigee-custom` to the `runtime` component:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+runtime:
+  nodeSelector:
+    key: cloud.google.com/gke-nodepool
+    value: apigee-custom
+```
+
+You can specify a custom node pool on any of these components:
+
+- `istio`
+- `mart`
+- `synchronizer`
+- `runtime`
+- `cassandra`
+- `udca`
+- `logger`
+
+## GKE node pool configuration
+
+In GKE, node pools must have a unique name that you provide when you create the pools, and GKE automatically labels each node with the following:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+cloud.google.com/gke-nodepool=THE_NODE_POOL_NAME
+```
+
+As long as you create node pools named `apigee-data` and `apigee-runtime`, no further configuration is required. If you want to use custom node names, see [Using custom node pool names](#using-custom-node-pool-names).
+
+## Manually labeling nodes
+
+While the node pools automatically label the worker nodes by default, you can optionally label the worker nodes manually with the following steps:
+
+1.  Run the following command to get a list of the worker nodes in your cluster:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl -n APIGEE_NAMESPACE get nodes
+    ```
+
+    Example output:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    NAME                   STATUS   ROLES    AGE     VERSION
+    apigee-092d639a-4hqt   Ready    <none>   7d      v1.14.6-gke.2
+    apigee-092d639a-ffd0   Ready    <none>   7d      v1.14.6-gke.2
+    apigee-109b55fc-5tjf   Ready    <none>   7d      v1.14.6-gke.2
+    apigee-c2a9203a-8h27   Ready    <none>   7d      v1.14.6-gke.2
+    apigee-c70aedae-t366   Ready    <none>   7d      v1.14.6-gke.2
+    apigee-d349e89b-hv2b   Ready    <none>   7d      v1.14.6-gke.2
+    ```
+
+2.  Label each node to differentiate between runtime nodes and data nodes.
+
+    **Note:** Be sure to choose the nodes so that they are equally distributed among availability zones (AZs).
+
+    Use this command to label the nodes:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl label node NODE_NAME KEY=VALUE
+    ```
+
+    For example:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    $ kubectl label node apigee-092d639a-4hqt apigee.com/apigee-nodepool=apigee-runtime
+    $ kubectl label node apigee-092d639a-ffd0 apigee.com/apigee-nodepool=apigee-runtime
+    $ kubectl label node apigee-109b55fc-5tjf apigee.com/apigee-nodepool=apigee-runtime
+    $ kubectl label node apigee-c2a9203a-8h27 apigee.com/apigee-nodepool=apigee-data
+    $ kubectl label node apigee-c70aedae-t366 apigee.com/apigee-nodepool=apigee-data
+    $ kubectl label node apigee-d349e89b-hv2b apigee.com/apigee-nodepool=apigee-data
+    ```
+
+## Overriding the node pool for specific components on Anthos GKE
+
+You can also override node pool configurations at the individual component level for an Anthos GKE installation. For example, the following configuration assigns the node pool with the value `apigee-custom` to the `runtime` component:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+runtime:
+  nodeSelector:
+    key: apigee.com/apigee-nodepool
+    value: apigee-custom
+```
+
+You can specify a custom node pool on any of these components:
+
+- `istio`
+- `mart`
+- `synchronizer`
+- `runtime`
+- `cassandra`
+- `udca`
+- `logger`

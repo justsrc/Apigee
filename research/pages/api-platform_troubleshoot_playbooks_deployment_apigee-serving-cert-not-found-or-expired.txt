@@ -1,0 +1,5 @@
+# generate kubernetes cluster-info dump
+kubectl cluster-info dump -A --output-directory=/tmp/kubectl-cluster-info-dump
+# zip kubernetes cluster-info dump
+zip -r kubectl-cluster-info-dump`date +%Y.%m.%d_%H.%M.%S`.zip /tmp/kubectl-cluster-info-dump/*
+```

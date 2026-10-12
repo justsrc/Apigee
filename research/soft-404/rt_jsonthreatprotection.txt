@@ -1,0 +1,14 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+## The equivalent page does not exist in Apigee.
+
+See the following for more information:
+
+- [Which Apigee Edge features are removed in Apigee?](/apigee/docs/api-platform/get-started/compare-apigee-products#unsupported-features)
+- [Unsupported Apigee Edge APIs](/apigee/docs/api-platform/get-started/compare-apigee-products#unsupported-apis)
+- [Compare Apigee products](https://cloud.google.com/apigee/docs/api-platform/get-started/compare-apigee-products)
+
+Click the browser <span class="material-icons" aria-hidden="true" translate="no">arrow_back</span> back button to return to the previous page.

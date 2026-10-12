@@ -1,0 +1,26 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments" class="section">
+
+- [Resource](#RESOURCE_REPRESENTATION)
+- [Methods](#METHODS_SUMMARY)
+
+<div id="RESOURCE_REPRESENTATION" class="section">
+
+## Resource
+
+There is no persistent data associated with this resource.
+
+</div>
+
+<div id="METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| deploy | Deploys a revision of an existing API proxy to an environment. |
+| generateDeployChangeReport | Generates a report for a dry run analysis of a DeployApiProxy request without committing the deployment. |
+| generateUndeployChangeReport | Generates a report for a dry run analysis of an UndeployApiProxy request without committing the undeploy. |
+| get | Gets the deployment of an API proxy revision and actual state reported by runtime pods. |
+| undeploy | Undeploys an API proxy revision from an environment. |
+
+</div>
+
+</div>

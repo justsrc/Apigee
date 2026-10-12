@@ -1,0 +1,159 @@
+<div id="NAME" class="section">
+
+NAME
+
+<span class="normalfont"> gcloud apigee deployments describe - describe an Apigee API proxy deployment </span>
+
+</div>
+
+<div id="SYNOPSIS" class="section">
+
+SYNOPSIS
+
+<span class="normalfont"> `gcloud apigee deployments describe` \[\[[`REVISION`](#REVISION)\] <span class="flag">[`--api`](#--api)=`API`</span> <span class="flag">[`--environment`](#--environment)=`ENVIRONMENT`</span> <span class="flag">[`--organization`](#--organization)=`ORGANIZATION`\]</span> \[[`GCLOUD_WIDE_FLAG`](#GCLOUD-WIDE-FLAGS)` …`\] </span>
+
+</div>
+
+<div id="DESCRIPTION" class="section">
+
+DESCRIPTION
+
+Describe an Apigee API proxy deployment.
+
+`gcloud apigee deployments describe` retrieves the status of a specific API proxy's deployment to a specific environment.
+
+</div>
+
+<div id="EXAMPLES" class="section">
+
+EXAMPLES
+
+To get the status of a deployment in the active Cloud Platform project, which deploys `my-proxy` into the `prod` environment, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee deployments describe --api=my-proxy --environment=prod
+```
+
+To get the status of that deployment as a JSON object, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee deployments describe --api=my-proxy --environment=prod --format=json
+```
+
+To get the status of a deployment in an organization called `my-org`, which deploys version 3 of the proxy `my-proxy` into the `test` environment, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee deployments describe 3 --organization=my-org --environment=test --api=my-proxy
+```
+
+</div>
+
+<div id="POSITIONAL-ARGUMENTS" class="section">
+
+POSITIONAL ARGUMENTS
+
+<span class="normalfont"> Revision resource - API proxy revision and environment of the deployment to be described. To get a list of deployed proxies and their environments, run: </span>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee deployments list
+```
+
+REVISION can either be a positive revision number, or the special value `auto`, which will choose whichever revision of API is currently deployed in ENVIRONMENT, or return an error if more than one revision is deployed.
+
+If REVISION is unspecified, the default is `auto`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+The arguments in this group can be used to specify the attributes of this resource.
+```
+
+<span class="normalfont">\[`REVISION`\]</span>  
+ID of the revision or fully qualified identifier for the revision.
+
+To set the `revision` attribute:
+
+- provide the argument `REVISION` on the command line;
+- leave the argument unspecified for it to be chosen automatically.
+
+<span class="normalfont">`--api`=`API`</span>  
+Deployed API proxy.
+
+To set the `api` attribute:
+
+- provide the argument `REVISION` on the command line with a fully specified name;
+- leave the argument unspecified for it to be chosen automatically with a fully specified name;
+- provide the argument `--api` on the command line.
+
+<span class="normalfont">`--environment`=`ENVIRONMENT`</span>  
+Environment in which the proxy was deployed.
+
+To set the `environment` attribute:
+
+- provide the argument `REVISION` on the command line with a fully specified name;
+- leave the argument unspecified for it to be chosen automatically with a fully specified name;
+- provide the argument `--environment` on the command line.
+
+<span class="normalfont">`--organization`=`ORGANIZATION`</span>  
+Apigee Organization of the proxy and environment. If unspecified, the Cloud Platform project's associated organization will be used.
+
+To set the `organization` attribute:
+
+- provide the argument `REVISION` on the command line with a fully specified name;
+- leave the argument unspecified for it to be chosen automatically with a fully specified name;
+- provide the argument `--organization` on the command line;
+- set the property \[project\] or provide the argument \[--project\] on the command line, using a Cloud Platform project with an associated Apigee organization.
+
+</div>
+
+<div id="GCLOUD-WIDE-FLAGS" class="section">
+
+GCLOUD WIDE FLAGS
+
+These flags are available to all commands: [`--access-token-file`](/sdk/gcloud/reference#--access-token-file), [`--account`](/sdk/gcloud/reference#--account), [`--billing-project`](/sdk/gcloud/reference#--billing-project), [`--configuration`](/sdk/gcloud/reference#--configuration), [`--flags-file`](/sdk/gcloud/reference#--flags-file), [`--flatten`](/sdk/gcloud/reference#--flatten), [`--format`](/sdk/gcloud/reference#--format), [`--help`](/sdk/gcloud/reference#--help), [`--impersonate-service-account`](/sdk/gcloud/reference#--impersonate-service-account), [`--log-http`](/sdk/gcloud/reference#--log-http), [`--project`](/sdk/gcloud/reference#--project), [`--quiet`](/sdk/gcloud/reference#--quiet), [`--trace-token`](/sdk/gcloud/reference#--trace-token), [`--user-output-enabled`](/sdk/gcloud/reference#--user-output-enabled), [`--verbosity`](/sdk/gcloud/reference#--verbosity).
+
+Run `$ `[`gcloud help`](/sdk/gcloud/reference) for details.
+
+</div>
+
+<div id="NOTES" class="section">
+
+NOTES
+
+These variants are also available:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud alpha apigee deployments describe
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee deployments describe
+```
+
+</div>

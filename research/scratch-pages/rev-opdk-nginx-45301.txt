@@ -1,0 +1,171 @@
+## Overview of Nginx 1.26 changes
+
+**Nginx 1.26 upgrade in Edge for Private Cloud 4.53.01**
+
+When you upgrade to Edge for Private Cloud 4.53.01, Nginx won't automatically update to 1.26.x. This is to avoid unexpected runtime issues from the behavior changes introduced in Nginx 1.26. You can manually [upgrade Nginx(from 1.20.x to 1.26.x)](/private-cloud/v4.53.01/update-apigee-edge-45202-45300#ngnixupgradeinedgerouter) after testing in lower environments. Fresh 4.53.00 installations will have Nginx 1.26.x on routers by default.
+
+With the release of Nginx 1.26, several important changes have been introduced to enhance security and ensure compliance with HTTP standards. The following are the key updates:
+
+### Handling of whitespace in header names and values
+
+To improve security, adherence to RFC 7230 has been strengthened, particularly concerning the handling of whitespace in headers. More details about these changes can be found in the [Appendix](#appendix).
+
+### Handling of `Content-Length` and `Transfer-Encoding` headers
+
+One of the common techniques used in request smuggling attacks involves sending HTTP requests with both `Content-Length` and `Transfer-Encoding` headers. While Apigee Edge was already fortified against such attacks, Nginx now explicitly blocks requests that contain both headers. If such a request is sent, Nginx will respond with a **400 Bad Request** error.
+
+### Supported ciphers
+
+The list of supported ciphers for northbound requests may change with this release. You can check the ciphers supported by OpenSSL on your router host to get the updated list of available ciphers.
+
+### Supported key sizes
+
+Previously, RSA, DSA, and DH keys smaller than 2048 bits, and ECC keys smaller than 224 bits, were accepted by default. However, with this update, such keys will no longer be allowed for both one-way and two-way TLS connections for northbound requests.
+
+## Appendix
+
+### Whitespace in headers
+
+There are three primary changes:
+
+1.  Certain header names that were previously allowed are now disallowed by Nginx 1.26. Requests with these headers will result in a **400 Bad Request** error.
+2.  Certain header values that were previously allowed are now disallowed by Nginx 1.26. Requests with these headers will also result in a **400 Bad Request** error.
+3.  Some headers that were previously accepted by Nginx but caused failures downstream in the message processor are now rejected directly by Nginx. Although these headers still lead to API failures, the HTTP failure messages will change.
+
+The section below provides examples of various header names and header values that are disallowed. These are examples only and may not be an exhaustive list. It is recommended to adhere to the guidelines of RFC 7230 for headers.
+
+#### Changes in header names
+
+This section lists various header names that were allowed in Nginx 1.20.1 but are now disallowed in Nginx 1.26.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Examples of header names</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Control character at start, end, or in between header name</td>
+<td>{ '\u0001'Header0, Value0 }<br />
+{ Header6'\u0002', Value6 }<br />
+{ Header'\u0005'4, Value4 }</td>
+</tr>
+<tr>
+<td>Leading &amp; trailing whitespace in header name</td>
+<td>{"Header2 ", "Value2"}<br />
+{" Header3", "Value3"}<br />
+{" Header4 ", "Value4"}</td>
+</tr>
+<tr>
+<td>Leading &amp; trailing HTAB in header name</td>
+<td>{"\tHeader11", "Value11"}<br />
+{"Header12\t", "Value12"}<br />
+{"\tHeader13\t", "Value13"}</td>
+</tr>
+<tr>
+<td>Leading &amp; trailing combination of HTAB, WS in header name</td>
+<td>{"\t Header24", "Value24"}<br />
+{" \tHeader25", "Value25"}<br />
+{"Header26 \t", "Value26"}<br />
+{"Header27\t ", "Value27"}</td>
+</tr>
+<tr>
+<td>NewLine (\n) in between header name followed immediately by WS or a series of WS</td>
+<td>{"Header\n 57Mutiline", "Value57"}<br />
+{"Header\n 58Mutiline", "Value58"}</td>
+</tr>
+<tr>
+<td>NewLine (\n) in between header name followed immediately by HTAB or a series of HTAB</td>
+<td>{"Header\n\t73", "Value73"}<br />
+{"Header\n\t\t74", "Value74"}</td>
+</tr>
+<tr>
+<td>Carriage return (\r) NewLine (\n) in between header name followed immediately by HTAB or a series of HTAB</td>
+<td>{"Header\r\n\t69", "Value69"}<br />
+{"Header\r\n\t\t70", "Value70"}</td>
+</tr>
+<tr>
+<td>Carriage return (\r) NewLine (\n) in between header name followed immediately by WS or a series of WS</td>
+<td>{"Header\r\n 71", "Value71"}<br />
+{"Header\r\n 72", "Value72"}</td>
+</tr>
+</tbody>
+</table>
+
+### Changes in header values
+
+This section shows various header values that were allowed in Nginx 1.20.1 but disallowed in Nginx 1.26.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\r\n or combination of \r\n with WS or HTAB allowed in between HEADERVALUE</td>
+<td>{"Header47", "Value47\r\n MultiLine"},<br />
+{"Header48", "Value48\r\n MultiLine"},<br />
+{"Header49b", "Value49b\r\n \r\nMultiLine"},<br />
+{"Header50", "Value50 \r\n MultiLine"},<br />
+{"Header51", "Value51\r\n\tMultiLine"},<br />
+{"Header52", "Value52\r\n\t\tMultiLine"},<br />
+{"Header53", "Value53\t\r\n\tMultiLine"}</td>
+</tr>
+<tr>
+<td>\n or combination of \n with WS or HTAB allowed in between HEADERVALUE</td>
+<td>{"Header61", "Value\n 61Multiline"},<br />
+{"Header62", "Value\n 63Multiline"},<br />
+{"Header65", "Value\n\t65"},<br />
+{"Header66", "Value\n\t\t66"},<br />
+{"Header67", "Value\n 67"},<br />
+{"Header68", "Value\n 68"}</td>
+</tr>
+</tbody>
+</table>
+
+### Change in HTTP failure response
+
+This section covers headers that were allowed by the old Nginx but rejected by the upstream message processor, resulting in a 400 status code. However, in Nginx 1.26, such headers cause failures directly at Nginx, preventing the request from being forwarded to the message processor.
+
+For clients that send such headers, the HTTP status code will remain 400. However, the HTTP response body may change as the failure will now be generated by Nginx instead of the message processor.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTAB or WS in between HEADERNAME
+<p>The Message Processor rejects such requests. With Nginx 1.26, these requests will be rejected by Nginx itself. The API consumer will receive a 400 error response with an Nginx error message in the body.</p></td>
+<td>{"Header 5", "Value5"},<br />
+{"Header\t14", "Value14"},<br />
+{"Header\t 32", "Value32"},<br />
+{"Header \t33", "Value33"},<br />
+{"Header- 36", "Value36"},<br />
+{"Header-\t40", "Value40"},<br />
+{"Header 4a", "Value4a"},<br />
+{"Header\t 59", "Value59"},<br />
+{"Header\t 60", "Value60"}</td>
+</tr>
+</tbody>
+</table>

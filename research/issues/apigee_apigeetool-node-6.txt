@@ -1,0 +1,110 @@
+URL: https://github.com/apigee/apigeetool-node/issues/6
+TITLE: Error: UNABLE_TO_VERIFY_LEAF_SIGNATURE when working with on premise SSL endpoint
+STATE: open state_reason: None
+AUTHOR: inovakov association: CONTRIBUTOR
+CREATED: 2014-12-04T08:16:57Z CLOSED: None
+LABELS: 
+MILESTONE: None
+--- BODY ---
+We have our own instance of Apigee and when trying to use our SSL endpoint (base URL) with apigeetool, I get:
+
+```
+Error: UNABLE_TO_VERIFY_LEAF_SIGNATURE
+    at SecurePair.<anonymous> (tls.js:1380:32)
+    at SecurePair.emit (events.js:92:17)
+    at SecurePair.maybeInitFinished (tls.js:979:10)
+    at CleartextStream.read [as _read] (tls.js:471:13)
+    at CleartextStream.Readable.read (_stream_readable.js:340:10)
+    at EncryptedStream.write [as _write] (tls.js:368:25)
+    at doWrite (_stream_writable.js:225:10)
+    at writeOrBuffer (_stream_writable.js:215:5)
+    at EncryptedStream.Writable.write (_stream_writable.js:182:11)
+    at write (_stream_readable.js:601:24)
+```
+
+There should be a way, how to specify the certificate used for validation of the endpoint certificate.
+
+Any ideas how this can be done?
+
+Thanks.
+
+
+--- COMMENTS (6) ---
+
+### comment by gbrail (association=NONE) at 2014-12-04T17:55:37Z
+That's a good use case -- thanks! However I think it'll require a small
+change to Apigeetool.
+
+There are two things to do (or both):
+
+We could add a flag that lets you pass in a CA certificate as a PEM file,
+that it'd use to validate the API server. Do you have access to a PEM file
+that you could use for that purpose? The underlying Node.js API that we'd
+use looks like this:
+
+http://nodejs.org/api/tls.html#tls_tls_connect_port_host_options_callback
+
+Or, we could add a flag to disable certificate validation, like the "-k"
+flag to "curl."
+
+Neither change should be very difficult, I might be able to get to it and
+there are lots of others who could potentially help as well.
+
+On Thu, Dec 4, 2014 at 12:16 AM, Ivan Novakov notifications@github.com
+wrote:
+
+> We have our own instance of Apigee and when trying to use our SSL endpoint
+> (base URL) with apigeetool, I get:
+> 
+> Error: UNABLE_TO_VERIFY_LEAF_SIGNATURE
+>     at SecurePair.<anonymous> (tls.js:1380:32)
+>     at SecurePair.emit (events.js:92:17)
+>     at SecurePair.maybeInitFinished (tls.js:979:10)
+>     at CleartextStream.read [as _read](tls.js:471:13)
+>     at CleartextStream.Readable.read (_stream_readable.js:340:10)
+>     at EncryptedStream.write [as _write](tls.js:368:25)
+>     at doWrite (_stream_writable.js:225:10)
+>     at writeOrBuffer (_stream_writable.js:215:5)
+>     at EncryptedStream.Writable.write (_stream_writable.js:182:11)
+>     at write (_stream_readable.js:601:24)
+> 
+> There should be a way, how to specify the certificate used for validation
+> of the endpoint certificate.
+> 
+> Any ideas how this can be done?
+> 
+> Thanks.
+> 
+> —
+> Reply to this email directly or view it on GitHub
+> https://github.com/apigee/apigeetool-node/issues/6.
+
+## 
+
+_greg brail_ | _apigee https://apigee.com/_ | twitter @gbrail
+http://twitter.com/gbrail
+
+
+### comment by inovakov (association=CONTRIBUTOR) at 2014-12-05T12:41:13Z
+I think, that disabling the validation is not a good approach, although there might be cases when you don't have other choice.
+
+I would prefer to have the first option - to be able to specify a certificate (PEM file) to be used for validation.
+
+Thanks!
+
+
+### comment by tmarrs (association=NONE) at 2015-12-30T22:39:00Z
+How about implementing both solutions (PEM certificate and also bypass completely)?
+
+
+### comment by prabhatjha (association=CONTRIBUTOR) at 2015-12-31T17:22:51Z
+We will get this done in next release.
+
+
+### comment by ivan-novakov (association=NONE) at 2016-01-05T14:20:29Z
+I think, this problem has been resolved in #7 . At least it works for me :).
+
+
+### comment by tmarrs (association=NONE) at 2016-01-05T18:17:33Z
+I tried the `insecure` option and it didn't solve https://github.com/apigee/apigeetool-node/issues/33
+

@@ -1,0 +1,63 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+**Note:** For Apigee hybrid v1.13.1, the new data pipeline is supported for newly created Apigee hybrid organizations with [data residency](/apigee/docs/api-platform/get-started/drz-concepts) enabled. See [Configure hybrid to use the new data pipeline](/apigee/docs/hybrid/v1.13/data-collection-with-data-residency). For Hybrid 1.14 or later, the new data pipeline is the default for all Hybrid organizations regardless of whether or not data residency is enabled.
+
+Debug is a tool for troubleshooting and monitoring API proxies running on Apigee. The Debug tool lets you probe the details of each step through an API proxy flow. Apigee lets you collect debug data, which shows the entire request/response flow of your API proxies. This includes all request/response parameters along with transformations applied to them at policy execution time. This is important for debugging and troubleshooting during API proxy development and deployment.
+
+In previous versions of Apigee, the Debug tool was referred to as the Trace tool.
+
+**Terminology:** The terms *debug data* and *debug session data* are used interchangeably.
+
+## Debug data collection and transmission
+
+Apigee gateway nodes collect debug session data and cache it internally, before transmitting that data to the control plane in the Cloud. From there it is shared to the debug session UI, for operators to analyze.
+
+If you use [Debug masking](/apigee/docs/api-platform/security/data-masking), Apigee performs the masking in the gateway nodes, before transmitting the debug data to the control plane.
+
+## Using Debug
+
+Create and manage debug sessions using the Debug tool using the UI or API, as described in [Using Debug](/apigee/docs/api-platform/debug/trace). Alternatively, you can download debug sessions and view and analyze them offline, as described in [Using Offline Debug](/apigee/docs/api-platform/debug/offline-trace).
+
+## Apigee Support use of Debug
+
+Only customers can trigger a debug session, but Apigee Support can access non-deleted past debug sessions during the course of a support case to help troubleshoot proxy-specific issues.
+
+Note the following:
+
+- Apigee Support has read-only permission to Debug data.
+- Apigee Support may request that you run a debug to capture information about an issue, and that you provide the debug session ID or a link to the debug session so that Support may review the captured debug. Since saved debug sessions are valid for only 24 hours, we recommend that you download the debug session and attach it to the case opened with Support to enable offline viewing.
+
+## For Apigee hybrid users
+
+**Note:** For Apigee hybrid v1.13.1 and later, the Debug tool is supported for newly created Apigee hybrid organizations with [data residency](/apigee/docs/api-platform/get-started/drz-concepts) enabled. See [Analytics and debug data collection with data residency](/apigee/docs/hybrid/v1.13/data-collection-with-data-residency).
+
+If you are using Apigee hybrid, review the following sections.
+
+### Debug architecture
+
+The following illustrates the process of creating a new debug session:
+
+<img src="/static/apigee/docs/api-platform/images/arch-trace-debug-session.png" class="screenshot" data-modal-dialog-id="arch-trace-debug-session" alt="Click to enlarge" /> ![A high-level view of a request to start a debug session: 1. You initiate a request to start a debug session, using the UI or API. 2. The management plane issues a debug session creation request to the runtime plane using the pub/sub model. 3. The Synchronizer, which subscribes to debug session notifications, propagates the creation request to the Message Processors. 4. The MPs collect debug data and stream it to a data collection pod. 5. fluent-bit immediately writes the debug data to the pod's file system. 6. The UDCA polls the pod's file system for new data files. 7. When it finds a new data file, UDCA uploads it to the UAP service. 8. You can then access the data via Apigee services such as the Apigee hybrid UI or the Apigee APIs.](/static/apigee/docs/api-platform/images/arch-trace-debug-session.png "Debug architecture")
+
+**Note:** Because of the asynchronous nature of multiple pollings, debug data is not available in real time; instead, there is a slight delay.
+
+Debug data is persisted in the management plane for up to 24 hours.
+
+### Apigee hybrid requirements
+
+This section lists important information for Apigee hybrid users.
+
+#### Support for data residency
+
+- If you have a newly created Apigee hybrid v1.13.1 org with [data residency enabled](/apigee/docs/api-platform/get-started/drz-concepts), follow the steps in [Using data residency with Apigee hybrid](/apigee/docs/hybrid/v1.13/using-data-residency-with-apigee-hybrid).
+- Clocks on all Synchronizer nodes should be in sync and in UTC.
+
+Older versions of Apigee hybrid do not support data residency.
+
+#### Other requirements
+
+- You must have the `apigee-udca` service account configured. See [Specify configuration overrides](https://docs.cloud.google.com/apigee/docs/api-platform/debug/install-create-overrides#specify-configuration-overrides).
+- Clocks on all Synchronizer nodes should be in sync and in UTC.

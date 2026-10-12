@@ -1,0 +1,299 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This section describes how to register apps and manage API keys.
+
+## Overview
+
+The primary way to control who can access your APIs is through application registration.
+
+As an API provider, you create one or more [API products](/apigee/docs/api-platform/publish/create-api-products) that bundle your APIs into service tiers. API products let you limit traffic and access levels at very granular levels. When you create an API product, you can set the access level to Public, Private, or Internal only. For more information, see [Access level](/apigee/docs/api-platform/publish/what-api-product#access-levels).
+
+When registering an app, the app developer selects which API products to use and Apigee provides a single [API key](/apigee/docs/api-platform/security/api-keys) that the developer uses to access those API products. The app developer passes the API key in each call to the API proxies contained in the API products. At any time, you can revoke an app's API key, preventing an app developer from accessing all or a subset of API products referenced by that app.
+
+App developers who have access to an API product through their membership in an [AppGroup](/apigee/docs/api-platform/publish/organizing-client-app-ownership) use similar methods as individual app developers to register their app, but as part of their AppGroup memberships.
+
+<img src="/static/apigee/docs/api-platform/images/Apps.png" width="400" alt="Diagram of a developer with three apps." />
+
+Typically, app developers register to use your API products using your developer portal. The steps to build your portal and publish your API products are described in [Build your portal](/apigee/docs/api-platform/publish/portal/build-integrated-portal).
+
+You can have more control over the app registration process by registering your apps using the Apigee UI or [Apigee API](/apigee/docs/reference/apis/apigee/rest) instead. For example, you may want to register apps for your internal development teams or for a developer that cannot access your portal.
+
+You must be an organization administrator or be assigned a role with the appropriate permissions to register apps and manage API keys.
+
+The following sections describe how to register apps and manage API keys using the [UI](#ui) and [API](#api).
+
+## Exploring the Apps page
+
+To view and register apps, and manage API keys in the Apigee UI you use the **Apps** view.
+
+Go to the **Distribution \> Apps** page in the Apigee in Cloud console:
+
+<a href="https://console.cloud.google.com/apigee/apps" class="button button-primary" target="console" data-track-type="commonIncludes" data-track-name="consoleLink">Go to Apps</a>
+
+The **Apps** view lets you do the following:
+
+- [Register an app](#register)
+- [View and edit an app](#edit)
+- [Manage credentials](#manage-credentials)
+- [Approve or revoke an app](#approve-revoke-app)
+- [Delete an app](#delete)
+- Search the list of apps by name, developer, app ID, consumer API key, or all content
+
+**Note:** As overall app count increases, load time latencies on the **Apps** view increase. Use filters to refine the app list and improve load times.
+
+## Registering an app
+
+**Warning:** Always be sure your app includes at least one [API product](/apigee/docs/api-platform/publish/what-api-product) in which at least one API proxy and/or resource path is specified. If the API product does not include an API proxy and/or resource path, the app's key can be used to call any API proxy in your Apigee organization. In most situations, you do not want to create a so-called [skeleton key](https://discuss.google.dev/t/making-sense-of-api-product-configuration/17610.html)—a key that can open any door in your house!
+
+An app can be registered in the following ways:
+
+- **By an app developer:** An app developer can register the app via your portal, as described in [How app developers interact with your portal](/apigee/docs/api-platform/publish/portal/portal-interact).
+- **By an administrator:** You can register an app in Apigee, as described below. It is up to you to determine how to provide the key to the app developer.
+
+Registered apps are added to the following:
+
+- List of registered apps in Apigee. See [Viewing and editing developer details](/apigee/docs/api-platform/publish/adding-developers-your-api-product#edit).
+- Apps page in the [developer portal](/apigee/docs/api-platform/publish/portal/build-integrated-portal).
+
+To register an app in Apigee:
+
+1.  Go to the **Distribution \> Apps** page:
+
+    <a href="https://console.cloud.google.com/apigee/apps" class="button button-primary" target="console" data-track-type="commonIncludes" data-track-name="consoleLink">Go to Apps</a>
+
+2.  Click **Create**.
+
+3.  Specify the **App Details**, as described in the following table:
+    | Field | Description | Required? |
+| --- | --- | --- |
+| Name | Name of the app. You can't change the name once the app is created. This name is used in Apigee API calls. | Required |
+| Display Name | Display name for the app that appears in the Apigee UI and the developer portal. | Optional |
+| Developer | Select a developer name from the drop-down. Note: For performance reasons, not all developers are displayed in the drop-down. Start typing the developer name or email in the search box, and the drop-down values are automatically refined to match the text you are typing. See also Register app developers . | Required |
+| Callback URL | Typically specifies the URL of an app that is designated to receive an authorization code on behalf of the client app. This value is not required for all API products. | Optional |
+| Notes | Descriptive notes for the app. | Optional |
+
+    **Note:** The app details also include an App ID which is only viewable and editable from the API, not the UI. See the [REST Resource: organizations.developers.apps](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.apps#DeveloperApp).
+
+4.  Specify the **Credentials**, including the API key expiration and status and the associated API products. In the **Credentials** section, click **<span class="material-icons" aria-hidden="true" translate="no">add</span> Add credential** and enter the following information:
+    | Field | Description |
+| --- | --- |
+| Expiry | Select an expiration duration or date, or set the API key to never expire. |
+| Products | Associate one or more API products with the API key: Click add Add products . Select one or more API products from list. Note: At least one API product must be selected. Click OK . Click Add . |
+
+5.  Set the **Status** to Approved or Revoked for each API product. If you added an API product to the credential that requires manual approval, it will show `Pending approval status`. Otherwise, it will show `Approved`. In this step, you can change the approval status.
+    1.  From the list of **Products** in the **Credentials** section, select one or more products from the list.
+    2.  Click **Approve** or **Revoke**.
+
+6.  Specify the **Custom Attributes**:
+    1.  In the Custom Attributes section, click **<span class="material-icons" aria-hidden="true" translate="no">add</span> Add attribute**.
+    2.  Enter the name and value.
+    3.  Click **<span class="material-icons" aria-hidden="true" translate="no">add</span> Add attribute**. to add more attributes. The maximum number of custom attributes that you can add is 18.
+
+7.  Click **Create**.
+
+If the API products you associated with the app required manual approval for their API keys, approve them, as described in [Approving or revoking API keys](#approve-revoke-key).
+
+## Viewing apps registered for a developer
+
+To view apps registered for a specific developer, use one of the following methods:
+
+- [View all registered apps](#ui), click <span class="material-icons" aria-hidden="true" translate="no">filter_list</span> **Filter**, click **App owner**, and enter the name of the developer in the search field.
+- [View all registered app developers](/apigee/docs/api-platform/publish/adding-developers-your-api-product#ui) and click the row associated with the developer.
+
+## Viewing and editing an app
+
+**Note:** We recommend that you avoid making concurrent update requests for the same resource. Near-simultaneous writes to the same entity can result in conflicts and unexpected behavior. Ensure operations are sequential when modifying a single resource.
+
+**Note**: Before editing custom attributes, ensure there are no system dependencies on the existing attribute settings.
+
+Apigee keeps the following entities in cache for a minimum of 180 seconds after the entities are *accessed*.
+
+- OAuth access tokens. This means the [`ExpiresIn`](/apigee/docs/api-platform/reference/policies/oauthv2-policy#expiresinelement) element on the OAuth v2 policy won't be able to expire an access token in less than 180 seconds.
+- Key Management Service (KMS) entities (Apps, Developers, API Products).
+- Custom attributes on OAuth tokens and KMS entities.
+
+To view and edit an app:
+
+1.  Go to the **Distribution \> Apps** page:
+
+    <a href="https://console.cloud.google.com/apigee/apps" class="button button-primary" target="console" data-track-type="commonIncludes" data-track-name="consoleLink">Go to Apps</a>
+
+2.  Click anywhere in the row of the app that you want to view and edit. Apigee displays the app details.
+    **Note:** Apps that are part of AppGroups are also shown in the results list. You can view app details and delete AppGroup apps, but not create or edit them in this view. For instructions on managing AppGroups and AppGroups apps, see [Using AppGroups to organize app ownership](/apigee/docs/api-platform/publish/organizing-client-app-ownership#using-appgroups-to-organize-app-ownership).
+
+3.  To edit an app, click **<span class="material-icons" aria-hidden="true" translate="no">edit</span> Edit**.
+
+4.  Perform one or more of the following tasks:
+    - Modify the app details, including the name, callback URL, or notes.
+    - [Manage the credentials](#manage-credentials) and associated products.
+    - Add or delete custom attributes. The maximum number of custom attributes that you can add is 18.
+    - [Approve or revoke the app](#approve-revoke-app).
+
+5.  Click **Save**.
+
+## Managing credentials
+
+When [editing an app](#edit), you can manage its credentials in the **Credentials** section, where you can perform the following tasks using the UI:
+
+- [View an API key and secret](#view-api-key)
+- [Approve or revoke an API key](#approve-revoke-key) for all associated API products or for a single API product.
+- [Manage API products in an app](#manage-api-products)
+- [Generate new credentials](#generate-credentials)
+
+To use the API to manage credentials, see [Import existing consumer keys and secrets](/apigee/docs/api-platform/publish/import-existing-consumer-keys-and-secrets).
+
+**Note:** When you create an API product, you can also set its [access level](/apigee/docs/api-platform/publish/what-api-product#access-levels) to **Internal only** or **Private**. API products marked **Internal only** or **Private** do not appear to developers on the developer portal. To access these products, you manually add them to a developer's app from the [Apigee API](/apigee/docs/reference/apis/apigee/rest).
+
+### Viewing an API key and secret
+
+**To view an API key and secret:**
+
+1.  Go to the **Distribution \> Apps** page:
+
+    <a href="https://console.cloud.google.com/apigee/apps" class="button button-primary" target="console" data-track-type="commonIncludes" data-track-name="consoleLink">Go to Apps</a>
+
+2.  Click in the row of the app for which you want to view the API key and secret.
+
+3.  In the Credentials section, click the <span class="material-icons" aria-hidden="true" translate="no">visibility</span> associated with the API key or secret that you want to view.
+
+### Approving or revoking an API key
+
+API calls to API proxies usually require an [API key](/apigee/docs/api-platform/security/api-keys). Apigee allows the calls only if the API key is approved, valid, and meets the conditions defined by the API product containing the API.
+
+You can configure an API product for automatic approval of API keys, as described in [Managing API products](/apigee/docs/api-platform/publish/create-api-products). However, if the API product requires manual approval of API keys, you need to manually approve the key.
+
+You can revoke an API key for all or a single API product. In this case, the API key and secret are invalid and cannot be used to access APIs in the associated API product(s). You can re-approve an API key at any time.
+
+To approve or revoke an API key:
+
+1.  Go to the **Distribution \> Apps** page:
+
+    <a href="https://console.cloud.google.com/apigee/apps" class="button button-primary" target="console" data-track-type="commonIncludes" data-track-name="consoleLink">Go to Apps</a>
+
+2.  Click in the row of the app that you want to view and edit.
+
+3.  Click **<span class="material-icons" aria-hidden="true" translate="no">edit</span> Edit**.
+
+4.  To approve or revoke an API key, select **Approved** or **Revoked** in the **Status** section for the credential.
+
+5.  Click **Save**.
+
+### Managing API products in an app
+
+Manage API products in your app by performing the following tasks:
+
+- [Add an API product to an app](#managingapikeys-addproduct)
+- [Remove an API product from an app](#managingapikeys-revokingorremovinganapiproductfromanapikey)
+
+#### Adding an API product to an app
+
+To add an API product to an app:
+
+1.  Go to the **Distribution \> Apps** page:
+
+    <a href="https://console.cloud.google.com/apigee/apps" class="button button-primary" target="console" data-track-type="commonIncludes" data-track-name="consoleLink">Go to Apps</a>
+
+2.  Click in the row of the app that you want to view and edit.
+
+3.  Click **<span class="material-icons" aria-hidden="true" translate="no">edit</span> Edit**.
+
+4.  Perform one of the following tasks:
+    - To add an API product to a new API key, click **<span class="material-icons" aria-hidden="true" translate="no">add</span> Add credential** to generate a new credential, select an expiration, and add the API product to the API key.
+    - To add an API product or products to an existing API key, in the Credential section click **<span class="material-icons" aria-hidden="true" translate="no">add</span> Add products** and select one or more API products from the drop-down list.
+
+5.  Click **Save**.
+
+#### Revoking or removing an API product from an app credential
+
+If you want to keep an API key active but not allow it to be used by an API product, you can revoke it or remove it from the associated credential.
+
+1.  Go to the **Distribution \> Apps** page:
+
+    <a href="https://console.cloud.google.com/apigee/apps" class="button button-primary" target="console" data-track-type="commonIncludes" data-track-name="consoleLink">Go to Apps</a>
+
+2.  Click in the row of the app that you want to view and edit.
+
+3.  Click **<span class="material-icons" aria-hidden="true" translate="no">edit</span> Edit**.
+
+4.  Select the API product (or products) to revoke or remove from the credential.
+
+5.  Click **Revoke** or **Remove**.
+
+6.  Click **Save**.
+
+You can re-approve a revoked API product or re-add an API product that was removed.
+
+### Generating new credentials
+
+You can generate new credentials for an app. For instance, if you're using API key rotation, you can generate new keys whose expiration overlaps keys that will be out of rotation when they expire. You might also generate a new key/secret if the security of the original key/secret is compromised. If you generate a new key, any existing API keys will continue to work until they expire or you explicitly revoke them.
+
+**To generate a new API key:**
+
+1.  Go to the **Distribution \> Apps** page:
+
+    <a href="https://console.cloud.google.com/apigee/apps" class="button button-primary" target="console" data-track-type="commonIncludes" data-track-name="consoleLink">Go to Apps</a>
+
+2.  Click in the row of the app that you want to view and edit.
+
+3.  Click **Edit**.
+
+4.  In the Credentials section, click **<span class="material-icons" aria-hidden="true" translate="no">add</span> Add credential**.
+
+5.  Specify the expiration, add the API products, and set their status.
+
+6.  Optionally, [revoke](#approve-revoke-key) any of the other API keys, as required.
+
+7.  Click **Save**.
+
+## Approving or revoking an app
+
+**Note**: You can approve or revoke apps that are associated with a particular user, as described in [Manage portal users](/apigee/docs/api-platform/publish/portal/api-portal-users)
+
+Approve or revoke an app, as described below. When you revoke an app, any approved API keys can no longer be used in API calls to Apigee. When you re-approve an app, all approved and valid API keys can be used to make API calls.
+
+If the app is registered in other organizations, you must revoke it in each of those organizations. It may take a few minutes for the changes to be recognized by all message processors.
+
+**To approve or revoke an app:**
+
+1.  Go to the **Distribution \> Apps** page:
+
+    <a href="https://console.cloud.google.com/apigee/apps" class="button button-primary" target="console" data-track-type="commonIncludes" data-track-name="consoleLink">Go to Apps</a>
+
+2.  Click in the row of the app that you want to view and edit.
+
+3.  Click **Edit**.
+
+4.  Select **Approve** or **Revoke** in the **App Status** field to approve or revoke the app, respectively.
+
+5.  Click **Save**.
+
+## Deleting an app
+
+When you delete an app, all client keys associated with the apps become invalid. Using an invalid key on a request causes the request to fail.
+
+If you think you may want to reinstate a developer app in the future, an alternative to deletion is [revoking an app](#revokingadeveloperapp).
+
+**To delete an app:**
+
+1.  Go to the **Distribution \> Apps** page:
+
+    <a href="https://console.cloud.google.com/apigee/apps" class="button button-primary" target="console" data-track-type="commonIncludes" data-track-name="consoleLink">Go to Apps</a>
+
+2.  Position the cursor in the row of the app to delete.
+
+3.  Click <span class="material-icons" aria-hidden="true" translate="no">more_vert</span> **More** <span class="material-icons" aria-hidden="true" translate="no">delete</span> **Delete** in the **Actions** column.
+
+**Note**: With Apigee, deletion of the developer app and associated artifacts happens asynchronously. The developer app is deleted immediately, but the resources associated with that developer app, such as app keys or access tokens, may take anywhere from a few seconds to a few minutes to be deleted.
+
+## Registering apps and managing API keys using the API
+
+To register and manage apps using the [Apigee API](/apigee/docs/reference/apis/apigee/rest), use the following APIs:
+
+- [Apps API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apps)
+- [Developer apps API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.apps)
+- [Developer app keys API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.apps.keys)
+
+See also [Import existing consumer keys and secrets](/apigee/docs/api-platform/publish/import-existing-consumer-keys-and-secrets).

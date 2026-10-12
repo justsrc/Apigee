@@ -1,0 +1,145 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/install-crds.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/install-crds.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/install-crds.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/install-crds.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/install-crds.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/install-crds.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/install-crds.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/install-crds.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/install-crds.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/install-crds.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/install-crds.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/install-crds.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/install-crds.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/install-crds.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/install-crds.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/install-crds.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/install-crds.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/install-crds.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+This step explains how to install the Custom Resource Definitions (CRDs) for Apigee hybrid.
+
+## Install the Apigee CRDs:
+
+**Note:** From this step onwards, all commands should be run from `$APIGEE_HELM_CHARTS_HOME` directory.
+
+**Note:** This is the only supported method for installing Apigee CRDs. Do not use `kubectl apply` without `-k`, do not omit `--server-side`.
+
+**Note:** This step requires elevated cluster permissions.
+
+1.  If you are installing Apigee Hybrid into a different namespace than the default (`apigee`), edit `apigee-operator/etc/crds/default/kustomization.yaml` and change the namespace to match:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    namespace: APIGEE_NAMESPACE
+    ```
+
+    For example:
+
+    <div>
+
+    </div>
+
+    ``` devsite-disable-click-to-copy
+    namespace: my-namespace
+    ```
+
+2.  Perform a dry-run of the installation by running the following command:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    kubectl apply -k  apigee-operator/etc/crds/default/ \
+      --server-side \
+      --force-conflicts \
+      --validate=false \
+      --dry-run=server
+    ```
+
+3.  After checking the installation with `--dry-run`, install the Apigee CRDs with the following command:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    kubectl apply -k  apigee-operator/etc/crds/default/ \
+      --server-side \
+      --force-conflicts \
+      --validate=false
+    ```
+
+4.  Validate the installation with the `kubectl get crds` command:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl get crds | grep apigee
+    ```
+
+    Your output should look something like the following:
+
+    <div>
+
+    </div>
+
+    ``` devsite-disable-click-to-copy
+
+    apigeedatastores.apigee.cloud.google.com            2024-12-16T19:44:48Z
+    apigeedeployments.apigee.cloud.google.com           2024-12-16T19:44:49Z
+    apigeeenvironments.apigee.cloud.google.com          2024-12-16T19:44:50Z
+    apigeeissues.apigee.cloud.google.com                2024-12-16T19:44:52Z
+    apigeeorganizations.apigee.cloud.google.com         2024-12-16T19:44:53Z
+    apigeeredis.apigee.cloud.google.com                 2024-12-16T19:44:55Z
+    apigeerouteconfigs.apigee.cloud.google.com          2024-12-16T19:44:56Z
+    apigeeroutes.apigee.cloud.google.com                2024-12-16T19:44:56Z
+    apigeetelemetries.apigee.cloud.google.com           2024-12-16T19:44:58Z
+    cassandradatareplications.apigee.cloud.google.com   2024-12-16T19:45:00Z
+    secretrotations.apigee.cloud.google.com             2024-12-16T19:45:00Z
+    ```
+
+**Note:** You may see warnings about deprecated terms. This will not impact the installation of the Apigee hybrid CRDs.
+
+You have now installed the structure for Apigee hybrid. Next you will check the readiness of your Kubernetes cluster before installing the Apigee Helm charts.
+
+## Next step
+
+<a href="/apigee/docs/hybrid/v1.17/install-create-cluster" class="button">1</a> <a href="/apigee/docs/hybrid/v1.17/install-download-charts" class="button">2</a> <a href="/apigee/docs/hybrid/v1.17/install-create-namespace" class="button">3</a> <a href="/apigee/docs/hybrid/v1.17/install-service-accounts" class="button">4</a> <a href="/apigee/docs/hybrid/v1.17/install-sa-authentication" class="button">5</a> <a href="/apigee/docs/hybrid/v1.17/install-create-tls-certificates" class="button">6</a> <a href="/apigee/docs/hybrid/v1.17/install-create-overrides" class="button">7</a> <a href="/apigee/docs/hybrid/v1.17/install-enable-control-plane-access" class="button">8</a> <a href="/apigee/docs/hybrid/v1.17/install-cert-manager" class="button">9</a> <a href="/apigee/docs/hybrid/v1.17/install-crds" class="button button-disabled">10</a> <a href="/apigee/docs/hybrid/v1.17/install-helm-charts" class="button button-primary">(NEXT) Step 11: Install Apigee hybrid using Helm charts</a>
