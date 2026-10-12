@@ -338,6 +338,39 @@ def _p_id_gap(sb: Sandbox) -> None:
     p.write_text(text[:start] + text[end:])
 
 
+@probe("synthetic-scenario-relabelled-real-world", "FAIL",
+       "relabel a regression scenario as a reported real-world case")
+def _p_origin_inflated(sb: Sandbox) -> None:
+    p = sb.path("scenarios/regression.md")
+    p.write_text(re.sub(r"- Origin: [^\n]+",
+                        "- Origin: reported real-world case (injected by fault probe)",
+                        p.read_text(), count=1))
+
+
+@probe("origin-field-removed", "FAIL",
+       "delete the Origin field entirely, leaving provenance unclassifiable")
+def _p_origin_missing(sb: Sandbox) -> None:
+    p = sb.path("scenarios/easy.md")
+    p.write_text(re.sub(r"^- Origin: [^\n]+\n", "", p.read_text(), count=1),
+                 )
+
+
+@probe("origin-unclassifiable-value", "FAIL",
+       "use an origin label outside the controlled vocabulary")
+def _p_origin_vague(sb: Sandbox) -> None:
+    p = sb.path("scenarios/easy.md")
+    p.write_text(re.sub(r"^- Origin: [^\n]+", "- Origin: based on something we saw once",
+                        p.read_text(), count=1))
+
+
+@probe("reference-path-unresolvable", "FAIL",
+       "point a SKILL.md reference table entry at a path that does not exist")
+def _p_bad_ref_path(sb: Sandbox) -> None:
+    skill = sb.path(".agents/skills/apigee-support-core/SKILL.md")
+    skill.write_text(skill.read_text().replace(
+        "`references/products.md`", "`references/products-v9.md`"))
+
+
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------

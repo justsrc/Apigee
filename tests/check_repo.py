@@ -815,6 +815,59 @@ def check_reference_discovery(root: Path, r: Results) -> None:
         r.ok("every reference path listed in a SKILL.md resolves to a file")
 
 
+def check_origin_integrity(root: Path, r: Results) -> None:
+    """Origin classification must use the controlled set and must not inflate real-world.
+
+    The project's own reported split was 53.4% real-world, 31.1% documented, 15.5%
+    synthetic. Measured from the scenarios that is 33.0 / 31.1 / 35.9. The difference is
+    exact, not approximate: adding the 13 adversarial and 8 regression scenarios to
+    real-world gives 55, and removing them from synthetic gives 16. Both match the reported
+    figures to the scenario.
+
+    Those two files are constructed evaluations, not incident reports, and say so in their
+    own headers. Counting them as real-world inflates the provenance of the library by
+    twenty-one scenarios and is the specific error this check exists to prevent.
+    """
+    counts: dict[str, int] = defaultdict(int)
+    unclassified: list[str] = []
+    misplaced: list[str] = []
+
+    for p in sorted((root / SCENARIOS_DIR).glob("*.md")):
+        if p.name == "index.md":
+            continue
+        constructed = p.name in ("adversarial.md", "regression.md")
+        for sid, block in find_scenario_blocks(read(p)):
+            m = re.search(r"^- Origin:\s*(.+?)\s*$", block, re.MULTILINE)
+            if not m:
+                unclassified.append(f"{sid}: no Origin field")
+                continue
+            low = m.group(1).strip().lower()
+            if low.startswith("reported real-world"):
+                kind = "real-world"
+            elif low.startswith("documented"):
+                kind = "documented"
+            elif "synthetic" in low:
+                kind = "synthetic"
+            else:
+                unclassified.append(f"{sid}: origin '{m.group(1).strip()[:40]}' is not one "
+                                    f"of real-world, documented or synthetic")
+                continue
+            counts[kind] += 1
+            if constructed and kind == "real-world":
+                misplaced.append(f"{sid} in {p.name} is labelled real-world")
+
+    for u in unclassified:
+        r.fail(f"origin classification: {u}")
+    for m in misplaced:
+        r.fail(f"origin classification: {m}. The adversarial and regression suites are "
+               f"constructed evaluations, not incident reports.")
+    if not unclassified and not misplaced:
+        total = sum(counts.values())
+        parts = ", ".join(f"{counts[k]} {k}" for k in ("real-world", "documented", "synthetic")
+                          if counts[k])
+        r.ok(f"origin classification is unambiguous across {total} scenarios ({parts})")
+
+
 def check_unslop_scope(r: Results) -> None:
     """unslop is a writing skill, not a diagnosis skill. Record that explicitly.
 
@@ -855,6 +908,7 @@ def main() -> int:
     check_generated_references(root, r)
     check_generated_freshness(root, r)
     check_reference_discovery(root, r)
+    check_origin_integrity(root, r)
     check_unslop_scope(r)
 
     def dump(title: str, items: list[str]) -> None:
