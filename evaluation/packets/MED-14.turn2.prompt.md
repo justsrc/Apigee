@@ -15,4 +15,5 @@ Rules for this exercise:
 The customer has replied with more information.
 
 ## Diagnostic Evidence
-Revocation at 09:15, first failure at 09:18. The window matches the documented cache.
+A second test token revoked at 10:02 first failed at 10:05, so the window repeats rather than
+being a one-off. The OAuthV2 policies in the bundle set no `<CacheExpiryInSeconds>`.
