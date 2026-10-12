@@ -45,6 +45,8 @@ all of these into `steps.oauth.v2.InvalidRequest`.
 ## References
 - OAuthV2 policy error reference:
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/oauthv2-policy>
+- OAuth HTTP status code reference, deprecated, source of the quoted error text:
+  <https://cloud.google.com/apigee/docs/api-platform/reference/policies/oauth-http-status-code-reference>
 - Real report of this failure:
   <https://github.com/apigee/api-platform-samples/issues/7>
 

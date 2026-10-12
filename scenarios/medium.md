@@ -1903,6 +1903,18 @@ missing or incorrect parameters sent in the request". The individual messages ar
 enumerated in the policy reference, so the message text cannot be read as a documented
 contract. It has to be read as a symptom.
 
+The mechanism below is an inference drawn from the real report, not something the report
+states. The reporter's conclusion was "It was not deployed properly", and the fix that worked
+was to undeploy and redeploy through the API. That the failing request then lands in the
+authorization-code flow is this scenario's reading of the trace. It fits the symptom, and an
+agent that reaches a different mechanism from the same trace has not contradicted the ground
+truth, but the trace is what settles it either way.
+
+The error text itself is quoted verbatim from the OAuth HTTP status code reference page, which
+carries a deprecation banner redirecting readers to the per-policy references. That page is
+where the exact string comes from, and its deprecated status is a second reason not to treat the
+string as a contract.
+
 #### Diagnostic evidence
 
 A trace of the failing request shows the request entering the flow whose `<Condition>` is
@@ -1964,6 +1976,8 @@ request; asserting the OAuth policy is misconfigured.
 
 - OAuthV2 policy error reference:
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/oauthv2-policy>
+- OAuth HTTP status code reference, deprecated, source of the quoted error text:
+  <https://cloud.google.com/apigee/docs/api-platform/reference/policies/oauth-http-status-code-reference>
 - Real report of this failure:
   <https://github.com/apigee/api-platform-samples/issues/7>
 
