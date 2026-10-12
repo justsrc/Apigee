@@ -54,12 +54,12 @@ prompt cost.
 | File | Count | What it is for |
 | --- | --- | --- |
 | `scenarios/easy.md` | 15 | Narrow cases with a short path to an answer |
-| `scenarios/medium.md` | 43 | Two or more live hypotheses, or a component interaction |
+| `scenarios/medium.md` | 45 | Two or more live hypotheses, or a component interaction |
 | `scenarios/hard.md` | 22 | Competing causes, some with deliberately insufficient evidence |
 | `scenarios/adversarial.md` | 13 | Built to break a specific behaviour. Not incidents. |
 | `scenarios/regression.md` | 8 | Cheaper to run, sharp to fail on. Rerun after any skill change. |
 
-`scenarios/index.md` is generated from those files. 101 scenarios in total.
+`scenarios/index.md` is generated from those files. 103 scenarios in total.
 
 Every scenario in the three graded files carries the same sections: metadata, the initial
 ticket, initial evidence, expected investigation, diagnostic evidence, ground truth,
@@ -76,45 +76,69 @@ happened to anyone.
 ## Running the checks
 
 ```bash
-python3 tests/check_repo.py    # structure, IDs, sections, frontmatter, local links
-./tests/check_urls.sh          # every cited URL resolves to real content
+python3 tests/check_repo.py          # structure, IDs, sections, frontmatter, links, freshness
+./tests/check_urls.sh                # classify every cited URL (network required)
+python3 tests/fault_probe.py         # prove the checkers detect broken projects
+python3 tests/test_leakage.py        # prove no answer key reaches a prompt
+./tests/release_gate.py              # run everything and emit a machine-readable verdict
 ```
 
 `check_repo.py` checks what a script can honestly check: files exist, scenario IDs are
 unique, each graded file has at least 15 scenarios, every scenario has its required
-sections with real content, skill frontmatter is well formed, and relative links resolve.
+sections with real content, skill frontmatter is well formed, relative links resolve, every
+reference path a skill lists points at a real file, and both generated indexes match what
+their generators produce from the current sources.
 
 It does not and cannot check whether a scenario's technical content is correct. It prints
 a separate block listing what needs human or model review, so a clean run is never mistaken
 for a correct suite. Read that block. Add `--strict` to fail on warnings.
 
-`evaluation/` holds the rubric, the A/B test protocol, generated packets, the eval runs with
-their grading and metadata, the hostile reviews of the scenario library, and
-`baseline.md`, which records the measured correctness baseline.
+`check_urls.py` classifies each cited URL as one of `VERIFIED`,
+`REDIRECTED_AND_VERIFIED`, `SOFT_404`, `NOT_FOUND`, `ACCESS_RESTRICTED`, `RATE_LIMITED`,
+`TRANSIENT_FAILURE`, `INVALID_URL`, `CONTENT_MISMATCH` or `UNVERIFIED`. It records redirect
+chains, checks that the body is actually the document it claims to be, retries only what a
+retry could change, and exits non-zero if it finds no URLs at all. `--fixtures` runs the
+classifier over recorded responses with no network, which is what makes the soft-404
+detection testable at all.
 
-The honest current numbers: 101 scenarios, and `baseline.md` records what blind review found
-and what it did not. Roughly a quarter of the library was materially wrong at first review.
-Read `baseline.md` before trusting any single scenario as ground truth.
+`fault_probe.py` is the one that matters most. It copies the repository to a throwaway
+directory, breaks one thing at a time, runs the checker, and records whether the checker
+noticed. A checker that passes a broken project is worse than no checker, because it turns
+an unknown into a known-good. Reading the checker is not evidence about its behaviour and
+neither is its docstring. **Add a probe here for every defect you fix.**
 
-`check_urls.sh` fetches every URL cited anywhere in the skills, references, scenarios,
-README and changelog, and checks both the status and the body. It found two broken
-citations during setup, which is why it exists. A 200 is not enough on its own here,
-because `cloud.google.com` serves a stub page at HTTP 200 for paths that do not exist.
+`test_leakage.py` checks all 206 prompt packets for held-back sections, ground-truth
+sentences, incorrect-answer text and scenario titles, and then deliberately injects a
+canary phrase into held-back material to prove the generator actually holds it back.
 
-Both scripts were wrong before they were right. The URL checker's first version reported
-PASS having checked nothing, and the repo checker's section matcher silently skipped every
-scenario whose title contained a section name. Both now fail loudly instead, and
-`check_urls.sh` was tested against known-bad URLs to confirm it still fails.
+`release_gate.py` runs all of the above and prints PASS, FAIL, BLOCKED or UNVERIFIED per
+criterion. BLOCKED and UNVERIFIED are real answers; a gate with none of them on a project
+like this one would be a gate that is not looking hard enough.
+
+## What the checks found
+
+The project's history records several checkers that reported success while checking nothing.
+`fault_probe.py` found eight more in the previous version of `check_repo.py`, including a
+corrupted fault-code index passing cleanly. All eight are fixed and the probe now runs
+25/25. `evaluation/defect-register.md` has the full list with reproduction steps and the
+test that now covers each one.
 
 ## Adding a scenario
 
 1. Find the fault code in `research/official-documentation-index.md`, or add the page and
-   re-run the fetch. Do not write a code from memory.
-2. Write the ticket so it reads like a person wrote it and does not reveal the cause.
+   re-run the fetch. Do not write a code from memory. If the code does not appear in
+   `references/error-codes.md`, say so explicitly rather than guessing.
+2. Write the ticket so it reads like a person wrote it and does not reveal the cause. The
+   scenario title is not shown to the agent, so a title that states the answer is harmless
+   for leakage, but it still makes the scenario read like a conclusion.
 3. Give the ground truth a source. If you cannot source it, mark the scenario synthetic
    and say the mechanism is unverified.
 4. Fill every required section. The harness will tell you which are missing.
-5. Run `python3 tests/check_repo.py`.
+5. Add critical-failure conditions specific to this case. A generic list copied into every
+   scenario is worse than none, because it teaches a grader to rubber-stamp.
+6. `python3 tests/make_packets.py <ID> --turn 1 && python3 tests/make_packets.py <ID> --turn 2`
+7. `python3 tests/check_repo.py`
+8. `python3 tests/release_gate.py --skip-urls`
 
 The section that catches the most bad scenarios is common incorrect answers. Writing the
 plausible wrong answer is how you find out whether the case actually discriminates.
@@ -129,6 +153,12 @@ guessing. Read it before citing anything.
 `fetch.sh` fetches a documentation page, records its real HTTP status, and extracts the
 article body. It handles three traps that produce wrong answers silently: soft 404s that
 return HTTP 200, pandoc truncating large pages, and URLs guessed from a naming pattern.
+
+`repair_manifest.py` confirms every cached page resolves and rewrites
+`research/pages/MANIFEST.tsv` with a provenance column: `recorded` (the URL was captured by
+fetch.sh at fetch time), `guess` (derived from the lossy filename encoding and confirmed
+live), `corrected` (the filename was a scratch name and the real URL was confirmed), or
+`UNRESOLVED` (no confirmed URL, stated rather than guessed). Run it after adding pages.
 
 `evaluation/outstanding-errors.md` lists scenario defects found by review and not yet
 fixed, highest severity first. Read it before trusting any scenario as ground truth.
@@ -147,25 +177,39 @@ plausible paths tried during setup failed. That file is the argument against gue
 
 ## What has and has not been verified
 
-Verified: every URL cited in a skill or scenario was fetched and returned real content.
-Every fault code was extracted from a policy page that was read.
+Verified by machine, in this repository, re-runnable: every scenario is structurally valid
+and has a complete packet set; no answer key reaches a prompt; both generated indexes match
+a fresh run of their generators; every cited URL resolves to the document it claims to be.
 
-Not verified: that every documented behavior is correctly described in a scenario, which
-needs review by someone who knows Apigee. Whether any skill improves an answer in practice,
-which needs running the scenarios against real models. Any claim about Edge for Private
-Cloud from the `cloud.google.com` policy pages, which carry an "Apigee and Apigee hybrid"
-banner and do not describe Edge.
+Verified by review, recorded in `evaluation/audit-*.md`: the fault codes, HTTP statuses,
+config elements and citations in the scenario library, against the source pages.
 
-Two documentation defects found during research are recorded because they will otherwise
-cause errors. The VerifyJWT policy page is truncated upstream and ends mid-table with no
-error reference, so `steps.jwt.*` codes could not be verified anywhere. The OAuth HTTP
-status code page is marked deprecated and its `keymanagement.service.*` codes disagree
-with the `steps.oauth.v2.*` codes on the OAuthV2 page for the same conditions.
+Not verified, and not claimed anywhere: that a model answers these better with the skills
+than without. That needs a model evaluation run, and the only one on record covers seven
+scenarios with a single grader. Whether any skill improves an answer in practice is an open
+question, not a finding.
+
+Two documentation problems are recorded rather than resolved, because the sources do not
+resolve them. `evaluation/source-conflicts-loadbalancing.md` documents two current official
+pages contradicting each other on whether a failed load-balanced target returns to rotation;
+the project records both and does not pick one. `evaluation/source-notes-opdk-knownissues.md`
+records that the official known-issues register scopes itself to "Apigee and Apigee hybrid"
+and so contains no Edge for Private Cloud entries by design, which is a statement about the
+register's scope and not about whether any OPDK issue exists.
 
 ## Contributing
 
-Change the skill, rerun `python3 tests/check_repo.py`, rerun `scenarios/regression.md`.
-The regression file exists to catch a skill that got longer and less accurate.
+Change the skill, rerun `python3 tests/check_repo.py`, rerun `scenarios/regression.md`, then
+`python3 tests/release_gate.py --skip-urls`. The regression file exists to catch a skill
+that got longer and less accurate.
+
+If you fix a defect in the tooling, add a probe to `tests/fault_probe.py` for it. If you fix
+a scenario defect, record it in `evaluation/defect-register.md` with the reproduction and
+the test that now covers it.
 
 If you find a citation that no longer resolves, check it before fixing it, then record it
 in `notes-known-404.txt` if it is genuinely gone.
+
+`research/tooling-superseded/` holds scripts this project wrote and then replaced. They are
+kept for provenance and must not be reintroduced; read the README there before adding a new
+script that overlaps an existing one.
