@@ -48,12 +48,31 @@ def rows_of(block: str) -> list[list[str]]:
         cells = [c.strip() for c in line.strip("|").split("|")]
         if all(re.fullmatch(r":?-{2,}:?", c) for c in cells if c):
             continue
-        if cells and cells[0].lower() in ("fault code", "error name", "variables", "field"):
+        if cells and cells[0].lower() in ("fault code", "error name", "error code", "variables", "field"):
             continue
         out.append(cells)
     if out:
         return out
     return rows_of_loose(block)
+
+
+def pipe_header(block: str) -> list[str] | None:
+    """Return the lowercased header cells of a pipe table, or None when there is none.
+
+    Most runtime tables carry (Fault code, HTTP status, Cause), but the
+    regular-expression-protection page carries (Error Code, Message) with no status
+    column. Mapping that table as if column 2 were a status put the real message in the
+    HTTP column and left the cause empty, so the caller has to know the shape.
+    """
+    for line in block.splitlines():
+        line = line.strip()
+        if not line.startswith("|"):
+            continue
+        cells = [c.strip() for c in line.strip("|").split("|")]
+        if all(re.fullmatch(r":?-{2,}:?", c) for c in cells if c):
+            continue
+        return [c.lower() for c in cells]
+    return None
 
 
 def rows_of_loose(block: str) -> list[list[str]]:
@@ -171,6 +190,9 @@ def parse_policy_page(text: str) -> dict | None:
         if nxt3:
             block = block[: nxt3.start()]
         out[key] = rows_of(block)
+        if key == "runtime":
+            header = pipe_header(block)
+            out["runtime_has_status"] = header is None or "http" in " ".join(header)
 
     fv = re.search(r"^### Fault variables\s*$", rest, re.MULTILINE)
     if fv:
@@ -217,14 +239,20 @@ def main() -> int:
             # empty, so record it instead of letting the index look complete.
             empty.append(f"{title}  ({url})")
 
+        has_status = parsed.get("runtime_has_status", True)
         for cells in parsed["runtime"]:
             if len(cells) < 2:
                 continue
             code = untick(cells[0])
             if not code or ".." in code or code.startswith("*"):
                 continue
-            status = clean(cells[1]) if len(cells) > 1 else ""
-            cause = clean(cells[2]) if len(cells) > 2 else ""
+            if has_status:
+                status = clean(cells[1]) if len(cells) > 1 else ""
+                cause = clean(cells[2]) if len(cells) > 2 else ""
+            else:
+                # Table has no HTTP column, so the second cell is the cause.
+                status = ""
+                cause = clean(cells[1]) if len(cells) > 1 else ""
             runtime.append((code, status, cause, url))
 
         for cells in parsed["deployment"]:
