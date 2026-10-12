@@ -3259,6 +3259,11 @@ directory rather than relative to the submitted bundle, and the filename in that
 the bundle's own XML filename. A path that is neither a real bundle entry nor the path the user
 typed means the stored path was derived from something other than the bundle contents.
 
+Two maintainers tried to reproduce this on their own machines, on two separate days, on the same
+version, and could not. They concluded the reporter's environment was unusual. The reporter then
+ran the same commands against the repository's own test bundle and they worked, and against a copy
+of that bundle placed elsewhere in his own repository and they did not.
+
 #### Ground-truth resolution
 
 Two failures are stacked here and they need separate answers.
