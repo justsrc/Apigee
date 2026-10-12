@@ -35,6 +35,10 @@ skills from that path will pick them up. If yours uses a different path, copy th
 skill directories there. Each `SKILL.md` carries YAML frontmatter with `name` and
 `description`, and the name matches its directory.
 
+Only `.agents/skills/` has been tested here. No other platform is claimed as tested, and
+nothing in this repository has been run against one. If you copy the skills somewhere else,
+you are the test.
+
 There is no plugin, hook or runtime dependency. The skills are Markdown plus reference
 files. The Python scripts under `research/` and `tests/` are development tools and are not
 needed to use the skills.
