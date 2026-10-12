@@ -1,5 +1,79 @@
 # Changelog
 
+## 2026-10-12, audit and repair
+
+An audit of the whole project found two critical defects, several high ones, and eight
+checker false passes. Full detail, with reproduction steps, in
+`evaluation/defect-register.md`.
+
+### Fixed, critical
+
+- **The fault-code index asserted one HTTP status for a code documented with two.**
+  Apigee documents many fault codes on several policy pages, and the pages disagree. The
+  generator kept only the first occurrence, so `steps.oauth.v2.invalid_access_token` was
+  published as HTTP 401 when `get-oauth-v2-info-policy` documents the same code as HTTP 500.
+  82 codes were affected. Records are now merged, every source page is listed, and a status
+  disagreement renders as `CONFLICT` rather than being resolved by sort order.
+
+- **Two scenarios were invisible to every tool.** MED-32 and MED-40 had their heading
+  jammed onto a `---` rule (`---### MED-32. ...`). Every block splitter anchors on
+  `^#{2,4}\s+`, so both were skipped by the structural checker, received no packets, and
+  appeared in no index. The library has always held 103 scenarios; the tooling saw 101.
+
+### Fixed, high
+
+- `check_repo.py` had eight false passes, found by `tests/fault_probe.py`. Deleting one
+  turn-2 prompt or one answer key, deleting a reference file still listed in a skill table,
+  deleting `scenarios/regression.md`, deleting `evaluation/packets/`, emptying
+  `research/pages/`, and corrupting the fault-code index all exited 0. Six were warnings
+  rather than failures; two were simply unchecked.
+
+- `check_urls.sh` reported a passing URL audit having checked nothing when given an empty
+  corpus, and could not distinguish a 403 from a missing page, a timeout from a dead link,
+  or a redirect from a citation resolving to the wrong article. Replaced by
+  `tests/check_urls.py`, which classifies each URL into one of ten states, records redirect
+  chains, checks the body is the document it claims to be, and exits 2 on no input.
+
+- MED-26 taught the opposite of the documented cause of `JavaCalloutInstantiationFailed`
+  and used a fault code that does not exist. HARD-20's remediation shipped a
+  `<LoadBalancer><Server>` listing Message Processors, which names proxy targets and cannot
+  work. HARD-19 and HARD-21 both cited fault codes absent from the reference.
+
+- Regression titles state the correct disposition ("Root cause cannot be established"), and
+  the packet generator put them in the prompt. The suite meant to catch skill drift was
+  handing over its own grading criterion. Titles are no longer released.
+
+### Changed
+
+- Origin classification was inflated by 21 scenarios. The reported 53.4% real-world figure
+  counts the 13 adversarial and 8 regression constructed cases as incident reports; measured
+  from the scenarios it is 33.0% real-world, 31.1% documented, 35.9% synthetic.
+  `check_repo.py` now enforces the controlled vocabulary.
+
+- 185 of 294 cached pages had no manifest entry, so the documentation index published a URL
+  guessed from a lossy filename. `research/repair_manifest.py` confirms every page live and
+  records provenance per row: 109 recorded, 172 guess-verified, 8 corrected, 5 declared
+  UNRESOLVED rather than guessed.
+
+### Added
+
+- `tests/fault_probe.py`, 29 controlled mutations proving the checkers detect them.
+- `tests/check_urls.py`, with 15 offline classifier fixtures.
+- `tests/test_leakage.py`, checking 206 prompt packets plus a deliberate canary leak.
+- `tests/release_gate.py`, a machine-readable PASS/FAIL/BLOCKED/UNVERIFIED verdict.
+- `tests/find_duplicates.py`, four-axis similarity across all 103 scenarios. No duplicates
+  found at any threshold.
+- `evaluation/source-conflicts-loadbalancing.md`, recording two current official pages that
+  contradict each other, without picking one.
+- `evaluation/source-notes-opdk-knownissues.md`, establishing that the known-issues register
+  scopes itself to "Apigee and Apigee hybrid" and so excludes OPDK by design.
+- `evaluation/MAINTENANCE.md`.
+
+### Not verified
+
+No model evaluation was executed in this environment. Structural validation and technical
+review are reported separately and are never counted as model evaluation.
+
 ## 2026-10-11, first working version
 
 ### Added
