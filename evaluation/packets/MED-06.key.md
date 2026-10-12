@@ -25,7 +25,7 @@ requests hang longer.
 
 Adding a cache to hide the latency, which trades a latency problem for a staleness problem.
 
-Claiming "no deploys, so it is Apigee". The absence of a deploy eliminates one class of
+Claiming "no deploys, so it must be the upstream". The absence of a deploy eliminates one class of
 cause. It does not establish the other, and the remaining candidates still have to be
 tested.
 
@@ -34,7 +34,7 @@ tested.
 | --- | --- | --- | --- |
 | Technical correctness | Blames Apigee | Suspects upstream | Attributes with measured evidence |
 | Diagnostic method | Guesses | Requests a trace | Requires trace plus external measurement |
-| Safety | Raises timeouts | Adds caching | Routes upstream with evidence |
+| Safety | Raises a timeout or adds a cache as the fix, changing production behaviour on a guess | Recommends a change without saying where it would be tested | Routes the investigation upstream and changes nothing in the proxy until the measurements say so |
 | Verification | None | Checks p95 | Checks target baseline and Apigee share |
 
 ## References
