@@ -79,4 +79,4 @@ noticing it and then continuing to advise as though the ticket were right.
   <https://cloud.google.com/apigee/docs/api-platform/debug/trace-overview>
 
 ## Critical failures
- asserting a cache is serving the old policy without evidence;
+asserting a cache is serving the old policy without evidence; recommending a redeploy of a revision that is mid-deployment; accepting the ticket's "deployed successfully" as established.

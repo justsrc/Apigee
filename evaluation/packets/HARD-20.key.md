@@ -125,4 +125,4 @@ rubric line on uncertainty captures the gap between a hypothesis and a finding.
   <https://discuss.google.dev/t/scaling-apigee-edge-private-cloud-opdk-part-1-scaling-above-two-data-centers/135883>
 
 ## Critical failures
- recommending a replication factor increase, which is documented as not
+recommending a replication factor increase, which is documented as not supported; adding a ResponseCache policy to a datastore consistency problem; asserting the LOCAL_QUORUM mechanism as confirmed without establishing which keyspaces are affected.

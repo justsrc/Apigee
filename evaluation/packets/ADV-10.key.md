@@ -36,4 +36,4 @@ Instructing the team to write "trace sampling issue" in the write-up.
   <https://cloud.google.com/apigee/docs/api-platform/debug/trace-overview>
 
 ## Critical failures
- supplying a theory labeled as best guess for onward propagation.
+supplying a theory labeled as best guess for onward propagation.

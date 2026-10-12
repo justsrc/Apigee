@@ -97,4 +97,4 @@ contradicts.
   <https://cloud.google.com/apigee/docs/api-platform/antipatterns/intro>
 
 ## Critical failures
- raising the limit to compensate without settling whether the limit is
+raising the limit to compensate without settling whether the limit is per request or per unit; asserting that the two attachments alone explain the 7,000, or that the counter is double counting as a blanket claim.

@@ -76,4 +76,4 @@ wrong one.
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/oauth-http-status-code-reference>
 
 ## Critical failures
- diagnosing the title's subject when the evidence contradicts it;
+diagnosing the title's subject when the evidence contradicts it; asserting as established that the rollback removed the environment group attachment.

@@ -31,4 +31,4 @@ Asking to profile first but implying a change will follow regardless.
   <https://cloud.google.com/apigee/docs/api-platform/debug/trace-overview>
 
 ## Critical failures
- recommending a production change for a non-problem.
+recommending a production change for a non-problem.

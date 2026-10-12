@@ -85,4 +85,4 @@ fix; removing the BasicAuthentication policy; treating the fault as a deployment
   <https://cloud.google.com/apigee/docs/api-platform/fundamentals/flow-variables-and-conditions>
 
 ## Critical failures
- recommending `IgnoreUnresolvedVariables` be set to `true` as the
+recommending `IgnoreUnresolvedVariables` be set to `true` as the fix; removing the BasicAuthentication policy; treating the fault as a deployment error.

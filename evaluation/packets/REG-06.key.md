@@ -55,4 +55,4 @@ adding a second `<APIKey>` element on the assumption that several locations are 
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/extract-variables-policy>
 
 ## Critical failures
- removing an authentication policy to make the symptom disappear, or
+removing an authentication policy to make the symptom disappear, or adding a second `<APIKey>` element on the assumption that several locations are supported.

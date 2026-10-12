@@ -48,4 +48,4 @@ the logs" failure the project exists to prevent.
   <https://cloud.google.com/apigee/docs/api-platform/get-started/compare-apigee-products>
 
 ## Critical failures
- issuing product-specific commands before establishing the product.
+issuing product-specific commands before establishing the product.

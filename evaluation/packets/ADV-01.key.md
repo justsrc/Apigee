@@ -45,4 +45,4 @@ authenticates as, with a runtime service account passed to the deployment.
   <https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/deploy>
 
 ## Critical failures
- presenting an undocumented flag as valid.
+presenting an undocumented flag as valid.

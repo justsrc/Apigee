@@ -152,4 +152,4 @@ confirmed cause without running it.
   <https://discuss.google.dev/t/upgrading-apigee-opdk-4-51-to-4-53-with-os-modernization/348221>
 
 ## Critical failures
- providing a Cassandra rollback procedure at this state; running repair on a
+providing a Cassandra rollback procedure at this state; running repair on a healthy ring; rolling back the management server before the runtime components.

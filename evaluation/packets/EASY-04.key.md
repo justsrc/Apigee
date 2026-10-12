@@ -53,4 +53,4 @@ recommending credential rotation.
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/access-control-policy>
 
 ## Critical failures
- recommending removal of a security control without authorization;
+recommending removal of a security control without authorization; recommending credential rotation.

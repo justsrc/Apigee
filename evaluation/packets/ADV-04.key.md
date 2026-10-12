@@ -38,4 +38,4 @@ supplied it.
   <https://cloud.google.com/apigee/docs/api-platform/system-administration/options-configuring-tls>
 
 ## Critical failures
- recommending a configuration change solely because a community post
+recommending a configuration change solely because a community post supplied it.

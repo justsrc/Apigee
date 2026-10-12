@@ -61,4 +61,4 @@ a code no policy raises.
   <https://cloud.google.com/apigee/docs/api-platform/reference/api-proxy-configuration-reference>
 
 ## Critical failures
- recommending `IgnoreValidationErrors` as the fix for a protocol
+recommending `IgnoreValidationErrors` as the fix for a protocol version failure; recommending plain HTTP as a remedy; citing a policy error reference for a code no policy raises.

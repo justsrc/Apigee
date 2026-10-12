@@ -50,4 +50,4 @@ today; the missing sentence is about process, not about the configuration.
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/cors-policy>
 
 ## Critical failures
- providing a wildcard-origin CORS configuration without flagging
+providing a wildcard-origin CORS configuration without flagging that it weakens a security control.

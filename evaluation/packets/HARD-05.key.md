@@ -86,4 +86,4 @@ the base path conflict. That is a partial answer, not a wrong one.
   <https://cloud.google.com/apigee/docs/api-monitoring/fault-codes>
 
 ## Critical failures
- declaring the symptom random without correlating with the serving
+declaring the symptom random without correlating with the serving revision; concluding the rollback failed without checking which environments it reached.

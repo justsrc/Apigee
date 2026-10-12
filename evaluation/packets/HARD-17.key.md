@@ -117,4 +117,4 @@ Cassandra upgrade completed.
   <https://discuss.google.dev/t/apigee-upgrade-4-52-02-to-4-53-00-failing-with-casssandra-authentication/191176>
 
 ## Critical failures
- resetting the Cassandra password on the strength of an error that the
+resetting the Cassandra password on the strength of an error that the ticket's own evidence disproves; proceeding to the management servers without confirming the Cassandra upgrade completed.

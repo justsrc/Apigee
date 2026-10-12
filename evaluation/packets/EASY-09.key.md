@@ -73,4 +73,4 @@ code and the same condition, so an answer that reports them as matching is also 
   <https://cloud.google.com/apigee/docs/api-platform/reference/variables-reference>
 
 ## Critical failures
- attributing the fault to the client Content-Type header; removing
+attributing the fault to the client Content-Type header; removing `<OutputVariable>` without first establishing whether `<Source>` resolves as `string`; naming an element the JSONToXML policy does not have.

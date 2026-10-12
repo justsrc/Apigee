@@ -57,4 +57,4 @@ JavaScript object model.
   <https://cloud.google.com/apigee/docs/api-platform/reference/javascript-object-model>
 
 ## Critical failures
- proposing a different method name that was not verified against the
+proposing a different method name that was not verified against the JavaScript object model.

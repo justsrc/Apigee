@@ -538,6 +538,75 @@ def check_packets(root: Path, r: Results) -> None:
         r.ok(f"all {len(keys)} answer keys carry critical-failure conditions")
 
 
+def _normalized_words(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+
+def source_critical_failure_paragraph(block: str) -> str:
+    """Rebuild the bold critical-failures paragraph from a scenario block.
+
+    Scenarios write the conditions as a bold lead-in followed by wrapped prose, for
+    example "**Critical failures:** first condition;\\n second condition.". The packet
+    generator once stopped at the first physical line and truncated the condition in the
+    answer key, so this reconstructs the paragraph independently and does not share that
+    bug.
+    """
+    lines = block.splitlines()
+    for i, line in enumerate(lines):
+        m = re.match(r"^\*\*Critical failures?:?\*\*\s*(.*)$", line.strip(), re.I)
+        if not m:
+            continue
+        out = [m.group(1).strip()]
+        for follow in lines[i + 1:]:
+            if not follow.strip() or re.match(r"^#{1,6}\s", follow):
+                break
+            out.append(follow.strip())
+        text = " ".join(x for x in out if x)
+        if text:
+            return text
+    return ""
+
+
+def check_critical_failure_completeness(root: Path, r: Results) -> None:
+    """Every key's critical failures must cover the whole condition in the scenario.
+
+    A truncated condition is worse than a missing one: the key looks present and the
+    grader applies only the fragment that survived. Compare the tail of the source
+    paragraph against the key so a first-line-only extraction fails here.
+    """
+    packets = root / "evaluation" / "packets"
+    if not packets.is_dir():
+        return
+
+    truncated = []
+    checked = 0
+    for path in sorted((root / SCENARIOS_DIR).glob("*.md")):
+        if path.name == "index.md":
+            continue
+        for sid, block in find_scenario_blocks(read(path)):
+            para = source_critical_failure_paragraph(block)
+            if not para:
+                continue
+            key = packets / f"{sid}.key.md"
+            if not key.is_file():
+                continue
+            checked += 1
+            key_text = read(key)
+            key_cf = key_text.split("## Critical failures", 1)[1] if "## Critical failures" in key_text else ""
+            words = _normalized_words(para).split()
+            tail = " ".join(words[-6:]) if words else ""
+            if not tail or tail not in _normalized_words(key_cf):
+                truncated.append(sid)
+
+    if truncated:
+        r.fail(f"{len(truncated)} answer key(s) carry a truncated critical-failure "
+               f"condition: {', '.join(truncated[:8])}{'...' if len(truncated) > 8 else ''}. "
+               f"Re-run: python3 tests/make_packets.py --all --turn 1 && "
+               f"python3 tests/make_packets.py --all --turn 2")
+    elif checked:
+        r.ok(f"all {checked} bold critical-failure conditions reach their answer keys in full")
+
+
 def check_unslop_scope(r: Results) -> None:
     """unslop is a writing skill, not a diagnosis skill. Record that explicitly.
 
@@ -574,6 +643,7 @@ def main() -> int:
     check_research(root, r)
     check_code_blocks(root, r)
     check_packets(root, r)
+    check_critical_failure_completeness(root, r)
     check_unslop_scope(r)
 
     def dump(title: str, items: list[str]) -> None:

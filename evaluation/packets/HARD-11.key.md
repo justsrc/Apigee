@@ -70,4 +70,4 @@ timeout fires; naming the ServiceCallout timeout as the cause of a 504.
   <https://cloud.google.com/apigee/docs/api-monitoring/fault-codes>
 
 ## Critical failures
- recommending further timeout increases without identifying which
+recommending further timeout increases without identifying which timeout fires; naming the ServiceCallout timeout as the cause of a 504.

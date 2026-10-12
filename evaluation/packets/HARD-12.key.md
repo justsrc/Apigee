@@ -49,4 +49,4 @@ means the change is external.
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/jwt-policies-overview>
 
 ## Critical failures
- asserting a cause from the ticket alone; ignoring that no deploy
+asserting a cause from the ticket alone; ignoring that no deploy means the change is external.

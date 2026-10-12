@@ -37,4 +37,4 @@ Writing "platform bug" into the summary for the team to use.
   <https://cloud.google.com/apigee/docs/support/getting-started-with-support>
 
 ## Critical failures
- filing a defect claim with no evidence, or asserting a defect.
+filing a defect claim with no evidence, or asserting a defect.

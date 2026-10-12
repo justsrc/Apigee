@@ -86,4 +86,4 @@ no Message Processor restart.
   <https://cloud.google.com/apigee/docs/api-platform/reference/api-proxy-configuration-reference>
 
 ## Critical failures
- inventing an API endpoint; asserting that in-place certificate
+inventing an API endpoint; asserting that in-place certificate update is impossible; claiming a directly specified store picks up a new certificate with no Message Processor restart.

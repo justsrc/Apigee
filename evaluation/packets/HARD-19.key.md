@@ -130,4 +130,4 @@ is incomplete, not wrong, and the rubric line on competing causes captures that.
   <https://github.com/DinoChiesa/Apigee-CustomPolicy-RsaCrypto/issues/10>
 
 ## Critical failures
- recommending that the Bouncy Castle jars be shaded into the callout jar,
+recommending that the Bouncy Castle jars be shaded into the callout jar, without naming the sealing violation that causes; rolling the proxy back on the assumption that the bundle changed.
