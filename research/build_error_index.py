@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
 from pathlib import Path
 
 PAGES = Path(__file__).parent / "pages"
@@ -442,7 +443,10 @@ def main() -> int:
 
     body = build()
     if args.stdout:
-        print(body)
+        # sys.stdout.write, not print. print appends a newline that the written file does
+        # not have, so comparing --stdout against the committed file reported a spurious
+        # one-line diff and taught a reader that the generator is non-deterministic.
+        sys.stdout.write(body)
         return 0
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
