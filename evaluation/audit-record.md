@@ -23,11 +23,25 @@ credential quoted from an open-source issue. Neither grants access to anything.
 
 ## Defect register
 
-Defects confirmed by reproduction, with the commit that fixed each one. Commit hashes
-are filled in as fixes land.
+Defects confirmed by reproduction, with the commit that fixed each one.
 
-| ID | Defect | Where | Status |
+| ID | Defect | Where | Fix |
 | --- | --- | --- | --- |
-| D1 | Critical-failure text truncated at the first line break in generated answer keys | `tests/make_packets.py` | see commit |
-| D2 | Raw `<span>` markup leaked into a generated fault code | `research/build_error_index.py` | see commit |
-| D3 | README and checker comments state scenario and reference counts that no longer match the repository | `README.md`, `tests/check_urls.sh` | see commit |
+| D1 | Critical-failure text truncated at the first line break in generated answer keys | `tests/make_packets.py` | `0a976fa` |
+| D2 | Raw `<span>` markup and pandoc escapes leaked into generated fault codes and causes | `research/build_error_index.py` | `6508133` |
+| D3 | README and checker comments stated scenario and reference counts that no longer match the repository | `README.md`, `tests/check_urls.sh` | `abb9906` |
+| D4 | A runtime table with no HTTP column was read as (code, status, cause), and its header row was kept as a fault code | `research/build_error_index.py` | `eb164f8` |
+| D5 | `policy-mechanics.md` existed but no skill file named it, so no agent would load it | `SKILL.md`, `tests/check_repo.py` | `c8aefbc` |
+
+`tests/check_repo.py` carries a guard for three of them: answer-key completeness (D1), no
+raw HTML or escaped angle brackets in generated references (D2), and every reference file
+named in its skill's `SKILL.md` (D5). D3 and D4 have no mechanical guard. D3 was prose
+drift, which a script can only catch with a count assertion, and D4 was a parser shape.
+
+## Left unchanged on purpose
+
+`CHANGELOG.md` and `evaluation/outstanding-errors.md` are dated records. Their counts
+(four reference files, 65 and 72 scenarios, 165 and 174 runtime codes) describe the state
+when they were written, so they were not rewritten. The "174 runtime codes" figure
+included one phantom row, the `Error Code` column header misread as a fault code. D4
+removed it, so the true runtime count is 173, which is the number the README now states.
