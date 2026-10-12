@@ -1,0 +1,18 @@
+The following table shows you the upgrade paths for version 4.53.01:
+
+<table class="green">
+<tbody>
+<tr>
+<th colspan="2" style="height: 5px"></th>
+</tr>
+&#10;<tr>
+<td class="alt">From 4.52.02 or 4.53.00</td>
+<td>Directly <a href="/private-cloud/v4.53.01/update-apigee-edge-45202-45301">upgrade from 4.52.02 or 4.53.00→ 4.53.01</a></td>
+</tr>
+<tr>
+<td colspan="2" style="height: 5px"></td>
+</tr>
+</tbody>
+</table>
+
+**Upgrade requirement:** To upgrade to version 4.53.00, you must first be on version 4.52.02. Direct upgrades from versions earlier than 4.52.02 are not supported.

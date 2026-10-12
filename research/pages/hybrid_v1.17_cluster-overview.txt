@@ -1,0 +1,108 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/cluster-overview.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/cluster-overview.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/cluster-overview.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/cluster-overview.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/cluster-overview.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/cluster-overview.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/cluster-overview.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/cluster-overview.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/cluster-overview.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/cluster-overview.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/cluster-overview.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/cluster-overview.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/cluster-overview.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/cluster-overview.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/cluster-overview.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/cluster-overview.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/cluster-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/cluster-overview.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+This topic describes minimum cluster configurations for Apigee hybrid. These minimum configurations apply to all of the supported [Kubernetes platforms](/apigee/docs/hybrid/supported-platforms). The recommendations in this topic apply for non-production installations, such as trial or testing scenarios. Keep these recommendations in mind when performing the Apigee hybrid installation steps.
+
+## About node pools
+
+A node pool is a group of nodes within a cluster that all have the same configuration. By default, hybrid assigns all pods to the default node pool; however, you can create dedicated node pools and assign hybrid components to them as a way of distributing resources.
+
+Typically, you define dedicated node pools when you have pods with differing resource requirements. For example, the `apigee-cassandra` pods require persistent storage, while the other Apigee hybrid pods do not. For this reason, we recommend that you create a stateful node pool for Cassandra and a stateless node pool for the rest of the hybrid runtime services. See [Configure dedicated node pools](/apigee/docs/hybrid/v1.17/configure-dedicated-nodes) for details.
+
+The following section lists configurations for both stateful and stateless node pools.
+
+## Minimum configurations
+
+Use these minimum configurations when setting up your cluster:
+
+| Configuration | Stateful node pool | Stateless node pool |
+| --- | --- | --- |
+| Purpose | A stateful node pool used for the Cassandra database. | A stateless node pool used by the runtime message processor. |
+| Label name | apigee-data | apigee-runtime |
+| Number of nodes | 1 per zone (3 per region) | 1 per zone (3 per region) |
+| CPU | 8 (Prod) 4 (Non-prod) | 8 (Prod) 4 (Non-prod) |
+| RAM | 32 (Prod) 16 (Non-prod) | 32 (Prod) 16 (Non-prod) |
+| Storage | dynamic | Managed with the ApigeeDeployment CRD |
+| Minimum disk IOPS | 2000 IOPS with SAN or directly attached storage. NFS is not recommended even if it can support the required IOPS. | 2000 IOPS with SAN or directly attached storage. NFS is not recommended even if it can support the required IOPS. |
+| Network bandwidth for each machine instance type | 1 Gbps | 1 Gbps |
+
+**Note:** For **production** environments, we recommend a minimum of two clusters.
+
+## Cassandra network requirements
+
+This section discusses network requirements and recommendations to follow when setting up Apigee hybrid.
+
+### Network bandwidth
+
+Cassandra uses the <a href="https://en.wikipedia.org/wiki/Gossip_protocol" class="external">Gossip protocol</a> to exchange information with other nodes about network topology. The use of Gossip plus the distributed nature of Cassandra—which involves talking to multiple nodes for read and write operations—results in a lot of data transfer through the network.
+
+Cassandra requires a minimum of 1 Gbps of network bandwidth for each machine instance. For example, on GKE, the minimum recommended machine type, `e2-standard-4`, has a minimum bandwidth of 1 Gbps. For production installations, a higher Gbps is recommended.
+
+The maximum or 99th percentile latency for Cassandra should be below 100 milliseconds.
+
+### Secure network connectivity between regions
+
+When installing hybrid in [multiple regions](/apigee/docs/hybrid/v1.17/multi-region), ensure that the connections between regions is secure:
+
+- Use a virtual private network solution, such as Google [Virtual Private Cloud](/vpc/docs/overview) (VPC), to secure connectivity between regions.
+- Open a firewall to ensure that Cassandra nodes can connect between regions in non-overlapping subnets and can resolve those network IPs.
+- Always use port 7001 for Cassandra. All other ports are local to the region. See also [Secure ports usage](/apigee/docs/hybrid/v1.17/ports).
+
+## Cassandra NTP requirements
+
+Cassandra data synchronizes based on the timestamp of the system. Ensure that the time is synchronized across all pods and all regions within the Cassandra cluster. Time delays between the nodes and regions causes data inconsistencies.
+
+## Scaling the configuration
+
+If you need to scale your initial configuration based on additional capacity or throughput needs, see the following topics:
+
+- [Configuring Cassandra for production](/apigee/docs/hybrid/v1.17/cassandra-production)
+- [Scaling Cassandra pods](/apigee/docs/hybrid/v1.17/cassandra-scaling)
+- [Configuring dedicated node pools](/apigee/docs/hybrid/v1.17/configure-dedicated-nodes)
+- [Scale and autoscale runtime services](/apigee/docs/hybrid/v1.17/scale-and-autoscale)
+- [Multi-region deployments](/apigee/docs/hybrid/v1.17/multi-region)

@@ -1,0 +1,55 @@
+URL: https://github.com/apigee/apigeetool-node/issues/33
+TITLE: Error: unable to verify the first certificate
+STATE: open state_reason: None
+AUTHOR: tmarrs association: NONE
+CREATED: 2015-12-31T17:02:54Z CLOSED: None
+LABELS: 
+MILESTONE: None
+--- BODY ---
+This isn't a defect in apigeetool, but I'm unable to use it behind my corporate firewall.
+As long as I'm outside the firewall, apigeetool works properly.
+
+I've tried the following, and no joy:
+- `npm config set registry="http://registry.npmjs.org/"`
+- `npm config set strict-ssl false`
+
+Do you have any ideas for helping node get through/past the firewall?
+
+Thanks.
+
+
+--- COMMENTS (4) ---
+
+### comment by tmarrs (association=NONE) at 2015-12-31T18:31:04Z
+I'm wondering if the solution for https://github.com/apigee/apigeetool-node/issues/6 
+fixes this too.
+
+
+### comment by ivan-novakov (association=NONE) at 2016-01-06T09:52:38Z
+What exactly goes wrong? And what is exactly the case - are you trying to use apigeetool behind a firewall to connect to the cloud version of Apigee?
+
+
+### comment by tmarrs (association=NONE) at 2016-01-06T13:52:06Z
+What exactly goes wrong? I get the following error message:
+
+```
+Error: unable to verify the first certificate
+```
+
+I'm using apigeetool from behind a firewall so that I can deploy my API. I don't know anything about the cloud version of Apigee. All I known is that apigeetool works OK once I get out from behind the firewall.
+
+The solution to https://github.com/apigee/apigeetool-node/issues/6
+doesn't fix the problem.
+
+I''ve also tried to use the `-k` option to turn off ssl checking, and it still doesn't work - I get other errors.
+
+So, the bottom line is that I need to use apigeetool outside my corporate firewall to make it work.
+
+
+### comment by stewartmatheson (association=NONE) at 2016-07-17T22:14:06Z
+This is similar to the issue I'm having. Apigeetool does not seem to respect the ignore certificate check. In my case the corporate proxy will return a different certificate to what apigeetool is expecting. Setting 
+
+`npm config set strict-ssl false`
+
+should resolve the issue however in apigeetool's case this does not seem to be happening.
+

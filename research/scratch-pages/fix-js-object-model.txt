@@ -1,0 +1,1502 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This topic discusses the Apigee JavaScript Object Model. It's important to understand this model if you intend to use the JavaScript policy to add custom JavaScript to an API proxy.
+
+## About the JavaScript object model
+
+The JavaScript object model defines objects with associated properties that are available to JavaScript code executing within an Apigee proxy flow. Use the JavaScript policy to attach this custom code to an API proxy flow.
+
+The objects defined by this model have *scope* within the API proxy flow, which means that certain objects and properties are available only at specific points in the flow. When your JavaScript is executed, a scope is created for the execution. In that scope, these object references are created:
+
+- **[context](#contextobjectreference):** An object that provides access to message context
+- **[request](#request-response-objects):** A shorthand that allows access to the request object
+- **[response](#request-response-objects):** A shorthand that allows access to the response object
+- **[crypto](#crypto-object-reference):** Provides various hash functions
+- **[print](#print-function):** A function to emit output
+- **[properties](#properties-object):** Allows read access to the configuration properties on the policy
+
+### The context object
+
+The `context` object has global scope. It is available everywhere within the API proxy flow. It has four child objects: `proxyRequest`, `proxyResponse`, `targetRequest`, `targetResponse`. These child objects are scoped to the ambient request and response, either the proxy request and response or the target request and response. For example, if the JavaScript policy executes in the proxy endpoint part of the flow, then the `context.proxyRequest` and `context.proxyResponse` objects are in scope. If the JavaScript runs in a target flow, then the `context.targetRequest` and `context.targetResponse` objects are in scope.
+
+The `context` object also has properties and methods, which are described in detail in this topic. For example, the following JavaScript code example uses the `context.flow` property and calls the get/setVariable() methods on `context`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+if (context.flow=="PROXY_REQ_FLOW") {
+     var username = context.getVariable("request.formparam.user");
+     context.setVariable("USER.name", username);
+}
+```
+
+These methods interact directly with [flow variables](/apigee/docs/api-platform/reference/variables-reference). The `context.flow` property value is the current flow scope. In the proxy request flow, it's set to the constant `PROXY_REQ_FLOW`. If in the target response flow, it's set to `TARGET_RESP_FLOW`. This constant is handy for executing scope-specific code. The getter lets you get flow variables and the setter lets you set flow variables. These variables are generally available in the proxy flow and can be consumed by other policies.
+
+See [context object reference](#contextObj) for more details and examples.
+
+### The crypto object
+
+The crypto object adds basic, high performance cryptographic support to the JavaScript Object Model. See [crypto object reference](#crypto) for more details and examples.
+
+### The request and response objects
+
+The `request` and `response` objects are *shorthand* references to the ambient request and response, either the proxy request and response or the target request and response. The objects these variables refer to depend upon the context in which the JavaScript policy executes. If the JavaScript runs in the flow of a proxy endpoint, then the request and response variables refer to `context.proxyRequest` and `context.proxyResponse`. If the JavaScript runs in a target flow, then the variables refer to the `context.targetRequest` and `context.targetResponse`.
+
+### The print() function
+
+The JavaScript object model includes a print() function that you can use to output debug information to the Apigee Debug tool. See [Debug with JavaScript print() statements](#debug).
+
+### The properties object
+
+When using a `Properties` element in the policy configuration, the JavaScript code can access the values of those properties using the `properties` variable.
+
+For example, if your JavaScript configuration contains:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Javascript name='JS-1' >
+  <Properties>
+    <Property name="number">8675309</Property>
+    <Property name="firstname">Jenny</Property>
+  </Properties>
+  <ResourceURL>jsc://my-code.js</ResourceURL>
+</Javascript>
+```
+
+Then in `my-code.js`, you can:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  print(properties.firstname);  // prints Jenny
+  print(properties.number);  // 8675309
+```
+
+More practically, configuration can allow the code to behave differently when run in different environments, at different moments, or for any reason.
+
+For example, the following specifies the "variable name" and the style of output that the JavaScript should emit information into:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Javascript name='JS-2' >
+  <Properties>
+    <Property name="output">my_output_variable</Property>
+    <Property name="prettyPrint">true</Property>
+  </Properties>
+  <ResourceURL>jsc://emit-results.js</ResourceURL>
+</Javascript>
+```
+
+Then in `emit-results.js`, the code could do this:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var result = { prop1: "something", prop2 : "something else" } ;
+if (properties.prettyPrint == "true") {
+  context.setVariable(properties.output, JSON.stringify(result, null, 2));
+}
+else {
+  context.setVariable(properties.output, JSON.stringify(result));
+}
+```
+
+## <span id="crypto"></span>crypto object reference
+
+The crypto object lets you perform basic cryptographic hashing functions in JavaScript.
+
+**Note:** The crypto functions support hashing only -- there is no support for 2-way encryption.
+
+The crypto object has global scope. It is available everywhere within the API proxy flow. Crypto lets you work with these hash objects:
+
+- SHA-1
+- SHA256
+- SHA512
+- MD5
+
+**Tip:** Apigee recommends that you use the crypto object to perform basic cryptographic functions in your JavaScript programs running on Apigee.
+
+### Working with SHA-1 objects
+
+You can create SHA-1 objects, update them, and convert them to hex and base64 values.
+
+**Create a new SHA-1 object**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _sha1 = crypto.getSHA1();
+```
+
+**Update an SHA-1 object**
+
+***Syntax***
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+_sha1.update(value);
+```
+
+***Parameters***
+
+- **value** - (String) Any string value.
+
+***Example***
+
+Update an SHA-1 object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+_sha1.update("salt_value");
+
+_sha1.update("some text");
+```
+
+**Return the SHA-1 object as a hex string**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _hashed_token = _sha1.digest();
+```
+
+**Return the SHA-1 object as a base64 string**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _hashed_token = _sha1.digest64();
+```
+
+### Working with SHA-256 objects
+
+You can create SHA-256 objects, update them, and convert them to hex and base64 values.
+
+**Create a new SHA-256 object**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _sha256 = crypto.getSHA256();
+```
+
+**Update an SHA-256 object**
+
+***Syntax***
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+_sha256.update(value);
+```
+
+***Parameters***
+
+- **value** - (String) Any string value.
+
+***Example***
+
+Update an SHA-256 object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+_sha256.update("salt_value");
+
+_sha256.update("some text");
+```
+
+**Return the SHA-256 object as a hex string**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _hashed_token = _sha256.digest();
+```
+
+**Return the SHA-256 object as a base64 string**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _hashed_token = _sha256.digest64();
+```
+
+### Working with SHA-512 objects
+
+You can create SHA-512 objects, update them, and convert them to hex and base64 values.
+
+**Create a new SHA-512 object**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _sha512 = crypto.getSHA512();
+```
+
+**Update an SHA-512 object**
+
+***Syntax***
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+_sha512.update(value);
+```
+
+***Parameters***
+
+- **value** - (String) Any string value.
+
+***Example***
+
+Update an SHA-512 object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+_sha512.update("salt_value");
+
+_sha512.update("some text");
+```
+
+**Return the SHA-512 object as a hex string**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _hashed_token = _sha512.digest();
+```
+
+**Return the SHA-512 object as a base64 string**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _hashed_token = _sha512.digest64();
+```
+
+### Working with MD5 objects
+
+You can create MD5 objects, update them, and convert them to hex and base64 values.
+
+**Create a new MD5 object**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _md5 = crypto.getMD5();
+```
+
+**Update an MD5 object**
+
+***Syntax***
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+_md5.update(value);
+```
+
+***Parameters***
+
+- **value** - (String) Any string value.
+
+***Example***
+
+Update an MD5 object:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+_md5.update("salt_value");
+
+_md5.update("some text");
+```
+
+**Return the MD5 object as a hex string**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _hashed_token = _md5.digest();
+```
+
+**Return the MD5 object as a base64 string**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _hashed_token = _md5.digest64();
+```
+
+### Crypto date/time support
+
+The crypto object supports date/time formatting patterns.
+
+**crypto.dateFormat()**
+
+Returns a date in string format.
+
+***Syntax***
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+crypto.dateFormat(format, [timezone], [time])
+```
+
+***Parameters***
+
+- **format** - (String) The underlying implementation for this parameter is <a href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" class="external">java.text.SimpleDateFormat</a>. For example: 'YYYY-MM-DD HH:mm:ss.SSS'
+- **timezone** - (String, optional) The underlying implementation for this parameter is <a href="https://docs.oracle.com/javase/7/docs/api/java/util/TimeZone.html" class="external">java.util.TimeZone</a>. This parameter is the sameDefault: UTC
+- **time** - (Number, optional) A Unix timestamp value to format. Default: current time
+
+***Examples***
+
+**Note:** The <a href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" class="external">java.text.SimpleDateFormat</a> documentation provides a complete list of all of the date/time formatting characters and character combinations, as well as detailed examples.
+
+Get the current time, down to milliseconds:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _now = crypto.dateFormat('YYYY-MM-DD HH:mm:ss.SSS');
+```
+
+Get the current time for the Pacific Time Zone:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _pst = crypto.dateFormat('YYYY-MM-DD HH:mm:ss.SSS','PST');
+```
+
+Get the value of ten seconds from now:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _timeNow = Number(context.getVariable('system.timestamp'));
+var tenSeconds = crypto.dateFormat('YYYY-MM-DD HH:mm:ss.SSS','PST', _timeNow + 10 * 1000);
+```
+
+Additional examples. See also the <a href="https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" class="external">java.text.SimpleDateFormat</a> documentation.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _pst = crypto.dateFormat('M');
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _pst = crypto.dateFormat('EEE, d MMM yyyy HH:mm:ss Z');
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _pst = crypto.dateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+```
+
+### Sign SOAP documents using WS-Security with X.509 certificates
+
+Secure SOAP documents via digital signatures, using WS-Security with RSA keys and X.509 certificates.
+
+**crypto.wsSecRsaSign()**
+
+Signs the SOAP document and returns the signed payload.
+
+***Syntax***
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+crypto.wsSecRsaSign(payload, options)
+```
+
+***Parameters***
+
+- **payload** - (String) SOAP document to sign.
+- **options** - (Object) Configuration options for the digital signature. The following table lists the available configuration options. All option values can be literal strings or message templates, indicated by using the template characters `'{'` and `'}'`.
+  <table>
+  <colgroup>
+  <col style="width: 33%" />
+  <col style="width: 33%" />
+  <col style="width: 33%" />
+  </colgroup>
+  <thead>
+  <tr>
+  <th><strong>Name</strong></th>
+  <th><strong>Required?</strong></th>
+  <th><strong>Description</strong></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+  <td><code translate="no" dir="ltr">certificate</code></td>
+  <td>Required</td>
+  <td>Certificate matching the private key in PEM format.</td>
+  </tr>
+  <tr>
+  <td><code translate="no" dir="ltr">private_key</code></td>
+  <td>Required</td>
+  <td>Flow variable containing the private key in PEM format.</td>
+  </tr>
+  <tr>
+  <td><code translate="no" dir="ltr">c14_inclusive_elements</code></td>
+  <td>Optional</td>
+  <td>Comma-separated list of namespace URIs (not prefixes) used to add an <code translate="no" dir="ltr">InclusiveElements</code> element to the <code translate="no" dir="ltr">CanonicalizationMethod</code> element.</td>
+  </tr>
+  <tr>
+  <td><code translate="no" dir="ltr">confirmation</code></td>
+  <td>Optional</td>
+  <td>One of the following:
+  <ul>
+  <li>List of signature values in <code translate="no" dir="ltr">SignatureConfirmation</code> elements to be signed. If a <code translate="no" dir="ltr">SignatureConfirmation</code> element with the specified value is not present, it will be injected.</li>
+  <li><code translate="no" dir="ltr">\*all\*</code> string that indicates that any existing <code translate="no" dir="ltr">SignatureConfirmation</code> elements in the source document will be signed.</li>
+  <li>Empty string that indicates to inject an empty <code translate="no" dir="ltr">SignatureConfirmation</code> element.</li>
+  </ul>
+  These confirmation signatures are in addition to the elements specified in <code translate="no" dir="ltr">elements-to-sign</code>.</td>
+  </tr>
+  <tr>
+  <td><code translate="no" dir="ltr">digest_method</code></td>
+  <td>Optional</td>
+  <td>Digest algorithm. Valid values are <code translate="no" dir="ltr">sha1</code> or <code translate="no" dir="ltr">sha256</code>. Defaults to <code translate="no" dir="ltr">sha256</code>.</td>
+  </tr>
+  <tr>
+  <td><code translate="no" dir="ltr">ds_prefix</code></td>
+  <td>Optional</td>
+  <td>Simple string to be used as the prefix for the namespace.</td>
+  </tr>
+  <tr>
+  <td><code translate="no" dir="ltr">elements_to_sign</code></td>
+  <td>Optional</td>
+  <td>Array of XPath expressions for elements to sign (such as, <code translate="no" dir="ltr">["soapenv:Body"]</code>).</td>
+  </tr>
+  <tr>
+  <td><code translate="no" dir="ltr">expiry</code></td>
+  <td>Optional</td>
+  <td>Values to inject in the <code translate="no" dir="ltr">Expires</code> element of the <code translate="no" dir="ltr">Timestamp</code>. Enter values like 120s, 10m, and 4d to indicate 120 seconds, 10 minutes, and 4 days. Defaults to no expiration.</td>
+  </tr>
+  <tr>
+  <td><code translate="no" dir="ltr">ignore_security_header_placement</code></td>
+  <td>Optional</td>
+  <td>Boolean value that specifies whether to check the placement of any existing <code translate="no" dir="ltr">Security</code> header in the unsigned payload. Provided for compatibility with some legacy systems. Setting to <code translate="no" dir="ltr">true</code> is not recommended because it can expose your API to signature wrapping attacks. Defaults to <code translate="no" dir="ltr">false</code>.</td>
+  </tr>
+  <tr>
+  <td><code translate="no" dir="ltr">issuer_name_style</code></td>
+  <td>Optional</td>
+  <td>Format of the issuer name. Valid values are <code translate="no" dir="ltr">CN</code> or <code translate="no" dir="ltr">DN</code>.</td>
+  </tr>
+  <tr>
+  <td><code translate="no" dir="ltr">key_identifier_type</code></td>
+  <td>Optional</td>
+  <td>Specifies the way the signed document encodes information about the key used to sign the document. Valid values are <code translate="no" dir="ltr">BST_DIRECT_REFERENCE</code>, <code translate="no" dir="ltr">ISSUER_SERIAL</code>, <code translate="no" dir="ltr">RSA_KEY_VALUE</code>, <code translate="no" dir="ltr">THUMBPRINT</code>,and <code translate="no" dir="ltr">X509_CERT_DIRECT</code>. Examples below show the shape of the <code translate="no" dir="ltr">KeyInfo</code> element for different key identifier types. Defaults to <code translate="no" dir="ltr">BST_DIRECT_REFERENCE</code>.</td>
+  </tr>
+  <tr>
+  <td><code translate="no" dir="ltr">private_key_password</code></td>
+  <td>Optional</td>
+  <td>Password key, if the private key is encrypted.</td>
+  </tr>
+  <tr>
+  <td><code translate="no" dir="ltr">signing_method</code></td>
+  <td>Optional</td>
+  <td>Method used for signing. Valid values are <code translate="no" dir="ltr">rsa-sha1</code> or <code translate="no" dir="ltr">rsa-sha256</code>. Defaults to <code translate="no" dir="ltr">rsa-sha1</code>; however, setting to <code translate="no" dir="ltr">rsa-sha256</code> is highly recommended.</td>
+  </tr>
+  <tr>
+  <td><code translate="no" dir="ltr">soap_version</code></td>
+  <td>Optional</td>
+  <td>SOAP version. Valid versions are 1.1 and 1.2. Defaults to 1.1.</td>
+  </tr>
+  <tr>
+  <td><code translate="no" dir="ltr">transform_inclusive_elements</code></td>
+  <td>Optional</td>
+  <td>Comma-separated list of namespace URIs (not prefixes) used to add an <code translate="no" dir="ltr">InclusiveElements</code> element to the <code translate="no" dir="ltr">Transform</code> element.</td>
+  </tr>
+  </tbody>
+  </table>
+
+***Examples***
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### X509_CERT_DIRECT
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var reqPayload = context.getVariable("request.content");
+var signed = crypto.wsSecRsaSign(reqPayload,{
+   private_key: '{private.key.pem}',
+   certificate: '{public.cert.pem}',
+   // elements_to_sign: 'wsa:Timestamp, soap:Body',
+   signing_method: 'rsa-sha256',
+   digest_method: 'sha256',
+   key_identifier_type: 'X509_CERT_DIRECT',
+   expiry: '120s'
+});
+var resPayload_signed = context.setVariable("request.content", signed);
+```
+
+The above example shows how to sign a SOAP document with a key identifier type of X509_CERT_DIRECT. It assumes that the private key and certificate are loaded into flow variables.
+
+The output signed document will have a `KeyInfo` element that looks like the following:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<KeyInfo> <!-- xmlns="http://www.w3.org/2000/09/xmldsig#" -->
+  <X509Data>
+    <X509Certificate>MIIEKjCCAxKgAwIBAgI....</X509Certificate>
+  </X509Data>
+</KeyInfo>
+```
+
+</div>
+
+<div class="section">
+
+### BST_DIRECT_REFERENCE
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var reqPayload = context.getVariable("request.content");
+var signed = crypto.wsSecRsaSign(reqPayload,{
+   private_key: '{private.key.pem}',
+   certificate: '{public.cert.pem}',
+   // elements_to_sign: 'wsa:Timestamp, soap:Body',
+   signing_method: 'rsa-sha256',
+   digest_method: 'sha256',
+   key_identifier_type: 'BST_DIRECT_REFERENCE',
+   expiry: '120s'
+});
+var resPayload_signed = context.setVariable("request.content", signed);
+```
+
+The above example shows how to sign a SOAP document with a key identifier type of BST_DIRECT_REFERENCE. It assumes that the private key and certificate are loaded into flow variables.
+
+The output signed document will have a `KeyInfo` element that looks like the following:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<KeyInfo> <!-- xmlns="http://www.w3.org/2000/09/xmldsig#" -->
+  <wssec:SecurityTokenReference>
+    <wssec:Reference
+      URI="#ST-101"
+      ValueType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3"/>
+  </wssec:SecurityTokenReference>
+</KeyInfo>
+```
+
+And there will be another element placed into the WS-Security header, using the `wsu:Id` from the above `KeyInfo` element, that provides the certificate encoded as a `BinarySecurityToken`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<wssec:BinarySecurityToken
+    EncodingType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary"
+    ValueType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3"
+    wsu:Id="ST-101">MIIEKjCCAxKgAwIB...
+</wssec:BinarySecurityToken>
+```
+
+</div>
+
+<div class="section">
+
+### ISSUER_SERIAL
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var reqPayload = context.getVariable("request.content");
+var signed = crypto.wsSecRsaSign(reqPayload,{
+   private_key: '{private.key.pem}',
+   certificate: '{public.cert.pem}',
+   // elements_to_sign: 'wsa:Timestamp, soap:Body',
+   signing_method: 'rsa-sha256',
+   digest_method: 'sha256',
+   key_identifier_type: 'ISSUER_SERIAL',
+   expiry: '120s'
+});
+var resPayload_signed = context.setVariable("request.content", signed);
+```
+
+The above example shows how to sign a SOAP document with a key identifier type of ISSUER_SERIAL. It assumes that the private key and certificate are loaded into flow variables.
+
+The output signed document will have a `KeyInfo` element that looks like the following:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<KeyInfo> <!-- xmlns="http://www.w3.org/2000/09/xmldsig#" -->
+  <wssec:SecurityTokenReference wsu:Id="STR-102">
+    <X509Data>
+      <X509IssuerSerial>
+        <X509IssuerName>CN=Test,O=Test,L=Test,ST=Test,C=US</X509IssuerName>
+        <X509SerialNumber>1234567890</X509SerialNumber>
+      </X509IssuerSerial>
+    </X509Data>
+  </wssec:SecurityTokenReference>
+</KeyInfo>
+```
+
+</div>
+
+<div class="section">
+
+### THUMBPRINT
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var reqPayload = context.getVariable("request.content"); 
+var signed = crypto.wsSecRsaSign(reqPayload,{
+   private_key: '{private.key.pem}',
+   certificate: '{public.cert.pem}',
+   // elements_to_sign: 'wsa:Timestamp, soap:Body',
+   signing_method: 'rsa-sha256',
+   digest_method: 'sha256',
+   key_identifier_type: 'THUMBPRINT',
+   expiry: '120s'
+});
+var resPayload_signed = context.setVariable("request.content", signed);
+```
+
+The above example shows how to sign a SOAP document with a key identifier type of THUMBPRINT. It assumes that the private key and certificate are loaded into flow variables.
+
+The output signed document will have a `KeyInfo` element that looks like the following:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<KeyInfo> <!-- xmlns="http://www.w3.org/2000/09/xmldsig#" -->
+  <wssec:SecurityTokenReference wsu:Id="STR-102">
+    <wssec:KeyIdentifier 
+      ValueType="http://docs.oasis-open.org/wss/oasis-wss-soap-message-security1.1#ThumbprintSHA1">XP+3...</wssec:KeyIdentifier>
+  </wssec:SecurityTokenReference>
+</KeyInfo>
+      
+```
+
+</div>
+
+</div>
+
+### Validate signed SOAP documents using WS-Security with X.509 certificates
+
+Validates the digital signature for a SOAP document using WS-Security with RSA/X.509. Apigee performs validation to ensure that the arguments passed are valid.
+
+**crypto.wsSecRsaValidate()**
+
+Validates the digital signature for a SOAP document.
+
+***Syntax***
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+crypto.wsSecRsaValidate(payload, options)
+```
+
+***Parameters***
+
+- **payload** - (String) SOAP document with digital signature to validate.
+- **options** - (Object) Configuration options for validation. The following table lists the available configuration options. All option values can be literal strings or message templates, indicated by using the template characters `'{'` and `''}'`.
+  | **Name** | **Required?** | **Description** |
+  |----|----|----|
+  | `accept_subject_cns` | Optional | Comma-separated list of common names (CNs) for the subject that are acceptable signers. If any signature is from a CN that doesn't match one of the CNs specified, the verification fails. |
+  | `accept_thumbprints` | Optional | Comma-separated list of SHA-1 thumbprints of the certs that are acceptable signers. If any signature is from a cert that has a thumbprint that doesn't match one of the thumbprints specified, the verification fails. Specify only one of `accept-thumbprints` or `accept-thumbprints-sha256`. At least one of these options is required if the `certificate` option isn't provided. |
+  | `accept_thumbprints_sha256` | Optional | Comma-separated list of SHA-256 thumbprints of the certs that are acceptable signers. If any signature is from a cert that has a thumbprint that doesn't match one of the thumbprints specified, the verification fails. Specify only one of `accept-thumbprints` or `accept-thumbprints-sha256`. At least one of these options is required if the `certificate` option isn't provided. |
+  | `certificate` | Optional | Certificate that provides the public key to verify the signature. Required and used only if `KeyInfo` in the signed document doesn't explicitly provide the certificate. |
+  | `digest_method` | Optional | Supported digest method. Valid values are `sha1` or `sha256`. If omitted, the digest method isn't checked. |
+  | `ignore_certificate_expiry` | Optional | Boolean value that specifies whether to ignore the validity dates on the provided certificate. Useful for testing. Defaults to `false`. |
+  | `ignore_expiry` | Optional | Boolean value that specifies whether to ignore the `Timestamp/Expires` field when evaluating validity of the SOAP document. Defaults to `false`. |
+  | `ignore_security_header_placement` | Optional | Boolean value that specifies whether to check the placement of the security header in the signed payload. Provided for compatibility with some legacy systems. Setting this to `true` is not recommended because it can expose APIs to signature wrapping attacks. Defaults to `false`. |
+  | `issuer_name_dn_comparison` | Optional | Method yo use to determine whether two issuer names refer to the same entity. Applies only if the signed document includes `KeyInfo` that wraps `X509IssuerSerial` and the `issuer-name-style` is `DN` (the default). Value can be one of {`string`, `normal`, `reverse`, `unordered`}. Defaults to `string`. |
+  | `issuer_name_dn_comparison_exclue_numeric_oids` | Optional | Method used to determine whether the two issuer names refer to the same entity. Applies only if the signed document includes `KeyInfo` that wraps `X509IssuerSerial` and the `issuer-name-style` is `DN` (the default), and the `issuer-name-dn-comparison` is set to `normal`, `reverse`, or `unordered`. |
+  | `issuer_name_style` | Optional | Format of the issuer name. Used only if the signed document includes a `KeyInfo` that wraps `X509IssuerSerial`. Valid values include `CN` or `DN`. |
+  | `max_lifetime` | Optional | Maximum lifetime of the signed document. Enter a value like 120s, 10m, and 4d to indicate 120 seconds, 10 minutes, and 4 days. This option requires the `Timestamp` to include a `Created` and an `Expires` element. Default to no maximum lifetime. |
+  | `require_expiry` | Optional | Boolean value that specifies whether to required an expiry in the timestamp. We recommend that this value remain set to `true`. Defaults to `true`. |
+  | `required_sign_elements` | Optional | Comma-separated or space-separated list of *`prefix:Tag`* forms indicating the elements that must be signed. Defaults to `soap:Body, wsu:Timestamp`. To require only a signature on the timestamp and not the body when validating, set this to `wsu:Timestamp`. To require only a signature on the body and not the timestamp when validating, set this to `soap:Body`. The prefix and tag are case sensitive. We recommend leaving this value set to the default unless you have a specific reason to change it. |
+  | `signing_method` | Optional | Signing method that must match the signing method in the signed document. Valid values are `rsa-sha1` or `rsa-sha256`. If omitted, the signing method isn't checked. |
+
+***Examples***
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Embedded certificate
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var reqPayload = context.getVariable("request.content");
+var isValid = crypto.wsSecRsaValidate(reqPayload, {
+   accept_thumbprints_sha256: '2578afd28d1d16e6b8f1d3ddfd5be4ff683dd147afae8d7096c183309794bbd9',
+   signing_method: 'rsa-sha256',
+   digest_method: 'sha256'
+   });
+if (!isValid) {
+  throw "invalid"
+}
+```
+
+The above example shows how to validate a SOAP document which was signed in such a way that the signature block contains a certificate within a `KeyInfo` element. If you used the Apigee `crypto.wsSecRsaSign()` function to sign the document, and used a`key_identifier_type` of `X509_CERT_DIRECT` or `BST_DIRECT_REFERENCE`, this would result in a certificate being embedded in the signature block, and the code shown above could be used to validate it. Other systems also will produce signed documents with embedded certificates, and you could verify those signatures this way as well.
+
+You must provide a list of thumbprints of one or more trusted certificates in order for the validation to succeed. Without this, Apigee would validate the signature, but not insure that the signer was trusted.
+
+</div>
+
+<div class="section">
+
+### Externally provided certificate
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var reqPayload = context.getVariable("request.content");
+var isValid = crypto.wsSecRsaValidate(reqPayload, {
+   certificate: '{public.cert.pem}',
+   signing_method: 'rsa-sha256',
+   digest_method: 'sha256'
+   });
+if (!isValid) {
+  throw "invalid"
+}
+```
+
+The above example shows how to validate a SOAP document which was signed in such a way that the signature block does not contain a certificate within a `KeyInfo` element, but instead contains a reference to a certificate, in the form of a serial number and issuer name, or a thumbprint. If you used the Apigee `crypto.wsSecRsaSign()` function to sign the document, and used a `key_identifier_type` of `ISSUER_SERIAL` or `THUMBPRINT`, this would result in a certificate not being embedded in the signature block. In that case, the validation logic must provide the certificate as shown in the code example. Other systems also will produce signed documents which lack embedded certificates, and you could verify those signatures this way as well.
+
+When you explicitly provide the certificate, you need not provide a list of thumbprints of trusted certificates. If you explicitly provide the certificate, it's assumed that you trust the certificate.
+
+</div>
+
+</div>
+
+### Use getHash() to get any of the supported hash objects
+
+***Examples***
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var _hash1 = crypto.getHash('MD5');
+
+var _hash2 = crypto.getHash('SHA-1');
+
+var _hash3 = crypto.getHash('SHA-256');
+
+var _hash4 = crypto.getHash('SHA-512');
+```
+
+### Sample with crypto
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+try {
+    // get values to use with hash functions
+    var salt = context.getVariable("salt") || 'SomeHardCodedSalt';
+    var host = context.getVariable("request.header.Host");
+    var unhashedToken = "";
+
+    var _timeNow = Number(context.getVariable('system.timestamp'));
+    var now = crypto.dateFormat('YYYY-MM-DD HH:mm:ss.SSS','PST', _timeNow);
+    unhashed_token = "|" + now + "|" + host
+
+    // generate a hash with the unhashedToken:
+    var sha512 = crypto.getSHA512();
+    sha512.update(salt);
+    sha512.update(unhashedToken);
+
+    // convert to base64
+    var base64Token = sha512.digest64();
+
+    // set headers
+    context.setVariable("request.header.now", now);
+    context.setVariable("request.header.token", base64Token);
+
+} catch(e) {
+    throw 'Error in Javascript';
+}
+```
+
+## <span id="contextObj"></span>context object reference
+
+- [context object summary](#summary)
+- [context object methods](#methods)
+- [context object properties](#properties)
+- [context object children](#children)
+
+A `context` object is created for each request/response transaction executed by an API proxy. The `context` object exposes methods to get, set, and remove variables related to each transaction.
+
+Variables define properties specific to a transaction. The time of day, the locale of the requesting client, the user-agent of the requesting client, and the URL of the target service are all examples of variables that are available in the `context`. Therefore, `context` is useful for building logic that relies on these properties to execute custom behavior.
+
+See [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference) and [ExtractVariables policy](/apigee/docs/api-platform/reference/policies/extract-variables-policy).
+
+### <span id="summary"></span>context object summary
+
+This table briefly describes the context object and its children, and lists the properties that are bound to each.
+
+| Name | Description | Properties |
+|----|----|----|
+| `context` | A wrapper for the message processing pipeline context and the request and response Flows that are executed by the ProxyEndpoint and TargetEndpoint. | flow, session |
+| `context.``proxyRequest` | An object that represents the inbound request message to the ProxyEndpoint (from the requesting app to the API proxy) | headers, query parameters, method, body, url |
+| `context.``targetRequest` | An object that represents the outbound request message from the TargetEndpoint (from the API proxy to the backend service). | headers, query parameters, method, body, url |
+| `context.``targetResponse` | An object that represents the inbound target response message (from the backend service to the API proxy) | headers, content, status |
+| `context.``proxyResponse` | An object that represents the outbound proxy response message (from the API proxy to the requesting app) | headers, content, status |
+| `context.flow` | The name of the current flow. | See [context.flow](#flow). |
+| `context.session` | A map of name/value pairs that you can use to pass objects between two different steps executing in the same context. For example: `context.session['key'] = 123`. | For more information on when and when not to use this object, see <a href="https://discuss.google.dev/t/what-is-the-difference-between-context-session-hello-and-context-setvaraible-hello/11150/2.html" class="external">What is the difference between context.session['hello'] = {} and context.setVariable("hello", {})</a>. |
+
+### <span id="methods"></span>context object methods
+
+**context.getVariable()**
+
+Retrieves the value of a pre-defined or custom variable.
+
+***Syntax***
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+context.getVariable("variable-name");
+```
+
+***Example***
+
+To get the value for the current year:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var year = context.getVariable('system.time.year');
+```
+
+**context.setVariable()**
+
+Sets the value for a custom variable or for any *writable* [pre-defined variables](/apigee/docs/api-platform/reference/variables-reference).
+
+***Syntax***
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+context.setVariable("variable-name", value);
+```
+
+***Example***
+
+A common scenario for setting a variable is when an API proxy must dynamically write the target URL. The following JavaScript obtains the value of a variable called USER.name, appends that value as a query parameter to the URL `http://mocktarget.apigee.net?user=`, and then sets the pre-defined `target.url` to that value.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+context.setVariable("target.url", "http://mocktarget.apigee.net/user?user="+context.getVariable("USER.name"));
+```
+
+**Tip:** Any writable pre-defined variable and any custom variable can be dynamically set from JavaScript. For a complete list of pre-defined variables, see [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference).
+
+**context.removeVariable()**
+
+Removes a variable from the context.
+
+***Syntax***
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+context.removeVariable('variable-name');
+```
+
+### <span id="properties"></span>context object properties
+
+**<span id="flow"></span>context.flow**
+
+The `flow` property is a string that identifies the current API proxy flow. This property is used to indicate the Flow to which the JavaScript is attached. Supported values are:
+
+- `PROXY_REQ_FLOW`
+- `PROXY_RESP_FLOW`
+- `TARGET_REQ_FLOW`
+- `TARGET_RESP_FLOW`
+
+Each Flow name encompasses the PreFlow, PostFlow, and any conditional Flows defined in the ProxyEndpoint(s) or TargetEndpoint(s).
+
+<div class="bestpractice">
+
+This optional property is useful when common JavaScript is executed in more than one Flow, but might vary its behavior depending on the Flow in which it executes. Use the Flow property for JavaScript modules intended to be reused in multiple API proxies, in which the code is required to check the current Flow before executing logic.
+
+</div>
+
+**Example**
+
+Set an HTTP header only on the targetRequest Flow:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+if (context.flow=="TARGET_REQ_FLOW") {
+     context.targetRequest.headers['TARGET-HEADER-X']='foo';
+}
+```
+
+Set the content only on the proxyResponse Flow:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+if (context.flow=="PROXY_RESP_FLOW") {
+     context.proxyResponse.content='bar';
+}
+```
+
+**<span id="session"></span>context.session**
+
+A map of name/value pairs that can be used to pass objects between two policies executing within the same message context.
+
+**Note:** It is important to understand the difference between using `context.session` to get/set variables versus using `context.getVariable()` and `context.setVariable()`. See this <a href="https://discuss.google.dev/t/what-is-the-difference-between-context-session-hello-and-context-setvaraible-hello/11150" class="external">Apigee Community discussion</a> for more details.
+
+**Example**
+
+Set a value in the session:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+context.session['key']  = 123;
+```
+
+Get the value from the session:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var value = context.session['key']; // 123
+```
+
+**Sample:** For a working example that uses the `context.sessio`n object see the <a href="https://github.com/apigee/api-platform-samples/tree/master/sample-proxies/async-callout" class="external">Asynchronous callout</a> sample API proxy.
+
+### <span id="children"></span>context object children
+
+As shown below, a complete API proxy Flow encompasses four distinct phases, each of which has an associated message object that is a child of the context object:
+
+- `context.proxyRequest`: The inbound request message received from the requesting client.
+- `context.targetRequest`: The outbound request message sent to the backend service.
+- `context.proxyResponse`: The outbound response message returned to the requesting client.
+- `context.targetResponse`: The inbound request message received from the backend service.
+
+<img src="/static/apigee/docs/api-platform/images/proxy_endpoints.png" width="650" alt="Diagram of a request and response passing through a proxy endpooint and a target endpoint." />
+
+The following sections describe the methods and properties of these objects:
+
+- [context.\*Request child objects](#Request)
+- [context.\*Response child objects](#Response)
+
+### <span id="Request"></span> context.\*Request child objects
+
+For each HTTP transaction that executes in an API proxy, two request message objects are created: one *inbound* (the request from the client) and one *outbound* (the request generated by the API proxy and submitted to the backend target.)
+
+The `context` object has child objects that represent these request messages: `context.proxyRequest` and `context.targetRequest`. These objects let you access properties within the request flow that is in scope when your JavaScript code executes.
+
+**Note:** You can also use the *shorthand* object `request` to access these properties in a request flow. The `request` object refers to either `context.proxyRequest` or `context.targetRequest`, depending on where in the flow your JavaScript code executes.
+
+#### context.\*Request child object properties
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Property name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td rowspan="2"><code translate="no" dir="ltr">url</code></td>
+<td><p>The <code translate="no" dir="ltr">url</code> property is a read/write convenience property that combines scheme, host, port, path and query parameters for the targetRequest.</p>
+<p>The complete URL of the request is composed of the following properties:</p>
+<ul>
+<li>protocol: The protocol of the URL (for example, HTTP, HTTPS)</li>
+<li>port: The port (for example, :80, :443)</li>
+<li>host: The host of the URL (for example, www.example.com)</li>
+<li>path: The path of the URI (for example, /v1/mocktarget)</li>
+</ul>
+<p>When getting <code translate="no" dir="ltr">url</code>, a URL is returned in the following format:</p>
+<p><code translate="no" dir="ltr">protocol://host:port/path?queryParams</code></p></td>
+</tr>
+<tr>
+<td><p>Examples:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>context.targetRequest.url = &#39;http://www.example.com/path?q1=1&#39;
+context.targetRequest.protocol =&#39;https&#39;;</code></pre></td>
+</tr>
+<tr>
+<td rowspan="2"><code translate="no" dir="ltr">headers</code></td>
+<td><p>HTTP request headers as a mapping of <code translate="no" dir="ltr">String =&gt; List</code></p></td>
+</tr>
+<tr>
+<td><p>Examples:</p>
+<p>For this HTTP request:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>POST /v1/blogs HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+Authorization: Bearer ylSkZIjbdWybfs4fUQe9BqP0LH5Z</code></pre>
+The following JavaScript:
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>context.proxyRequest.headers[&#39;Content-Type&#39;];
+context.proxyRequest.headers[&#39;Authorization&#39;];</code></pre>
+<p>will return the following values</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>application/json
+Bearer ylSkZIjbdWybfs4fUQe9BqP0LH5Z</code></pre></td>
+</tr>
+<tr>
+<td rowspan="2"><code translate="no" dir="ltr">queryParams</code></td>
+<td><p>The request message query parameters as a mapping of <code translate="no" dir="ltr">String =&gt; List</code>.</p></td>
+</tr>
+<tr>
+<td><p>Examples:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>&quot;?city=PaloAlto&amp;city=NewYork&quot;</code></pre>
+<p>can be accessed as:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>context.proxyRequest.queryParams[&#39;city&#39;];  // == &#39;PaloAlto&#39;
+context.proxyRequest.queryParams[&#39;city&#39;][0]     // == &#39;PaloAlto&#39;
+context.proxyRequest.queryParams[&#39;city&#39;][1];    // == &#39;NewYork&#39;
+context.proxyRequest.queryParams[&#39;city&#39;].length(); // == 2</code></pre></td>
+</tr>
+<tr>
+<td rowspan="2"><code translate="no" dir="ltr">method</code></td>
+<td><p>The HTTP verb (GET, POST, PUT, DELETE. PATCH, etc.) associated with the request</p></td>
+</tr>
+<tr>
+<td><p>Examples:</p>
+<p>For this request:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>POST /v1/blogs HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+Authorization: Bearer ylSkZIjbdWybfs4fUQe9BqP0LH5Z</code></pre>
+<p>The following JavaScript:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>context.proxyRequest.method;</code></pre>
+<p>will return the following value</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>POST</code></pre></td>
+</tr>
+<tr>
+<td rowspan="2"><code translate="no" dir="ltr">body</code></td>
+<td><p>The message body (payload) of the HTTP request.</p>
+<p>The request body has the following members:</p>
+<ul>
+<li><code translate="no" dir="ltr">context.targetRequest.body.asXML;</code></li>
+<li><code translate="no" dir="ltr">context.targetRequest.body.asJSON;</code></li>
+<li><code translate="no" dir="ltr">context.targetRequest.body.asForm;</code></li>
+</ul></td>
+</tr>
+<tr>
+<td><p>Examples:</p>
+<p>For an XML body:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>&lt;customer number=&#39;1&#39;&gt;
+&lt;name&gt;Fred&lt;name/&gt;
+&lt;customer/&gt;</code></pre>
+<p>To access the elements of the XML object as follows:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>var name = context.targetRequest.body.asXML.name;</code></pre>
+<p>To access XML attributes, use the <code translate="no" dir="ltr">@</code> notation.</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>var number = context.targetRequest.body.asXML.@number;</code></pre>
+<p>For a JSON request body:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>{
+&quot;a&quot;:  1 ,
+&quot;b&quot; : &quot;2&quot;
+}</code></pre>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>var a = context.proxyRequest.body.asJSON.a;    // == 1
+var b = context.proxyRequest.body.asJSON.b;    // == 2</code></pre>
+<p>To read form parameters:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>&quot;vehicle=Car&amp;vehicle=Truck&quot;</code></pre>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>v0 = context.proxyRequest.body.asForm[&#39;vehicle&#39;][0];
+v1 = context.proxyRequest.body.asForm[&#39;vehicle&#39;][1];</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+### <span id="Response"></span>context.\*Response child objects
+
+For each HTTP transaction the executes in an API proxy, two response message objects are created: one *inbound* (the response from the backend service) and one *outbound* (the response sent back to the client.)
+
+The context object has child objects that represent these response messages: `context.proxyResponse` and `context.targetResponse`. These objects let you access properties within the response flow that is in scope when your JavaScript code executes.
+
+**Note:** You can also use the *shorthand* object `response` to access these properties from a response flow. The `response` object refers to either `context.proxyResponse` or `context.targetResponse`, depending on where in the flow your JavaScript code executes.
+
+#### context.\*Response object properties
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Property name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td rowspan="2"><code translate="no" dir="ltr">headers</code></td>
+<td><p>The HTTP headers of the response message as a mapping of <code translate="no" dir="ltr">String =&gt; List</code>.</p></td>
+</tr>
+<tr>
+<td><p>Example:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>var cookie = context.targetResponse.headers[&#39;Set-Cookie&#39;];</code></pre></td>
+</tr>
+<tr>
+<td rowspan="2"><code translate="no" dir="ltr">status</code></td>
+<td><p>The status code with status message as a property. Both status code and status message are available as properties.</p></td>
+</tr>
+<tr>
+<td><p>Example:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>var status = context.targetResponse.status.code;   // 200
+var msg = context.targetResponse.status.message;   // &quot;OK&quot;</code></pre></td>
+</tr>
+<tr>
+<td rowspan="2"><code translate="no" dir="ltr">content</code></td>
+<td><p>The HTTP body (payload content) of the response message.</p>
+<p>Response content has the following members:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="JavaScript"><code>context.targetResponse.content.asXML;
+context.targetResponse.content.asJSON;</code></pre></td>
+</tr>
+<tr>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+## Using .asXML notation
+
+There is a handy way to walk through an XML document using the `.asXML` notation. This section describes how to use this notation, and how it differs from `request.content` and `context.proxyRequest.content`.
+
+For example:
+
+`request.content.asXML`
+
+or
+
+`context.proxyRequest.content.asXML`
+
+Both the `*.content` and `*.content.asXML` forms can be used in a string context, and JavaScript will coerce them to become strings. In the former case (`*.content`), the string includes all declarations as well as XML comments. In the latter case (`*.content.asXML`), the string value of the result is cleaned of declarations and comments.
+
+### Example
+
+**msg.content:**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8"?>
+<yahoo:error xmlns:yahoo="http://yahooapis.com/v1/base.rng" xml:lang="en-US">
+   <yahoo:description>Please provide valid credentials. OAuth oauth_problem="unable_to_determine_oauth_type", realm="yahooapis.com"
+   </yahoo:description>
+</yahoo:error>
+<!-- mg023.mail.gq1.yahoo.com uncompressed/chunked Sat Dec 14 01:23:35 UTC 2013 -->
+```
+
+**msg.content.asXML:**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8"?>
+<yahoo:error xmlns:yahoo="http://yahooapis.com/v1/base.rng" xml:lang="en-US">
+   <yahoo:description>Please provide valid credentials. OAuth oauth_problem="unable_to_determine_oauth_type", realm="yahooapis.com"
+   </yahoo:description>
+</yahoo:error>
+```
+
+Furthermore, you can use the `.asXML` form to traverse the XML hierarchy, by specifying the names of elements and attributes. It is not possible to traverse the hierarchy using the other syntax.
+
+## <span id="debug"></span>Debug with JavaScript print() statements
+
+If you're using the JavaScript policy to execute custom JavaScript code, note that you can use the print() function to output debug information to the [Debug tool](/apigee/docs/api-platform/debug/trace-overview). This function is available directly through the JavaScript object model. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+if (context.flow=="PROXY_REQ_FLOW") {
+     print("In proxy request flow");
+     var username = context.getVariable("request.queryparam.user");
+     print("Got query param: " + username);
+     context.setVariable("USER.name", username);
+     print("Set query param: " + context.getVariable("USER.name"));
+}
+
+
+if (context.flow=="TARGET_REQ_FLOW") {
+     print("In target request flow");
+     var username = context.getVariable("USER.name");
+     var url = "http://mocktarget.apigee.net/user?"
+     context.setVariable("target.url", url + "user=" + username);
+     print("Callout to URL: ", context.getVariable("target.url"));
+}
+```
+
+To see the output, select **Output from all transactions** at the bottom of the Debug window. You can also find output in the Debug property called `stepExecution-stdout`.
+
+## Making JavaScript callouts with httpClient
+
+Use `httpClient` to make multiple, parallel, asynchronous HTTP requests to any URL from within custom JavaScript code executing in an API proxy flow. The `httpClient` object is exposed by the [Apigee Javascript object model](/apigee/docs/api-platform/reference/javascript-object-model).
+
+### About httpClient
+
+The `httpClient` object is exposed to custom JavaScript code running on Apigee through the JavaScript object model. To attach custom JavaScript to an API proxy, you use the [JavaScript policy](/apigee/docs/api-platform/reference/policies/javascript-policy). When the policy runs, the custom JavaScript code executes.
+
+The `httpClient` object is useful for developing composite services or mashups. For example, you can consolidate multiple backend calls into a single API method.
+
+**Note:** One use case we don't recommend for the [JavaScript policy](/apigee/docs/api-platform/reference/policies/javascript-policy) is logging. The [MessageLogging policy](/apigee/docs/api-platform/reference/policies/message-logging-policy) is much better suited for logging to third-party logging platforms such as Splunk, Sumo, and Loggly, and you improve API proxy performance by executing the [MessageLogging policy](/apigee/docs/api-platform/reference/policies/message-logging-policy) in the PostClientFlow, which executes after the response has been sent back to the client.
+
+Here's a basic usage pattern. Instantiate a Request object, assign to it a URL (e.g., to a backend service you wish to call), and call `httpClient.send` with that request object.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var myRequest = new Request();
+myRequest.url = "http://www.example.com";
+var exchangeObj = httpClient.send(myRequest);
+```
+
+### httpClient Reference
+
+The HTTP Client exposes two methods: `get()` and `send()`.
+
+#### **httpClient.get()**
+
+A convenience method for simple HTTP `GET` requests, with no support for HTTP headers.
+
+**Usage**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var exchangeObj = httpClient.get(url);
+```
+
+**Returns**
+
+The method returns an `exchange` object. This object has no properties, and it exposes the following methods:
+
+- `isError()`: (Boolean) Returns `true` if the httpClient was unable to connect to the server. HTTP status codes `4xx` and `5xx` result in `isError()` `false`, as the connection completed and a valid response code was returned. If `isError()` returns `true`, then a call to `getResponse()` returns the JavaScript `undefined`.
+- `isSuccess()`: (Boolean) Returns `true` if the send was complete and successful.
+- `isComplete()`: (Boolean) Returns `true` if the request is complete.
+- `waitForComplete()`: Pauses the thread until the request is complete (by success or error).
+  **Antipattern:** Use of `waitForComplete` is not recommended and is considered to be an antipattern. We recommend using callbacks instead. For details, see [Antipattern: Use waitForComplete() in JavaScript code](/apigee/docs/api-platform/antipatterns/wait-for-complete).
+- `getResponse()`: (object) Returns the response object if the `httpClient.send()` was complete and successful. The returned object has the identical methods and properties as the context.proxyResponse object. See [context object summary](#summary).
+- `getError()`: (string) If the call to `httpClient.send()` resulted in an error, returns the error message as a string.
+
+### **Example**
+
+Send a fully configured Request object containing the properties of the HTTP request. Use a non-blocking callback to process the response.
+
+**Note:** Use of callbacks to asynchronously process responses is a recommended best practice. The use of the `waitForComplete()` function is not recommended and is considered an antipattern. See also [Antipattern: Use waitForComplete() in JavaScript code](/apigee/docs/api-platform/antipatterns/wait-for-complete).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+// Add the required the headers for making a specific API request
+var headers = {'X-SOME-HEADER' : 'some value' };
+// Make a GET API request along with headers
+var myRequest = new Request("http://www.example.com","GET",headers);
+
+// Define the callback function and process the response from the GET API request
+function onComplete(response,error) {
+ // Check if the HTTP request was successful
+    if (response) {
+      context.setVariable('example.status', response.status);
+     } else {
+      context.setVariable('example.error', 'Woops: ' + error);
+     }
+}
+
+// Specify the callback Function as an argument
+httpClient.get(myRequest, onComplete);
+```
+
+## Using the JavaScript policy
+
+Use the JavaScript policy to attach custom JavaScript code to a proxy flow. See [JavaScript policy](/apigee/docs/api-platform/reference/policies/javascript-policy).
+
+## Related topics
+
+- [JavaScript policy](/apigee/docs/api-platform/reference/policies/javascript-policy)
+- [JavaScript object model](/apigee/docs/api-platform/reference/javascript-object-model)
+- <a href="/apigee/docs/api-platform/antipatterns/intro" class="external">Introduction to antipatterns</a>

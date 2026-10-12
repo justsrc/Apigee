@@ -1,0 +1,404 @@
+URL: https://github.com/apigee/apigeecli/issues/276
+TITLE: Shared flow deploy after create fails when path uses ./ notation
+STATE: closed state_reason: completed
+AUTHOR: cygnus8595 association: NONE
+CREATED: 2023-08-22T16:27:35Z CLOSED: 2023-09-20T16:41:02Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+When creating a shared flow with apigeecli, deploying fails if the shared flow was created with the shared flow path using `./` notation. For example:
+
+If a shared flow is created like so:
+```
+apigeecli sharedflows create -n $SF_NAME -f $SF_PATH -t $GCLOUD_TOKEN -o $APIGEE_ORG
+```
+where
+```
+$SF_PATH="./fromscratch/sharedflowbundle"
+```
+
+Deployment will fail with the following error on the console:
+```
+Status: instance "us-east1" reported error repository.FailedToLoadFile: "Failed to load file : /sharedflows/fromscratch.xml"
+```
+
+However, if the path is defined like so:
+```
+$SF_PATH="fromscratch/sharedflowbundle"
+```
+The shared flow deploys successfully.
+
+Note that in both cases, the create step is successful.
+
+--- COMMENTS (20) ---
+
+### comment by srinandan (association=CONTRIBUTOR) at 2023-08-23T15:24:33Z
+I was able to run this command successfully
+
+```sh
+apigeecli sharedflows create -n sf1 -f ./test/sharedflowbundle -t $token
+
+{
+	"configurationVersion": {
+		"majorVersion": 4
+	},
+	"createdAt": "1692804197663",
+	"displayName": "test_flow",
+	"entityMetaDataAsProperties": {
+....
+```
+
+### comment by cygnus8595 (association=NONE) at 2023-08-23T15:26:49Z
+ Creation is not the problem. It's the deployment after creation. In my initial comment, I said that creation is successful in both cases.
+
+What happens when you try to deploy that shared flow?
+
+### comment by cygnus8595 (association=NONE) at 2023-08-23T15:29:23Z
+For reference, this is the deploy command:
+```
+apigeecli sharedflows deploy -n $SF_NAME -e $APIGEE_ENV -t $GCLOUD_TOKEN -o $APIGEE_ORG -r -v $REV
+```
+
+
+### comment by srinandan (association=CONTRIBUTOR) at 2023-08-23T16:31:57Z
+I was able to deploy the sharedflow also with this command:
+
+```
+apigeecli sharedflows deploy -n sf1 -e prod1 -t $token
+
+{
+	"environment": "prod1",
+	"apiProxy": "sf1",
+	"revision": "2",
+	"deployStartTime": "1692808285746"
+}
+```
+
+### comment by srinandan (association=CONTRIBUTOR) at 2023-08-23T16:35:49Z
+To be sure I ran the commands again (matching your flags)
+
+```
+apigeecli sharedflows create -n sf1 -f ./test/sharedflowbundle -t $token
+{
+	"configurationVersion": {
+		"majorVersion": 4
+	},
+	"createdAt": "1692808466927",
+	"displayName": "test_flow",
+	"entityMetaDataAsProperties": {
+		"bundle_type": "zip",
+		"subType": "SharedFlow",
+		"createdAt": "1692808466927",
+		"lastModifiedAt": "1692808466927"
+	},
+	"lastModifiedAt": "1692808466927",
+	"name": "sf1",
+	"policies": [
+		"Verify-API-Key-1"
+	],
+	"resourceFiles": {},
+	"sharedFlows": [
+		"default"
+	],
+	"type": "Application",
+	"revision": "1",
+	"description": "undefined"
+}
+
+ apigeecli sharedflows deploy -n sf1 -e prod1 -r -v1 -t $token
+{
+	"environment": "prod1",
+	"apiProxy": "sf1",
+	"revision": "1",
+	"deployStartTime": "1692808487397"
+}
+```
+
+
+### comment by srinandan (association=CONTRIBUTOR) at 2023-08-23T16:37:13Z
+You can also test this test, I am using a test sharedflow bundle in the [test](https://github.com/apigee/apigeecli/tree/main/test/sharedflowbundle) folder
+
+### comment by cygnus8595 (association=NONE) at 2023-08-23T16:39:14Z
+Unfortunately, the deploy response only shows successful deploy start. The UI will show the error I mentioned above.
+
+This is a screenshot of the error in the UI
+
+![image](https://github.com/apigee/apigeecli/assets/2982058/87b6a4c0-4cd9-4b11-aab6-00980417077a)
+
+
+### comment by srinandan (association=CONTRIBUTOR) at 2023-08-23T17:29:16Z
+I still wasn't able to reproduce it.
+
+
+```
+apigeecli sharedflows create -n sf3 -f ./test/sharedflowbundle -t $token
+{
+	"configurationVersion": {
+		"majorVersion": 4
+	},
+	"createdAt": "1692811596271",
+	"displayName": "test_flow",
+	"entityMetaDataAsProperties": {
+		"bundle_type": "zip",
+		"subType": "SharedFlow",
+		"createdAt": "1692811596271",
+		"lastModifiedAt": "1692811596271"
+	},
+	"lastModifiedAt": "1692811596271",
+	"name": "sf3",
+	"policies": [
+		"Verify-API-Key-1"
+	],
+	"resourceFiles": {},
+	"sharedFlows": [
+		"default"
+	],
+	"type": "Application",
+	"revision": "1",
+	"description": "undefined"
+}
+
+apigeecli sharedflows deploy -n sf3 -e dev -r -v 1 -t $token
+{
+	"environment": "dev",
+	"apiProxy": "sf3",
+	"revision": "1",
+	"deployStartTime": "1692811605257"
+}
+
+apigeecli sharedflows listdeploy -e dev -n sf3 -r 1
+{
+	"environment": "dev",
+	"apiProxy": "sf3",
+	"revision": "1",
+	"deployStartTime": "1692811605257",
+	"state": "READY",
+	"instances": [
+		{
+			"instance": "us-west1",
+			"deployedRevisions": [
+				{
+					"revision": "1",
+					"percentage": 100
+				}
+			]
+		}
+	]
+}
+```
+
+### comment by cygnus8595 (association=NONE) at 2023-08-23T20:17:50Z
+OK, so this is getting really weird. I cloned this repo and deployed the test shared flow EXACTLY the same way you did and it worked for me, too. 
+
+However, when I copied the test shared flow into my repo - not even doing anything else to it - the behavior was the same as the issue I'm dealing with. I did see something interesting though. For some reason, it's looking for the wrong xml file in the revision I created with the `./` notation:
+```
+apigeecli sharedflows listdeploy -e mobility-dev -n sf-test2 -o tcna-nonprod-apigee -t $token -r 3
+{
+        "environment": "mobility-dev",
+        "apiProxy": "sf-test2",
+        "revision": "3",
+        "deployStartTime": "1692821476473",
+        "state": "ERROR",
+        "errors": [
+                {
+                        "code": 2,
+                        "message": "instance \"us-east1\" reported error repository.FailedToLoadFile: \"Failed to load file : /sharedflows/test.xml\""
+                }
+        ],
+        "instances": [
+                {
+                        "instance": "us-east1"
+                }
+        ]
+}
+```
+These are the commands I used to create and deploy this revision:
+```
+apigeecli sharedflows create -n sf-test2 -f ./sharedflows/test/test_flow/sharedflowbundle -o tcna-nonprod-apigee -t 
+$token
+{
+        "configurationVersion": {
+                "majorVersion": 4
+        },
+        "createdAt": "1692820943670",
+        "displayName": "test_flow",
+        "entityMetaDataAsProperties": {
+                "createdAt": "1692820943670",
+                "lastModifiedAt": "1692820943670",
+                "bundle_type": "zip",
+                "subType": "SharedFlow"
+        },
+        "lastModifiedAt": "1692820943670",
+        "name": "sf-test2",
+        "policies": [
+                "Verify-API-Key-1"
+        ],
+        "resourceFiles": {},
+        "sharedFlows": [
+                "default"
+        ],
+        "type": "Application",
+        "revision": "3",
+        "description": "undefined"
+}
+
+apigeecli sharedflows deploy -n sf-test2 -e ce-dev -r -v 3 -o tcna-nonprod-apigee -t $token
+{
+        "environment": "ce-dev",
+        "apiProxy": "sf-test2",
+        "revision": "3",
+        "deployStartTime": "1692820956999"
+}
+```
+
+### comment by cygnus8595 (association=NONE) at 2023-08-28T19:59:52Z
+Is there any update on this? I ran into the same exact issue with a proxy deployment just now.
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-08-28T20:18:18Z
+I just tried the same commands and it worked as expected
+
+```
+apigeecli sharedflows create -n sf-test2 -f ./test/sharedflowbundle -o $ORG -t $TOKEN
+apigeecli sharedflows create -n sf-test3 -f ./dummy/test/test_sharedflow/sharedflowbundle -o $ORG -t $TOKEN
+```
+
+```
+apigeecli sharedflows deploy -n sf-test2 -e dev -o $ORG -t $TOKEN -r 1
+apigeecli sharedflows deploy -n sf-test3 -e dev -o $ORG -t $TOKEN -r 1
+```
+
+```
+apigeecli sharedflows listdeploy -e dev -t $TOKEN -o $ORG --->
+{
+	"deployments": [
+		{
+			"environment": "dev",
+			"apiProxy": "sf-test2",
+			"revision": "1",
+			"deployStartTime": "1693253449765"
+		},
+		{
+			"environment": "dev",
+			"apiProxy": "sf-test3",
+			"revision": "1",
+			"deployStartTime": "1693253602502"
+		}
+	]
+}
+```
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-08-28T20:19:41Z
+Are you trying this locally from your machine? how did you install apigeecli?
+
+Can you paste the output of `which apigeecli`  from the machine you are testing?
+
+### comment by cygnus8595 (association=NONE) at 2023-08-28T20:29:08Z
+This is being done from an apigeecli container from a GitLab CI pipeline. I will get the info shortly; however, the shared flow issue also happened on my local machine, with the following values:
+
+```
+❯ apigeecli --version
+apigeecli version 1.122 date: 2023-07-27T20:30:08Z [commit: 9997413]
+
+❯ which apigeecli
+/Users/john.inama/.apigeecli/bin//apigeecli
+```
+
+### comment by cygnus8595 (association=NONE) at 2023-08-28T20:36:21Z
+Here is the info from the pipeline container:
+```
+$ apigeecli --version
+apigeecli version 1.122 date: 2023-07-27T20:30:08Z [commit: 9997413]
+$ which apigeecli
+/usr/local/bin/apigeecli
+```
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-08-28T21:50:30Z
+> 
+
+Thanks for the info. Both @srinandan and I are not able to replicate the issue. Its working from our laptops and we use the same version
+
+### comment by kurtkanaskie (association=COLLABORATOR) at 2023-08-29T16:36:19Z
+All, I just tried reproducing this and it works fine using both a local path "./sharedflowbundle" or full path "/Users/kurtkanaskie/work/APIGEEX/SRC/sharedflows/log-set-values-v1/sharedflowbundle".
+
+But I did see an error when I used a name for the shared flow that is already in use by a proxy (e.g. test-n-delete).
+```
+apigeecli sharedflows create -n test-n-delete -f ./sharedflowbundle -o apigeex-mint-kurt -t $TOKEN
+{
+  "error": {
+    "code": 400,
+    "message": "cannot reserve proxy revision with type SHARED_FLOW; its parent has type PROXY",
+    "status": "FAILED_PRECONDITION",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.RequestInfo",
+        "requestId": "5563290539529193474"
+      }
+    ]
+  }
+}
+
+ERROR: 2023/08/29 12:33:47 bundles.go:270: Bad Request - malformed request syntax
+Error: Bad Request - malformed request syntax
+```
+
+Is that your error?
+
+### comment by cygnus8595 (association=NONE) at 2023-08-29T16:43:07Z
+Thanks for looking, but no, that's not it. Creation works fine, and deploy shows success on apigeecli (because it just checks for the deploy starting) but once deployed, there's an error where it can't find the base xml file. Sometimes it has the name wrong, too. But only when using `./` notation. It's odd and random and really annoying me!! :) 
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-09-20T19:11:57Z
+@cygnus8595  - we just released a beta version
+Can you try installing that and see if the fix works as expected?
+
+```
+export APIGEECLI_VERSION=v1.124.0-beta
+curl -L https://raw.githubusercontent.com/apigee/apigeecli/main/downloadLatest.sh | sh -
+```
+
+### comment by cygnus8595 (association=NONE) at 2023-09-20T20:31:32Z
+@ssvaidyanathan I downloaded the latest version and it works:
+
+`❯ apigeecli sharedflows create bundle -n from-scratch -f ./sharedflows/from-scratch/sharedflowbundle -t $token
+{
+        "configurationVersion": {
+                "majorVersion": 4
+        },
+        "createdAt": "1695241506070",
+        "entityMetaDataAsProperties": {
+                "bundle_type": "zip",
+                "subType": "SharedFlow",
+                "createdAt": "1695241506070",
+                "lastModifiedAt": "1695241506070"
+        },
+        "lastModifiedAt": "1695241506070",
+        "name": "from-scratch",
+        "resourceFiles": {},
+        "type": "Application",
+        "revision": "11"
+}`
+
+`❯ apigeecli sharedflows deploy -n from-scratch -e ce-dev -r -t $token
+{
+        "environment": "ce-dev",
+        "apiProxy": "from-scratch",
+        "revision": "11",
+        "deployStartTime": "1695241549053"
+}`
+
+`{
+        "environment": "mobility-dev",
+        "apiProxy": "from-scratch",
+        "revision": "11",
+        "deployStartTime": "1695241637466"
+}`
+
+![Screenshot 2023-09-20 at 4 28 51 PM](https://github.com/apigee/apigeecli/assets/2982058/eaf1b9cc-bf63-459d-a92b-3939efb8fc25)
+
+Thanks!
+
+
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-09-20T21:23:46Z
+Great news! We will release the version in a few days as we consolidate other fixes
+
+Thanks for checking and getting back to us

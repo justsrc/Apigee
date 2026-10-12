@@ -1,0 +1,110 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/ports.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/ports.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/ports.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/ports.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/ports.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/ports.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/ports.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/ports.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/ports.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/ports.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/ports.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/ports.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/ports.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/ports.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/ports.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/ports.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/ports.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/ports.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+Understanding which ports the hybrid runtime plane uses is important for enterprise implementations. This section describes the ports used for secure communications within the runtime plane as well as external ports used for communications with external services.
+
+## Internal connections
+
+Communication between the runtime plane and management plane is secured with TLS 1-way and OAuth 2.0. Individual services use different protocols, depending on which service they are communicating with.
+
+The certificates used for intra-component communication are generated by Apigee's certificate manager. You do not have to provide a certificate or manage it.
+
+The following image shows the ports and communications channels within the hybrid runtime plane:
+
+<img src="https://docs.cloud.google.com/apigee/docs/hybrid/v1.17/images/arch-internal-connections.png" style="width:100.0%" alt="Shows connections between internal components on the hybrid runtime plane" />
+
+The following table describes the ports and communications channels within the hybrid runtime plane:
+
+| Internal Connections |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- |
+| Source |  | Destination | Protocol/Ports | Security protocol | Description |
+| MART | arrow_right_alt | Cassandra | TCP/9042 TCP/9142 | mTLS | Sends data for persistence. |
+| Apigee Connect | arrow_right_alt | MART | TCP/8443 | TLS | Requests from the management plane go through Apigee Connect. Apigee Connect initiates the connection. |
+| Default Istio Ingress | arrow_right_alt | Message Processor | TCP/8443 | TLS (Apigee-generated, self-signed cert) | Processes incoming API requests. |
+| Message Processor | arrow_right_alt | Cassandra | TCP/9042 TCP/9142 | mTLS | Sends data for persistence. |
+| Message Processor | arrow_right_alt | fluentd (analytics / logging) | TCP/20001 | mTLS | Streams data to the data collection pod. |
+| Cassandra | compare_arrows | Cassandra | TCP/7001 TCP/7199 | mTLS | Intra-node cluster communications. |
+| Cassandra | compare_arrows | Cassandra | TCP/7001 | mTLS | Inter-region communications. |
+| Synchronizer | arrow_right_alt | Cassandra | TCP/9042 TCP/9142 | mTLS | Sends data for persistence. |
+| Prometheus (metrics) | arrow_right_alt | Cassandra | TCP/7070 (HTTPS) | TLS | Scrapes metrics data from various services. |
+| MART | TCP/8843 (HTTPS) | TLS |  |  |  |
+| Message Processor | TCP/8843 (HTTPS) | TLS |  |  |  |
+| Synchronizer | TCP/8843 (HTTPS) | TLS |  |  |  |
+| UDCA | TCP/7070 (HTTPS) | TLS |  |  |  |
+| Watcher | arrow_right_alt | Ingress pods | TCP/8843 | TLS | Polls to get deployment status. |
+
+## External connections
+
+To appropriately configure your network firewall, you should know the inbound and outbound ports used by hybrid to communicate with external services.
+
+The following image shows the ports used for external communications with the hybrid runtime plane:
+
+<img src="/static/apigee/docs/hybrid/v1.6/images/arch-external-connections.png" style="width:100.0%" alt="Shows connections with external services from the hybrid runtime plane" />
+
+The following table describes the ports used for external communications with the hybrid runtime plane:
+
+| External Connections |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- |
+| Source |  | Destination | Protocol/Port(s) | Security Protocol | Description |
+| Inbound Connections (exposed externally) |  |  |  |  |  |
+| Client Apps | arrow_right_alt | Default Istio Ingress | TCP/* | None/OAuth over TLS 1.2 | API requests from external apps. |
+| Outbound Connections |  |  |  |  |  |
+| Message Processor | arrow_right_alt | Backend services | TCP/* UDP/* | None/OAuth over TLS 1.2 | Sends requests to customer-defined hosts. |
+| Synchronizer | arrow_right_alt | Apigee Services | TCP/443 | OAuth over TLS 1.2 | Fetches configuration data; connects to apigee.googleapis.com . |
+| Google Cloud | Connects to iamcredentials.googleapis.com for authorization. |  |  |  |  |
+| UDCA (Analytics) | arrow_right_alt | Apigee Services (UAP) | TCP/443 | OAuth over TLS 1.2 | Sends data to UAP in the management plane and to Google Cloud; connects to apigee.googleapis.com and storage.googleapis.com . |
+| Apigee Connect | arrow_right_alt | Apigee Services | TCP/443 | TLS | Establishes the connection with the management plane; connects to apigeeconnect.googleapis.com . |
+| Prometheus (metrics) | arrow_right_alt | Google Cloud (Cloud Operations) | TCP/443 | TLS | Sends data to Cloud Operations in the management plane; connects to monitoring.googleapis.com . |
+| fluentd (logging) | arrow_right_alt | Google Cloud (Cloud Operations) | TCP/443 | TLS | Sends data to Cloud Operations in the management plane; connects to logging.googleapis.com |
+| MART | arrow_right_alt | Google Cloud | TCP/443 | OAuth over TLS 1.2 | Connects to iamcredentials.googleapis.com for authorization. |
+| Message Processor | arrow_right_alt | Distributed Trace back end | http or https | TLS (configurable) | (Optional) Communicates trace information to the Distributed Trace back end service. Configure the service and protocol in the TraceConfig API . The back end for Distributed Trace is usually Cloud Trace or Jaeger. |
+| Two-way Connections |  |  |  |  |  |
+| Apigee Connect | compare_arrows | Apigee Services | TCP/443 | TLS | Communicates management data between the managemennt plane and the Management API for runtime data (MART) in the runtime plane. Apigee Connect initiates the connection; connects to apigeeconnect.googleapis.com . Therefore, you do not need to configure your firewall for inbound connectivity. |
+| * indicates that the port is configurable. Apigee recommends using port 443. |  |  |  |  |  |
+
+You should not allow external connections for specific IP addresses associated with `*.googleapis.com`. The IP addresses can change since the domain currently resolves to multiple addresses.

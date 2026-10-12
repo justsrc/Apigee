@@ -1,0 +1,145 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances/list" class="section">
+
+- [HTTP request](#body.HTTP_TEMPLATE)
+- [Path parameters](#body.PATH_PARAMETERS)
+- [Query parameters](#body.QUERY_PARAMETERS)
+- [Request body](#body.request_body)
+- [Response body](#body.response_body)
+  - [JSON representation](#body.ListInstancesResponse.SCHEMA_REPRESENTATION)
+- [Authorization scopes](#body.aspect)
+- [Try it!](#try-it)
+
+<div id="google.cloud.apigee.v1.InstanceService.ListInstances" class="section">
+
+</div>
+
+<div id="description" class="section">
+
+Lists all Apigee runtime instances for the organization.
+
+**Note:** Not supported for Apigee hybrid.
+
+</div>
+
+<div id="body" class="section">
+
+<div id="body.HTTP_TEMPLATE" class="section">
+
+### HTTP request
+
+`GET https://apigee.googleapis.com/v1/{parent=organizations/*}/instances`
+
+The URL uses [gRPC Transcoding](https://google.aip.dev/127) syntax.
+
+</div>
+
+<div id="body.PATH_PARAMETERS" class="section">
+
+### Path parameters
+
+| Parameters |  |
+| --- | --- |
+| parent | string Required. Name of the organization. Use the following structure in your request: organizations/{org} . |
+
+</div>
+
+<div id="body.QUERY_PARAMETERS" class="section">
+
+### Query parameters
+
+| Parameters |  |
+| --- | --- |
+| pageSize | integer Maximum number of instances to return. Defaults to 25. |
+| pageToken | string Page token, returned from a previous instances.list call, that you can use to retrieve the next page of content. |
+
+</div>
+
+<div id="body.request_body" class="section">
+
+### Request body
+
+The request body must be empty.
+
+</div>
+
+<div id="body.response_body" class="section">
+
+### Response body
+
+<div id="body.ListInstancesResponse" class="section">
+
+<div id="body.ListInstancesResponse.description" class="section">
+
+Response for [`instances.list`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances/list#google.cloud.apigee.v1.InstanceService.ListInstances).
+
+If successful, the response body contains data with the following structure:
+
+</div>
+
+<div id="body.ListInstancesResponse.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;instances&quot;: [
+    {
+      object (Instance)
+    }
+  ],
+  &quot;nextPageToken&quot;: string
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="body.ListInstancesResponse.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| instances[] | object ( Instance ) Instances in the specified organization. |
+| nextPageToken | string Page token that you can include in a ListInstance request to retrieve the next page of content. If omitted, no subsequent pages exist. |
+
+</div>
+
+</div>
+
+</div>
+
+<div id="body.aspect" class="section">
+
+### Authorization scopes
+
+Requires the following OAuth scope:
+
+- `https://www.googleapis.com/auth/cloud-platform`
+
+</div>
+
+</div>
+
+<div id="try-it" class="section">
+
+<div class="devsite-apix">
+
+<div class="apis-explorer" discovery-rest-url="https://apigee.googleapis.com/$discovery/rest?version=v1" method-id="apigee.organizations.instances.list" params="">
+
+</div>
+
+</div>
+
+</div>
+
+</div>

@@ -1,0 +1,93 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups/create" class="section">
+
+- [HTTP request](#body.HTTP_TEMPLATE)
+- [Path parameters](#body.PATH_PARAMETERS)
+- [Query parameters](#body.QUERY_PARAMETERS)
+- [Request body](#body.request_body)
+- [Response body](#body.response_body)
+- [Authorization scopes](#body.aspect)
+- [Try it!](#try-it)
+
+<div id="google.cloud.apigee.v1.EnvironmentGroupService.CreateEnvironmentGroup" class="section">
+
+</div>
+
+<div id="description" class="section">
+
+Creates a new environment group.
+
+</div>
+
+<div id="body" class="section">
+
+<div id="body.HTTP_TEMPLATE" class="section">
+
+### HTTP request
+
+`POST https://apigee.googleapis.com/v1/{parent=organizations/*}/envgroups`
+
+The URL uses [gRPC Transcoding](https://google.aip.dev/127) syntax.
+
+</div>
+
+<div id="body.PATH_PARAMETERS" class="section">
+
+### Path parameters
+
+| Parameters |  |
+| --- | --- |
+| parent | string Required. Name of the organization in which to create the environment group in the following format: organizations/{org} . Authorization requires the following IAM permission on the specified resource parent : apigee.envgroups.create |
+
+</div>
+
+<div id="body.QUERY_PARAMETERS" class="section">
+
+### Query parameters
+
+| Parameters |  |
+| --- | --- |
+| name | string Optional. ID of the environment group. Overrides any ID in the environmentGroup resource. |
+
+</div>
+
+<div id="body.request_body" class="section">
+
+### Request body
+
+The request body contains an instance of [`EnvironmentGroup`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups#EnvironmentGroup).
+
+</div>
+
+<div id="body.response_body" class="section">
+
+### Response body
+
+If successful, the response body contains a newly created instance of [`Operation`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.operations#Operation).
+
+</div>
+
+<div id="body.aspect" class="section">
+
+### Authorization scopes
+
+Requires the following OAuth scope:
+
+- `https://www.googleapis.com/auth/cloud-platform`
+
+</div>
+
+</div>
+
+<div id="try-it" class="section">
+
+<div class="devsite-apix">
+
+<div class="apis-explorer" discovery-rest-url="https://apigee.googleapis.com/$discovery/rest?version=v1" method-id="apigee.organizations.envgroups.create" params="">
+
+</div>
+
+</div>
+
+</div>
+
+</div>

@@ -1,0 +1,76 @@
+This section describes the backup and restore tasks in an on-premises installation of Apigee Edge. It is recommended that you should always create a backup of Apigee Edge components, i.e. configuration and data, at regular intervals and ensure that recovery is performed in an event of a system failure. Backup and restore procedures enable you to restore the state of an entire system (including all components), without affecting other parts of the system.
+
+## What to back up
+
+In an on-premises deployment of Apigee Edge, you must back up the following Edge components:
+
+- `apigee-cassandra` (Cassandra)
+- `apigee-openldap` (OpenLDAP)
+- `apigee-postgresql` (PostgreSQL database)
+- `apigee-qpidd` (Qpidd)
+- `apigee-sso` (Edge SSO)
+- `apigee-zookeeper` (ZooKeeper)
+- `edge-management-server` (Management Server)
+- `edge-management-ui` (new Edge UI)
+- `edge-message-processor` (Message Processor)
+- `edge-postgres-server` (Postgres Server)
+- `edge-qpid-server` (Qpid Server)
+- `edge-router` (Edge Router)
+- `edge-ui` (Classic UI)
+
+**Note**: In a Postgres master/standby configuration, you only backup the Master. You do not have to backup the standby (or *slave*).
+
+## Recovery time objective (RTO) vs. Recovery point objective (RPO)
+
+The RTO is the duration of time and a service level within which a business process must be restored after a disaster (or disruption) in order to avoid unacceptable consequences associated with a break in business continuity.
+
+A RPO is the maximum tolerable period in which data might be lost from an IT service due to a major incident. Both objectives must be taken into consideration before you implement a backup plan for your recovery strategy.
+
+## Before you start: useful facts
+
+You may observe that installation data is distributed across several systems, for example organizations are in LDAP, ZooKeeper and Cassandra. Make sure that you take care of the following notes about backup and restore:
+
+- If you have multiple Cassandra nodes, back them up one at a time.
+
+- If you have multiple ZooKeeper nodes, back them up one at a time. The backup process temporarily shuts down ZooKeeper.
+
+- If you have multiple Postgres nodes, back them up one at a time.
+
+- You can back up all other Edge components at the same time on all nodes by using tools such as Ansible or Chef.
+
+- When you restore one of ZooKeeper, Cassandra or LDAP nodes it is recommended to restore all three nodes in order to achieve consistency (especially when organizations/environments have been created since backup was created).
+  **Note**: The above does not affect restoration of one Cassandra or ZooKeeper node in a datastore cluster, since no backup is used.
+
+- If LDAP or global administrator passwords are lost/corrupted, a complete backup is required in order to get the same credentials for the last backup and running system.
+
+- The backup utility writes the generated backup file to `/opt/apigee/backup/``comp` where `comp` is the name of the component. Because you can generate many backup files, and because these files can get large, you can mount a separate disk at `/opt/apigee/backup` just for backup files.
+
+- All backup files, except for PostgreSQL, are named in the form:
+
+  <div>
+
+  </div>
+
+  ```
+  backup-year.month.day,hour.min.seconds.tar.gz
+  ```
+
+  For example:
+
+  <div>
+
+  </div>
+
+  ```
+  backup-2018.05.29,11.13.41.tar.gz
+  ```
+
+  PostgreSQL backup files are named:
+
+  <div>
+
+  </div>
+
+  ```
+  year.month.day,hour.min.seconds.dump
+  ```

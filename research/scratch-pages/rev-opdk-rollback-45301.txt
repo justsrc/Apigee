@@ -1,0 +1,1266 @@
+# On nodes where Cassandra is upgraded
+/opt/apigee/apigee-cassandra/bin/nodetool describecluster
+Cluster Information:
+    Name: Apigee
+    Snitch: org.apache.cassandra.locator.PropertyFileSnitch
+    DynamicEndPointSnitch: enabled
+    Partitioner: org.apache.cassandra.dht.RandomPartitioner
+    Schema versions:
+        2eadcd74-0245-309a-9992-3625afa70038: [DC-1-IP1, DC-1-IP2, DC-1-IP3]
+        129dc15e-198e-3c11-b64c-701044a3a1ad: [DC-2-IP1, DC-2-IP2, DC-2-IP3]
+
+Stats for all nodes:
+    Live: 6
+    Joining: 0
+    Moving: 0
+    Leaving: 0
+    Unreachable: 0
+
+Data Centers:
+    dc-1 #Nodes: 3 #Down: 0
+    dc-2 #Nodes: 3 #Down: 0
+
+Database versions:
+    4.0.13: [DC-1-IP1:7000, DC-1-IP2:7000, DC-1-IP3:7000]
+    3.11.16: [DC-2-IP1:7000, DC-2-IP2:7000, DC-2-IP3:7000]
+
+Keyspaces:
+    system_schema -> Replication class: LocalStrategy {}
+    system -> Replication class: LocalStrategy {}
+    auth -> Replication class: NetworkTopologyStrategy {dc-2=3, dc-1=3}
+    cache -> Replication class: NetworkTopologyStrategy {dc-2=3, dc-1=3}
+    devconnect -> Replication class: NetworkTopologyStrategy {dc-2=3, dc-1=3}
+    dek -> Replication class: NetworkTopologyStrategy {dc-2=3, dc-1=3}
+    user_settings -> Replication class: NetworkTopologyStrategy {dc-2=3, dc-1=3}
+    apprepo -> Replication class: NetworkTopologyStrategy {dc-2=3, dc-1=3}
+    kms -> Replication class: NetworkTopologyStrategy {dc-2=3, dc-1=3}
+    identityzone -> Replication class: NetworkTopologyStrategy {dc-2=3, dc-1=3}
+    audit -> Replication class: NetworkTopologyStrategy {dc-2=3, dc-1=3}
+    analytics -> Replication class: NetworkTopologyStrategy {dc-2=3, dc-1=3}
+    keyvaluemap -> Replication class: NetworkTopologyStrategy {dc-2=3, dc-1=3}
+    counter -> Replication class: NetworkTopologyStrategy {dc-2=3, dc-1=3}
+    apimodel_v2 -> Replication class: NetworkTopologyStrategy {dc-2=3, dc-1=3}
+    system_distributed -> Replication class: SimpleStrategy {replication_factor=3}
+    system_traces -> Replication class: SimpleStrategy {replication_factor=2}
+    system_auth -> Replication class: SimpleStrategy {replication_factor=1}
+
+# On nodes where Cassandra is not upgraded
+/opt/apigee/apigee-cassandra/bin/nodetool describecluster
+Cluster Information:
+    Name: Apigee
+    Snitch: org.apache.cassandra.locator.PropertyFileSnitch
+    DynamicEndPointSnitch: enabled
+    Partitioner: org.apache.cassandra.dht.RandomPartitioner
+    Schema versions:
+        2eadcd74-0245-309a-9992-3625afa70038: [DC-1-IP1, DC-1-IP2, DC-1-IP3]
+        129dc15e-198e-3c11-b64c-701044a3a1ad: [DC-2-IP1, DC-2-IP2, DC-2-IP3]
+        
+```
+
+**Identify the seed nodes in the data center:** Refer to the section [How to identify seed nodes](#identify-seed-nodes) in the Appendix. Execute the steps below on one of the seed nodes:
+
+Stop, uninstall, and clean up data from the node of Cassandra. Pick the first seed node on Cassandra version 4 in this data center. Stop it.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+# Stop Cassandra service on the node
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra stop
+
+# Uninstall Cassandra software
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra uninstall
+
+# Wipe out Cassandra data
+rm -rf /opt/apigee/data/apigee-cassandra
+        
+```
+
+Install the older Cassandra software on the node and set some configurations. Execute the bootstrap file of Edge for Private Cloud 4.52.02.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+# Download bootstrap of 4.52.02
+curl https://software.apigee.com/bootstrap_4.52.02.sh -o /tmp/bootstrap_4.52.02.sh -u uName:pWord
+
+# Execute bootstrap of 4.52.02
+sudo bash /tmp/bootstrap_4.52.02.sh apigeeuser=uName apigeepassword=pWord
+    
+```
+
+Create or edit the file `/opt/apigee/customer/application/cassandra.properties`.
+
+Add the following contents to the file. `ipOfNode` is the IP address of the node that Cassandra uses to communicate with other Cassandra nodes:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+conf_jvm_options_custom_settings=-Dcassandra.replace_address=ipOfNode -Dcassandra.allow_unsafe_replace=true
+```
+
+Ensure the file is owned and readable by the apigee user:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+chown apigee:apigee /opt/apigee/customer/application/cassandra.properties
+```
+
+Install and set up Cassandra:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+# Install cassandra version 3.11.X
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra install
+# Setup cassandra while passing standard configuration file
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra setup -f configFile
+# Ensure Cassandra version is correct and service is running
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra version
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra status
+```
+
+Verify that the node has started. Check the following command on this node and other nodes in the cluster. The node should report that it is in the "UN" (Up/Normal) state:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-cassandra/bin/nodetool status
+```
+
+Remove the extra configurations added earlier from the file `/opt/apigee/customer/application/cassandra.properties`.
+
+Repeat steps 3 to 10 on all Cassandra seed nodes in the data center, one by one.
+
+Repeat steps 3 to 10 on all remaining Cassandra nodes in the data center, one by one.
+
+Rebuild all the nodes in the data center from a data center running the older Cassandra version. Perform this step one node at a time:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-cassandra/bin/nodetool rebuild -dc <name of working DC>
+```
+
+This procedure may take time. You can adjust `streamingthroughput` if needed. Check `nodetool netstats` for the status of operation completion.
+
+(Optional) Execute the repair command in the Cassandra node if data is not getting rebuilt.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-cassandra/bin/nodetool -h node-IP repair -pr
+```
+
+Restart all edge-\* components in the data center, one by one:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service edge-message-processor restart
+/opt/apigee/apigee-service/bin/apigee-service edge-router restart
+/opt/apigee/apigee-service/bin/apigee-service edge-management-server restart
+/opt/apigee/apigee-service/bin/apigee-service edge-qpid-server restart
+/opt/apigee/apigee-service/bin/apigee-service edge-postgres-server restart
+```
+
+Validate and divert traffic back to this data center. Run some validations for runtime traffic and management APIs in this data center, and start rerouting proxy and management API traffic back to it.
+
+Repeat the above steps for each data center you want to roll back.
+
+### Rollback Cassandra using Backup
+
+#### Prerequisites
+
+1.  You are in the process of upgrading Cassandra from 3.11.X to 4.0.X and have encountered issues during the upgrade.
+2.  You have backups for the node you are rolling back. The backup was taken before the upgrade from 3.11.X to 4.0.X was attempted.
+
+**Warning:** Restoring backups without having replicas available to rebuild will result in data loss. Any data written to Cassandra between the time the backup was taken and the time it is restored will be lost.
+
+#### Steps
+
+Select one node you want to roll back. If you are rolling back all nodes in a data center using backups, start with the seed nodes first. Refer to the section "How to Identify Seed Nodes" in the Appendix.
+
+Stop, uninstall, and clean up the Cassandra node:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+# Stop Cassandra service on the node
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra stop
+
+# Uninstall Cassandra software
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra uninstall
+
+# Wipe Cassandra data
+rm -rf /opt/apigee/data/apigee-cassandra
+```
+
+Install the older Cassandra software on the node and configure it:
+
+Execute the bootstrap file for Edge for Private Cloud 4.52.02:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+# Download bootstrap for 4.52.02
+curl https://software.apigee.com/bootstrap_4.52.02.sh -o /tmp/bootstrap_4.52.02.sh -u ‘uName:pWord’
+
+# Execute bootstrap for 4.52.02
+sudo bash /tmp/bootstrap_4.52.02.sh apigeeuser=uName apigeepassword=pWord
+```
+
+Create or edit the file `/opt/apigee/customer/application/cassandra.properties`:
+
+<div>
+
+</div>
+
+```
+conf_jvm_options_custom_settings=-Dcassandra.replace_address=ipOfNode -Dcassandra.allow_unsafe_replace=true
+```
+
+Ensure the file is owned by the apigee user and is readable:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+chown apigee:apigee /opt/apigee/customer/application/cassandra.properties
+```
+
+Install and set up Cassandra:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+# Install Cassandra version 3.11.X
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra install
+
+# Set up Cassandra with the standard configuration file
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra setup -f configFile
+
+# Verify Cassandra version and check service status
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra version
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra status
+```
+
+Verify that the node has started. Check the following command on this node and other nodes in the cluster. Nodes should report that this node is in the "UN" state:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-cassandra/bin/nodetool status
+```
+
+Stop the Cassandra service and restore the backup. Refer to the backup and restore documentation for more details:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+# Stop Cassandra service on the node
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra stop
+
+# Wipe the data directory in preparation for restore
+rm -rf /opt/apigee/data/apigee-cassandra/data
+
+# Restore the backup taken before the upgrade attempt
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra restore backupFile
+        
+```
+
+Once the backup is restored, remove the additional configurations:
+
+Remove the configuration added earlier from the file `/opt/apigee/customer/application/cassandra.properties`.
+
+Start the Cassandra service on the node:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra start
+```
+
+Repeat the steps on each Cassandra node you wish to roll back using backups, one at a time.
+
+Once all Cassandra nodes are restored, restart all edge-\* components one by one:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service edge-message-processor restart
+/opt/apigee/apigee-service/bin/apigee-service edge-router restart
+/opt/apigee/apigee-service/bin/apigee-service edge-management-server restart
+/opt/apigee/apigee-service/bin/apigee-service edge-qpid-server restart
+/opt/apigee/apigee-service/bin/apigee-service edge-postgres-server restart
+        
+```
+
+#### Backup optimizations (advanced option)
+
+You can potentially minimize (or eliminate) data loss while restoring backups if you have replicas available that contain the latest data. If replicas are available, after restoring the backup, run a repair on the node that was restored.
+
+### Appendix
+
+#### How to identify seed nodes
+
+On any Cassandra node in a data center, run the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra configure -search conf_cassandra_seeds
+```
+
+The command will output multiple lines. Look for the last line of the output. The IP addresses listed in the last line are the seed nodes. In the example below, `DC-1-IP1`, `DC-1-IP2`, `DC-2-IP1`, and `DC-2-IP2` are the seed node IPs:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+Found key conf_cassandra_seeds, with value, "127.0.0.1", in /opt/apigee/apigee-cassandra/token/default.properties
+
+Found key conf_cassandra_seeds, with value, 127.0.0.1, in /opt/apigee/apigee-cassandra/token/application/cassandra.properties
+
+Found key conf_cassandra_seeds, with value, "DC-1-IP1, DC-1-IP2, DC-2-IP1, DC-2-IP2", in /opt/apigee/token/application/cassandra.properties
+apigee-configutil: apigee-cassandra: # OK
+```
+
+**Note:** The IP addresses such as `DC-1-IP1` and similar are representative. In your output, you will see actual IP addresses.
+
+## Rollback the Zookeeper 3.8.4 update
+
+### Rollback
+
+In case a rollback is required:
+
+1.  Perform rollback steps on observers and followers first.
+
+2.  Download and execute bootstrap of the version you're rolling back to—either 4.52.02 or 4.53.00. The process will likely vary depending on whether the node has an external internet connection or you're following offline installation.
+
+3.  Stop Zookeeper if it is running on the node:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+      /opt/apigee/apigee-service/bin/apigee-service apigee-zookeeper stop
+    ```
+
+4.  Uninstall existing zookeeper:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+      /opt/apigee/apigee-service/bin/apigee-service apigee-zookeeper uninstall
+    ```
+
+5.  Install Zookeeper as usual:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+      /opt/apigee/apigee-setup/bin/setup.sh -p zk -f <silent-config-file>
+    ```
+
+6.  Once all followers and observers have been rolled back, roll back the leader node by following steps 2 through 5 on the leader node.
+
+7.  After all the nodes have been rolled back, verify the cluster health and ensure there is a leader node in the cluster.
+
+### Restore backup
+
+Refer to [Restore from a backup](/private-cloud/v4.53.01/how-perform-restore). Note that backups of Zookeeper taken from earlier versions of Edge for Private Cloud like 4.52.02 or 4.53.00 should be compatible with the version of Zookeeper in Edge for Private Cloud 4.53.01
+
+## Roll back the Postgres 17 update
+
+If you upgraded to 4.53.01 from version 4.52.02 or 4.53.00, you must roll back your Postgres update in addition to the Edge components.
+
+To rollback the Postgres update when updating Postgres in a master-standby configuration:
+
+- Promote the new standby node to become the Postgres master. The new Postgres master will be the same version as your previous Edge installation.
+- Configure the old standby node to be a standby node of the new master. The old standby node will be the same version as your previous Edge installation.
+- Register the new master and standby nodes with the analytics and consumer groups.
+
+When you are done with the rollback, the old master node will no longer be necessary. You can then decommission the old master node.
+
+**Note:** If you are performing an update in an environment that uses a single Postgres node, such as the [all-in-one](/private-cloud/v4.53.01/installation-topologies#allinoneinstallation) and [2-node](/private-cloud/v4.53.01/installation-topologies#standaloneinstallation2host) topologies, there is no rollback procedure.
+
+In the situation where the update of these topologies fails, try the rollback procedure again. If the rollback continues to fail after multiple attempts, then Apigee recommends that you do a fresh install of the previous version.
+
+### Before you begin
+
+Before performing an rollback Postgres 17 to 14, do the following steps on both the new standby host and old standby, to update the `max_locks_per_transaction` property on `apigee-postgresql`:
+
+1.  If not present, create the file `/opt/apigee/customer/application/postgresql.properties`
+
+2.  Change the ownership of this file to apigee:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    sudo chown apigee:apigee /opt/apigee/customer/application/postgresql.properties
+    ```
+
+3.  Add the following property to the file:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    conf/postgresql.conf+max_locks_per_transaction=30000
+    ```
+
+4.  Configure apigee-postgresql:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-postgresql configure
+    ```
+
+5.  Restart apigee-postgresql:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-postgresql restart
+    ```
+
+**Note:** You must perform these steps on both the new standby host and old standby host.
+
+Make sure the new standby Postgres node is running:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-all status
+```
+
+If Postgres is not running, start it:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-all start
+```
+
+Make sure Postgres is stopped on the old master node and old standby node:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-all status
+```
+
+If Postgres is running, stop it:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service edge-postgres-server stop  
+/opt/apigee/apigee-service/bin/apigee-service apigee-postgresql stop
+```
+
+If installed, start Qpid on the old standby node:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service edge-qpid-server start
+```
+
+**Note**: In many configurations, the old standby node will only be hosting Postgres but not Qpid.
+
+Promote the new standby node as the Postgres master:
+
+1.  Promote the new standby node to be the **new master**:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-postgresql promote-standby-to-master old_master_IP
+    ```
+
+    If prompted, enter the Postgres password for the 'apigee' user, which defaults to "postgres".
+
+2.  Edit the config file that you used to install your current version of Edge to specify the following:
+
+    <div>
+
+    </div>
+
+    ```
+    # IP address of the new master:
+    PG_MASTER=new_standby_IP
+    # IP address of the old standby node
+    PG_STANDBY=old_standby_IP
+    ```
+
+3.  Configure the **new master**:  
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-postgresql setup-replication-on-master -f configFile
+    ```
+
+If you have already upgraded the old standby node to the newer version, you must first downgrade Apigee software on the old standby node. If you still have the older version on the old standby node, you can skip this step and continue with step 6.
+
+1.  Stop Postgres on the old standby node:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-postgresql stop
+    apigee-service edge-postgres-server stop
+    ```
+
+2.  Uninstall Postgres from the old standby node:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-postgresql uninstall
+    apigee-service edge-postgres-server uninstall
+    ```
+
+3.  Delete the Postgres data directory from the old standby node:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    cd /opt/apigee/data/apigee-postgresql/pgdata
+    rm -rf *
+    ```
+
+4.  Download and run the older version bootstrap (for the Apigee version you are rolling back to) on the old standby node. The exact steps may vary based on whether you're using internet based or offline installation. Running the older version Apigee bootstrap will set up the yum repositories with older version Apigee data.
+
+5.  Set up Postgres components on the old standby node:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/setup.sh -p ps -f configFile
+    ```
+
+6.  Check and verify that Postgres components on the old standby node have been rolled back to the older version:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-postgresql version
+    apigee-service edge-postgres-server version
+    ```
+
+**Note**: Please ensure to remove the rpm `postgresql17-libs-17.4-1PGDG` if it still exists.
+
+Rebuild the old standby node:
+
+1.  Edit the config file that you used to install your current version of Edge to specify the following:
+
+    <div>
+
+    </div>
+
+    ```
+    # IP address of the new master:
+    PG_MASTER=new_standby_IP
+    # IP address of the old standby node
+    PG_STANDBY=old_standby_IP
+    ```
+
+2.  Remove the data directory on the old standby node:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    cd /opt/apigee/data/apigee-postgresql/pgdata
+    rm -rf *
+    ```
+
+3.  Reconfigure the old standby node to be a standby node of the new master:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-postgresql setup-replication-on-standby -f configFile
+    ```
+
+4.  Make sure Postgres is running on the old standby node:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-all status
+    ```
+
+    If Postgres is not running, start it:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service edge-postgres-server start
+    ```
+
+Verify that the new standby node was added by viewing the `/opt/apigee/apigee-postgresql/conf/pg_hba.conf` file on the new master.
+
+View the current analytics and consumer group information by running the following command on the Management Server:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -u sysAdminEmail:password http://ms_IP:8080/v1/analytics/groups/ax
+```
+
+This command returns the analytics group name in the `name` field, and the consumer group name in the `name` field under `consumer-groups`. It also returns the UUIDs of the old Postgres master and standby nodes in the `postgres-server` field, and in the `datastores` field. You should see output in the form:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "name" : "axgroup-001",
+  "properties" : {
+  },
+  "scopes" : [ "VALIDATE~test", "sgilson~prod" ],
+  "uuids" : {
+    "qpid-server" : [ "8381a053-433f-4382-bd2a-100fd37a1592", "4b6856ec-ef05-498f-bac6-ef5f0d5f6521" ],
+    "postgres-server" : [
+      "ab1158bd-1d59-4e2a-9c95-24cc2cfa6edc:27f90844-efab-4b32-8a23-8f85cdc9a256"
+    ]
+  },
+  "consumer-groups" : [ {
+    "name" : "consumer-group-001",
+    "consumers" : [ "8381a053-433f-4382-bd2a-100fd37a1592", "4b6856ec-ef05-498f-bac6-ef5f0d5f6521" ],
+    "datastores" :
+      [ "ab1158bd-1d59-4e2a-9c95-24cc2cfa6edc:27f90844-efab-4b32-8a23-8f85cdc9a256" ],
+      "properties" : {     }
+    }
+  ],
+  "data-processors" : {
+  }
+}
+```
+
+Get the UUID address of the old master by running the following `curl` command on the old master node:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -u sysAdminEmail:password http://node_IP:8084/v1/servers/self
+```
+
+You should see the UUID of the node at the end of the output, in the form:
+
+<div>
+
+</div>
+
+```
+"type" : [ "postgres-server" ],
+"uUID" : "599e8ebf-5d69-4ae4-aa71-154970a8ec75"
+```
+
+**Note**: The `edge-postgres-server` service must be running. If the Postgres server is not running, you can run the following command on the Management Server to determine the UUID:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -u sysAdminEmail:password http://ms_IP:8080/v1/servers?pod=analytics
+```
+
+The output of this command lists the UUID for the IP address of each Postres node.
+
+Repeat previous step to get the IP addresses of the old standby node and the new master.
+
+Remove old master and standby nodes from the consumer group:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -u sysAdminEmail:password -X DELETE \
+  "http://ms_IP:8080/v1/analytics/groups/ax/axgroup-001/consumer-groups/consumer-group-001/datastores/masterUUID,standbyUUID" -v
+```
+
+Where `axgroup-001` and `consumer-group-001` are the default names of the analytics and consumer groups. `masterUUID,standbyUUID` are in the same order as they appeared above when you viewed the current analytics and consumer group information above. You might have to specify them as `standbyUUID,masterUUID`.
+
+The `datastores` property for `consumer-groups` should now be empty.
+
+Remove the old master and standby nodes from the analytics group:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -u sysAdminEmail:password -X DELETE \
+  "http://ms_IP:8080/v1/analytics/groups/ax/axgroup-001/servers?uuid=masterUUID,standbyUUID&type=postgres-server" -v
+```
+
+The `postgres-server` property under `uuids` should now be empty.
+
+Register new PG master and standby nodes with the analytics and consumer groups:  
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -u sysAdminEmail:password -X POST -H "Content-Type: application/json" -d ''
+  "http://ms_IP:8080/v1/analytics/groups/ax/axgroup-001/servers?uuid=masterUUID,standbyUUID&type=postgres-server" -v
+curl -u sysAdminEmail:password -X POST -H "Content-Type:application/json" -d ''
+  "http://ms_IP:8080/v1/analytics/groups/ax/axgroup-001/consumer-groups/consumer-group-001/datastores?uuid=masterUUID,standbyUUID" -v
+```
+
+Validate the analytics group:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -u sysAdminEmail:password http://ms_IP:8080/v1/analytics/groups/ax
+```
+
+You should see the UUIDs of the new master and standby nodes listed in the analytics group and the consumer group.
+
+Restart the Edge Management Server:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service edge-management-server restart
+```
+
+Restart all Qpid servers:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service edge-qpid-server restart
+```
+
+Restart all Postgres servers:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service edge-postgres-server restart
+```
+
+Verify the replication status by issuing the following scripts on both servers. The system should display identical results on both servers to ensure a successful replication:
+
+On the new master, run:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service apigee-postgresql postgres-check-master
+```
+
+Verify that it is the master. On the old standby node:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service apigee-postgresql postgres-check-standby
+```
+
+Verify that it is the standby.
+
+Repeat the previous step after making several API requests to ensure that the nodes are in synch.
+
+Decommission the old Postgres master using the procedure in [Decommissioning a Postgres node](/private-cloud/v4.53.01/update-apigee-edge-45202-45301#decom).
+
+**Note**: If the old master node was running Qpid, you can leave that server up to run Qpid. Ensure that it is running. If not, start it:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service edge-management-server start
+```
+
+Alternatively, you can [uninstall Qpid from the old master and install Qpid on the new master node](/private-cloud/v4.53.01/add-or-remove-qpid-nodes). After uninstalling Qpid, you can decommission the old master node.
+
+## Rollback the LDAP 2.6 update
+
+This section provides a comprehensive, step-by-step guide for rolling back a LDAP installation to a previous LDAP version. The rollback must be performed on the entire LDAP cluster and is only possible using a valid pre-upgrade LDAP backup.
+
+The primary goal is to revert the entire LDAP cluster to a consistent state from a known - good backup. This procedure is the same for all scenarios - single server, active-active, and active-passive.
+
+### Prerequisites and considerations
+
+- **Backup incompatibility:** Use a backup from the older 2.4 LDAP version that you were running with Edge for Private Cloud 4.52.02 or 4.53.00. This backup must have been taken before the upgrade was attempted. Backups taken after the upgrade are incompatible and cannot be used.
+- **Management API downtime:** During the LDAP rollback, management APIs will be unavailable, which may impact administrative tasks. Please make sure to shutdown all edge-management-server and edge-ui before proceeding further with LDAP rollback.
+- **Risk of data loss:** Proceeding without a valid, compatible backup risks irreversible data loss.
+- **Valid backup:** A valid pre-upgrade LDAP backup is required.
+
+### Rollback procedure
+
+Please make sure to shutdown all edge-management-server and edge-ui before proceeding further with LDAP upgrade.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+apigee-service edge-management-server stop
+apigee-service edge-ui stop
+```
+
+**Backup existing LDAP Data (Before stopping LDAP)**
+
+Get total record count for reference from all ldap servers. (The record count should match across all LDAP servers)
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+      # Note: Replace 'YOUR_PASSWORD' with your current LDAP manager password. 
+ldapsearch -o ldif-wrap=no -b "dc=apigee,dc=com" \ -D "cn=manager,dc=apigee,dc=com" -H ldap://:10389 -LLL -x -w 'YOUR_PASSWORD' | wc -l
+```
+
+**Stop and uninstall new LDAP 2.6**
+
+Stop the `apigee-openldap` service and delete its configuration and data directories. This must be performed on all LDAP servers, one node at a time in the cluster to ensure consistency.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+apigee-service apigee-openldap stop
+apigee-service apigee-openldap uninstall
+rm -rf /opt/apigee/data/apigee-openldap/*
+```
+
+**Install old LDAP 2.4 version**
+
+- **Install old LDAP version:**
+
+  <div>
+
+  </div>
+
+  ``` devsite-terminal
+
+  /opt/apigee/apigee-setup/bin/setup.sh -p ld -f /opt/silent.conf
+  ```
+
+- **Validate LDAP version:**
+
+  <div>
+
+  </div>
+
+  ``` devsite-terminal
+
+  source ~/.bash_profile
+  ldapsearch -VV
+
+  #Expected output:
+  ldapsearch: @(#) $OpenLDAP: ldapsearch 2.4.46
+  ```
+
+- **Repeat the above Steps on each LDAP node, one at a time**
+
+**Clean residual data**
+
+On all LDAP servers, one at a time, stop the newly installed service and clean its data directory to prepare for the restore from backup.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+apigee-service apigee-openldap stop
+rm -rf /opt/apigee/data/apigee-openldap/*
+```
+
+**Restore LDAP data**
+
+For single-server setup, you can proceed directly to step 5b. For multi server setup, proceed with step 5a.
+
+1.  **Identify the active LDAP server**
+
+    Before restoring LDAP data, identify the active server (provider) by running this command.
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    grep -i '^olcSyncrepl:' /opt/apigee/data/apigee-openldap/slapd.d/cn=config/olcDatabase*\ldif
+
+    * **Note**:
+    * If this command returns output, the server is a passive server. 
+    * If it returns no output, the server is the active server.
+    ```
+
+2.  **Restore LDAP data (Ensure step 4 is completed across all servers before restoring.)**
+    - On the single and active LDAP server (determined in Step 5a), restore the backup.
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+
+      cd /opt/apigee/backup/openldap
+
+      # To restore a specific backup, provide the timestamp as shown below:
+      apigee-service apigee-openldap restore 2025.07.28,13.59.00
+      # Note: If no timestamp is provided, the latest available backup will be restored by default.
+      apigee-service apigee-openldap restore
+
+      # It is recommended to specify the backup explicitly to avoid restoring an unintended version.
+      ```
+
+    - Start the apigee-openldap service.
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+
+      apigee-service apigee-openldap start
+      ```
+
+**Start remaining LDAP servers**
+
+If you have a multi server setup, on each of the LDAP servers, start the service:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+apigee-service apigee-openldap start
+```
+
+**Note:** You do not need to restore data manually on these peer servers. Upon starting, they will connect to the first server (which now contains the restored data) and automatically synchronize the entire directory via replication.
+
+**Final validation**
+
+- The final step is to verify that the rollback was successful and that data is consistent across the entire LDAP cluster.
+
+- Run the validation command on all LDAP servers. The record count should be identical across all servers and must match the count you captured in Step 1.
+
+  <div>
+
+  </div>
+
+  ``` devsite-terminal
+
+  # Note: Replace 'YOUR_PASSWORD' with your current LDAP manager password.
+  ldapsearch -o ldif-wrap=no -b "dc=apigee,dc=com" \ -D "cn=manager,dc=apigee,dc=com" -H ldap://:10389 -LLL -x -w 'YOUR_PASSWORD' | wc -l
+  ```
+
+- Once you have confirmed that the data is correct and consistent, your LDAP rollback is complete. You may now proceed with starting the **edge-management-server**, **edge-ui** and any other dependent components as per your organization's standard upgrade procedure.
+
+## Roll back to a previous major or minor release
+
+To roll back to a previous major or minor release, do the following on each node that hosts the component:
+
+Download the `bootstrap.sh` file for the version to which you want to roll back:
+
+- To roll back to 4.52.02, download `bootstrap_4.52.02.sh`
+
+Stop the component to roll back:
+
+1.  To roll back any of the [components with common code](#commoncode) on the node, you must stop them all, as the following example shows:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service edge-management-server stop
+    /opt/apigee/apigee-service/bin/apigee-service edge-router stop
+    /opt/apigee/apigee-service/bin/apigee-service edge-message-processor stop
+    /opt/apigee/apigee-service/bin/apigee-service edge-qpid-server stop
+    /opt/apigee/apigee-service/bin/apigee-service edge-postgres-server stop
+    ```
+
+2.  To roll back any *other* component on the node, stop just that component:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service component stop
+    ```
+
+If you are rolling back Monetization, uninstall it from all Management Server and Message Processor nodes:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service edge-mint-gateway uninstall
+```
+
+Uninstall the component to roll back on the node:
+
+1.  To roll back any of the [components with common code](#commoncode) on the node, you must uninstall them all by uninstalling the `edge-gateway` and `apigee-cassandra-client` component group, as the following example shows:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service edge-gateway uninstall
+    ```
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-cassandra-client uninstall
+    ```
+
+2.  To rollback the Nginx as below:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    ###Find the apigee-nginx RPM 
+    rpm -qa | grep -i "apigee-nginx"
+
+    ###Remove the apigee-nginx RPM
+    dnf remove apigee-nginx-1.26.x
+    ```
+
+3.  To roll back any other component on the node, uninstall just that component, as the following example shows:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service component uninstall
+    ```
+
+    Where `component` is the component name.
+
+4.  To roll back the Edge Router, you must delete the contents of the `/opt/nginx/conf.d` file in addition to uninstalling the `edge-gateway` component group:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    cd /opt/nginx/conf.d
+    rm -rf *
+    ```
+
+Uninstall the 4.53.01 version of `apigee-setup`:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service apigee-setup uninstall
+```
+
+Install the 4.52.02 version of the `apigee-service` utility and its dependencies. The following example installs the 4.52.02 version of the `apigee-service`:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+sudo bash /tmp/bootstrap_4.52.02.sh apigeeuser=uName apigeepassword=pWord
+```
+
+Where `uName` and `pWord` are the username and password you received from Apigee. If you omit `pWord`, you will be prompted to enter it.
+
+If you get an error, be sure you downloaded the `bootstrap.sh` file in step 1.
+
+Install `apigee-setup`:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service apigee-setup install
+```
+
+Install the older version of the component:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-setup/bin/setup.sh -p component -f configFile
+```
+
+Where `component` is the component to install and configFile is your configuration file for the older version.
+
+If you are rolling back Qpid, flush iptables:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+sudo iptables -F
+```
+
+Repeat this process for each node that hosts the component you are rolling back.
+
+**Note:** Upon uninstallation of the apigee-cassandra-client, the apigee-provision and apigee-validate will be automatically removed due to their dependency. If these are subsequently required, they must be reinstalled.
+
+## Roll back mTLS
+
+To roll back the mTLS update, do the following steps on all hosts:
+
+1.  Stop Apigee:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-all stop
+    ```
+
+2.  Stop mTLS:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-mtls uninstall
+    ```
+
+3.  Reinstall mTLS:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-mtls install
+    apigee-service apigee-mtls setup -f /opt/silent.conf
+    ```

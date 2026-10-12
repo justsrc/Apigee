@@ -1,0 +1,29 @@
+URL: https://github.com/apigee/apigee-remote-service-cli/issues/261
+TITLE: apigee-remote-service-cli: Verification Step Ignores mTLS, Causing 400 Errors
+STATE: open state_reason: None
+AUTHOR: salehmashal association: NONE
+CREATED: 2025-01-09T15:06:05Z CLOSED: None
+LABELS: 
+MILESTONE: None
+--- BODY ---
+When using apigee-remote-service-cli to provision with mTLS, the proxy resources are successfully created over mTLS, but the subsequent verification steps fail with HTTP 400. The verification logic appears to ignore the provided mTLS certificates, sending requests without the client certificate. As a result, if the newly deployed proxy requires mutual TLS, the verification step cannot complete successfully.
+
+**Steps to Reproduce**
+
+- Provision an Apigee environment requiring mTLS by running apigee-remote-service-cli provision with --tls-cert, --tls-key, and --tls-ca.
+- Observe that the proxy creation and KVM setup succeed.
+- Notice that the automatic verification attempts to call /remote-service and /remote-token endpoints, returning 400 errors because the client certificate is not presented.
+
+**Platform (include version)**
+- OS: (e.g., Ubuntu 20.04 / Container Image)
+- Envoy: (version if applicable)
+- Kubernetes: (version if applicable)
+- Istio: (version if applicable)
+
+
+**Additional context**
+- The CLI version can be seen in [provision.go](https://github.com/apigee/apigee-remote-service-cli/blob/main/cmd/provision/provision.go), where mTLS is used for provisioning but not for verification.
+- wget or curl calls with the same certificate work correctly, indicating the root CA is properly trusted at the OS level. The issue occurs specifically during the CLI’s internal verification step.
+
+
+--- COMMENTS (0) ---

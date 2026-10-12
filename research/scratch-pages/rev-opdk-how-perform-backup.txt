@@ -1,0 +1,131 @@
+**Note:** When backing up a complete Edge installation, you must back up all components. See "What to Backup" at [Backup and restore](/private-cloud/v4.53.01/backup-and-restore) for more.
+
+Use the following command to perform a backup:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service component_name backup
+```
+
+Where `component_name` is the name of the component. Possible values include:
+
+- `apigee-cassandra` (Cassandra)
+- `apigee-openldap` (OpenLDAP)
+- `apigee-postgresql` (PostgreSQL database)
+- `apigee-qpidd` (Qpidd)
+- `apigee-sso` (Edge SSO)
+- `apigee-zookeeper` (ZooKeeper)
+- `edge-management-server` (Management Server)
+- `edge-management-ui` (new Edge UI)
+- `edge-message-processor` (Message Processor)
+- `edge-postgres-server` (Postgres Server)
+- `edge-qpid-server` (Qpid Server)
+- `edge-router` (Edge Router)
+- `edge-ui` (Classic UI)
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service apigee-cassandra backup
+```
+
+**Warning:** The backup utility writes the generated backup file to `/opt/apigee/backup/``component_name` where `component_name` is the name of the component. Because you can generate many backup files, and because these files can get large, you can mount a separate disk at `/opt/apigee/backup` just for backup files.
+
+**Note:** For components not associated with a data store, such as the Router or Message Processor, the backup command still creates a backup file containing configuration and other information.
+
+**Note:** For PostgreSQL only, you can optionally create a network storage snapshot as an alternative to using the Apigee backup command. This snapshot cab be useful because the Apigee backup command takes time to run and PostgreSQL data generated while the backup runs could be omitted from the resulting `.dump` file.
+
+To perform a backup:
+
+1.  Stop the component (except for PostgreSQL and Cassandra which must be running to backup):
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service component_name stop
+    ```
+
+2.  Run the backup command:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service component_name backup
+    ```
+
+    The backup command then:
+
+    - Creates a tar file of the following directories and files, where `component_name` is the name of the component:
+      1.  Directories
+          - `/opt/apigee/data/``component_name`
+          - `/opt/apigee/etc/``component_name``.d`
+      2.  Files if they exist
+          - `/opt/apigee/token/application/``component_name``.properties`
+          - `/opt/apigee/customer/application/``component_name``.properties`
+          - `/opt/apigee/customer/defaults.sh`
+          - `/opt/apigee/customer/conf/license.txt`
+
+    - Creates a .tar.gz file in the `/opt/apigee/backup/``component_name` directory. The file name has the following form:
+
+      <div>
+
+      </div>
+
+      ```
+      backup-year.month.day,hour.min.seconds.tar.gz
+      ```
+
+      For example:
+
+      <div>
+
+      </div>
+
+      ```
+      backup-2018.05.29,11.13.42.tar.gz
+      ```
+
+      For PostgreSQL, the file name has the following form:
+
+      <div>
+
+      </div>
+
+      ```
+      year.month.day,hour.min.seconds.dump
+      ```
+
+3.  Start the component (except for PostgreSQL and Cassandra which must be running to backup):
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service component_name start
+    ```
+
+If you have multiple Edge components installed on the same node, you can back up them all with a single command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-all backup
+```
+
+**NOTE:** Ensure that you stop the components, except for PostgreSQL and Cassandra, before doing the backup. Then start the components after the backup completes.
+
+This command creates a backup file for each component on the node.

@@ -1,0 +1,93 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/install-before-begin.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/install-before-begin.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/install-before-begin.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/install-before-begin.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/install-before-begin.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/install-before-begin.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/install-before-begin.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/install-before-begin.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/install-before-begin.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/install-before-begin.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/install-before-begin.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/install-before-begin.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/install-before-begin.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/install-before-begin.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/install-before-begin.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/install-before-begin.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/install-before-begin.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/install-before-begin.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+## Supported platforms
+
+You can install Apigee hybrid on a number of platforms, including Google Distributed Cloud (on bare metal or VMware), AWS, Bare Metal, EKS, Google Kubernetes Engine (GKE), OpenShift, and others. For a list of supported platforms see [Apigee hybrid: supported platforms](/apigee/docs/hybrid/supported-platforms).
+
+## Permissions
+
+Each supported platform has its own permission requirements for creating a cluster. As cluster owner, you can proceed to install the Apigee-specific components (including cert-manager and the Apigee runtime) into the cluster. However, if you want to delegate to another user the installation of the runtime components into the cluster, you can manage the necessary permissions through Kubernetes <a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/" class="external">authn-authz</a>.
+
+For a complete list of Kubernetes resources and custom resources that are used by Apigee installations, see [Kubernetes and custom resources used by Apigee](https://docs.cloud.google.com/apigee/docs/hybrid/kubernetes-resources).
+
+## Prerequisites
+
+This section describes tasks you must accomplish before you begin the runtime plane quickstart install.
+
+Complete the tasks in [Part 1: Project and org setup](/apigee/docs/hybrid/v1.17/precog-overview) before you begin the runtime installation:
+
+<div>
+
+Meet the [Prerequisites](/apigee/docs/hybrid/v1.17/prerequisites) having a Google Cloud project, a billing account, and the `gcloud` CLI installed.
+
+</div>
+
+<div>
+
+Enable the APIs for Google Cloud services in [Step 1: Enable APIs](/apigee/docs/hybrid/v1.17/precog-enableapi).
+
+</div>
+
+<div>
+
+Create an Apigee organization in [Step 2: Create an organization](/apigee/docs/hybrid/v1.17/precog-provision).
+
+</div>
+
+<div>
+
+Create an Apigee environment and environment group in [Step 3: Create an environment group](/apigee/docs/hybrid/v1.17/precog-add-environment).
+
+</div>
+
+**Note about VPC Service Controls:** If you plan to enable Google Cloud [Virtual Private Cloud (VPC) Service Controls](https://cloud.google.com/vpc-service-controls) with your Apigee hybrid installation, see [Using VPC Service Controls with Apigee and Apigee hybrid](/apigee/docs/api-platform/security/vpc-sc) for instructions before you proceed.
+
+|  |
+|----|
+| <a href="/apigee/docs/hybrid/v1.17/install-create-cluster" class="button button-primary">Next step: Create a cluster</a> |

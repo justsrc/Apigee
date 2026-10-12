@@ -1,0 +1,24 @@
+URL: https://github.com/apigee/microgateway-plugins/issues/86
+TITLE: Quota plugin request logic on EDGEMICRO_LOCAL seems reversed
+STATE: closed state_reason: completed
+AUTHOR: heckler association: NONE
+CREATED: 2018-10-11T13:32:04Z CLOSED: 2018-12-15T22:36:11Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+Looking at the quota plugin, the check for local mode appears reversed:
+
+https://github.com/apigee/microgateway-plugins/blob/master/quota/index.js#L61-L65
+
+For the 'if' test clause to match the debug message it should be reversed: `!process.env.EDGEMICRO_LOCAL` or `process.env.EDGEMICRO_LOCAL != "1"`
+
+--- COMMENTS (3) ---
+
+### comment by srinandan (association=CONTRIBUTOR) at 2018-10-16T05:26:37Z
+yes, i have a PR to fix this. i will publish this version soon.
+
+### comment by dschniepp (association=NONE) at 2018-12-14T15:03:11Z
+This issue should be closed or am I wrong?
+
+### comment by srinandan (association=CONTRIBUTOR) at 2018-12-15T22:36:11Z
+yes, this should be closed.

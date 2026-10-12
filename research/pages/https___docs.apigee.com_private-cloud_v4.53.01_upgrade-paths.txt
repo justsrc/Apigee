@@ -1,0 +1,7 @@
+The following table shows you the upgrade paths for version 4.53.01:
+
+| From 4.52.02 or 4.53.00 | Directly upgrade from 4.52.02 or 4.53.00→ 4.53.01 |
+| --- | --- |
+|  |  |
+
+**Upgrade requirement:** To upgrade to version 4.53.00, you must first be on version 4.52.02. Direct upgrades from versions earlier than 4.52.02 are not supported.

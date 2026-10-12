@@ -1,0 +1,536 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+**Note:** In environments enabled for [archive deployments](/apigee/docs/api-platform/fundamentals/api-development-lifecycle#deploying-api-proxies), you cannot manage resources using the Apigee UI, API, or gcloud. To manage resources for archive deployments using Apigee in VS Code, see [Managing resources](/apigee/docs/api-platform/local-development/vscode/manage-resources).
+
+Understand and manage resources, as described in the following sections.
+
+## About resources
+
+Many policy types rely on *resources*. Resources are the files that implement the code or configuration to be executed by a policy when attached to an API proxy. In some cases, as with JavaScript and JavaCallout, a policy simply defines an attachment point in an API proxy where some code should execute. The JavaScript or JavaCallout policy is a pointer to a resource.
+
+### Resource types
+
+The following table summarizes the resource types:
+
+| Resource type | Description |
+|----|----|
+| `GraphQL (graphql)` | GraphQL schema file referenced by [GraphQL policies](/apigee/docs/api-platform/reference/policies/graphql-policy). |
+| `JAR (java)` | Java classes in a JAR file referenced by [JavaCallout policies](/apigee/docs/api-platform/reference/policies/java-callout-policy). |
+| `JavaScript (js)` | JavaScript referenced by [JavaScript policies](/apigee/docs/api-platform/reference/policies/javascript-policy). |
+| `JavaScript (jsc)` | Compiled JavaScript referenced by [JavaScript policies](/apigee/docs/api-platform/reference/policies/javascript-policy). |
+| `OpenAPI Specification (oas)` | OpenAPI Specification used to validate request and response messages of type JSON or YAML. |
+| `Property Set (properties)` | Collection of key/value pairs that can be referenced an API proxy [property sets](/apigee/docs/api-platform/cache/property-sets). |
+| `Python (py)` | Python scripts referenced by [PythonScript policies](/apigee/docs/api-platform/reference/policies/python-script-policy). Resources must be implemented in "pure Python" (in the Python language only). |
+| `Security policy (securityPolicy)` | Custom security policy referenced by [JavaCallout policies](/apigee/docs/api-platform/develop/adding-custom-java-callout-security-policy). |
+| `WSDL (wsdl)` | WSDL files referenced by [SOAPMessageValidation policies](/apigee/docs/api-platform/reference/policies/message-validation-policy). |
+| `XSD (xsd)` | XML schemas referenced by [SOAPMessageValidation policies](/apigee/docs/api-platform/reference/policies/message-validation-policy). |
+| `XSL Transformations (xsl)` | XSLT transformations referenced by [XSLTransform policies](/apigee/docs/api-platform/reference/policies/xsl-transform-policy). |
+
+### Where resources are stored
+
+You can store resources to the following locations. You can't store resource files in an **organization**.
+
+- **API proxy revision**: Resources are available only to the API proxy revisions in which the resources are included. For example, you might include a JavaScript resource with revision 1 of an API proxy, then change the implementation to use a Python script in revision 2 of the proxy. revision 1 has access to only the JavaScript resource, and revision 2 has access to only the Python resource.
+  **Note:** In the UI, resources scoped to an API proxy revision are listed in the Resources section of the Navigation pane whether you added them with the UI or API.
+- **Environment**: When stored in an environment (for example, `test` or `prod`), resources are available to any API proxy deployed in the same environment.
+
+The environment repository is available at the following URI, as described by the [List resource files API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.resourcefiles/list) and later in [Manage resources using the API](#api): `/organizations/`**`$ORG`**`/environments/`**`$ENV`**`/resourcefiles`
+
+**Note:** You cannot view the API proxy revision resource repository using the API.
+
+The following table shows the methods you can use to create, update, and delete resources for each repository:
+
+| Repository | Create | View | Update | Delete |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| API | UI | API | UI | API | UI | API | UI |  |
+| API proxy revision |  |  |  |  |  |  |  |  |
+| Environment |  |  |  |  |  |  |  |  |
+
+For example, all JavaScript files available to the `test` environment are stored in the following repository and are available to any API proxy running in the `test` environment:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+/organizations/$ORG/environments/test/resourcefiles/jsc
+```
+
+### Resource name resolution
+
+Resolve resource names from the most specific to the most general scope. Resource names are resolved "up the chain", from the API proxy revision level, to the environment level.
+
+Let's say that you have populated the same resource in two different repositories — the API proxy revision and the `prod` environment.
+
+Consider the API proxy that is configured with the following policy:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Javascript name='PathSetterPolicy' timeLimit='200'>
+    <ResourceURL>jsc://pathSetter.js</ResourceURL>
+</Javascript>
+```
+
+The policy reference cannot explicitly resolve to a repository. The first resource at the most granular scope whose name matches the resource name in the policy is resolved.
+
+So, when the API proxy is deployed in the environment `prod`, the policy will resolve to the environment-scoped `pathSetter.js` resource.
+
+When deployed in the environment `test`, the Policy will resolve to the API proxy revision-scoped resource, because the environment-scoped resource is in the `prod` environment, not the `test` environment.
+
+### Java resource guidelines
+
+You can add compiled Java resources as JAR files using multiple options in curl, such as `-T`, `--data-binary`, or `-F` option (not the `-d` option). For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+curl "http://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/resourcefiles?name={jar_file}&type=java" \  -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/octet-stream" \
+  --data-binary @{jar_file}
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+curl "http://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/resourcefiles?name={jar_file}&type=java" \  -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/octet-stream" \
+  -T "{jar_file}"
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+curl "http://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/resourcefiles?name={jar_file}&type=java" \  -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/octet-stream" \
+  -F "file=@{jar_file}"
+```
+
+**Note:** **Package naming**: Don't use `io.apigee` or `com.apigee` as package names in JavaCallout policies. Those are reserved and used by other Apigee modules.
+
+**See also:**
+
+- Java best practices: [Best practices for API proxy design and development](/apigee/docs/api-platform/fundamentals/best-practices-api-proxy-design-and-development)
+- Java cookbook example: [XSL Transform policy](/apigee/docs/api-platform/reference/policies/xsl-transform-policy)
+
+## Manage proxy-level resources using the UI
+
+Manage resources scoped to an **API proxy revision** using the UI, as described in the following sections. You can also manage resources scoped to an **environment** using the UI.
+
+### View proxy-level resources using the UI
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Proxy development <span aria-label="and then">\></span> API proxies** page.
+
+    <a href="https://console.cloud.google.com/apigee/proxies" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to API proxies</a>
+
+2.  Select the API proxy whose resources you want to view. This displays the Proxy Editor **Overview** view.
+
+3.  Click the **Develop** tab.
+
+4.  In the navigation pane, scroll down to **Resources**. The current resources are displayed below that.
+
+### Create a proxy-level resource using the UI
+
+To create a resource using the Apigee UI:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Proxy development <span aria-label="and then">\></span> API proxies** page.
+
+    <a href="https://console.cloud.google.com/apigee/proxies" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to API proxies</a>
+
+2.  Select the API proxy whose resources you want to view. This displays the Proxy Editor **Overview** view.
+
+3.  Click the **Develop** tab.
+
+4.  In the navigation pane, scroll down to **Resources** and click the **+** button to its right.
+
+5.  In the **Add resource** dialog, enter the following:
+    - **Resource type**: Select the type of file for the resource.
+    - Under **Source**, select either **Create a new file** or **Import file**. If you choose **Import file**, also select a file to import in the **File** field.
+    - **Resource name**: Enter a name for the resource.
+
+6.  Click **Add**.
+
+### Update a proxy-level resource using the UI
+
+Update a resource scoped to an API proxy revision **only if the revision has not been deployed**. After an API proxy revision is deployed, it is immutable.
+
+To update a resource scoped to an API proxy revision using the UI:
+
+1.  [View the resources scoped to the API proxy revision](#view-ui).
+2.  In the Navigator view under **Resources**, click the resource that you want to update.  
+    **Note:** For JAR files, position your cursor over the resource that you want to edit and click <img src="/static/apigee/docs/api-platform/images/edit-icon-black.png" width="15" alt="Image of the edit icon." />.
+3.  Update the resource, as required.  
+    **Note:** After uploading a new JAR file, click **Update**.
+
+### Delete a proxy-level resource using the UI
+
+Delete a resource scoped to an API proxy revision **only if the revision has not been deployed**. After an API proxy revision is deployed, it is immutable.
+
+To delete a resource scoped to an API proxy revision using the UI:
+
+1.  [View the resources scoped to the API proxy revision](#view-ui).
+2.  In the Navigator view under Resources, position your cursor over the resource that you want to delete to display the actions menu.
+3.  Click <img src="/static/apigee/docs/api-platform/images/delete-x.png" width="15" alt="Image of the delete icon." />.
+4.  Click **Delete** to confirm the action.
+
+## Manage environment-level resources using the UI
+
+Manage resources scoped to an **environment** using the UI, as described in the following sections.
+
+### View environment-level resources using the UI
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Admin <span aria-label="and then">\></span> Environments** page.
+
+    <a href="https://console.cloud.google.com/apigee/environments" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Environments</a>
+
+2.  Select a project.
+
+3.  Select an environment from the environment list.
+
+4.  Click the **Resources** tab.
+
+### Create an environment-level resource using the UI
+
+To create an environment-level resource using the UI:
+
+1.  [View the environment-level resources](#view-environment-ui).
+2.  Click **+ Resource**.
+3.  In the **Add resource** pane:
+    - **Resource type**: Select the type of file for the resource.
+    - **Import file**:
+      1.  Click **Browse**.
+      2.  Select the resource file.
+      3.  Click **Open**.
+      4.  Modify the **Resource name**, if necessary.
+      5.  Click **Add**.
+
+### Update an environment-level resource using the UI
+
+To update an environment-level resource using the UI:
+
+1.  [View the environment-level resources](#view-environment-ui).
+2.  Under **Actions**, click <span class="material-icons" aria-hidden="true" translate="no">more_vert</span> **More**, and then click **Edit**.
+3.  Edit the resource, as necessary and then click **Save**.
+
+### Delete an environment-level resource using the UI
+
+To delete an environment-level resource using the UI:
+
+1.  [View the environment-level resources](#view-environment-ui).
+2.  Under **Actions**, click <span class="material-icons" aria-hidden="true" translate="no">more_vert</span> **More**, and then click **Delete**.
+3.  Type the resource name, and then click **Delete** to confirm the action.
+
+## Manage resources using the API
+
+Manage resources using the API, as described in the following sections.
+
+### Create resources using the API
+
+Create resources that are scoped to an [API proxy revision](#create-api-proxy) or [environment](#create-environment), as described in the following sections.
+
+#### Create resources scoped to an API proxy revision using the API
+
+Create resources that are scoped to an API proxy revision using the API, as described in the following sections.
+
+**Note:** You can create a resource that is scoped to an existing API proxy revision **only if the revision has not been deployed**. After an API proxy revision is deployed, it is immutable.
+
+To create a resource that is scoped to an API proxy revision using the API:
+
+1.  Create the resource file.
+2.  Add the resource file to an [API proxy configuration bundle](/apigee/docs/api-platform/reference/api-proxy-configuration-reference#apiproxystructure).
+3.  Upload the bundle using one of the following APIs:
+    - [Create API proxy](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis/create)
+    - [Update API proxy revision](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.revisions/updateApiProxyRevision)
+
+#### Create resources scoped to an environment using the API
+
+Create resources that are scoped to an environment using the API by issuing a `POST` request to the following resource: `/organizations/`**`$ORG`**`/environments/`**`$ENV`**`/resourcefiles`
+
+Pass the following information with your request:
+
+- Set the `name` query parameter to the name of the resource
+- Set the `type` query parameter to the required [resource type](#resourcetypes)
+- Pass the contents of the resource file as `application/octet-stream` or `multipart/form-data`)
+
+**Note:** When importing a resource file using the API, you might need to `chmod` the file's permissions so that your development tool (such as `curl`) can upload it.
+
+The following example shows how to create a JavaScript resource by passing its contents in the request body.
+
+<div>
+
+</div>
+
+```
+curl -X POST https://apigee.googleapis.com/v1/organizations/myorg/environments/test/resourcefiles?name=pathSetter.js&type=jsc
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-type:application/octet-stream" \
+  -d 'request.headers["RequestPath"] = context.getVariable("proxy.basepath");'
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+The following example shows how to upload the resource as a file from your local machine. It's important to use `-F` for the binary upload in curl in order for the environment- or organization-scoped JavaScript files to be accessible by the JavaScript policy.
+
+<div>
+
+</div>
+
+```
+curl -X POST https://apigee.googleapis.com/v1/organizations/myorg/environments/test/resourcefiles?name=pathSetter.js&type=jsc
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-type:multipart/form-data" \
+  -F file=@pathSetter.js
+```
+
+The following provides an example of the response:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "name" : "pathSetter.js",
+  "type" : "jsc"
+}
+```
+
+**Note:** When using a REST client, such as Postman:
+
+- Set the `Content-Type` to `multipart/form-data`.
+- Attach the script as a file.
+
+### View resources using the API
+
+The following sections describe how to view resources using the API.
+
+#### View all resources using the API
+
+View all resources scoped to an environment using the API, as described in the following sections.
+
+Using the API you can view resources scoped to an environment only.
+
+To view all resources in an environment using the API, issue a `GET` request to the following resource: `https://apigee.googleapis.com/v1/organizations/`**`$ORG`**`/environments/`**`$ENV`**`/resourcefiles`
+
+The following example lists all resources in the `test` environment:
+
+<div>
+
+</div>
+
+```
+curl -X GET https://apigee.googleapis.com/v1/organizations/myorg/environments/test/resourcefiles
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+For more information, see [List environment resource files API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.resourcefiles/listEnvironmentResources).
+
+The following provides an example of the response.
+
+<div>
+
+</div>
+
+```
+{
+  "resourceFile": [
+{
+  "name" : "pathSetter.js",
+  "type" : "jsc"
+}
+  ]
+}
+```
+
+#### View the contents of a resource using the API
+
+To view the contents of a resource in an environment using the API, issue a `GET` request to the following resource: `/organizations/`**`$ORG`**`/environments/`**`$ENV`**`/resourcefiles/`**`$TYPE`**`/`**`$NAME`**
+
+The following example lists the contents of the `pathSetter.js` JavaScript (`jsc`) file in the `test` environment:
+
+<div>
+
+</div>
+
+```
+curl -X GET https://apigee.googleapis.com/v1/organizations/myorg/environments/test/resourcefiles/jsc/pathSetter.js
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+The following provides an example of the response:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+request.headers["RequestPath"] = context.getVariable("proxy.basepath");
+```
+
+### Update resources using the API
+
+Update resources that are scoped to an [API proxy revision](#update-api-proxy) or [environment](#update-environment), as described in the following sections.
+
+#### Update resources scoped to an API proxy revision using the API
+
+**Note:** You can update a resource that is scoped to an existing API proxy revision **only if the revision has not been deployed**. After an API proxy revision is deployed, it is immutable.
+
+To update a resource that is scoped to an API proxy revision using the API:
+
+1.  Download the API proxy configuration bundle using the [Get API proxy revision API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.revisions/get) with the following options:
+    - Set the `format` query parameter to `bundle`
+    - Set the `Accept` header to `application/zip`
+2.  Update the resource file in the [API proxy configuration bundle](/apigee/docs/api-platform/reference/api-proxy-configuration-reference#apiproxystructure).
+3.  Upload the API proxy configuration bundle using the [Update API proxy revision](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.revisions/updateApiProxyRevision) API.
+
+#### Update resources scoped to an environment using the API
+
+Update a resource that is scoped to to an environment using the API by issuing a `PUT` request to the following resource: `/organizations/`**`$ORG`**`/environments/`**`$ENV`**`/resourcefiles/`**`$TYPE`**`/`**`$NAME`**
+
+Pass the contents of the resource file as `application/octet-stream` or `multipart/form-data`.
+
+**Note:** When importing a resource file using the API, you might need to `chmod` the file's permissions so that your development tool (such as `curl`) can upload it.
+
+The following example shows how to update a JavaScript resource by passing its contents in the request body.
+
+<div>
+
+</div>
+
+```
+curl -X PUT https://apigee.googleapis.com/v1/organizations/myorg/environments/test/resourcefiles/jsc/pathSetter.js
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-type:application/octet-stream" \
+  -d 'request.headers["RequestPath"] = context.getVariable("proxy.basepath");'
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+The following example shows how to update the resource file using a file from your local machine. It's important to use `-F` for the binary upload in curl in order for the environment- or organization-scoped JavaScript files to be accessible by the JavaScript policy.
+
+<div>
+
+</div>
+
+```
+curl -X PUT https://apigee.googleapis.com/v1/organizations/myorg/environments/test/resourcefiles/jsc/pathSetter.js
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-type:multipart/form-data" \
+  -F file=@pathSetter.js
+```
+
+The following provides an example of the response:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "name" : "pathSetter.js",
+  "type" : "jsc"
+}
+```
+
+### Delete resources using the API
+
+Delete resource scoped to an [API proxy revision](#delete-api-proxy) or [environment](#delete-environment), as described in the following sections.
+
+#### Delete resources scoped to an API proxy revision using the API
+
+**Note:** You can delete a resource scoped to an API proxy revision if it has not been deployed. After an API proxy revision is deployed, it is immutable.
+
+With hybrid, to delete a resource that is scoped to an API proxy using the API:
+
+1.  Download the API proxy configuration bundle using the [Get API proxy revision API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.revisions/get) with the following options:
+    - Set the `format` query parameter to `bundle`
+    - Set the `Accept` header to `application/zip`
+2.  Delete the resource file from the [API proxy configuration bundle](/apigee/docs/api-platform/reference/api-proxy-configuration-reference#apiproxystructure).
+3.  Upload the API proxy configuration bundle using the [Update API proxy revision](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.revisions/updateApiProxyRevision) API.
+
+#### Delete a resource scoped to an environment using the API
+
+Delete a resource scoped to an environment using the API, as described in the following sections.
+
+To delete a resource scoped to an environment using the API, issue a `DELETE` request to the following resource: `https://apigee.googleapis.com/v1/organizations/`**`$ORG`**`/environments/`**`$ENV`**`/resourcefiles/`**`$TYPE`**`/`**`$NAME`**
+
+The following example deletes the `pathSetter.js` JavaScript resource file from the `test` environment:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -X DELETE https://apigee.googleapis.com/v1/organizations/my-organization/environments/test/resourcefiles/jsc/pathSetter.js \
+  -H "Authorization: Bearer $TOKEN"
+  
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+For more information, see [Delete resource file API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.resourcefiles/delete).
+
+The following provides an example of the response.
+
+<div>
+
+</div>
+
+```
+{
+  "name" : "pathSetter.js",
+  "type" : "jsc"
+}
+```
+
+## Access the resource
+
+How you access the resource depends on the [resource type](#resourcetypes). For more information, refer to the [Policy reference overview](/apigee/docs/api-platform/reference/policies/reference-overview-policy).
+
+The examples in this section demonstrate how to create and manage a JavaScript resource named `pathSetter.js` to allow it to be referenced by policies of type JavaScript.
+
+To attach the JavaScript to the Request PostFlow, create a policy called `PathSetterPolicy.xml` that references the file `pathSetter.js`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Javascript name='PathSetterPolicy' timeLimit='200'>
+    <ResourceURL>jsc://pathSetter.js</ResourceURL>
+</Javascript>
+```
+
+Then, reference the policy in the Endpoint configuration:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PostFlow>
+  <Request>
+    <Step><Name>PathSetterPolicy</Name></Step>
+  </Request>
+<PostFlow>
+```
+
+For more information, see [JavaScript policy](/apigee/docs/api-platform/reference/policies/javascript-policy).

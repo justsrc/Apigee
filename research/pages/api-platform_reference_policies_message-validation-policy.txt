@@ -1,0 +1,1000 @@
+[<span class="devsite-label" background="google-blue">Standard policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The SOAPMessageValidation policy does the following:
+
+- Validates any XML message against their XSD schemas
+- Validates SOAP messages against a WSDL definition
+- Determines well-formedness of JSON and XML messages
+
+While the name of this policy in the UI is *SOAPMessageValidation*, the policy validates more than just SOAP messages. This section refers to the policy as the *MessageValidation policy*.
+
+Message validation provides the following benefits:
+
+- **Immediately informs** app developers that are consuming your API if their requests are non-conformant or incomplete.
+- **Pinpoints issues** in requests, such as XML tags that are not properly closed.
+- **Protects backend services** by blocking XML or SOAP messages with structures that might cause unpredictable behavior.
+- **Reduces time** spent troubleshooting, searching forums, or consulting with tech support.
+- **Encourages developers** to familiarize themselves with the XML schema WSDL definition to eliminate validation errors, making well-understood XML schemas a key component of your API documentation.
+
+This policy is a *Standard policy* and can be deployed to any environment type. For information on policy types and availability with each environment type, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+#### Videos
+
+Watch the following videos to learn more about the MessageValidation policy:
+
+| Video | Description |
+|----|----|
+| [Validate XML request](https://www.youtube.com/watch?v=VhaWHrrFMq8) | Validate the XML request for an API using the MessageValidation policy. |
+| [Validate JSON request](https://www.youtube.com/watch?v=iO2CW6ymN7U) | Validate the JSON request for an API using the MessageValidation policy. |
+
+## `<MessageValidation>` element
+
+Defines the MessageValidation policy.
+
+| Default Value | See Default Policy tab, below |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex object |
+| Parent Element | n/a |
+| Child Elements | <DisplayName> <Element> <ResourceURL> <SOAPMessage> <Source> |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+The `<MessageValidation>` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<MessageValidation
+  continueOnError="[false|true]"
+  enabled="[true|false]"
+  name="policy_name"
+>
+    <!-- All MessageValidation child elements are optional -->
+    <DisplayName>policy_display_name</DisplayName>
+    <Element namespace="element_namespace">element_to_validate</Element>
+    <SOAPMessage version="[ 1.1 | 1.2 | 1.1/1.2 ]"/>
+    <Source>message_to_validate</Source>
+    <ResourceURL>validation_WSDL_or_XSD</ResourceURL>
+
+</MessageValidation>
+```
+
+</div>
+
+<div class="section">
+
+### Default Policy
+
+The following example shows the default settings when you add a MessageValidation policy to your flow in the Apigee UI:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<MessageValidation continueOnError="false" enabled="true" name="SOAP-Message-Validation-1">
+  <DisplayName>SOAP Message Validation-1</DisplayName>
+  <Properties/>
+  <Element namespace="http://sample.com">sampleObject</Element>
+  <SOAPMessage/>
+  <Source>request</Source>
+  <ResourceURL>wsdl://SOAP-Message-Validation-1.wsdl</ResourceURL>
+</MessageValidation>
+```
+
+</div>
+
+</div>
+
+This element has the following attributes that are common to all policies:
+
+**Attribute**
+
+**Default**
+
+**Required?**
+
+**Description**
+
+`name`
+
+N/A
+
+**Required**
+
+The internal name of the policy. The value of the `name` attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters.
+
+Optionally, use the `<DisplayName>` element to label the policy in the management UI proxy editor with a different, natural-language name.
+
+`continueOnError`
+
+false
+
+Optional
+
+Set to `false` to return an error when a policy fails. This is expected behavior for most policies. Set to `true` to have flow execution continue even after a policy fails. See also:
+
+- [Fault rules are triggered ONLY in an error state (about continueOnError)](/apigee/docs/api-platform/fundamentals/fault-handling#multiplefaultrulesandexecutionlogic-faultrulesaretriggeredonlyinanerrorstateaboutcontinueonerror)
+- [Handling faults within the current flow](/apigee/docs/api-platform/fundamentals/fault-handling#continueonerror)
+
+`enabled`
+
+true
+
+Optional
+
+Set to `true` to enforce the policy. Set to `false` to *turn off* the policy. The policy will not be enforced even if it remains attached to a flow.
+
+`async`  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray">not_interested</span></span>
+
+false
+
+Deprecated
+
+This attribute is deprecated.
+
+## Examples
+
+The following examples show some of the ways in which you can use the MessageValidation policy:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### 1: XSD Validation
+
+You can use the Message Validation policy to validate an XML message request's payload against an XSD schema.
+
+1.  Create a new XSD [resource file](/apigee/docs/api-platform/develop/resource-files). For example, `note-schema.xsd`:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:element name="note">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="to" type="xs:string"/>
+            <xs:element name="from" type="xs:string"/>
+            <xs:element name="heading" type="xs:string"/>
+            <xs:element name="body" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+    ```
+
+2.  Add the SOAP Message Validation policy to your proxy endpoint's pre-flow:
+
+    1.  Specify the location of your XSD resource file with the [`<ResourceURL>`](/apigee/docs/api-platform/reference/policies/message-validation-policy#resourceurl) element. For example:
+
+        <div>
+
+        </div>
+
+        ``` devsite-click-to-copy
+        ...
+          <ResourceURL>xsd://note-schema.xsd</ResourceURL>
+        ...
+        ```
+
+    2.  Remove the [`<SOAPMessage>`](/apigee/docs/api-platform/reference/policies/message-validation-policy#soapmessage) and [`<Element>`](/apigee/docs/api-platform/reference/policies/message-validation-policy#element) elements from the policy definition.
+
+    Your policy definition should look like the following:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    <MessageValidation continueOnError="false"
+        enabled="true" name="validateXMLRequest">
+      <DisplayName>My XML Validator</DisplayName>
+      <Properties/>
+      <Source>request</Source>
+      <ResourceURL>xsd://note-schema.xsd</ResourceURL>
+    </MessageValidation>
+    ```
+
+3.  Send a `POST` request to your API proxy with your XML as the message payload, as the following example shows:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    curl -v -X POST -H 'Content-Type: application/xml' http://my-test.apigee.net/v1/xsd-mock
+      -d '<note>
+      <to>Fred Rogers</to>
+      <from>Nick Danger</from>
+      <heading>Greetings from my neighborhood</heading>
+      <body>Just writing to say hello.</body>
+    </note>'
+    ```
+
+    Notice that the `Content-type` header is set to `application/xml`.
+
+    You can also create a data file for the payload and reference it with a command similar to the following:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    curl -v -X POST -H 'Content-type: application/xml' http://my-test.apigee.net/v1/xsd-mock
+      --data '@../examples/note-payload.xml'
+    ```
+
+You should receive an `HTTP 200` response. Depending on your target endpoint, you might receive addditional details about the request. For example, if you use `http://httpbin.org/post` as your target endpoint and specify `-v` (verbose) output, the response should be similar to the following:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+< HTTP/1.1 200 OK
+< Date: Wed, 16 May 2018 21:24:54 GMT
+< Content-Type: application/xml
+< Content-Length: 431
+< Connection: keep-alive
+< Server: gunicorn/19.8.1
+< Access-Control-Allow-Origin: *
+< Access-Control-Allow-Credentials: true
+< Via: 1.1 vegur
+{
+  "args":{},
+  "data":"<note><to>fred</to><from>nick</from><heading>hello</heading>
+    <body>Just writing to say hello.</body></note>",
+  "files":{},
+  "form":{},
+  "headers": {
+    "Accept":"*/*",
+    "Connection":"close",
+    "Content-Length":"106",
+    "Content-Type":"application/xml",
+    "Host":"httpbin.org",
+    "User-Agent":"curl/7.58.0"
+  },
+  "json":null,
+  "origin":"10.1.1.1, 104.154.179.1",
+  "url":"http://httpbin.org/post"
+}
+```
+
+To verify that your XSD validation is working, try inserting another tag into the body of your request. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+curl -v -X POST -H 'Content-Type: application/xml' http://my-test.apigee.net/v1/xsd-mock
+  -d '<note>
+  <to>Fred Rogers</to>
+  <from>Nick Danger</from>
+  <heading>Greetings from my neighborhood</heading>
+  <body>Just writing to say hello.</body>
+  <badTag>Not good</badTag>
+</note>'
+```
+
+You should receive a validation error.
+
+</div>
+
+<div class="section">
+
+### 2: SOAP Validation
+
+You can use the Message Validation policy to validate a SOAP message request's payload against a WSDL.
+
+1.  Create a new WSDL [resource file](/apigee/docs/api-platform/develop/resource-files). For example, "example-wsdl.wsdl":
+    <div class="section expandable">
+
+    View Full WSDL
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    <?xml version="1.0" encoding="UTF-8"?>
+    <wsdl:definitions targetNamespace="https://example.com/gateway"
+        xmlns:tns="https://example.com/gateway"
+        xmlns:types="https://example.com/gateway/types"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/">
+      <wsdl:types>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="https://example.com/gateway/types"
+            elementFormDefault="qualified">
+          <xsd:element name="MyType">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="ID" nillable="false" minOccurs="1" maxOccurs="1"/>
+              </xsd:sequence>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:schema>
+        <schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+            targetNamespace="https://example.com/gateway"
+            xmlns="http://www.w3.org/2001/XMLSchema">
+          <xsd:import namespace="https://example.com/gateway/types"/>
+          <element name="getID">
+            <complexType>
+              <sequence>
+                <element ref="types:MyType"/>
+              </sequence>
+            </complexType>
+          </element>
+        </schema>
+      </wsdl:types>
+
+      <wsdl:message name="getRequest">
+        <wsdl:part name="getRequest" element="tns:getID"/>
+      </wsdl:message>
+      <wsdl:message name="getResponse">
+        <wsdl:part name="getResponse" element="tns:getID"/>
+      </wsdl:message>
+
+      <wsdl:portType name="PortType">
+        <wsdl:operation name="get">
+          <wsdl:input name="methodRequest" message="tns:getRequest"/>
+          <wsdl:output name="methodResponse" message="tns:getResponse"/>
+        </wsdl:operation>
+      </wsdl:portType>
+
+      <wsdl:service name="Gateway">
+        <wsdl:port name="GatewaySoap" binding="tns:SoapBinding">
+          <wsdlsoap:address location="https://example.com/gateway"/>
+        </wsdl:port>
+      </wsdl:service>
+
+      <wsdl:binding name="SoapBinding" type="tns:PortType">
+        <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+        <wsdl:operation name="get">
+          <wsdlsoap:operation soapAction="get"/>
+          <wsdl:input name="methodRequest"/>
+          <wsdl:output name="methodResponse"/>
+        </wsdl:operation>
+
+      </wsdl:binding>
+    </wsdl:definitions>
+    ```
+
+    </div>
+
+2.  Add the SOAP Message Validation policy to your proxy endpoint's pre-flow:
+
+    1.  Set the [`<SOAPMessage>`](/apigee/docs/api-platform/reference/policies/message-validation-policy#soapmessage) element's `version` attribute to the version of the SOAP protocol that you want to validate against. For example, "1.1":
+
+        <div>
+
+        </div>
+
+        ``` devsite-click-to-copy
+        ...
+          <SOAPMessage version="1.1"/>
+        ...
+        ```
+
+    2.  Set the value of the [`<Element>`](/apigee/docs/api-platform/reference/policies/message-validation-policy#element) element to the element that you want to validate:
+
+        <div>
+
+        </div>
+
+        ``` devsite-click-to-copy
+        ...
+          <Element namespace="https://example.com/gateway">getID</Element>
+        ...
+        ```
+
+        `<Element>` specifies the first child under the `<Body>` element in the SOAP request's envelope.
+
+        Set the `namespace` attribute to the namespace for that child.
+
+    3.  Specify the location of your WSDL resource file with the [`<ResourceURL>`](/apigee/docs/api-platform/reference/policies/message-validation-policy#resourceurl) element. For example:
+
+        <div>
+
+        </div>
+
+        ``` devsite-click-to-copy
+        ...
+          <ResourceURL>wsdl://example-wsdl.wsdl</ResourceURL>
+        ...
+        ```
+
+    Your policy definition should look like the following:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    <MessageValidation continueOnError="false"
+        enabled="true" name="validateSOAPRequest">
+      <DisplayName>My SOAP Validator</DisplayName>
+      <Properties/>
+      <Source>request</Source>
+      <SOAPMessage version="1.1"/>
+      <Element namespace="https://example.com/gateway">getID</Element>
+      <ResourceURL>wsdl://example-wsdl.wsdl</ResourceURL>
+    </MessageValidation>
+    ```
+
+3.  Send a `POST` request to your API proxy with the SOAP envelope as the message payload, as the following example shows:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    curl -v -X POST -H 'Content-Type: application/xml' http://my-test.apigee.net/v1/xsd-mock
+      -d '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+        xmlns:prox="https://example.com/gateway" xmlns:typ="https://example.com/gateway/types">
+      <soapenv:Header/>
+      <soapenv:Body>
+        <prox:getID>
+          <typ:MyType>
+            <typ:ID>42</typ:ID>
+          </typ:MyType>
+        </prox:getID>
+      </soapenv:Body>
+    </soapenv:Envelope>'
+    ```
+
+    Notice that the `Content-type` header is set to "application/xml".
+
+    You can also create a data file for the payload and reference it with a command similar to the following:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    curl -v -X POST -H 'Content-type: application/xml' http://my-test.apigee.net/v1/xsd-mock
+      --data '@../examples/soap-payload.xml'
+    ```
+
+You should receive an `HTTP 200` response. Depending on your target endpoint, you might receive addditional details about the request. For example, if you use `http://httpbin.org/post` as your target endpoint, the response should be similar to the following:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+< HTTP/1.1 200 OK
+< Date: Wed, 16 May 2018 21:24:54 GMT
+< Content-Type: application/xml
+< Content-Length: 431
+< Connection: keep-alive
+< Server: gunicorn/19.8.1
+< Access-Control-Allow-Origin: *
+< Access-Control-Allow-Credentials: true
+< Via: 1.1 vegur
+{
+  "args":{},
+  "data":"<note><to>fred</to><from>nick</from><heading>hello</heading>
+    <body>Just writing to say hello.</body></note>",
+  "files":{},
+  "form":{},
+  "headers": {
+    "Accept":"*/*",
+    "Connection":"close",
+    "Content-Length":"106",
+    "Content-Type":"application/xml",
+    "Host":"httpbin.org",
+    "User-Agent":"curl/7.58.0"
+  },
+  "json":null,
+  "origin":"10.1.1.1, 104.154.179.1",
+  "url":"http://httpbin.org/post"
+}
+```
+
+</div>
+
+<div class="section">
+
+### 3: Well-formed XML/JSON
+
+You can use the Message Validation policy to confirm that a JSON or XML message payload is well-formed (not the same as *validation*). The policy ensures that the structure and content meets accepted standards, including:
+
+- There is a single root element
+- There are no illegal characters in the content
+- Objects and tags are properly nested
+- Beginning and ending tags match
+
+To check for a well-formed XML or JSON payload:
+
+1.  Add the SOAP Message Validation policy to your proxy endpoint's pre-flow.
+
+2.  Remove the [`<ResourceURL>`](/apigee/docs/api-platform/reference/policies/message-validation-policy#resourceurl), [`<SOAPMessage>`](/apigee/docs/api-platform/reference/policies/message-validation-policy#soapmessage), and [`<Element>`](/apigee/docs/api-platform/reference/policies/message-validation-policy#element) elements from the policy definition.
+
+    Your policy definition should look like the following:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    <MessageValidation async="false" continueOnError="false"
+        enabled="true" name="validateXMLRequest">
+      <DisplayName>My JSON Checker</DisplayName>
+      <Properties/>
+      <Source>request</Source>
+    </MessageValidation>
+    ```
+
+3.  Send a `POST` request to your API proxy, as the following example shows:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    curl -v -X POST -H 'Content-Type: application/json' http://my-test.apigee.net/v1/xsd-mock
+      -d '{
+    "note": {
+      "to": "Fred Rogers",
+      "from": "Nick Danger",
+      "header": "Greetings from my neighborhood",
+      "body": "Just writing to say hello."
+      }
+    }'
+    ```
+
+    Notice that the `Content-type` header is set to `application/json`.
+
+    To check an *XML file* for well-formedness, use XML as the message payload and set `Content-type` to `application/xml`.
+
+You should receive an `HTTP 200` response. When you send a message payload that does not contain well-formed XML or JSON, you should receive a `steps.messagevalidation.Failed` error.
+
+</div>
+
+</div>
+
+## Child element reference
+
+This section describes the child elements of [`<MessageValidation>`](/apigee/docs/api-platform/reference/policies/message-validation-policy#messagevalidation).
+
+### `<DisplayName>`
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, more natural-sounding name.
+
+The `<DisplayName>` element is common to all policies.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional. If you omit `<DisplayName>`, the value of the policy's `name` attribute is used. |
+| **Type** | String |
+| **Parent Element** | \<`PolicyElement`\> |
+| **Child Elements** | None |
+
+The `<DisplayName>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>POLICY_DISPLAY_NAME</DisplayName>
+  ...
+</PolicyElement>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>My Validation Policy</DisplayName>
+</PolicyElement>
+```
+
+</div>
+
+</div>
+
+The `<DisplayName>` element has no attributes or child elements.
+
+### `<Element>`
+
+Specifies the element in the message to validate. This is the first child under the `<Body>` element in the SOAP request's envelope.
+
+|  |  |
+|----|----|
+| **Default Value** | sampleObject |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<MessageValidation>`](/apigee/docs/api-platform/reference/policies/message-validation-policy#messagevalidation) |
+| **Child Elements** | None |
+
+The `<Element>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+  <Element namespace="element_namespace">element_to_validate</Element>
+...
+```
+
+</div>
+
+<div class="section">
+
+### Example 1
+
+The following example defines a single element to be validated:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+<Element namespace="https://example.com/gateway">getID</Element>
+...
+```
+
+</div>
+
+<div class="section">
+
+### Example 2
+
+You can specify more than one element to validate by adding multiple `<Element>` elements:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+<Element namespace="https://example.com/gateway">getID</Element>
+<Element namespace="https://example.com/gateway">getDetails</Element>
+...
+```
+
+</div>
+
+</div>
+
+The `<Element>` element has the following attributes:
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Default | Required? | Description |
+| `namespace` | "http://sample.com" | Optional | Defines the namespace of the element to be validated. |
+
+### `<ResourceURL>`
+
+Identifies the XSD schema or WSDL definition to be used to validate the source message.
+
+|  |  |
+|----|----|
+| **Default Value** | wsdl://`display_name`.wsdl |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<MessageValidation>`](/apigee/docs/api-platform/reference/policies/message-validation-policy#messagevalidation) |
+| **Child Elements** | None |
+
+The `<ResourceURL>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+  <ResourceURL>[wsdl|xsd]://validation_WSDL_or_XSD</ResourceURL>
+...
+```
+
+</div>
+
+<div class="section">
+
+### Examples
+
+For an XML file:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+<ResourceURL>xsd://note-schema.xsd</ResourceURL>
+...
+```
+
+For a WSDL:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+<ResourceURL>wsdl://example-wsdl.wsdl</ResourceURL>
+...
+```
+
+</div>
+
+</div>
+
+The value of `<ResourceURL>` must point to a [resource file](/apigee/docs/api-platform/develop/resource-files) in your API proxy. It cannot refer to external resources over HTTP or HTTPS.
+
+If you do not specify a value for `<ResourceURL>`, the message is checked for well-formed JSON or XML if the `Content-type` header is `application/json` or `application/xml`, respectively.
+
+The `<ResourceURL>` element has no child elements or attributes.
+
+#### Using XSDs for validation
+
+If the XML payload that you validate with the MessageValidation policy references *another* schema, you must prefix the included XSD file with `xsd` in the `schemaLocation` attribute.
+
+The following example schema is comprised of multiple XSDs:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:include schemaLocation="xsd://note-schema.xsd"/>
+  <xs:include schemaLocation="xsd://letter-schema.xsd"/>
+  <xs:include schemaLocation="xsd://user-schema.xsd"/>
+</xs:schema>
+```
+
+**Note:** You can only include or import XSDs if they are [resource files](/apigee/docs/api-platform/develop/resource-files) in your API Proxy. You cannot include external XSD files.
+
+#### Using WSDLs for validation
+
+A WSDL must define at least one schema. If it does not reference at least one schema, the MessageValidation policy fails.
+
+The maximum import depth for a schema is 10. If you exceed that number of nested imports, the MessageValidation policy fails.
+
+### `<SOAPMessage>`
+
+Defines the SOAP version against which the MessageValidation policy validates.
+
+|  |  |
+|----|----|
+| **Default Value** | n/a |
+| **Required?** | Optional |
+| **Type** | n/a |
+| **Parent Element** | [`<MessageValidation>`](/apigee/docs/api-platform/reference/policies/message-validation-policy#messagevalidation) |
+| **Child Elements** | None |
+
+The `<SOAPMessage>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+  <SOAPMessage version="[ 1.1 | 1.2 | 1.1/1.2 ]"/>
+...
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+<SOAPMessage version="1.1"/>
+...
+```
+
+</div>
+
+</div>
+
+The `<SOAPMessage>` element has the following attributes:
+
+| Attribute | Default | Required? | Description |
+| --- | --- | --- | --- |
+| version | None | Optional | The SOAP version that this policy uses to validate SOAP messages. Valid values are: "1.1" "1.2" "1.1/1.2" |
+
+For more information, see [From SOAP/1.1 to SOAP Version 1.2 in 9 points](https://www.w3.org/2003/06/soap11-soap12.html).
+
+### `<Source>`
+
+Identifies the source message to be validated. The value of this element is the name of the message that you want to validate.
+
+If you do not set `<Source>`, this policy defaults to `message`, which refers to the complete request message (in a request flow) or response message (in a response flow), including any payload. You can also explicitly set it to `request` or `response` to refer to the request or response.
+
+|  |  |
+|----|----|
+| **Default Value** | request |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<MessageValidation>`](/apigee/docs/api-platform/reference/policies/message-validation-policy#messagevalidation) |
+| **Child Elements** | None |
+
+The `<Source>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+  <Source>message_to_validate</Source>
+...
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+<Source>request</Source>
+...
+```
+
+</div>
+
+</div>
+
+In addition to `message`, `request`, and `response`, you can set the value of `<Source>` to the name of any message in your flow. If you do this, though, you must create a custom message with that name in your flow before this policy executes. Otherwise, you will get an error.
+
+If the value of `<Source>` cannot be resolved in the message flow or resolves to a non-message type, then one of the following occurs:
+
+- *If a null value:* Apigee throws a `steps.messagevalidation.SourceMessageNotAvailable` error.
+- *If a non-message type:* Apigee throws a `steps.messagevalidation.NonMessageVariable` error.
+
+The `<Source>` element has no attributes or child elements.
+
+## Error codes
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+Need help resolving an error? Click *build* in the Fix column for detailed troubleshooting information.
+
+Use <u>[API Monitoring](/apigee/docs/api-monitoring)</u> to investigate fault codes and diagnose issues faster. See [Set up a policy fault code alert](/apigee/docs/api-monitoring/alerts-notifications#fault-code-alert) for an example. See [Fault code reference](/apigee/docs/api-monitoring/fault-codes) for a complete list of all fault codes that you can handle with API Monitoring.
+
+Fault code
+
+HTTP status
+
+Cause
+
+Fix
+
+`steps.messagevalidation.SourceMessageNotAvailable`
+
+500
+
+This error occurs if a variable specified in the `<Source>` element of the policy is either:
+
+- out of scope (not available in the specific flow where the policy is being executed)
+  or
+- can't be resolved (is not defined)
+
+[*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/soap-message-validation-runtime-errors#sourcemessagenotavailable)
+
+`steps.messagevalidation.NonMessageVariable`
+
+500
+
+This error occurs if the `<Source>` element in the SOAPMessageValidation policy is set to a variable which is not of type [message](/apigee/docs/api-platform/reference/variables-reference#message).
+
+Message type variables represent entire HTTP requests and responses. The built-in Apigee flow variables `request`, `response`, and `message` are of type message. To learn more about message variables, see the [Variables reference](/apigee/docs/api-platform/reference/variables-reference#message).
+
+[*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/soap-message-validation-runtime-errors#nonmessagevariable)
+
+`steps.messagevalidation.Failed`
+
+500
+
+This error occurs if the SOAPMessageValidation policy fails to validate the input message payload against the XSD schema or WSDL definition. It will also occur if there is malformed JSON or XML in the payload message.
+
+[*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/soap-message-validation-runtime-errors#failed)
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+Need help resolving an error? Click *build* next to the error's cause description to visit the troubleshooting page.
+
+| Error name | Cause | Fix |
+|----|----|----|
+| `InvalidResourceType` | The `<ResourceURL>` element in the SOAPMessageValidation policy is set to a resource type not supported by the policy. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/soap-message-validation-deployment-errors#invalidresourcetype) |
+| `ResourceCompileFailed` | The resource script referenced in the `<ResourceURL>` element of the SOAPMessageValidation policy contains an error that prevents it from compiling. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/soap-message-validation-deployment-errors#resourcecompilefailed) |
+| `RootElementNameUnspecified` | The `<Element>` element in the SOAPMessageValidation policy does not contain the root element's name. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/soap-message-validation-deployment-errors#rootelementnameunspecified) |
+| `InvalidRootElementName` | The `<Element>` element in the SOAPMessageValidation policy contains a root element name that does not adhere to XML rules for valid element naming. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/soap-message-validation-deployment-errors#invalidrootelementname) |
+
+## Schemas
+
+Each policy type is defined by an XML schema (`.xsd`). For reference, [policy schemas](https://github.com/apigee/api-platform-samples/tree/master/schemas/policy) are available on GitHub.
+
+## Related topics
+
+- [XML Threat Protection policy](/apigee/docs/api-platform/reference/policies/xml-threat-protection-policy)
+- [XML to JSON policy](/apigee/docs/api-platform/reference/policies/xml-json-policy)
+- [JSON to XML policy](/apigee/docs/api-platform/reference/policies/json-xml-policy)
+- [JSON Threat Protection policy](/apigee/docs/api-platform/reference/policies/json-threat-protection-policy)

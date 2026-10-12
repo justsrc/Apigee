@@ -1,0 +1,2579 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+OAuthV2 is a multi-faceted policy for performing OAuth 2.0 grant type operations. This is the primary policy used to configure OAuth 2.0 endpoints on Apigee.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+To learn more about OAuth on Apigee, see the [OAuth home page](/apigee/docs/api-platform/security/oauth/oauth-home). It provides links to resources, samples, videos, and more.
+
+**Tip:** See the [VerifyIAM policy](/apigee/docs/api-platform/reference/policies/verify-iam-policy) for a [Standard policy](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types) that provides a Google Cloud IAM-integrated method of managing authentication and authorization on a proxy.
+
+### <span id="Samples"></span>Samples
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### VerifyAccessToken
+
+### VerifyAccessToken
+
+This OAuthV2 policy configuration (with the VerifyAccessToken operation) verifies that an access token submitted to Apigee is valid. When this policy operation is triggered, Apigee looks for a valid access token in the request. If the access token is valid, the request is allowed to proceed. If invalid, all processing stops and an error is returned in the response.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OAuthV2 name="OAuthV2-Verify-Access-Token">
+    <Operation>VerifyAccessToken</Operation>
+</OAuthV2>
+```
+
+**Note:** Only OAuth 2.0 Bearer Tokens are supported. Other types of tokens such as Message Authentication Code (MAC) tokens are not supported.
+
+A client application would need to send in a request with a token. For example using curl it might be:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+$ curl https://API_ENDPOINT/weather/forecastrss?w=12797282 \
+  -H "Authorization: Bearer ylSkZIjbdWybfsUQe9BqP0LH5Z"
+```
+
+Where `API_ENDPOINT` is the domain used to access your APIs, as configured in your Apigee system.
+
+By default, the OAuthV2 policy extracts the access token from `Authorization` header, stripping the `Bearer` prefix. You can change this default behavior with the [`AccessToken`](#accesstokenelement) configuration element.
+
+</div>
+
+<div class="section">
+
+### GenerateAccessToken
+
+### Generating access tokens
+
+For examples showing how to request access tokens for each of the supported grant types, see [Get OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/access-tokens). The topic includes examples of these operations:
+
+- [Authorization code](/apigee/docs/api-platform/security/oauth/access-tokens#requestinganaccesstokenauthorizationcodegranttype)
+- [Client credentials](/apigee/docs/api-platform/security/oauth/access-tokens#requestinganaccesstokenclientcredentialsgranttype)
+- [Implicit](/apigee/docs/api-platform/security/oauth/access-tokens#requestinganaccesstokenimplicitgranttype)
+- [Password](/apigee/docs/api-platform/security/oauth/access-tokens#requestinganaccesstokenpasswordgranttype)
+
+**Note**: With the GenerateAccessToken operation, the OAuthV2 policy can return a response that is not fully compliant with the related OAuth 2.0 specifications. As one example, the `token_type` property in the token response may be non-compliant. For details on this and other possible non-compliant response elements, see [RFC-compliant behavior](#rfc-compliant-behavior).
+
+</div>
+
+<div class="section">
+
+### GenerateAuthorizationCode
+
+### Generate authorization code
+
+For examples showing how to request authorization codes, see [Requesting an authorization code](/apigee/docs/api-platform/security/oauth/access-tokens#requestinganauthorizationcode).
+
+</div>
+
+<div class="section">
+
+### RefreshAccessToken
+
+### Refresh an access token
+
+For examples showing how to request access tokens using a refresh token, see [Refreshing an access token](/apigee/docs/api-platform/security/oauth/access-tokens#refreshinganaccesstoken).
+
+</div>
+
+<div class="section">
+
+### JWT access tokens
+
+### JWT access tokens
+
+For examples showing how to generate, verify, and refresh JWT access tokens, see [Using JWT access tokens](/apigee/docs/api-platform/security/oauth/using-jwt-oauth#refreshing-a-jwt-access-token).
+
+</div>
+
+<div class="section">
+
+### Response flow token
+
+### Generate an access token on the response flow
+
+Sometimes you may need to generate an access token in the response flow. For example, you may do this in response to some custom validation done in a backend service. In this example, the use case requires both an access token and a refresh token, ruling out the implicit grant type. In this case, we'll use the password grant type to generate the token. As you'll see, the trick to making this work is to pass in an Authorization request header with a JavaScript policy.
+
+First, let's look at the sample policy:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OAuthV2 enabled="true" continueOnError="false" async="false" name="generateAccessToken">
+    <Operation>GenerateAccessToken</Operation>
+    <AppEndUser>Doe</AppEndUser>
+    <UserName>jdoe</UserName>
+    <PassWord>jdoe</PassWord>
+    <GrantType>grant_type</GrantType>
+    <ClientId>a_valid_client_id</ClientId>
+    <SupportedGrantTypes>
+        <GrantType>password</GrantType>
+    </SupportedGrantTypes>
+</OAuthV2>
+```
+
+If you put this policy on the response flow, it will fail with a 401 UnAuthorized error even though the correct login parameters are specified in the policy. To solve this problem, you need to set an Authorization request header.
+
+The Authorization header must contain a Basic access scheme with the Base64-encoded client_id:client_secret.
+
+You can add this header with a JavaScript policy placed just before the OAuthV2 policy, like this. The "local_clientid" and "local_secret" context variables must be previously set and available in the flow:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+var clientId = context.getVariable("local_clientid");
+var clientSecret = context.getVariable("local_secret");
+context.setVariable("request.header.Authorization","Basic "+ CryptoJS.enc.Base64.stringify(CryptoJS.enc.Latin1
+                                      .parse(clientId + ':' + clientSecret)));
+```
+
+</div>
+
+</div>
+
+**Warning:** `VerifyAPIKey` and `OAuthV2` policies may experience increased p90+ latencies under specific conditions. This behavior is typically observed when the Queries Per Second (QPS) rate is very low (single-digit rate) and Message Processors (MPs) are over-provisioned. The elevated latency in these scenarios is primarily attributed to inefficient cache utilization.
+
+See also [Encoding basic authentication credentials](/apigee/docs/api-platform/security/oauth/access-tokens#encoding).
+
+## <span id="policyref"></span>Element reference
+
+The policy reference describes the elements and attributes of the OAuthV2 policy.
+
+**Note:** The way you configure this policy, and the elements you need to specify, depend on which operation you want the policy to perform. For example, if you are implementing the authorization code grant type, then you will require four separate OAuthV2 policies to perform authorization code generation, access code generation, access code validation, and refresh token generation. This reference lists all of the elements that can be used with this policy.
+
+If you want to see configurations for specific grant type use cases, refer to the [OAuth home page](/apigee/docs/api-platform/security/oauth/oauth-home) for a list of grant type implementations.
+
+The sample policy shown below is one of many possible configurations. This sample shows an OAuthV2 policy configured for the GenerateAccessToken operation. It includes required and optional elements. Refer to the element descriptions in this section for details.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OAuthV2 name="GenerateAccessToken">
+  <!-- This policy generates an OAuth 2.0 access token using the client_credentials grant type -->
+  <Operation>GenerateAccessToken</Operation>
+  <!-- This is in millseconds, so expire in an hour -->
+  <ExpiresIn>3600000</ExpiresIn>
+  <SupportedGrantTypes>
+    <GrantType>client_credentials</GrantType>
+  </SupportedGrantTypes>
+  <GrantType>request.queryparam.grant_type</GrantType>
+  <GenerateResponse/>
+</OAuthV2>
+```
+
+## \<OAuthV2\> attributes
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OAuthV2 async="false" continueOnError="false" enabled="true" name="MyOAuthPolicy">
+```
+
+The following table describes attributes that are common to all policy parent elements:
+
+<table width="650">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<tbody>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Default</th>
+<th>Presence</th>
+</tr>
+&#10;<tr>
+<td><code translate="no" dir="ltr">name</code></td>
+<td><p>The internal name of the policy. The value of the <code translate="no" dir="ltr">name</code> attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters.</p>
+<p>Optionally, use the <code translate="no" dir="ltr">&lt;DisplayName&gt;</code> element to label the policy in the management UI proxy editor with a different, natural-language name.</p></td>
+<td>N/A</td>
+<td>Required</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">continueOnError</code></td>
+<td><p>Set to <code translate="no" dir="ltr">false</code> to return an error when a policy fails. This is expected behavior for most policies.</p>
+<p>Set to <code translate="no" dir="ltr">true</code> to have flow execution continue even after a policy fails. See also:</p>
+<ul>
+<li><a href="/apigee/docs/api-platform/fundamentals/fault-handling#multiplefaultrulesandexecutionlogic-faultrulesaretriggeredonlyinanerrorstateaboutcontinueonerror">Fault rules are triggered ONLY in an error state (about continueOnError)</a></li>
+<li><a href="/apigee/docs/api-platform/fundamentals/fault-handling#continueonerror">Handling faults within the current flow</a></li>
+</ul></td>
+<td>false</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">enabled</code></td>
+<td><p>Set to <code translate="no" dir="ltr">true</code> to enforce the policy.</p>
+<p>Set to <code translate="no" dir="ltr">false</code> to <em>turn off</em> the policy. The policy will not be enforced even if it remains attached to a flow.</p></td>
+<td>true</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">async</code></td>
+<td><p>This attribute is deprecated.</p></td>
+<td>false</td>
+<td>Deprecated</td>
+</tr>
+</tbody>
+</table>
+
+## \<DisplayName\> element
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, natural-language name.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<th width="75" scope="row">Default</th>
+<td><p>N/A</p>
+<p>If you omit this element, the value of the policy's <code translate="no" dir="ltr">name</code> attribute is used.</p></td>
+</tr>
+<tr>
+<th scope="row">Presence</th>
+<td>Optional</td>
+</tr>
+<tr>
+<th scope="row">Type</th>
+<td>String</td>
+</tr>
+</tbody>
+</table>
+
+## \<AccessToken\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AccessToken>request.header.access_token</AccessToken>
+```
+
+By default, when `Operation` is `VerifyAccessToken`, the policy expects the access token to be sent in the `Authorization` header as a bearer token; that is to say, with a prefix of "Bearer", followed by one blank space. You can change that default using this element, specifying the name of a variable that contains the access token to verify. When you use this element, the policy by default does not look for a prefix in the contents of the variable. If you want to specify that the policy should look for a prefix, use the [`AccessTokenPrefix`](#accesstokenprefixelement) element as well.
+
+Examples:
+
+- When the policy configuration is:
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+    <OAuthV2 name="OAuthV2-Verify-Access-Token-in-Header">
+        <Operation>VerifyAccessToken</Operation>
+        <AccessToken>request.header.access_token</AccessToken>
+    </OAuthV2>
+  ```
+
+  To pass the token using curl, you might use:
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+    curl https://API_ENDPOINT/oauth2/validate -H "access_token:Rft3dqrs56Blirls56a"
+  ```
+
+- When the policy configuration is:
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+    <OAuthV2 name="OAuthV2-Verify-Access-Token-in-QueryParam">
+        <Operation>VerifyAccessToken</Operation>
+        <AccessToken>request.queryparam.token</AccessToken>
+    </OAuthV2>
+  ```
+
+  To pass the token using curl, you might use:
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+    curl "https://API_ENDPOINT/oauth2/validate?token=Rft3dqrs56Blirls56a"
+  ```
+
+Where `API_ENDPOINT` is the domain used to access your APIs, as configured in your Apigee system.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td width="223"><p>N/A</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td><p>any variable name</p></td>
+</tr>
+<tr>
+<td><strong>Used with operations</strong></td>
+<td><ul>
+<li>VerifyAccessToken</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<AccessTokenPrefix\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AccessTokenPrefix>Prefix</AccessTokenPrefix>
+```
+
+By default, when `Operation` is `VerifyAccessToken`, the policy expects the access token to be sent in the `Authorization` header as a bearer token; that is to say, with a prefix of "Bearer", followed by one blank space. If you use the [`AccessToken`](#accesstokenelement) element to specify a different location for the incoming access token, then you can also use this element, `AccessTokenPrefix`, to specify a different, non-standard prefix.
+
+For example, if you specify:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OAuthV2 name="OAuthV2-Verify-Access-Token-Alternative-Header">
+    <Operation>VerifyAccessToken</Operation>
+    <AccessToken>request.header.token</AccessToken>
+    <AccessTokenPrefix>KEY</AccessTokenPrefix>
+</OAuthV2>
+```
+
+Then the policy will extract the inbound access token in from `token` request header, in this way: if the header begins with the word "KEY" followed by a space, the policy will strip that prefix and space and interpret the remaining value as the access token. If the specified prefix is not present in the header, the policy will throw a fault.
+
+If you specify the `AccessToken` element, and do not specify the `AccessTokenPrefix` element, the policy will interpret the entire value of the variable specified within the `AccessToken` element as the access token.
+
+This element is effective only when the `AccessToken` element is also used.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td width="223"><p>-none-</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td><p>any string</p></td>
+</tr>
+<tr>
+<td><strong>Used with operations</strong></td>
+<td><ul>
+<li>VerifyAccessToken</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<Algorithm\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Algorithm>algorithm-here</Algorithm>
+```
+
+Specifies the encryption algorithm used to sign a JWT access token. RSA (RS\*) algorithms employ a public/secret key pair while HMAC (HS\*) algorithms employ a shared secret. This element is required for the `GenerateJWTAccessToken`, `VerifyJWTAccessToken`, and `RefreshJWTAccessToken` operations.
+
+|  |  |
+|----|----|
+| **Default** | N/A |
+| **Presence** | Required when using the `GenerateJWTAccessToken`, `VerifyJWTAccessToken`, and `RefreshJWTAccessToken` operations. |
+| **Type** | String |
+| **Valid values** | HS256, HS384, HS512, RS256, RS384, RS512 |
+
+## \<AppEndUser\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AppEndUser>request.queryparam.app_enduser</AppEndUser>
+```
+
+In cases where the app end user ID must be sent to the authorization server, this element lets you specify where Apigee should look for the end user ID. For example, it could be sent as a query parameter or in an HTTP header.
+
+For example `request.queryparam.app_enduser` indicates that the AppEndUser should be present as a query parameter, as, for example, `?app_enduser=ntesla@theramin.com`. To require the AppEndUser in an HTTP header, for example, set this value to `request.header.app_enduser`.
+
+Providing this setting enables you to include an app end user ID in the access token. This feature is useful if you want to be able to retrieve or revoke OAuth 2.0 access tokens by end user ID. For more information, see [Enable retrieval and revocation of OAuth 2.0 access tokens by end user ID, app id, or both](/apigee/docs/api-platform/security/oauth/enable-retrieval-and-revocation-oauth-20-access-tokens-end-user-id-app-id-or-both).
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td><p>N/A</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td><p>Any flow variable accessible to the policy at runtime.</p></td>
+</tr>
+<tr>
+<td><strong>Used with grant types</strong></td>
+<td><ul>
+<li>authorization_code</li>
+<li>implicit</li>
+<li>password</li>
+<li>client_credentials</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<Attributes/Attribute\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Attributes>
+    <Attribute name="attr_name1" ref="flow.variable" display="true|false">value1</Attribute>
+    <Attribute name="attr_name2" ref="flow.variable" display="true|false">value2</Attribute>
+</Attributes>
+```
+
+Use this element to add custom attributes to an access token or authorization code. For example, you may wish to embed a user ID or session identifier in an access token that can be extracted and checked at runtime.
+
+This element lets you specify a value in a flow variable or from a literal string. If you specify both a variable and a string, the value specified in the flow variable is used. If the variable cannot be resolved, then the string is the default.
+
+For more information on using this element, see [Customizing Tokens and Authorization Codes](/apigee/docs/api-platform/security/oauth/customizing-access-tokens).
+
+**Notes:**
+
+You can create up to 18 custom attributes.
+
+If you add custom attributes to an authorization code, those attributes will be inherited by the access token generated from that code.
+
+### <span id="displayorhide"></span>Displaying or hiding custom attributes in the response
+
+Remember that if you set the GenerateResponse element of this policy to **true**, the full JSON representation of the token is returned in the response, including any custom attributes that you set. In some cases, you might want to hide some or all of your custom attributes in the response so that they are not visible to client apps.
+
+By default, custom attributes do appear in the response. If you want to hide them, you can set the **display** parameter to **false**. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Attributes>
+    <Attribute name="employee_id" ref="employee.id" display="false"/>
+    <Attribute name="employee_name" ref="employee.name" display="false"/>
+</Attributes>
+```
+
+The value of the `display` attribute is not persisted. Let's say you generate an access token with custom attributes that you want to hide in the generated response. Setting `display=false` accomplishes that goal. However, if a new access token is generated later using a refresh token, the original custom attributes from the access token will show up in the refresh token response. This is because Apigee does not remember that the `display` attribute was originally set to `false` in the generate access token policy--the custom attribute is simply part of the access token's metadata.
+
+You will see the same behavior if you add custom attributes to an authorization code--when an access token is generated using that code, those custom attributes will show up in the access token response. Again, this may not be the behavior you intend.
+
+To hide custom attributes in these cases, you have these choices:
+
+- Explicitly reset the custom attributes in the refresh token policy and set their display to false. In this case, you may need to retrieve the original custom values from the original access token using the GetOAuthV2Info policy.
+- Use a postprocessing JavaScript policy to manually extract any custom attributes that you do not want to see in the response.
+
+See also [Customizing Tokens and Authorization Codes](/apigee/docs/api-platform/security/oauth/customizing-access-tokens).
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td><p><code translate="no" dir="ltr">N/A</code></p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td><ul>
+<li><code translate="no" dir="ltr">name</code> -The attribute name</li>
+<li><code translate="no" dir="ltr">ref</code> - The value of the attribute. Can come from a flow variable.</li>
+<li><code translate="no" dir="ltr">display</code> - (Optional) Lets you specify whether or not custom attributes appear in the response. If <code translate="no" dir="ltr">true</code>, custom attributes appear in the response (If <code translate="no" dir="ltr">GenerateResponse</code> is also enabled). If <code translate="no" dir="ltr">false</code>, custom attributes are not included in the response. Default value is <code translate="no" dir="ltr">true</code>. See <a href="#displayorhide">Displaying or hiding custom attributes in the response</a>.</li>
+</ul></td>
+</tr>
+<tr>
+<td height="116"><strong>Used with grant types</strong></td>
+<td><ul>
+<li>authorization_code</li>
+<li>implicit</li>
+<li>password</li>
+<li>client_credentials</li>
+<li>refresh_token</li>
+<li>Can also be used with the GenerateAuthorizationCode operation.</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<CacheExpiryInSeconds\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<CacheExpiryInSeconds ref="propertyset.settings.token-ttl">60</CacheExpiryInSeconds>
+```
+
+This element can be used with the `VerifyAccessToken` operation only. It specifies the time-to-live (TTL) on the access token cache for the particular policy execution. The first time Apigee verifies an OAuth 2 access token, it must retrieve the access token from a persistent store. This is a relatively expensive operation, so Apigee caches the result of the token lookup, including the token status, the list of products the token is valid for, and any custom attributes attached to the token. Subsequent invocations of `OAuthV2/VerifyAccessToken` until the TTL elapses will read the in-memory cached result, which means token verification will be much faster.
+
+The default TTL for the access token cache is 180 seconds. This element allows you to reduce that TTL, thereby trading performance for correctness. One scenario in which this would make sense is if you sometimes revoke tokens, and you want to reduce the time window during which Apigee will continue to treat revoked tokens as valid.
+
+The supported range is between 1 and 180 seconds. You can provide a flow variable and a default value. If you provide a flow variable and if it contains a numeric value, it takes precedence over the specified default value.
+
+**Note**: There will be a drop in performance when you use a lower number for the cache expiry.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td>N/A
+<p>If you omit this element, the default expiration period for the cached access token is 180 seconds.</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><p><strong>Type</strong></p></td>
+<td>Integer</td>
+</tr>
+<tr>
+<td><p><strong>Valid values</strong></p></td>
+<td>Any positive, nonzero integer. Specifies the expiration time in seconds.</td>
+</tr>
+<tr>
+<td><strong>Used with operations</strong></td>
+<td><ul>
+<li>VerifyAccessToken</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+### Attributes
+
+The following table describes the attributes of the `<CacheExpiryInSeconds>` element
+
+<table width="650">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<tbody>
+<tr>
+<th scope="col">Attribute</th>
+<th scope="col">Description</th>
+<th scope="col">Default</th>
+<th scope="col">Presence</th>
+</tr>
+&#10;<tr>
+<td>ref</td>
+<td><p>A reference to the flow variable containing the value for the cache expiration, expressed in seconds.</p>
+<p>If provided, the flow variable value takes precedence over the specified default value.</p></td>
+<td>N/A</td>
+<td>Optional</td>
+</tr>
+</tbody>
+</table>
+
+## \<ClientId\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ClientId>request.formparam.client_id</ClientId>
+```
+
+In several cases, the client app must send the client ID to the authorization server. This element specifies that Apigee should look for the client ID in the flow variable `request.formparam.client_id`. Setting `ClientId` to any other variable is not supported. See also [Get OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/access-tokens).
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td><p>request.formparam.client_id (a x-www-form-urlencoded and specified in the request body)</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td>The flow variable: <code translate="no" dir="ltr">request.formparam.client_id</code></td>
+</tr>
+<tr>
+<td><strong>Used with grant types</strong></td>
+<td><ul>
+<li>authorization_code</li>
+<li>password</li>
+<li>implicit</li>
+<li>client_credentials</li>
+</ul>
+<p>Can also be used with the GenerateAuthorizationCode operation.</p></td>
+</tr>
+</tbody>
+</table>
+
+## \<Code\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Code>request.queryparam.code</Code>
+```
+
+In the authorization grant type flow, the client must submit an authorization code to the authorization server (Apigee). This element lets you specify where Apigee should look for the authorization code. For example, it could be sent as a query parameter, HTTP header, or form parameter (the default).
+
+The variable, `request.queryparam.auth_code` indicates that the authorization code should be present as a query parameter, as, for example, `?auth_code=AfGlvs9`. To require the authorization code in an HTTP header, for example, set this value to `request.header.auth_code`. See also [Get OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/access-tokens).
+
+|  |  |
+|----|----|
+| **Default** | request.formparam.code (a x-www-form-urlencoded and specified in the request body) |
+| **Presence** | optional |
+| **Type** | String |
+| **Valid values** | Any flow variable accessible to the policy at runtime |
+| **Used with grant types** | authorization_code |
+
+## <span id="expiresin"></span>\<ExpiresIn\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExpiresIn>10000</ExpiresIn>
+```
+
+Enforces the expiry time of access tokens and authorization codes in milliseconds. (For refresh tokens, use `<RefreshTokenExpiresIn>`.) The expiry time value is a system generated value plus the `<ExpiresIn>` value. If `<ExpiresIn>` is not specified, the system applies a default value configured at the system level.
+
+The expiry time can also be set at runtime using either a hard-coded, default value or by referencing a flow variable. For example, you can store a token expiration value in a key value map, retrieve it, assign it to a variable, and reference it in the policy. For example, `kvm.oauth.expires_in`.
+
+Apigee keeps the following entities in cache for a minimum of 180 seconds after the entities are *accessed*.
+
+- OAuth access tokens. This means the [`ExpiresIn`](/apigee/docs/api-platform/reference/policies/oauthv2-policy#expiresinelement) element on the OAuth v2 policy won't be able to expire an access token in less than 180 seconds.
+- Key Management Service (KMS) entities (Apps, Developers, API Products).
+- Custom attributes on OAuth tokens and KMS entities.
+
+The following stanza specifies a flow variable and a default value as well. Note that the flow variable value takes precedence over the specified default value.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExpiresIn ref="kvm.oauth.expires_in">
+    3600000 <!--default value in milliseconds-->
+</ExpiresIn>
+```
+
+Apigee does not support a way to force the expiration of a token after it has been created. If you need to force token expiration (for example, based on a condition), a possible solution is described in [this Apigee Community post](https://discuss.google.dev/t/is-there-a-way-to-update-expiry-time-of-an-existing-access-token/7293.html).
+
+By default, expired access tokens are purged from the Apigee Apigee system automatically 3 days after expiration. See also [Purging access tokens](#purge)
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td><p>If not specified, the system applies a default value configured at the system level.</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>Integer</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td><p>Any positive, non-zero integer. Specify the expiry time in <strong>milliseconds</strong>. Although the value of this element is in milliseconds, the value set in the token's <code translate="no" dir="ltr">expires_in</code> property and in the <code translate="no" dir="ltr">expires_in</code> flow variable is expressed in seconds.</p></td>
+</tr>
+<tr>
+<td><strong>Used with grant types</strong></td>
+<td><ul>
+<li>authorization_code</li>
+<li>implicit</li>
+<li>password</li>
+<li>client_credentials</li>
+<li>refresh_token</li>
+</ul>
+<p>Also used with GenerateAuthorizationCode operation.</p></td>
+</tr>
+</tbody>
+</table>
+
+## \<ExternalAccessToken\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExternalAccessToken>request.queryparam.external_access_token</ExternalAccessToken>
+```
+
+Tells Apigee where to find an external access token (an access token not generated by Apigee).
+
+The variable `request.queryparam.external_access_token` indicates that the external access token should be present as a query parameter, as, for example, `?external_access_token=12345678`. To require the external access token in an HTTP header, for example, set this value to `request.header.external_access_token`. See also [Using Third-Party OAuth Tokens](/apigee/docs/api-platform/security/oauth/use-third-party-oauth-system).
+
+## \<ExternalAuthorization\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExternalAuthorization>true</ExternalAuthorization>
+```
+
+If this element is false or not present, then Apigee validates the client_id and client_secret normally against the Apigee authorization store. Use this element when you want to work with third-party OAuth tokens. For details on using this element, see [Using Third-Party OAuth Tokens](/apigee/docs/api-platform/security/oauth/use-third-party-oauth-system).
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td width="321"><p>false</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td>true or false</td>
+</tr>
+<tr>
+<td><strong>Used with grant types</strong></td>
+<td><ul>
+<li>authorization_code</li>
+<li>password</li>
+<li>client_credentials</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<ExternalAuthorizationCode\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExternalAuthorizationCode>request.queryparam.external_auth_code</ExternalAuthorizationCode>
+```
+
+Tells Apigee where to find an external auth code (an auth code not generated by Apigee).
+
+The variable `request.queryparam.external_auth_code` indicates that the external auth code should be present as a query parameter, as, for example, `?external_auth_code=12345678`. To require the external auth code in an HTTP header, for example, set this value to `request.header.external_auth_code`. See also [Using Third-Party OAuth Tokens](/apigee/docs/api-platform/security/oauth/use-third-party-oauth-system).
+
+## \<ExternalRefreshToken\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExternalRefreshToken>request.queryparam.external_refresh_token</ExternalRefreshToken>
+```
+
+Tells Apigee where to find an external refresh token (a refresh token not generated by Apigee).
+
+The variable `request.queryparam.external_refresh_token` indicates that the external refresh token should be present as a query parameter, as, for example, `?external_refresh_token=12345678`. To require the external refresh token in an HTTP header, for example, set this value to `request.header.external_refresh_token`. See also [Using Third-Party OAuth Tokens](/apigee/docs/api-platform/security/oauth/use-third-party-oauth-system).
+
+## \<GenerateResponse\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<GenerateResponse enabled='true'/>
+```
+
+If set to `true` or if the `enabled` attribute is omitted, the policy generates and returns a response. For example, for GenerateAccessToken, the response might be like:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "issued_at" : "1467841035013",
+  "scope" : "read",
+  "application_name" : "e31b8d06-d538-4f6b-9fe3-8796c11dc930",
+  "refresh_token_issued_at" : "1467841035013",
+  "status" : "approved",
+  "refresh_token_status" : "approved",
+  "api_product_list" : "[Product1, nhl_product]",
+  "expires_in" : "1799",
+  "developer.email" : "edward@slalom.org",
+  "token_type" : "BearerToken",
+  "refresh_token" : "rVSmm3QaNa0xBVFbUISz1NZI15akvgLJ",
+  "client_id" : "Adfsdvoc7KX5Gezz9le745UEql5dDmj",
+  "access_token" : "AnoHsh2oZ6EFWF4h0KrA0gC5og3a",
+  "organization_name" : "cerruti",
+  "refresh_token_expires_in" : "0",
+  "refresh_count" : "0"
+}
+```
+
+If set to `false` or if the `<GenerateResponse>` element is omitted, no response is sent. Instead, a set of flow variables are populated with values related to the policy's function. For example, a flow variable called `oauthv2authcode.OAuthV2-GenerateAuthorizationCode.code` gets populated with the newly minted auth code. Note that **expires_in** is expressed in seconds in the response.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td width="390"><p>true</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>string</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td>true or false</td>
+</tr>
+<tr>
+<td><strong>Used with grant types</strong></td>
+<td><ul>
+<li>implicit</li>
+<li>password</li>
+<li>client_credentials</li>
+<li>refresh_token</li>
+<li>Also can be used with the GenerateAuthorizationCode operation.</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<GenerateErrorResponse\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<GenerateErrorResponse enabled='true'/>
+```
+
+If set to `true`, the policy generates and returns a response if the ContinueOnError attribute is set to true. If `false` (the default), no response is sent. Instead, a set of flow variables are populated with values related to the policy's function.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td width="390"><p>false</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>string</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td>true or false</td>
+</tr>
+<tr>
+<td><strong>Used with grant types</strong></td>
+<td><ul>
+<li>implicit</li>
+<li>password</li>
+<li>client_credentials</li>
+<li>refresh_token</li>
+<li>Also can be used with the GenerateAuthorizationCode operation.</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## <span id="granttype"></span>\<GrantType\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<GrantType>request.queryparam.grant_type</GrantType>
+```
+
+Tells the policy where to find the grant type parameter that is passed in a request. Per the OAuth 2.0 specification, the grant type must be supplied with requests for access tokens and authorization codes. The variable can be a header, query parameter, or form parameter (default).
+
+For example `request.queryparam.grant_type` indicates that the Password should be present as a query parameter, as, for example, `?grant_type=password`. To require the grant type in an HTTP header, for example, set this value to `request.header.grant_type`. See also [Get OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/access-tokens).
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td width="390"><p>request.formparam.grant_type (a x-www-form-urlencoded and specified in the request body)</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>string</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td>A variable, as explained above.</td>
+</tr>
+<tr>
+<td><strong>Used with grant types</strong></td>
+<td><ul>
+<li>authorization_code</li>
+<li>password</li>
+<li>implicit</li>
+<li>client_credentials</li>
+<li>refresh_token</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<Operation\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Operation>GenerateAuthorizationCode</Operation>
+```
+
+The OAuth 2.0 operation executed by the policy.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td><p>If <code translate="no" dir="ltr">&lt;Operation&gt;</code> is not specified, Apigee looks at the list of <code translate="no" dir="ltr">&lt;SupportedGrantTypes&gt;</code>. Only operations on those grant types will be successful. In other words, you can omit <code translate="no" dir="ltr">&lt;Operation&gt;</code> if you specify a <code translate="no" dir="ltr">&lt;GrantType&gt;</code> in the <code translate="no" dir="ltr">&lt;SupportedGrantTypes&gt;</code> list. If neither <code translate="no" dir="ltr">&lt;Operation&gt;</code> nor <code translate="no" dir="ltr">&lt;SupportedGrantTypes&gt;</code> are specified, the default grant type is authorization_code. That is, authorization_code grant type requests will succeed, but all others will fail.</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td><ul>
+<li><code translate="no" dir="ltr">GenerateAccessToken</code> - Generates an access token. See also <a href="/apigee/docs/api-platform/security/oauth/access-tokens">Get OAuth 2.0 tokens</a>.</li>
+<li><code translate="no" dir="ltr">GenerateAccessTokenImplicitGrant</code> - Generates an access token for the implicit grant type. See also <a href="/apigee/docs/api-platform/security/oauth/access-tokens">Get OAuth 2.0 tokens</a>.</li>
+<li><code translate="no" dir="ltr">GenerateAuthorizationCode</code> - Generates an auth code. Used with the authorization code grant type. See also <a href="/apigee/docs/api-platform/security/oauth/access-tokens">Get OAuth 2.0 tokens</a>.</li>
+<li><code translate="no" dir="ltr">RefreshAccessToken</code> - Exchange a refresh token for a new access token. See also <a href="/apigee/docs/api-platform/security/oauth/access-tokens">Get OAuth 2.0 tokens</a>.</li>
+<li><code translate="no" dir="ltr">VerifyAccessToken</code> - Verifies that an access token sent in a request is valid. See the VerifyAccessToken sample above and <a href="#verifying">Verifying access tokens</a>.</li>
+<li><code translate="no" dir="ltr">InvalidateToken</code> - Revokes an access token. After a token has been revoked, clients cannot use that token to call a protected API. See also <a href="/apigee/docs/api-platform/security/oauth/validating-and-invalidating-access-tokens">Approving and revoking access tokens</a>.
+<strong>Warning:</strong> OAuth tokens are cached for three minutes (180 seconds); therefore, a revoked token may still succeed for up to three minutes, until its cache limit expires.</li>
+<li><code translate="no" dir="ltr">ValidateToken</code> - Reinstates or "approves" an access token that was previously revoked. See also <a href="/apigee/docs/api-platform/security/oauth/validating-and-invalidating-access-tokens">Approving and revoking access tokens</a>.</li>
+</ul>
+<p><strong>Additional JWT access token operations</strong></p>
+<p>If you prefer to use JWT access tokens instead of opaque string tokens, the following operations are also available for generating and validating JWT tokens. For details, see <a href="/apigee/docs/api-platform/security/oauth/using-jwt-oauth">Using JWT OAuth token operations</a>:</p>
+<ul>
+<li><code translate="no" dir="ltr">GenerateJWTAccessToken</code> - Generates an access token with a signed JWT. See <a href="/apigee/docs/api-platform/security/oauth/using-jwt-oauth#generating-a-jwt-access-token">Generating a JWT access token</a>.</li>
+<li><code translate="no" dir="ltr">GenerateJWTAccessTokenImplicitGrant</code> - Generates an access token with a signed JWT for the implicit grant type. See <a href="/apigee/docs/api-platform/security/oauth/using-jwt-oauth#generating-a-jwt-access-token">Generating a JWT access token</a>.</li>
+<li><code translate="no" dir="ltr">VerifyJWTAccessToken</code> - Verifies a signed JWT access token. See also <a href="/apigee/docs/api-platform/security/oauth/using-jwt-oauth#verifying-a-jwt-access-token-encrypted-with-an-hmac-algorithm">Verifying a JWT access token</a>.</li>
+<li><code translate="no" dir="ltr">RefreshJWTAccessToken</code> - Exchange a refresh token for a new JWT access token. See also <a href="/apigee/docs/api-platform/security/oauth/using-jwt-oauth#refreshing-an-hmac-encrypted-access-token">Refreshing a JWT access token</a>.</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<PassWord\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PassWord>request.queryparam.password</PassWord>
+```
+
+**This element is used with the** **password grant type only**. With the password grant type, user credentials (password and username) must be made available to the OAuthV2 policy. The `<PassWord>` and `<UserName>` elements are used to specify variables where Apigee can find these values. If these elements are not specified, the policy expects to find the values (by default) in form parameters named `username` and `password`. If the values are not found, the policy throws an error. You can use the `<PassWord>` and `<UserName>` elements to reference any flow variable containing the credentials.
+
+For example, you can pass the password in a token request using a query parameter and set the element like this: `<PassWord>request.queryparam.password</PassWord>``.` To require the password in an HTTP header, set this value to `request.header.password`.
+
+The OAuthV2 policy doesn't do anything else with these credential values; Apigee is simply verifying that they are present. It is up to the API developer to retrieve the values request and send them to an identity provider before the token generation policy executes.
+
+See also [Get OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/access-tokens).
+
+|  |  |
+|----|----|
+| **Default** | request.formparam.password (a x-www-form-urlencoded and specified in the request body) |
+| **Presence** | Optional |
+| **Type** | String |
+| **Valid values** | Any flow variable available to the policy at runtime. |
+| **Used with grant types** | password |
+
+## \<PrivateKey\>/\<Value\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PrivateKey>
+  <Value ref="variable-name-here"/>
+</PrivateKey>
+```
+
+Provides the private key used to verify or sign JWT-formatted access tokens with an RSA algorithm. Use the `ref` attribute to pass the key in a flow variable. **Use only when the `Algorithm` element value is one of RS256, RS384, or RS512**. For more information, see [Using JWT OAuth token operations](/apigee/docs/api-platform/security/oauth/using-jwt-oauth).
+
+**Note:** To protect secrets, it's a best practice to store the key in an environment-scoped [property set](/apigee/docs/api-platform/cache/property-sets) or an environment-scoped key value map (KVM). See also [Access property set values](/apigee/docs/api-platform/cache/property-sets#access-values) and [Using key value maps.](/apigee/docs/api-platform/cache/key-value-maps)
+
+|  |  |
+|----|----|
+| **Default** | N/A |
+| **Presence** | Required when the `Algorithm` element value is one of HS256, HS384, or HS512. |
+| **Type** | String |
+| **Valid values** | A flow variable containing a string representing a PEM-encoded RSA private key value. |
+
+## \<PublicKey\>/\<Value\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PublicKey>
+   <Value ref="variable-name-here"/>
+</PublicKey>
+```
+
+Specifies the public key or public cert used to verify the signature on a JWT-formatted access token signed with an RSA algorithm. Use the `ref` attribute to pass the key/cert in a flow variable. **Use only when the `Algorithm` element value is one of RS256, RS384, or RS512**.
+
+|  |  |
+|----|----|
+| **Default** | N/A |
+| **Presence** | To verify a JWT signed with an RSA algorithm, you must either use the Certificate, JWKS, or Value elements. |
+| **Type** | String |
+| **Valid values** | A flow variable or string. |
+
+## \<RedirectUri\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<RedirectUri>request.queryparam.redirect_uri</RedirectUri>
+```
+
+Specifies where Apigee should look for the `redirect_uri` parameter in the request.
+
+### About redirection URIs
+
+Redirection URIs are used with the authorization code and implicit grant types. The redirect URI tells the authorization server (Apigee) where to send an authorization code (for the auth code grant type) or access token (for the implicit grant type). It's important to understand when this parameter is required, when it is optional, and how it is used:
+
+- (required) If a Callback URL is registered with the developer app that is associated with the request's client keys, and if the `redirect_uri` is present in the request, then the two must match exactly. If they do not match, an error is returned. For information on registering developer apps on Apigee and specifying a Callback URL, see [Register apps and manage API keys](/apigee/docs/api-platform/publish/creating-apps-surface-your-api).
+
+  **Note:** To ensure that Apigee checks for an exact match between "Callback URL" and "redirect_uri" (as opposed to a forward match), set the following property in your organization: `features.isStrictOAuthUriValidation = true`. The default is false (forward match).
+
+  Contact <a href="https://cloud.google.com/support-hub/" class="external">Google Cloud Customer Care</a> to enable the property.
+
+- (optional) If a Callback URL is registered, and the `redirect_uri` is missing from the request, then Apigee redirects to the registered Callback URL.
+
+- (required) If a Callback URL is not registered, then the `redirect_uri` is required. Note that in this case, Apigee will accept ANY URL. **This case can present a security issue,** **and therefore should only be used with trusted client apps.** If client apps are not trusted, then the best practice is to always require the registration of a Callback URL.
+
+You can send this parameter in a query parameter or in a header. The variable `request.queryparam.redirect_uri` indicates that the RedirectUri should be present as a query parameter, as, for example, `?redirect_uri=login.myapp.com`. To require the RedirectUri in an HTTP header, for example, set this value to `request.header.redirect_uri`. See also [Get OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/access-tokens).
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td><p>request.formparam.redirect_uri (a x-www-form-urlencoded and specified in the request body)</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td>Any flow variable accessible in the policy at runtime</td>
+</tr>
+<tr>
+<td><strong>Used with grant types</strong></td>
+<td><ul>
+<li>authorization_code</li>
+<li>implicit</li>
+</ul>
+<p>Also used with the GenerateAuthorizationCode operation.</p></td>
+</tr>
+</tbody>
+</table>
+
+## \<RefreshToken\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<RefreshToken>request.queryparam.refreshtoken</RefreshToken>
+```
+
+When requesting an access token using a refresh token, you must supply the refresh token in the request. This element lets you specify where Apigee should look for the refresh token. For example, it could be sent as a query parameter, HTTP header, or form parameter (the default).
+
+The variable `request.queryparam.refreshtoken` indicates that the refresh token should be present as a query parameter, as, for example, `?refresh_token=login.myapp.com`. To require the RefreshToken in an HTTP header, for example, set this value to `request.header.refresh_token`. See also [Get OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/access-tokens).
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td><p>request.formparam.refresh_token (a x-www-form-urlencoded and specified in the request body)</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td>Any flow variable accessible in the policy at runtime</td>
+</tr>
+<tr>
+<td><strong>Used with grant types</strong></td>
+<td><ul>
+<li>refresh_token</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<RefreshTokenExpiresIn\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<RefreshTokenExpiresIn>1000</RefreshTokenExpiresIn>
+```
+
+Enforces the expiry time of refresh tokens in milliseconds. The expiry time value is a system-generated value plus the `<RefreshTokenExpiresIn>` value. If `<RefreshTokenExpiresIn>` is not specified, the system applies the default value.
+
+The expiry time can also be set at runtime using either a hard-coded, default value or by referencing a flow variable. For example, you can store a token expiration value in a key value map, retrieve it, assign it to a variable, and reference it in the policy. For example, `kvm.oauth.expires_in`.
+
+The following stanza specifies a flow variable and a default value as well. Note that the flow variable value takes precedence over the specified default value.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<RefreshTokenExpiresIn ref="kvm.oauth.expires_in">
+    86400000 <!--value in milliseconds-->
+</RefreshTokenExpiresIn>
+```
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td><p>2592000000 ms (30 days) <strong>(effective May 31, 2023)</strong></p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>Integer</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td><p>Any positive, non-zero integer. Specifies the expiry time in milliseconds.</p></td>
+</tr>
+<tr>
+<td><strong>Used with grant types</strong></td>
+<td><ul>
+<li>authorization_code</li>
+<li>password</li>
+<li>refresh_token</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<ResponseType\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ResponseType>request.queryparam.response_type</ResponseType>
+```
+
+This element informs Apigee which grant type the client app is requesting. It is used only with the authorization code and implicit grant type flows.
+
+By default, Apigee looks for the response type value in a `response_type` query parameter. If you wish to override this default behavior, use the \<ResponseType\> element to configure a flow variable containing the response type value. For example, if you set this element to `request.header.response_type`, Apigee looks for the response type to be passed in the request header. See also [Get OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/access-tokens).
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td><p>request.formparam.response_type (a x-www-form-urlencoded and specified in the request body)</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional. Use this element if you wish to override the default behavior.</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td>Either <code translate="no" dir="ltr">code</code> (for the authorization code grant type) or <code translate="no" dir="ltr">token</code> (for the implicit grant type)</td>
+</tr>
+<tr>
+<td><strong>Used with grant types</strong></td>
+<td><ul>
+<li>implicit</li>
+<li>Also used with the GenerateAuthorizationCode operation.</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<ReuseRefreshToken\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ReuseRefreshToken>true</ReuseRefreshToken>
+```
+
+When set to `true`, the existing refresh token is reused until it expires. If `false`, a new refresh token is issued by Apigee when a valid refresh token is presented.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td width="226"><p><code translate="no" dir="ltr">false</code></p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>boolean</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td><p><code translate="no" dir="ltr">true</code> or <code translate="no" dir="ltr">false</code></p></td>
+</tr>
+<tr>
+<td height="116"><strong>Used with grant types</strong></td>
+<td><ul>
+<li>refresh_token</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<RFCCompliantRequestResponse\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<RFCCompliantRequestResponse>[true | false]</RFCCompliantRequestResponse>
+```
+
+The OAuthV2 policy, with the GenerateAccessToken operation, can return a response that is not compliant with the related IETF OAuth 2.0 specifications, including <a href="https://tools.ietf.org/html/rfc6749" class="external">RFC 6749</a> and <a href="https://tools.ietf.org/html/rfc6750" class="external">RFC 6750</a>. If you include the `RFCCompliantRequestResponse` element in your policy, with a value of `true`, the OAuthV2 policy returns an RFC-compliant response.
+
+The following table shows the differences in some values returned by the OAuthV2 policy, depending on whether the `RFCCompliantRequestResponse` element is `true` or `false`.
+
+<table class="fixed" style="width:60%;">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 40%" />
+<col />
+</colgroup>
+<thead>
+<tr>
+<th>Element</th>
+<th>Value is false or absent</th>
+<th>Value is true</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code translate="no" dir="ltr">Cache-Control</code> HTTP header</td>
+<td>None supplied</td>
+<td>Error and non-error responses will include the HTTP Cache-Control response header field to comply with <a href="https://tools.ietf.org/html/rfc2616" class="external">RFC2616</a> (Hypertext Transfer Protocol -- HTTP/1.1), with a value of <code translate="no" dir="ltr">no-store</code> in any response containing tokens, credentials, or other sensitive information, as well as the <code translate="no" dir="ltr">Pragma</code> response header field with a value of <code translate="no" dir="ltr">no-cache</code>.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">"token_type"</code> property in valid token response</td>
+<td><p>A non-compliant <code translate="no" dir="ltr">token_type</code> value.</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="Carbon" data-syntax-guessed=""><code>{
+ ...
+ &quot;token_type&quot;: &quot;BearerToken&quot;,
+ ...
+}</code></pre></td>
+<td><p>A compliant <code translate="no" dir="ltr">token_type</code> value.</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="Carbon" data-syntax-guessed=""><code>{
+ ...
+ &quot;token_type&quot;: &quot;Bearer&quot;,
+ ...
+}</code></pre></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">"expires_in"</code> and <code translate="no" dir="ltr">"refresh_token_expires_in"</code> properties in a valid token response</td>
+<td><p>The numeric value is quoted. Example:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="scdoc" data-syntax-guessed=""><code>{
+ ...
+ &quot;expires_in&quot;: &quot;3600&quot;,
+ &quot;refresh_token_expires_in&quot;:
+   &quot;345600&quot;,
+ ...
+}</code></pre></td>
+<td><p>The value is serialized as a number, not a string. Example:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="scdoc" data-syntax-guessed=""><code>{
+ ...
+ &quot;expires_in&quot;: 3600,
+ &quot;refresh_token_expires_in&quot;:
+   345600,
+ ...
+}</code></pre></td>
+</tr>
+<tr>
+<td>error response for an expired refresh token when <code translate="no" dir="ltr">grant_type = refresh_token</code></td>
+<td><p>Error responses were not compliant with RFC 6749. Example:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="Text only" data-syntax-guessed=""><code>{
+ &quot;ErrorCode&quot;: &quot;InvalidRequest&quot;,
+ &quot;Error&quot;: &quot;Refresh Token expired&quot;
+}</code></pre></td>
+<td><p>Error response payloads will include the <code translate="no" dir="ltr">"error"</code> and <code translate="no" dir="ltr">"error_description"</code> elements. Example:</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="scdoc" data-syntax-guessed=""><code>{
+ &quot;error&quot;: &quot;invalid_grant&quot;,
+ &quot;error_description&quot;:
+   &quot;refresh token expired&quot;
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+**Note:** The response from Apigee includes some properties that are not explicitly mentioned in RFC 6749. The specification allows additional properties. To customize the response to contain only the properties you need, use the [`GenerateResponseElement`](#GenerateResponseElement) element set to `false`, and then employ an `AssignMessage` or `JavaScript` policy to produce your own response payload.
+
+|  |  |
+|----|----|
+| **Default** | `false`: By default, the policy will exhibit certain non-RFC-compliant behaviors as described above. |
+| **Presence** | Optional |
+| **Type** | Boolean |
+| **Valid values** | `true` or `false` |
+| **Used with grant types** | All |
+
+## \<SecretKey\>/\<Value\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SecretKey>
+  <Value ref="your-variable-name"/>
+</SecretKey>
+```
+
+Provides the secret key used to verify or sign JWT-formatted access tokens with an HMAC algorithm. **Use only when the algorithm is one of HS256, HS384, or HS512.** Use the `ref` attribute to pass the key in a flow variable. For more information, see [Using JWT OAuth token operations](/apigee/docs/api-platform/security/oauth/using-jwt-oauth).
+
+Apigee enforces a minimum key strength for the HS256/HS384/HS512 algorithms. The minimum key length for HS256 is 32 bytes, for HS384 it is 48 bytes, and for HS512 it is 64 bytes. Using a lower-strength key causes a runtime error.
+
+**Note:** To protect secrets, it's a best practice to store the key in an environment-scoped [property set](/apigee/docs/api-platform/cache/property-sets) or an environment-scoped key value map (KVM). See also [Access property set values](/apigee/docs/api-platform/cache/property-sets#access-values) and [Using key value maps.](/apigee/docs/api-platform/cache/key-value-maps)
+
+|                  |                               |
+|------------------|-------------------------------|
+| **Default**      | N/A                           |
+| **Presence**     | Required for HMAC algorithms. |
+| **Type**         | String                        |
+| **Valid values** | A flow variable               |
+
+## \<Scope\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Scope>request.queryparam.scope</Scope>
+```
+
+If this element is present in one of the GenerateAccessToken or GenerateAuthorizationCode policies, it is used to specify which scopes to grant the token or code. These values are typically passed to the policy in the request from a client app. You can configure the element to take a flow variable, giving you the option to choose how the scopes are passed in a request. In the following example, `request.queryparam.scope` indicates that the scope should be present as a query parameter, as, for example, `?scope=READ`. To require the scope in an HTTP header, for example, set this value to `request.header.scope`.
+
+If this element appears in a "VerifyAccessToken" policy, then it is used to specify which scopes the policy should enforce. In this type of policy, the value must be a "hard coded" scope name -- you can't use variables. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Scope>A B</Scope>
+```
+
+See also [Working with OAuth2 scopes](/apigee/docs/api-platform/security/oauth/working-scopes) and [Get OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/access-tokens).
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td><p>No scope</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td><p>If used with Generate* policies, a flow variable.</p>
+<p>If used with VerifyAccessToken, a space-separated list of scope names (strings).</p></td>
+</tr>
+<tr>
+<td><strong>Used with grant types</strong></td>
+<td><ul>
+<li>authorization_code</li>
+<li>implicit</li>
+<li>password</li>
+<li>client_credentials</li>
+<li>Can also be used with the GenerateAuthorizationCode and VerifyAccessToken operations.</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<State\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<State>request.queryparam.state</State>
+```
+
+In cases where the client app must send the state information to the authorization server, this element lets you specify where Apigee should look for the state values. For example, it could be sent as a query parameter or in an HTTP header. The state value is typically used as a security measure to prevent CSRF attacks.
+
+For example `request.queryparam.state` indicates that the state should be present as a query parameter, as, for example, `?state=HjoiuKJH32`. To require the state in an HTTP header, for example, set this value to `request.header.state`. See also See also [Get OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/access-tokens).
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td><p>No state</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td>Any flow variable accessible to the policy at runtime</td>
+</tr>
+<tr>
+<td><strong>Used with grant types</strong></td>
+<td><ul>
+<li>All</li>
+<li>Can also be used with the GenerateAuthorizationCode operation</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<StoreToken\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+ <StoreToken>true</StoreToken>
+```
+
+Set this element to `true` when the `<ExternalAuthorization>` element is `true`. The `<StoreToken>` element tells Apigee to store the external access token. Otherwise, it will not be persisted.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td><p>false</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Optional</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td>true or false</td>
+</tr>
+<tr>
+<td><strong>Used with grant types</strong></td>
+<td><ul>
+<li>authorization_code</li>
+<li>password</li>
+<li>client_credentials</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<SupportedGrantTypes\>/\<GrantType\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SupportedGrantTypes>
+    <GrantType>authorization_code</GrantType>
+    <GrantType>client_credentials</GrantType>
+    <GrantType>implicit</GrantType>
+    <GrantType>password</GrantType>
+</SupportedGrantTypes>
+```
+
+Specifies the grant types supported by an OAuth token endpoint on Apigee. An endpoint may support multiple grant types (that is, a single endpoint can be configured to distribute access tokens for multiple grant types.) For more on endpoints, see [Understanding OAuth endpoints](/apigee/docs/api-platform/security/oauth/configuring-oauth-endpoints-and-policies). The grant type is passed in token requests in a `grant_type` parameter.
+
+If no supported grant types are specified, then the only allowed grant types are `authorization_code` and `implicit`. See also the [\<GrantType\>](#granttype) element (which is a higher-level element that is used to specify where Apigee should look for the `grant_type` parameter that is passed in a client request. Apigee will make sure that the value of the `grant_type` parameter matches one of the supported grant types).
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td style="width: 120px"><p><strong>Default</strong></p></td>
+<td width="285"><p>authorization _code and implicit</p></td>
+</tr>
+<tr>
+<td><p><strong>Presence</strong></p></td>
+<td><p>Required</p></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Valid values</strong></td>
+<td><ul>
+<li>client_credentials</li>
+<li>authorization_code</li>
+<li>password</li>
+<li>implicit</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+## \<Tokens\>/\<Token\> element
+
+Used with the ValidateToken and InvalidateToken operations. See also [Approving and revoking access tokens](/apigee/docs/api-platform/security/oauth/validating-and-invalidating-access-tokens). The \<Token\> element identifies the flow variable that defines the source of the token to be revoked. If developers are expected to submit access tokens as query parameters named `access_token`, for example, use `request.queryparam.access_token`.
+
+## \<UserName\> element
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<UserName>request.queryparam.user_name</UserName>
+```
+
+**This element is used with the** **password grant type only**. With the password grant type, user credentials (password and username) must be made available to the OAuthV2 policy. The `<PassWord>` and `<UserName>` elements are used to specify variables where Apigee can find these values. If these elements are not specified, the policy expects to find the values (by default) in form parameters named `username` and `password`. If the values are not found, the policy throws an error. You can use the `<PassWord>` and `<UserName>` elements to reference any flow variable containing the credentials.
+
+For example, you can pass the username in a query parameter and set the `<UserName>` element like this: `<UserName>request.queryparam.username</UserName>``.`To require the username in an HTTP header, set this value to `request.header.username`.
+
+The OAuthV2 policy doesn't do anything else with these credential values; Apigee is simply verifying that they are present. It is up to the API developer to retrieve the values request and send them to an identity provider before the token generation policy executes.
+
+See also [Get OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/access-tokens).
+
+|  |  |
+|----|----|
+| **Default** | request.formparam.username (a x-www-form-urlencoded and specified in the request body) |
+| **Presence** | Optional |
+| **Type** | String |
+| **Valid values** | Any variable setting. |
+| **Used with grant types** | password |
+
+## <span id="verifying"></span>Verifying access tokens
+
+Once a token endpoint is set up for an API proxy, a corresponding OAuthV2 policy that specifies the `VerifyAccessToken` operation is attached to the Flow that exposes the protected resource.
+
+For example, to ensure that all requests to an API are authorized, the following policy enforces access token verification:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OAuthV2 name="VerifyOAuthAccessToken">
+  <Operation>VerifyAccessToken</Operation>
+</OAuthV2>
+```
+
+The policy is attached to the API resource to be protected. To ensure that all requests to an API are verified, attach the policy to the ProxyEndpoint request PreFlow, as follows:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PreFlow>
+  <Request>
+    <Step><Name>VerifyOAuthAccessToken</Name></Step>
+  </Request>
+</PreFlow>
+```
+
+The following optional elements can be used to override the default settings for the VerifyAccessToken operation.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Scope</td>
+<td><p>A space-delimited list of scopes. Verification will succeed if at least one of the scopes listed is present in the access token. For example, the following policy will check the access token to ensure that it contains at least one of the scopes listed. If <span style="font-family:courier new,courier,monospace;">READ</span> or <span style="font-family:courier new,courier,monospace;">WRITE</span> is present, verification will succeed.</p>
+<div>
+&#10;</div>
+<pre class="devsite-click-to-copy" data-suppresswarning="true" translate="no" dir="ltr" data-is-upgraded="" data-syntax="Text only" data-syntax-guessed=""><code>&lt;OAuthV2 name=&quot;ValidateOauthScopePolicy&quot;&gt;
+  &lt;Operation&gt;VerifyAccessToken&lt;/Operation&gt;
+  &lt;Scope&gt;READ WRITE&lt;/Scope&gt;
+&lt;/OAuthV2&gt;</code></pre></td>
+</tr>
+<tr>
+<td>AccessToken</td>
+<td>The variable where the access token is expected to be located. For example <code translate="no" dir="ltr">request.queryparam.accesstoken</code>. By default, the access token is expected to be presented by the app in the Authorization HTTP header, according to the <a href="https://tools.ietf.org/html/draft-ietf-oauth-v2-31">OAuth 2.0 specification</a>. Use this setting if the access token is expected to be presented in a non-standard location, such as a query parameter, or an HTTP header with a name other than Authorization.</td>
+</tr>
+</tbody>
+</table>
+
+See also [Verifying access tokens](/apigee/docs/api-platform/security/oauth/using-access-tokens) and [Get OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/access-tokens).
+
+## <span id="variablelocations"></span>Specifying request variable locations
+
+For each grant type, the policy makes assumptions about the location or required information in request messages. These assumptions are based on the OAuth 2.0 specification. If your apps need to deviate from the OAuth 2.0 specification, then you can specify the expected locations for each parameter. For example, when handling an authorization code, you can specify the location of the authorization code, the client ID, the redirect URI, and the scope. These can be specified as HTTP headers, query parameters, or form parameters.
+
+The example below demonstrates how you can specify the location of required authorization code parameters as HTTP headers:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  ...
+  <GrantType>request.header.grant_type</GrantType>
+  <Code>request.header.code</Code>
+  <ClientId>request.header.client_id</ClientId>
+  <RedirectUri>request.header.redirect_uri</RedirectUri>
+  <Scope>request.header.scope</Scope>
+  ...
+```
+
+Or, if necessary to support your client app base, you can mix and match headers and query parameters:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  ...
+  <GrantType>request.header.grant_type</GrantType>
+  <Code>request.header.code</Code>
+  <ClientId>request.queryparam.client_id</ClientId>
+  <RedirectUri>request.queryparam.redirect_uri</RedirectUri>
+  <Scope>request.queryparam.scope</Scope>
+  ...
+```
+
+Only one location can be configured per parameter.
+
+## <span id="flowvariables"></span>Flow variables
+
+The flow variables defined in this table are populated when the respective OAuth policies are executed, and hence are available to other policies or applications executing in the API proxy flow.
+
+### VerifyAccessToken operation
+
+When the VerifyAccessToken operation executes, a large number of flow variables are populated in the proxy's execution context. These variables give you properties related to the access token, developer app, and developer. You can use an AssignMessage or JavaScript policy, for example, to read any of these variables and use them as needed later in the flow. These variables can also be useful for debugging purposes.
+
+**Note:** API product variables will be populated automatically if the API products are configured with valid environment, proxies, and API resources (derived from the `proxy.pathsuffix`). Explicitly setting flow.resource.name variable is not required.
+
+Where the API products are not configured with valid environments and API proxies, then `flow.resource.name` must explicitly be set to populate API product variables in the flow. For details on product configuration, see [Managing API products](/apigee/docs/api-platform/publish/create-api-products).
+
+**Token-specific variables**
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<th scope="col" width="250">Variables</th>
+<th scope="col" width="655">Description</th>
+</tr>
+&#10;<tr>
+<td><code translate="no" dir="ltr">organization_name</code></td>
+<td>The name of the organization where the proxy is executing.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">developer.id</code></td>
+<td>The ID of either the developer or <a href="/apigee/docs/api-platform/publish/organizing-client-app-ownership#what-are-appgroups">AppGroup</a> associated with the registered client app.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">developer.app.name</code></td>
+<td>The name of the developer or <a href="/apigee/docs/api-platform/publish/organizing-client-app-ownership#what-are-appgroups">AppGroup</a> app associated with the registered client app.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">client_id</code></td>
+<td>The client ID of the registered client app.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">grant_type</code></td>
+<td>The grant type associated with the request. Not supported for the <code translate="no" dir="ltr">VerifyJWTAccessToken</code> operation.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">token_type</code></td>
+<td>The token type associated with the request.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">access_token</code></td>
+<td>The access token that is being verified.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">accesstoken.{custom_attribute}</code></td>
+<td>A named custom attribute in the access token.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">issued_at</code></td>
+<td>The date the access token was issued expressed in Unix epoch time in milliseconds.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">expires_in</code></td>
+<td>The expiration time for the access token. Expressed in <strong>seconds</strong>. Although the <code translate="no" dir="ltr">ExpiresIn</code> element sets the expiration in milliseconds, in the token response and flow variables, the value is expresed in seconds.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">status</code></td>
+<td>The status of the access token (e.g., approved or revoked).</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">scope</code></td>
+<td>The scope (if any) associated with the access token.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">apiproduct.&lt;custom_attribute_name&gt;</code></td>
+<td>A named custom attribute of the API product associated with the registered client app.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">apiproduct.name</code></td>
+<td>The name of the API product associated with the registered client app.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">revoke_reason</code></td>
+<td><p>(Apigee hybrid only) Indicates why the access token is revoked. Not supported for the <code translate="no" dir="ltr">VerifyJWTAccessToken</code> operation.</p>
+<p>Value can be <code translate="no" dir="ltr">REVOKED_BY_APP</code>, <code translate="no" dir="ltr">REVOKED_BY_ENDUSER</code>, <code translate="no" dir="ltr">REVOKED_BY_APP_ENDUSER</code>, or <code translate="no" dir="ltr">TOKEN_REVOKED</code>.</p></td>
+</tr>
+</tbody>
+</table>
+
+**App-specific variables**
+
+These variables are related to the Developer App that is associated with the token.
+
+|  |  |
+|----|----|
+| Variables | Description |
+| `app.name` |  |
+| `app.id` |  |
+| `app.accessType` |  |
+| `app.callbackUrl` |  |
+| `app.status` | approved or revoked |
+| `app.scopes` |  |
+| `app.appFamily` |  |
+| `app.apiproducts` |  |
+| `app.appParentStatus` |  |
+| `app.appType` | For example: Developer |
+| `app.appParentId` |  |
+| `app.created_by` |  |
+| `app.created_at` |  |
+| `app.last_modified_at` |  |
+| `app.last_modified_by` |  |
+| `app.{custom_attributes}` | A named custom attribute of the registered client app. |
+
+**AppGroup-specific variables**
+
+The following flow variables containing information about the [AppGroup](/apigee/docs/api-platform/publish/organizing-client-app-ownership#using-appgroups-to-organize-app-ownership) for the token and are populated by the policy. These AppGroup attributes populate only if `verifyapikey.{policy_name}.app.appType` is "AppGroup".
+
+**Note:** If you migrate from Apigee Edge, your [company flow variables](https://docs.apigee.com/api-platform/reference/policies/verify-api-key-policy#flowvariables-companyflowvariables) are automatically available in the corresponding AppGroup attribute after migration. No changes are needed to the bundles during migration.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<th scope="col" width="250">Variables</th>
+<th scope="col" width="655">Description</th>
+</tr>
+&#10;<tr>
+<td><code translate="no" dir="ltr">appgroup.displayName</code></td>
+<td>The AppGroup display name.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">appgroup.name</code></td>
+<td>Name of the AppGroup.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">appgroup.id</code></td>
+<td>The AppGroup ID.<br />
+&#10;<strong>Note:</strong> This ID is generated internally by Apigee and is not guaranteed to stay the same over time. Do not use the <code translate="no" dir="ltr">appgroup.id</code> variable for any of the following purposes:<br />
+&#10;<ul>
+<li><a href="/apigee/docs/api-platform/reference/policies/quota-policy#identifier">Quota Identifier</a></li>
+<li><a href="/apigee/docs/api-platform/cache/key-value-maps">KVM keys</a></li>
+<li>Identifiers sent to targets to be used in backend business logic</li>
+</ul></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">appOwnerStatus</code></td>
+<td>The status of the app owner: 'active', 'inactive', or 'login_lock'.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">created_at</code></td>
+<td>The date/time stamp when the AppGroup was created.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">created_by</code></td>
+<td>The email address of the developer who created the AppGroup.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">last_modified_at</code></td>
+<td>The date/time stamp when the AppGroup was last modified.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">last_modified_by</code></td>
+<td>The email address of the developer who last modified the AppGroup.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">{appgroup_custom_attributes}</code></td>
+<td>Any custom AppGroup attribute. Specify the name of the custom attribute.</td>
+</tr>
+</tbody>
+</table>
+
+**Developer-specific variables**
+
+If the `app.appType` is "Developer", then developer attributes are populated.
+
+|  |  |
+|----|----|
+| Variables | Description |
+| **Developer-specific variables** |  |
+| `developer.id` |  |
+| `developer.userName` |  |
+| `developer.firstName` |  |
+| `developer.lastName` |  |
+| `developer.email` |  |
+| `developer.status` | active or inactive |
+| `developer.apps` | **Note**: Accessing this variable will result in high latency when the number of apps is greater than 10. |
+| `developer.created_by` |  |
+| `developer.created_at` |  |
+| `developer.last_modified_at` |  |
+| `developer.last_modified_by` |  |
+| `developer.{custom_attributes}` | A named custom attribute of the developer. |
+
+### GenerateAuthorizationCode operation
+
+These variables are set when the GenerateAuthorizationCode operation executes successfully:
+
+**Prefix:** `oauthv2authcode.{policy_name}.{variable_name}`
+
+**Example:** `oauthv2authcode.GenerateCodePolicy.code`
+
+| Variable | Description |
+|----|----|
+| `code` | The authorization code generated when the policy executes. |
+| `redirect_uri` | The redirect URI associated with the registered client app. |
+| `scope` | The optional OAuth scope passed in the client request. |
+| `client_id` | The client ID passed in the client request. |
+
+### GenerateAccessToken and RefreshAccessToken operations
+
+These variables are set when the GenerateAccessToken and RefreshAccessToken operations execute successfully. Note that refresh token variables do not apply for the client credentials grant type flow.
+
+**Prefix:** `oauthv2accesstoken.{policy_name}.{variable_name}`
+
+**Example:** `oauthv2accesstoken.GenerateTokenPolicy.access_token`
+
+| Variable name | Description |
+|----|----|
+| `access_token` | The access token that was generated. |
+| `client_id` | The client ID of the developer app associated with this token. |
+| `expires_in` | The expiry value for the token. See the [\<ExpiresIn\>](#expiresin) element for details. Note that in the response, **expires_in** is expressed in **seconds**. |
+| `scope` | List of available scopes configured for the token. See [Working with OAuth2 scopes](/apigee/docs/api-platform/security/oauth/working-scopes). |
+| `status` | Either `approved` or `revoked`. |
+| `token_type` | Is set to `BearerToken`. |
+|  |  |
+| `developer.email` | The email address of the registered developer who owns the developer app associated with the token. |
+| `organization_name` | The org where the proxy executes. |
+| `api_product_list` | A list of the products associated with the token's corresponding developer app. |
+|  |  |
+| `refresh_count` |  |
+| `refresh_token` | The refresh token that was generated. Note that refresh tokens are not generated for the client credentials grant type. |
+| `refresh_token_expires_in` | The lifespan of the refresh token, in seconds. |
+| `refresh_token_issued_at` | This time value is the string representation of the corresponding 32-bit timestamp quantity. For example, 'Wed, 21 Aug 2013 19:16:47 UTC' corresponds to the timestamp value of 1377112607413. |
+| `refresh_token_status` | Either `approved` or `revoked`. |
+
+### GenerateAccessTokenImplicitGrant
+
+These variables are set when the GenerateAccessTokenImplicit operation executes successfully for the implicit grant type flow.
+
+**Prefix:** `oauthv2accesstoken.{policy_name}.{variable_name}`
+
+**Example:** `oauthv2accesstoken.RefreshTokenPolicy.access_token`
+
+| Variable | Description |
+|----|----|
+| `oauthv2accesstoken.access_token` | The access token generated when the policy executes. |
+| `oauthv2accesstoken.{policy_name}.expires_in` | The expiry value for the token, in seconds. See the [\<ExpiresIn\>](#expiresin) element for details. |
+
+## <span id="errorcodes"></span>Error reference
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" width="279">Fault code</th>
+<th scope="col" width="58">HTTP status</th>
+<th scope="col" width="379">Cause</th>
+<th scope="col" width="379">Thrown by operations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.access_token_expired</code></td>
+<td><code translate="no" dir="ltr">401</code></td>
+<td>The access token is expired.</td>
+<td><p><code translate="no" dir="ltr">VerifyAccessToken</code><br />
+<code translate="no" dir="ltr">InvalidateToken</code></p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.access_token_not_approved</code></td>
+<td><code translate="no" dir="ltr">401</code></td>
+<td>The access token was revoked.</td>
+<td><code translate="no" dir="ltr">VerifyAccessToken</code></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.apiproduct_doesnot_exist</code></td>
+<td><code translate="no" dir="ltr">401</code></td>
+<td>The requested API product does not exist in any of the API products associated with the access token.</td>
+<td><code translate="no" dir="ltr">VerifyAccessToken</code></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.FailedToResolveAccessToken</code></td>
+<td><code translate="no" dir="ltr">500</code></td>
+<td>The policy expected to find an access token in a variable specified in the <code translate="no" dir="ltr">&lt;AccessToken&gt;</code> element, but the variable could not be resolved.</td>
+<td><code translate="no" dir="ltr">GenerateAccessToken</code></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.FailedToResolveAuthorizationCode</code></td>
+<td><code translate="no" dir="ltr">500</code></td>
+<td>The policy expected to find an authorization code in a variable specified in the <code translate="no" dir="ltr">&lt;Code&gt;</code> element, but the variable could not be resolved.</td>
+<td><code translate="no" dir="ltr">GenerateAuthorizationCode</code></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.FailedToResolveClientId</code></td>
+<td><code translate="no" dir="ltr">500</code></td>
+<td>The policy expected to find the Client ID in a variable specified in the <code translate="no" dir="ltr">&lt;ClientId&gt;</code> element, but the variable could not be resolved.</td>
+<td><code translate="no" dir="ltr">GenerateAccessToken</code><br />
+<code translate="no" dir="ltr">GenerateAuthorizationCode</code><br />
+<code translate="no" dir="ltr">GenerateAccessTokenImplicitGrant</code><br />
+<code translate="no" dir="ltr">RefreshAccessToken</code></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.FailedToResolveRefreshToken</code></td>
+<td><code translate="no" dir="ltr">500</code></td>
+<td>The policy expected to find a refresh token in a variable specified in the <code translate="no" dir="ltr">&lt;RefreshToken&gt;</code> element, but the variable could not be resolved.</td>
+<td><code translate="no" dir="ltr">RefreshAccessToken</code></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.FailedToResolveToken</code></td>
+<td><code translate="no" dir="ltr">500</code></td>
+<td>The policy expected to find a token in a variable specified in the <code translate="no" dir="ltr">&lt;Tokens&gt;</code> element, but the variable could not be resolved.</td>
+<td><p><code translate="no" dir="ltr">ValidateToken</code><br />
+<code translate="no" dir="ltr">InvalidateToken</code></p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.InsufficientScope</code></td>
+<td>403</td>
+<td>The access token presented in the request has a scope that does not match the scope specified in the verify access token policy. To learn about scope, see <a href="/apigee/docs/api-platform/security/oauth/working-scopes">Working with OAuth2 scopes</a>.</td>
+<td><code translate="no" dir="ltr">VerifyAccessToken</code></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.invalid_client</code></td>
+<td><code translate="no" dir="ltr">401</code></td>
+<td><p>This error name is returned when the <code translate="no" dir="ltr">&lt;GenerateResponse&gt;</code> property of the policy is set to <strong>true</strong> and the client ID sent in the request is invalid. Check to be sure you are using the correct client key and secret values for the Developer App associated with your proxy. Typically, these values are sent as a Base64 encoded Basic Authorization header.</p>
+<strong>Note:</strong> It is recommended that you change existing fault rule conditions to catch both the <code translate="no" dir="ltr">invalid_client</code> and <code translate="no" dir="ltr">InvalidClientIdentifier</code> names.</td>
+<td><code translate="no" dir="ltr">GenerateAccessToken</code><br />
+<code translate="no" dir="ltr">RefreshAccessToken</code></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.InvalidRequest</code></td>
+<td>400</td>
+<td>This error name is used for multiple different kinds of errors, typically for missing or incorrect parameters sent in the request. If <code translate="no" dir="ltr">&lt;GenerateResponse&gt;</code> is set to <code translate="no" dir="ltr">false</code>, use fault variables (described below) to retrieve details about the error, such as the fault name and cause.</td>
+<td><code translate="no" dir="ltr">GenerateAccessToken</code><br />
+<code translate="no" dir="ltr">GenerateAuthorizationCode</code><br />
+<code translate="no" dir="ltr">GenerateAccessTokenImplicitGrant</code><br />
+<code translate="no" dir="ltr">RefreshAccessToken</code></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.InvalidAccessToken</code></td>
+<td><code translate="no" dir="ltr">401</code></td>
+<td>The authorization header does not have the word <code translate="no" dir="ltr">Bearer</code>, which is required. For example: <code translate="no" dir="ltr">Authorization: Bearer your_access_token</code></td>
+<td><code translate="no" dir="ltr">VerifyAccessToken</code></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.InvalidAPICallAsNoApiProductMatchFound</code></td>
+<td><code translate="no" dir="ltr">401</code></td>
+<td><p>The currently executing API proxy or operation is not in the Product associated with the access token.</p>
+<p><strong>Tips:</strong> Be sure that the product associated with the access token is configured correctly. For example, if you use wildcards in resource paths, be sure the wildcards are being used correctly. See <a href="/apigee/docs/api-platform/publish/create-api-products">Managing API products</a> for details.</p>
+<p>See also <a href="https://www.googlecloudcommunity.com/gc/Cloud-Product-Articles/Oauth2-0-Access-Token-Verification-throws-Invalid-API-call-as-no/ta-p/75367">Oauth2.0 Access Token Verification throws "Invalid API call as no apiproduct match found" error</a> for more guidance on causes for this error.</p></td>
+<td><code translate="no" dir="ltr">VerifyAccessToken</code></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.InvalidClientIdentifier</code></td>
+<td><code translate="no" dir="ltr">500</code></td>
+<td><p>This error name is returned when the <code translate="no" dir="ltr">&lt;GenerateResponse&gt;</code> property of the policy is set to <strong>false</strong> and the client ID sent in the request is invalid. Check to be sure you are using the correct client key and secret values for the Developer App associated with your proxy. Typically, these values are sent as a Base64 encoded Basic Authorization header.</p>
+<strong>Note:</strong> It is recommended that you change existing fault rule conditions to catch both the <code translate="no" dir="ltr">invalid_client</code> and <code translate="no" dir="ltr">InvalidClientIdentifier</code> names.</td>
+<td><p><code translate="no" dir="ltr">GenerateAccessToken</code><br />
+<code translate="no" dir="ltr">RefreshAccessToken</code></p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.InvalidParameter</code></td>
+<td><code translate="no" dir="ltr">500</code></td>
+<td>The policy must specify either an access token or an authorization code, but not both.</td>
+<td><code translate="no" dir="ltr">GenerateAuthorizationCode</code><br />
+<code translate="no" dir="ltr">GenerateAccessTokenImplicitGrant</code></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.InvalidTokenType</code></td>
+<td><code translate="no" dir="ltr">500</code></td>
+<td>The <code translate="no" dir="ltr">&lt;Tokens&gt;/&lt;Token&gt;</code> element requires you to specify the token type (for example, <code translate="no" dir="ltr">refreshtoken</code>). If the client passes the wrong type, this error is thrown.</td>
+<td><code translate="no" dir="ltr">ValidateToken</code><br />
+<code translate="no" dir="ltr">InvalidateToken</code></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.MissingParameter</code></td>
+<td><code translate="no" dir="ltr">500</code></td>
+<td>The response type is <code translate="no" dir="ltr">token</code>, but no grant types are specified.</td>
+<td><code translate="no" dir="ltr">GenerateAuthorizationCode</code><br />
+<code translate="no" dir="ltr">GenerateAccessTokenImplicitGrant</code></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">steps.oauth.v2.UnSupportedGrantType</code></td>
+<td><code translate="no" dir="ltr">500</code></td>
+<td><p>The client specified a grant type that is unsupported by the policy (not listed in the <code translate="no" dir="ltr">&lt;SupportedGrantTypes&gt;</code> element).</p>
+<strong>Note:</strong> There is currently a bug where unsupported grant type errors are not thrown correctly. If an unsupported grant type error occurs, the proxy does not enter the Error Flow, as expected.</td>
+<td><code translate="no" dir="ltr">GenerateAccessToken</code><br />
+<code translate="no" dir="ltr">GenerateAuthorizationCode</code><br />
+<code translate="no" dir="ltr">GenerateAccessTokenImplicitGrant</code><br />
+<code translate="no" dir="ltr">RefreshAccessToken</code></td>
+</tr>
+</tbody>
+</table>
+
+### JWT token-specific runtime errors
+
+Runtime error codes and descriptions for JWT auth token flows depend on the OAuth2 flow context:
+
+- If the flow context is token generation or refresh, see [Error codes for JWT token generation and refresh flows](#generationrefresherrors) below.
+- For the token verification flow, see [Error codes for token verification flows](#verificationerrors) below.
+
+#### Error codes for JWT token generation and refresh flows
+
+For OAuth2 flows that generate or refresh JWT tokens, error responses adhere to the error responses specified in RFC6749. For details, see [Section 5.2 Error Response](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2).
+
+#### Error codes for the token verification flow
+
+The error codes listed in the following table apply to VerifyAccessToken operation only.
+
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" width="279">Fault code</th>
+<th scope="col" width="58">HTTP status</th>
+<th scope="col" width="379">Cause</th>
+<th scope="col" width="379">Thrown by operations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code translate="no" dir="ltr">oauth.v2.JWTSigningFailed</code></td>
+<td><code translate="no" dir="ltr">401</code></td>
+<td>The policy was unable to sign the JWT.</td>
+<td><p><code translate="no" dir="ltr">GenerateJWTAccessToken</code></p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">oauth.v2.InvalidValueForJWTAlgorithm</code></td>
+<td><code translate="no" dir="ltr">401</code></td>
+<td>This occurs when the algorithm is not present in the JWT access token or when the value is not supported.</td>
+<td><p><code translate="no" dir="ltr">GenerateJWTAccessToken</code><br />
+<code translate="no" dir="ltr">VerifyJWTAccessToken</code></p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">oauth.v2.InsufficientKeyLength</code></td>
+<td><code translate="no" dir="ltr">401</code></td>
+<td>In Generation of JWT, for a key less than the minimum size for the HS384 or HS512 algorithms</td>
+<td><p><code translate="no" dir="ltr">GenerateJWTAccessToken</code><br />
+<code translate="no" dir="ltr">VerifyJWTAccessToken</code></p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">oauth.v2.JWTAlgorithmMismatch</code></td>
+<td><code translate="no" dir="ltr">401</code></td>
+<td>The algorithm specified in the Generate policy did not match the one expected in the Verify policy. The algorithms specified must match.</td>
+<td><p><code translate="no" dir="ltr">VerifyJWTAccessToken</code></p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">oauth.v2.JWTDecodingFailed</code></td>
+<td><code translate="no" dir="ltr">401</code></td>
+<td>The policy was unable to decode the JWT. The JWT is possibly corrupted.</td>
+<td><p><code translate="no" dir="ltr">VerifyJWTAccessToken</code></p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">oauth.v2.MissingMandatoryClaimsInJWT</code></td>
+<td><code translate="no" dir="ltr">401</code></td>
+<td>Occurs when the required claims are not present in the Jwt Access token</td>
+<td><p><code translate="no" dir="ltr">VerifyJWTAccessToken</code></p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">oauth.v2.InvalidJWTSignature</code></td>
+<td><code translate="no" dir="ltr">401</code></td>
+<td>This occurs when the signature of JWT access token could not be verified or when the signature is invalid.</td>
+<td><p><code translate="no" dir="ltr">VerifyJWTAccessToken</code></p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">oauth.v2.InvalidTypeInJWTHeader</code></td>
+<td><code translate="no" dir="ltr">401</code></td>
+<td>Occurs when the JWT's type is not <code translate="no" dir="ltr">at+Jwt</code></td>
+<td><p><code translate="no" dir="ltr">VerifyJWTAccessToken</code></p></td>
+</tr>
+</tbody>
+</table>
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" width="272">Error name</th>
+<th scope="col" width="381">Cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code translate="no" dir="ltr">InvalidValueForExpiresIn</code></td>
+<td><p>For the <code translate="no" dir="ltr">&lt;ExpiresIn&gt;</code> element, valid values are positive integers.</p></td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">InvalidValueForRefreshTokenExpiresIn</code></td>
+<td>For the <code translate="no" dir="ltr">&lt;RefreshTokenExpiresIn&gt;</code> element, valid values are positive integers.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">InvalidGrantType</code></td>
+<td>An invalid grant type is specified in the <code translate="no" dir="ltr">&lt;SupportedGrantTypes&gt;</code> element. See the policy reference for a list of valid types.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">ExpiresInNotApplicableForOperation</code></td>
+<td>Be sure that the operations specified in the <code translate="no" dir="ltr">&lt;Operations&gt;</code> element support expiration. For example, the <code translate="no" dir="ltr">VerifyToken</code> operation does not.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">RefreshTokenExpiresInNotApplicableForOperation</code></td>
+<td>Be sure that the operations specified in the <code translate="no" dir="ltr">&lt;Operations&gt;</code> element support refresh token expiration. For example, the VerifyToken operation does not.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">GrantTypesNotApplicableForOperation</code></td>
+<td>Be sure that the grant types specified in <code translate="no" dir="ltr">&lt;SupportedGrantTypes&gt;</code> are supported for the specified operation.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">OperationRequired</code></td>
+<td><p>You must specify an operation in this policy using the <code translate="no" dir="ltr">&lt;Operation&gt;</code> element.</p>
+<strong>Note:</strong> If the <code translate="no" dir="ltr">&lt;Operation&gt;</code> element is missing, the UI throws a schema validation error.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">InvalidOperation</code></td>
+<td><p>You must specify a valid operation in this policy using the <code translate="no" dir="ltr">&lt;Operation&gt;</code> element.</p>
+<strong>Note:</strong> If the <code translate="no" dir="ltr">&lt;Operation&gt;</code> element is invalid, the UI throws a schema validation error.</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">TokenValueRequired</code></td>
+<td>You must specify a token <code translate="no" dir="ltr">&lt;Token&gt;</code> value in the <code translate="no" dir="ltr">&lt;Tokens&gt;</code> element.</td>
+</tr>
+</tbody>
+</table>
+
+### JWT token-specific deployment errors
+
+These deployment errors are specific to policies that use JWT token operations.
+
+| Error name | Cause |
+|----|----|
+| `InvalidValueForAlgorithm` | The algorithm specified in the `<Algorithm>` element is not among the list of available algorithms or is not present. |
+| `MissingKeyConfiguration` | The required `<SecretKey>`, `<PrivateKey>`, or `<PublicKey>` elements are missing, depending on which algorithm is used. |
+| `EmptyValueElementForKeyConfiguration` | The required child element `<Value>` is not defined in the `<PrivateKey>`, `<PublicKey>`, or `<SecretKey>` elements |
+| `InvalidKeyConfiguration` | The `<PrivateKey>` element is not used with RSA family algorithms or the `<SecretKey>` element is not used with HS Family algorithms. |
+| `EmptyRefAttributeForKeyconfiguration` | The `ref` attribute of the child element `<Value>` of the `<PrivateKey>`, `<PublicKey>` or `<SecretKey>` elements is empty. |
+| `InvalidVariableNameForKey` | The flow variable name specified in the `ref` attribute of the child element `<Value>` of the `<PrivateKey>`, `<PublicKey>` or `<SecretKey>` elements does not contain the `private` prefix. |
+
+### Fault variables
+
+These variables are set when this policy triggers an error at runtime.
+
+**Note:** You can use these variables to create Fault Rule conditions. These variables are populated when an error occurs if `<GenerateResponse>` is set to `false`. If `<GenerateResponse>` is `true`, the policy returns a response to the client immediately if an error occurs -- the error flow is skipped and these variables are not populated. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<tbody>
+<tr>
+<th width="324">Variables</th>
+<th width="428">Where</th>
+<th width="428">Example</th>
+</tr>
+&#10;<tr>
+<td><code translate="no" dir="ltr">fault.name="</code><var translate="no">fault_name</var><code translate="no" dir="ltr">"</code></td>
+<td><var translate="no">fault_name</var> is the name of the fault, as listed in the <a href="#runtime-errors">Runtime errors</a> table above. The fault name is the last part of the fault code.</td>
+<td><code translate="no" dir="ltr">fault.name = "InvalidRequest"</code></td>
+</tr>
+<tr>
+<td width="324"><code translate="no" dir="ltr">oauthV2.</code><var translate="no">policy_name</var><code translate="no" dir="ltr">.failed</code></td>
+<td width="428"><var translate="no">policy_name</var> is the user-specified name of the policy that threw the fault.</td>
+<td width="428"><code translate="no" dir="ltr">oauthV2.GenerateAccesstoken.failed = true</code></td>
+</tr>
+<tr>
+<td width="324"><code translate="no" dir="ltr">oauthV2.</code><var translate="no">policy_name</var><code translate="no" dir="ltr">.fault.name</code></td>
+<td width="428"><var translate="no">policy_name</var> is the user-specified name of the policy that threw the fault.</td>
+<td width="428"><code translate="no" dir="ltr">oauthV2.GenerateAccesstoken.fault.name = InvalidRequest</code>
+<strong>Note</strong>: For the <code translate="no" dir="ltr">VerifyAccessToken</code> operation, the fault name includes this suffix: <code translate="no" dir="ltr">keymanagement.service</code><br />
+For example: <code translate="no" dir="ltr">keymanagement.service.invalid_access_token</code></td>
+</tr>
+<tr>
+<td width="324"><code translate="no" dir="ltr">oauthV2.</code><var translate="no">policy_name</var><code translate="no" dir="ltr">.fault.cause</code></td>
+<td width="428"><var translate="no">policy_name</var> is the user-specified name of the policy that threw the fault.</td>
+<td width="428"><code translate="no" dir="ltr">oauthV2.GenerateAccesstoken.cause = Required param : grant_type</code></td>
+</tr>
+</tbody>
+</table>
+
+### Example error response
+
+These responses are sent back to the client if the `<GenerateResponse>` element is **true**.
+
+**Note:** For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+If `<GenerateResponse>` is **true**, the policy returns errors in this format for operations that generate tokens and codes. For a complete list, see see [OAuth HTTP error response reference](/apigee/docs/api-platform/reference/policies/oauth-http-status-code-reference).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{"ErrorCode" : "invalid_client", "Error" :"ClientId is Invalid"}
+```
+
+If `<GenerateResponse>` is **true**, the policy returns errors in this format for verify and validate operations. For a complete list, see see [OAuth HTTP error response reference](/apigee/docs/api-platform/reference/policies/oauth-http-status-code-reference).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{  
+   {  
+      "fault":{  
+         "faultstring":"Invalid Access Token",
+         "detail":{  
+            "errorcode":"keymanagement.service.invalid_access_token"
+         }
+      }
+   }
+```
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name="OAuthV2 Faults">
+    <Step>
+        <Name>AM-InvalidClientResponse</Name>
+        <Condition>(fault.name = "invalid_client") OR (fault.name = "InvalidClientIdentifier")</Condition>
+    </Step>
+    <Step>
+        <Name>AM-InvalidTokenResponse</Name>
+        <Condition>(fault.name = "invalid_access_token")</Condition>
+    </Step>
+    <Condition>(oauthV2.failed = true) </Condition>
+</FaultRule>
+```
+
+## Tokens in Storage are Hashed
+
+If you're using Apigee hybrid or Apigee, the OAuthV2 access tokens and refresh tokens are hashed by default when stored in the runtime Cassandra database. Hashing prevents the tokens from being used if the database were compromised.
+
+## Working with the default OAuth configuration
+
+Each organization (even a free trial org) on Apigee is provisioned with an OAuth token endpoint. The endpoint is preconfigured with policies in the API proxy called **oauth**. You can begin using the token endpoint as soon as you create an account on [Apigee](https://accounts.apigee.com/accounts/sign_up). For details, see [Understanding OAuth endpoints](/apigee/docs/api-platform/security/oauth/configuring-oauth-endpoints-and-policies).
+
+## <span id="purge"></span>Purging access tokens
+
+By default, OAuth2 tokens are purged from the Apigee system 3 days (259200 seconds) after both the access token and refresh token (if it exists) have expired.
+
+## <span id="Related"></span>Related topics
+
+- [Introduction to OAuth 2.0](/apigee/docs/api-platform/security/oauth/oauth-introduction)

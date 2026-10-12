@@ -1,0 +1,1119 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/upgrade.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/upgrade.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/upgrade.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/upgrade.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/upgrade.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/upgrade.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/upgrade.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/upgrade.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/upgrade.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/upgrade.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/upgrade.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/upgrade.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/upgrade.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/upgrade.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/upgrade.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/upgrade.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/upgrade.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/upgrade.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+This procedure covers upgrading from Apigee hybrid version 1.16.x to Apigee hybrid version 1.17.1 and from previous releases of hybrid 1.17.x to version 1.17.1.
+
+Use the same procedures for minor version upgrades (for example version 1.16 to 1.17) and for patch release upgrades (for example 1.17.0 to 1.17.1).
+
+If you are upgrading from Apigee hybrid version 1.15 or older, you must first upgrade to hybrid version 1.16 before upgrading to version 1.17.1. See the instructions for [Upgrading Apigee hybrid to version 1.16](/apigee/docs/hybrid/v1.16/upgrade).
+
+## Changes from Apigee hybrid v1.16
+
+Please note the following changes:
+
+- **Model Context Protocol (MCP) support**: Apigee hybrid version 1.17 adds support for the <a href="https://modelcontextprotocol.io" class="external">Model Context Protocol (MCP)</a>, an open protocol that lets agentic AI applications use your APIs as tools through managed MCP endpoints. Apigee hybrid routes, authorizes, and secures these MCP tool calls the same way it manages your other APIs, so you don't need to run or maintain your own MCP servers. For more information, see [Model Context Protocol (MCP) in Apigee overview](/apigee/docs/api-platform/apigee-mcp/apigee-mcp-overview) and the [MCP quickstart](/apigee/docs/api-platform/apigee-mcp/apigee-mcp-quickstart).
+- **Root CA certificate rotation**: Apigee hybrid version 1.17 adds support for rotating the root certificate authority (CA) certificate that anchors trust for TLS communication between your runtime components. You can now replace the root CA before it expires, without downtime, by following a phased rotation procedure. For more information, see [Rotate the root CA certificate](/apigee/docs/hybrid/v1.17/rotate-root-ca).
+- **TLS 1.3 support**: Apigee hybrid version 1.17 adds support for TLS 1.3, the latest version of the Transport Layer Security protocol. TLS 1.3 offers faster connection handshakes and stronger security than earlier TLS versions. For information about configuring TLS on the ingress gateway, see [Configuring TLS and mTLS on the ingress gateway](/apigee/docs/hybrid/v1.17/ingress-tls).
+- **Forward proxy support for AI policies**: Apigee hybrid version 1.17 adds forward proxy support for the AI policies, such as the Model Armor and semantic caching policies. Outbound calls that these policies make can now be routed through an HTTP forward proxy, which was not supported in earlier versions of Apigee hybrid. For more information, see [Configure forward proxying for API proxies](/apigee/docs/hybrid/v1.17/forward-proxy).
+- **Semantic cache Private Service Connect (PSC) endpoint support**: Apigee hybrid version 1.17 adds Private Service Connect (PSC) endpoint support for semantic caching. The semantic caching policies can now reach their backing services over a Private Service Connect endpoint, which keeps that traffic on your private network. For more information, see [Get started with semantic caching policies](/apigee/docs/api-platform/tutorials/using-semantic-caching-policies).
+
+For additional information about features in Hybrid version 1.17, see the [Apigee hybrid v1.17.1 release notes](/apigee/docs/hybrid/release-notes#hybrid_v1171).
+
+## Prerequisites
+
+Before upgrading to hybrid version 1.17, make sure your installation meets the following requirements:
+
+- If your hybrid installation is running a version older than v1.16, you must upgrade to version 1.16 before upgrading to v1.17. See [Upgrading Apigee hybrid to version 1.16](/apigee/docs/hybrid/v1.16/upgrade).
+- Helm version v3.14.2+.
+- `kubectl`: A supported version of `kubectl` appropriate for your Kubernetes platform version. See [Supported platforms and versions: `kubectl`](/apigee/docs/hybrid/supported-platforms#kubectl).
+- cert-manager: A supported version of cert-manager. See [Supported platforms and versions: cert-manager](/apigee/docs/hybrid/supported-platforms#cert-manager). If needed, you will upgrade cert-manager in the [Prepare to upgrade to version 1.17](#prepare) section below.
+
+## Before you upgrade to 1.17.1 - limitations and important notes
+
+- Upgrading to Apigee hybrid version 1.17 may require downtime.
+
+  When upgrading the Apigee controller to version 1.17.1, all Apigee deployments undergo a rolling restart. To minimize downtime in production hybrid environments during a rolling restart, make sure you are running at least two clusters (in the same or different region/data center). Divert all production traffic to a single cluster and take the cluster you are about to upgrade offline, and then proceed with the upgrade process. Repeat the process for each cluster.
+
+  Apigee recommends that once you begin the upgrade, you should upgrade all clusters as soon as possible to reduce the chances of production impact. There is no time limit on when all remaining clusters must be upgraded after the first one is upgraded. However, until all remaining clusters are upgraded Cassandra backup and restore cannot work with mixed versions. For example, a backup from Hybrid 1.16 cannot be used to restore a Hybrid 1.17 instance.
+
+- Management plane changes do not need to be fully suspended during an upgrade. Any required temporary suspensions to management plane changes are noted in the upgrade instructions below.
+
+## Upgrading to version 1.17.1 overview
+
+The procedures for upgrading Apigee hybrid are organized in the following sections:
+
+1.  [Prepare to upgrade](#prepare).
+2.  [Install hybrid runtime version 1.17.1](#install-runtime).
+
+## Prepare to upgrade to version 1.17
+
+### Back up your hybrid installation
+
+1.  These instructions use the environment variable `APIGEE_HELM_CHARTS_HOME` for the directory in your file system where you have installed the Helm charts. If needed, change directory into this directory and define the variable with the following command:
+    <div class="section">
+
+    ### Linux
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    export APIGEE_HELM_CHARTS_HOME=$PWD
+    echo $APIGEE_HELM_CHARTS_HOME
+    ```
+
+    </div>
+
+    <div class="section">
+
+    ### Mac OS
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    export APIGEE_HELM_CHARTS_HOME=$PWD
+    echo $APIGEE_HELM_CHARTS_HOME
+    ```
+
+    </div>
+
+    <div class="section">
+
+    ### Windows
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    set APIGEE_HELM_CHARTS_HOME=%CD%
+    echo %APIGEE_HELM_CHARTS_HOME%
+    ```
+
+    </div>
+
+2.  Make a backup copy of your version 1.16 `$APIGEE_HELM_CHARTS_HOME/` directory. You can use any backup process. For example, you can create a `tar` file of your entire directory with:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    tar -czvf $APIGEE_HELM_CHARTS_HOME/../apigee-helm-charts-v1.16-backup.tar.gz $APIGEE_HELM_CHARTS_HOME
+    ```
+
+3.  Back up your Cassandra database following the instructions in [Cassandra backup and recovery](/apigee/docs/hybrid/v1.17/cassandra-backup-overview).
+
+4.  Make sure that your TLS certificate and key files (`.crt`, `.key`, and/or `.pem`) reside in the `$APIGEE_HELM_CHARTS_HOME/apigee-virtualhost/` directory.
+
+### Upgrade your Kubernetes version
+
+Check your Kubernetes platform version and if needed, upgrade your Kubernetes platform to a version that is supported by both hybrid 1.16 and hybrid 1.17. Follow your platform's documentation if you need help.
+
+<div id="supported-platforms" class="section expandable">
+
+#### *Click to expand a list of supported platforms*
+
+<div class="section">
+
+### Supported versions
+
+|  | 1.14 | 1.15 | 1.16 | 1.17 |  |
+| --- | --- | --- | --- | --- | --- |
+| GKE on Google Cloud | 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.33.x 1.34.x 1.35.x 1.36.x |  |
+| Google Distributed Cloud (software only) on VMware (3) | 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.33.x 1.34.x 1.35.x 1.36.x |  |
+| Google Distributed Cloud (software only) on bare metal | 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.33.x 1.34.x 1.35.x 1.36.x |  |
+| EKS | 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.33.x 1.34.x 1.35.x 1.36.x |  |
+| AKS | 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.34.x 1.35.x 1.36.x |  |
+| OpenShift (7) | 4.13 4.14 4.15 4.16 4.17 4.18 4.19 (≥ v1.14.4)(11) 4.20 (≥ v1.14.4)(11) 4.21 (≥ v1.14.4)(11) 4.22 (≥ v1.14.4)(11) | 4.16 4.17 4.18 4.19 (≥ v1.15.2)(10) 4.20 (≥ v1.15.2)(10) 4.21 (≥ v1.15.2)(10) 4.22 (≥ v1.15.2)(10) | 4.16 4.18 4.19 4.20 4.21 4.22 | 4.20 4.21 4.22 |  |
+| Rancher Kubernetes Engine (RKE) | v1.27.x 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | v1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.33.x 1.34.x 1.35.x 1.36.x |  |
+| Components | 1.14 | 1.15 | 1.16 | 1.17 |  |
+| Cloud Service Mesh | 1.22.x (2) | 1.22.x (2) | 1.22.x (2) | 1.22.x (2) |  |
+| JDK | JDK 11 | JDK 11 | JDK 11 | JDK 17 |  |
+| cert-manager | 1.15.x (8) 1.16.x (8) 1.17.x (8) | 1.16.x (8) 1.17.x (8) | 1.16.x (8) 1.17.x (8) 1.18.x (9) 1.19.x (9) | 1.17.x (8) 1.18.x (9) 1.19.x (9) |  |
+| Cassandra | 4.0 | 4.0 | 4.0 | 4.0 |  |
+| Kubernetes | 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.33.x 1.34.x 1.35.x 1.36.x |  |
+| kubectl | 1.28.x 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.29.x 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.30.x 1.31.x 1.32.x 1.33.x 1.34.x 1.35.x 1.36.x | 1.33.x 1.34.x 1.35.x 1.36.x |  |
+| Helm | 3.14.2 through 3.x.x | 3.14.2 through 3.x.x | 3.17.0 through 3.x.x | 3.17.0 through 3.x.x |  |
+| Secret Store CSI driver | 1.4.6+ | 1.4.6+ | 1.4.6+ | 1.4.6+ |  |
+| Vault | 1.17.2 | 1.17.2 | 1.17.2 | 1.19.0+ |  |
+| (1) The official EOL dates for Apigee hybrid versions 1.13 and older have been reached. Regular monthly patches are no longer available. These releases are no longer officially supported except for customers with explicit and official exceptions for continued support. Other customers must upgrade . (2) Cloud Service Mesh is automatically installed with Apigee hybrid 1.9 and newer . (3) Vault is not certified on Google Distributed Cloud for VMware. (4) Support available with Apigee hybrid version 1.10.5 and newer . (5) Support available with Apigee hybrid version 1.11.2 and newer . (6) Support available with Apigee hybrid version 1.12.1 and newer . (7) Apigee hybrid is tested and certified on OpenShift using the Kubernetes version bundled with each specific OCP version . (8) Some versions of cert-manager have an issue where the webhook TLS server may fail to automatically renew its CA certificate. To avoid this, Apigee recommends using: Hybrid v1.13 : use cert-manager version 1.15.3 +. Hybrid v1.14: use cert-manager versions 1.15.3 + or 1.16.0 +. Hybrid v1.15: use cert-manager versions 1.16.0 + or 1.17.2 +. Hybrid v1.16: use cert-manager versions 1.16.0 +, 1.17.2 +, 1.18.0 + or 1.19.0 +. See Known Issue 465834046 for cert-manager releases 1.18 and 1.19. Hybrid v1.17: use cert-manager versions 1.17.2 +, 1.18.0 + or 1.19.0 +. See Known Issue 465834046 for cert-manager releases 1.18 and 1.19. (9) cert-manager release 1.18 introduces a change to the default private key rotation policy that may cause traffic interruptions. See Known Issue 465834046 for a workaround. (10) Support for OpenShift 4.19, 4.20, 4.21, & 4.22 available with Apigee hybrid version 1.15.2 and newer. (11) Support for OpenShift 4.19, 4.20, 4.21, & 4.22 available with Apigee hybrid version 1.14.4 and newer. |  |  |  |  |  |
+
+**Note:** Hybrid installations are not currently supported on Autopilot clusters.
+
+</div>
+
+<div class="section">
+
+### Unsupported versions
+
+|  | 1.6 (1) | 1.7 (1) | 1.8 (1) | 1.9 (1) | 1.10 (1) | 1.11 (1) | 1.12 (1) | 1.13 (1) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| GKE on Google Cloud | 1.19.x 1.20.x 1.21.x | 1.20.x 1.21.x 1.22.x (≥ 1.7.2) 1.23.x (≥ 1.7.2) | 1.21.x (≤ 1.8.3) 1.22.x (≤ 1.8.3) 1.23.x (≤ 1.8.4) 1.24.x (≥ 1.8.4) 1.25.x (≥ 1.8.4) | 1.23.x 1.24.x 1.25.x 1.26.x (≥ 1.9.2) | 1.24.x 1.25.x 1.26.x 1.27.x (≥ 1.10.5)(6) 1.28.x (≥ 1.10.5)(6) | 1.25.x 1.26.x 1.27.x 1.28.x (≥ 1.11.2)(7) 1.29.x (≥ 1.11.2)(7) | 1.26.x 1.27.x 1.28.x 1.29.x (≥ 1.12.1)(8) | 1.27.x 1.28.x 1.29.x 1.30.x |
+| Google Distributed Cloud (software only) on VMware (3) | 1.7.x 1.8.x 1.9.3+ 1.10.x | 1.9.x 1.10.x 1.11.x (3) (≥ 1.7.2) 1.12.x (≥ 1.7.2) | 1.10.x 1.11.x 1.12.x 1.13.x 1.14.x 1.15.x (K8s v1.26.x) | 1.12.x 1.13.x 1.14.x 1.15.x (K8s v1.26.x) | 1.13.x 1.14.x 1.15.x (K8s v1.26.x) 1.16.x (K8s v1.27.x) 1.27.x (≥ 1.10.5)(6) 1.28.x (≥ 1.10.5)(6) | 1.14.x 1.15.x (K8s v1.26.x) 1.16.x (K8s v1.27.x) 1.28.x (≥ 1.11.2)(7) 1.29.x (≥ 1.11.2)(7) | 1.15.x (K8s v1.26.x) 1.16.x (K8s v1.27.x) 1.28.x 1.29.x (≥ 1.12.1)(8) | 1.16.x (K8s v1.27.x) 1.28.x 1.29.x 1.30.x |
+| Google Distributed Cloud (software only) on bare metal | 1.7.x 1.8.2+ 1.9.3+ 1.10.x | 1.9.x 1.10.x 1.11.x (≥ 1.7.2) 1.12.x (≥ 1.7.2) | 1.10.x 1.11.x 1.12.x 1.13.x 1.14.x 1.15.x | 1.12.x 1.13.x 1.14.x 1.15.x | 1.13.x 1.14.x (K8s v1.25.x) 1.15.x (K8s v1.26.x) 1.16.x (K8s v1.27.x) 1.27.x (≥ 1.10.5)(6) 1.28.x (≥ 1.10.5)(6) | 1.14.x 1.15.x (K8s v1.26.x) 1.16.x (K8s v1.27.x) 1.28.x (≥ 1.11.2)(7) 1.29.x (≥ 1.11.2)(7) | 1.15.x (K8s v1.26.x) 1.16.x (K8s v1.27.x) 1.28.x 1.29.x (≥ 1.12.1)(8) | 1.16.x (K8s v1.27.x) 1.28.x 1.29.x 1.30.x |
+| EKS | 1.19.x 1.20.x 1.21.x | 1.21.x 1.22.x (≥ 1.7.2) 1.23.x (≥ 1.7.2) | 1.22.x (≤ 1.8.3) 1.23.x (≤ 1.8.4) 1.24.x (≥ 1.8.4) 1.25.x (≥ 1.8.4) | 1.23.x 1.24.x 1.25.x 1.26.x | 1.24.x 1.25.x 1.26.x 1.27.x (≥ 1.10.5)(6) 1.28.x (≥ 1.10.5)(6) | 1.25.x 1.26.x 1.27.x 1.28.x (≥ 1.11.2)(7) 1.29.x (≥ 1.11.2)(7) | 1.26.x 1.27.x 1.28.x 1.29.x (≥ 1.12.1)(8) | 1.27.x 1.28.x 1.29.x 1.30.x |
+| AKS | 1.19.x 1.20.x 1.21.x | 1.21.x 1.22.x (≥ 1.7.2) 1.23.x (≥ 1.7.2) | 1.22.x (≤ 1.8.3) 1.23.x (≤ 1.8.4) 1.24.x (≥ 1.8.4) 1.25.x (≥ 1.8.4) | 1.23.x 1.24.x 1.25.x 1.26.x (≥ 1.9.2) | 1.24.x 1.25.x 1.26.x 1.27.x (≥ 1.10.5)(6) 1.28.x (≥ 1.10.5)(6) | 1.25.x 1.26.x 1.27.x 1.28.x (≥ 1.11.2)(7) 1.29.x (≥ 1.11.2)(7) | 1.26.x 1.27.x 1.28.x 1.29.x (≥ 1.12.1)(8) | 1.27.x 1.28.x 1.29.x 1.30.x |
+| OpenShift (7) | 4.6 4.7 4.8 | 4.7 4.8 | 4.8 4.9 4.10 | 4.10 4.11 | 4.11 4.12 4.14 (≥ 1.10.5)(6) 4.15 (≥ 1.10.5)(6) | 4.12 4.13 4.14 4.15 (≥ 1.11.2)(7) 4.16 (≥ 1.11.2)(7) | 4.12 4.13 4.14 4.15 4.16 (≥ 1.12.1)(8) | 4.12 4.13 4.14 4.15 4.16 |
+| Rancher Kubernetes Engine (RKE) | N/A | N/A | N/A | 1.3.8 | v1.26.2+rke2r1 1.27.x (≥ 1.10.5)(6) 1.28.x (≥ 1.10.5)(6) | v1.26.2+rke2r1 v1.27.x 1.28.x (≥ 1.11.2)(7) 1.29.x (≥ 1.11.2)(7) | v1.26.2+rke2r1 v1.27.x 1.28.x 1.29.x (≥ 1.12.1)(8) | v1.26.2+rke2r1 v1.27.x 1.28.x 1.29.x 1.30.x |
+| Components | 1.6 (1) | 1.7 (1) | 1.8 (1) | 1.9 (1) | 1.10 (1) | 1.11 (1) | 1.12 (1) | 1.13 (1) |
+| Cloud Service Mesh | 1.9.x 1.10.x 1.12.x 1.13.x | 1.10.x 1.11.x 1.12.x 1.13.x (≥ 1.7.2) 1.14.x 1.15.x (≥ 1.7.6) | 1.11.x 1.12.x 1.13.x 1.14.x 1.15.x | 1.17.x (2) | 1.17.x (2) | 1.17.x (v1.11.0 - v1.11.1) (2) 1.18.x (≥ 1.11.2)(7) (2) | 1.18.x (2) | 1.19.x (2) |
+| JDK | JDK 11 | JDK 11 | JDK 11 | JDK 11 | JDK 11 | JDK 11 | JDK 11 | JDK 11 |
+| cert-manager | 1.5.4 | 1.7.x | 1.7.x 1.8.x 1.9.x 1.10.x 1.11.x | 1.10.x 1.11.x | 1.10.x 1.11.x 1.12.x | 1.11.x 1.12.x 1.13.x | 1.11.x 1.12.x 1.13.x | 1.15.x (8) 1.16.x (8) 1.17.x (8) |
+| Cassandra | 3.11 | 3.11 | 3.11 | 3.11 | 3.11 | 3.11 | 4.0 | 4.0 |
+| Kubernetes |  |  |  | 1.23.x 1.24.x 1.25.x | 1.24.x 1.25.x 1.26.x | 1.25.x 1.26.x 1.27.x | 1.26.x 1.27.x 1.28.x 1.29.x | 1.27.x 1.28.x 1.29.x 1.30.x |
+| kubectl |  |  |  |  | 1.24.x 1.25.x 1.26.x | 1.25.x 1.26.x 1.27.x | 1.26.x 1.27.x 1.28.x 1.29.x | 1.27.x 1.28.x 1.29.x 1.30.x |
+| Helm |  |  |  |  | 3.10+ | 3.10+ | 3.14.2 through 3.x.x | 3.14.2 through 3.x.x |
+| Secret Store CSI driver |  |  |  |  |  | 1.3.4+ | 1.4.1+ | 1.4.6+ |
+| Vault |  |  |  |  |  | 1.13.x | 1.15.2 | 1.15.2 |
+| (1) The official EOL dates for Apigee hybrid versions 1.13 and older have been reached. Regular monthly patches are no longer available. These releases are no longer officially supported except for customers with explicit and official exceptions for continued support. Other customers must upgrade . (2) Cloud Service Mesh is automatically installed with Apigee hybrid 1.9 and newer . (3) Vault is not certified on Google Distributed Cloud for VMware. (4) Support available with Apigee hybrid version 1.10.5 and newer . (5) Support available with Apigee hybrid version 1.11.2 and newer . (6) Support available with Apigee hybrid version 1.12.1 and newer . (7) Apigee hybrid is tested and certified on OpenShift using the Kubernetes version bundled with each specific OCP version . (8) Some versions of cert-manager have an issue where the webhook TLS server may fail to automatically renew its CA certificate. To avoid this, Apigee recommends using: Hybrid v1.13 : use cert-manager version 1.15.3 +. Hybrid v1.14: use cert-manager versions 1.15.3 + or 1.16.0 +. Hybrid v1.15: use cert-manager versions 1.16.0 + or 1.17.2 +. Hybrid v1.16: use cert-manager versions 1.16.0 +, 1.17.2 +, 1.18.0 + or 1.19.0 +. See Known Issue 465834046 for cert-manager releases 1.18 and 1.19. Hybrid v1.17: use cert-manager versions 1.17.2 +, 1.18.0 + or 1.19.0 +. See Known Issue 465834046 for cert-manager releases 1.18 and 1.19. (9) cert-manager release 1.18 introduces a change to the default private key rotation policy that may cause traffic interruptions. See Known Issue 465834046 for a workaround. (10) Support for OpenShift 4.19, 4.20, 4.21, & 4.22 available with Apigee hybrid version 1.15.2 and newer. (11) Support for OpenShift 4.19, 4.20, 4.21, & 4.22 available with Apigee hybrid version 1.14.4 and newer. |  |  |  |  |  |  |  |  |
+
+**Note:** Hybrid installations are not currently supported on Autopilot clusters.
+
+</div>
+
+</div>
+
+### Pull the Apigee Helm charts.
+
+Apigee hybrid charts are hosted in [Google Artifact Registry](/artifact-registry):
+
+`oci://us-docker.pkg.dev/apigee-release/apigee-hybrid-helm-charts`
+
+Using the `pull` command, copy all of the Apigee hybrid Helm charts to your local storage with the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+export CHART_REPO=oci://us-docker.pkg.dev/apigee-release/apigee-hybrid-helm-charts
+export CHART_VERSION=1.17.1
+helm pull $CHART_REPO/apigee-operator --version $CHART_VERSION --untar
+helm pull $CHART_REPO/apigee-datastore --version $CHART_VERSION --untar
+helm pull $CHART_REPO/apigee-env --version $CHART_VERSION --untar
+helm pull $CHART_REPO/apigee-ingress-manager --version $CHART_VERSION --untar
+helm pull $CHART_REPO/apigee-org --version $CHART_VERSION --untar
+helm pull $CHART_REPO/apigee-redis --version $CHART_VERSION --untar
+helm pull $CHART_REPO/apigee-telemetry --version $CHART_VERSION --untar
+helm pull $CHART_REPO/apigee-virtualhost --version $CHART_VERSION --untar
+```
+
+### Edit `kustomization.yaml` for a custom apigee namespace
+
+If your Apigee namespace is not `apigee`, edit the `apigee-operator/etc/crds/default/kustomization.yaml` file and replace the `namespace` value with your Apigee namespace.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: APIGEE_NAMESPACE
+```
+
+If you are using `apigee` as your namespace you do not need to edit the file.
+
+Install the updated Apigee CRDs:
+
+**Note:** From this step onwards, all commands should be run under the chart repo root directory.
+
+**Note:** This is the only supported method for installing Apigee CRDs. Do not use `kubectl apply` without `-k`, do not omit `--server-side`.
+
+**Note:** This step requires elevated cluster permissions.
+
+1.  Use the `kubectl` dry-run feature by running the following command:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    kubectl apply -k  apigee-operator/etc/crds/default/ --server-side --force-conflicts --validate=false --dry-run=server
+    ```
+
+2.  After validating with the dry-run command, run the following command:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    kubectl apply -k  apigee-operator/etc/crds/default/ \
+      --server-side \
+      --force-conflicts \
+      --validate=false
+    ```
+
+3.  Validate the installation with the `kubectl get crds` command:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl get crds | grep apigee
+    ```
+
+    Your output should look something like the following:
+
+    <div>
+
+    </div>
+
+    ``` devsite-disable-click-to-copy
+
+    apigeedatastores.apigee.cloud.google.com                    2024-08-21T14:48:30Z
+    apigeedeployments.apigee.cloud.google.com                   2024-08-21T14:48:30Z
+    apigeeenvironments.apigee.cloud.google.com                  2024-08-21T14:48:31Z
+    apigeeissues.apigee.cloud.google.com                        2024-08-21T14:48:31Z
+    apigeeorganizations.apigee.cloud.google.com                 2024-08-21T14:48:32Z
+    apigeeredis.apigee.cloud.google.com                         2024-08-21T14:48:33Z
+    apigeerouteconfigs.apigee.cloud.google.com                  2024-08-21T14:48:33Z
+    apigeeroutes.apigee.cloud.google.com                        2024-08-21T14:48:33Z
+    apigeetelemetries.apigee.cloud.google.com                   2024-08-21T14:48:34Z
+    cassandradatareplications.apigee.cloud.google.com           2024-08-21T14:48:35Z
+    ```
+
+Check the labels on the cluster nodes. By default, Apigee schedules data pods on nodes with the label `cloud.google.com/gke-nodepool=apigee-data` and runtime pods are scheduled on nodes with the label `cloud.google.com/gke-nodepool=apigee-runtime`. You can customize your node pool labels in the `overrides.yaml` file.
+
+For more information, see [Configuring dedicated node pools](/apigee/docs/hybrid/v1.17/configure-dedicated-nodes).
+
+### Upgrade cert-manager
+
+**Note:** This procedure is optional if you are using cert-manager 1.16.3 or higher.
+
+Apigee hybrid v1.17 supports cert-manager releases 1.16 through 1.19. There is a change in cert-manager 1.18 that can cause an issue with your traffic. In cert-manager release 1.18, the default value of `Certificate.Spec.PrivateKey.rotationPolicy` was changed from `Never` to `Always`. For upgraded Apigee hybrid installations, this can cause an issue with your traffic. When upgrading to hybrid v1.17 from an earlier version, you must either edit your `apigee-ca` certificate to compensate for this change or keep your version of cert-manager at release 1.17.x or lower.
+
+**Note:** This change affects upgrades from earlier versions of Apigee hybrid only and does not affect fresh installations of Apigee hybrid v1.17.
+
+Before upgrading cert-manager to 1.18 or 1.19, use the following steps procedure to edit your `apigee-ca` certificate to set the value of `Certificate.Spec.PrivateKey.rotationPolicy` to `Never`.
+
+**Warning:** Performe these steps *before* upgrading cert-manager. Otherwise, you may trigger a certificate rotation.
+
+**Note:** For multi-region deployments, the following change to the `apigee-ca` certificate only needs to be made in the primary region. If there is no `apigee-ca` certificate, skip this procedure for clusters in secondary regions.
+
+1.  Check the contents of your `apigee-ca` certificate to see if `rotationPolicy` is set:
+
+    **Tip:** If you are using a custom cert-manager namesspace, replace `cert-manager` with the correct namespace in the following commands.
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    kubectl get certificate apigee-ca -n cert-manager -o yaml
+    ```
+
+    Look for the values under `spec.privateKey` in the output:
+
+    <div>
+
+    </div>
+
+    ``` devsite-disable-click-to-copy
+
+    ...
+    spec:
+      commonName: apigee-hybrid
+      duration: 87600h
+      isCA: true
+      issuerRef:
+        group: cert-manager.io
+        kind: ClusterIssuer
+        name: apigee-root-certificate-issuer
+      privateKey:
+        algorithm: ECDSA
+        # Note: rotationPolicy would appear here if it is set.
+        size: 256
+      secretName: apigee-ca
+    ...
+    ```
+
+2.  If `rotationPolicy` is not set or if it is set to `Always`, edit the `apigee-ca` certificate to set the value of `rotationPolicy` to `Never`:
+    1.  Perform a dry run first:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+
+        kubectl patch Certificate \
+          --dry-run=server \
+          -n cert-manager \
+          --type=json \
+          -p='[{"op": "replace", "path": "/spec/privateKey/rotationPolicy", "value": "Never"}]' \
+          -o=yaml \
+          apigee-ca
+        ```
+
+    2.  Patch the certificate:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+
+        kubectl patch Certificate \
+          -n cert-manager \
+          --type=json \
+          -p='[{"op": "replace", "path": "/spec/privateKey/rotationPolicy", "value": "Never"}]' \
+          -o=yaml \
+          apigee-ca
+        ```
+
+3.  Verify that the value of `rotationPolicy` is now set to `Never`:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    kubectl get certificate apigee-ca -n cert-manager -o yaml
+    ```
+
+    The output should look similar to the following:
+
+    <div>
+
+    </div>
+
+    ``` devsite-disable-click-to-copy
+
+    ...
+    spec:
+      commonName: apigee-hybrid
+      duration: 87600h
+      isCA: true
+      issuerRef:
+        group: cert-manager.io
+        kind: ClusterIssuer
+        name: apigee-root-certificate-issuer
+      privateKey:
+        algorithm: ECDSA
+        rotationPolicy: Never
+        size: 256
+      secretName: apigee-ca
+    ...
+    ```
+
+4.  Upgrade cert-manager. The following command will download and install cert-manager v1.19.2:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.19.2/cert-manager.yaml
+    ```
+
+    See [Supported platforms and versions: cert-manager](/apigee/docs/hybrid/supported-platforms#cert-manager) for a list of supported versions.
+
+See:
+
+- [Known issue 465834046](/apigee/docs/release/known-issues#465834046)
+- <a href="https://cert-manager.io/docs/releases/release-notes/release-notes-1.18/#the-default-value-of-certificatespecprivatekeyrotationPolicy-is-now-always" class="external">cert-manager Release 1.18: The default value of <code translate="no" dir="ltr">Certificate.Spec.PrivateKey.rotationPolicy</code> is now <code translate="no" dir="ltr">Always</code></a>
+
+## Install the hybrid 1.17.1 runtime
+
+**Caution:** Do not create new environments during the upgrade process.
+
+This upgrade procedure assumes you are using the same namespace and service accounts for the upgraded installation. If you are making any configuration changes, be sure to reflect those changes in your overrides file before installing the Helm charts.
+
+**Note:** Before executing any of the Helm upgrade/install commands, use the Helm dry-run feature by adding `--dry-run` at the end of the command. See `helm -h` to list supported commands, options, and usage.
+
+If you have not, navigate into your `APIGEE_HELM_CHARTS_HOME` directory. Run the following commands from that directory.
+
+Upgrade the Apigee Operator/Controller:
+
+**Note:** This step requires elevated cluster permissions. Run `helm -h` or `helm upgrade -h` for details.
+
+Dry run:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade operator apigee-operator/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  -f OVERRIDES_FILE \
+  --dry-run=server
+```
+
+Upgrade the chart:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade operator apigee-operator/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  -f OVERRIDES_FILE
+```
+
+Verify Apigee Operator installation:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm ls -n APIGEE_NAMESPACE
+```
+
+<div>
+
+</div>
+
+``` disable-click-to-copy
+
+NAME       NAMESPACE       REVISION   UPDATED                                STATUS     CHART                   APP VERSION
+operator   apigee   3          2024-08-21 00:42:44.492009 -0800 PST   deployed   apigee-operator-1.17.1   1.17.1
+```
+
+Verify it is up and running by checking its availability:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+kubectl -n APIGEE_NAMESPACE get deploy apigee-controller-manager
+```
+
+<div>
+
+</div>
+
+``` disable-click-to-copy
+
+NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
+apigee-controller-manager   1/1     1            1           7d20h
+```
+
+Upgrade the Apigee datastore:
+
+Dry run:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade datastore apigee-datastore/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  -f OVERRIDES_FILE \
+  --dry-run=server
+```
+
+Upgrade the chart:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade datastore apigee-datastore/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  -f OVERRIDES_FILE
+```
+
+Verify `apigeedatastore` is up and running by checking its state:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+kubectl -n APIGEE_NAMESPACE get apigeedatastore default
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+NAME      STATE       AGE
+default   running    2d
+```
+
+Upgrade Apigee telemetry:
+
+Dry run:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade telemetry apigee-telemetry/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  -f OVERRIDES_FILE \
+  --dry-run=server
+```
+
+Upgrade the chart:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade telemetry apigee-telemetry/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  -f OVERRIDES_FILE
+```
+
+Verify it is up and running by checking its state:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+kubectl -n APIGEE_NAMESPACE get apigeetelemetry apigee-telemetry
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+NAME               STATE     AGE
+apigee-telemetry   running   2d
+```
+
+Upgrade Apigee Redis:
+
+Dry run:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade redis apigee-redis/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  -f OVERRIDES_FILE \
+  --dry-run=server
+```
+
+Upgrade the chart:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade redis apigee-redis/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  -f OVERRIDES_FILE
+```
+
+Verify it is up and running by checking its state:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+kubectl -n APIGEE_NAMESPACE get apigeeredis default
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+NAME      STATE     AGE
+default   running   2d
+```
+
+Upgrade Apigee ingress manager:
+
+Dry run:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade ingress-manager apigee-ingress-manager/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  -f OVERRIDES_FILE \
+  --dry-run=server
+```
+
+Upgrade the chart:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade ingress-manager apigee-ingress-manager/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  -f OVERRIDES_FILE
+```
+
+Verify it is up and running by checking its availability:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+kubectl -n APIGEE_NAMESPACE get deployment apigee-ingressgateway-manager
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
+apigee-ingressgateway-manager   2/2     2            2           2d
+```
+
+Upgrade the Apigee organization:
+
+Dry run:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade ORG_NAME apigee-org/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  -f OVERRIDES_FILE \
+  --dry-run=server
+```
+
+Upgrade the chart:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade ORG_NAME apigee-org/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  -f OVERRIDES_FILE
+```
+
+Verify it is up and running by checking the state of the respective org:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+kubectl -n APIGEE_NAMESPACE get apigeeorg
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+NAME                      STATE     AGE
+apigee-my-org-my-env      running   2d
+```
+
+**Note**: If the upgrade command fails with the error `Forbidden: state: releasing`, the existing components are still in releasing status. You can wait for the current update to complete and then retry. Check release status with the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+kubectl get org -n APIGEE_NAMESPACE
+```
+
+Upgrade the environment.
+
+You must install one environment at a time. Specify the environment with `--set env=``ENV_NAME`.
+
+Dry run:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade ENV_RELEASE_NAME apigee-env/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  --set env=ENV_NAME \
+  -f OVERRIDES_FILE \
+  --dry-run=server
+```
+
+- `ENV_RELEASE_NAME` is a name used to keep track of installation and upgrades of the `apigee-env` chart. This name must be unique from the other Helm release names in your installation. Usually this is the same as `ENV_NAME`. However, if your environment has the same name as your environment group, you must use different release names for the environment and environment group, for example `dev-env-release` and `dev-envgroup-release`. For more information on releases in Helm, see <a href="https://helm.sh/docs/intro/using_helm/#three-big-concepts" class="external">Three big concepts</a> in the Helm documentation.
+- `ENV_NAME` is the name of the environment you are upgrading.
+- `OVERRIDES_FILE` is your new overrides file for v.1.17.1
+
+Upgrade the chart:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade ENV_RELEASE_NAME apigee-env/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  --set env=ENV_NAME \
+  -f OVERRIDES_FILE
+```
+
+Verify it is up and running by checking the state of the respective env:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+kubectl -n APIGEE_NAMESPACE get apigeeenv
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+NAME                          STATE       AGE   GATEWAYTYPE
+apigee-my-org-my-env          running     2d
+```
+
+**Note**: If the upgrade command fails with the error `Forbidden: state: releasing`, the existing components are still in releasing status. You can wait for the current update to complete and then retry. Check release status with the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+kubectl get env -n APIGEE_NAMESPACE
+```
+
+Upgrade the environment groups (`virtualhosts`).
+
+1.  You must upgrade one environment group (virtualhost) at a time. Specify the environment group with `--set envgroup=``ENV_GROUP_NAME`. Repeat the following commands for each environment group mentioned in the overrides.yaml file:
+
+    Dry run:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    helm upgrade ENV_GROUP_RELEASE_NAME apigee-virtualhost/ \
+      --install \
+      --namespace APIGEE_NAMESPACE \
+      --set envgroup=ENV_GROUP_NAME \
+      -f OVERRIDES_FILE \
+      --dry-run=server
+    ```
+
+    `ENV_GROUP_RELEASE_NAME` is the name with which you previously installed the `apigee-virtualhost` chart. It is usually `ENV_GROUP_NAME`.
+
+    Upgrade the chart:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    helm upgrade ENV_GROUP_RELEASE_NAME apigee-virtualhost/ \
+      --install \
+      --namespace APIGEE_NAMESPACE \
+      --set envgroup=ENV_GROUP_NAME \
+      -f OVERRIDES_FILE
+    ```
+
+    **Note:** `ENV_GROUP_RELEASE_NAME` must be unique within the `apigee` namespace.
+
+    For example, if you have an *environment* named `prod` and an *environment group* named `prod`, set the value of `ENV_GROUP_RELEASE_NAME` to something unique, like `prod-envgroup`.
+
+2.  Check the state of the ApigeeRoute (AR).
+
+    Installing the `virtualhosts` creates ApigeeRouteConfig (ARC) which internally creates ApigeeRoute (AR) once the Apigee watcher pulls environment group-related details from the control plane. Therefore, check that the corresponding AR's state is running:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    kubectl -n APIGEE_NAMESPACE get arc
+    ```
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    NAME                                STATE   AGE
+    apigee-org1-dev-egroup                       2d
+    ```
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    kubectl -n APIGEE_NAMESPACE get ar
+    ```
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    NAME                                        STATE     AGE
+    apigee-org1-dev-egroup-123abc               running   2d
+    ```
+
+**Congratulations!** You have upgraded to Apigee hybrid version 1.17.1. To test your upgrade, call a proxy against the new installation. For an example, see [Part 3, Step 2: Deploy an API proxy](/apigee/docs/hybrid/v1.17/install-deploy-proxy) in the Apigee hybrid 1.17 installation guide.
+
+## Rolling back to a previous version
+
+To roll back to the previous version, use the older chart version to roll back the upgrade process in the reverse order. Start with `apigee-virtualhost` and work your way back to `apigee-operator`, and then revert the CRDs.
+
+**Tip:** If you know the last release version, you can use the `helm rollback` command rather than the `helm upgrade` command described below.
+
+1.  Revert the charts. The following commands assume you are using the charts from the previous version (v1.16.x).
+    1.  Run the following command for each environment group:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+
+        helm upgrade ENV_GROUP_RELEASE_NAME apigee-virtualhost/ \
+          --install \
+          --namespace APIGEE_NAMESPACE \
+          --atomic \
+          --set envgroup=ENV_GROUP_NAME \
+          -f 1.16_OVERRIDES_FILE
+        ```
+
+    2.  Run the following command for each environment:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+
+        helm upgrade ENV_RELEASE_NAME apigee-env/ \
+          --install \
+          --namespace APIGEE_NAMESPACE \
+          --atomic \
+          --set env=ENV_NAME \
+          -f 1.16_OVERRIDES_FILE
+        ```
+
+    3.  `apigee-org`:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+
+        helm upgrade ORG_NAME apigee-org/ \
+          --install \
+          --namespace APIGEE_NAMESPACE \
+          --atomic \
+          -f 1.16_OVERRIDES_FILE
+        ```
+
+    4.  `apigee-ingress-manager`:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+
+        helm upgrade ingress-manager apigee-ingress-manager/ \
+          --install \
+          --namespace APIGEE_NAMESPACE \
+          --atomic \
+          -f 1.16_OVERRIDES_FILE
+        ```
+
+    5.  `apigee-redis`:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+
+        helm upgrade redis apigee-redis/ \
+          --install \
+          --namespace APIGEE_NAMESPACE \
+          --atomic \
+          -f 1.16_OVERRIDES_FILE
+        ```
+
+    6.  `apigee-telemetry`:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+
+        helm upgrade telemetry apigee-telemetry/ \
+          --install \
+          --namespace APIGEE_NAMESPACE \
+          --atomic \
+          -f 1.16_OVERRIDES_FILE
+        ```
+
+    7.  `apigee-datastore`:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+
+        helm upgrade datastore apigee-datastore/ \
+          --install \
+          --namespace APIGEE_NAMESPACE \
+          --atomic \
+          -f 1.16_OVERRIDES_FILE
+        ```
+
+    8.  `apigee-operator`:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+
+        helm upgrade operator apigee-operator/ \
+          --install \
+          --namespace APIGEE_NAMESPACE \
+          --atomic \
+          -f 1.16_OVERRIDES_FILE
+        ```
+
+2.  Revert the CRDs by reinstalling the older CRDs.
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    kubectl apply -k apigee-operator/etc/crds/default/ \
+      --server-side \
+      --force-conflicts \
+      --validate=false
+    ```

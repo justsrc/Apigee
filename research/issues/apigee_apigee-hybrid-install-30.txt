@@ -1,0 +1,55 @@
+URL: https://github.com/apigee/apigee-hybrid-install/issues/30
+TITLE: credentials expire while waiting for kubernetes resources
+STATE: open state_reason: None
+AUTHOR: DinoChiesa association: NONE
+CREATED: 2022-12-09T22:08:27Z CLOSED: None
+LABELS: 
+MILESTONE: None
+--- BODY ---
+At line 416,  the script `apigee-hybrid-install/tools/apigee-hybrid-setup.sh` performs a `kubectl wait`. In my experience this thing can wait a good long time. It has a timeout of 15 minutes, and maybe that is appropriate.  But I have seen the credentials expire during this wait, causing an unexpected failure:
+```
+2022-12-09T20:38:14.091439 apigee-hybrid-setup.sh: ********************************************
+2022-12-09T20:38:14.122211 apigee-hybrid-setup.sh: Resources have been created. Waiting for them to be ready...
+2022-12-09T20:38:14.152891 apigee-hybrid-setup.sh: ********************************************
+2022-12-09T20:38:14.187368 apigee-hybrid-setup.sh: Running: '/usr/bin/kubectl wait apigeedatastore/default apigeeredis/default apigeeenvironment/intrinsic-beam-11622-eval apigeeorganization/intrinsic-beam-11622 apigeetelemetry/apigee-telemetry -n apigee --for=jsonpath=.status.state=running --timeout=15m'
+error: You must be logged in to the server (Unauthorized)
+error: You must be logged in to the server (Unauthorized)
+2022-12-09T20:47:40.545270 apigee-hybrid-setup.sh: ********************************************
+2022-12-09T20:47:40.579935 apigee-hybrid-setup.sh: FAILED.
+2022-12-09T20:47:40.610626 apigee-hybrid-setup.sh: ********************************************
+2022-12-09T20:47:40.642200 apigee-hybrid-setup.sh: Please try again and possibly use '--verbose' flag to debug if error persists.
+```
+
+If after the script terminates, I try 
+```
+kubectl get pods -n apigee
+```
+
+...I see the same "You must be logged in" error. 
+If I refresh the credentials with
+```
+gcloud container clusters get-credentials ${CLUSTER_NAME} --project ${GCP_PROJECT_ID} --region ${CLUSTER_REGION}
+```
+...then I can perform kubectl operations again. 
+
+So my suggestion is to modify the script at line 416 so that it does this: 
+```
+    # Resources having been successfully created. Now wait for them to start.
+    banner_info "Resources have been created. Waiting for them to be ready..."
+    info "Refreshing kubernetes credentials..."
+    gcloud container clusters get-credentials ${CLUSTER_NAME} --project ${GCP_PROJECT_ID} --region ${CLUSTER_REGION}
+    kubectl wait "apigeedatastore/default" \
+        "apigeeredis/default" \
+       ....
+```
+
+--- COMMENTS (2) ---
+
+### comment by DinoChiesa (association=NONE) at 2022-12-09T22:32:49Z
+Now that I look further, the symptom I am reporting here may be due to a problem on my side - in my .bashrc file I force a specific project, which is probably the wrong thing to do. It may be causing the timeout I reported.   Stay tuned.
+
+### comment by blackrookgeek (association=CONTRIBUTOR) at 2022-12-12T21:19:25Z
+Hey Dino,
+You are correct that the Wait time may need to be adjusted. I have seen it take longer than 15 mins to complete setup.
+
+The Creds issue is separate from the wait issue. I'm not aware of any connection between the two.

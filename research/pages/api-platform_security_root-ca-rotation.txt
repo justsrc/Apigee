@@ -1,0 +1,156 @@
+# Ensure $AUTH and $PROJECT_ID are set in your environment
+curl -H "$AUTH" \
+  https://apigee.googleapis.com/v1/organizations/$PROJECT_ID/instances \
+  | jq -r '.instances[] | "\(.name)\t\(.host)"'
+```
+
+If your clients connect to a host other than these IPs (for example, your own DNS name in front of an internal load balancer), use that host instead.
+
+### Step 2: Fetch the current and upcoming root CA certificates
+
+Read the `caCertificates[]` field from `organizations.get`. During a rotation, this array contains both the current and the new root CA, each base64-encoded:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -H "$AUTH" \
+  https://apigee.googleapis.com/v1/organizations/$PROJECT_ID \
+  | jq -r '.caCertificates[]' \
+  | awk '/-----BEGIN/{i++}{print > ("ca_" i ".b64")}'
+```
+
+Decode each entry to PEM format and inspect the validity period to identify the new certificate:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+for f in ca_*.b64; do
+  base64 -d "$f" > "${f%.b64}.crt"
+  echo "==> ${f%.b64}.crt"
+  openssl x509 -in "${f%.b64}.crt" -noout -subject -issuer -dates
+done
+```
+
+The certificate with the later `notAfter` date is the new root CA.
+
+### Step 3: Add the new root CA to your truststores
+
+Add the new root CA certificate to every client truststore that currently trusts the Apigee root CA. Keep the current root CA in place until the cutover is complete, so that connections continue to work through the cutover window. After the cutover, you can remove the old root CA from your truststores.
+
+The exact procedure depends on the client. Common cases include:
+
+- Adding the certificate to the OS-level truststore (for example, `/etc/ssl/certs/` on Debian-based systems followed by `update-ca-certificates`).
+- Adding the certificate to an application-managed truststore (for example, a Java `cacerts` keystore, an Nginx `ssl_trusted_certificate` bundle, or an Envoy `validation_context` trust bundle).
+- Adding the certificate to a Kubernetes `Secret` or `ConfigMap` that is mounted into your workload pods.
+
+### Step 4: Verify the connection works with the new root CA
+
+After you stage the new root CA, verify that an HTTPS request to the Apigee runtime succeeds when you trust only the new certificate:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+# Ensure $ENV_GROUP_HOSTNAME and $INTERNAL_LOAD_BALANCER_IP are set
+curl -is -H "Host: $ENV_GROUP_HOSTNAME" \
+  https://example.$PROJECT_ID.apigee.internal/PROXY_BASEPATH \
+  --cacert NEW_CA_FILE \
+  --resolve example.$PROJECT_ID.apigee.internal:443:$INTERNAL_LOAD_BALANCER_IP
+```
+
+If this command succeeds, your client is ready for the cutover. If it fails, the client does not yet trust the new root CA — revisit Step 3.
+
+## Example: Internal routing (VPC), TLS Option 2
+
+This example demonstrates the rotation steps for the access pattern documented in [Internal routing (VPC)](/apigee/docs/api-platform/get-started/install-cli#internal-routing-vpc), TLS Option 2, where the client connects directly to the Apigee internal load balancer and validates the Apigee self-signed certificate. This is the access pattern most commonly affected by a rotation.
+
+Before the cutover:
+
+1.  Get the IP of the Apigee internal load balancer:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    export INTERNAL_LOAD_BALANCER_IP=$(curl -H "$AUTH" \
+      https://apigee.googleapis.com/v1/organizations/$PROJECT_ID/instances -s \
+      | jq -r '.instances[0].host')
+    ```
+
+2.  Fetch the current and new root CAs into separate files and identify the new one:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    curl -H "$AUTH" \
+      https://apigee.googleapis.com/v1/organizations/$PROJECT_ID \
+      | jq -r '.caCertificates[]' \
+      | awk '/-----BEGIN/{i++}{print > ("ca_" i ".b64")}'
+
+    for f in ca_*.b64; do
+      base64 -d "$f" > "${f%.b64}.crt"
+    done
+
+    # Identify the new root CA (latest notAfter):
+    openssl x509 -in ca_1.crt -noout -dates
+    openssl x509 -in ca_2.crt -noout -dates
+    ```
+
+3.  Build a combined truststore that contains both the current and the new root CA, and use it for your test request:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    cat ca_1.crt ca_2.crt > cacert-combined.crt
+
+    curl -is -H "Host: $ENV_GROUP_HOSTNAME" \
+      https://example.$PROJECT_ID.apigee.internal/PROXY_BASEPATH \
+      --cacert cacert-combined.crt \
+      --resolve example.$PROJECT_ID.apigee.internal:443:$INTERNAL_LOAD_BALANCER_IP
+    ```
+
+    If this request succeeds, deploy `cacert-combined.crt` as your client truststore. The combined truststore continues to validate the current certificate today and will validate the new certificate after the cutover.
+
+After the cutover (typically within a few days of the cutover date), confirm the rotation by verifying that the connection still succeeds when you trust only the new certificate:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -is -H "Host: $ENV_GROUP_HOSTNAME" \
+  https://example.$PROJECT_ID.apigee.internal/PROXY_BASEPATH \
+  --cacert NEW_CA_FILE \
+  --resolve example.$PROJECT_ID.apigee.internal:443:$INTERNAL_LOAD_BALANCER_IP
+```
+
+When this request succeeds, you can safely remove the old root CA from your truststore.
+
+## Notifications
+
+Apigee sends a notification to the project owners and organization owners of your Google Cloud project at the start of each rotation stage. Each notification includes the stage name, the date the stage will be applied to your organization, and a link to this page.
+
+| Notification | Recommended customer action |
+| --- | --- |
+| 1. New certificate published (~1 year before expiry) | Fetch the new root CA from caCertificates[] and add it to every client truststore that currently trusts the Apigee root CA. See How to prepare for a rotation . |
+| 2. Leaf certificate cutover (~60 days before expiry) | Confirm that all of your clients trust the new root CA before this stage is applied to your region. After this stage, clients that trust only the old root CA cannot connect. |
+| 3. Old certificate withdrawn (~30 days before expiry) | Once this stage has been applied to all your regions, you can safely remove the old root CA from your client truststores. |
+| 4. Rotation complete (at the original expiry date) | No action required. The old root CA has been permanently deleted and the new root CA is the only root CA for your organization. |
+
+If you do not receive rotation notifications and you use one of the access patterns listed in [Who is affected by a rotation](#impact), contact [Apigee support](/apigee/docs/support) to confirm the notification recipients for your organization.
+
+## What's next
+
+- Review the [Options for configuring TLS](/apigee/docs/api-platform/system-administration/options-configuring-tls) to understand all of the TLS termination options in Apigee.
+- Review [Calling an API proxy with internal-only access](/apigee/docs/api-platform/get-started/accessing-internal-proxies) for the full set of internal-access call patterns.
+- See the [`organizations.get`](/apigee/docs/reference/apis/apigee/rest/v1/organizations/get) API reference for the full schema of the `caCertificates[]` field.

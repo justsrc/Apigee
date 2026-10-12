@@ -1,0 +1,28 @@
+# Apigee <span slot="popout-heading"> Stay organized with collections </span> <span slot="popout-contents"> Save and categorize content based on your preferences. </span>
+
+<div class="devsite-article-body clearfix">
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+## The equivalent page does not exist in Apigee.
+
+See the following for more information:
+
+- [Which Apigee Edge features are removed in Apigee?](/apigee/docs/api-platform/get-started/compare-apigee-products#unsupported-features)
+- [Unsupported Apigee Edge APIs](/apigee/docs/api-platform/get-started/compare-apigee-products#unsupported-apis)
+- [Compare Apigee products](https://cloud.google.com/apigee/docs/api-platform/get-started/compare-apigee-products)
+
+Click the browser <span class="material-icons" aria-hidden="true" translate="no">arrow_back</span> back button to return to the previous page.
+
+</div>
+
+Send feedback
+
+<div class="devsite-floating-action-buttons">
+
+</div>
+
+Except as otherwise noted, the content of this page is licensed under the [Creative Commons Attribution 4.0 License](https://creativecommons.org/licenses/by/4.0/), and code samples are licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0). For details, see the [Google Developers Site Policies](https://developers.google.com/site-policies). Java is a registered trademark of Oracle and/or its affiliates.

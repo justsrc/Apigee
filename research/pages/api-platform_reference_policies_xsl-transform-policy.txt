@@ -1,0 +1,298 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The XSLTransform policy applies custom [Extensible stylesheet language transformations (XSLT)](https://en.wikipedia.org/wiki/XSLT) to XML messages, letting you transform them from XML to another format, such as HTML or plain text. The policy is often used to integrate applications that support XML, but that require different XML-based formats for the same data.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+**Note:** This policy transforms XML only if the `Content-Type` header on the message to be transformed is set to XML. For example, `text/xml` or `application/xml`.
+
+**Note:** The XSL Transform policy does not support reading, loading, or manipulating XML external entities (XXEs).
+
+### Inputs
+
+The XSL policy takes the following inputs:
+
+- **(Required)** The name of an XSLT stylesheet, which contains a set of transformation rules stored in the API proxy under `/resources/xsl`.
+- **(Required)** The XML to be transformed (typically a request or response message).
+- (Optional) The name of a variable that stores the output.
+- (Optional) Parameters that match parameters in the XSL stylesheet.
+
+### Parsing processor
+
+Apigee relies on the [Saxon XSLT processor](https://saxon.sourceforge.net/), and supports XSLT 1.0 and 2.0.
+
+### Unsupported XSL elements
+
+The XSL policy does not support the following XSL elements:
+
+- `<xsl:include>`
+- `<xsl:import>`
+
+### Samples
+
+The following samples show an XSL transformation flow:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### XSL policy --\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<XSL name="TransformXML">
+  <ResourceURL>xsl://my_transform.xsl</ResourceURL>
+  <Source>request</Source>
+</XSL>
+```
+
+Simple XSL policy. Go to the next example to see the XSLT stylesheet referenced in the policy (`my_transform.xsl`). The [`<Source>`](/apigee/docs/api-platform/reference/policies/xsl-transform-policy#source) element is important. For example, if the XML you want to transform is in the response, the transformation won't occur unless you set the `<Source>` to `response` (and the policy is attached to the response flow). But in this case, the XML to be transformed is in the request.
+
+</div>
+
+<div class="section">
+
+### XSLT stylesheet --\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+  <xsl:output method="text"/>
+  <xsl:variable name="newline">
+    <xsl:text></xsl:text>
+  </xsl:variable>
+  <xsl:template match="/">
+  <xsl:text>&lt;Life&gt;</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <xsl:text>Here are the odd-numbered items from the list:</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <xsl:for-each select="list/listitem">
+      <xsl:if test="(position() mod 2) = 1">
+        <xsl:number format="1. "/>
+        <xsl:value-of select="."/>
+        <xsl:value-of select="$newline"/>
+      </xsl:if>
+    </xsl:for-each>
+  <xsl:text>&lt;/Life&gt;</xsl:text>
+</xsl:template>
+</xsl:stylesheet>
+```
+
+The `my_transform.xsl` stylesheet referenced in the policy. Go to the next sample to see an example of an incoming XML message.
+
+</div>
+
+<div class="section">
+
+### Message --\>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0"?>
+<list>
+  <title>A few of my favorite albums</title>
+  <listitem>A Love Supreme</listitem>
+  <listitem>Beat Crazy</listitem>
+  <listitem>Here Come the Warm Jets</listitem>
+  <listitem>Kind of Blue</listitem>
+  <listitem>London Calling</listitem>
+  <listitem>Remain in Light</listitem>
+  <listitem>The Joshua Tree</listitem>
+  <listitem>The Indestructible Beat of Soweto</listitem>
+</list>
+```
+
+Sample message in the request (indicated in the policy's `<Source>request</Source>` element in the first sample).
+
+</div>
+
+<div class="section">
+
+### Transformed message
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Life>
+Here are the odd-numbered items from the list:
+1. A Love Supreme
+3. Here Come the Warm Jets
+5. London Calling
+7. The Joshua Tree
+</Life>
+```
+
+The transformed message after the XSLT stylesheet from these samples is applied to the XML message.
+
+</div>
+
+</div>
+
+## `<XSL>` element
+
+Defines an `XSLTransform` policy.
+
+| Default Value | n/a |
+| --- | --- |
+| Required? | Required |
+| Type | Complex object |
+| Parent Element | n/a |
+| Child Elements | <OutputVariable> <Parameters> <ResourceURL> <Source> |
+
+**Note:** `<xsl:include>` and `<xsl:import>` are not supported.
+
+The `<XSL>` element has the following attributes:
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Required? | Type |
+| `name` | Name of the policy. Characters you can use in the name are restricted to: `A-Z0-9._\-$ %`. However, the <a href="https://apigee.google.com" class="external">Apigee UI</a> enforces additional restrictions, such as automatically removing characters that are not alphanumeric. | Required | String |
+
+## Child element reference
+
+This section describes the child elements of [`<XSL>`](/apigee/docs/api-platform/reference/policies/xsl-transform-policy#xsl).
+
+### `<OutputVariable>`
+
+A variable that stores the output of the transformation. You should set this element to be a custom variable, and then consume that variable.
+
+|  |  |
+|----|----|
+| **Default Value** | n/a |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<XSL>`](/apigee/docs/api-platform/reference/policies/xsl-transform-policy#xsl) |
+| **Child Elements** | None |
+
+The value of `<OutputVariable>` cannot be a *message* type; that is, it cannot be `message`, `request`, or `response`.
+
+To replace the message content with the output of the transformation, delete this element. For example, if you're transforming a message to HTML, don't include this element.
+
+### `<Parameters>`
+
+Adds support for the `<xsl:param>` element in your stylesheets. You define each parameter as a [`<Parameter>`](/apigee/docs/api-platform/reference/policies/xsl-transform-policy#parameter) child element of this element.
+
+| Default Value | n/a |
+| --- | --- |
+| Required? | Optional |
+| Type | Array of <Parameter> elements |
+| Parent Element | <XSL> |
+| Child Elements | <Parameter> |
+
+The `<Parameters>` element has the following attributes:
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Required? | Type |
+| `ignoreUnresolvedVariables` | Determines if the policy ignores any unresolved variable errors in the XSLT script instructions. The default value is `false`, which means that, by default, the policy will throw errors if it encounters unresolved variables. | Optional | Boolean |
+
+#### `<Parameter>`
+
+Defines a parameter in the [`<Parameters>`](/apigee/docs/api-platform/reference/policies/xsl-transform-policy#parameters) element.
+
+|  |  |
+|----|----|
+| **Default Value** | n/a |
+| **Required?** | Optional |
+| **Type** | Complex object |
+| **Parent Element** | [`<Parameters>`](/apigee/docs/api-platform/reference/policies/xsl-transform-policy#parameters) |
+| **Child Elements** | None |
+
+The `<Parameter>` element has the following attributes:
+
+| Attribute | Required? | Type | Description |
+| --- | --- | --- | --- |
+| name | Required | String | The name of the parameter. Apigee matches the value you set here with the value of the name attribute on an <xsl:param> element in the stylesheet. For example, if you enter a name of uid , your XSL might look something like the following: <xsl:param name="uid" select="''"/> |
+| ref | Optional | String | Points to a context variable that holds the value for the parameter. Values for the ref context variables must be set prior to the evaluation of this policy. For example, if a uid parameter needs to get its value from a variable called authn.uid , the <Parameter> element would look like the following: <Parameter name="uid" ref="authn.uid"/> If you use this attribute, don't use the value attribute. |
+| value | Optional | String | Specifies a hard-coded value for the parameter. For example, if a parameter named answer should have the value 42, the <Parameter> element would look like the following: <Parameter name="answer" value="42"/> If you use this attribute, don't use the ref attribute. |
+
+The parameter gets its value either from the `ref` attribute or with an explicit `value`.
+
+For an example and more information, see [How should the optional parameters on the XSL Transform policy be used?](https://discuss.google.dev/t/how-should-the-the-optional-parameters-on-the-xsl-transform-policy-be-used/7160).
+
+### `<ResourceURL>`
+
+The XSL file that Apigee uses for transforming the message. The value of this element is the name of the XSL stylesheet stored in the API proxy under `/resources/xsl`.
+
+|  |  |
+|----|----|
+| **Default Value** | n/a |
+| **Required?** | Required |
+| **Type** | String |
+| **Parent Element** | [`<XSL>`](/apigee/docs/api-platform/reference/policies/xsl-transform-policy#xsl) |
+| **Child Elements** | None |
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ResourceURL>xsl://SubscriberNumbers-Request.xsl</ResourceURL>
+```
+
+For more information, see [resource files](/apigee/docs/api-platform/develop/resource-files).
+
+### `<Source>`
+
+Specifies the message that is transformed. Usually this value is set to `request` or `response`, depending on whether the message to be transformed is inbound or outbound.
+
+|  |  |
+|----|----|
+| **Default Value** | n/a |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<XSL>`](/apigee/docs/api-platform/reference/policies/xsl-transform-policy#xsl) |
+| **Child Elements** | None |
+
+The XSL file that defines the transformation is defined by the [`<ResourceURL>`](/apigee/docs/api-platform/reference/policies/xsl-transform-policy#resourceurl).
+
+- If the source is missing, it is treated as a simple message. For example, `<Source>message</Source>`
+- If the source variable cannot be resolved, or resolves to a non-message type, the transformation step fails.
+
+**Sample:** See our [GitHub repository](https://github.com/apigee/api-platform-samples/tree/master/schemas/policy) samples for the most recent schemas.
+
+## Error reference
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+| Fault code | HTTP status | Cause | Fix |
+|----|----|----|----|
+| `steps.xsl.XSLSourceMessageNotAvailable` | `500` | This error occurs if the message or string variable specified in the `<Source>` element of the `XSLTransform` policy is either out of scope (not available in the specific flow where the policy is being executed) or can't be resolved (is not defined). | [*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/xsl-transform-runtime-errors#xslsourcemessagenotavailable) |
+| `steps.xsl.XSLEvaluationFailed` | `500` | This error occurs if the input XML payload is unavailable/malformed or the XSLTransform policy fails/is unable to transform the input XML file based on the transformation rules provided in the XSL file. There could be many different causes for the XSLTransform policy to fail. The reason for failure in the error message will provide more information on the cause. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/xsl-transform-runtime-errors#xslevaluationfailed) |
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+Need help resolving an error? Click *build* next to the error's cause description to visit the troubleshooting page.
+
+| Error name | Cause | Fix |
+|----|----|----|
+| `XSLEmptyResourceUrl` | If the `<ResourceURL>` element in the `XSLTransform` policy is empty, then the deployment of the API proxy fails. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/xsl-transform-deployment-errors#xslemptyresourceurl) |
+| `XSLInvalidResourceType` | If the resource type specified in the `<ResourceURL>` element of the `XSLTransform` policy is not of type `xsl`, then the deployment of the API proxy fails. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/xsl-transform-deployment-errors#xslinvalidresourcetype) |
+
+## Related topics
+
+- [jira-release-notes](https://github.com/apigee/api-platform-samples/tree/master/sample-proxies/jira-release-notes)
+- [pagination](https://github.com/apigee/api-platform-samples/tree/master/sample-proxies/pagination)
+- [soap](https://github.com/apigee/api-platform-samples/tree/master/sample-proxies/soap)

@@ -1,0 +1,1086 @@
+[<span class="devsite-label" background="google-blue">Standard policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The OASValidation (OpenAPI Specification Validation) policy enables you to validate an incoming request or response message against an [OpenAPI 3.0 Specification](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md), using JSON or YAML format. See [What content is validated?](#what-validated)
+
+The OASValidation policy specifies the name of the OpenAPI Specification to use for validation when the step to which the policy is attached executes. The OpenAPI Specification is stored as a resource in the following standard location within the API proxy bundle: `apiproxy/resources/oas`. The OpenAPI Specification document must have a `.json`, `.yml`, or `.yaml` extension.
+
+Add an OpenAPI Specification as a resource to an API proxy bundle using the UI or API, as described in [Manage resources](/apigee/docs/api-platform/develop/resource-files).
+
+This policy is a *Standard policy* and can be deployed to any environment type. For information on policy types and availability with each environment type, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+**Note:** You can store the OpenAPI Specification with the API proxy revision only. See [Where resources are stored](/apigee/docs/api-platform/develop/resource-files#stored).
+
+## What content is validated?
+
+The following table summarizes the **request message content** that is validated by the OASValidation policy, by component.
+
+Components
+
+Request validation
+
+Basepath
+
+Validates the basepath defined by the API proxy; ignores the basepath specified in the OpenAPI Specification.
+
+Path
+
+Validates that the request path (minus the basepath) matches one of the path patterns defined in the OpenAPI Specification.
+
+Verb
+
+Validates that the verb is defined for the path in the OpenAPI Specification.
+
+Request message body
+
+- Validates the existence of the message body in the request, if required.
+- Optionally, validates the message body against the operation's request body schema in the OpenAPI Specification. Configure this option using [`<ValidateMessageBody>`](/apigee/docs/api-platform/reference/policies/oas-validation-policy#validatemessagebody)
+
+**Note:** The policy validates a request message body against the OpenAPI Specification only if the Content-Type is set to `application/json`. If the content type is not set to `application/json`, the request message body validation will pass automatically (without actually validating the content).
+
+Parameters
+
+- Validates that the required parameters are present in the request, including path, header, query and cookie parameters.
+- Validates that the parameter values match those defined in the OpenAPI Specification.
+- Optionally, validates whether parameters exist in the request that are not defined in the OpenAPI Specification. Configure this option using [`<AllowUnspecifiedParameters>`](/apigee/docs/api-platform/reference/policies/oas-validation-policy#allowunspecified)
+
+The following table summarizes the **response message content** that is validated by the OASValidation policy, by component.
+
+Components
+
+Response validation
+
+Path
+
+Validates that the request path (minus the basepath) matches one of the path patterns defined in the OpenAPI Specification.
+
+Verb
+
+Validates that the verb is defined for the path in the OpenAPI Specification.
+
+Response message body
+
+- Validates the existence of the message body in the response, if required.
+- Validates that the response headers in the OpenAPI Specification are present in the response message, and that the value of the response headers matches the schema.
+- Optionally, validates the message body against the operation's response body schema in the OpenAPI Specification. Configure this option using [`<ValidateMessageBody>`](/apigee/docs/api-platform/reference/policies/oas-validation-policy#validatemessagebody)
+
+**Note:** Apigee's **OASValidation** policy validates request and response paths differently.  
+For request validation, it validates the request path of the API proxy (for example, `/hello` for `https://``<BasePath>``/hello`).  
+For response validation, it validates the path of the target endpoint that Apigee calls (for example, `/apigee/hello` for `https://{target-basepath}}/apigee/hello`).  
+This distinction is crucial to know if your proxy and target paths differ, as you must align your OpenAPI specification accordingly for response validation.
+
+## Samples
+
+The following examples show some of the ways in which you can use the OASValidation policy to validate messages against an OpenAPI 3.0 Specification.
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Validate request message
+
+In the following example, the `myoaspolicy` policy validates the body of the **request message** against the operation's request message body schema defined in the `my-spec.json` OpenAPI Specification.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="myoaspolicy">
+   <OASResource>oas://my-spec.json</OASResource>
+   <Options>
+      <ValidateMessageBody>true</ValidateMessageBody>
+   </Options>
+   <Source>request</Source>
+</OASValidation>
+```
+
+If the message body doesn't conform to the OpenAPI Specification, a `policies.oasvalidation.Failed` error is returned.
+
+</div>
+
+<div class="section">
+
+### Validate parameters
+
+The following example configures the policy to fail if a header, query, or cookie parameters is specified in the request that is not defined in the OpenAPI Specification.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="myoaspolicy">
+   <OASResource>oas://my-spec.yaml</OASResource>
+   <Options>
+      <AllowUnspecifiedParameters>
+         <Header>false</Header>
+         <Query>false</Query>
+         <Cookie>false</Cookie>
+      </AllowUnspecifiedParameters>
+   </Options>
+</OASValidation>
+```
+
+</div>
+
+</div>
+
+## `<OASValidation>` element
+
+Defines the OpenAPI Specification Validation policy.
+
+| Default Value | See Default Policy tab below |
+| --- | --- |
+| Required? | Required |
+| Type | Complex object |
+| Parent Element | n/a |
+| Child Elements | <DisplayName> <OASResource> <Source> <Options> <Source> |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+The `<OASValidation>` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation
+  continueOnError="[true|false]"
+  enabled="[true|false]"
+  name="policy_name"
+>
+    <!-- All OASValidation child elements are optional except OASResource -->
+    <DisplayName>policy_display_name</DisplayName>
+    <OASResource>validation_JSON_or_YAML</OASResource>
+    <Options>
+        <ValidateMessageBody>[true|false]</ValidateMessageBody>
+        <AllowUnspecifiedParameters>
+            <Header>[true|false]</Header>
+            <Query>[true|false]</Query>
+            <Cookie>[true|false]</Cookie>
+        </AllowUnspecifiedParameters>
+    </Options>
+    <Source>message_to_validate</Source>
+</OASValidation>
+```
+
+</div>
+
+<div class="section">
+
+#### Default Policy
+
+The following example shows the default settings when you add an OAS Validation policy to your flow in the Apigee UI:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation continueOnError="false" enabled="true" name="OpenAPI-Spec-Validation-1">
+    <DisplayName>OpenAPI Spec Validation-1</DisplayName>
+    <Properties/>
+    <Source>request</Source>
+    <OASResource>oas://OpenAPI-Spec-Validation-1.yaml</OASResource>
+</OASValidation>
+```
+
+</div>
+
+</div>
+
+This element has the following attributes that are common to all policies:
+
+**Attribute**
+
+**Default**
+
+**Required?**
+
+**Description**
+
+`name`
+
+N/A
+
+**Required**
+
+The internal name of the policy. The value of the `name` attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters.
+
+Optionally, use the `<DisplayName>` element to label the policy in the management UI proxy editor with a different, natural-language name.
+
+`continueOnError`
+
+false
+
+Optional
+
+Set to `false` to return an error when a policy fails. This is expected behavior for most policies. Set to `true` to have flow execution continue even after a policy fails. See also:
+
+- [Fault rules are triggered ONLY in an error state (about continueOnError)](/apigee/docs/api-platform/fundamentals/fault-handling#multiplefaultrulesandexecutionlogic-faultrulesaretriggeredonlyinanerrorstateaboutcontinueonerror)
+- [Handling faults within the current flow](/apigee/docs/api-platform/fundamentals/fault-handling#continueonerror)
+
+`enabled`
+
+true
+
+Optional
+
+Set to `true` to enforce the policy. Set to `false` to *turn off* the policy. The policy will not be enforced even if it remains attached to a flow.
+
+`async`  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray">not_interested</span></span>
+
+false
+
+Deprecated
+
+This attribute is deprecated.
+
+## Child element reference
+
+This section describes the child elements of [`<OASValidation>`](/apigee/docs/api-platform/reference/policies/oas-validation-policy#oasvalidation).
+
+### `<DisplayName>`
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, more natural-sounding name.
+
+The `<DisplayName>` element is common to all policies.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional. If you omit `<DisplayName>`, the value of the policy's `name` attribute is used. |
+| **Type** | String |
+| **Parent Element** | \<`PolicyElement`\> |
+| **Child Elements** | None |
+
+The `<DisplayName>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>POLICY_DISPLAY_NAME</DisplayName>
+  ...
+</PolicyElement>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>My Validation Policy</DisplayName>
+</PolicyElement>
+```
+
+</div>
+
+</div>
+
+The `<DisplayName>` element has no attributes or child elements.
+
+### `<OASResource>`
+
+Specifies the OpenAPI Specification to validate against. You can store this file:
+
+- At the API proxy scope under `/apiproxy/resources/oas` in the API proxy bundle
+- In the `Resources` section of the API proxy editor's Navigator view.
+
+For more information, see [Manage resources](/apigee/docs/api-platform/develop/resource-files).
+
+You can specify the OpenAPI Specification using a message template, such as `{oas.resource.url}`. In this case, the value of flow variable `oas.resource.url` (in curly braces) will be evaluated and substituted into the payload string at runtime. For more information, see [Message templates](/apigee/docs/api-platform/reference/message-template-intro).
+
+|  |  |
+|----|----|
+| **Default Value** | None |
+| **Required?** | Required |
+| **Type** | String |
+| **Parent Element** | [`<OASValidation>`](/apigee/docs/api-platform/reference/policies/oas-validation-policy#oasvalidation) |
+| **Child Elements** | None |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+The `<OASResource>` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="policy_name">
+   <OASResource>oas://specname[.json|.yaml|.yml]</OASResource>
+   ...
+</OASValidation>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example references the `my-spec.yaml` specification that is stored under `/apiproxy/resources/oas` in the API proxy bundle:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="myoaspolicy">
+   <OASResource>oas://my-spec.yaml</OASResource>
+</OASValidation>
+```
+
+</div>
+
+</div>
+
+The `<OASResource>` element has no attributes or child elements.
+
+**Note**: If the OASValidation policy specifies an \<OASResource\> with security requirements set at a *global* level, the security requirements are not enforced. To ensure enforcement, all security requirements must be set at the *operation* level in the OpenAPI specification passed in the `<OASResource>` element of this policy. For more information, see [Apigee Known Issues](/apigee/docs/release/known-issues).
+
+### \<Options\>
+
+Configures options for the policy.
+
+| Default Value | n/a |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex type |
+| Parent Element | <OASValidation> |
+| Child Elements | <ValidateMessageBody> <AllowUnspecifiedParameters> |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+The `<Options>` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="policy_name">
+   <OASResource>oas://specname[.json|.yaml|.yml]</OASResource>
+   <Options>
+      <ValidateMessageBody>[true|false]</ValidateMessageBody>
+      <AllowUnspecifiedParameters>
+         <Header>[true|false]</Header>
+         <Query>[true|false]</Query>
+         <Cookie>[true|false]</Cookie>
+      </AllowUnspecifiedParameters>
+   </Options>
+   ...
+</OASValidation>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example configures the options for the policy. Each of the options are described in more detail below.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="myoaspolicy">
+   <OASResource>oas://my-spec.yaml</OASResource>
+   <Options>
+      <ValidateMessageBody>false</ValidateMessageBody>
+      <AllowUnspecifiedParameters>
+         <Header>false</Header>
+         <Query>false</Query>
+         <Cookie>false</Cookie>
+      </AllowUnspecifiedParameters>
+   </Options>
+</OASValidation>
+```
+
+</div>
+
+</div>
+
+#### \<ValidateMessageBody\>
+
+Specifies whether the policy should validate the message body against the operation's request body schema in the OpenAPI Specification. Set to **true** to validate the message body contents. Set to **false** to validate only that the message body exists.
+
+You can control whether flow execution continues following a validation error by setting the `continueOnError` attribute for the [`<OASValidation>`](/apigee/docs/api-platform/reference/policies/oas-validation-policy#oasvalidation) element to **true**.
+
+**Note:** The policy validates a request message body against the OpenAPI Specification only if the Content-Type is set to `application/json`. If the content type is not set to `application/json`, the request message body validation will succeed automatically (without actually validating the content).
+
+|  |  |
+|----|----|
+| **Default Value** | false |
+| **Required?** | Optional |
+| **Type** | Boolean |
+| **Parent Element** | [`<Options>`](/apigee/docs/api-platform/reference/policies/oas-validation-policy#options) |
+| **Child Elements** | None |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+The `<ValidateMessageBody>` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="policy_name">
+   <OASResource>oas://specname[.json|.yaml|.yml]</OASResource>
+   <Options>
+         <ValidateMessageBody>[true|false]</ValidateMessageBody>
+   </Options>
+   ...
+</OASValidation>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example enables the validation of the message body contents:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="myoaspolicy">
+   <OASResource>oas://my-spec.yaml</OASResource>
+   <Options>
+      <ValidateMessageBody>true</ValidateMessageBody>
+   </Options>
+</OASValidation>
+```
+
+</div>
+
+</div>
+
+#### `<AllowUnspecifiedParameters>`
+
+Configures the behavior of the policy if there are header, query, or cookie parameters present in the request that are not defined in the OpenAPI Specification.
+
+| Default Value | n/a |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex type |
+| Parent Element | <Options> |
+| Child Elements | <Header> <Query> <Cookie> |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+The `<AllowUnspecifiedParameters>` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="policy_name">
+   <OASResource>oas://specname[.json|.yaml|.yml]</OASResource>
+   <Options>
+      <AllowUnspecifiedParameters>
+         <Header>[true|false]</Header>
+         <Query>[true|false]</Query>
+         <Cookie>[true|false]</Cookie>
+      </AllowUnspecifiedParameters>
+   </Options>
+   ...
+</OASValidation>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example configures the policy to fail if a header, query, or cookie parameters is specified in the request that is not defined in the OpenAPI Specification.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="myoaspolicy">
+   <OASResource>oas://my-spec.yaml</OASResource>
+   <Options>
+      <AllowUnspecifiedParameters>
+         <Header>false</Header>
+         <Query>false</Query>
+         <Cookie>false</Cookie>
+      </AllowUnspecifiedParameters>
+   </Options>
+</OASValidation>
+```
+
+</div>
+
+</div>
+
+**`<Header>` (child of `<AllowUnspecifiedParameters>`)**
+
+Configures the behavior of the policy if there are header parameters present in the request that are not defined in the OpenAPI Specification.
+
+To allow header parameters to be specified in the request that are not defined in the OpenAPI Specification, set this parameter to **true**. Otherwise, set this parameter to **false** to cause policy execution to fail.
+
+|  |  |
+|----|----|
+| **Default Value** | true |
+| **Required?** | Boolean |
+| **Type** | Complex type |
+| **Parent Element** | [`<AllowUnspecifiedParameters>`](/apigee/docs/api-platform/reference/policies/oas-validation-policy#allowunspecified) |
+| **Child Elements** | None |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+The `<Header>` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="policy_name">
+   <OASResource>oas://specname[.json|.yaml|.yml]</OASResource>
+   <Options>
+      <AllowUnspecifiedParameters>
+         <Header>[true|false]</Header>
+      </AllowUnspecifiedParameters>
+   </Options>
+   ...
+</OASValidation>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example configures the policy to fail if a header parameter is specified in the request that is not defined in the OpenAPI Specification.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="myoaspolicy">
+   <OASResource>oas://my-spec.yaml</OASResource>
+   <Options>
+      <AllowUnspecifiedParameters>
+         <Header>false</Header>
+      </AllowUnspecifiedParameters>
+   </Options>
+</OASValidation>
+```
+
+</div>
+
+</div>
+
+**`<Query>` (child of `<AllowUnspecifiedParameters>`)**
+
+Configures the behavior of the policy if there are query parameters present in the request that are not defined in the OpenAPI Specification.
+
+To allow query parameters to be specified in the request that are not defined in the OpenAPI Specification, set this parameter to **true**. Otherwise, set this parameter to **false** to cause policy execution to fail.
+
+|  |  |
+|----|----|
+| **Default Value** | true |
+| **Required?** | Boolean |
+| **Type** | Complex type |
+| **Parent Element** | [`<AllowUnspecifiedParameters>`](/apigee/docs/api-platform/reference/policies/oas-validation-policy#allowunspecified) |
+| **Child Elements** | None |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+The `<Query>` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="policy_name">
+   <OASResource>oas://specname[.json|.yaml|.yml]</OASResource>
+   <Options>
+      <AllowUnspecifiedParameters>
+         <Query>[true|false]</Query>
+      </AllowUnspecifiedParameters>
+   </Options>
+   ...
+</OASValidation>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example configures the policy to fail if a query parameter is specified in the request that is not defined in the OpenAPI Specification.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="myoaspolicy">
+   <OASResource>oas://my-spec.yaml</OASResource>
+   <Options>
+      <AllowUnspecifiedParameters>
+         <Query>false</Query>
+      </AllowUnspecifiedParameters>
+   </Options>
+</OASValidation>
+```
+
+</div>
+
+</div>
+
+**`<Cookie>` (child of `<AllowUnspecifiedParameters>`)**
+
+Configures the behavior of the policy if there are cookie parameters present in the request that are not defined in the OpenAPI Specification.
+
+To allow cookie parameters to be specified in the request that are not defined in the OpenAPI Specification, set this parameter to **true**. Otherwise, set this parameter to **false** to cause policy execution to fail.
+
+|  |  |
+|----|----|
+| **Default Value** | true |
+| **Required?** | Boolean |
+| **Type** | Complex type |
+| **Parent Element** | [`<AllowUnspecifiedParameters>`](/apigee/docs/api-platform/reference/policies/oas-validation-policy#allowunspecified) |
+| **Child Elements** | None |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+The `<Cookie>` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="policy_name">
+   <OASResource>oas://specname[.json|.yaml|.yml]</OASResource>
+   <Options>
+      <AllowUnspecifiedParameters>
+         <Query>[true|false]</Query>
+      </AllowUnspecifiedParameters>
+   </Options>
+   ...
+</OASValidation>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example configures the policy to fail if a query parameter is specified in the request that is not defined in the OpenAPI Specification.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="myoaspolicy">
+   <OASResource>oas://my-spec.yaml</OASResource>
+   <Options>
+      <AllowUnspecifiedParameters>
+         <Cookie>false</Cookie>
+      </AllowUnspecifiedParameters>
+   </Options>
+</OASValidation>
+```
+
+</div>
+
+</div>
+
+### `<Source>`
+
+JSON message to be evaluated against JSON payload attacks. This is most commonly set to `request`, as you will typically need to evaluate inbound requests from client apps. Set to **response** to evaluate response messages. Set to **message** to automatically evaluate the request message when the policy is attached to the request flow and the response message when the policy is attached to the response flow.
+
+|  |  |
+|----|----|
+| **Default Value** | request |
+| **Required?** | Optional |
+| **Type** | String |
+| **Parent Element** | [`<Source>`](/apigee/docs/api-platform/reference/policies/oas-validation-policy#source) |
+| **Child Elements** | None |
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+The `<Source>` element uses the following syntax:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="policy_name">
+   <OASResource>oas://specname[.json|.yaml|.yml]</OASResource>
+   <Source>[message|request|response]</Source>
+   ...
+</OASValidation>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example evaluates automatically the request message when the policy is attached to the request flow and the response message when the policy is attached to the response flow:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OASValidation name="myoaspolicy">
+   <OASResource>oas://my-spec.yaml</OASResource>
+   <Source>message</Source>
+</OASValidation>
+```
+
+</div>
+
+</div>
+
+The `<Source>` element has no attributes or child elements.
+
+## Schema for this policy
+
+Each policy type is defined by an XML schema (`.xsd`). For reference, [policy schemas](https://github.com/apigee/api-platform-samples/tree/master/schemas/policy) are available on GitHub.
+
+## Error codes
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+| Fault code | HTTP status | Cause |
+|----|----|----|
+| `steps.oasvalidation.Failed` | `400` | The Request message body cannot be validated against the provided OpenAPI Specification. |
+| `steps.oasvalidation.Failed` | `500` | The Response message body cannot be validated against the provided OpenAPI Specification. |
+| `steps.oasvalidation.SourceMessageNotAvailable` | `500` | Variable specified in the `<Source>` element of the policy is either out of scope or cannot be resolved. |
+| `steps.oasvalidation.NonMessageVariable` | `500` | `<Source>` element is set to a variable that is not of type [message](/apigee/docs/api-platform/reference/variables-reference#message). |
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+| Error name | Cause |  |
+|----|----|----|
+| `ResourceDoesNotExist` | OpenAPI Specification referenced in the `<OASResource>` element does not exist. |  |
+| `ResourceCompileFailed` | OpenAPI Specification that is included in the deployment contains errors that prevent it from being compiled. This generally indicates that the specification is not a well-formed OpenAPI Specification 3.0. |  |
+| `BadResourceURL` | OpenAPI Specification referenced in the `<OASResource>` element cannot be processed. This can occur if the file is not a JSON or YAML file or the file URL is not specified correctly. |  |
+
+### Fault variables
+
+These variables are set when this policy triggers an error at runtime. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variable | Description | Example |
+| `fault.category` | The category of the fault. When the policy rejects a request, this will always hold `Step`. | `fault.category = "Step"` |
+| `fault.name` | The name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name Matches "ResourceDoesNotExist"` |
+| `fault.reason` | The reason for the fault. It is a human-readable string explaining the reason for the fault. | `OASValidation OAS-1 with resource "oas://my-spec1.yaml": failed with reason: "[ERROR - POST operation not allowed on path '/persons/13'.: []]"` |
+| `fault.subcategory` | The subcategory of the fault. When the policy rejects a request, this will always hold `OASValidationFailure`. | `fault.subcategory = "OASValidationFailure"` |
+| `OASValidation.``policy_name``.failed` | `policy_name` is the user-specified name of the policy that threw the fault. | `OASValidation.myoaspolicy.failed = true` |
+
+## Supported OpenAPI Specifications features
+
+The OASValidation policy supports the OpenAPI Specification features that are summarized in the following table, by category. The features that are not supported are also listed.
+
+**Note:** The OASValidation policy will reject OpenAPI Specifications that use unsupported features. In this case, the policy will not pass the validation of the unsupported features and deployment of the API proxy fails.
+
+Category
+
+Supported
+
+Not supported
+
+**Data type formats**
+
+boolean  
+date  
+date-time  
+double  
+email  
+float  
+int32/int64  
+ipv4/ipv6  
+md5  
+sha1/sha256/sha512  
+string  
+uri  
+uri-template  
+uuid  
+
+binary  
+byte  
+password  
+
+**Discriminator object**
+
+mapping  
+propertyName
+
+N/A
+
+Media type object
+
+schema
+
+encoding  
+example  
+examples
+
+Operations object
+
+parameters  
+requestBody  
+responses  
+security (partial support)
+
+callbacks  
+deprecated  
+servers
+
+Parameters object
+
+allowEmptyValue  
+in (`query`, `header`, `path`)  
+required  
+responses  
+schema  
+style (`deepObject`, `form`, `formmatrix`, `label`, `pipeDelimited`, `simple`, `spaceDelimited`)  
+  
+**Note:** `deepObject` supports string parameters only; arrays and nested objects are not supported.
+
+allowReserved  
+deprecated  
+example  
+examples  
+content
+
+Paths object
+
+delete  
+get  
+head  
+options  
+parameters  
+patch  
+post  
+put  
+trace  
+variables
+
+servers
+
+Request body object
+
+application/json  
+application/hal+json  
+application/x-www-form-urlencoded (`encoding` object not supported)  
+content  
+required
+
+application/xml  
+multipart/form-data  
+text/plain  
+text/xml
+
+**Response object**
+
+application/json  
+application/hal+json  
+application/x-www-form-urlencoded (`encoding` object not supported)  
+content  
+headers
+
+application/xml  
+links  
+text/plain  
+text/xml
+
+**Responses object**
+
+default  
+HTTP Status Code
+
+N/A
+
+Schema object
+
+\$ref  
+additionalProperties (boolean flag variant only)  
+allOf (ignored if `additionalProperties` is `false`)  
+anyOf  
+enum  
+exclusiveMaximum/exclusiveMinimum  
+format  
+items  
+maximum/minimum  
+maxItems/minItems  
+maxLength/minLength  
+maxProperties/minProperties  
+multipleOf  
+not  
+nullable  
+oneOf  
+pattern  
+properties  
+required  
+title  
+type  
+uniqueItems
+
+deprecated  
+example  
+readOnly  
+writeOnly  
+xml
+
+**Security scheme object**
+
+in (`header`, `query`) (ignored if `type` is `http`)  
+name  
+type (`apiKey`, `http`)
+
+bearerFormat  
+flows  
+openIdConnectUrl  
+scheme
+
+**Server object**
+
+url  
+variables
+
+Multiple server definitions
+
+## Using patterns in schema
+
+The OpenAPI Specification standard allows specifications to stipulate a `schema` to describe the data type of a parameter or field. For a parameter or field of type string, the schema may also define a `pattern`, which is a regular expression (regex) that defines valid forms for the string.
+
+As an example, consider the following OpenAPI Specification fragment:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+paths:
+  /products/{product-id}:
+    get:
+      operationId: getProduct
+      summary: Get product by id
+      description: returns information regarding a product, by id
+      parameters:
+        - name: product-id
+          in: path
+          description: id of the product
+          required: true
+          schema:
+            type: string
+            pattern: '^\w{3}-\d{4}$'
+```
+
+This specification requires that for the `getProduct` operation, the `product-id` parameter should comply with the given regex, which stipulates a sequence of 3 word characters, a dash, and 4 decimal digits.
+
+[The OpenAPI Specification defers](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#schema-object) to [the JSON Schema Validation standard](https://json-schema.org/draft/2020-12/json-schema-validation#name-validation-keywords-for-str) for formally defining the behavior of the pattern in validating the string value, and to the [JSON Schema Core standard](https://json-schema.org/draft/2020-12/json-schema-core#name-regular-expressions) for recommendations to schema authors regarding the restricted set of regular expression syntax. That latter standard recommends avoiding the use of lookarounds (lookaheads and lookbehinds), backreferences, and octal character expressions, among other features, within patterns inside OpenAPI Specification documents.
+
+By default, Apigee validates the OpenAPI Specification document referenced by the OASValidation policy and reports errors if the specification document is not well formed. Apigee also validates regex patterns in your specification document and reports problems found there.
+
+It is important to note that if you employ regex features outside of the recommended subset, Apigee will *not* validate the regex and will suspend any additional validation of your OpenAPI Specification document. If there is an error in the document, or in the regex that uses a feature outside the recommended subset, or if the regex feature is not supported by the Apigee runtime, the error will be detected only at runtime when the policy executes.
+
+The following table provides some examples.
+
+| Pattern | Behavior |
+|----|----|
+| `^\w{3}-\d{4}$` | The pattern is valid. It uses only regex features within the recommended subset. Apigee will allow save or import of the proxy, and at runtime the OASValidation policy will work as intended, validating the parameter against the pattern. |
+| `^([a-z]\w{3}-\d{4}$` | The pattern is invalid; it is missing a closing parenthesis. The pattern does not use regex features outside the recommended subset. Apigee will report this error at the time you import or save your API proxy. |
+| `^(?![a-z]\w{3}-\d{4}$` | The pattern is invalid. As with the prior example, it is missing a closing parenthesis. But Apigee will not report this error at the time you save or import your API Proxy, because the regex is using a negative lookahead, which is outside the recommended subset of regex features. The error will be detected only at runtime when the policy executes. |
+| `^(?![a-z])\w{3}-\d{4}$` | The pattern is valid, but it uses a negative lookahead, which is outside the recommended subset of regex features. Apigee will suspend validation of the OpenAPI Specification document. At runtime, when you execute the OASValidation policy that references a specification using this pattern, because the Apigee runtime actually supports negative lookaheads, Apigee will correctly apply this regex to validate the parameter value. |
+| `^(a)?b(?(1)c|d)$` | The pattern is valid, but uses a capturing group conditional, which is outside the recommended subset of regex features. Apigee will suspend validation of the OpenAPI Specification document. At runtime, when you execute the OASValidation policy that references a specification using this pattern, because the Apigee runtime does not support this regex feature, Apigee will return an error. |
+
+We recommend using only the recommended subset of features in your regex to prevent runtime failures.
+
+## Related topics
+
+- [JSON Threat Protection policy](/apigee/docs/api-platform/reference/policies/json-threat-protection-policy)
+- [SOAPMessageValidation policy](/apigee/docs/api-platform/reference/policies/message-validation-policy)

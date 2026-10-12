@@ -1,0 +1,331 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The JavaCallout policy enables you to use Java to implement custom behavior that is not included out-of-the-box by Apigee policies. In your Java code, you can access message properties (headers, query parameters, content), get and set flow variables, execute custom logic and perform error handling, extract data from requests or responses, and more. If you're just getting started with this policy, see [How to create a Java callout](/apigee/docs/api-platform/develop/how-create-java-callout).
+
+You can package your Java application with whatever package JAR files you need. Note that there are some restrictions on what you can do with JavaCallout. These are listed in [Restrictions](#Restrictions).
+
+Supported Java versions include: Oracle JDK 11 and OpenJDK 11.
+
+**Note:** Apigee recommends using the [JavaScript policy](/apigee/docs/api-platform/reference/policies/javascript-policy) instead of JavaCallout. Or, consider using [Service Callout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy) if you need to make HTTP calls to remote services. See also [When should I use a JavaCallout?](/apigee/docs/api-platform/develop/how-create-java-callout#whenshouldiuseajavacallout)
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+**Note:** **Important:** If you are developing JavaCallout policies, you need to know which permission policies are in effect in the Apigee JVM and how they will affect your code. See [Java permission reference](/apigee/docs/api-platform/reference/java-permission-reference). See also [Restrictions](#Restrictions).
+
+## Samples
+
+### General samples
+
+For a simple example using a Java callout, see [How to create a Java callout](/apigee/docs/api-platform/develop/how-create-java-callout).
+
+To learn how to set flow variables in your Java code, see this [Apigee Community post on debugging Java callouts](https://discuss.google.dev/t/debugging-java-callouts/17493).
+
+### Retrieve properties in your Java code
+
+This example shows how to use the `<Property>` element's `name` attribute to specify the name with which to access the property from Java code.
+
+The `<Property>` element's value (the value between the opening and closing tags) is the value that will be received by the Java code. The value must be a string; you cannot reference a flow variable to get the value.
+
+**Note:** For a working example that uses properties, see [How to use properties in JavaCallout policies](/apigee/docs/api-platform/develop/how-use-properties-java-callout).
+
+The configuration requires two pieces:
+
+- Configure the property. Here, the property value is the variable name `response.status.code`.
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+  <JavaCallout async="false" continueOnError="false" enabled="true" name="JavaCallout">
+      <DisplayName>JavaCallout</DisplayName>
+      <ClassName>com.example.mypolicy.MyJavaCallout</ClassName>
+      <ResourceURL>java://MyJavaCallout.jar</ResourceURL>
+      <Properties>
+          <Property name="source">response.status.code</Property>
+      </Properties>
+  </JavaCallout>
+  ```
+
+- In your Java code, implement the following constructor on the Execution class:  
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+  public class MyJavaCallout implements Execution{
+      public MyJavaCallout(Map<string, string> props){
+
+              // Extract property values from map.
+      }
+      ...
+  }
+  ```
+
+## Element reference
+
+The element reference describes the elements and attributes of the JavaCallout policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<JavaCallout name="MyJavaCalloutPolicy">
+   <ClassName>com.example.mypolicy.MyJavaCallout</ClassName>
+   <ResourceURL>java://MyJavaCallout.jar</ResourceURL>
+</JavaCallout>
+```
+
+## \<JavaCallout\> attributes
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<JavaCallout name="MyJavaCalloutPolicy" enabled="true" continueOnError="false" async="false" >
+```
+
+The following table describes attributes that are common to all policy parent elements:
+
+| Attribute | Description | Default | Presence |
+| --- | --- | --- | --- |
+| name | The internal name of the policy. The value of the name attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters. Optionally, use the <DisplayName> element to label the policy in the management UI proxy editor with a different, natural-language name. | N/A | Required |
+| continueOnError | Set to false to return an error when a policy fails. This is expected behavior for most policies. Set to true to have flow execution continue even after a policy fails. See also: Fault rules are triggered ONLY in an error state (about continueOnError) Handling faults within the current flow Tip: In the cases where your Java code throws an exception, the Apigee proxy flow moves to fault status even if the continueOnError attribute is set to true. If you do not wish a thrown exception to result in a fault status in the proxy, design the Java callout code so that it does not throw errors. Instead, catch exceptions and set a context variable to capture the exception information. For more information, see this Apigee Community post . | false | Optional |
+| enabled | Set to true to enforce the policy. Set to false to turn off the policy. The policy will not be enforced even if it remains attached to a flow. | true | Optional |
+| async | This attribute is deprecated. | false | Deprecated |
+
+## \<DisplayName\> element
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, natural-language name.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+| Default | N/A If you omit this element, the value of the policy's name attribute is used. |
+| --- | --- |
+| Presence | Optional |
+| Type | String |
+
+## \<ClassName\> element
+
+Specifies the name of the Java class that executes when the JavaCallout policy runs. The class must be included in the JAR file specified by the `<ResourceURL>`. See also [How to create a Java callout](/apigee/docs/api-platform/develop/how-create-java-callout).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<JavaCallout name="MyJavaCalloutPolicy">
+   <ResourceURL>java://MyJavaCallout.jar</ResourceURL>
+   <ClassName>com.example.mypolicy.MyJavaCallout</ClassName>
+</JavaCallout>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Required |
+| **Type:**     | String   |
+
+## \<Properties\> element
+
+Adds new properties that you can access from Java code at runtime.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Properties>
+    <Property name="propName">propertyValue</Property>
+</Properties>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | None     |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+## \<Property\> element
+
+Specifies a property you can access from Java code at runtime. You must specify a literal string value for each property; you cannot reference flow variables in this element. For a working example that uses properties, see [How to use properties in a JavaCallout policy](/apigee/docs/api-platform/develop/how-use-properties-java-callout).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Properties>
+    <Property name="propName">propertyValue</Property>
+</Properties>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | None     |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+### Attributes
+
+| Attribute | Description                         | Default | Presence  |
+|-----------|-------------------------------------|---------|-----------|
+| name      | Specifies the name of the property. | N/A     | Required. |
+
+## <span id="ResourceURL"></span>\<ResourceURL\> element
+
+This element specifies the Java JAR file that will execute when the JavaCallout policy runs.
+
+You can store this file at the API proxy scope (under `/apiproxy/resources/java` in the API proxy bundle or in the Scripts section of the API proxy editor's Navigator pane), or at the organization or environment scopes for reuse across multiple API proxies, as described in [Resource files](/apigee/docs/api-platform/develop/resource-files).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<JavaCallout name="MyJavaCalloutPolicy">
+   <ResourceURL>java://MyJavaCallout.jar</ResourceURL>
+   <ClassName>com.example.mypolicy.MyJavaCallout</ClassName>
+</JavaCallout>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | None     |
+| **Presence:** | Required |
+| **Type:**     | String   |
+
+## Error reference
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+| Fault code | HTTP status | Cause | Fix |
+|----|----|----|----|
+| ` `<span sheets-userformat="{'2':513,'3':{'1':0},'12':0}" sheets-value="{'1':2,'2':'javacallout.ExecutionError'}">`steps.javacallout.ExecutionError`</span> | `500` | Occurs when Java code throws an exception or returns null during the execution of a `JavaCallout policy`. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/java-callout-runtime-errors#executionerror) |
+
+### Deployment errors
+
+These errors can occur when the proxy containing the policy is deployed.
+
+| Error name | Fault string | HTTP status | Occurs when |
+|----|----|----|----|
+| ` `<span sheets-userformat="{'2':513,'3':{'1':0},'12':0}" sheets-value="{'1':2,'2':'javacallout.ResourceDoesNotExist'}">`ResourceDoesNotExist`</span> | ` `<span sheets-userformat="{'2':513,'3':{'1':0},'12':0}" sheets-value="{'1':2,'2':'Resource with name {0} and type {1} does not exist'}">`Resource with name [name] and type [type] does not exist`</span> | N/A | The file specified in the `<ResourceURL>` element does not exist. |
+| `JavaCalloutInstantiationFailed` | `Failed to instantiate the JavaCallout Class [classname]` | N/A | The class file specified in the `<ClassName>` element is not in the jar. |
+| `IncompatibleJavaVersion` | `Failed to load java class [classname] definition due to - [reason]` | N/A | See fault string. Supported Java versions include: Oracle JDK 7/8 and OpenJDK 7/8 |
+| `JavaClassNotFoundInJavaResource` | `Failed to find the ClassName in java resource [jar_name] - [class_name]` | N/A | See fault string. |
+| `JavaClassDefinitionNotFound` | `Failed to load java class [class_name] definition due to - [reason]` | N/A | See fault string. |
+| `NoAppropriateConstructor` | `No appropriate constructor found in JavaCallout class [class_name]` | N/A | See fault string. |
+| `NoResourceForURL` | `Could not locate a resource with URL [string]` | N/A | See fault string. |
+
+### Fault variables
+
+These variables are set when this policy triggers an error. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``fault_name``"` | `fault_name` is the name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name Matches "ExecutionError"` |
+| `javacallout.``policy_name``.failed` | `policy_name` is the user-specified name of the policy that threw the fault. | `javacallout.JC-GetUserData.failed = true` |
+
+### Example error response
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{  
+   "fault":{  
+      "faultstring":"Failed to execute JavaCallout. [policy_name]",
+      "detail":{  
+         "errorcode":"javacallout.ExecutionError"
+      }
+   }
+}
+```
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name="JavaCalloutFailed">
+    <Step>
+        <Name>AM-JavaCalloutError</Name>
+    </Step>
+    <Condition>(fault.name Matches "ExecutionError") </Condition>
+</FaultRule>
+```
+
+## Schemas
+
+**Sample:** Each policy type is defined by an XML schema (`.xsd`). For reference, [policy schemas](https://github.com/apigee/api-platform-samples/tree/master/schemas/policy) are available on GitHub.
+
+## Compiling and deploying
+
+For details on how to compile your custom Java code and deploy it with a proxy, see [How to create a Java callout](/apigee/docs/api-platform/develop/how-create-java-callout).
+
+## <span id="Restrictions"></span>Restrictions
+
+**Note:** For security reasons, Apigee applies Java permissions policies to Java callout code. The policies apply to code that you write as well as to code from imported packages. Any code (whether your code or imported) will fail if it violates a permission policy. For details, see [Java permission reference](/apigee/docs/api-platform/reference/java-permission-reference).
+
+Below are restrictions that you need to consider when writing Java callout code:
+
+- Most system calls are disallowed. For example, you cannot make internal file system reads or writes.
+- Access to the network via sockets. Apigee restricts access to sitelocal, anylocal, loopback, and linklocal addresses.
+- The callout cannot get information about the current process, the process list, or CPU/memory utilization on the machine. Although some such calls may be functional, they are unsupported and liable to be actively disabled at any time. For forward compatibility, you should avoid making such calls in your code.
+- Reliance on Java libraries that are included with Apigee is not supported. Those libraries are for Apigee product functionality only, and there's no guarantee that a library will be available from release to release.
+- Don't use `io.apigee` or `com.apigee` as package names in Java Callouts. Those names are reserved and used by other Apigee modules.
+
+## Packaging
+
+Place the JAR in an API proxy under `/resources/java`. If your JavaCallout code relies on additional third-party libraries packaged as independent JAR files, then place those JAR files in the `/resources/java` directory as well to ensure that they are loaded correctly at runtime.
+
+If you are using the management UI to create or modify the proxy, add a new resource and specify an additional dependent JAR file. If there are multiple JARs, simply add them as additional resources. You do not need to modify the policy configuration to refer to additional JAR files. Putting them in `/resources/java` is sufficient.
+
+For information on uploading Java JARs, see [Resource files](/apigee/docs/api-platform/develop/resource-files).
+
+For a detailed example that demonstrates how to package and deploy JavaCallout policies using Maven or javac, see [How to create a Java callout](/apigee/docs/api-platform/develop/how-create-java-callout).
+
+## Javadoc
+
+Javadoc for writing Java callout code is included [here on GitHub](https://github.com/apigee/api-platform-samples/tree/master/docs/javadocs-javacallout). You will need to clone or download the HTML to your system, and then simply open the **index.html** file in a browser.
+
+## Usage notes and best practices
+
+- When working with multiple JavaCallout policies, consider uploading common JARs as [environment-scoped resources](/apigee/docs/api-platform/develop/resource-files). This practice is more efficient as compared to packaging the same JARs with multiple proxy bundles when deploying to the same environment.
+
+- Avoid packaging and deploying multiple copies or versions of the same JAR file to an environment. For example, Apigee recommends that you avoid:
+
+  - Deploying the same JAR as part of a proxy bundle and as an environment resource.
+  - Deploying one version of a JAR file as an environment resource and another as part of a proxy bundle.
+
+  Having multiple copies of same JAR deployed can cause non-deterministic behavior at runtime because of potential ClassLoader conflicts.
+
+- A JavaCallout policy contains no actual code. Instead, the policy references a Java 'resource' and defines the Step in the API flow where the Java code executes. You can upload your Java JAR through the Management UI proxy editor, or you can include it in the `/resources/java` directory in API proxies that you develop locally.
+
+- For lightweight operations, such as API calls to remote services, we recommend using the ServiceCallout policy. See [Service Callout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy).
+
+- For relatively simple interactions with message content, such as modifying or extracting HTTP headers, parameters, or message content, Apigee recommends using a JavaScript policy.
+
+## 

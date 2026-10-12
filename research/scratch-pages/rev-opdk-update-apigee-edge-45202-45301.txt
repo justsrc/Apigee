@@ -1,0 +1,2279 @@
+# Note: Replace 'YOUR_PASSWORD' with your LDAP manager password.
+ldapsearch -o ldif-wrap=no -b "dc=apigee,dc=com" \
+-D "cn=manager,dc=apigee,dc=com" -H ldap://:10389 -LLL -x -w 'YOUR_PASSWORD' | wc -l
+```
+
+Once you have confirmed that the data is correct and consistent, your LDAP upgrade is complete. You may now proceed with starting the **edge-management-server** and **edge-ui** and any other dependent components as per your organization's standard upgrade procedure.
+
+## Required upgrade to Cassandra 4.0.18
+
+Apigee Edge for Private Cloud 4.53.01 includes an upgrade of Cassandra to version 4.0.18.
+
+**Note:** These instructions are specific to the users upgrading from version 4.52.02 only. Users upgrading from version 4.53.00 already have Cassandra version 4.0.13 and don't need to perform these steps as it is a minor version change of Cassandra only for them.
+
+**Caution:** While Apigee has certified the Cassandra upgrade, it is strongly advised that you thoroughly test the upgrade in your lower environments before applying it in production to ensure you are familiar with the upgrade steps and that the upgrade is not disruptive.
+
+### Upgrades and rollback
+
+Upgrading from Cassandra 3.11.X to Cassandra 4.0.X is a smooth process. Cassandra 4.0.X, released with Edge for Private Cloud 4.53.00, is compatible with the runtime and management components of Private Cloud 4.52.02.
+
+Direct in-place rollback from Cassandra 4.0.X to 3.11.X is not possible. Rolling back using replicas or backups is a complex procedure and may involve downtime and/or data loss. Troubleshooting issues and upgrading to Cassandra 4.0.X is preferable to rolling back.
+
+It is important to familiarize yourself with rollback procedures before attempting the upgrade. Considering the nuances of rollback during the upgrade is critical to ensure appropriate rollback paths are available.
+
+**Important:** There is no direct in-place rollback option available after upgrading Cassandra.
+
+#### Single data center
+
+Upgrading Cassandra from 3.11.X to 4.0.X within a single data center is seamless, but rollback is complex and may result in downtime and data loss. For production workloads, it's strongly advised to <a href="/private-cloud/v4.53.00/adding-data-center" target="_blank">add a new data center</a> with at least Cassandra nodes available in the new data center before initiating the upgrade. This will enable rollback of Cassandra without incurring data loss or disruption to your API traffic. This additional data center can be decommissioned once the upgrade is finished or Checkpoint 2 is reached.
+
+If adding a new data center isn't feasible but rollback capability is still desired, backups will be necessary for restoring Cassandra 3.11.X. However, this method is likely to involve both downtime and data loss.
+
+#### Multiple data centers
+
+Operating multiple data centers with Edge for Private Cloud 4.52.02 offers more flexibility for rollbacks during the upgrade to Edge for Private Cloud 4.53.00.
+
+- Rollbacks depend on having at least one data center running the older Cassandra version (3.11.X).
+- **If your entire Cassandra cluster is upgraded to 4.0.X, you must not roll back to Cassandra 3.11.X.** You must continue using the newer Cassandra version with the other components of Private Cloud 4.53.00 or 4.52.02.
+
+##### Recommended upgrade methodology
+
+1.  **Upgrade one Cassandra data center at a time:** Start by upgrading Cassandra nodes individually within a single data center. Complete upgrades of all Cassandra nodes in one data center before proceeding to the next.
+2.  **Pause and validate:** After upgrading one data center, pause to ensure your Private Cloud cluster, especially the upgraded data center, is functioning correctly.
+3.  **Remember:** You can only roll back to the previous Cassandra version if you have at least one data center still running the older version.
+4.  **Time-sensitive:** While you can pause for a short period (a few hours is recommended) to validate functionality, you cannot remain in a mixed-version state indefinitely. This is because a non-uniform Cassandra cluster (with nodes on different versions) has operational limitations.
+5.  **Thorough testing:** Apigee strongly recommends comprehensive testing of performance and functionality before upgrading the next data center. Once all data centers are upgraded, rollback to the earlier version is impossible.
+
+##### Rollback as a two-checkpoint process
+
+1.  **Checkpoint 1:** The initial state, with all components on version 4.52.02. Full rollback is possible as long as at least one Cassandra data center remains on the older version.
+2.  **Checkpoint 2:** After all Cassandra nodes in all data centers are updated. You can roll back to this state, but you cannot revert to Checkpoint 1.
+
+##### Example
+
+Consider a two-data-center (DC) cluster:
+
+1.  **Start state:** Cassandra nodes in both DCs are on version 3.11.X. All other nodes are on Edge for Private Cloud version 4.52.02. Assume three Cassandra nodes per DC.
+2.  **Upgrade DC-1:** Upgrade the three Cassandra nodes in DC-1 one by one.
+3.  **Pause and validate:** Pause to ensure the cluster, particularly DC-1, is working correctly (check performance, functionality). You can roll back to the initial state using the Cassandra nodes in DC-2. Remember, this pause must be temporary due to the limitations of a mixed-version Cassandra cluster.
+4.  **Upgrade DC-2:** Upgrade the remaining three Cassandra nodes in DC-2. This becomes your new rollback checkpoint.
+5.  **Upgrade other components:** Upgrade management, runtime, and analytics nodes as usual across all data centers, one node and one data center at a time. If issues arise, you can roll back to the state of step 4.
+
+**Note:** Careful planning and testing are crucial for a successful upgrade. Always consider the rollback limitations and follow the recommended methodology.
+
+### Prerequisites for Cassandra upgrade
+
+You should be running Cassandra 3.11.16 with Edge for Private Cloud 4.52.02 and ensure the following:
+
+1.  The entire cluster is operational and fully functional with Cassandra 3.11.16.
+
+2.  The <a href="https://docs.apigee.com/private-cloud/v4.52.02/cassandra-compaction-strategy" target="_blank">compaction strategy</a> is set to `LeveledCompactionStrategy` (a prerequisite for the upgrade to version 4.52.02).
+
+3.  Confirm that each step below was completed as part of the initial upgrade of Cassandra 3.11 in Edge for Private Cloud of 4.52.02.
+
+    - The `post_upgrade` command was executed on each Cassandra node during previous upgrade
+    - The `drop_old_tables` command was executed on the entire Cassandra cluster during previous upgrade.
+
+    **Note:** The above steps ([post-upgrade](/private-cloud/v4.52.02/update-apigee-edge-45100-45200#step-3:-upgrade-all-cassandra-nodes-in-the-first-data-center) and [Drop Unused tables](/private-cloud/v4.52.02/update-apigee-edge-45100-45200#step-10---drop-unused-tables)) are part of standard steps that you should have executed while upgrading your cluster to Edge for Private Cloud 4.52.02 from older versions.
+
+If you are not sure that the [`post_upgrade`](/private-cloud/v4.52.02/update-apigee-edge-45100-45200#step-3:-upgrade-all-cassandra-nodes-in-the-first-data-center) and [`drop_old_tables`](/private-cloud/v4.52.02/update-apigee-edge-45100-45200#step-10---drop-unused-tables) commands were executed on Cassandra 3.11 while using Edge for Private Cloud 4.52.02, you can safely re-run them before attempting the upgrade to 4.53.01.
+
+### Step 1: Prepare for upgrade
+
+The steps below are in addition to standard files that you typically create, such as [Apigee’s standard configuration file](/private-cloud/v4.52.02/edge-configuration-file-reference) for enabling component upgrades.
+
+Backup Cassandra using Apigee.
+
+Take VM snapshots of Cassandra nodes (if feasible).
+
+Ensure that port 9042 is accessible from all Edge for Private Cloud components, including Management Server, Message Processor, Router, Qpid, and Postgres, to Cassandra nodes if not already configured. Refer to the [Port requirements](/private-cloud/v4.53.01/port-requirements) for more information.
+
+**Caution:** All these steps are critical for upgrading Cassandra to version 4 to ensure minimal data loss if a rollback is required and to prevent data loss post-upgrade. It is imperative that these steps are carried out carefully and not skipped.
+
+### Step 2: Upgrade all Cassandra nodes
+
+All Cassandra nodes should be updated one by one in each data center, one data center at a time. Between upgrades of nodes within a data center, wait a few minutes to ensure that an updated node has fully started and joined the cluster before proceeding with upgrading another node in the same data center.
+
+After upgrading all Cassandra nodes within a data center, wait for some time (30 minutes to a few hours) before proceeding with the nodes in the next data center. During this time, thoroughly review the data center that was updated and ensure that the functional and performance metrics of your Apigee cluster are intact. This step is crucial to ensure the stability of the data center where Cassandra has been upgraded to version 4.0.X, while the rest of the Apigee components remain on version 4.52.02.
+
+1.  To upgrade a Cassandra node, Run the following command:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c cs -f configFile
+    ```
+
+2.  Once a node is updated, run the following command on the node to run some validations before proceeding ahead:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-cassandra validate_upgrade -f configFile
+    ```
+
+3.  The above will output something along the lines of:
+
+    <div>
+
+    </div>
+
+    ```
+    Cassandra version is verified - [cqlsh 6.0.0 | Cassandra 4.0.18 | CQL spec 3.4.5 | Native protocol v5] 
+    Metadata is verified
+    ```
+
+4.  Run the following `post_upgrade` command on the Cassandra node:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-cassandra post_upgrade
+    ```
+
+5.  Run the following `cleanup_old_index` command on the Cassandra node:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-cassandra cleanup_old_index
+    ```
+
+6.  Run the following nodetool commands to **rebuild indices** on the Cassandra node:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms api_products api_products_organization_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms app_credentials app_credentials_api_products_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms app_credentials app_credentials_organization_app_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms app_credentials app_credentials_organization_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms app_end_user app_end_user_app_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms apps apps_app_family_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms apps apps_app_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms apps apps_app_type_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms apps apps_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms apps apps_organization_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms apps apps_parent_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms apps apps_parent_status_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms apps apps_status_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms maps maps_organization_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms oauth_10_access_tokens oauth_10_access_tokens_app_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms oauth_10_access_tokens oauth_10_access_tokens_consumer_key_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms oauth_10_access_tokens oauth_10_access_tokens_organization_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms oauth_10_access_tokens oauth_10_access_tokens_status_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms oauth_10_request_tokens oauth_10_request_tokens_consumer_key_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms oauth_10_request_tokens oauth_10_request_tokens_organization_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms oauth_10_verifiers oauth_10_verifiers_organization_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms oauth_10_verifiers oauth_10_verifiers_request_token_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms oauth_20_access_tokens oauth_20_access_tokens_app_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms oauth_20_access_tokens oauth_20_access_tokens_client_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms oauth_20_access_tokens oauth_20_access_tokens_refresh_token_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms oauth_20_authorization_codes oauth_20_authorization_codes_client_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index kms oauth_20_authorization_codes oauth_20_authorization_codes_organization_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index devconnect companies companies_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index devconnect companies companies_organization_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index devconnect companies companies_status_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index devconnect company_developers company_developers_company_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index devconnect company_developers company_developers_developer_email_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index devconnect company_developers company_developers_organization_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index devconnect developers developers_email_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index devconnect developers developers_organization_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index devconnect developers developers_status_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index cache cache_entries cache_entries_cache_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index audit audits audits_operation_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index audit audits audits_requesturi_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index audit audits audits_responsecode_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index audit audits audits_timestamp_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index audit audits audits_user_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 apis a_name
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 apis a_org_name
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 apis_revision ar_a_active_rev
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 apis_revision ar_a_def_index_template
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 apis_revision ar_a_def_method_template
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 apis_revision ar_a_latest_rev
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 apis_revision ar_a_name
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 apis_revision ar_a_uuid
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 apis_revision ar_base_url
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 apis_revision ar_is_active
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 apis_revision ar_is_latest
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 apis_revision ar_name
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 apis_revision ar_org_name
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 apis_revision ar_rel_ver
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 apis_revision ar_rev_num
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 method m_a_name
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 method m_api_uuid
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 method m_ar_uuid
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 method m_base_url
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 method m_name
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 method m_org_name
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 method m_r_name
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 method m_r_uuid
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 method m_res_path
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 method m_rev_num
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 resource r_a_name
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 resource r_api_uuid
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 resource r_ar_uuid
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 resource r_base_url
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 resource r_name
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 resource r_org_name
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 resource r_res_path
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 resource r_rev_num
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 schemas s_api_uuid
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 schemas s_ar_uuid
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 security sa_api_uuid
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 security sa_ar_uuid
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 template t_a_name
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 template t_a_uuid
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 template t_entity
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 template t_name
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 template t_org_name
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index apimodel_v2 template_auth au_api_uuid
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index dek keys usecase_index
+    ```
+
+    **Note:** Rebuilding indices may take a while to complete, depending on how much data is in your nodes.
+
+    If you’re using **monetization**, also run the following **rebuild indices** commands related to monetization keyspaces:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint limits limits_created_date_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint limits limits_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint limits limits_org_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint limits limits_updated_date_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint suspended_developer_products suspended_developer_products_created_date_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint suspended_developer_products suspended_developer_products_currency_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint suspended_developer_products suspended_developer_products_dev_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint suspended_developer_products suspended_developer_products_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint suspended_developer_products suspended_developer_products_limit_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint suspended_developer_products suspended_developer_products_org_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint suspended_developer_products suspended_developer_products_prod_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint suspended_developer_products suspended_developer_products_reason_code_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint suspended_developer_products suspended_developer_products_sub_org_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint invitations invitations_company_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint invitations invitations_created_at_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint invitations invitations_developer_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint invitations invitations_lastmodified_at_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index mint invitations invitations_org_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index taurus triggers triggers_env_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index taurus triggers triggers_job_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index taurus triggers triggers_org_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index taurus job_details job_details_job_class_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index taurus job_details job_details_job_group_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index taurus job_details job_details_job_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index taurus org_triggers org_triggers_org_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index taurus triggers_suite triggers_suite_group_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index taurus triggers_suite triggers_suite_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index taurus triggers_suite triggers_suite_suite_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index notification notification_service_item notification_service_item_org_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index notification notification_service_item notification_service_item_status_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index notification notification_service_black_list_item notification_service_black_list_item_org_id_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index notification notification_service_black_list_item notification_service_black_list_item_to_email_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index notification notification_email_template_item notification_email_template_item_name_idx
+    /opt/apigee/apigee-cassandra/bin/nodetool rebuild_index notification notification_email_template_item notification_email_template_item_org_id_idx
+    ```
+
+**Caution:** With a major Cassandra upgrade, it is advised to upgrade the entire Cassandra cluster (across all data centers) at once. Major Cassandra upgrades involve automatic schema changes, and until the entire cluster is upgraded, the schema of the Cassandra cluster remains inconsistent. In this state, Cassandra operations such as adding and removing nodes should be avoided.
+
+### Step 3: Upgrade all Management nodes
+
+Upgrade all Management nodes in all regions one by one:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-setup/bin/update.sh -c edge -f configFile
+```
+
+### Step 4: Upgrade all Runtime nodes
+
+Upgrade all Routers and Message Processor nodes in all regions one by one:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-setup/bin/update.sh -c edge -f configFile
+```
+
+### Step 5: Upgrade all remaining Edge for Private Cloud 4.53.01 components
+
+Upgrade all remaining `edge-qpid-server` and `edge-postgres-server` nodes in all regions one by one.
+
+## Required upgrade to Zookeeper 3.8.4
+
+**Note:** These instructions are for uses upgrading from 4.52.02. Users upgrading from 4.53.00, should already have correct configurations.
+
+This release of Edge for Private Cloud includes an upgrade to Zookeeper 3.8.4. As part of that upgrade, all Zookeeper data will be migrated to Zookeeper 3.8.4.
+
+Before upgrading Zookeeper, read through the [Zookeeper maintenance guide](/private-cloud/v4.53.01/zookeeper-maintenance#maintenanceconsiderations). Most Edge production systems use a cluster of Zookeeper nodes spread across multiple data centers. Some of these nodes are configured as voters who participate in Zookeeper leader election, and the rest are configured as observers. See [About leaders, followers, voters, and observers](/private-cloud/v4.53.01/zookeeper-maintenance#aboutzookeeperandedge-aboutleadersfollowersvotersandobservers) for more details. The voter nodes elect a leader after which the voter nodes themselves become followers.
+
+During the update process, there could be a momentary delay or write failure into Zookeeper when the leader node is shutdown. This could affect Management operations that write into Zookeeper, such as deployment operation of a proxy, and Apigee infrastructure changes, such as addition or removal of a message processor, etc. There should be no impact on runtime APIs of Apigee (unless these runtime APIs call management APIs) during upgrade of Zookeeper while following the procedure below.
+
+At a high level, the upgrade process involves taking a backup of each node. This is followed by upgrading all observers and followers and finally upgrading the leader node.
+
+### Take a backup
+
+Take a backup of all nodes of Zookeeper for use in case a rollback is required. Note that a rollback will restore Zookeeper to the state when the backup was taken. **Note:** Any deployments or infrastructure changes in Apigee since the backup was taken (whose information is stored in Zookeeper) will be lost during restoration.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+  /opt/apigee/apigee-service/bin/apigee-service apigee-zookeeper backup
+```
+
+If you are using virtual machines and have the capability, VM snapshots or backups could also be taken for restoration or rollback (if necessary).
+
+### Identify leader, followers and observers
+
+**Note:** The sample commands below use the <a href="https://linux.die.net/man/1/nc" class="external">nc utility</a> to send data to Zookeeper. You could use alternate utilities to send data to Zookeeper as well.
+
+1.  If it is not installed on the ZooKeeper node, install nc:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+      sudo yum install nc
+    ```
+
+2.  Run the following nc command on the node, where 2181 is the ZooKeeper port:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+      echo stat | nc localhost 2181
+    ```
+
+    You should see output like the following:
+
+    <div>
+
+    </div>
+
+    ```
+
+      Zookeeper version: 3.8.4-5a02a05eddb59aee6ac762f7ea82e92a68eb9c0f, built on 2022-02-25 08:49 UTC
+      Clients:
+       /0:0:0:0:0:0:0:1:41246[0](queued=0,recved=1,sent=0)
+      
+      Latency min/avg/max: 0/0.2518/41
+      Received: 647228
+      Sent: 647339
+      Connections: 4
+      Outstanding: 0
+      Zxid: 0x400018b15
+      Mode: follower
+      Node count: 100597
+    ```
+
+    In the `Mode` line of the output for the nodes, you should see observer, leader, or follower (meaning a voter that is not the leader) depending on the node configuration. **Note:** In a standalone installation of Edge with a single ZooKeeper node, the `Mode` is set to standalone.
+
+3.  Repeat steps 1 and 2 on each ZooKeeper node.
+
+### Upgrade Zookeeper on the observer and follower nodes
+
+Upgrade Zookeeper on each of the observer and follower nodes as follows:
+
+1.  Download and run bootstrap of Edge for Private Cloud 4.53.01, as described in [Update to 4.53.01 on a node with an external internet connection](#procedureforupdatingto45201onanodewithanexternalinternetconnection). The process will likely vary depending on whether the node has an external internet connection or you're performing an offline installation.
+
+2.  Upgrade the Zookeeper component:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+      /opt/apigee/apigee-setup/bin/update.sh -c zk -f <silent-config-file>
+    ```
+
+    **Note:** If these nodes have other components installed (such as Cassandra), you could upgrade them too now (like with cs,zk profile) or you could upgrade the other components later. Apigee recommends that you upgrade Zookeeper only first and ensure your cluster is working properly before upgrading other components.
+
+3.  Repeat above steps on each of Zookeeper observer and follower nodes.
+
+### Shutdown the leader
+
+Once all observer and follower nodes have been upgraded, shutdown the leader. On the node identified as leader, run the command below:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+  /opt/apigee/apigee-service/bin/apigee-service apigee-zookeeper stop
+```
+
+Note that during this event, before a new leader is elected, there could be momentary delays or write failures in Zookeeper. This could affect operations which write into Zookeeper such as deployment action of proxies or Apigee infrastructure changes, such as addition or removal of message processors, etc.
+
+### Verify that the new leader is elected
+
+Using the steps in the [Identify leader, followers and observers](#identify-leader,-followers-and-observers) section above, verify that a new leader has been elected from the followers, once the existing leader is stopped. Note that leader could have been elected in a different data center than the current leader.
+
+### Upgrade leader
+
+Follow the same steps as in [Upgrading Zookeeper on the observer and follower nodes](#upgrading-zookeeper-on-the-observer-and-follower-nodes) above.
+
+Once the old leader node is upgraded as well, verify the cluster health and ensure there is a leader node.
+
+## Nginx 1.26 upgrade in Edge-Router
+
+Upgrading to Edge for Private Cloud 4.53.01 from previous versions does not automatically upgrade Nginx software to the latest version (1.26.x). This is to prevent any accidental runtime side-effects as a result of the changes documented in [Nginx 1.26 changes in Apigee Edge 4.53.01](/private-cloud/v4.53.01/nginx-45301). You can manually upgrade Nginx from 1.20.x to 1.26.x after verification in lower environments. To manually upgrade:
+
+1.  Ensure edge-router node has the latest 4.53.01 software
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service edge-router version
+    ```
+
+2.  Check and verify the Nginx version you're currently running
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/nginx/sbin/nginx -V
+    ```
+
+    If you're operating an older version of Nginx, you can follow the steps below to upgrade Nginx to version 1.26.X on the router node.
+
+3.  Stop edge-router process on the router node
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service edge-router stop
+    ```
+
+4.  Upgrade nginx software on the router node
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    dnf update apigee-nginx-1.26.3
+    ```
+
+5.  Verify that the Nginx version has been updated
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/nginx/sbin/nginx -V
+    ```
+
+6.  Start router process on the node
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service edge-router start
+    ```
+
+7.  Repeat the process on each router node, one at a time
+
+**Note:** For fresh installations of Edge for Private Cloud 4.53.01, Nginx 1.26.X will be installed by default on router nodes.
+
+**Note:** Nginx 1.26 is automatically installed if you are using 9 series operating system (RHEL 9.X, Rocky 9.X or Oracle Linux 9.X)
+
+## Required Upgrade to Postgres 17
+
+This release of Edge includes an upgrade to Postgres 17. As part of that upgrade, all Postgres data is migrated to the Postgres 17.
+
+**Notes:**
+
+- You must [upgrade to Zookeeper 3.8.4](#upgrade-zookeeper) before performing the upgrade to Postgres 17.
+- Make sure that yum is *not* set to clean requirements on remove. Otherwise, Postgres upgrades will fail.
+- If `apigee-monit` is installed and enabled, you must disable `apigee-monit` before upgrading the Postgres server to ensure that it does not try to restart the Postgres database while the upgrade is in progress.
+
+Most Edge production systems use two Postgres nodes configured for master-standby replication. During the update process, while the Postgres nodes are down for update, analytics data is still written to the Qpid nodes. After the Postgres nodes are updated and back online, analytics data is then pushed to the Postgres nodes.
+
+The way you perform the Postgres update depends on how you configured data storage for your Postgres nodes:
+
+- **If you use local data storage for your Postgres nodes**, you must install a new Postgres standby node for the duration of the upgrade. After the upgrade completes, you can decommission the new Postgres standby node.
+
+  The additional Postgres standby node is required if you have to roll back the update for any reason. If you have to roll back the update, the new Postgres standby node becomes the master Postgres node after the rollback. Therefore, when you install the new Postgres standby node, it should be on a node that meets all the hardware requirements of a Postgres server, as defined in the Edge [Installation requirements](/private-cloud/v4.53.01/installation-requirements).
+
+  In a 1-node and 2-node configuration of Edge, topologies used for prototyping and testing, you only have a single Postgres node. You can update these Postgres nodes directly without having to create a new Postgres node.
+
+- **If you use network storage for your Postgres nodes**, as recommended by Apigee, you do not have to install a new Postgres node. In the procedures below, you can skip the steps that specify to install and later decommission a new Postgres standby node.
+
+  Before you begin the update process, take a network snapshot of the data store used by Postgres. Then, if any errors occur during update and you are forced to perform a roll back, you can restore the Postgres node from that snapshot.
+
+### Installing a new Postgres standby node
+
+This procedure creates a Postgres standby server on a new node. Ensure that you install a new Postgres standby server for your **existing** version of Edge (4.52.02 or 4.53.00), not for version 4.53.01.
+
+To perform the install, use the same config file that you used to install your current version of Edge.
+
+To create a new Postgres standby node:
+
+1.  On the current Postgres master, edit the `/opt/apigee/customer/application/postgresql.properties` file to set the following token. If that file does not exist, create it:
+
+    <div>
+
+    </div>
+
+    ```
+    conf_pg_hba_replication.connection=host replication apigee existing_standby_ip/32 trust\ \nhost replication apigee new_standby_ip/32 trust
+    ```
+
+    Where `existing_standby_ip` is the IP address of the current Postgres standby server and `new_standby_ip` is the IP address of the new standby node.
+
+2.  Restart `apigee-postgresql` on the Postgres master:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-postgresql restart
+    ```
+
+3.  Verify that the new standby node was added by viewing the `/opt/apigee/apigee-postgresql/conf/pg_hba.conf` file on the master. You should see the following lines in that file:
+
+    <div>
+
+    </div>
+
+    ```
+    host replication apigee existing_standby_ip/32 trust
+    host replication apigee new_standby_ip/32 trust
+    ```
+
+4.  Install the new Postgres standby server:
+    1.  Edit the config file that you used to install your current version of Edge to specify the following:
+
+        <div>
+
+        </div>
+
+        ```
+        # IP address of the current master:
+        PG_MASTER=192.168.56.103
+        # IP address of the new standby node
+        PG_STANDBY=192.168.56.102
+        ```
+
+    2.  Disable SELinux as described in [Install the Edge apigee-setup utility](/private-cloud/v4.53.01/install-edge-apigee-setup-utility).
+
+    3.  If you are currently on Edge 4.52.02:
+
+        1.  Download the Edge bootstrap_4.52.02.sh file to `/tmp/bootstrap_4.52.02.sh `:
+
+            <div>
+
+            </div>
+
+            ``` devsite-terminal
+            curl https://software.apigee.com/bootstrap_4.52.02.sh -o /tmp/bootstrap_4.51.00.sh
+            ```
+
+        2.  Install the Edge `apigee-service` utility and dependencies:
+
+            <div>
+
+            </div>
+
+            ``` devsite-terminal
+            sudo bash /tmp/bootstrap_4.52.02.sh apigeeuser=uName apigeepassword=pWord
+            ```
+
+        If you are currently on Edge 4.53.00:
+
+        1.  Download the Edge bootstrap_4.53.00.sh file to `/tmp/bootstrap_4.53.00.sh `:
+
+            <div>
+
+            </div>
+
+            ``` devsite-terminal
+            curl https://software.apigee.com/bootstrap_4.53.00.sh -o /tmp/bootstrap_4.53.00.sh
+            ```
+
+        2.  Install the Edge `apigee-service` utility and dependencies:
+
+            <div>
+
+            </div>
+
+            ``` devsite-terminal
+            sudo bash /tmp/bootstrap_4.53.00.sh apigeeuser=uName apigeepassword=pWord
+            ```
+
+    4.  Use `apigee-service` to install the `apigee-setup` utility:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+        /opt/apigee/apigee-service/bin/apigee-service apigee-setup install
+        ```
+
+    5.  Install Postgres:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+        /opt/apigee/apigee-setup/bin/setup.sh -p ps -f configFile
+        ```
+
+    6.  On the new standby node, run the following command:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+        /opt/apigee/apigee-service/bin/apigee-service apigee-postgresql postgres-check-standby
+        ```
+
+        Verify that it is the standby.
+
+### Performing an in-place upgrade of Postgres
+
+**Note:** You must do the following preliminary step before performing an in-place upgrade of Postgres.
+
+#### Preliminary step
+
+Before performing an in-place upgrade to Postgres, do the following steps on both the master host and standby, to update the `max_locks_per_transaction` property on `apigee-postgresql`:
+
+1.  If not present, create the file `/opt/apigee/customer/application/postgresql.properties`.
+
+2.  Change the ownership of this file to `apigee`:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    sudo chown apigee:apigee /opt/apigee/customer/application/postgresql.properties
+    ```
+
+3.  Add the following property to the file:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+
+    conf/postgresql.conf+max_locks_per_transaction=30000
+    ```
+
+4.  Configure `apigee-postgresql`:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-postgresql configure
+    ```
+
+5.  Restart `apigee-postgresql`:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-postgresql restart
+    ```
+
+**Note:** You must perform these steps on both the master host and standby.
+
+#### Perform the in-place upgrade
+
+To perform an in-place upgrade to Postgres 17, do the following steps:
+
+1.  Upgrade postgres on the master host
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    /opt/apigee/apigee-setup/bin/update.sh -c ps -f /opt/silent.conf
+    ```
+
+2.  Run the setup command on the master host:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    apigee-service apigee-postgresql setup -f /opt/silent.conf
+    ```
+
+3.  Run the configure command on the master host:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    apigee-service apigee-postgresql configure
+    ```
+
+4.  Restart the master host:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    apigee-service apigee-postgresql restart
+    ```
+
+5.  Configure it as master:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    apigee-service apigee-postgresql setup-replication-on-master -f /opt/silent.conf
+    ```
+
+6.  Ensure the master host has started:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    apigee-service apigee-postgresql wait_for_ready
+    ```
+
+7.  Stop the standby:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    apigee-service apigee-postgresql stop
+    ```
+
+8.  Upgrade the standby.
+
+    **Note:** If this step errors/fails, it can be ignored. `update.sh` will attempt to start the stand-by server with an incorrect configuration. Provided the Postgres installation is upgraded to 17, the error can be ignored.
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    /opt/apigee/apigee-setup/bin/update.sh -c ps -f /opt/silent.conf
+    ```
+
+9.  Ensure the standby is stopped:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    apigee-service apigee-postgresql stop
+    ```
+
+10. Remove the old standby configuration:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    rm -rf /opt/apigee/data/apigee-postgresql/
+    ```
+
+11. Set up replication on the standby server:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    apigee-service apigee-postgresql setup-replication-on-standby -f /opt/silent.conf
+    ```
+
+12. Remove the line `conf/postgresql.conf+max_locks_per_transaction=30000` from the file `/opt/apigee/customer/application/postgresql.properties` on both the master host and standby. This line was added in the [preliminary step](#preliminary-step).
+
+After completing this procedure, the standby will start successfully.
+
+### Decommissioning a Postgres node
+
+After the update completes, decommission the new standby node:
+
+1.  Make sure Postgres is running:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-all status
+    ```
+
+    If Postgres is not running, start it:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-all start
+    ```
+
+2.  Get the UUID of the new standby node by running the following `curl` command on the new standby node:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    curl -u sysAdminEmail:password http://node_IP:8084/v1/servers/self
+    ```
+
+    You should see the UUID of the node at the end of the output, in the form:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    "type" : [ "postgres-server" ],
+    "uUID" : "599e8ebf-5d69-4ae4-aa71-154970a8ec75"
+    ```
+
+3.  Stop the new standby node by running the following command on the new standby node:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-all stop
+    ```
+
+4.  On the Postgres master node, edit `/opt/apigee/customer/application/postgresql.properties` to remove the new standby node from `conf_pg_hba_replication.connection`:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    conf_pg_hba_replication.connection=host replication apigee existing_standby_ip/32 trust
+    ```
+
+5.  Restart apigee-postgresql on the Postgres master:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-postgresql restart
+    ```
+
+6.  Verify that the new standby node was removed by viewing the `/opt/apigee/apigee-postgresql/conf/pg_hba.conf` file on the master. You should see only the following line in that file:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    host replication apigee existing_standby_ip/32 trust
+    ```
+
+7.  Delete the UUID of the standby node from ZooKeeper by making the following Edge management API call on the Management Server node:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    curl -u sysAdminEmail:password -X DELETE http://ms_IP:8080/v1/servers/new_standby_uuid
+    ```
+
+### Post-upgrade steps for Postgres
+
+After a major Postgres upgrade, the internal statistics of Postgres are wiped out. These statistics aid the Postgres query planner in utilizing the most optimal indexes and paths to execute queries.
+
+Postgres can gradually rebuild its statistics over time as queries are executed and when the autovacuum daemon runs. However, until the statistics are rebuilt, your queries may be slow.
+
+To address this issue, execute [`ANALYZE`](https://www.postgresql.org/docs/17/sql-analyze.html) on all tables in the database on the master Postgres node. Alternatively, you can execute [`ANALYZE`](https://www.postgresql.org/docs/17/sql-analyze.html) for a few tables at a time.
+
+**NOTE:** `ANALYZE` can take a long time to run, but it only takes a read lock on the table, allowing other operations on Postgres to continue executing while `ANALYZE` is running.
+
+## Steps for updating Apigee SSO from older versions
+
+**Note:** These instructions are for uses upgrading from 4.52.02. Users upgrading from 4.53.00, should already have correct configurations.
+
+In Edge for Private Cloud 4.53.01, the IDP keys and certificates used in the `apigee-sso` component are now configured through a keystore. You will need to export the key and certificate used earlier into a keystore, configure it, and then proceed with the SSO update as usual.
+
+Identify the existing key and certificate used for configuring IDP:
+
+1.  Retrieve the certificate by looking up the value of `SSO_SAML_SERVICE_PROVIDER_CERTIFICATE` in the SSO installation configuration file or by querying the `apigee-sso` component for `conf_login_service_provider_certificate`.
+
+    Use the following command on the SSO node to query `apigee-sso` for the IDP certificate path. In the output, look for the value in the last line.
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-sso configure -search conf_login_service_provider_certificate
+    ```
+
+2.  Retrieve the key by looking up the value of `SSO_SAML_SERVICE_PROVIDER_KEY` in the SSO installation configuration file or by querying the `apigee-sso` component for `conf_login_service_provider_key`.
+
+    Use the following command on the SSO node to query `apigee-sso` for the IDP key path. In the output, look for the value on the last line.
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-sso configure -search conf_login_service_provider_key
+    ```
+
+Export the key and certificate to a keystore:
+
+Export the key and certificate to a PKCS12 keystore:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+sudo openssl pkcs12 -export -clcerts -in <certificate_path> -inkey <key_path> -out <keystore_path> -name <alias>
+```
+
+Parameters:
+
+- `certificate_path`: Path to the certificate file retrieved in Step 1.a.
+- `key_path`: Path to the private key file retrieved in Step 1.b.
+- `keystore_path`: Path to the newly created keystore containing the certificate and private key.
+- `alias`: Alias used for the key and certificate pair within the keystore.
+
+Refer to the <a href="https://docs.openssl.org/1.1.1/man1/pkcs12/" target="_blank">OpenSSL documentation</a> for more details.
+
+**Note:** You can skip the step below if you prefer to use a PKCS12 keystore.
+
+(Optional) Export the key and certificate from PKCS12 to a JKS keystore:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+sudo keytool -importkeystore -srckeystore <PKCS12_keystore_path> -srcstoretype PKCS12 -destkeystore <destination_keystore_path> -deststoretype JKS -alias <alias>
+```
+
+Parameters:
+
+- `PKCS12_keystore_path`: Path to the PKCS12 keystore created in Step 2.a, containing the certificate and key.
+- `destination_keystore_path`: Path to the new JKS keystore where the certificate and key will be exported.
+- `alias`: Alias used for the key and certificate pair within the JKS keystore.
+
+Refer to the <a href="https://docs.oracle.com/javase/8/docs/technotes/tools/unix/keytool.html" target="_blank">keytool documentation</a> for more details.
+
+Change the owner of the output keystore file to the "apigee" user:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+sudo chown apigee:apigee <keystore_file>
+```
+
+Add the following properties in <a href="/private-cloud/v4.53.01/install-and-configure-edge-sso#commonconfig" target="_blank">Apigee SSO configuration file</a> and update them with the keystore file path, password, keystore type, and alias:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+# Path to the keystore file
+SSO_SAML_SERVICE_PROVIDER_KEYSTORE_PATH=${APIGEE_ROOT}/apigee-sso/source/conf/keystore.jks
+
+# Keystore password
+SSO_SAML_SERVICE_PROVIDER_KEYSTORE_PASSWORD=Secret123  # Password for accessing the keystore
+
+# Keystore type
+SSO_SAML_SERVICE_PROVIDER_KEYSTORE_TYPE=JKS  # Type of keystore, e.g., JKS, PKCS12
+
+# Alias within keystore that stores the key and certificate
+SSO_SAML_SERVICE_PROVIDER_KEYSTORE_ALIAS=service-provider-cert 
+```
+
+Update Apigee SSO software on the SSO node as usual using the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-setup/bin/update.sh -c sso -f /opt/silent.conf
+```
+
+## New Edge UI
+
+This section lists considerations regarding the Edge UI. For more information, see [The new Edge UI for Private Cloud](/private-cloud/v4.53.01/new-edge-ui).
+
+### Install the Edge UI
+
+After you complete the initial installation, Apigee recommends that you install the Edge UI, which is an enhanced user interface for developers and administrators of Apigee Edge for Private Cloud.
+
+Note that the Edge UI requires that you disable Basic authentication and use an <span class="abbr" title="Identity Provider">IDP</span> such as SAML or LDAP.
+
+For more information, see [Install the new Edge UI](/private-cloud/v4.53.01/install-new-edge-ui).
+
+## Update with Apigee mTLS
+
+To update [Apigee mTLS](/private-cloud/v4.53.01/mtls-intro) , do the following steps:
+
+- [Uninstall Apigee mTLS](/private-cloud/v4.53.01/mtls-uninstall).
+- [Re-install Apigee mTLS](/private-cloud/v4.53.01/mtls-install).
+
+## Rolling back an update
+
+In the case of an update failure, you can try to correct the issue, and then execute `update.sh` again. You can run the update multiple times and it continues the update from where it last left off.
+
+If the failure requires that you roll back the update to your previous version, see [Roll back 4.53.01](/private-cloud/v4.53.01/rollback-45301) for detailed instructions.
+
+**NOTE:** The Edge [all-in-one (AIO)](/private-cloud/v4.53.01/installation-topologies#allinoneinstallation) and [standalone (2-node)](/private-cloud/v4.53.01/installation-topologies#standaloneinstallation2host) topologies are designed for a getting started and prototyping environments, not for production. Therefore, there is no rollback procedure for the [all-in-one (AIO)](/private-cloud/v4.53.01/installation-topologies#allinoneinstallation) and [standalone (2-node)](/private-cloud/v4.53.01/installation-topologies#standaloneinstallation2host) topologies. In the situation where the update of these topologies fails, and retrying the update does not resolve the issue, the easiest option is to do a fresh install of 4.53.01.
+
+## Logging update information
+
+By default, the `update.sh` utility writes log information to:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+/opt/apigee/var/log/apigee-setup/update.log
+```
+
+If the person running the `update.sh` utility does not have access to that directory, it writes the log to the `/tmp` directory as a file named `update_username.log`.
+
+If the person does not have access to `/tmp`, the `update.sh` utility fails.
+
+## Zero-downtime update
+
+A zero-downtime update, or rolling update, lets you update your Edge installation without bringing down Edge.
+
+Zero-downtime update is only possible with a 5-node configuration and larger.
+
+The key to zero-downtime upgrading is to remove each Router, one at a time, from the load balancer. You then update the Router and any other components on the same machine as the Router, and then add the Router back to the load balancer.
+
+1.  Update the machines in the correct order for your installation as described [Order of machine update](#orderofmachineupdate).
+2.  When it is time to update the Routers, select any one Router and make it unreachable, as described in [Enabling/Disabling server (Message Processor/Router) reachability](/private-cloud/v4.53.01/enablingdisabling-server-message-processorrouter-reachability).
+3.  Update the selected Router and all other Edge components on the same machine as the Router. All Edge configurations show a Router and Message Processor on the same node.
+4.  Make the Router reachable again.
+5.  Repeat steps 2 through 4 for the remaining Routers.
+6.  Continue the update for any remaining machines in your installation.
+
+Take care of the following before and after the update:
+
+- On combined Router and Message Processor node:
+  - Before update – perform the following:
+    1.  Make the Router unreachable.
+    2.  Make the Message Processor unreachable.
+  - After update – perform the following:
+    1.  Make the Message Processor reachable.
+    2.  Make the Router reachable.
+- On single Router nodes:
+  - Before update, [make the Router unreachable](/private-cloud/v4.53.01/enablingdisabling-server-message-processorrouter-reachability#disablingenablingreachabilityonarouter).
+  - After update, [make the Router reachable](/private-cloud/v4.53.01/enablingdisabling-server-message-processorrouter-reachability#disablingenablingreachabilityonarouter).
+- On single Message Processor nodes:
+  - Before update, [make the Message Processor unreachable](/private-cloud/v4.53.01/enablingdisabling-server-message-processorrouter-reachability#disablingenablingreachabilityonamessageprocessor).
+  - After update, [make the Message Processor reachable](/private-cloud/v4.53.01/enablingdisabling-server-message-processorrouter-reachability#disablingenablingreachabilityonamessageprocessor).
+
+## Use a silent configuration file
+
+You must pass a silent configuration file to the update command. The silent configuration file should be the same one that you used to install Edge for Private Cloud 4.52.02 or 4.53.00.
+
+## Update to 4.53.01 on a node with an external internet connection
+
+Use the following procedure to update the Edge components on a node:
+
+If present, disable any `cron` jobs configured to perform a repair operation on Cassandra until after the update completes.
+
+Log in to your node as root to install the Edge RPMs.
+
+**NOTE:** While RPM installation requires root access, you can perform Edge configuration without root access.
+
+Disable SELinux as described in [Install the Edge apigee-setup utility](/private-cloud/v4.53.01/install-edge-apigee-setup-utility).
+
+**If you are installing on AWS**, execute the following `yum-configure-manager` commands:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+yum update rh-amazon-rhui-client.noarch
+sudo yum-config-manager --enable rhui-REGION-rhel-server-extras rhui-REGION-rhel-server-optional
+```
+
+If you are currently on Edge 4.52.02 or 4.53.00:
+
+Download the Edge `bootstrap_4.53.01.sh` file to `/tmp/bootstrap_4.53.01.sh`:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://software.apigee.com/bootstrap_4.53.01.sh -o /tmp/bootstrap_4.53.01.sh
+```
+
+Install the Edge 4.53.01 `apigee-service` utility and dependencies by executing the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+sudo bash /tmp/bootstrap_4.53.01.sh apigeeuser=uName apigeepassword=pWord
+```
+
+Where `uName:pWord` are the username and password you received from Apigee. If you omit `pWord`, you will be prompted to enter it.
+
+By default, the installer checks that you have Java 1.8 installed. If you do not, the installer installs it for you.
+
+Use the `JAVA_FIX` option to specify how to handle Java installation. `JAVA_FIX` takes the following values:
+
+- `I`: Install OpenJDK 1.8 (default).
+- `C`: Continue without installing Java.
+- `Q`: Quit. For this option, you must install Java yourself.
+
+Use `apigee-service` to update the `apigee-setup` utility, as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service apigee-setup update
+```
+
+Update the `apigee-validate` utility on the Management Server, as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service apigee-validate update
+```
+
+Update the `apigee-provision` utility on the Management Server, as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service apigee-provision update
+```
+
+Run the `update` utility on your nodes by executing the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-setup/bin/update.sh -c component -f configFile
+```
+
+Do this in the order described in [Order of machine update](#orderofmachineupdate).
+
+Where:
+
+`component` is the Edge component to update. Possible values include:
+
+- `cs`: Cassandra
+- `edge`: All Edge components except Edge UI: Management Server, Message Processor, Router, QPID Server, Postgres Server
+- `ldap`: OpenLDAP
+- `ps`: postgresql
+- `qpid`: qpidd
+- `sso`: Apigee SSO (if you installed SSO)
+- `ue`: New Edge UI
+- `ui`: Classic Edge UI
+- `zk`: Zookeeper
+
+`configFile` is the same configuration file that you used to [define your Edge components](/private-cloud/v4.53.01/install-edge-components-node#installedgecomponents) during the 4.52.02 or 4.53.00 installation.
+
+**NOTE:** The configuration file must be readable by the "apigee" user. To change the owner, use the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+chown apigee:apigee configFile
+```
+
+You can run `update.sh` against all components by setting `component` to "all", but only if you have an Edge all-in-one (AIO) installation profile. For example:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-setup/bin/update.sh -c all -f ./sa_silent_config
+```
+
+Restart the Edge UI components on all nodes running them, if you haven't done so already:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service [edge-management-ui|edge-ui] restart
+```
+
+Test the update by running the `apigee-validate` utility on the Management Server, as described in [Test the install](/private-cloud/v4.53.01/test-install).
+
+If you later decide to roll back the update, use the procedure described in [Roll back 4.53.01](/private-cloud/v4.53.01/rollback-45301).
+
+## Update to 4.53.01 from a local repo
+
+If your Edge nodes are behind a firewall, or in some other way are prohibited from accessing the Apigee repository over the Internet, then you can perform the update from a local repository, or mirror, of the Apigee repo.
+
+After you create a local Edge repository, you have two options for updating Edge from the local repo:
+
+- Create a .tar file of the repo, copy the .tar file to a node, and then update Edge from the .tar file.
+- Install a webserver on the node with the local repo so that other nodes can access it. Apigee provides the Nginx webserver for you to use, or you can use your own webserver.
+
+To update from a local 4.53.01 repo:
+
+1.  Create a local 4.53.01 repo as described in "Create a local Apigee repository" at [Install the Edge apigee-setup utility](/private-cloud/v4.53.01/install-edge-apigee-setup-utility).
+    **NOTE:** If you already have an existing repo, you can add the 4.53.01 repo to it as described in "Update a local Apigee repository" at [Install the Edge apigee-setup utility](/private-cloud/v4.53.01/install-edge-apigee-setup-utility).
+
+2.  **To install apigee-service from a .tar file**:
+    1.  On the node with the local repo, use the following command to package the local repo into a single .tar file named `/opt/apigee/data/apigee-mirror/apigee-4.53.01.tar.gz`:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+        /opt/apigee/apigee-service/bin/apigee-service apigee-mirror package
+        ```
+
+    2.  Copy the .tar file to the node where you want to update Edge. For example, copy it to the `/tmp` directory on the new node.
+
+    3.  On the new node, untar the file to the `/tmp` directory:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+        tar -xzf apigee-4.53.01.tar.gz
+        ```
+
+        This command creates a new directory, named `repos`, in the directory containing the .tar file. For example `/tmp/repos`.
+
+    4.  Install the Edge `apigee-service` utility and dependencies from `/tmp/repos`:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+        sudo bash /tmp/repos/bootstrap_4.53.01.sh apigeeprotocol="file://" apigeerepobasepath=/tmp/repos
+        ```
+
+        Notice that you include the path to the repos directory in this command.
+
+3.  **To install apigee-service using the Nginx webserver:**
+    1.  Configure the Nginx web server as described in "Install from the repo using the Nginx webserver" at [Install the Edge apigee-setup utility](/private-cloud/v4.53.01/install-edge-apigee-setup-utility).
+
+    2.  On the remote node, download the Edge `bootstrap_4.53.01.sh` file to `/tmp/bootstrap_4.53.01.sh`:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+        /usr/bin/curl http://uName:pWord@remoteRepo:3939/bootstrap_4.53.01.sh -o /tmp/bootstrap_4.53.01.sh
+        ```
+
+        Where `uName:pWord` are the username and password you set previously for the repo, and `remoteRepo` is the IP address or DNS name of the repo node.
+
+    3.  On the remote node, install the Edge `apigee-setup` utility and dependencies:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+        sudo bash /tmp/bootstrap_4.53.01.sh apigeerepohost=remoteRepo:3939 apigeeuser=uName apigeepassword=pWord apigeeprotocol=http://
+        ```
+
+        Where `uName:pWord` are the repo username and password.
+
+4.  Use `apigee-service` to update the `apigee-setup` utility, as the following example shows:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-setup update 
+    ```
+
+5.  Update the `apigee-validate` utility on the Management Server, as the following example shows:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-validate update
+    ```
+
+6.  Update the `apigee-provision` utility on the Management Server, as the following example shows:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-provision update
+    ```
+
+7.  Run the `update` utility on your nodes in the order described in [Order of machine update](#orderofmachineupdate):
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c component -f configFile
+    ```
+
+    Where:
+
+    - `component` is the Edge component to update. You typically update the following components:
+      - `cs`: Cassandra
+      - `edge`: All Edge components except Edge UI: Management Server, Message Processor, Router, QPID Server, Postgres Server
+      - `ldap`: OpenLDAP
+      - `ps`: postgresql
+      - `qpid`: qpidd
+      - `sso`: Apigee SSO (if you installed SSO)
+      - `ue` New Edge UI
+      - `ui`: Classic Edge UI
+      - `zk`: Zookeeper
+
+    - `configFile` is the same configuration file that you used to [define your Edge components](/private-cloud/v4.53.01/install-edge-components-node#installedgecomponents) during the 4.52.02 or 4.53.00 installation.
+
+      **NOTE:** The configuration file must be readable by the "apigee" user. To change the owner, use the following command:
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+      chown apigee:apigee configFile
+      ```
+
+    You can run `update.sh` against all components by setting `component` to "all", but only if you have an Edge all-in-one (AIO) installation profile. For example:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c all -f /tmp/sa_silent_config
+    ```
+
+8.  Restart the UI components on all nodes running it, if you haven't done so already:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service [edge-management-ui|edge-ui] restart
+    ```
+
+9.  Test the update by running the `apigee-validate` utility on the Management Server, as described in [Test the install](/private-cloud/v4.53.01/test-install).
+
+If you later decide to roll back the update, use the procedure described in [Roll back 4.53.01](/private-cloud/v4.53.01/rollback-41901).
+
+## Order of machine update
+
+The order that you update the machines in an Edge installation is important:
+
+- You must update all LDAP nodes before updating any other components. You will need to follow special steps to [upgrade LDAP.](/private-cloud/v4.53.01/update-apigee-edge-45202-45301#openldapupgrade)
+- You must update all Cassandra and ZooKeeper nodes. If you’re upgrading from 4.52.02 then, follow the special steps to [upgrade cassandra.](/private-cloud/v4.53.01/update-apigee-edge-45202-45301#cassandraupgrade) You will need to follow the special steps to [upgrade Zookeeper](/private-cloud/v4.53.01/update-apigee-edge-45202-45301#upgrade-zookeeper) for 4.52.02 or 4.53.00.
+- You must upgrade all the Management Servers and Router & Message Processors using the -c edge option to update them.
+- You must upgrade all Postgres nodes following the special steps for [upgrade Postgres.](/private-cloud/v4.53.01/update-apigee-edge-45202-45301#upgradetopostgres)
+- You must update edge-qpid-server & edge-postgres-server components across all data centers.
+- You must upgrade all Qpid nodes.
+- You must upgrade Edge UI nodes and also upgrade the New Edge UI and SSO nodes(if applicable).
+- There is no separate step to update Monetization. It is updated when you specify the -c edge option.
+
+**NOTE:** After you update the Edge UI component, you must restart the Edge UI service, as described in the update installation instructions.
+
+### 1-node standalone upgrade
+
+**To upgrade a 1-node standalone configuration to 4.53.01:**
+
+1.  Update all components:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c all -f configFile
+    ```
+
+2.  *(If you installed `apigee-adminapi`)* Update the `apigee-adminapi` utility:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-adminapi update
+    ```
+
+### 2-node standalone upgrade
+
+Update the following components for a 2-node standalone installation:
+
+See [Installation topologies](/private-cloud/v4.53.01/installation-topologies) for the list of Edge topologies and node numbers.
+
+1.  Update LDAP on machine 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ldap -f configFile
+    ```
+
+2.  Update Cassandra and ZooKeeper on machine 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c cs,zk -f configFile
+    ```
+
+3.  Update Edge components on machine 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c edge -f configFile
+    ```
+
+4.  Update Postgres on machine 2:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ps -f configFile
+    ```
+
+5.  Update Edge components on machine 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c edge -f configFile
+    ```
+
+6.  Update Qpid on Machine 2:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c qpid -f configFile
+    ```
+
+7.  Update the UI on machine 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ui -f configFile
+    ```
+
+8.  *(If you installed `apigee-adminapi`)* Updated the `apigee-adminapi` utility on machine 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-adminapi update
+    ```
+
+9.  *(If you installed Apigee SSO)* Update Apigee SSO on machine 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c sso -f sso_config_file
+    ```
+
+    Where `sso_config_file` is the configuration file you created when you [installed SSO](/private-cloud/v4.53.01/install-and-configure-edge-sso).
+
+10. Restart the Edge UI component on machine 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service edge-ui restart
+    ```
+
+### 5-node upgrade
+
+Update the following components for a 5-node installation:
+
+See [Installation topologies](/private-cloud/v4.53.01/installation-topologies) for the list of Edge topologies and node numbers.
+
+1.  Update LDAP on machine 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ldap -f configFile
+    ```
+
+2.  Update Cassandra and ZooKeeper on machine 1, 2, and 3:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c cs,zk -f configFile
+    ```
+
+3.  Update Edge components on machine 1, 2, 3:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c edge -f configFile
+    ```
+
+4.  Update Postgres on machine 4:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ps -f configFile
+    ```
+
+5.  Update Postgres on machine 5:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ps -f configFile
+    ```
+
+6.  Update Edge components on machine 4, 5:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c edge -f configFile
+    ```
+
+7.  Update Qpid on machine 4:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c qpid -f configFile
+    ```
+
+8.  Update Qpid on machine 5:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c qpid -f configFile
+    ```
+
+9.  Update the Edge UI:
+    - **Classic UI:** If you are using the classic UI, then update the `ui` component on machine 1, as the following example shows:
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+      /opt/apigee/apigee-setup/bin/update.sh -c ui -f configFile
+      ```
+
+    - **New Edge UI:** If you installed the new Edge UI, then update the `ue` component on the appropriate machine (may not be machine 1):
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+      /opt/apigee/apigee-setup/bin/update.sh -c ue -f /opt/silent.conf
+      ```
+
+10. *(If you installed `apigee-adminapi`)* Updated the `apigee-adminapi` utility on machine 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-adminapi update
+    ```
+
+11. *(If you installed Apigee SSO)* Update Apigee SSO on machine 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c sso -f sso_config_file
+    ```
+
+    Where `sso_config_file` is the configuration file you created when you [installed SSO](/private-cloud/v4.53.01/install-and-configure-edge-sso).
+
+12. Restart the UI component:
+    - **Classic UI:** If you are using the classic UI, then restart the `edge-ui` component on machine 1, as the following example shows:
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+      /opt/apigee/apigee-service/bin/apigee-service edge-ui restart
+      ```
+
+    - **New Edge UI:** If you installed the new Edge UI, then restart the `edge-management-ui` component on the appropriate machine (may not be machine 1):
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+      /opt/apigee/apigee-service/bin/apigee-service edge-management-ui restart
+      ```
+
+### 9-node clustered upgrade
+
+Update the following components for a 9-node clustered installation:
+
+See [Installation topologies](/private-cloud/v4.53.01/installation-topologies) for the list of Edge topologies and node numbers.
+
+1.  Update LDAP on machine 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ldap -f configFile
+    ```
+
+2.  Update Cassandra and ZooKeeper on machine 1, 2, and 3:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c cs,zk -f configFile
+    ```
+
+3.  Update Edge components on machine 1, 4, and 5 (Management server, message processor, router) in that order:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c edge -f configFile
+    ```
+
+4.  Update Postgres on machine 8:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ps -f configFile
+    ```
+
+5.  Update Postgres on machine 9:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ps -f configFile
+    ```
+
+6.  Update Edge components on machine 6, 7, 8, and 9 in that order:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c edge -f configFile
+    ```
+
+7.  Update Qpid on machines 6 and 7:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c qpid -f configFile
+    ```
+
+8.  Update either the new UI (`ue`) or classic UI (`ui`) on machine 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c [ui|ue] -f configFile
+    ```
+
+9.  *(If you installed `apigee-adminapi`)* Update the `apigee-adminapi` utility on machine 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-adminapi update
+    ```
+
+10. *(If you installed Apigee SSO)* Update Apigee SSO on machine 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c sso -f sso_config_file
+    ```
+
+    Where `sso_config_file` is the configuration file you created when you [installed SSO](/private-cloud/v4.53.01/install-and-configure-edge-sso).
+
+11. Restart the UI component:
+    - **Classic UI:** If you are using the classic UI, then restart the `edge-ui` component on machine 1, as the following example shows:
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+      /opt/apigee/apigee-service/bin/apigee-service edge-ui restart
+      ```
+
+    - **New Edge UI:** If you installed the new Edge UI, then restart the `edge-management-ui` component on the appropriate machine (may not be machine 1):
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+      /opt/apigee/apigee-service/bin/apigee-service edge-management-ui restart
+      ```
+
+### 13-node clustered upgrade
+
+Update the following components for a 13-node clustered installation:
+
+See [Installation topologies](/private-cloud/v4.53.01/installation-topologies) for the list of Edge topologies and node numbers.
+
+1.  Update LDAP on machine 4 and 5:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ldap -f configFile
+    ```
+
+2.  Update Cassandra and ZooKeeper on machines 1, 2, and 3:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c cs,zk -f configFile
+    ```
+
+3.  Update Edge components on machines 6, 7, 10, and 11 in that order:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c edge -f configFile
+    ```
+
+4.  Update Postgres on machine 8:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ps -f configFile
+    ```
+
+5.  Update Postgres on machine 9:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ps -f configFile
+    ```
+
+6.  Update Edge components on machines 12, 13, 8, and 9 in that order:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c edge -f configFile
+    ```
+
+7.  Update Qpid on machines 12 and 13:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c qpid -f configFile
+    ```
+
+8.  Update either the new UI (`ue`) or classic UI (`ui`) on machines 6 and 7:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c [ui|ue] -f configFile
+    ```
+
+9.  *(If you installed `apigee-adminapi`)* Updated the `apigee-adminapi` utility on machines 6 and 7:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-adminapi update
+    ```
+
+10. *(If you installed Apigee SSO)* Update Apigee SSO on machines 6 and 7:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c sso -f sso_config_file
+    ```
+
+    Where `sso_config_file` is the configuration file you created when you [installed SSO](/private-cloud/v4.53.01/install-and-configure-edge-sso).
+
+11. Restart the UI component:
+    - **Classic UI:** If you are using the classic UI, then restart the `edge-ui` component on machines 6 and 7, as the following example shows:
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+      /opt/apigee/apigee-service/bin/apigee-service edge-ui restart
+      ```
+
+    - **New Edge UI:** If you installed the new Edge UI, then restart the `edge-management-ui` component on machines 6 and 7:
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+      /opt/apigee/apigee-service/bin/apigee-service edge-management-ui restart
+      ```
+
+### 12-node clustered upgrade
+
+Update the following components for a 12-node clustered installation:
+
+See [Installation topologies](/private-cloud/v4.53.01/installation-topologies) for the list of Edge topologies and node numbers.
+
+Update LDAP:
+
+1.  Machine 1 in Data Center 1
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ldap -f configFile
+    ```
+
+2.  Machine 7 in Data Center 2
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ldap -f configFile
+    ```
+
+Update Cassandra and ZooKeeper:
+
+1.  Machines 1, 2 and 3 in Data center 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c cs,zk -f configFile
+    ```
+
+2.  On machines 7, 8, and 9 in Data Center 2:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c cs,zk -f configFile
+    ```
+
+Update Edge components:
+
+On machines 1, 2 and 3 in Data Center 1:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-setup/bin/update.sh -c edge -f configFile
+```
+
+On machines 7, 8, and 9 in Data Center 2
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-setup/bin/update.sh -c edge -f configFile
+```
+
+Update Postgres:
+
+1.  Machine 6 in Data Center 1
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ps -f configFile
+    ```
+
+2.  Machine 12 in Data Center 2
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c ps -f configFile
+    ```
+
+Update Edge components:
+
+1.  Machines 4, 5, 6 in Data Center 1
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c edge -f configFile
+    ```
+
+2.  Machines 10, 11, 12 in Data Center 2
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c edge -f configFile
+    ```
+
+Update qpidd:
+
+1.  Machines 4, 5 in Data Center 1
+    1.  Update `qpidd` on machine 4:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+        /opt/apigee/apigee-setup/bin/update.sh -c qpid -f configFile
+        ```
+
+    2.  Update `qpidd` on machine 5:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+        /opt/apigee/apigee-setup/bin/update.sh -c qpid -f configFile
+        ```
+2.  Machines 10, 11 in Data Center 2
+    1.  Update `qpidd `on machine 10:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+        /opt/apigee/apigee-setup/bin/update.sh -c qpid -f configFile
+        ```
+
+    2.  Update `qpidd `on machine 11:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+        /opt/apigee/apigee-setup/bin/update.sh -c qpid -f configFile
+        ```
+
+Update either the new UI (`ue`) or classic UI (`ui`):
+
+1.  Machine 1 in Data Center 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c [ui|ue] -f configFile
+    ```
+
+2.  Machine 7 in Data Center 2:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c [ui|ue] -f configFile
+    ```
+
+*(If you installed `apigee-adminapi`)* Updated the `apigee-adminapi` utility:
+
+1.  Machine 1 in Data Center 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-adminapi update
+    ```
+
+2.  Machine 7 in Data Center 2:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-adminapi update
+    ```
+
+*(If you installed Apigee SSO)* Update Apigee SSO:
+
+1.  Machine 1 in Data Center 1:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c sso -f sso_config_file
+    ```
+
+2.  Machine 7 in Data Center 2:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-setup/bin/update.sh -c sso -f sso_config_file
+    ```
+
+    Where `sso_config_file` is the configuration file you created when you [installed SSO](/private-cloud/v4.53.01/install-and-configure-edge-sso).
+
+Restart the new Edge UI (`edge-management-ui`) or classic Edge UI (`edge-ui`) component on machines 1 and 7:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service [edge-ui|edge-management-ui] restart
+```
+
+### For a non-standard configuration
+
+If you have a non-standard configuration, then update Edge components in the following order:
+
+1.  LDAP
+2.  Cassandra
+3.  Zookeeper
+4.  Management Server
+5.  Message Processor
+6.  Router
+7.  Postgres
+8.  Edge, meaning the "-c edge" profile on all nodes in the order: nodes with Qpid server, Edge Postgres Server.
+    **NOTE:** If a node has both Qpid server and Edge Postgres Server installed, run the "-c edge" profile step.
+9.  qpidd
+10. Edge UI (either classic or new)
+11. `apigee-adminapi`
+12. Apigee SSO
+
+After you finish updating, be sure to restart the Edge UI component on all machines running it.

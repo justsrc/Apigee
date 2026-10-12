@@ -1,0 +1,163 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The **`gcloud apigee`** CLI enables you to perform the following:
+
+- View API proxies
+- Create and manage API products
+- Deploy and undeploy API proxies, and view deployment details
+- View information about developers and apps
+- List your environments and organizations
+- Manage third-party applications that call Apigee API proxies
+
+In addition, the **`gcloud beta apigee`** CLI enables you to deploy and manage archives in your Apigee environment.
+
+The following sections describe how to install, authorize, and use the `gcloud apigee` and `gcloud beta apigee` CLIs, and optionally set environment variables.
+
+## Before you begin
+
+Ensure that you have met the [prerequisites](/apigee/docs/api-platform/get-started/overview#prerequisites) for using Apigee, including installing the [Google Cloud SDK](/sdk/install).
+
+**Note:** As an alternative, you can use the [Google Cloud Shell](https://console.cloud.google.com/?cloudshell=true). The Google Cloud Shell is a command-line environment that already includes the Google Cloud SDK, so you wouldn't need to install it.
+
+## Installing the gcloud beta apigee components
+
+To access the `gcloud beta apigee` commands, you must install the complete gcloud beta component, as follows:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+gcloud components install beta
+```
+
+To confirm that the beta component has been installed, enter the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+gcloud components list
+```
+
+You should see the beta component in the list, as follows:
+
+Status
+
+Name
+
+ID
+
+Size
+
+Installed
+
+gcloud Beta Commands
+
+beta
+
+\< 1 MiB
+
+For more information, see [Managing SDK components](/sdk/docs/components).
+
+## Authenticate for the gcloud CLI
+
+See [Authenticate for the gcloud CLI](/sdk/docs/authenticate#user-accounts) for instructions on how to authenticate.
+
+For example, to authorize access using your user account and perform other common Cloud SDK setup steps, use the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+gcloud init
+```
+
+Follow the prompts to authenticate the account, grant access permissions, and initialize your Cloud SDK installation, as described in [Initialize the gcloud CLI](/sdk/docs/initialize).
+
+Alternatively, to authorize access without performing any additional set up, use the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+gcloud auth login
+```
+
+Follow the browser-based authorization flow to authenticate the account and grant access permissions.
+
+For more information about authorizing and revoking access to the gcloud CLI, see [Credentials](/sdk/docs/cheatsheet#credentials).
+
+## Setting environment variables for gcloud commands
+
+The Apigee API and gcloud CLI examples provided throughout the documentation use one or more of the environment variables defined in the following table.
+
+By setting the environment variables upfront to meaningful values in your environment, you can copy and paste the example requests to execute them in your own environment with minimal or no modifications.
+
+| Environment variable | Description |
+|----|----|
+| `$API` | Name of your API proxy. |
+| `$APIPRODUCT` | Name of the API product. |
+| `$APP` | ID of an app. |
+| `$DEVELOPER_EMAIL` | Email address of the developer. |
+| `$ENV` | Name of your environment, such as `test` or `prod`. |
+| `$ID` | Resource ID. |
+| `$KEY` | Consumer key. |
+| `$NAME` | Name of your resource. |
+| `$ORG` | Your Apigee organization. |
+| `$REV` | Revision number of your API proxy. |
+| `$SHAREDFLOW` | Name of your shared flow. |
+| `$TYPE` | [Resource type](/apigee/docs/api-platform/develop/resource-files#resourcetypes). |
+
+## Using the gcloud CLI
+
+Use the `gcloud` CLI as follows:
+
+<div>
+
+</div>
+
+``` pretty-print
+gcloud apigee GROUP [GCLOUD_WIDE_FLAG …]
+```
+
+For more information about the available command groups and flags, see [gcloud apigee](/sdk/gcloud/reference/apigee).
+
+For example, the following command lists the API proxies in your organization:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+gcloud apigee apis list --organization=$ORG
+```
+
+The following provides an example of the response for the `my-org` organization:
+
+<div>
+
+</div>
+
+``` pretty-print
+Using Apigee organization `myorg`
+ - hello-world
+ - weather-app
+ 
+```
+
+## More information
+
+For more information, see:
+
+- [gcloud apigee](/sdk/gcloud/reference/apigee)
+- [gcloud beta apigee](/sdk/gcloud/reference/beta/apigee)
+- [gcloud command-line tool overview](/sdk/gcloud)
+- [Managing SDK components](/sdk/docs/components)
+- [Scripting gcloud CLI commands](/sdk/docs/scripting-gcloud)

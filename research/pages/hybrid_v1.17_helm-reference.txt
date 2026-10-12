@@ -1,0 +1,99 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/helm-reference.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/helm-reference.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/helm-reference.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/helm-reference.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/helm-reference.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/helm-reference.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/helm-reference.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/helm-reference.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/helm-reference.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/helm-reference.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/helm-reference.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/helm-reference.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/helm-reference.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/helm-reference.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/helm-reference.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/helm-reference.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/helm-reference.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/helm-reference.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+## Helm supported version
+
+Apigee hybrid supports Helm v3.14.2+.
+
+## Helm charts for Apigee hybrid components
+
+The hybrid components are installed and managed by the following Helm charts. The table is arranged in the order you will typically install them in during a fresh installation.
+
+| Scope | Components | Helm chart |
+| --- | --- | --- |
+| Apigee operator | Apigee operator | apigee-operator |
+| Storage | Cassandra | apigee-datastore |
+| In‑memory storage | Redis | apigee-redis |
+| Reporting | Logger Metrics | apigee-telemetry |
+| Ingress | Apigee Ingress gateway | apigee-ingress-manager |
+| Organization | Apigee Connect Agent MART UDCA Watcher | apigee-org |
+| Environment | Runtime Synchronizer | apigee-env |
+| Environment group | virtualhost | apigee-virtualhost |
+
+**Note:** The hybrid Helm charts depend on the Apigee hybrid Custom Resource Definitions (CRDs) being installed. See [Install the Apigee hybrid CRDs](/apigee/docs/hybrid/v1.17/install-crds) in the Installation guide.
+
+## Recommended upgrade order
+
+We recommend that you upgrade the Helm charts in the following order:
+
+1.  `apigee-operator`
+2.  `apigee-datastore`
+3.  `apigee-telemetry`
+4.  `apigee-redis`
+5.  `apigee-ingress-manager`
+6.  `apigee-org`
+7.  `apigee-env`
+8.  `apigee-virtualhost`
+
+## Service accounts and Helm charts
+
+The following table lists the Google Cloud service accounts used by the Apigee Helm charts:
+
+| Apigee Helm chart | Service account | IAM roles |
+| --- | --- | --- |
+| apigee-operator | apigee-guardrails | Service Usage Viewer |
+| apigee-datastore | apigee-cassandra | Storage Object Admin |
+| apigee-telemetry | apigee-logger apigee-metrics | Logs Writer Monitoring Metric Writer |
+| apigee-org | apigee-mart apigee-watcher apigee-mint-task-scheduler (optional) | Apigee Connect Agent Apigee Runtime Agent No role required |
+| apigee-env | apigee-runtime apigee-synchronizer | No role required Apigee Synchronizer Manager , Storage Object Admin |
+
+See: [About service accounts](/apigee/docs/hybrid/v1.17/sa-about)
+
+------------------------------------------------------------------------
+
+**Note:** The `apigeectl` command-line tool has not been supported since Apigee hybrid v1.11. For information on using `apigeectl` in v1.11, see [apigeectl reference (v1.11)](/apigee/docs/hybrid/v1.11/cli-reference).

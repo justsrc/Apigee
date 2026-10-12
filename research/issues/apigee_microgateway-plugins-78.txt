@@ -1,0 +1,73 @@
+URL: https://github.com/apigee/microgateway-plugins/issues/78
+TITLE: apikeys plugin - cacheKey: false does not disable apikey caching
+STATE: closed state_reason: completed
+AUTHOR: swilliams11 association: CONTRIBUTOR
+CREATED: 2018-07-24T16:48:23Z CLOSED: 2018-07-30T17:30:59Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+There are two ways to disable API Key caching in EM:
+1) set the cacheKey equal to false in the EM config file
+```
+apikeys:
+  cacheKey: false
+```
+
+2) include the following request header.
+```
+Cache-Control: no-cache
+```
+
+The 2nd option works, but the first option does not work. 
+
+The cacheKey variable is set to false by default, so apikey caching should always be disabled.   The reason it is enabled is because the cacheControl variable is "undefined" when there is no cache-control header and !cacheControl changes the value to true, which is why caching is always enabled.  
+```
+                if (cacheKey || (!cacheControl || (cacheControl && cacheControl.indexOf("no-cache") < 0))) { 
+```
+
+We should update this code to remove the !cachedControl condition.  
+
+--- COMMENTS (1) ---
+
+### comment by swilliams11 (association=CONTRIBUTOR) at 2018-07-25T18:29:56Z
+Docs should also be updated with this release. 
+https://docs.apigee.com/api-platform/microgateway/2.5.x/operation-and-configuration-reference-edge-microgateway#usingapikeysecurity-cachingofkeys
+
+**Current Documentation**
+API keys are exchanged for bearer tokens, which are cached. You can disable caching by setting the Cache-Control: no-cache header on incoming requests to Edge Microgateway.
+
+**Should Be**
+API keys are exchanged for bearer tokens, which are not cached by default. You can enable caching by setting cacheKey: true in the Edge Microgateway Configuration file. 
+
+```
+apikeys:
+ cacheKey: true
+ verify_api_key_url: 'https://YOUR_ORG-YOUR_ENV.apigee.net/edgemicro-auth/verifyApiKey' 
+```
+The following Doc update should also be made with this release.
+https://docs.apigee.com/api-platform/microgateway/2.5.x/operation-and-configuration-reference-edge-microgateway#usingapikeysecurity-configuringtheapikeyname
+
+**Current Documentation**
+By default, x-api-key is the name used for the API key header or query parameter. You can change this default in the configuration file, as explained in Making configuration changes. For example, to change the name to apiKey:
+
+```
+oauth:
+ allowNoAuthorization: false
+ allowInvalidAuthorization: false
+ api-key-header: apiKey
+```
+
+**Should Be**
+By default, x-api-key is the name used for the API key header or query parameter. You can change this default in the configuration file, as explained in Making configuration changes. For example, to change the name to apiKey:
+
+```
+oauth:
+ allowNoAuthorization: false
+ allowInvalidAuthorization: false
+apikeys:
+ api-key-header: apiKey
+ verify_api_key_url: 'https://YOURORG-test.apigee.net/edgemicro-auth/verifyApiKey' 
+
+```
+Also note that you must include the verify_api_key_url in the apikeys stanza as shown above.
+

@@ -1,0 +1,252 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The SetOAuthV2Info policy lets you add or update custom attributes associated with an access token. Custom attributes might include things like department name, a customer ID, or a session identifier. See also [Customizing Tokens and Authorization Codes](/apigee/docs/api-platform/security/oauth/customizing-access-tokens).
+
+You can only add or modify custom attributes. You cannot use this policy to change fields like scope, status, expires_in, developer_email, client_id, org_name, or refresh_count. If an attribute already exists, this policy updates it. If it does not exist, the policy adds it. The access token referenced must be valid and in an approved state.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+## Samples
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Basic example
+
+Below is an example policy used to update an OAuth 2.0 access token. The example below locates the access token on the request message by looking for a query parameter called `access_token`. When an access token is presented by a client app, the policy below will locate the access token in the query parameter. It will then update the access token's profile. It adds a custom property called `department.id` to the profile.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SetOAuthV2Info name="SetOAuthV2Info">
+  <AccessToken ref="request.queryparam.access_token"></AccessToken>
+  <Attributes>
+    <Attribute name="department.id" ref="request.queryparam.department_id"></Attribute>
+  </Attributes>
+</SetOAuthV2Info>
+```
+
+**Note:** If an attribute already exists in the access token profile, then it will be updated with the new value in the policy. If an attribute does not exist, then the attribute will be added to the access token's profile.
+
+</div>
+
+</div>
+
+------------------------------------------------------------------------
+
+## Element Reference
+
+The element reference describes the elements and attributes of the SetOAuthV2 policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SetOAuthV2Info async="false" continueOnError="false" enabled="true" name="SetOAuthV2Info-1">
+    <DisplayName>Set OAuth v2.0 Info 1</DisplayName>
+    <AccessToken ref={some-variable}></AccessToken>
+    <Attributes/>
+</SetOAuthV2Info>
+</xml>
+```
+
+## \<SetOAuthV2Info\> attributes
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SetOAuthV2Info async="false" continueOnError="false" enabled="true" name="Set-OAuth-v20-Info-1">
+```
+
+The following table describes attributes that are common to all policy parent elements:
+
+| Attribute | Description | Default | Presence |
+| --- | --- | --- | --- |
+| name | The internal name of the policy. The value of the name attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters. Optionally, use the <DisplayName> element to label the policy in the management UI proxy editor with a different, natural-language name. | N/A | Required |
+| continueOnError | Set to false to return an error when a policy fails. This is expected behavior for most policies. Set to true to have flow execution continue even after a policy fails. See also: Fault rules are triggered ONLY in an error state (about continueOnError) Handling faults within the current flow | false | Optional |
+| enabled | Set to true to enforce the policy. Set to false to turn off the policy. The policy will not be enforced even if it remains attached to a flow. | true | Optional |
+| async | This attribute is deprecated. | false | Deprecated |
+
+## \<DisplayName\> element
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, natural-language name.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+| Default | N/A If you omit this element, the value of the policy's name attribute is used. |
+| --- | --- |
+| Presence | Optional |
+| Type | String |
+
+## \<AccessToken\> element
+
+Identifies the variable where the access token is located. For example, if the access token is attached to request message as a query parameter, specify `request.queryparam.access_token`. You can use any valid variable that references the token. Or, could pass in the literal token string (rare case).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+ <AccessToken ref="request.queryparam.access_token"></AccessToken>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Required |
+| **Type:**     | String   |
+
+### Attributes
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| ref | An access token variable. Typically, retrieved from a flow variable. | N/A | Optional |
+
+## \<Attributes\> element
+
+A set of attributes in the access token profile that will be modified or augmented.
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Required |
+| **Type:**     | N/A      |
+
+## \<Attributes\>/\<Attribute\> element
+
+An individual attribute to update.
+
+The name attribute identifies the custom property of the access token profile to be updated. This example shows how to use a referenced variable value and a static value.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  <Attributes>
+    <Attribute name="department.id" ref="request.queryparam.department_id"></Attribute>
+    <Attribute name="foo">bar</Attribute>
+  </Attributes>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | N/A      |
+
+### Attributes
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| name | The name of the profile attribute to add or change. | N/A |  |
+| ref | The value to assign to the profile attribute. | N/A | Optional |
+
+## Flow variables
+
+On success, the following flow variables will be set:
+
+- `oauthv2accesstoken.{policyName}.access_token`
+- `oauthv2accesstoken.{policyName}.client_id`
+- `oauthv2accesstoken.{policyName}.refresh_count`
+- `oauthv2accesstoken.{policyName}.organization_name`
+- `oauthv2accesstoken.{policyName}.expires_in //--in seconds`
+- `oauthv2accesstoken.{policyName}.refresh_token_expires_in //--in seconds`
+- `oauthv2accesstoken.{policyName}.issued_at`
+- `oauthv2accesstoken.{policyName}.status`
+- `oauthv2accesstoken.{policyName}.api_product_list`
+- `oauthv2accesstoken.{policyName}.token_type`
+- `oauthv2accesstoken.{policyName}.{custom_attribute_name}`
+
+## Schema
+
+Each policy type is defined by an XML schema (`.xsd`). For reference, [policy schemas](https://github.com/apigee/api-platform-samples/tree/master/schemas/policy) are available on GitHub.
+
+## Error reference
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+| Fault code | HTTP status | Cause |
+|----|----|----|
+| `steps.oauth.v2.access_token_expired` | `500` | The access token sent to the policy is expired. |
+| `steps.oauth.v2.invalid_access_token` | `500` | The access token sent to the policy is invalid. |
+| `steps.oauth.v2.InvalidAPICallAsNoApiProductMatchFound` | `401` | Please see [Oauth2.0 Access Token Verification throws "Invalid API call as no apiproduct match found" error](https://discuss.google.dev/t/oauth2-0-access-token-verification-throws-invalid-api-call-as-no-apiproduct-match-found-error/17064) for information about troubleshooting this error. |
+
+### Deployment errors
+
+Refer to the message reported in the UI for information about deployment errors.
+
+### Fault variables
+
+These variables are set when this policy triggers an error at runtime.
+
+**Note:** You an use these variables to create Fault Rule conditions. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``fault_name``"` | `fault_name` is the name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name = "invalid_access_token"` |
+| `oauthV2.``policy_name``.failed` | `policy_name` is the user-specified name of the policy that threw the fault. | `oauthV2.SetTokenInfo.failed = true` |
+| `oauthV2.``policy_name``.fault.name` | `policy_name` is the user-specified name of the policy that threw the fault. | `oauthV2.SetTokenInfo.fault.name = invalid_access_token` |
+| `oauthv2.``policy_name``.fault.cause` | `policy_name` is the user-specified name of the policy that threw the fault. | `oauthV2.SetTokenInfo.cause = Invalid Access Token` |
+
+### Example error response
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "fault": {
+    "faultstring": "Invalid Access Token",
+    "detail": {
+      "errorcode": "keymanagement.service.invalid_access_token"
+    }
+  }
+}
+```
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name=SetOAuthV2Info Faults">
+    <Step>
+        <Name>AM-InvalidTokenResponse</Name>
+        <Condition>(fault.name = "invalid_access_token")</Condition>
+    </Step>
+    <Condition>(oauthV2.failed = true) </Condition>
+</FaultRule>
+```
+
+## Related topics
+
+- [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy)
+- [OAuth home](/apigee/docs/api-platform/security/oauth/oauth-home)
+- [Customizing Tokens and Authorization Codes](/apigee/docs/api-platform/security/oauth/customizing-access-tokens)

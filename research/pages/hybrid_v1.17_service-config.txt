@@ -1,0 +1,79 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/service-config.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/service-config.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/service-config.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/service-config.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/service-config.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/service-config.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/service-config.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/service-config.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/service-config.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/service-config.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/service-config.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/service-config.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/service-config.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/service-config.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/service-config.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/service-config.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/service-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/service-config.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+The Apigee hybrid runtime plane is made up of a variety of services. Each service is deployed on nodes within your Kubernetes cluster, and each one can be configured using the [`overrides.yaml` file](/apigee/docs/hybrid/v1.17/customize-services).
+
+<div class="section expandable">
+
+#### Runtime architectural diagram
+
+The following image shows how each of the runtime services interacts with other services in hybrid:
+
+<img src="/static/apigee/docs/hybrid/v1.17/images/arch-runtime-apigee-connect.png" title="image_tooltip" style="width:90.0%" alt="alt_text" />
+
+</div>
+
+The following table summarizes the runtime services:
+
+| Service | Description | Configuration Object | Implemented As | Scope |
+| --- | --- | --- | --- | --- |
+| Apigee Connect | Apigee Connect allows the Apigee hybrid management plane to connect securely to the MART service in the runtime plane without requiring you to expose the MART endpoint on the internet. If you use Apigee Connect, you do not need to configure the MART ingress gateway with a host alias and an authorized DNS certificate. | connectAgent | Deployment | Kubernetes cluster |
+| Apigee Ingress Gateway | Apigee Ingress gateway routes incoming traffic through that endpoint to the correct message processor. By default, it generates a LoadBalancer service with external endpoints. | apigeeIngressGateway ingressGateways | Deployment | Kubernetes cluster |
+| Apigee Operators | Apigee Operators (AO) creates and updates low level Kubernetes and Istio resources that are required to deploy and maintain the ApigeeDeployment (AD) configuration. For example, the controller carries out the release of message processors and validates the AD configuration before making it persistent in Kubernetes cluster. | ao | Deployment | Kubernetes cluster |
+| Cassandra | Acts as a runtime datastore that provides Apigee local persistent storage for KMS, OAuth, KVMs, and caching for the runtime plane. You can have separate Cassandra rings for KMS, OAuth, KVMs, and caching. apigee-cassandra-default pods are the pods running the Hybrid Cassandra database on a Kubernetes cluster. One or more pods together make a cluster that reads, writes, and stores persistent data for Apigee Hybrid. apigee-cassandra-user-setup pod initializes and configures the users and roles for the Cassandra database. These roles are used by Cassandra and Runtime components to read and write data to the Hybrid Cassandra database. apigee-cassandra-schema-setup pod initializes and configures the database schema of the Hybrid Cassandra database. This pod is for setting up Cassandra keyspace and table definitions with the Hybrid Cassandra database. | cassandra | StatefulSet | Organization (one or more orgs) |
+| Guardrails | Validates that required conditions are satisfied before allowing Runtime services to be created. Guardrails pods are created when you apply the Apigee hybrid charts with Helm install or update commands. | guardrails | Kubernetes pod | Cluster (one or more organizations in the same cluster) |
+| Logger | Extracts log files and sends the data to the monitoring application associated with your Google Cloud account (currently Cloud Operations). | logger | DaemonSet | Cluster (one or more organizations in the same cluster) |
+| Management API for Runtime data (MART) | Exposes an endpoint to administer data entities on the runtime plane, such as KMS (API keys and OAuth tokens), quotas, KVMs, and API products. MART services are scoped to a single organization. | mart | Deployment | Organization |
+| Message Processor | Consumes rolling updates from the management plane to provide API request processing and policy execution on the runtime plane. Each Message Processor is scoped to a single environment. | runtime | Deployment | Environment |
+| Metrics | Collects operations metrics that you can use to monitor the health of hybrid services, to set up alerts, and so on. | metrics | Deployment | Cluster (one or more organizations in the same cluster) |
+| Redis | Redis is used for storing cluster-level rate limit counts used for distributed rate limiting used for SpikeArrest policies that use effectiveCount option to synchronize request counts across message processors. | redis | DaemonSet and Deployment (both) | Cluster (one or more organizations in the same cluster) |
+| Synchronizer | Fetches configuration data about an API environment from the management plane to the runtime plane. A Synchronizer can poll one or more environments in the same or different organizations. | synchronizer | Deployment | Environment |
+| Universal Data Collection Agent (UDCA) | Extracts analytics and deployment status data and sends it to the UAP service in the management plane so that you can access it with the management UI. | udca | Deployment | Environment |
+| Watcher | Watcher periodically executes task in the runtime cluster such as reconfiguring Ingress routes, checking ingress status for new proxy deployments, fetching deployment status from Message Processors and Ingress in order to report status to Management Plane. | watcher | Deployment | Cluster (one or more organizations in the same cluster) |
+
+Most services make socket connections with other internal or external services that you should be aware of. For more information, see [Hybrid ports](/apigee/docs/hybrid/v1.17/ports).

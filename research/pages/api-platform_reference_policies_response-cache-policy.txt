@@ -1,0 +1,698 @@
+# An error occurred.
+
+<div class="submessage">
+
+Unable to execute JavaScript.
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+**Tip:** For a discussion of antipatterns for the Response Cache policy, see [Introduction to antipatterns](/apigee/docs/api-platform/antipatterns/intro).
+
+**Note:** You are limited to attaching this policy once in the proxy request flow and once in the response flow. You cannot use the ResponseCache policy in a shared flow.  
+  
+For a video tutorial showing how to use the policy, see [Tutorial: Implementing Response Caching within Edge](https://discuss.google.dev/t/tutorial-implementing-response-caching-within-edge/17526.html). See also [Error Codes](#ErrorCodes) below.
+
+### Samples
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### 10-minute cache
+
+<span id="Sample1"></span>This sample shows how to have cached responses kept for 10 minutes.
+
+Imagine that you have an API at the following URL:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+http://{org_name}-test.apigee.net/weather/forecastrss?w=23424778
+```
+
+You're using the query parameter `w` as a cache key. Apigee checks the value of the query parameter `w` whenever a request is received. If a valid (that is, non-expired) response is present in the cache, then the cached response message is returned to the requesting client.
+
+Now imagine that you have a ResponseCache policy configured as follows.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ResponseCache name="ResponseCache">
+    <CacheKey>
+        <KeyFragment ref="request.queryparam.w" />
+    </CacheKey>
+    <ExpirySettings>
+        <TimeoutInSeconds>600</TimeoutInSeconds>
+    </ExpirySettings>
+</ResponseCache>
+```
+
+The first time the API proxy receives a request message for the following URL, the response is cached. On the second request within 10 minutes, a cache lookup occurs -- the cached response is returned to the app with no request forwarded to the backend service.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+http://{org_name}-test.apigee.net/weather/forecastrss?w=23424778
+```
+
+**Tip:** HTTP headers and query parameters are automatically populated as variables when a request is received. Any HTTP header is available as `request.header.{header_name}`, for example `request.header.user-agent`. Any query parameter is available as `request.queryparam.{queryparam_name}`, for example `request.queryparam.action`.
+
+</div>
+
+<div class="section">
+
+### Skip cache lookup
+
+The following example shows how to have the cache lookup skipped and have the cache refreshed. See also [this video](https://discuss.google.dev/t/using-the-responsecache-policy-responsibly-or-dont-cache-post-requests/17540.html) on the use of SkipCacheLookup.
+
+The optional SkipCacheLookup condition (if configured) is evaluated in the request path. If the condition evaluates to true, then the cache look up is skipped and the cache is refreshed.
+
+A common use of conditional cache refresh is a condition that defines a specific HTTP header that causes the condition to evaluate to true. A scripted client application could be configured to periodically submit a request with the appropriate HTTP header, explicitly causing the response cache to refresh.
+
+For example, imagine a call to an API at the following URL:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+'http://{org_name}-test.apigee.net/weather/forecastrss?w=23424778' -H "bypass-cache:true"
+```
+
+Now imagine the following ResponseCache policy configured on that proxy. Note that the bypass-cache condition is set to true.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ResponseCache name="ResponseCache">
+    <CacheKey>
+        <KeyFragment ref="request.queryparam.w" />
+    </CacheKey>
+    <!-- Explicitly refresh the cached response -->
+    <SkipCacheLookup>request.header.bypass-cache = "true"</SkipCacheLookup>
+    <ExpirySettings>
+        <TimeoutInSeconds>600</TimeoutInSeconds>
+    </ExpirySettings>
+</ResponseCache>
+```
+
+For more information about conditions, see [Flow variables and conditions](/apigee/docs/api-platform/fundamentals/flow-variables-and-conditions).
+
+</div>
+
+</div>
+
+## Element reference
+
+The element reference describes the elements and attributes of the policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ResponseCache async="false" continueOnError="false" enabled="true" name="Response-Cache-1">
+    <DisplayName>Response Cache 1</DisplayName>
+    <Properties/>
+    <CacheKey>
+        <Prefix/>
+        <KeyFragment ref="request.uri" />
+    </CacheKey>
+    <Scope>Exclusive</Scope>
+    <ExpirySettings>
+        <ExpiryDate/>
+        <TimeOfDay/>
+        <TimeoutInSeconds ref="flow.variable.here">300</TimeoutInSeconds>
+    </ExpirySettings>
+    <CacheResource>cache_to_use</CacheResource>
+    <CacheLookupTimeoutInSeconds/>
+    <ExcludeErrorResponse/>
+    <SkipCacheLookup/>
+    <SkipCachePopulation/>
+    <UseAcceptHeader/>
+    <UseResponseCacheHeaders/>
+</ResponseCache>
+```
+
+## \<ResponseCache\> attributes
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ResponseCache async="false" continueOnError="false" enabled="true" name="Response-Cache-1">
+```
+
+The following table describes attributes that are common to all policy parent elements:
+
+| Attribute | Description | Default | Presence |
+| --- | --- | --- | --- |
+| name | The internal name of the policy. The value of the name attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters. Optionally, use the <DisplayName> element to label the policy in the management UI proxy editor with a different, natural-language name. | N/A | Required |
+| continueOnError | Set to false to return an error when a policy fails. This is expected behavior for most policies. Set to true to have flow execution continue even after a policy fails. See also: Fault rules are triggered ONLY in an error state (about continueOnError) Handling faults within the current flow | false | Optional |
+| enabled | Set to true to enforce the policy. Set to false to turn off the policy. The policy will not be enforced even if it remains attached to a flow. | true | Optional |
+| async | This attribute is deprecated. | false | Deprecated |
+
+## \<DisplayName\> element
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, natural-language name.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+| Default | N/A If you omit this element, the value of the policy's name attribute is used. |
+| --- | --- |
+| Presence | Optional |
+| Type | String |
+
+## \<CacheKey\> element
+
+Configures a unique pointer to a piece of data stored in the cache.
+
+Cache keys are limited to a size of 2 KB.
+
+**Note:** You can further augment the cache key configured here by using values from response headers. For more information, see [Configuring a cache key](#configuring_cache_key).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<CacheKey>
+    <Prefix>string</Prefix>
+    <KeyFragment ref="variable_name" />
+    <KeyFragment>literal_string</KeyFragment>
+</CacheKey>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Required |
+| **Type:**     | N/A      |
+
+`<CacheKey>` constructs the name of each piece of data stored in the cache. The key is often set using a value from entity headers or query params. In those cases, you would have the element's ref attribute specify a variable containing the key value.
+
+At runtime, `<KeyFragment>` values are prepended with either the `<Scope>` element value or `<Prefix>` value. For example, the following results in a cache key of `UserToken__apiAccessToken__`\<*value_of_client_id\>*:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<CacheKey>
+    <Prefix>UserToken</Prefix>
+    <KeyFragment>apiAccessToken</KeyFragment>
+    <KeyFragment ref="request.queryparam.client_id" />
+</CacheKey>
+```
+
+You use the `<CacheKey>` element in conjunction with `<Prefix>` and `<Scope>`. For more information, see [Working with cache keys](/apigee/docs/api-platform/reference/policies/working-cachekeys).
+
+## \<CacheLookupTimeoutInSeconds\> element
+
+Specifies the number of seconds after which an unsuccessful cache lookup will be considered a cache miss. If this occurs, flow resumes along the cache-miss path.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<CacheLookupTimeoutInSeconds>30</CacheLookupTimeoutInSeconds>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | 30       |
+| **Presence:** | Optional |
+| **Type:**     | Integer  |
+
+## \<CacheResource\> element
+
+Specifies the cache where messages should be stored. Omit this element to use the included shared cache. You should specify a `CacheResource` by name if you wish to be able to administratively clear entries contained in the cache. For more on that, see [Caches API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.caches).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<CacheResource>cache_to_use</CacheResource>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+## \<CacheKey\>/\<KeyFragment\> element
+
+Specifies a value that should be included in the cache key, creating a namespace for matching requests to cached responses.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<KeyFragment ref="variable_name"/>
+<KeyFragment>literal_string</KeyFragment>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | N/A      |
+
+This can be a key (a static name that you provide) or a value (a dynamic entry set by referencing a variable). All specified fragments combined (plus the prefix) are concatenated to create the cache key.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<KeyFragment>apiAccessToken</KeyFragment>
+<KeyFragment ref="request.queryparam.client_id" />
+```
+
+You use the `<KeyFragment>` element in conjunction with `<Prefix>` and `<Scope>`. For more information, see [Working with cache keys](/apigee/docs/api-platform/reference/policies/working-cachekeys).
+
+### Attributes
+
+| Attribute | Type | Default | Required | Description |
+|----|----|----|----|----|
+| ref | string |  | No | The variable from which to get the value. Should not be used if this element contains a literal value. |
+
+## \<CacheKey\>/\<Prefix\> element
+
+Specifies a value to use as a cache key prefix.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Prefix>prefix_string</Prefix>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+Use this value instead of `<Scope>` when you want to specify your own value rather than a `<Scope>` -enumerated value. If defined, `<Prefix>` prepends the cache key value for entries written to the cache. A `<Prefix>` element value overrides a `<Scope>` element value.
+
+You use the `<Prefix>` element in conjunction with `<CacheKey>` and `<Scope>`. For more information, see [Working with cache keys](/apigee/docs/api-platform/reference/policies/working-cachekeys).
+
+## \<ExcludeErrorResponse\> element
+
+This policy can cache HTTP responses with **any** status code. That means both success and error responses can be cached, including 2xx and 3xx status codes.
+
+Set this element to `true` (default) to exclude the error responses. Set it to `false` if you do not want to exclude cache target responses with HTTP error status codes.
+
+**Note:** Status codes from 200 to 205 are still cached when this element is set to `true`; these are the HTTP status codes that Apigee counts as "success" codes, and you cannot exclude them with this element.
+
+For a discussion of Response Cache patterns in which this element is useful, see [Introduction to antipatterns](/apigee/docs/api-platform/antipatterns/intro).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExcludeErrorResponse>true</ExcludeErrorResponse>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | true     |
+| **Presence:** | Optional |
+| **Type:**     | Boolean  |
+
+## \<ExpirySettings\> element
+
+Specifies when a cache entry should expire. When present, `<TimeoutInSeconds>` overrides both `<TimeOfDay>` and `<ExpiryDate>`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExpirySettings>
+  <TimeOfDay ref="time_variable">expiration_time</TimeOfDay>
+  <TimeoutInSeconds ref="duration_variable">seconds_until_expiration</TimeoutInSeconds>
+  <ExpiryDate ref="date_variable">expiration_date</ExpiryDate>
+</ExpirySettings>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Required |
+| **Type:**     | N/A      |
+
+## *\<ExpirySettings\>*/\<ExpiryDate\> element
+
+Specifies the date on which a cache entry should expire. Use the form `mm-dd-yyyy`. When present, this element's sibling, `<TimeoutInSeconds>`, overrides `<ExpiryDate>`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExpirySettings>
+    <ExpiryDate ref="{date_variable}">expiration_date</ExpiryDate>
+</ExpirySettings>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+### Attributes
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExpiryDate ref="" />
+```
+
+|  |  |  |  |  |
+|----|----|----|----|----|
+| Attribute | Description | Default | Presence | Type |
+| ref | The variable from which to get the value. Should not be used if this element contains a literal value. | N/A | Optional | String |
+
+## \<ExpirySettings\>/\<TimeOfDay\> element
+
+The time of day at which a cache entry should expire. Use the form `hh:mm:ss` . When present, this element's sibling, `<TimeoutInSeconds>`, overrides `<TimeOfDay>`.
+
+Enter time of day in the format HH:mm:ss, where HH represents the hour on a 24-hour clock. For example, 14:30:00 for 2:30 in the afternoon.
+
+For the time of day, the default locale and time zone will vary depending on where the code is running (which isn't knowable when you configure the policy).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExpirySettings>
+    <TimeOfDay ref="time_variable">expiration_time</TimeOfDay>
+</ExpirySettings>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+### Attributes
+
+| Attribute | Description | Default | Presence | Type |
+| --- | --- | --- | --- | --- |
+| ref | Variable with the expiration time value. | N/A | Optional | String |
+
+## \<ExpirySettings\>/\<TimeoutInSec\> element
+
+**Note:** Deprecated. Use [`TimeoutInSeconds`](#TimeoutInSecondsElement). If both the `TimeoutInSec` and `TimeoutInSeconds` elements are present, Apigee uses `TimeoutInSeconds`.
+
+The number of seconds after which a cache entry should expire.
+
+## \<ExpirySettings\>/\<TimeoutInSeconds\> element
+
+The number of seconds after which a cache entry should expire. When present, this element overrides its siblings, `<TimeOfDay>` and `<ExpiryDate>`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExpirySettings>
+    <TimeoutInSeconds ref="duration_variable">seconds_until_expiration</TimeoutInSeconds>
+</ExpirySettings>
+```
+
+**Note:** Provide a default timeout value to use if the ref does not receive a value from the `duration_variable`.
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+### Attributes
+
+| Attribute | Description | Default | Presence | Type |
+| --- | --- | --- | --- | --- |
+| ref | Variable with the timeout value. | N/A | Optional | String |
+
+## \<Scope\> element
+
+Enumeration used to construct a prefix for a cache key when a `<Prefix>` element is not provided in the `<CacheKey>` element.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Scope>scope_enumeration</Scope>
+```
+
+|               |             |
+|---------------|-------------|
+| **Default:**  | "Exclusive" |
+| **Presence:** | Optional    |
+| **Type:**     | String      |
+
+The `<Scope>` setting determines a cache key that is prepended according to the `<Scope>` value. For example, a cache key would take the following form when scope is set to `Exclusive` : *orgName\_\_envName\_\_apiProxyName\_\_proxy\|TargetName\_\_* \[ *serializedCacheKey* \].
+
+If a `<Prefix>` element is present in `<CacheKey>`, it supersedes a `<Scope>` element value. Valid values include the enumerations below.
+
+You use the `<Scope>` element in conjunction with `<CacheKey>` and `<Prefix>`. For more information, see [Working with cache keys](/apigee/docs/api-platform/reference/policies/working-cachekeys).
+
+### Acceptable values
+
+| Scope Value | Description |
+| --- | --- |
+| Global | Cache key is shared across all API proxies deployed in the environment. Cache key is prepended in the form orgName __ envName __. If you define a <CacheKey> entry with the <KeyFragment> apiAccessToken and a <Global> scope, each entry is stored as orgName__envName__apiAccessToken , followed by the serialized value of the access token. For an API proxy deployed in an environment called 'test' in an organization called 'apifactory', access tokens would be stored under the following cache key: apifactory__test__apiAccessToken . |
+| Application | API proxy name is used as the prefix. Cache key is prepended in the form orgName__envName__apiProxyName . |
+| Proxy | ProxyEndpoint configuration is used as the prefix. Cache key is prepended in the form orgName__envName__apiProxyName__proxyEndpointName . |
+| Target | TargetEndpoint configuration is used as the prefix. Cache key prepended in the form orgName__envName__apiProxyName__targetEndpointName . |
+| Exclusive | Default. This is the most specific, and therefore presents minimal risk of namespace collisions within a given cache. Prefix is one of two forms: If the policy is attached to the ProxyEndpoint flow, prefix is of the form ApiProxyName_ProxyEndpointName . If the policy is attached at TargetEndpoint , prefix is of the form ApiProxyName_TargetName . Cache key prepended in the form orgName__envName__apiProxyName__proxyNameITargetName For example, the full string might look like this: apifactory__test__weatherapi__default__apiAccessToken . |
+
+## \<SkipCacheLookup\> element
+
+Defines an expression that, if it evaluates to true at runtime, specifies that cache lookup should be skipped and the cache should be refreshed. See also [Using the ResponseCache policy video](https://discuss.google.dev/t/using-the-responsecache-policy-responsibly-or-dont-cache-post-requests/17540.html) on the use of `SkipCacheLookup`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SkipCacheLookup>variable_condition_expression</SkipCacheLookup>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+From the following example, if the bypass-cache variable is set to true in an incoming header, cache lookup is skipped and the cache is refreshed.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SkipCacheLookup>request.header.bypass-cache = "true"</SkipCacheLookup>
+```
+
+## \<SkipCachePopulation\> element
+
+Defines an expression that, if it evaluates to true at runtime, specifies that a write to the cache should be skipped. See also [this video](https://discuss.google.dev/t/using-the-responsecache-policy-responsibly-or-dont-cache-post-requests/17540.html) on the use of `SkipCachePopulation`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SkipCachePopulation>variable_condition_expression</SkipCachePopulation>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+For example, the following would skip the cache write if the response status code was 400 or higher:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<SkipCachePopulation>response.status.code >= 400</SkipCachePopulation>
+```
+
+## \<UseAcceptHeader\> element
+
+Set to `true` to have a response cache entry's cache key appended with values from response Accept headers.
+
+Apigee uses the `Accept`, `Accept-Encoding`, `Accept-Language` and `Accept-Charset` request headers when calculating the cache key. This approach prevents a client from getting a media type they did not ask for.
+
+For example, consider if two requests come in from the same URL, where the first request accepts gzip and the second does not. The first request will be cached, and the cached entry will (probably) be a gzipped response. The second request will read the cached value and may then return a gzipped entry to a client that is not capable of reading gzip.
+
+See [Configuring a cache key](#configuring_cache_key) for more.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<UseAcceptHeader>false</UseAcceptHeader>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | false    |
+| **Presence:** | Optional |
+| **Type:**     | Boolean  |
+
+## \<UseResponseCacheHeaders\> element
+
+Set to `true` to have HTTP response headers considered when setting the "time to live" (TTL) of the response in the cache. When this is true, Apigee considers the values of the following response headers, comparing the values with those set by `<ExpirySettings>` when setting time to live:
+
+- `Cache-Control s-maxage`
+- `Cache-Control max-age`
+- `Expires`
+
+See [Setting cache entry expiration](#setting_cache_entry_expiration) for more details.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<UseResponseCacheHeaders>false</UseResponseCacheHeaders>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | false    |
+| **Presence:** | Optional |
+| **Type:**     | Boolean  |
+
+## Usage notes
+
+The maximum size for each cached object is 256 KB. (For detailed information on how Apigee processes cache, see [Cache internals](/apigee/docs/api-platform/cache/cache-internals).)
+
+Through configuration in the ResponseCache policy, you can have Apigee include HTTP response headers in setting cache entry expiration and cache keys. This section describes you can use the policy with headers to manage cache expiration and cache keys.
+
+For more about how Apigee handles response headers with the ResponseCache policy, see [Support for HTTP response headers](/apigee/docs/api-platform/cache/http-response-caching).
+
+**Note:** For other best practice suggestions related to the ResponseCache policy, see [Best practices for API proxy design and development](/apigee/docs/api-platform/fundamentals/best-practices-api-proxy-design-and-development).
+
+### Setting cache entry expiration
+
+As with the [PopulateCache policy](/apigee/docs/api-platform/reference/policies/populate-cache-policy), you can set a response cache entry's expiration (its time to live) using the `<ExpirySettings>` element. In the ResponseCache policy, you can also have Apigee consider response headers when they're present.
+
+To use response headers, you set the [`<UseResponseCacheHeaders>`](#UseResponseCacheHeaders) element value to true. That setting causes Apigee to consider the response headers, compare them with the value set by `<ExpirySettings>`, then use the lowest value between the two. When considering the response headers, Apigee chooses the value available as described in the following:
+
+![Diagram that shows what happens when you set UseResponseCacheHeaders to true.](/static/apigee/docs/api-platform/images/responsecache_ttl3.png)
+
+For example, imagine a response is cached with the following values:
+
+- No `Cache-Control s-maxage` value
+- A `Cache-Control max-age` value of 300
+- An `Expires` date in three days
+- An `<ExpirySettings>` `TimeoutInSeconds` value of 600.
+
+In this case, the `Cache-Control` `max-age` value would be used for the TTL because it is lower than the `<ExpirySettings>` value and because there is no `Cache-Control s-maxage` value (which takes precedence over `max-age`).
+
+### Configuring a cache key
+
+As with general purpose cache policies such as the [PopulateCache policy](/apigee/docs/api-platform/reference/policies/populate-cache-policy), with ResponseCache you use `<CacheKey>` and `<Scope>` elements to configure cache key creation for cache entries. With ResponseCache you can also make cache keys more meaningful by having response Accept headers appended to key values.
+
+For general information about configuring cache keys, see [Working with cache keys](/apigee/docs/api-platform/reference/policies/working-cachekeys). For information about using Accept headers, see [`<UseAcceptHeader>`](#UseAcceptHeader).
+
+### About cache encryption
+
+**Apigee and Apigee hybrid (version 1.4 and later):** Cache and KVM data are always encrypted.
+
+## Flow variables
+
+The following predefined Flow variables are populated when a ResponseCache policy is executed. For more information about Flow variables, see [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference).
+
+| Variables | Type | Permission | Description |
+|----|----|----|----|
+| `responsecache.{policy_name}.cachename` | String | Read-Only | Returns the cache used in the policy |
+| `responsecache.{policy_name}.cachekey` | String | Read-Only | Returns the key used |
+| `responsecache.{policy_name}.cachehit` | Boolean | Read-Only | True if the policy execution is successful |
+| `responsecache.{policy_name}.invalidentry` | Boolean | Read-Only | True if the cache entry in not valid |
+
+## <span id="ErrorCodes"></span>Error codes
+
+This section describes the error messages and flow variables that are set when this policy triggers an error. This information is important to know if you are developing fault rules for a proxy. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Error code prefix
+
+N/A
+
+### Runtime errors
+
+This policy does not throw any runtime errors.
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+**Tip:** Need help resolving an error? Click *build* in the Fix column for detailed troubleshooting information.
+
+| Error name | Cause | Fix |
+|----|----|----|
+| `InvalidTimeout` | If the `<CacheLookupTimeoutInSeconds>` element of the `ResponseCache` policy is set to a negative number, then the deployment of the API proxy fails. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/responsecache-deployment-errors#invalidtimeout) |
+| `InvalidCacheResourceReference` | This error occurs if the `<CacheResource>` element in a `ResponseCache` policy is set to a name that does not exist in the environment where the API proxy is being deployed. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/responsecache-deployment-errors#invalidcacheresourcereference) |
+| `ResponseCacheStepAttachmentNotAllowedReq` | This error occurs if the same `ResponseCache` policy is attached to multiple request paths within any flows of an API proxy. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/responsecache-deployment-errors#responsecachestepattachmentnotallowedreq) |
+| `ResponseCacheStepAttachmentNotAllowedResp` | This error occurs if the same `ResponseCache` policy is attached to multiple response paths within any flows of an API proxy. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/responsecache-deployment-errors#responsecachestepattachmentnotallowedresp) |
+| `InvalidMessagePatternForErrorCode` | This error occurs if either the `<SkipCacheLookup>` or the `<SkipCachePopulation>` element in a `ResponseCache` policy contains an invalid condition. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/responsecache-deployment-errors#invalidmessagepatternforerrorcode) |
+| `CacheNotFound` | This error occurs if the specific cache mentioned in the error message has not been created on a specific Message Processor component. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/responsecache-deployment-errors#cachenotfound) |
+
+### Fault variables
+
+N/A
+
+### Example error response
+
+N/A
+
+## <span id="schema"></span>Schema
+
+Each policy type is defined by an XML schema (`.xsd`). For reference, [policy schemas](https://github.com/apigee/api-platform-samples/tree/master/schemas/policy) are available on GitHub.

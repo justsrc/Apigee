@@ -1,0 +1,74 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+In this step, you will test the API proxy you just created and deployed.
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Management <span aria-label="and then">\></span> Environments** page.
+
+    <a href="https://console.cloud.google.com//apigee/environments" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Environments</a>
+
+2.  Make sure the same Google Cloud project where you created the API proxy is selected from the dropdown at the top of the page.
+
+3.  Select the **Environment Groups** tab.
+
+4.  In the table, find the row for the environment group that contains the environment where **myproxy** is deployed. The hostname appears in the **Host Names** column of this row. For example: `mydomain.com`.
+
+5.  Call the API proxy. The way you call the proxy depends on whether your Apigee instance is configured for external or internal network access. If you aren't sure how your Apigee instance is configured, contact your Apigee administrator.
+    - **External access**: If your Apigee instance is configured for external access, call the proxy as follows:
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+      curl https://YOUR_ENV_GROUP_HOSTNAME/myproxy
+      ```
+
+      Where `YOUR_ENV_GROUP_HOSTNAME` is the hostname you obtained in the previous step.
+
+      For example:
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+      curl https://mydomain.com/myproxy
+      ```
+
+      Here's another example, where the wildcard DNS service `nip.io` is used for the host:
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+      curl https://198.51.100.251.nip.io/myproxy
+      ```
+
+    - **Internal access**: If your Apigee instance is configured for internal network access, some extra steps are needed to obtain access to the internal load balancer and its IP address. For details, see [Calling a proxy with internal-only access](/apigee/docs/api-platform/get-started/accessing-internal-proxies).
+
+6.  A successful call to the proxy returns the following output:
+
+    <div>
+
+    </div>
+
+    ```
+    Hello, Guest!
+    ```
+
+If you get an error, check the following:
+
+- If you see a timeout error (unusual), try [undeploying and redeploying](/apigee/docs/api-platform/deploy/ui-deploy-new) the new API proxy.
+- If the host cannot be resolved, for example you receive a 404 error, double check that you are using the correct hostname and proxy name.
+- Make sure the environment group hostname is configured with the Cloud Load Balancer. See [Determining whether the Cloud Load Balancer is configured for a hostname](/apigee/docs/api-platform/fundamentals/environmentgroups-working-with#determining-whether-the-cloud-load-balancer-is-configured-for-a-hostname).
+- If you see a TLS/SSL error, such as an SSL handshake error, contact your DNS provider to make sure the DNS A record for the hostname is configured properly. Make sure the record has the IP of the load balancer that was created during Apigee provisioning. If you're not sure what the IP should be, see [Determining whether the Cloud Load Balancer is configured for a hostname](/apigee/docs/api-platform/fundamentals/environmentgroups-working-with#determining-whether-the-cloud-load-balancer-is-configured-for-a-hostname).
+- If you see a TLS/SSL certificate error, the SSL certificate associated with the load balancer might not have the correct hostname, and therefore is being rejected. The certificate was created during the provisioning process. The troubleshooting steps in [Determining whether the Cloud Load Balancer is configured for a hostname](/apigee/docs/api-platform/fundamentals/environmentgroups-working-with#determining-whether-the-cloud-load-balancer-is-configured-for-a-hostname) show you how to locate and inspect the certificate.
+- If you're unable to resolve the problem, contact the person who provisioned Apigee for further assistance.
+
+In the next step, you will change the target endpoint of the API proxy.
+
+<a href="/apigee/docs/api-platform/get-started/create-proxy" class="button">1</a> <a href="/apigee/docs/api-platform/get-started/deploy-proxy" class="button">2</a> <a href="/apigee/docs/api-platform/get-started/test-proxy" class="button button-disabled">3</a> <a href="/apigee/docs/api-platform/get-started/change-endpoint" class="button button-primary">(NEXT) Step 4: Change the target endpoint</a> <a href="/apigee/docs/api-platform/get-started/add-policy" class="button">5</a>

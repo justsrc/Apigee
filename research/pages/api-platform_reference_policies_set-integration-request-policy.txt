@@ -1,0 +1,1148 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The SetIntegrationRequest policy lets you create a request object for an integration that you want to run. In the policy, you must configure the details of the API trigger and the input parameters required to run the integration. When you run the SetIntegrationRequest policy, it creates a request object and saves it in a flow variable. The request object has all the information required to run the integration. At this stage, the integration is still not run. To run the integration, you must either call the [IntegrationCallout policy](/apigee/docs/api-platform/reference/policies/integration-callout-policy) or set an [IntegrationEndpoint](/apigee/docs/api-platform/reference/api-proxy-configuration-reference#integrationendpoint). Both the IntegrationCallout policy and IntegrationEndpoint require the request object to run the integration.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+**Note**:
+
+- You can run only integrations that have an API trigger.
+- To run an integration, you must use the SetIntegrationRequest policy along with the IntegrationCallout policy or the IntegrationEndpoint.
+
+## `<SetIntegrationRequest>`
+
+Specifies the SetIntegrationRequest policy.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | Complex type |
+| Parent Element | N/A |
+| Child Elements | <ApiTrigger> <DisplayName> <IntegrationName> <IntegrationRegion> <Parameters> <ProjectId> <Request> <ScheduleTime> |
+
+The following table provides a high-level description of the child elements of the [`<SetIntegrationRequest>`](/apigee/docs/api-platform/reference/policies/set-integration-request-policy#setintegrationrequest) element:
+
+| Child Element | Required? | Description |
+|----|----|----|
+| [`<ApiTrigger>`](/apigee/docs/api-platform/reference/policies/set-integration-request-policy#apitrigger) | Required | Name of the API trigger to call in the integration. |
+| [`<DisplayName>`](/apigee/docs/api-platform/reference/policies/set-integration-request-policy#displayname) | Optional | A custom name for the policy. |
+| [`<IntegrationName>`](/apigee/docs/api-platform/reference/policies/set-integration-request-policy#integrationname) | Optional | Name of the integration to run. |
+| [`<IntegrationRegion>`](/apigee/docs/api-platform/reference/policies/set-integration-request-policy#integrationregion) | Required | Name of the region where the integration exists. |
+| [`<Parameters>`](/apigee/docs/api-platform/reference/policies/set-integration-request-policy#parameters) | Optional | Input parameters of the integration. |
+| [`<ProjectId>`](/apigee/docs/api-platform/reference/policies/set-integration-request-policy#projectid) | Optional | Name of the Google Cloud Project which has the integration that you want to run. |
+| [`<Request>`](/apigee/docs/api-platform/reference/policies/set-integration-request-policy#request) | Optional | Name of the flow variable to save the request object. |
+| [`<ScheduleTime>`](/apigee/docs/api-platform/reference/policies/set-integration-request-policy#scheduletime) | Optional | The time at which the integration must be run. |
+
+The SetIntegrationRequest policy uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<SetIntegrationRequest continueOnError="[true|false]" enabled="[true|false]" name="Set-Integration-Request">
+  <DisplayName>POLICY_DISPLAY_NAME</DisplayName>
+  <ProjectId ref="FLOW_VARIABLE_NAME">GOOGLE_CLOUD_PROJECT_ID</ProjectId>
+  <IntegrationName ref="FLOW_VARIABLE_NAME">INTEGRATION_NAME</IntegrationName>
+  <IntegrationRegion ref="FLOW_VARIABLE_NAME">INTEGRATION_REGION</IntegrationRegion>
+  <ApiTrigger ref="FLOW_VARIABLE_NAME">API_TRIGGER_NAME</ApiTrigger>
+  <ScheduleTime>PARAMETER_VALUE</ScheduleTime>
+  <Parameters>
+    <Parameter name="PARAMETER_NAME" type="PARAMETER_DATATYPE" ref="FLOW_VARIABLE_NAME">PARAMETER_VALUE</Parameter>
+    <ParameterArray name="ARRAY_NAME" type="ARRAY_DATATYPE" ref="FLOW_VARIABLE_NAME>
+      <Value ref="FLOW_VARIABLE_NAME>PARAMETER_VALUE</Value>
+      <Value ref="FLOW_VARIABLE_NAME>PARAMETER_VALUE</Value>
+      <Value ref="FLOW_VARIABLE_NAME>PARAMETER_VALUE</Value>
+    </ParameterArray>
+  </Parameters>
+  <Request>FLOW_VARIABLE_NAME</Request>
+</SetIntegrationRequest>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+The following example shows the SetIntegrationRequest policy definition:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<SetIntegrationRequest continueOnError="false" enabled="true" name="Set-Integration-Request">
+  <DisplayName>Set Integration Request Policy</DisplayName>
+  <ProjectId ref="my_projectid_var">apigee_staging_1</ProjectId>
+  <IntegrationName ref="my_integration_ref">integration_1</IntegrationName>
+  <IntegrationRegion ref="my_integration_ref">asia-east1</IntegrationRegion>
+  <ApiTrigger ref="my_api_trigger_ref">API-Trigger-2</ApiTrigger>
+  <ScheduleTime>2022-01-15T01:30:15Z</ScheduleTime>
+  <Parameters>
+    <Parameter name="my_str_param" type="string" ref="flow_var_1">someText</Parameter>
+    <ParameterArray name="my_array_param" type="integer" ref="flow_var_2">
+      <Value ref="flow_var_3">1</Value>
+      <Value ref="flow_var_4">2</Value>
+      <Value ref="flow_var_5">3</Value>
+    </ParameterArray>
+  </Parameters>
+  <Request>my_request_var</Request>
+</SetIntegrationRequest>
+```
+
+</div>
+
+</div>
+
+This element has the following attributes that are common to all policies:
+
+**Attribute**
+
+**Default**
+
+**Required?**
+
+**Description**
+
+`name`
+
+N/A
+
+**Required**
+
+The internal name of the policy. The value of the `name` attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters.
+
+Optionally, use the `<DisplayName>` element to label the policy in the management UI proxy editor with a different, natural-language name.
+
+`continueOnError`
+
+false
+
+Optional
+
+Set to `false` to return an error when a policy fails. This is expected behavior for most policies. Set to `true` to have flow execution continue even after a policy fails. See also:
+
+- [Fault rules are triggered ONLY in an error state (about continueOnError)](/apigee/docs/api-platform/fundamentals/fault-handling#multiplefaultrulesandexecutionlogic-faultrulesaretriggeredonlyinanerrorstateaboutcontinueonerror)
+- [Handling faults within the current flow](/apigee/docs/api-platform/fundamentals/fault-handling#continueonerror)
+
+`enabled`
+
+true
+
+Optional
+
+Set to `true` to enforce the policy. Set to `false` to *turn off* the policy. The policy will not be enforced even if it remains attached to a flow.
+
+`async`  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray">not_interested</span></span>
+
+false
+
+Deprecated
+
+This attribute is deprecated.
+
+## Child element reference
+
+This section describes the child elements of [`<SetIntegrationRequest>`](/apigee/docs/api-platform/reference/policies/set-integration-request-policy#setintegrationrequest).
+
+### `<DisplayName>`
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, more natural-sounding name.
+
+The `<DisplayName>` element is common to all policies.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional. If you omit `<DisplayName>`, the value of the policy's `name` attribute is used. |
+| **Type** | String |
+| **Parent Element** | \<`PolicyElement`\> |
+| **Child Elements** | None |
+
+The `<DisplayName>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>POLICY_DISPLAY_NAME</DisplayName>
+  ...
+</PolicyElement>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>My Validation Policy</DisplayName>
+</PolicyElement>
+```
+
+</div>
+
+</div>
+
+The `<DisplayName>` element has no attributes or child elements.
+
+### `<ProjectId>`
+
+Specifies the name of the Google Cloud Project.
+
+Apigee assigns the value you specify for this element to the `integration.project.id` flow variable.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | String |
+| Parent Element | <SetIntegrationRequest> |
+| Child Elements | None |
+
+The `<ProjectId>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ProjectId ref="FLOW_VARIABLE_NAME">GOOGLE_CLOUD_PROJECT_ID</ProjectId>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example configures the policy to use the `my_projectid_var` flow variable to fetch the project ID, and if the flow variable fails to resolve at runtime, use `apigee_staging_1` as the project ID:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ProjectId ref="my_projectid_var">apigee_staging_1</ProjectId>
+```
+
+</div>
+
+</div>
+
+The following table describes the attributes of `<ProjectId>`:
+
+| Attribute | Required? | Type | Description |
+| --- | --- | --- | --- |
+| ref | Optional | String | Specifies the flow variable from which Apigee should read the Google Cloud Project ID. You can set the <ProjectId> element in one of the following ways: <ProjectId>val</ProjectId> : Use val as the project ID. <ProjectId ref="refval"/> : Resolve refval dynamically to determine the project ID. Apigee reports an exception if the resolved project ID is invalid or if refval is unresolved. <ProjectId ref="refval">val</ProjectId> : Resolve refval dynamically to determine the project ID. Apigee reports an exception if the resolved project ID is invalid. If refval does not resolve, use val as the project ID. |
+
+### `<IntegrationName>`
+
+Specifies the integration to run.
+
+Apigee assigns the value you specify for this element to the `integration.name` flow variable.
+
+The integration name must meet the following naming requirements:
+
+- Must start and end with letters or numbers.
+- Cannot have spaces.
+- Cannot have two consecutive dash or underscore characters.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | String |
+| Parent Element | <SetIntegrationRequest> |
+| Child Elements | None |
+
+The `<IntegrationName>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IntegrationName ref="FLOW_VARIABLE_NAME">INTEGRATION_NAME</IntegrationName>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example configures the policy to use the `my_integration_ref` flow variable to fetch the integration name, and if the flow variable fails to resolve at runtime, use `integration_1` as the integration name:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IntegrationName ref="my_integration_ref">integration_1</IntegrationName>
+```
+
+</div>
+
+</div>
+
+The following table describes the attributes of `<IntegrationName>`:
+
+| Attribute | Required? | Type | Description |
+| --- | --- | --- | --- |
+| ref | Optional | String | Specifies the flow variable from which Apigee should read the integration name. You can set the <IntegrationName> element in one of the following ways: <IntegrationName>val</IntegrationName> : Use val as the integration name. <IntegrationName ref="refval"/> : Resolve refval dynamically to determine the integration name. Apigee reports an exception if the resolved integration name is invalid or if refval is unresolved. <IntegrationName ref="refval">val</IntegrationName> : Resolve refval dynamically to determine the integration name. Apigee reports an exception if the resolved integration name is invalid. If refval does not resolve, use val as the integration name. |
+
+### `<IntegrationRegion>`
+
+Specifies the region where integration exists.
+
+At runtime, Apigee assigns the element's value to the `integration.region` flow variable, creates a region-based target URL and stores the URL in the `integration.target.url` flow variable.
+
+The region-based target URL has the following format: `https://``integration.region``-integrations.googleapis.com`
+
+The integration region must be supported by Application Integration. For information about the supported regions of Application Integration, see [Supported regions](/application-integration/docs/locations).
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | String |
+| Parent Element | <SetIntegrationRequest> |
+| Child Elements | None |
+
+The `<IntegrationRegion>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IntegrationRegion ref="FLOW_VARIABLE_NAME">INTEGRATION_REGION</IntegrationRegion>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example configures the policy to use the `my_integration_region_ref` flow variable to fetch the integration region, and if the flow variable fails to resolve at runtime, `asia-east1` is used as the region of the integration:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IntegrationRegion ref="my_integration_region_ref">asia-east1</IntegrationRegion>
+```
+
+</div>
+
+</div>
+
+The following table describes the attributes of `<IntegrationRegion>`:
+
+| Attribute | Required? | Type | Description |
+| --- | --- | --- | --- |
+| ref | Optional | String | Specifies the flow variable from which Apigee should read the integration region. You can set the <IntegrationRegion> element in one of the following ways: <IntegrationRegion>val</IntegrationRegion> : Use val as the integration region. <IntegrationRegion ref="refval"/> : Resolve refval dynamically to determine the integration region. Apigee reports an exception if the resolved integration region is invalid or if refval is unresolved. <IntegrationRegion ref="refval">val</IntegrationRegion> : Resolve refval dynamically to determine the integration region. Apigee reports an exception if the resolved integration region is invalid. If refval does not resolve, use val as the integration region. |
+
+### `<ApiTrigger>`
+
+Specifies the API trigger to run.
+
+You must specify the API trigger name in the `api_trigger/``API_TRIGGER_NAME` format.
+
+Apigee assigns the value you specify for this element to the `integration.api.trigger` flow variable.
+
+If you have specified the `<IntegrationName>`, only the API trigger of that integration is run. However, if you have not specified the `<IntegrationName>`, all the integrations that have the specified API trigger are run.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | String |
+| Parent Element | <SetIntegrationRequest> |
+| Child Elements | None |
+
+The `<ApiTrigger>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ApiTrigger ref="FLOW_VARIABLE_NAME">API_TRIGGER_NAME</ApiTrigger>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example configures the policy to use the `my_api_trigger_ref` flow variable to fetch the API trigger name, and if the flow variable fails to resolve at runtime, use `api_trigger/API-Trigger-2` as the API trigger name:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ApiTrigger ref="my_api_trigger_ref">api_trigger/API-Trigger-2</ApiTrigger>
+```
+
+</div>
+
+</div>
+
+The following table describes the attributes of `<ApiTrigger>`:
+
+| Attribute | Required? | Type | Description |
+| --- | --- | --- | --- |
+| ref | Optional | String | Specifies the flow variable from which Apigee should read the API trigger name. You can set the <ApiTrigger> element in one of the following ways: <ApiTrigger>val</ApiTrigger> : Use val as the API trigger name. <ApiTrigger ref="refval"/> : Resolve refval dynamically to determine the trigger name. Apigee reports an exception if the resolved API trigger name is invalid or if refval is unresolved. <ApiTrigger ref="refval">val</ApiTrigger> : Resolve refval dynamically to determine the trigger name. Apigee reports an exception if the resolved API trigger name is invalid. If refval does not resolve, use val as the trigger name. |
+
+### `<ScheduleTime>`
+
+Specifies the time at which the integration must run.
+
+If the time is less or equal to the current time, the integration runs immediately. You must specify the time in the `yyyy-mm-ddThh:mm:ssZ` format where Z is the UTC timezone. For example, if you specify `2022-01-15T01:30:15Z`, the integration is scheduled to run on 1-15-2022 at 1:30:15 UTC. You can also specify the timezone using an offset from UTC. For example, if you specify `2022-01-15T01:30:15-08:00`, the integration is scheduled to run on 1-15-2022 at 1:30:15 PST. For more information about the time format, see [Combined date and time representations](https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations).
+
+**Note:** You can schedule the time only if you are running your integrations in [asynchronous mode](/apigee/docs/api-platform/reference/policies/integration-callout-policy#asyncexecution). If you are running your integration in synchronous mode and if you specify a schedule time, the execution of the integration fails and you will get a runtime error.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | String |
+| Parent Element | <SetIntegrationRequest> |
+| Child Elements | None |
+
+The `<ScheduleTime>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ScheduleTime>PARAMETER_VALUE</ScheduleTime>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example schedules the integration to run at `2022-01-15T01:30:15Z`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ScheduleTime>2022-01-15T01:30:15Z</ScheduleTime>
+```
+
+</div>
+
+</div>
+
+### `<Parameters>`
+
+Specifies the input parameters required to run the integration.
+
+You can specify individual parameter(s) or parameter array(s).
+
+- To specify an individual parameter, use the [`<Parameter>`](/apigee/docs/api-platform/reference/policies/set-integration-request-policy#parameter) element.
+- To specify a parameter array, use the [`<ParameterArray>`](/apigee/docs/api-platform/reference/policies/set-integration-request-policy#parameterarray) element.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex type |
+| Parent Element | <SetIntegrationRequest> |
+| Child Elements | <Parameter> <ParameterArray> |
+
+The following table describes the attributes of `<Parameters>`:
+
+| Attribute | Required? | Type | Description |
+| --- | --- | --- | --- |
+| substitutionVariableChar | Optional | Char | Lets you set custom delimiters to pass flow variable values as template arguments in the <Parameter> child element. Note: substitutionVariableChar can pass template arguments only for parameters of JSON or String datatype, and for parameter arrays of String array datatype. |
+
+The `<Parameters>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Parameters substitutionVariableChar="SUBSTITUTION_CHAR">
+  <Parameter name="PARAMETER_NAME" type="PARAMETER_DATATYPE" ref="FLOW_VARIABLE_NAME" >PARAMETER_VALUE</Parameter>
+  <Parameter name="PARAMETER_NAME" type="PARAMETER_DATATYPE">SUBSTITUTION_CHAR FLOW_VARIABLE_NAME SUBSTITUTION_CHAR</Parameter>
+  <ParameterArray name="ARRAY_NAME" type="ARRAY_DATATYPE ref="FLOW_VARIABLE_NAME"">
+    <Value>PARAMETER_VALUE</Value>
+    <Value ref="FLOW_VARIABLE_NAME"/>
+    <Value ref="FLOW_VARIABLE_NAME">PARAMETER_VALUE</Value>
+  </ParameterArray>
+</Parameters>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example initializes the `my_str_param` parameter and the `my_array_param` parameter array:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Parameters substitutionVariableChar="#">
+  <Parameter name="my_str_param" type="string" ref="flow_var_1">someText</Parameter>
+  <Parameter name="strVar" type="string">#flowvar1#</Parameter>
+  <ParameterArray name="my_array_param" type="integer" ref="flow_var_2">
+    <Value>1</Value>
+    <Value ref="flow_var_3"/>
+    <Value ref="flow_var_4">3</Value>
+  </ParameterArray>
+</Parameters>
+```
+
+</div>
+
+</div>
+
+Apigee treats empty [`<Parameter>`](/apigee/docs/api-platform/reference/policies/set-integration-request-policy#parameter) and [`<ParameterArray>`](/apigee/docs/api-platform/reference/policies/set-integration-request-policy#parameterarray) elements as `null` values. For example, declarations like `<Parameter></Parameter>` and `<ParameterArray></ParameterArray>` are treated as `null` values.
+
+**Note:** If a parameter has a JSON value, ensure that the JSON is valid. For example, if your JSON payload contains double quotes ("), escape each double quotes with a backslash (\\.
+
+#### `<Parameter>`
+
+Specifies an input parameter.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | String |
+| Parent Element | <Parameters> |
+| Child Elements | None |
+
+You can specify the parameter value in the following ways:
+
+- **\<Parameter name="my_param" type="string"\>val\</Parameter\>**: Use **val** as the parameter value. If **val** is invalid, Apigee reports an exception.
+- **\<Parameter name="my_param" type="string" ref="refval"/\>**: Resolve the **refval** flow variable at runtime and use its value. Apigee reports an exception if the resolved **refval** value is invalid or if **refval** is unresolved.
+- **\<Parameter name="my_param" type="string" ref="refval"\>val\</Parameter\>**: Resolve the **refval** flow variable at runtime and use its value. Apigee reports an exception if the resolved **refval** value is invalid. If **refval** does not resolve, Apigee uses **val** as the parameter value.
+- **\<Parameter name="my_param" type="json"\>{"name":"\$#flowval#\$"}\</Parameter\>**: Use `$#``FLOW_VARIABLE_NAME``#$` to pass flow variable values as a template argument in Parameter. Apigee resolves the **flowval** flow variable at runtime and uses its value. An exception is reported if the resolved **flowval** value is invalid.
+  **Note:** You can only pass template arguments for parameters of JSON or String datatype, and for parameter arrays of String array datatype.
+  **Warning:** Template arguments enclosed within `{` and `}` are no longer identified as flow variables.
+- **\<Parameter name="my_param" type="json"\>{"name":"`SUBSTITUTION_CHAR` flowval `SUBSTITUTION_CHAR`"}\</Parameter\>**: Where `SUBSTITUTION_CHAR` denotes the the value specified for the [`substitutionVariableChar`](#para) attribute of the `<Parameters>` parent element. Apigee resolves the **flowval** flow variable at runtime and uses its value. An exception is reported if the resolved **flowval** value is invalid.
+  **Note:** **substitutionVariableChar** can pass template arguments only for parameters of JSON or String datatype, and for parameter arrays of String array datatype.
+  **Important:** We recommend you to add and update the [`substitutionVariableChar`](#para) attribute in the `<Parameters>` parent element for any existing delimiters in your Set Integration Request policy.
+
+The `<Parameter>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+##### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Parameters substitutionVariableChar="SUBSTITUTION_CHAR">
+  <Parameter name="PARAMETER_NAME" type="PARAMETER_DATATYPE">PARAMETER_VALUE</Parameter>
+  <Parameter name="PARAMETER_NAME" type="PARAMETER_DATATYPE" ref="FLOW_VARIABLE_NAME"/>
+  <Parameter name="PARAMETER_NAME" type="PARAMETER_DATATYPE" ref="FLOW_VARIABLE_NAME">PARAMETER_VALUE</Parameter>
+  <Parameter name="PARAMETER_NAME" type="json">$#FLOW_VARIABLE_NAME#$</Parameter>
+  <Parameter name="PARAMETER_NAME" type="PARAMETER_DATATYPE">SUBSTITUTION_CHAR FLOW_VARIABLE_NAME SUBSTITUTION_CHAR</Parameter>
+</Parameters>
+```
+
+</div>
+
+<div class="section">
+
+##### Example 1
+
+The following example declares `my_str_param` parameter as a string and sets the value to `someText`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Parameters>
+  <Parameter name="my_str_param" type="string">someText</Parameter>
+</Parameters>
+```
+
+</div>
+
+<div class="section">
+
+##### Example 2
+
+The following example declares `my_double_param` parameter as a double and assigns the value of the `flow_var` flow variable to the parameter.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Parameters>
+  <Parameter name="my_double_param" type="double" ref="flow_var"/>
+</Parameters>
+```
+
+</div>
+
+<div class="section">
+
+##### Example 3
+
+The following example sets value to the `my_int_param_1` integer parameter.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Parameters>
+  <Parameter name="my_int_param_1" type="integer" ref="flow_var_1">96</Parameter>
+</Parameters>
+```
+
+In this example, if the `flow_var_1` flow variable resolves successfully, `my_int_param_1` is set to the value of the flow variable. However, if `flow_var_1` fails to resolve, `my_int_param_1` is set to `96`.
+
+</div>
+
+<div class="section">
+
+##### Example 4
+
+The following example sets values for the `my_json_param_1` and `my_json_param_2` JSON parameters.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Parameters>
+  <Parameter name="my_json_param_1" type="json" ref="flow_var_1">{name:"Apple", color:"Red"}</Parameter>
+  <Parameter name="my_json_param_2" type="json">{name:"Banana", color:"Yellow"}</Parameter>
+</Parameters>
+```
+
+In this example, if the `flow_var_1` flow variable resolves successfully, `my_json_param_1` is set to the value of the `flow_var_1` flow variable. However, if the `flow_var_1` fails to resolve, `my_json_param_1` is set to `{name:"Apple", color:"Red"}`. The `my_json_param_2` parameter is set to `{name:"Banana", color:"Yellow"}` as there is no `ref` attribute specified.
+
+</div>
+
+<div class="section">
+
+##### Example 5
+
+The following example sets the value for the `template_json_param` JSON parameter using the flow variable value passed in the default template.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  <Parameters>
+    <Parameter name="template_json_param" type="json">{"name":"$#flow_var_1#$"}</Parameter>
+</Parameters>
+  
+```
+
+In this example, if the `flow_var_1` flow variable resolves successfully, `template_json_param` is set to the value of the `flow_var_1` flow variable. However, if the `flow_var_1` fails to resolve, Apigee throws an exception.
+
+</div>
+
+<div class="section">
+
+##### Example 6
+
+The following example sets the value for the `template_json_param` JSON parameter using the **substitutionVariableChar** attribute.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Parameters substitutionVariableChar="#">
+    <Parameter name="template_json_param" type="json">{"name":"#flow_var_1#"}</Parameter>
+</Parameters>
+  
+```
+
+In this example, if the `flow_var_1` flow variable resolves successfully, `template_json_param` is set to the value of the `flow_var_1` flow variable. However, if the `flow_var_1` fails to resolve, Apigee throws an exception.
+
+</div>
+
+</div>
+
+The following table describes the attributes of `<Parameter>`:
+
+| Attribute | Required? | Type | Description |
+| --- | --- | --- | --- |
+| name | Required | String | Name of the parameter. |
+| type | Required | String | Data type of the parameter. The supported types are integer , string , boolean , double , and json . |
+| ref | Optional | String | Specifies the flow variable from which Apigee should read the parameter value. Apigee uses the following criteria to set the parameter value: If the flow variable resolves at runtime and is valid, Apigee uses the value of the flow variable. If the flow variable resolves at runtime but is invalid, Apigee reports an exception. If the flow variable doesn't resolve at runtime, Apigee uses the <Parameter> element value. If the element value is invalid, Apigee reports an error. |
+
+#### `<ParameterArray>`
+
+Specifies an input parameter array.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | Complex type |
+| Parent Element | <Parameters> |
+| Child Elements | <Value> |
+
+The `<Parameters>` element can have multiple `<ParameterArray>` elements within it. For a parameter array you can set the value of the array elements either by specifying the actual value or by specifying a flow variable in the `ref` attribute. If you specify a flow variable, the array elements are set to the value of the flow variable. The examples in this section describe the various ways in which you can configure the `<ParameterArray>` element.
+
+The `<ParameterArray>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+##### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Parameters>
+  <ParameterArray name="ARRAY_NAME" type="ARRAY_DATATYPE" ref="FLOW_VARIABLE_NAME">
+    <Value ref="FLOW_VARIABLE_NAME"/>
+    <Value ref="FLOW_VARIABLE_NAME">PARAMETER_VALUE</Value>
+    <Value>PARAMETER_VALUE</Value>
+  </ParameterArray>
+  <ParameterArray name="ARRAY_NAME" type="ARRAY_DATATYPE" ref="FLOW_VARIABLE_NAME"/>
+  <ParameterArray name="ARRAY_NAME" type="ARRAY_DATATYPE">
+    <Value ref="FLOW_VARIABLE_NAME"/>
+    <Value ref="FLOW_VARIABLE_NAME">PARAMETER_VALUE</Value>
+    <Value>PARAMETER_VALUE</Value>
+  </ParameterArray>
+<Parameters/>
+```
+
+</div>
+
+<div class="section">
+
+##### Example-1
+
+The following example declares `my_array_param` as an integer array and sets the value of the array elements to `1`, `2`, and `3`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Parameters>
+  <ParameterArray name="my_array_param" type="integer">
+    <Value>1</Value>
+    <Value>2</Value>
+    <Value>3</Value>
+  </ParameterArray>
+<Parameters/>
+```
+
+</div>
+
+<div class="section">
+
+##### Example-2
+
+The following example declares `my_array_param` as a double array where:
+
+- First element is set to the value of the `flow_var_1` flow variable.
+- Second element is set to `3.0`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Parameters>
+  <ParameterArray name="my_array_param" type="double">
+    <Value ref="flow_var_1"/>
+    <Value>3.0</Value>
+  </ParameterArray>
+<Parameters/>
+```
+
+</div>
+
+<div class="section">
+
+##### Example-3
+
+The following example declares `my_array_param` as a boolean array and sets it to the value of the `flow_var_1` flow variable.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Parameters>
+  <ParameterArray name="my_array_param" type="boolean" ref="flow_var_1">
+    <Value>true</Value>
+    <Value>false</Value>
+    <Value>false</Value>
+  </ParameterArray>
+<Parameters/>
+```
+
+In this example, if `flow_var_1` resolves successfully, `my_array_param` is set to the values of the `flow_var_1` array. However, if `flow_var_1` fails to resolve, the `my_array_param` array is set to the values of the `Value` elements.
+
+</div>
+
+<div class="section">
+
+##### Example-4
+
+The following example declares `my_array_param` as a JSON array and sets it to the value of the `flow_var_1` flow variable.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Parameters>
+  <ParameterArray name="my_array_param" type="json" ref="flow_var_1"/>
+<Parameters/>
+```
+
+In this example, if `flow_var_1` resolves successfully, `my_array_param` is set to the values of the `flow_var_1` array. However, if `flow_var_1` fails to resolve, Apigee reports an exception.
+
+</div>
+
+<div class="section">
+
+##### Example-5
+
+The following example declares `my_array_param` as a string array and sets it to the values of the `flow_var_1` flow variable.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Parameters>
+  <ParameterArray name="my_array_param" type="string" ref="flow_var_1">
+    <Value ref="flow_var_2"/>
+    <Value>test_string</Value>
+  </ParameterArray>
+<Parameters/>
+```
+
+In this example, if `flow_var_1` resolves successfully, `my_array_param` is set to the values of the `flow_var_1` array. Only if `flow_var_1` fails to resolve, `my_array_param` is set to the values specified in the `<Value>` elements.
+
+</div>
+
+</div>
+
+The following table describes the attributes of `<ParameterArray>`:
+
+| Attribute | Required? | Type | Description |
+| --- | --- | --- | --- |
+| name | Required | String | Name of the parameter array. |
+| type | Required | String | Data type of the parameter array. The supported types are integer , string , boolean , and double . |
+| ref | Optional | String | Specifies the flow variable from which Apigee should read the array values. Apigee uses the following criteria to set the parameter value: If the flow variable resolves at runtime and is valid, Apigee uses the value of the flow variable. If the flow variable resolves at runtime but is invalid, Apigee reports an exception. If the flow variable doesn't resolve at runtime, Apigee uses the values specified in the <Value> elements. |
+
+##### `<Value>`
+
+Specifies the value of an array element.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Optional |
+| Type | String |
+| Parent Element | <ParameterArray> |
+| Child Elements | None |
+
+Each element of the array must be a separate `<Value>` element. You can specify the value in the following ways:
+
+- **\<Value\>val\</Value\>**: Use **val** as the element value. If **val** is invalid, Apigee reports an exception.
+- **\<Value ref="refval"/\>**: Resolve the **refval** flow variable at runtime and use its value. Apigee reports an exception if the resolved **refval** value is invalid or if **refval** is unresolved.
+- **\<Value ref="refval"\>val\</Value\>**: Resolve the **refval** flow variable at runtime and use its value. Apigee reports an exception if the resolved **refval** value is invalid. If **refval** does not resolve, Apigee uses **val** as the element value.
+- **\<Value\>val1 \$#flowval#\$\</Value\>**: Use `$#``FLOW_VARIABLE_NAME``#$` to pass flow variable values as a template argument in Value. Apigee resolves the **flowval** flow variable at runtime and uses its value. An exception is reported if the resolved **flowval** value is invalid.
+  **Note:** You can only specify template arguments as Value for parameter arrays of string data type.
+  **Warning:** Template arguments enclosed within `{` and `}` are no longer identified as flow variables.
+
+The `<Value>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+###### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ParameterArray name="ARRAY_NAME" type="ARRAY_DATATYPE" ref="FLOW_VARIABLE_NAME">
+  <Value>PARAMETER_VALUE</Value>
+  <Value ref="FLOW_VARIABLE_NAME"/>
+  <Value ref="FLOW_VARIABLE_NAME">PARAMETER_VALUE</Value>
+</ParameterArray>
+```
+
+</div>
+
+<div class="section">
+
+###### Example 1
+
+The following example declares `my_array_param` as an integer parameter array with values `1`, `2`, and `3`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ParameterArray name="my_array_param" type="integer">
+  <Value>1</Value>
+  <Value>2</Value>
+  <Value>3</Value>
+</ParameterArray>
+```
+
+</div>
+
+<div class="section">
+
+###### Example 2
+
+The following example declares `my_array_param` as a string parameter array with values of the `flow_var_1` and `flow_var_2` flow variables:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ParameterArray name="my_array_param" type="string">
+  <Value ref="flow_var_1"/>
+  <Value ref="flow_var_2"/>
+</ParameterArray>
+```
+
+</div>
+
+<div class="section">
+
+###### Example 3
+
+The following example declares `my_array_param` as a string parameter array:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ParameterArray name="my_array_param" type="string">
+   <Value ref="flow_var_1">string_1</Value>
+   <Value ref="flow_var_2">string_2</Value>
+</ParameterArray>
+```
+
+In this example, if the flow variable resolves successfully, the array element value is set to the value of the `flow_var_1` flow variable. However, if `flow_var_1` fails to resolve, the array element value is set to `string_1`.
+
+</div>
+
+<div class="section">
+
+##### Example 4
+
+The following example sets the value for the `template_strArray_param` string array parameter using the flow variable value passed in a template.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+  <Parameters>
+    <ParameterArray name="template_strArray_param" type="string">
+    <Value>apple $#flow_var_1#$</Value>
+    </ParameterArray>
+  </Parameters>
+  
+```
+
+In this example, if the flow variable resolves successfully, the array element value is set to the value of the `flow_var_1` flow variable. However, if `flow_var_1` fails to resolve, Apigee throws an exception.
+
+</div>
+
+</div>
+
+The following table describes the attributes of `<Value>`:
+
+| Attribute | Required? | Type | Description |
+| --- | --- | --- | --- |
+| ref | Optional | String | Specifies the flow variable from which Apigee should read the parameter value. Apigee uses the following criteria to set the parameter value: If the flow variable resolves at runtime and is valid, Apigee uses the value of the flow variable. If the flow variable resolves at runtime but is invalid, Apigee reports an exception. If the flow variable doesn't resolve at runtime, Apigee uses the <Value> element's value. If the element value is invalid, Apigee reports an error. |
+
+**Note:** The `<Value>` element can't be empty.
+
+### `<Request>`
+
+Specifies the flow variable name for saving the request.
+
+**Note:** If you are using an integration endpoint instead of the [IntegrationCallout policy](/apigee/docs/api-platform/reference/policies/integration-callout-policy) policy, do not specify the `<Request>` element in the SetIntegrationRequest policy.
+
+After the policy executes, it creates a new [request message](/apigee/docs/api-platform/reference/variables-reference#message) object, and saves the object in the `FLOW_VARIABLE_NAME` variable which you can query to read the request.
+
+If you do not specify a flow variable name, the policy saves the request in the [request message](/apigee/docs/api-platform/reference/variables-reference#request), overriding the existing request message if any.
+
+| Default Value | request |
+| --- | --- |
+| Required? | Optional |
+| Type | String |
+| Parent Element | <SetIntegrationRequest> |
+| Child Elements | None |
+
+The `<Request>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Request>FLOW_VARIABLE_NAME</Request>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example saves the request object in the `my_request_var` flow variable:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Request>my_request_var</Request>
+```
+
+</div>
+
+</div>
+
+## Error codes
+
+This section describes the fault codes, error messages, and the fault variables set by Apigee when this policy triggers an error. This information is essential if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+| Fault code | HTTP status | Cause |
+| --- | --- | --- |
+| steps.setintegrationrequest.EmptyParameterArray | 500 | This error occurs when the <ParameterArray> element has the name and type attributes, but doesn't have the ref attribute or a <Value> element. |
+| steps.setintegrationrequest.EmptyParameterArrayValue | 500 | This error occurs when the <Value> element is empty and the ref attribute is not set. |
+| steps.setintegrationrequest.InvalidResolvedFlowVariable | 500 | This error occurs when the flow variable specified in the ref attribute of an element fails to resolve to a valid value. For the ProjectId , IntegrationName , or the ApiTrigger elements, this error occurs if the flow variable resolves to a null, an empty string, or an invalid data type. A valid value for these elements is as follows: ProjectId : See the naming requirements for Project ID in the Before you begin section. IntegrationName : See the naming requirements for the IntegrationName element. ApiTrigger : The name should start with api_trigger/ . For the ParameterArray element, this error occurs if the flow variable resolves to an empty string. |
+| steps.setintegrationrequest.MismatchedTypeAndResolvedRef | 500 | This error occurs when the flow variable specified in the ref attribute of the <Parameter> element resolves, but the flow variable value's data type doesn't match the data type specified in the type attribute. |
+| steps.setintegrationrequest.MismatchedTypeAndResolvedRefOfParameterArray | 500 | This error occurs when the flow variable specified in the ref attribute of the <ParameterArray> element resolves, but the flow variable value's data type doesn't match with the data type specified in the type attribute. |
+| steps.setintegrationrequest.MismatchedTypeAndResolvedRefOfParameterArrayValue | 500 | This error occurs when the flow variable specified in the ref attribute of the <Value> element resolves, but the flow variable value's data type doesn't match with the data type specified in the type attribute of its parent element ( <ParameterArray> ). |
+| steps.setintegrationrequest.RequestVariableNotMessageType | 500 | This error occurs when the flow variable specified by the Request element is not of message type. |
+| steps.setintegrationrequest.RequestVariableNotRequestMessageType | 500 | This error occurs when the flow variable specified by the Request element is not of Request message type. |
+| steps.setintegrationrequest.UnresolvedVariable | 500 | This error occurs when Apigee can't resolve the flow variables specified in the <Parameter> , <ParameterArray> , or the <Value> elements. |
+
+### Fault variables
+
+Whenever there are execution errors in a policy, Apigee generates error messages. You can view these error messages in the error response. Many a time, system generated error messages might not be relevant in the context of your product. You might want to customize the error messages based on the type of error to make the messages more meaningful.
+
+To customize the error messages, you can use either fault rules or the RaiseFault policy. For information about differences between fault rules and the RaiseFault policy, see [FaultRules vs. the RaiseFault policy](/apigee/docs/api-platform/fundamentals/fault-handling#rulesvraisefault). You must check for conditions using the `Condition` element in both the fault rules and the RaiseFault policy. Apigee provides fault variables unique to each policy and the values of the fault variables are set when a policy triggers runtime errors. By using these variables, you can check for specific error conditions and take appropriate actions. For more information about checking error conditions, see [Building conditions](/apigee/docs/api-platform/fundamentals/fault-handling#buildingconditions).
+
+The following table describes the fault variables specific to this policy.
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name` | The `fault.name` can match to any of the faults listed in the [Runtime errors](#runtime-errors) table. The fault name is the last part of the fault code. | `fault.name Matches "UnresolvedVariable"` |
+| `SetIntegrationRequest.``POLICY_NAME``.failed` | `POLICY_NAME` is the user-specified name of the policy that threw the fault. | `SetIntegrationRequest.set-integration-request-1.failed = true` |
+
+For more information about policy errors, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+## Related topics
+
+If you want to learn more about Application Integration feature, see [Application Integration overview](/application-integration/docs/overview)

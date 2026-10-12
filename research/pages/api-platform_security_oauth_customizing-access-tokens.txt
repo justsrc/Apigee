@@ -1,0 +1,93 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+## About token and authorization code metadata
+
+Apigee generates OAuth access tokens, refresh tokens, and authorization codes, and dispenses them to authenticated apps. At generation time, Apigee stores those tokens and codes. Later, when Apigee receives inbound API requests bearing these tokens or codes, Apigee uses the stored information to authorize the requests.
+
+When Apigee generates these OAuth artifacts, it also attaches metadata to the token or code. For example, an access token is associated to name/value pairs that define expiration time, the associated app and developer, and other information.
+
+The JSON representation of an Apigee access token looks like the following:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "issued_at" : "1372170159093",
+  "application_name" : "ccd1803b-b557-4520-bd62-ddd3abf8e501",
+  "scope" : "READ",
+  "status" : "approved",
+  "api_product_list" : "[Product1,Product2]",
+  "api_product_list_json" : ["Product1", "Product2"],
+  "expires_in" : "3599", //--in seconds
+  "developer.email" : "joe@weathersample.com",
+  "organization_id" : "0",
+  "refresh_token" : "82XMXgDyHTpFyXOaApj8C2AGIPnN2IZe",
+  "client_id" : "deAVedE0W9Z9U35PAMaAJYphBJCGdrND",
+  "access_token" : "shTUmeI1geSKin0TODcGLXBNe9vp",
+  "organization_name" : "apifactory",
+  "refresh_count" : "0"
+}
+```
+
+## Adding custom attributes to OAuth tokens and authorization codes
+
+Sometimes it's useful to attach custom metadata to an access token. For example, you might wish to add a user name, group memberships or roles for a user, a customer ID, a session identifier, or other arbitrary information to a token. In Apigee, these data are called "custom attributes." Subsequently, when the token is verified within the scope of an API request, that data is made available to the API proxy via context variables. An API proxy could make fine-grained authorization or routing decisions based on the custom data that is attached to the token.
+
+To attach arbitrary data to a token, use the `<Attributes>` element in [the OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy). You can specify the name and value of the custom attribute. For example, here is a policy configuration that generates a token and attaches a custom attribute called "tenant_list" to the token:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OAuthV2 name="GenerateAccessToken">
+  <Operation>GenerateAccessToken</Operation>
+  <ExpiresIn>600000</ExpiresIn>
+  <GenerateResponse />
+  <SupportedGrantTypes>
+    <GrantType>client_credentials</GrantType>
+  </SupportedGrantTypes>
+  <GrantType>request.queryparam.grant_type</GrantType>
+  <Attributes> 
+    <Attribute name="tenant_list" ref="tenant_list_retrieved_from_external_service" display="false"/>
+  </Attributes>
+</OAuthV2>
+```
+
+You can specify multiple custom attributes, and you can attach them implicitly to either an authorization code (`<Operation>GenerateAuthorizationCode</Operation>`) or a token (`<Operation>GenerateAccessToken</Operation>`) at the time of generation.
+
+When `display` is set to `true` (the default), custom attributes are returned in the response, where they may be viewable by the app, or passed on to the end user. When `display` is set to `false`, custom attributes are stored in the data store, but are not returned in the response message. In either case, the custom data is available to the policies within the API Proxy, after the token has been verified.
+
+For more information about the `display` option, see [Displaying or hiding custom attributes in the response](/apigee/docs/api-platform/reference/policies/oauthv2-policy#attributesattribute-displayingorhidingcustomattributesintheresponse).
+
+## Getting custom access token attributes at runtime
+
+When there is a call to [`OAuthV2/VerifyAccessToken`](/apigee/docs/api-platform/reference/policies/oauthv2-policy), Apigee verifies the token by looking it up in the token store. Apigee then populates a set of context variables containing information about the token. These include:
+
+- `organization_name`
+- `developer.id`
+- `developer.app.name`
+- `client_id`
+- `grant_type`
+- `token_type`
+- `access_token`
+- `issued_at`
+- `expires_in` //--in seconds
+- `status`
+- `scope`
+- `apiproduct.name*`
+
+If there are any custom attributes on the token, those custom attributes are made available in a context variable with the name `accesstoken.{custom_attribute}`. For example, suppose a token is issued from the policy shown above. After verifying such a token, there would be an additional context variable named `accesstoken.tenant_list`, containing the value that was stored at the time the token was generated.
+
+Policies or conditions can then refer to these variables and modify behavior based on the values stored within.
+
+## Setting and updating custom attributes at runtime
+
+In some situations, you will want your API Proxy to update the metadata associated to an access token at runtime while an API call is being processed on Apigee. To help with this, Apigee provides policies for getting and setting token attributes. For more information, see [Get OAuth V2 Info policy](/apigee/docs/api-platform/reference/policies/get-oauth-v2-info-policy) and [Set OAuth V2 Info policy](/apigee/docs/api-platform/reference/policies/set-oauth-v2-info-policy).
+
+In each of these policies, the `AccessToken` element should refer to a variable that contains the access token.

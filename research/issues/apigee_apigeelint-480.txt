@@ -1,0 +1,31 @@
+URL: https://github.com/apigee/apigeelint/issues/480
+TITLE: BN003 - LookupCache may not have a corresponding PopulateCache
+STATE: open state_reason: None
+AUTHOR: ssvaidyanathan association: COLLABORATOR
+CREATED: 2024-10-17T22:51:01Z CLOSED: None
+LABELS: 
+MILESTONE: None
+--- BODY ---
+The logic for BN003 might not be right
+
+The plugin basically checks for a key from LookupCache policy matches with the PopulateCache policy. It fails if the PopulateCache policy is not part of the bundle
+
+This is a common use case where I could have the logic to populate the cache in one proxy and have the lookup in another.. 
+
+Similarly I could have populating cache in one SharedFlow and the retrieval in another sharedflow.. This should not flag as an error... 
+
+--- COMMENTS (3) ---
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2024-10-18T17:55:57Z
+Ya, that is a good point.  
+
+Do you know, What happens if the PopulateCache is done within one Shared flow, and the LookupCache is done from within another shared flow, and if the [Scope](https://cloud.google.com/apigee/docs/api-platform/reference/policies/lookup-cache-policy#scopeelement-acceptablevalues) for the policies is _anything other than Global_  ?  Does it work? 
+
+If the Scope is "Application" does it use the shared flow name? or the proxy name?  Do you know? What about the other cases?
+
+
+### comment by mldelaney94 (association=CONTRIBUTOR) at 2026-03-24T23:13:02Z
+@DinoChiesa I created an external plugin for my company that just scans all apigeex repos for the existence of a newly referenced sharedflow or proxy, allowing us to disable this plugin altogether. That is probably just where this rule will go and should be the recommended path for users who find it giving false negatives once their setup becomes at a certain level of complexity.
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2026-04-12T23:18:05Z
+Ya, I am of the mind to just leave it alone.  People can disable it in their .apigeelintrc file  or on the command line.  It's not useful in a sufficiently complex environment. 

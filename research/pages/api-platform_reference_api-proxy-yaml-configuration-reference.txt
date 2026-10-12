@@ -1,0 +1,239 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This page describes the YAML format for Apigee Feature Templates: the `template`, `feature`, and `proxy` document types and all of their fields. For a conceptual introduction, see [Configuring a proxy with YAML](/apigee/docs/api-platform/fundamentals/configure-proxy-with-yaml). For a walkthrough, see [Create an API proxy from a YAML template](/apigee/docs/api-platform/fundamentals/configure-proxy-with-yaml-example).
+
+## Conventions
+
+- **Field names use camelCase.** For example, `schemaVersion`, `basePath`, `displayName`, `faultRules`, `defaultFaultRule`, `httpTargetConnection`.
+- **The schema is strict.** Unknown fields cause an error when you import the file.
+- **Required fields.** Only `gateway` and `schemaVersion` are validated when a file is parsed. Other fields marked **Yes** in the following tables are required in practice to produce a working API proxy.
+
+## Common top-level fields
+
+Every `template`, `feature`, and `proxy` document begins with the following fields.
+
+| Name | Description | Default | Required? |
+|----|----|----|----|
+| `gateway` | The target gateway. Must be `apigee`. | N/A | Yes |
+| `schemaVersion` | The schema version of the document. Must be `1.0.0`. | N/A | Yes |
+| `name` | The name of the document. For a template or proxy, this is the API proxy name written into the bundle. | N/A | Yes |
+| `type` | The document type: `template`, `feature`, or `proxy`. | N/A | Yes |
+| `description` | A human-readable description. | N/A | No |
+| `priority` | An integer that controls the order in which features are applied during compilation. Lower numbers are applied first. | `100` | No |
+
+## Document type: template
+
+A template is the entry point that you import. It composes features and defines the proxy's endpoints and routes. A template does not contain policies or resources; those come from the features it references.
+
+| Name | Description | Default | Required? |
+|----|----|----|----|
+| `features` | A list of feature file names to compose into the proxy. Each name must resolve to a file in the **same directory** as the template. | `[]` | No |
+| `parameters` | A list of [parameter](#parameter) values that supply defaults to the features. | `[]` | No |
+| `endpoints` | A list of [endpoints](#endpoint) that define base paths and routes. | `[]` | No |
+| `targets` | A list of [targets](#target) that define backend connections. | `[]` | No |
+
+**Note:** In a template, `endpoints` and `targets` use the simple form (no `flows` or fault rules). To attach policies to flows, define them in features.
+
+## Document type: feature
+
+A feature is a reusable unit of configuration that you include in a template. A feature holds policies and resources, and can contribute flows, endpoints, and targets to the compiled proxy. In addition to the [common top-level fields](#common-fields), a feature has the following fields.
+
+| Name | Description | Default | Required? |
+|----|----|----|----|
+| `displayName` | A human-readable display name. | N/A | No |
+| `uid` | A unique identifier used to namespace the feature's policies and resources. If unset, `name` is used. | N/A | No |
+| `documentation` | Extended documentation for the feature. | N/A | No |
+| `categories` | A list of free-form category labels. | `[]` | No |
+| `parameters` | A list of [parameters](#parameter) the feature defines. | `[]` | No |
+| `defaultEndpoint` | A [proxy endpoint](#proxyendpoint) whose flows and default fault rule are merged into every endpoint of the compiled proxy. Use this to attach a feature's policies to the request or response flow. | N/A | No |
+| `defaultTarget` | A [proxy target](#proxytarget) used as a default backend connection. | N/A | No |
+| `endpoints` | A list of [proxy endpoints](#proxyendpoint) to add to the proxy. An endpoint with the same name as an existing one replaces it. | `[]` | No |
+| `targets` | A list of [proxy targets](#proxytarget) to add to the proxy. A target with the same name as an existing one replaces it. | `[]` | No |
+| `policies` | A list of [policies](#policy) the feature provides. Policy names are automatically prefixed with the feature's `uid` (or `name`) during compilation. | `[]` | No |
+| `resources` | A list of [resources](#resource) the feature provides, such as JavaScript or properties files. | `[]` | No |
+
+## Document type: proxy
+
+A proxy is the fully resolved document that the CLI produces when it compiles a template with its features. You do not usually author this type directly; it is described here because it is the shape that becomes the API proxy bundle.
+
+A proxy has the same fields as a feature, except that it uses `endpoints` and `targets` (not `defaultEndpoint` or `defaultTarget`) and always represents a complete, deployable proxy. Its `type` is `proxy`.
+
+## Nested objects
+
+### parameter
+
+A parameter supplies a value to a feature. A parameter's value resolves to its `default`.
+
+| Name | Description | Default | Required? |
+|----|----|----|----|
+| `name` | The parameter name. Referenced in feature content as `{name}`. | N/A | Yes |
+| `displayName` | A human-readable name. | N/A | No |
+| `description` | A description of the parameter. | N/A | No |
+| `default` | The default value. Substituted for `{name}` in the feature's strings. | N/A | No |
+| `examples` | A list of example values. | `[]` | No |
+| `maps` | A map of value replacements. If the resolved value is a key in the map, it is replaced with the mapped value. | N/A | No |
+| `paths` | A list of JSONPath expressions. **Not supported in this release**—using it causes an error. | N/A | No |
+
+**Note:** Parameter substitution is a simple text replacement: every occurrence of `{name}` in the feature's strings is replaced with the resolved value.
+
+### endpoint
+
+Used in a template's `endpoints` list.
+
+| Name | Description | Default | Required? |
+|----|----|----|----|
+| `name` | The endpoint name. | N/A | Yes |
+| `basePath` | The base path clients use to call the proxy, for example `/v1/gemini`. | N/A | No |
+| `routes` | A list of [routes](#route) that map requests to targets. | `[]` | No |
+
+### proxyEndpoint
+
+Used in a feature's `defaultEndpoint` and `endpoints`, and in a compiled proxy. Extends [endpoint](#endpoint) with flow handling.
+
+| Name | Description | Default | Required? |
+|----|----|----|----|
+| `flows` | A list of [flows](#flow). Flows named `PreFlow` or `PostFlow` map to the corresponding Apigee flow; any other name is placed in the generic flows container. | `[]` | No |
+| `postClientFlow` | A single [flow](#flow) that runs after the response is sent to the client. | N/A | No |
+| `faultRules` | A list of [flows](#flow) used as fault rules. | `[]` | No |
+| `defaultFaultRule` | A [fault rule](#faultrule) that runs when no other fault rule matches. | N/A | No |
+
+### route
+
+| Name | Description | Default | Required? |
+|----|----|----|----|
+| `name` | The route name. | N/A | Yes |
+| `target` | The name of the target endpoint to route to. | N/A | No |
+| `condition` | A condition that must be true for this route to apply. | N/A | No |
+
+### flow
+
+| Name | Description | Default | Required? |
+|----|----|----|----|
+| `name` | The flow name. Use `PreFlow` or `PostFlow` for the standard request/response flows. | N/A | Yes |
+| `mode` | `Request` or `Response`. Determines whether the steps run on the request or the response. | `Request` | No |
+| `condition` | A condition that must be true for the flow to run. | N/A | No |
+| `steps` | An ordered list of [steps](#step) (policy invocations). | `[]` | No |
+
+### step
+
+A step runs a policy within a flow.
+
+| Name | Description | Default | Required? |
+|----|----|----|----|
+| `name` | The name of the policy to run. Within a feature, use the policy's local name; the compiler rewrites it to the namespaced name. | N/A | Yes |
+| `condition` | A condition that must be true for the step to run. | N/A | No |
+
+### faultRule
+
+Extends [flow](#flow) with one additional field.
+
+The `mode` field inherited from [flow](#flow) does **not** apply to a fault rule. Because a fault rule runs after a request fails, it doesn't have a request or response phase; its steps always run directly. If you set `mode` on a fault rule, the tool logs a warning and ignores the field.
+
+| Name | Description | Default | Required? |
+|----|----|----|----|
+| `alwaysEnforce` | If `true`, the default fault rule is always enforced. | `false` | No |
+
+### target
+
+Used in a template's `targets` list.
+
+| Name | Description | Default | Required? |
+|----|----|----|----|
+| `name` | The target name. Referenced by a route's `target`. | N/A | Yes |
+| `url` | The backend URL. | N/A | No |
+| `auth` | The authentication scheme for a Google Cloud backend, for example `GoogleAccessToken` or `GoogleIDToken`. | N/A | No |
+| `scopes` | A list of OAuth scopes to request. Applies when `auth` is set. | `[]` | No |
+| `aud` | The audience for the token. Applies when `auth` is set. | N/A | No |
+
+### proxyTarget
+
+Used in a feature's `defaultTarget` and `targets`, and in a compiled proxy. Extends [target](#target) with flow handling and raw connection overrides.
+
+| Name | Description | Default | Required? |
+|----|----|----|----|
+| `flows` | A list of [flows](#flow) that run on the target request or response. | `[]` | No |
+| `faultRules` | A list of [flows](#flow) used as fault rules. | `[]` | No |
+| `defaultFaultRule` | A [fault rule](#faultrule). | N/A | No |
+| `httpTargetConnection` | A raw representation of the `HTTPTargetConnection` element, for advanced configuration. If set, it takes precedence over `url`, `auth`, `scopes`, and `aud`. | N/A | No |
+| `localTargetConnection` | A raw representation of a `LocalTargetConnection` element. If set, it takes precedence over an HTTP connection. | N/A | No |
+
+### policy
+
+A policy is defined in a feature. Its configuration is written under `content` using the attribute/text convention described in [Policy content convention](#policy-content).
+
+| Name | Description | Default | Required? |
+|----|----|----|----|
+| `name` | The policy name. | N/A | Yes |
+| `type` | The Apigee policy type, for example `VerifyAPIKey`, `SpikeArrest`, or `Javascript`. Must match the single top-level key in `content`. | N/A | Yes |
+| `content` | A single-key dictionary whose one key equals `type`. The nested value describes the policy's XML using the convention below. | `{}` | Yes |
+
+#### Policy content convention
+
+Apigee policies are XML. In YAML, you represent that XML in `content` with these rules:
+
+- The `content` dictionary has exactly one key, which must match the policy's `type`.
+- **Element attributes** go under a `metadata` key.
+- **Element text** goes under a `_text` key. For example, `<Foo bar="baz">qux</Foo>` becomes `Foo: {metadata: {bar: "baz"}, _text: "qux"}`. If an element has only text and no attributes, you can write the text directly as the value.
+- **Child elements** are nested under their tag name. Repeated tags become a list.
+
+For example, this feature policy:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+policies:
+- name: VA-VerifyAPIKey
+  type: VerifyAPIKey
+  content:
+    VerifyAPIKey:
+      metadata:
+        name: VA-VerifyAPIKey
+        enabled: "true"
+        continueOnError: "false"
+      DisplayName: VA-VerifyAPIKey
+      APIKey:
+        metadata:
+          ref: request.header.x-api-key
+```
+
+compiles to this policy XML:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyAPIKey continueOnError="false" enabled="true" name="verify-api-key-VA-VerifyAPIKey">
+  <APIKey ref="request.header.x-api-key"></APIKey>
+  <DisplayName>VA-VerifyAPIKey</DisplayName>
+</VerifyAPIKey>
+```
+
+### resource
+
+A resource is a file that a feature contributes to the bundle, such as a JavaScript file or a properties file.
+
+| Name | Description | Default | Required? |
+|----|----|----|----|
+| `name` | The file name, for example `hello-world.js`. Resource names are prefixed with the feature's `uid` (or `name`) during compilation. | N/A | Yes |
+| `type` | The resource type, which determines the subdirectory in the bundle, for example `jsc` (JavaScript) or `properties`. | N/A | Yes |
+| `content` | The raw file contents. | N/A | No |
+
+## Fields that are not supported in this release
+
+- **`paths` on a parameter** (JSONPath). Using it causes compilation to fail.
+- **`tests`** on any document. The field is accepted but ignored, and is not included in the generated bundle.
+
+## Limits
+
+The generated API proxy bundle must not exceed **10 MiB** uncompressed or **256 files**.
+
+## Next steps
+
+- [Configuring a proxy with YAML](/apigee/docs/api-platform/fundamentals/configure-proxy-with-yaml)
+- [Create an API proxy from a YAML template](/apigee/docs/api-platform/fundamentals/configure-proxy-with-yaml-example)

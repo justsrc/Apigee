@@ -1,0 +1,421 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+The IntegrationCallout policy lets you run an Application Integration that has an API trigger. However, before running an integration, you must run the [SetIntegrationRequest policy](/apigee/docs/api-platform/reference/policies/set-integration-request-policy). The SetIntegrationRequest policy creates a request object and makes the object available to the IntegrationCallout policy as a flow variable. The request object has the integration details such as the API trigger name, integration project ID, integration name, and other details configured in the SetIntegrationRequest policy. The IntegrationCallout policy uses the flow variable of the request object to run the integration. You can configure the IntegrationCallout policy to save the integration run response in a flow variable.
+
+The IntegrationCallout policy is helpful if you want to run integration in the middle of your proxy flow. Alternately, instead of configuring the IntegrationCallout policy, you can also run an integration by specifying an integration endpoint as your target endpoint. For more information, see [IntegrationEndpoint](/apigee/docs/api-platform/reference/api-proxy-configuration-reference#integrationendpoint).
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+**Note**: You need an authentication token to run the IntegrationCallout policy. However, there is no explicit `Authentication` element in the policy definition. Apigee adds an authentication token to the request under the hood. For the IntegrationCallout policy to successfully authenticate, you must deploy your API proxy with a service account that has the required IAM roles to run an integration. For information about the required roles, see [IAM roles for integrations](/application-integration/docs/predefined-iam-roles-permissions). For more details on deploying an API proxy, see [Deploy on Apigee](/apigee/docs/api-platform/security/google-auth/overview#deploy-on-apigee-x).
+
+## `<IntegrationCallout>`
+
+Specifies the IntegrationCallout policy.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | Complex type |
+| Parent Element | N/A |
+| Child Elements | <DisplayName> <AsyncExecution> <Request> <Response> |
+
+The following table provides a high-level description of the child elements of [`<IntegrationCallout>`](/apigee/docs/api-platform/reference/policies/integration-callout-policy#integrationcallout):
+
+| Child Element | Required? | Description |
+|----|----|----|
+| [`<DisplayName>`](/apigee/docs/api-platform/reference/policies/integration-callout-policy#displayname) | Optional | A custom name for the policy. |
+| [`<AsyncExecution>`](/apigee/docs/api-platform/reference/policies/integration-callout-policy#asyncexecution) | Optional | Specifies if the integration must run in synchronous mode or asynchronous mode. |
+| [`<Request>`](/apigee/docs/api-platform/reference/policies/integration-callout-policy#request) | Required | The flow variable having the request object created by the SetIntegrationRequest policy. |
+| [`<Response>`](/apigee/docs/api-platform/reference/policies/integration-callout-policy#response) | Optional | The flow variable to save the integration's response. |
+
+The `<IntegrationCallout>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<IntegrationCallout continueOnError="[true|false]" enabled="[true|false]" name=POLICY_NAME>
+  <DisplayName>POLICY_DISPLAY_NAME</DisplayName>
+  <AsyncExecution>BOOLEAN_ASYNC_EXECUTION</AsyncExecution>
+  <Request clearPayload="[true|false]">REQUEST_FLOW_VARIABLE_NAME</Request>
+  <Response>RESPONSE_FLOW_VARIABLE_NAME</Response>
+</IntegrationCallout>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+The following example shows the IntegrationCallout policy definition:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<IntegrationCallout continueOnError="false" enabled="true" name="Integration-Callout">
+  <DisplayName>Integration-Callout-1</DisplayName>
+  <AsyncExecution>true</AsyncExecution>
+  <Request clearPayload="true">my_request_flow_var</Request>
+  <Response>my_response_flow_var</Response>
+</IntegrationCallout>
+```
+
+</div>
+
+</div>
+
+This element has the following attributes that are common to all policies:
+
+**Attribute**
+
+**Default**
+
+**Required?**
+
+**Description**
+
+`name`
+
+N/A
+
+**Required**
+
+The internal name of the policy. The value of the `name` attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters.
+
+Optionally, use the `<DisplayName>` element to label the policy in the management UI proxy editor with a different, natural-language name.
+
+`continueOnError`
+
+false
+
+Optional
+
+Set to `false` to return an error when a policy fails. This is expected behavior for most policies. Set to `true` to have flow execution continue even after a policy fails. See also:
+
+- [Fault rules are triggered ONLY in an error state (about continueOnError)](/apigee/docs/api-platform/fundamentals/fault-handling#multiplefaultrulesandexecutionlogic-faultrulesaretriggeredonlyinanerrorstateaboutcontinueonerror)
+- [Handling faults within the current flow](/apigee/docs/api-platform/fundamentals/fault-handling#continueonerror)
+
+`enabled`
+
+true
+
+Optional
+
+Set to `true` to enforce the policy. Set to `false` to *turn off* the policy. The policy will not be enforced even if it remains attached to a flow.
+
+`async`  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray">not_interested</span></span>
+
+false
+
+Deprecated
+
+This attribute is deprecated.
+
+## Child element reference
+
+This section describes the child elements of [`<IntegrationCallout>`](/apigee/docs/api-platform/reference/policies/integration-callout-policy#integrationcallout).
+
+### `<DisplayName>`
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, more natural-sounding name.
+
+The `<DisplayName>` element is common to all policies.
+
+|  |  |
+|----|----|
+| **Default Value** | N/A |
+| **Required?** | Optional. If you omit `<DisplayName>`, the value of the policy's `name` attribute is used. |
+| **Type** | String |
+| **Parent Element** | \<`PolicyElement`\> |
+| **Child Elements** | None |
+
+The `<DisplayName>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>POLICY_DISPLAY_NAME</DisplayName>
+  ...
+</PolicyElement>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<PolicyElement>
+  <DisplayName>My Validation Policy</DisplayName>
+</PolicyElement>
+```
+
+</div>
+
+</div>
+
+The `<DisplayName>` element has no attributes or child elements.
+
+### `<AsyncExecution>`
+
+Specifies the mode to run the integration. You can run the integration either synchronously or asynchronously.
+
+If set to `true`, the integration runs asynchronously. And if set to `false`, the integration runs synchronously.
+
+- **Asynchronous mode**: When the request to run the integration reaches the endpoint, the endpoint immediately returns the integration execution IDs, but starts the execution of integration at the time specified by the `<ScheduleTime>` element. If you have not set the `<ScheduleTime>` element, the integration is scheduled to run immediately. Even though the integration is scheduled to run immediately, its execution may start after a few seconds. When the integration starts to execute, the following two things happen:
+  - The integration returns the HTTP `200 OK` status code so that the caller can continue processing.
+  - The IntegrationCallout policy completes.
+
+  Once started, the integration will have a maximum time limit of 50 minutes to complete the execution.
+- **Synchronous mode**: When the request to run the integration reaches the endpoint, the endpoint immediately starts the execution of the integration and waits for the response. The maximum time limit to complete the execution is 2 minutes. After finishing the execution, the endpoint returns a response with the execution IDs and other response data.
+
+| Default Value | false |
+| --- | --- |
+| Required? | Optional |
+| Type | Boolean |
+| Parent Element | <IntegrationCallout> |
+| Child Elements | None |
+
+The `<AsyncExecution>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AsyncExecution>BOOLEAN</AsyncExecution>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example sets asynchronous execution to `true`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AsyncExecution>true</AsyncExecution>
+```
+
+</div>
+
+</div>
+
+### `<Request>`
+
+Specifies the flow variable having the request object created by the SetIntegrationRequest policy. The IntegrationCallout policy sends this request object to Application Integration for running the integration.
+
+| Default Value | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | String |
+| Parent Element | <IntegrationCallout> |
+| Child Elements | None |
+
+The `<Request>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Request clearPayload="true">FLOW_VARIABLE_NAME</Request>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example specifies that the request object is available in the `my_request_flow_var` flow variable:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Request clearPayload="true">my_request_flow_var</Request>
+```
+
+</div>
+
+</div>
+
+The following table describes the attributes of `<Request>`:
+
+| Attribute | Required? | Type | Description |
+| --- | --- | --- | --- |
+| clearPayload | Optional | boolean | Specifies if the request object should be cleared from the memory after sending the request to run the integration. If set to true , Apigee clears the request object. If set to false , Apigee doesn't clear the request object. If you don't specify this attribute, the default value is true and the request object is cleared from the memory. |
+
+### `<Response>`
+
+Specifies the flow variable for saving the integration's response.
+
+If you don't specify this element, the policy saves the response in the `integration.response` flow variable.
+
+| Default Value | integration.response |
+| --- | --- |
+| Required? | Optional |
+| Type | String |
+| Parent Element | <IntegrationCallout> |
+| Child Elements | None |
+
+The output of the integration can be accessed by `integration.response.content` or `flow_variable.content`. The `<Response>` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+#### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Response>FLOW_VARIABLE_NAME</Response>
+```
+
+</div>
+
+<div class="section">
+
+#### Example
+
+The following example saves the response of the integration run in the `my_response_flow_var` flow variable:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Response>my_response_flow_var</Response>
+```
+
+</div>
+
+</div>
+
+## Error codes
+
+This section describes the fault codes, error messages, and the fault variables set by Apigee when this policy triggers an error. This information is essential if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+Fault code
+
+HTTP status
+
+Cause
+
+`entities.UnresolvedVariable`
+
+`500`
+
+This error occurs if Apigee cannot resolve the `integration.project.id` or the `integration.name` variables.
+
+`steps.integrationcallout.ExecutionFailed`
+
+`500`
+
+This error can occur if the backend target service returns an HTTP error status such as `4xx` or `5xx`. The possible causes include:
+
+- The service account deployed with the proxy has the incorrect permissions to run the integration.
+- The integration or the API trigger does not exist.
+- Application Integration is not enabled for your Google Cloud project.
+- You have configured the `<ScheduleTime>` element in your SetIntegrationRequest policy and the IntegrationCallout policy has the `AsyncExecution` set to `false`.
+
+`steps.integrationcallout.NullRequestVariable`
+
+`500`
+
+This error occurs if the flow variable specified in the `<Request>` is null.
+
+`steps.integrationcallout.RequestVariableNotMessageType`
+
+`500`
+
+This error occurs when the flow variable specified by the `Request` element is not of [message](/apigee/docs/api-platform/reference/variables-reference#message) type.
+
+`steps.integrationcallout.RequestVariableNotRequestMessageType`
+
+`500`
+
+This error occurs when the flow variable specified by the `Request` element is not of [Request message](/apigee/docs/api-platform/reference/variables-reference#message) type.
+
+`messaging.adaptors.http.filter.GoogleTokenGenerationFailure`
+
+`500`
+
+This error can occur because of an incorrect service account configuration. The possible causes include:
+
+- The service account deployed with the proxy does not exist in your project.
+- The service account deployed with the proxy is disabled.
+
+### Fault variables
+
+Whenever there are execution errors in a policy, Apigee generates error messages. You can view these error messages in the error response. Many a time, system generated error messages might not be relevant in the context of your product. You might want to customize the error messages based on the type of error to make the messages more meaningful.
+
+To customize the error messages, you can use either fault rules or the RaiseFault policy. For information about differences between fault rules and the RaiseFault policy, see [FaultRules vs. the RaiseFault policy](/apigee/docs/api-platform/fundamentals/fault-handling#rulesvraisefault). You must check for conditions using the `Condition` element in both the fault rules and the RaiseFault policy. Apigee provides fault variables unique to each policy and the values of the fault variables are set when a policy triggers runtime errors. By using these variables, you can check for specific error conditions and take appropriate actions. For more information about checking error conditions, see [Building conditions](/apigee/docs/api-platform/fundamentals/fault-handling#buildingconditions).
+
+The following table describes the fault variables specific to this policy.
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name` | The `fault.name` can match to any of the faults listed in the [Runtime errors](#runtime-errors) table. The fault name is the last part of the fault code. | `fault.name Matches "UnresolvedVariable"` |
+| `IntegrationCallout.``POLICY_NAME``.failed` | `POLICY_NAME` is the user-specified name of the policy that threw the fault. | `IntegrationCallout.integration-callout-1.failed = true` |
+
+For more information about policy errors, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+## Related topics
+
+If you want to learn more about Application Integration feature, see [Application Integration overview](/application-integration/docs/overview)

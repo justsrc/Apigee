@@ -1,0 +1,78 @@
+<div class="section intro">
+
+This page documents releases and patches for Apigee Edge for Private Cloud. We recommend that users periodically check this list for any new announcements, or [subscribe](#sub) to this page using a feed reader to get notifications of updates. What is a feed reader?
+
+<div id="feed-reader-modal-dialog" class="devsite-dialog devsite-feed-reader-dialog">
+
+<div class="devsite-dialog-contents">
+
+### What is a feed reader?
+
+Really simple syndication (RSS) feed readers aggregate content from websites that you specify.
+
+Feed reader notifications can be email-, browser-, desktop-, or mobile-based. Some readers are free, or have free versions, and some require a subscription.
+
+A few examples:
+
+- <a href="https://feedly.com" class="external" target="_blank">Feedly</a>
+- <a href="https://feedreader.com" class="external" target="_blank">Feedreader</a>
+- <a href="https://feeder.co/" class="external" target="_blank">Feeder</a>
+
+More information on RSS:
+
+- <a href="https://en.wikipedia.org/wiki/RSS" class="external" target="_blank">RSS</a>
+- <a href="https://en.wikipedia.org/wiki/Comparison_of_feed_aggregators" class="external" target="_blank">Comparison of feed aggregators</a>
+
+</div>
+
+<div class="devsite-dialog-buttons">
+
+Close
+
+</div>
+
+</div>
+
+See also:
+
+- [Release notes published before September 2026](https://docs.apigee.com/release/notes/apigee-release-notes)
+- [Apigee Edge for Public Cloud release notes](/apigee/docs/edge-public-cloud/release-notes)
+- [Known issues](/apigee/docs/release/known-issues)
+
+<span id="sub"><span class="material-icons" aria-hidden="true" translate="no">rss_feed</span> Subscribe:</span>
+
+</div>
+
+<div class="section">
+
+You can see the latest product updates for all of Google Cloud on the <a href="/release-notes" data-track-type="releaseNotes" data-track-name="releaseNotesIndex">Google Cloud</a> page, browse and filter all release notes in the <a href="https://console.cloud.google.com/release-notes" class="external" target="console" data-track-type="releaseNotes" data-track-name="consoleLink">Google Cloud console</a>, or programmatically access release notes in <a href="https://console.cloud.google.com/bigquery?p=bigquery-public-data&amp;d=google_cloud_release_notes&amp;t=release_notes&amp;page=table" class="external" data-track-type="releaseNotes" data-track-name="bigqueryDataset">BigQuery</a>.
+
+</div>
+
+<div class="section xml">
+
+To get the latest product updates delivered to you, add the URL of this page to your <a href="https://wikipedia.org/wiki/Comparison_of_feed_aggregators" class="external">feed reader</a>, or add the [feed URL](https://docs.cloud.google.com/feeds/apigee-edge-private-cloud-release-notes.xml) directly.
+
+</div>
+
+<div class="section releases">
+
+## September 02, 2026
+
+<div class="devsite-release-note">
+
+<span class="devsite-label devsite-label-release-announcement">Announcement</span>
+
+<div>
+
+Apigee Edge for Private Cloud release notes are now published on Google Cloud documentation.
+
+Release notes and patch announcements for Apigee Edge for Private Cloud are published on the [Apigee Edge for Private Cloud release notes](/apigee/docs/edge-private-cloud/release-notes) page from September 2026 onward. You can [subscribe](/apigee/docs/edge-private-cloud/release-notes#sub) to that page with a feed reader to be notified when a new release or patch is published.
+
+Release notes published before September 2026 remain available in the [Apigee Edge release notes archive](https://docs.apigee.com/release/notes/apigee-release-notes).
+
+</div>
+
+</div>
+
+</div>

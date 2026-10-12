@@ -1,0 +1,238 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/using-data-residency-with-apigee-hybrid.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/using-data-residency-with-apigee-hybrid.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+This topic explains how to configure a new Apigee hybrid installation for data residency compliance.
+
+## About data residency
+
+You can use data residency with new Apigee hybrid installations. You cannot convert an existing installation to use data residency.
+
+Data residency meets compliance and regulatory requirements by allowing you to specify the geographic locations (regions) where Apigee data is stored. With data residency, selecting the control plane location ensures that all customer content is stored within the specified region. See also, see [Introduction to data residency](/apigee/docs/api-platform/get-started/drz-concepts).
+
+## Basic steps for data residency configuration
+
+To configure Apigee hybrid for data residency, you need to follow a few basic steps, including:
+
+- [Creating an Apigee organization with data residency](#creatinganorg)
+- [Creating an environment using the Apigee API](#createinganenv)
+- [Enabling the new data pipeline](#newpipeline)
+- [Configuring the overrides file(s)](#configureoverrides)
+
+### Creating an Apigee organization with data residency
+
+When you create an Apigee organization, you have the option of enabling the org with data residency. Creating an org with data residency requires you to specify two key location attributes: the **control plane location** and the **consumer data region**. You will also need to specify the **billing type**. For details, see [Step 2: Create an organization](/apigee/docs/hybrid/v1.17/precog-provision).
+
+- **Control plane location**: You need to specify the location where customer core content like proxy bundles are stored. For a list see [Available Apigee API control plane regions](/apigee/docs/locations#available-apigee-api-control-plane-regions).
+
+  The control plane location is the location of the service endpoint location, for example `us` for United States.
+
+  The following table lists available hosting jurisdictions and regions for the Apigee control plane.
+
+  <div>
+
+  <div class="section">
+
+  ### Americas
+
+  | Control plane hosting jurisdiction description | Control plane hosting jurisdiction name | Details |
+| --- | --- | --- |
+| United States | us (multiple regions in United States) | Service endpoint: apigee.us.rep.googleapis.com Note: See also Use VPC Service Controls with data residency . |
+| Canada | ca (multiple regions in Canada) | Service endpoint: ca-apigee.googleapis.com |
+
+  | Consumer data region description | Consumer data region name | Details |
+  |----|----|----|
+  | Iowa | `us-central1` | <img src="https://cloud.google.com/sustainability/region-carbon/gleaf.svg" width="18" alt="leaf icon" /> <a href="https://cloud.google.com/sustainability/region-carbon#region-picker" data-track-type="inline link">Low CO<sub>2</sub></a> |
+  | Oregon | `us-west1` | <img src="https://cloud.google.com/sustainability/region-carbon/gleaf.svg" width="18" alt="leaf icon" /> <a href="https://cloud.google.com/sustainability/region-carbon#region-picker" data-track-type="inline link">Low CO<sub>2</sub></a> |
+  | Los Angeles | `us-west2` |  |
+  | Salt Lake City | `us-west3` |  |
+  | Las Vegas | `us-west4` |  |
+  | South Carolina | `us-east1` |  |
+  | Northern Virginia | `us-east4` |  |
+  | Columbus | `us-east5` |  |
+  | Dallas | `us-south1` |  |
+  | Montréal | `northamerica-northeast1` | <img src="https://cloud.google.com/sustainability/region-carbon/gleaf.svg" width="18" alt="leaf icon" /> <a href="https://cloud.google.com/sustainability/region-carbon#region-picker" data-track-type="inline link">Low CO<sub>2</sub></a> |
+  | Toronto | `northamerica-northeast2` | <img src="https://cloud.google.com/sustainability/region-carbon/gleaf.svg" width="18" alt="leaf icon" /> <a href="https://cloud.google.com/sustainability/region-carbon#region-picker" data-track-type="inline link">Low CO<sub>2</sub></a> |
+
+  </div>
+
+  <div class="section">
+
+  ### Europe
+
+  | Control plane hosting jurisdiction description | Control plane hosting jurisdiction name | Details |
+| --- | --- | --- |
+| European Union | eu (multiple regions in the European Union) | Service endpoint: apigee.eu.rep.googleapis.com Note: See also Use VPC Service Controls with data residency . |
+| Germany | de (multiple regions in Germany) | Service endpoint: de-apigee.googleapis.com |
+| France | fr (single region europe-west9) | Service endpoint: fr-apigee.googleapis.com |
+| Switzerland | ch (single region europe-west6) | Service endpoint: ch-apigee.googleapis.com |
+
+  | Consumer data region description | Consumer data region name | Details |
+  |----|----|----|
+  | Belgium | `europe-west1` | <img src="https://cloud.google.com/sustainability/region-carbon/gleaf.svg" width="18" alt="leaf icon" /> <a href="https://cloud.google.com/sustainability/region-carbon#region-picker" data-track-type="inline link">Low CO<sub>2</sub></a> |
+  | Frankfurt | `europe-west3` |  |
+  | Netherlands | `europe-west4` |  |
+  | Zurich | `europe-west6` | <img src="https://cloud.google.com/sustainability/region-carbon/gleaf.svg" width="18" alt="leaf icon" /> <a href="https://cloud.google.com/sustainability/region-carbon#region-picker" data-track-type="inline link">Low CO<sub>2</sub></a> |
+  | Milan | `europe-west8` |  |
+  | Paris | `europe-west9` | <img src="https://cloud.google.com/sustainability/region-carbon/gleaf.svg" width="18" alt="leaf icon" /> <a href="https://cloud.google.com/sustainability/region-carbon#region-picker" data-track-type="inline link">Low CO<sub>2</sub></a> |
+  | Turin | `europe-west12` |  |
+  | Warsaw | `europe-central2` |  |
+  | Madrid | `europe-southwest1` | <img src="https://cloud.google.com/sustainability/region-carbon/gleaf.svg" width="18" alt="leaf icon" /> <a href="https://cloud.google.com/sustainability/region-carbon#region-picker" data-track-type="inline link">Low CO<sub>2</sub></a> |
+  | Finland | `europe-north1` | <img src="https://cloud.google.com/sustainability/region-carbon/gleaf.svg" width="18" alt="leaf icon" /> <a href="https://cloud.google.com/sustainability/region-carbon#region-picker" data-track-type="inline link">Low CO<sub>2</sub></a> |
+
+  </div>
+
+  <div class="section">
+
+  ### Asia-Pacific
+
+  | Control plane hosting jurisdiction description | Control plane hosting jurisdiction name | Details |
+| --- | --- | --- |
+| Australia | au (multiple regions in Australia) | Service endpoint: au-apigee.googleapis.com |
+| India | in (multiple regions in India) | Service endpoint: apigee.in.rep.googleapis.com Note: See also Use VPC Service Controls with data residency . |
+| Japan | jp (multiple regions in Japan) | Service endpoint: jp-apigee.googleapis.com |
+
+  | Consumer data region description | Consumer data region name | Details |
+  |----------------------------------|---------------------------|---------|
+  | Sydney                           | `australia-southeast1`    |         |
+  | Melbourne                        | `australia-southeast2`    |         |
+  | Mumbai                           | `asia-south1`             |         |
+  | Delhi                            | `asia-south2`             |         |
+  | Tokyo                            | `asia-northeast1`         |         |
+  | Osaka                            | `asia-northeast2`         |         |
+
+  </div>
+
+  <div class="section">
+
+  ### Middle East
+
+  | Control plane hosting juridiction description | Control plane hosting jurisdiction name | Details |
+  |----|----|----|
+  | Qatar | `qa (single region me-central1)` | Service endpoint: `qa-apigee.googleapis.com` |
+  | Saudi Arabia | `sa (single region me-central2)` | Service endpoint: `sa-apigee.googleapis.com` |
+  | Israel | `il (single region me-west1)` | Service endpoint: `il-apigee.googleapis.com` |
+
+  | Consumer data region description | Consumer data region name | Details |
+  |----------------------------------|---------------------------|---------|
+  | Doha                             | `me-central1`             |         |
+  | Dammam                           | `me-central2`             |         |
+  | Tel Aviv                         | `me-west1`                |         |
+
+  </div>
+
+  </div>
+
+- **Consumer data region**: You need to specify a region where API consumer data is stored. This must be a sub-region of the control plane region. For a list of available consumer data regions, see [Apigee locations](/apigee/docs/locations#consumer-data-region).
+
+- **Billing type**: You can only use data residency with paid subscription orgs.
+
+### Creating an environment using the Apigee API
+
+If you create a new environment using the Apigee API, you must specify the control plane location. See [Create an environment](https://docs.cloud.google.com/apigee/docs/hybrid/v1.17/precog-add-environment#apigee-apit). If you use the UI to create an environment, no special steps are needed.
+
+### Configure the control plane `contractProvider`
+
+Add the [`contractProvider`](/apigee/docs/hybrid/v1.17/config-prop-ref#contractprovider) configuration property to each overrides file and apply the changes. The service endpoint for Apigee management APIs. For example: `https://us-apigee.googleapis.com`.
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-disable-click-to-copy
+
+instanceID: "my_hybrid_example"
+namespace: apigee
+
+gcp:
+  projectID: hybrid-example
+  region: us-central1
+
+k8sCluster:
+  name: apigee-hybrid
+  region: us-central1
+
+org: hybrid-example
+
+contractProvider: https://us-apigee.googleapis.com
+```
+
+See [Step 7: Create the overrides](/apigee/docs/hybrid/v1.17/install-create-overrides)
+
+### When calling the Apigee APIs
+
+When you make `curl` calls to Apigee APIs to perform tasks in your hybrid installation, you will need to call APIs from within the control plane location:
+
+<div>
+
+</div>
+
+``` devsite-disable-click-to-copy
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://CONTROL_PLANE_LOCATION-apigee.googleapis.com/v1/organizations/ORG_NAME/envgroups"
+```
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-disable-click-to-copy
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://us-apigee.googleapis.com/v1/organizations/my-hybrid-org/envgroups"
+```
+
+### URL allowlisting
+
+If you are using forward proxies with data residency, you must additionally allowlist in the forward proxy:
+
+- `CONTROL_PLANE_LOCATION``-apigee.googleapis.com`
+- `ANALYTICS_REGION``-pubsub.googleapis.com`
+- URLs required by Apigee hybrid, see [Google Cloud URLs to allow for Hybrid](/apigee/docs/hybrid/v1.17/allow-gcp-urls).

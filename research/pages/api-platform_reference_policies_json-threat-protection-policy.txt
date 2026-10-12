@@ -1,0 +1,256 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+APIs that accept JSON payloads are vulnerable to malicious attacks designed to overwhelm the JSON parser. These attacks might include payloads with excessive array elements, deeply nested structures, or incredibly long strings, which can crash the service or consume excessive memory.
+
+The JSONThreatProtection policy minimizes this risk by screening incoming requests for payloads that violate the defined limits on structures like arrays and strings, effectively protecting your backend services from these denial-of-service or parser attacks.
+
+**Note:** This policy executes only if the `Content-Type` of the request or response header is set to `application/json.`
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+## Element reference
+
+The element reference describes the elements and attributes of the JSONThreatProtection policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<JSONThreatProtection async="false" continueOnError="false" enabled="true" name="JSON-Threat-Protection-1">
+   <DisplayName>JSONThreatProtection 1</DisplayName>
+   <ArrayElementCount>20</ArrayElementCount>
+   <ContainerDepth>10</ContainerDepth>
+   <ObjectEntryCount>15</ObjectEntryCount>
+   <ObjectEntryNameLength>50</ObjectEntryNameLength>
+   <Source>request</Source>
+   <StringValueLength>500</StringValueLength>
+</JSONThreatProtection>
+```
+
+## \<JSONThreatProtection\> attributes
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<JSONThreatProtection async="false" continueOnError="false" enabled="true" name="JSON-Threat-Protection-1">
+```
+
+The following table describes attributes that are common to all policy parent elements:
+
+| Attribute | Description | Default | Presence |
+| --- | --- | --- | --- |
+| name | The internal name of the policy. The value of the name attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters. Optionally, use the <DisplayName> element to label the policy in the management UI proxy editor with a different, natural-language name. | N/A | Required |
+| continueOnError | Set to false to return an error when a policy fails. This is expected behavior for most policies. Set to true to have flow execution continue even after a policy fails. See also: Fault rules are triggered ONLY in an error state (about continueOnError) Handling faults within the current flow | false | Optional |
+| enabled | Set to true to enforce the policy. Set to false to turn off the policy. The policy will not be enforced even if it remains attached to a flow. | true | Optional |
+| async | This attribute is deprecated. | false | Deprecated |
+
+## \<DisplayName\> element
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, natural-language name.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+| Default | N/A If you omit this element, the value of the policy's name attribute is used. |
+| --- | --- |
+| Presence | Optional |
+| Type | String |
+
+## \<ArrayElementCount\> element
+
+Specifies the maximum number of elements allowed in an array.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ArrayElementCount>20</ArrayElementCount>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify this element, or if you specify a negative integer, the system does not enforce a limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## \<ContainerDepth\> element
+
+Specifies the maximum allowed containment depth, where the containers are objects or arrays. For example, an array containing an object which contains an object would result in a containment depth of 3.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ContainerDepth>10</ContainerDepth>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify this element, or if you specify a negative integer, the system does not enforce any limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## \<ObjectEntryCount\> element
+
+Specifies the maximum number of entries allowed in an object.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ObjectEntryCount>15</ObjectEntryCount>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify this element, or if you specify a negative integer, the system does not enforce any limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## \<ObjectEntryNameLength\> element
+
+Specifies the maximum string length allowed for a property name within an object.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ObjectEntryNameLength>50</ObjectEntryNameLength>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify this element, or if you specify a negative integer, the system does not enforce a limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## \<Source\> element
+
+Message to be screened for JSON payload attacks. This is most commonly set to `request`, as you will typically need to validate inbound requests from client apps. When set to `message`, this element will automatically evaluate the request message when attached to the request flow and the response message when attached to the response flow.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Source>request</Source>
+```
+
+| Default: | request |
+| --- | --- |
+| Presence: | Optional |
+| Type: | String. Valid values: request, response, or message. |
+
+## \<StringValueLength\> element
+
+Specifies the maximum length allowed for a string value.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<StringValueLength>500</StringValueLength>
+```
+
+|  |  |
+|----|----|
+| **Default:** | If you do not specify this element, or if you specify a negative integer, the system does not enforce a limit. |
+| **Presence:** | Optional |
+| **Type:** | Integer |
+
+## Error reference
+
+**Note:** This policy executes only if the `Content-Type` of the request or response header is set to `application/json.`
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+| Fault code | HTTP status | Cause | Fix |
+| --- | --- | --- | --- |
+| steps.jsonthreatprotection.ExecutionFailed | 500 | The JSONThreatProtection policy can throw many different types of ExecutionFailed errors. Most of these errors occur when a specific threshold set in the policy is exceeded. These types of errors include: object entry name length , object entry count , array element count , container depth , string string value length . This error also occurs when the payload contains an invalid JSON object . | build |
+| steps.jsonthreatprotection.SourceUnavailable | 500 | This error occurs if the message variable specified in the <Source> element is either: Out of scope (not available in the specific flow where the policy is being executed) Is not one of the valid values request , response , or message | build |
+| steps.jsonthreatprotection.NonMessageVariable | 500 | This error occurs if the <Source> element is set to a variable which is not of type message . | build |
+
+### Deployment errors
+
+None.
+
+### Fault variables
+
+These variables are set when this policy triggers an error. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``fault_name``"` | `fault_name` is the name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name Matches "SourceUnavailable"` |
+| `jsonattack.``policy_name``.failed` | `policy_name` is the user-specified name of the policy that threw the fault. | `jsonattack.JTP-SecureRequest.failed = true` |
+
+### Example error response
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "fault": {
+    "faultstring": "JSONThreatProtection[JPT-SecureRequest]: Execution failed. reason: JSONThreatProtection[JTP-SecureRequest]: Exceeded object entry name length at line 2",
+    "detail": {
+      "errorcode": "steps.jsonthreatprotection.ExecutionFailed"
+    }
+  }
+}
+```
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name="JSONThreatProtection Policy Faults">
+    <Step>
+        <Name>AM-CustomErrorResponse</Name>
+        <Condition>(fault.name Matches "ExecutionFailed") </Condition>
+    </Step>
+    <Condition>(jsonattack.JPT-SecureRequest.failed = true) </Condition>
+</FaultRule>
+```
+
+## Schemas
+
+**Sample:** See our <a href="https://github.com/apigee/api-platform-samples/tree/master/schemas/policy" class="external">GitHub repository</a> samples for the most recent schemas.
+
+## Usage notes
+
+Like XML-based services, APIs that support JavaScript object notation (JSON) are vulnerable to content-level attacks. Simple JSON attacks attempt to use structures that overwhelm JSON parsers to crash a service and induce application-level denial-of-service attacks. All settings are optional and should be tuned to optimize your service requirements against potential vulnerabilities.
+
+## Related topics
+
+[JSONtoXML policy](/apigee/docs/api-platform/reference/policies/json-xml-policy)
+
+[XMLThreatProtection policy](/apigee/docs/api-platform/reference/policies/xml-threat-protection-policy)
+
+[RegularExpressionProtection policy](/apigee/docs/api-platform/reference/policies/regular-expression-protection)

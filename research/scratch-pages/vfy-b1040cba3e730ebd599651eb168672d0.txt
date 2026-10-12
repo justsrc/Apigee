@@ -1,0 +1,149 @@
+<div id="NAME" class="section">
+
+NAME
+
+<span class="normalfont"> gcloud beta apigee apis - manage Apigee API proxies </span>
+
+</div>
+
+<div id="SYNOPSIS" class="section">
+
+SYNOPSIS
+
+<span class="normalfont"> `gcloud beta apigee apis` [`COMMAND`](#COMMAND) \[[`GCLOUD_WIDE_FLAG`](#GCLOUD-WIDE-FLAGS)` …`\] </span>
+
+</div>
+
+<div id="DESCRIPTION" class="section">
+
+DESCRIPTION
+
+`(BETA)` Manage Apigee API proxies.
+
+</div>
+
+<div id="EXAMPLES" class="section">
+
+EXAMPLES
+
+To list all the API proxies in the active Cloud Platform project, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee apis list
+```
+
+To get details about a specific API proxy in a specific Apigee organization, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee apis describe PROXY_NAME --organization=ORG_NAME
+```
+
+To get a JSON object containing revision-level details about an API proxy, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee apis describe PROXY_NAME --verbose --format=json
+```
+
+To deploy the most recent revision of an API proxy into the `eval` deployment environment, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee apis deploy --api=PROXY_NAME --environment=eval
+```
+
+To deploy the first revision of that API proxy into the `release` deployment environment, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee apis deploy 1 --api=PROXY_NAME --environment=release
+```
+
+To undeploy whatever revision of PROXY_NAME is currently deployed in ENVIRONMENT, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee apis undeploy --api=PROXY_NAME --environment=ENVIRONMENT
+```
+
+</div>
+
+<div id="GCLOUD-WIDE-FLAGS" class="section">
+
+GCLOUD WIDE FLAGS
+
+These flags are available to all commands: [`--help`](/sdk/gcloud/reference#--help).
+
+Run `$ `[`gcloud help`](/sdk/gcloud/reference) for details.
+
+</div>
+
+<div id="COMMAND" class="section">
+
+COMMANDS
+
+`COMMAND` is one of the following:
+
+<span class="normalfont">[`delete`](/sdk/gcloud/reference/beta/apigee/apis/delete)</span>  
+`(BETA)` Delete an Apigee API proxy.
+
+<span class="normalfont">[`deploy`](/sdk/gcloud/reference/beta/apigee/apis/deploy)</span>  
+`(BETA)` Deploy an Apigee API proxy to an environment.
+
+<span class="normalfont">[`describe`](/sdk/gcloud/reference/beta/apigee/apis/describe)</span>  
+`(BETA)` Describe an Apigee API proxy.
+
+<span class="normalfont">[`import`](/sdk/gcloud/reference/beta/apigee/apis/import)</span>  
+`(BETA)` Import an Apigee API proxy from local files.
+
+<span class="normalfont">[`list`](/sdk/gcloud/reference/beta/apigee/apis/list)</span>  
+`(BETA)` List Apigee API proxies.
+
+<span class="normalfont">[`undeploy`](/sdk/gcloud/reference/beta/apigee/apis/undeploy)</span>  
+`(BETA)` Undeploy an Apigee API proxy from an environment.
+
+</div>
+
+<div id="NOTES" class="section">
+
+NOTES
+
+This command is currently in beta and might change without notice. These variants are also available:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee apis
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud alpha apigee apis
+```
+
+</div>

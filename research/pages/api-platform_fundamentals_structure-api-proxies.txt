@@ -1,0 +1,58 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This topic lists some basic characteristics of API proxies, along with links to more information.
+
+## APIs are entry points for one application to use the capabilities of another. You implement API proxies to create APIs
+
+In Apigee, you implement API proxies by configuring API proxy logic as a sequence of steps that execute in response to a request from client code. You expose an API proxy to clients by defining endpoints that include a URL with resource paths, an HTTP verb, body requirements, and so on.
+
+Though it's called an API proxy, from the client code's perspective, *it's the API*.
+
+For an overview of API proxies, see [Understanding APIs and API proxies](/apigee/docs/api-platform/fundamentals/understanding-apis-and-api-proxies).
+
+## You arrange the sequence of API proxy logic using flows
+
+In any application, data flows through the application guided by condition logic. In Apigee, the path of processing is made up of flows. A flow is a sequence of stages (or "steps") that make up an API proxy's processing path. Flows are how Apigee provides places for you to apply logic and behavior at specific places from client to backend resource, then back to client.
+
+For more on flows, see [Controlling how a proxy executes with flows](/apigee/docs/api-platform/fundamentals/what-are-flows)
+
+## You access state data through flow variables created by API proxies
+
+An API proxy has access to variables that represent execution state. You can access these variables from the XML that configures your API proxies and policies. You can also access them when you're extending an API proxy with a procedural language, such as Java, JavaScript, or Python.
+
+These variables are held by Apigee. Some exist by default, usually because they're common to what API proxies do (such as because they're part of an HTTP request). You can also create your own variables to satisfy a logic requirement.
+
+For more about variables, see [Managing proxy state with flow variables](/apigee/docs/api-platform/fundamentals/introduction-flow-variables).
+
+## You can have API proxies execute conditionally
+
+Just as in most programming languages, in API proxies you can have code execute conditionally. Conditions are often based on API proxy state, which you can access through flow variables. For example, you can have a condition that checks for the user agent, then processes the request accordingly.
+
+For more on conditional execution, see [Conditions with flow variables](/apigee/docs/api-platform/fundamentals/flow-variables-and-conditions).
+
+## You implement most logic in an API proxy using policies
+
+Most of the logic you add to an API proxy is packaged as policies. A policy is an Apigee component that encapsulates logic for a functional area, such as security or traffic management. You configure a policy with XML that sets properties for the underlying logic. You arrange policies in a sequence of "steps" within a flow, so that your API proxy executes the logic in the best order for your proxy's goals.
+
+For more about policies, see [What's a policy?](/apigee/docs/api-platform/develop/policy-attachment-and-enforcement).
+
+## You can include reusable sets of functionality
+
+When your API proxy includes logic that will be used from multiple places in your code—such as other API proxies—you can collect that logic for calls from multiple places. For example, you can group security logic in a shared flow that other API proxies call, reducing duplication across API proxies.
+
+For more on shared flows, see [Reusable shared flows](/apigee/docs/api-platform/fundamentals/shared-flows). For more on API proxy chaining, see [Chaining API proxies together](/apigee/docs/api-platform/fundamentals/connecting-proxies-other-proxies).
+
+## You can debug a proxy with the Debug tool
+
+Apigee includes a [Debug tool](/apigee/docs/api-platform/debug/trace-overview) you can use to examine your API proxy's execution flow when debugging and testing. The tool visually presents each API proxy step that executes for a request. As in a debugger, at each step you can view the list of variable values that make up API proxy state.
+
+For more about debugging with the Debug tool, see [Debug tool](/apigee/docs/api-platform/debug/trace-overview).
+
+## You handle API proxy errors as faults
+
+By configuring a fault handler, you can customize the error returned to an API client. Fault handlers give you control over error messages whether the error originates from your own code or from an included component (such as a policy).
+
+For more, see [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).

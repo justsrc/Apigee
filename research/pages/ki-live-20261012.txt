@@ -1,0 +1,2309 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+Select one or more of the following to filter this page:
+
+Select product API hub API Monitoring/Analytics Apigee Apigee in VS Code Archive deployments Connectors Documentation hybrid Integration Integrated portal Monetization UI Select status FIXED OPEN Apigee 1-10 Apigee 1-9 hybrid 1.16 hybrid 1.15 hybrid 1.14 hybrid 1.13 hybrid 1.12 hybrid 1.11 hybrid 1.10 hybrid 1.9 hybrid 1.8 hybrid 1.7 hybrid 1.6 hybrid 1.5 hybrid 1.4 hybrid 1.3
+
+This section lists known issues for Apigee components. For a list of bugs, new features, and other release information, see the [release notes](/apigee/docs/apigee-release-notes).
+
+Issue ID
+
+Affects
+
+Status
+
+Description
+
+543171828
+
+hybrid 1.14.7, hybrid 1.15.7, and hybrid 1.16.8
+
+<span style="color:#008000">FIXED</span> in hybrid 1.16.9
+
+**The `apigee-logger` DaemonSet is not scheduled on any node, so Apigee runtime logs stop reaching Cloud Logging.**
+
+After you install or upgrade to an affected version, `kubectl get daemonset apigee-logger -n apigee` reports a desired count of `0` and no logger pods are created.
+
+The `apigee-telemetry` chart has always shipped a default `logger.nodeSelector` of `apigee.cloud.google.com/apigee-logger-enabled: "true"`, which requires you to label the nodes that should run the logger. Releases before the affected versions ignored component-level node selectors, so the logger was scheduled on the Apigee node pools even though the nodes were not labeled. The affected releases apply component-level node selectors correctly, so the default now takes effect and the DaemonSet matches no nodes.
+
+Only deployments that set `logger.enabled: true` are affected.
+
+**Workaround:** Choose one of the following, then upgrade the `apigee-telemetry` chart.
+
+To run the logger on every node, which matches the behavior of earlier releases, clear the default node selector in your `overrides.yaml` file:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+logger:
+  enabled: true
+  nodeSelector:
+    key: ""
+    value: ""
+```
+
+To restrict the logger to a specific set of nodes, keep the default node selector and label each of those nodes:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+kubectl label nodes NODE_NAME apigee.cloud.google.com/apigee-logger-enabled=true
+```
+
+534420582
+
+Apigee  
+Apigee hybrid
+
+<span style="color:#008000">FIXED</span> in hybrid 1.15.8
+
+**JSON payloads with duplicate keys may be interpreted differently by Apigee policies and by backend services, which can weaken content-based security checks.**
+
+The [ExtractVariables](/apigee/docs/api-platform/reference/policies/extract-variables-policy) policy uses JSONPath, which resolves duplicate JSON keys using *last-wins* semantics. Some backends—most notably Google Cloud APIs that accept [proto3 JSON](https://protobuf.dev/programming-guides/json/)—instead *merge* repeated keys (for example, concatenating repeated array fields). If an Apigee proxy relies on ExtractVariables + JSONPath + [RaiseFault](/apigee/docs/api-platform/reference/policies/raise-fault-policy) to inspect and block privileged request bodies, an attacker can hide malicious content in a duplicate key that the Apigee policy does not see but the backend still processes.
+
+**Workaround:** Do not rely on ExtractVariables with JSONPath alone as a security boundary for backends that accept proto3 JSON. Add a [JSONThreatProtection](/apigee/docs/api-platform/reference/policies/json-threat-protection-policy) policy to the request flow before ExtractVariables and configure `<ObjectEntryCount>` and other limits to match your API contract. For stronger protection, use a [JavaScript](/apigee/docs/api-platform/reference/policies/javascript-policy) policy to parse the request body with `JSON.parse()` and reject payloads that contain duplicate keys before extraction runs.
+
+523085517
+
+UI
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**The Apigee debug trace view can flicker or render slowly for large debug sessions.**
+
+When you view a debug session in the Apigee UI, the transaction map and trace details can repeatedly appear and disappear (flicker) or take a long time to render. This behavior is most noticeable for debug sessions that contain a large number of events and on lower-powered machines, and it can make it difficult to inspect the flow of an API request.
+
+**Workaround:** In the **View options** pane of the debug trace view, clear all of the checkboxes to reduce the number of rendered elements. You can also try viewing the debug session in a different browser.
+
+513032450
+
+hybrid 1.16.2
+
+<span style="color:#008000">FIXED</span> in hybrid 1.17.1
+
+**`apigee-connect-agent` first tether wedges on RKE2-on-GKE clusters after Go 1.26.3 toolchain bump.**
+
+The hung connection is not detectable by the `apigee-connect-agent` pod. The root cause is still under investigation, but may lie in cloudNAT, which is used by our test clusters.
+
+**Workaround:** Use more than one `apigee-connect-agent` pod. The second pod will come up healthy, and the first pod will reset the connection after 2 hours and become healthy thereafter.
+
+515424331
+
+hybrid 1.16.3
+
+<span style="color:#008000">FIXED</span> in hybrid 1.16.4
+
+**The `apigee-pull-push.sh` script fails on 1.16.3 because some images carried over from 1.16.2 were not retagged with the `1.16.3` tag in the `gcr.io/apigee-release/hybrid/` repository.**
+
+When `apigee-pull-push.sh` (or any manual `docker pull`) requested an affected image at the `1.16.3` tag, the registry returned an `image not known` error and the script aborted. Upgrades performed through the Apigee hybrid Helm charts were not affected, because the charts reference the correct image digests directly.
+
+**Workaround:** For each affected image, pull the `1.16.2` tag instead of `1.16.3`, or upgrade directly to `1.16.4`, which republishes all images with the matching tag.
+
+512866352
+
+hybrid 1.16.2
+
+<span style="color:#008000">FIXED</span> in hybrid 1.16.3
+
+**External secret stores (such as HashiCorp Vault) do not work with the `apigee-redis` image due to a glibc version mismatch.**
+
+**Workaround:** Do not configure external secret store (ESS) integration for `apigee-redis` on Apigee hybrid 1.16.2. Use the default secret configuration until a fix is available.
+
+415061771
+
+Apigee  
+Apigee hybrid
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Controller Error Message "Object has been modified"**
+
+Hybrid customers could observe the recurring "object has been modified; please apply your changes to the latest version and try again." messages in controller logs. These messages are a harmless side-effect of Apigee and Apigee hybrid built-in safety mechanisms and do not indicate any risk to the Apigee or Apigee Hybrid environments. To ensure total reliability, the system is designed to double-check and re-verify its internal settings several times every minute to make sure they match the desired configuration exactly. These errors mean that two sub-controllers tried to update their internal "specs" at the same time; the first update succeeds, and the second update results in the message and it will perform the fresh update later. Because these are purely internal administrative updates and do not change how APIs actually process traffic, the services should remain stable and completely unaffected.
+
+499322601
+
+hybrid 1.16.0-hotfix.1,  
+hybrid 1.15.2,  
+hybrid 1.14.4
+
+<span style="color:#008000">FIXED</span> in hybrid 1.16.2
+
+**Apigee will not support a forward proxy which has the Basic Auth credential enforced.**
+
+495305258
+
+Apigee (Marketplace Solution)
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Deployment disruption for Apigee Drupal Portal via Cloud Marketplace**
+
+We are transitioning the Apigee Drupal Portal Marketplace solution to use Infrastructure Manager instead of Cloud Deployment Manager. During this transition period, some deployment and management functionalities might be unavailable.
+
+**Impact:**
+
+- New Deployments: Starting April 1, 2026, attempting to deploy a new Apigee Drupal Portal instance using the "Deploy" button on the Cloud Marketplace might fail.
+- Existing Deployments: Your underlying resources (such as VMs and Cloud SQL databases) are unaffected and will continue to run normally. However, using Deployment Manager-based features to manage the deployment via the Cloud Marketplace UI or the `gcloud deployment-manager` tool might fail.
+
+**Workaround:** Perform any configuration changes or management tasks directly on the individual Google Cloud resources (Compute Engine, Cloud SQL, etc.) rather than through the Cloud Marketplace UI.
+
+496552286
+
+Apigee
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Deployment fails for MCP Discovery Proxies in regions with capacity limitations.**
+
+MCP infrastructure deployment may be subject to capacity limitations in the following regions:
+
+- `asia-east2`
+- `asia-northeast3`
+- `asia-southeast2`
+- `australia-southeast1`
+- `europe-central2`
+- `europe-west12`
+- `europe-west9`
+- `me-central2`
+- `us-central2`
+
+If you see an error related to load balancer provisioning failure, or the provisioning status never changes to **Deployed**, it might be due to temporary infrastructure capacity limits in the selected region. Try deploying the proxy to an environment in a different region.
+
+490308770
+
+hybrid 1.12.x, hybrid 1.15.x, hybrid 1.16.0
+
+<span style="color:#008000">FIXED</span> in 1.16.0-hotfix.1 and 1.15.2
+
+**Authenticated HTTP proxy configurations fail due to malformed URL strings in Helm templates.**
+
+When an authenticated outbound proxy is configured using `httpProxy.username` and `httpProxy.password`, Apigee Hybrid Helm charts generate malformed `http_proxy` and `https_proxy` strings. The templates incorrectly inject double-quotes into the middle of the URL, causing components like the guardrail validation pods to crash with a `net/url: invalid userinfo` error.
+
+**Workaround:** Manually edit the Helm template files to remove the `quote` function from the username and password fields in the proxy URL construction. For example, in `apigee-operator/templates/apigee-operators-guardrails.yaml`, modify the proxy environment variable definitions to ensure the credentials are not individually quoted within the URL string.
+
+482077193
+
+hybrid 1.15.0 and later
+
+<span style="color:#008000">FIXED</span> in 1.16.0-hotfix.1
+
+**Proxy chaining fails with 404 route_not_found in multi-organization, single-namespace configurations.**
+
+In Apigee Hybrid environments where multiple organizations share a single Kubernetes namespace, proxy chaining may fail intermittently with an HTTP `404 route_not_found` error. This occurs because the internal chaining gateways for different organizations use the same `ingress_name` selector, causing Envoy to inconsistently load routing rules.
+
+**Workaround:** Assign a unique name to the chaining gateway for each organization in your `overrides.yaml` file to ensure selector isolation:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+apigeeChainingGateway:
+  name: internal-chaining-UNIQUE_SUFFIX
+```
+
+Additionally, ensure that your virtual host selectors and any dedicated Kubernetes Services are updated to reference this unique name.
+
+479040521
+
+hybrid 1.16.0
+
+<span style="color:#008000">FIXED</span> in hybrid 1.16.0-hotfix.1
+
+**`apigee-operator-guardrails-sa` not created on AKS/EKS with Federated Workload Identity.**
+
+The Kubernetes ServiceAccount `apigee-operator-guardrails-sa` is not created when installing or upgrading the `apigee-operator` chart in Apigee Hybrid 1.16.0 on non-GKE platforms where Federated Workload Identity (WIF) is enabled.
+
+**Workaround:** Manually patch the `apigee-operator` Helm chart template:
+
+1.  Edit the `apigee-operator` Helm chart template file `apigee-operator/templates/apigee-operator-guardrails-sa.yaml`.
+
+    Update the initial `if` condition to include the check for `federatedWorkloadIdentity`:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+
+    {{ - if or (.Values.serviceAccountSecretProviderClass) (.Values.gcp.workloadIdentity.enabled) (.Values.gcp.federatedWorkloadIdentity.enabled) } }
+    ```
+
+2.  Edit the `apigee-operator` Helm chart template file `apigee-operator/templates/apigee-operator-guardrails.yaml` (**Note:** This is the `apigee-operator-guardrails.yaml` template file, not the `apigee-operator-guardrails-sa` file).
+
+    Update the initial `if` condition in line 17 immediately after the `spec:`to include the check for `federatedWorkloadIdentity`:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+
+    {{ - if or (.Values.serviceAccountSecretProviderClass) (.Values.gcp.workloadIdentity.enabled) (.Values.gcp.federatedWorkloadIdentity.enabled) } }
+    ```
+
+3.  Apply the changes to the `apigee-operator` chart.
+
+479872706
+
+hybrid 1.16.0 (EKS with WIF and forward proxy)
+
+<span style="color:#008000">FIXED</span> in hybrid 1.16.0-hotfix.1
+
+**Unable to load API Products, Apps, and Developers after migrating data to Apigee Hybrid 1.16.**
+
+After upgrading to Apigee Hybrid 1.16.0, environments using Workload Identity Federation (WIF) in conjunction with an HTTP Forward Proxy may fail to load management entities (API Products, Apps, Developers) due to a credential casting regression in MART.
+
+**Workaround:** Apply the 1.16.0-hotfix.1 update by updating the `image.url` and `image.tag` properties for the operator and MART components in your `overrides.yaml` file:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+ao:
+  image:
+    url: "gcr.io/apigee-release/hybrid/apigee-operators"
+    tag: "1.16.0-hotfix.1"
+mart:
+  image:
+    url: "gcr.io/apigee-release/hybrid/apigee-mart-server"
+    tag: "1.16.0-hotfix.1"
+```
+
+482209901
+
+hybrid 1.16.0
+
+<span style="color:#008000">FIXED</span> in hybrid 1.16.0-hotfix.1
+
+**Proxy deployment not completing due to missing RBAC permissions in Hybrid v1.16.0.**
+
+There is a known issue in 1.16.0 where Hybrid clusters may fail to report deployment status of proxies. This is due to a missing permission in the apigee-manager-role role.
+
+**Workaround:** Add the permission to the `apigee-operator` helm chart template:
+
+1.  Edit the `apigee-operator` Helm chart template file `apigee-operator/templates/apigee-operators.yaml`.
+2.  Add the ` - watch` verb to the `deployments` resource, after the ` - update` verb on line 584.
+3.  Update the `apigee-operator` Helm release.
+
+418274570
+
+hybrid 1.16.0
+
+<span style="color:#008000">FIXED</span>
+
+**Hybrid release notes page not updated with 1.16.0-hotfix.1 information.**
+
+The [hybrid release notes page](/apigee/docs/hybrid/release-notes) does not show the 1.16.0-hotfix.1 update information. See [Apigee hybrid v1.16.0-hotfix.1 release notes](/apigee/docs/hybrid/release-notes/hybrid-v1160-hotfix1) for update details.
+
+484366184
+
+hybrid 1.14.x, hybrid 1.15.x
+
+<span style="color:#008000">FIXED</span> in hybrid 1.16.0
+
+**Apigee Hybrid versions 1.14 and 1.15 encounter a crash loop in the `apigee-ingressgateway-manager` when <a href="https://gateway-api.sigs.k8s.io/guides/getting-started/" class="external">Kubernetes Gateway API</a> v1.4.0 or newer is utilized.**
+
+Apigee Hybrid 1.16 is not affected by this issue.
+
+**Workaround:** If you need to use the Kubernetes Gateway API with Apigee hybrid versions 1.14 or 1.15, install version v1.3.x of the Gateway API. For example:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
+```
+
+See also:
+
+- <a href="https://gateway-api.sigs.k8s.io/implementations/v1.3/" class="external">Kubernetes Gateway API v1.3</a>
+- <a href="https://kubernetes.io/blog/2025/06/02/gateway-api-v1-3/" class="external">Gateway API v1.3.0: Advancements in Request Mirroring, CORS, Gateway Merging, and Retry Budgets</a>
+
+471125841
+
+hybrid 1.14.x,hybrid 1.15.x
+
+<span style="color:#008000">FIXED</span> in hybrid 1.16.x
+
+**When a new API proxy revision is created and deployed with an updated `io.timeout.millis` value, the new value might not be consistently honored.**
+
+The updated value of `io.timeout.millis` is intermittently not honored for API requests. This happens when multiple servers are used under \<LoadBalancer\> in the TargetEndpoint.  
+  
+**Workaround:** After API proxy deployment, restart the apigee-runtime pods one by one so that the change is propagated correctly.
+
+480997525
+
+Apigee 1-17-0-apigee-1
+
+<span style="color:#008000">FIXED</span> in Apigee 1-17-0-apigee-2
+
+**Proxy calls fail with `The URI contain illegal characters` error after Netty upgrade.**
+
+In Apigee version 1-17-0-apigee-1, a Netty upgrade to 4.1.129.Final introduced a regression. This can cause API proxy calls to fail with a `400` status code and the error message `The URI contain illegal characters`. This issue is tracked externally in [netty/netty#16020](https://github.com/netty/netty/issues/16020).
+
+465834046
+
+hybrid 1.14.3, hybrid 1.15.1, and hybrid 1.16.0 and later for upgrades
+
+<span style="color:#008000">FIXED</span> in hybrid 1.14.3, hybrid 1.15.1, and hybrid 1.16.0 for fresh installs
+
+**cert-manager versions 1.18+ changed the default for the private key rotation policy from `Never` to `Always`. If the private key for `apigee-ca` is rotated it will impact traffic**
+
+**Note:** This only applies to upgraded Apigee hybrid clusters. The certificates in fresh installs of the hybrid versions 1.14.3+, 1.15.1+, and 1.16.0. already have the rotation policy set to `Never`.
+
+Newer versions of cert-manager (v1.18+) now automatically rotate the private keys. When this key is rotated for the apigee-ca certificate, it will cause an outage.
+
+**Workaround:** To avoid this issue, you can choose one of the following options:
+
+- Do not upgrade cert-manager to a version higher than 1.17.x.
+- Edit the `apigee-ca` certificate in the `cert-manager` namespace and set `spec.privateKey.rotationPolicy` to `Never`. Use the following procedure to edit your `apigee-ca` certificate and upgrade cert-manager:
+  **Warning:** Performe these steps *before* upgrading cert-manager. Otherwise, you may trigger a certificate rotation.
+  1.  Check the contents of your `apigee-ca` certificate to see if `rotationPolicy` is set:
+
+      **Tip:** If you are using a custom cert-manager namesspace, replace `cert-manager` with the correct namespace in the following commands.
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+
+      kubectl get certificate apigee-ca -n cert-manager -o yaml
+      ```
+
+      Look for the values under `spec.privateKey` in the output:
+
+      <div>
+
+      </div>
+
+      ``` devsite-disable-click-to-copy
+
+      ...
+      spec:
+        commonName: apigee-hybrid
+        duration: 87600h
+        isCA: true
+        issuerRef:
+          group: cert-manager.io
+          kind: ClusterIssuer
+          name: apigee-root-certificate-issuer
+        privateKey:
+          algorithm: ECDSA
+          # Note: rotationPolicy would appear here if it is set.
+          size: 256
+        secretName: apigee-ca
+      ...
+      ```
+
+  2.  If `rotationPolicy` is not set or if it is set to `Always`, edit the `apigee-ca` certificate to set the value of `rotationPolicy` to `Never`:
+      1.  Perform a dry run first:
+
+          <div>
+
+          </div>
+
+          ``` devsite-terminal
+
+          kubectl patch Certificate \
+            --dry-run=server \
+            -n cert-manager \
+            --type=json \
+            -p='[{"op": "replace", "path": "/spec/privateKey/rotationPolicy", "value": "Never"}]' \
+            -o=yaml \
+            apigee-ca
+          ```
+
+      2.  Patch the certificate:
+
+          <div>
+
+          </div>
+
+          ``` devsite-terminal
+
+          kubectl patch Certificate \
+            -n cert-manager \
+            --type=json \
+            -p='[{"op": "replace", "path": "/spec/privateKey/rotationPolicy", "value": "Never"}]' \
+            -o=yaml \
+            apigee-ca
+          ```
+
+  3.  Verify that the value of `rotationPolicy` is now set to `Never`:
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+
+      kubectl get certificate apigee-ca -n cert-manager -o yaml
+      ```
+
+      The output should look similar to the following:
+
+      <div>
+
+      </div>
+
+      ``` devsite-disable-click-to-copy
+
+      ...
+      spec:
+        commonName: apigee-hybrid
+        duration: 87600h
+        isCA: true
+        issuerRef:
+          group: cert-manager.io
+          kind: ClusterIssuer
+          name: apigee-root-certificate-issuer
+        privateKey:
+          algorithm: ECDSA
+          rotationPolicy: Never
+          size: 256
+        secretName: apigee-ca
+      ...
+      ```
+
+  4.  Upgrade cert-manager. The following command will download and install cert-manager v0.14.2:
+
+      <div>
+
+      </div>
+
+      ``` devsite-terminal
+
+      kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v0.14.2/cert-manager.yaml
+      ```
+
+See:
+
+- [Supported platforms and versions: cert-manager](/apigee/docs/release/supported-platforms#cert-manager)
+- [Upgrading Apigee hybrid to version 1.16: Upgrade cert-manager](/apigee/docs/hybrid/v1.16/upgrade#upgrade-cert-manager)
+- <a href="https://cert-manager.io/docs/releases/release-notes/release-notes-1.18/#the-default-value-of-certificatespecprivatekeyrotationPolicy-is-now-always" class="external">cert-manager Release 1.18: The default value of <code translate="no" dir="ltr">Certificate.Spec.PrivateKey.rotationPolicy</code> is now <code translate="no" dir="ltr">Always</code></a>
+
+458417250
+
+Apigee 1-16-0-apigee-4
+
+<span style="color:#008000">FIXED</span> in Apigee 1-16-0-apigee-6
+
+**Message Processor returns 500 error with `"Duplicate Header "authorization""`.**
+
+When multiple authorization headers are present in a request, the Apigee ingress gateway doesn't concatenate them into a single header. This results in the Message Processor returning a `500` error with a `"Duplicate Header "authorization""` message.
+
+**Workaround:** If multiple authorization headers are present in the request, concatenate them into a single header. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+curl -s https://my-hostname.net/mocktarget/echo \
+          -H 'authorization: a, b'
+```
+
+462685598
+
+UI
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**The Apigee UI currently does not offer the option for provisioning Apigee orgs with a Google-owned and Google-managed encryption key.**
+
+The Apigee UI does not offer the option of selecting a Google-owned and Google-managed encryption key when provisioning subscription orgs.
+
+**Workaround**: Use the Apigee APIs to create subscription-based organizations with a Google-owned and Google-managed encryption key.
+
+As mentioned in the [Apigee API documentation](/apigee/docs/reference/apis/apigee/rest/v1/organizations#Organization), while creating the Apigee organization, you can create the organization using a Google-owned and Google-managed encryption key by not supplying values for `runtimeDatabaseEncryptionKeyName`, `apiConsumerDataEncryptionKeyName`, and `controlPlaneEncryptionKeyName` fields.
+
+460431753
+
+Apigee, Apigee hybrid
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Apigee Model Armor policies are not supported with WebSockets.**
+
+Apigee Model Armor policies, including [SanitizeUserPrompt](/apigee/docs/api-platform/reference/policies/sanitize-user-prompt-policy) and [SanitizeModelResponse](/apigee/docs/api-platform/reference/policies/sanitize-llm-response-policy), currently do not function as expected when used in API proxies handling WebSocket connections. See [WebSockets with Apigee](/apigee/docs/api-platform/develop/websocket-config) for more information on WebSocket configuration.
+
+433759657
+
+Apigee
+
+<span style="color:#008000">FIXED</span> in 1-16-0-apigee-3 or later
+
+Following the upgrade to [1-16-0-apigee-3](/apigee/docs/release/release-notes#October_16_2025), some Apigee organizations may encounter `HTTP 500` errors stemming from a `java.lang.NoClassDefFoundError` within a Java Callout policy. The error appears similar to the following:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{"fault":{"faultstring":"Failed to execute JavaCallout. org/apache/commons/lang/StringUtils","detail":{"errorcode":"steps.javacallout.ExecutionError"}}}
+```
+
+This error occurs when a Java Callout policy incorrectly depends on libraries intended for Apigee's internal use instead of providing its own dependencies.
+
+**Action required:** To prevent this issue, developers must ensure that all Java Callouts are self-contained and utilize their own dedicated libraries, avoiding any reliance on Apigee's internal class path.
+
+In the API proxy that utilizes the Apache Commons JAR library, import the Apache Commons JAR file to include as a resource for the proxy. For more information, see [Java resource guidelines](/apigee/docs/api-platform/develop/resource-files#java).
+
+451841788
+
+hybrid 1.14.3 and hybrid 1.15.1
+
+<span style="color:#008000">FIXED</span>
+
+**Apigee hybrid requires the `mintTaskScheduler.serviceAccountPath` property even when Monetization is not enabled.**
+
+Upgrading the `apigee-org` chart can fail if the `mintTaskScheduler.serviceAccountPath` property is not set, even if Monetization is not enabled:
+
+<div>
+
+</div>
+
+``` devsite-disable-click-to-copy
+
+Error: UPGRADE FAILED: execution error at (apigee-org/templates/mint-task-scheduler-gsa-secret.yaml:12:63): mintTaskScheduler.serviceAccountPath is required!
+```
+
+**Workaround:** Remove the `apigee-org/templates/mint-task-scheduler-gsa-secret.yaml` and `apitee-org/templates/mint-task-scheduler-sa.yaml` files.
+
+You can optionally move the files to a separate location outside of the Helm chart directory. Alternatively you can download them again if you want to enable Monetization in the future, following the instructions in [Step 2: Download the Apigee Helm charts](/apigee/docs/hybrid/v1.14/install-download-charts).
+
+For example, from the `helm-charts/` directory:
+
+1.  <div>
+
+    </div>
+
+    ``` devsite-terminal
+    ls apigee-org/templates/
+    ```
+
+    Output:
+
+    <div>
+
+    </div>
+
+    ``` devsite-disable-click-to-copy
+
+    apigee-org-guardrails.yaml              mart-sa.yaml
+    apigee-proxy-chaining-certificate.yaml  mint-task-scheduler-gsa-secret.yaml
+    apigee-proxy-chaining-route.yaml        mint-task-scheduler-sa.yaml
+    ax-hash-salt-secret.yaml                NOTES.txt
+    connect-agent-gsa-secret.yaml           organization.yaml
+    connect-agent-sa.yaml                   udca-gsa-secret.yaml
+    data-encryption-secret.yaml             udca-sa.yaml
+    encryption-keys-secret.yaml             watcher-gsa-secret.yaml
+    _helpers.tpl                            watcher-sa.yaml
+    mart-gsa-secret.yaml
+    ```
+
+2.  (Optional:)
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    cp apigee-org/templates/mint-task-scheduler-gsa-secret.yaml /tmp/
+    cp apigee-org/templates/mint-task-scheduler-sa.yaml /tmp/
+    ```
+
+3.  <div>
+
+    </div>
+
+    ``` devsite-terminal
+    rm apigee-org/templates/mint-task-scheduler-gsa-secret.yaml
+    ```
+
+4.  <div>
+
+    </div>
+
+    ``` devsite-terminal
+    rm apigee-org/templates/mint-task-scheduler-sa.yaml
+    ```
+
+5.  <div>
+
+    </div>
+
+    ``` devsite-terminal
+    ls apigee-org/templates/
+    ```
+
+    Output:
+
+    <div>
+
+    </div>
+
+    ``` devsite-disable-click-to-copy
+
+    apigee-org-guardrails.yaml              mart-gsa-secret.yaml
+    apigee-proxy-chaining-certificate.yaml  mart-sa.yaml
+    apigee-proxy-chaining-route.yaml        NOTES.txt
+    ax-hash-salt-secret.yaml                organization.yaml
+    connect-agent-gsa-secret.yaml           udca-gsa-secret.yaml
+    connect-agent-sa.yaml                   udca-sa.yaml
+    data-encryption-secret.yaml             watcher-gsa-secret.yaml
+    encryption-keys-secret.yaml             watcher-sa.yaml
+    _helpers.tpl
+    ```
+
+451375397
+
+hybrid 1.14.3
+
+<span style="color:#008000">FIXED</span> in hybrid 1.15.1
+
+The `apigee-pull-push.sh` script can return a `No such image` error message, for example:
+
+<div>
+
+</div>
+
+``` devsite-disable-click-to-copy
+
+Error response from daemon: No such image: gcr.io/apigee-release/hybrid/apigee-stackdriver-logging-agent:latest
+```
+
+**Workaround:** Edit the `HELM_CHARTS_DIR``/apigee-operator/etc/tools/apigee-pull-push.sh` script to change line 114 in the `docker_tag()`function from:
+
+<div>
+
+</div>
+
+``` devsite-disable-click-to-copy
+
+  docker tag "${source}/$i" "${dest}/$i:${TAG}"
+```
+
+To:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+  docker tag "${source}/$i:${TAG}" "${dest}/$i:${TAG}"
+```
+
+405936071
+
+hybrid 1.15.0
+
+<span style="color:#008000">FIXED</span> in hybrid 1.15.1
+
+When `metrics.serviceAccountRef` or `metrics.serviceAccountSecretProviderClass` is specified in the overrides.yaml file, the telemetry role will target the wrong service account.
+
+**Workaround:** Patch `_helper.tpl` in the `apigee-operator/` chart and reapply it.
+
+1.  Edit `apigee-operator/templates/_helpers.tpl` and remove the following **bold** lines:
+
+    <div>
+
+    </div>
+
+    ``` devsite-disable-click-to-copy
+    {{- define "metricsSA" -}}
+      {{- $metricsName := "apigee-metrics" }}
+      {{- $telemetryName := "apigee-telemetry" -}}
+      {{- $generatedName := include "orgScopeEncodedName" (dict "name" .Values.org) -}}
+      {{- if .Values.gcp.workloadIdentity.enabled -}}
+      {{- printf "%s-sa" $metricsName -}}
+      {{- else if .Values.serviceAccountSecretProviderClass -}}  <-- DELETE
+      {{- .Values.serviceAccountSecretProviderClass -}}          <-- DELETE
+      {{- else if .Values.metrics.serviceAccountRef -}}          <-- DELETE
+      {{- .Values.metrics.serviceAccountRef -}}                  <-- DELETE
+      {{- else if .Values.multiOrgCluster -}}
+      {{- printf "%s-%s" $metricsName $generatedName -}}
+      {{- else -}}
+      {{- printf "%s-%s" $metricsName $telemetryName -}}
+      {{- end -}}
+    {{- end -}}
+    ```
+
+    The resulting section should look like the following:
+
+    <div>
+
+    </div>
+
+    ``` devsite-disable-click-to-copy
+    {{- define "metricsSA" -}}
+      {{- $metricsName := "apigee-metrics" }}
+      {{- $telemetryName := "apigee-telemetry" -}}
+      {{- $generatedName := include "orgScopeEncodedName" (dict "name" .Values.org) -}}
+      {{- if .Values.gcp.workloadIdentity.enabled -}}
+      {{- printf "%s-sa" $metricsName -}}
+      {{- else if .Values.multiOrgCluster -}}
+      {{- printf "%s-%s" $metricsName $generatedName -}}
+      {{- else -}}
+      {{- printf "%s-%s" $metricsName $telemetryName -}}
+      {{- end -}}
+    {{- end -}}
+    ```
+
+2.  Reapply the `apigee-operator` chart.
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    helm upgrade operator apigee-operator/ \
+        --namespace APIGEE_NAMESPACE \
+        --atomic \
+        -f overrides.yaml
+    ```
+
+419856132
+
+hybrid 1.14.2 and newer
+
+<span style="color:#008000">FIXED</span> in hybrid 1.14.3 and hybrid 1.15.0
+
+**If `gateway.networking.k8s.io/v1` is installed in your cluster,`apigee-ingressgateway-manager` may fail to upgrade.**
+
+**Note:** `gateway.networking.k8s.io/v1` is usually installed in clusters running on Google Distributed Cloud (software only) on bare metal v1.32 or later.
+
+For a workaround, follow the steps in [Known issue 416634326](#416634326).
+
+378686709
+
+Apigee  
+Apigee hybrid
+
+<span style="color:#008000">FIXED</span> in Apigee (support call required)  
+<span style="color:#008000">FIXED</span> in hybrid 1.14.3 and hybrid 1.15.1 ([procedure required](#378686709-procedure))
+
+The use of wildcards (`*`) in Apigee proxy basepaths may conflict with other explicit basepaths, resulting in a `404` error. For example, use of the following basepaths for two proxies deployed in the same environment may result in a `404` error when calling `Proxy-2`:
+
+<div>
+
+</div>
+
+``` lang-shell
+Proxy-1: /a/v1/b
+Proxy-2: /a/*/c
+```
+
+In this case, calls to the explicit base path will resolve successfully, but calls to the `Proxy-2` may return a `404`, if the wildcard path is evaluated as `/a/v1/c`.
+
+**Fixed:** This issue is fixed in Apigee and in hybrid 1.14.3 and later. However, the fix is not enabled by default. If you wish to enable the use of wildcards in basepaths:
+
+- Customers with Apigee orgs should reach out to Apigee support to enable the fix if needed.
+- Customers with Apigee hybrid orgs should use the following procedure to enable the fix if needed.
+
+**Procedure:** To enable use of wildcards (`*`) in Apigee proxy basepaths in Apigee hybrid:
+
+**Tip:** Apply this change to a non-prod environment first to test it before applying it to your production environment.
+
+1.  Add the following stanza to your `overrides.yaml` file before upgrading to hybrid 1.14.3 or later:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+
+    runtime:
+      cwcAppend:
+        conf_message-processor-communication_classificationV2.enabled: "true"
+    ```
+
+2.  Apply the changes to the `apigee-env` chart. Repeat the change for each environment in your installation.
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    helm upgrade ENV_RELEASE_NAME apigee-env/ \
+      --install \
+      --namespace APIGEE_NAMESPACE \
+      --set env=ENV_NAME \
+      -f OVERRIDES_FILE
+    ```
+
+    - `ENV_RELEASE_NAME` is a name used to keep track of installation and upgrades of the `apigee-env` chart. This name must be unique from the other Helm release names in your installation. Usually this is the same as `ENV_NAME`. However, if your environment has the same name as your environment group, you must use different release names for the environment and environment group, for example `dev-env-release` and `dev-envgroup-release`. For more information on releases in Helm, see <a href="https://helm.sh/docs/intro/using_helm/#three-big-concepts" class="external">Three big concepts</a> in the Helm documentation.
+    - `ENV_NAME` is the name of the environment you are upgrading.
+    - `OVERRIDES_FILE` is your overrides file.
+
+3.  Upgrade to hybrid 1.14.3 or later.
+
+382565315
+
+hybrid 1.13.0,  
+hybrid 1.13.1,  
+hybrid 1.13.2,  
+hybrid 1.14.0
+
+<span style="color:#008000">FIXED</span> in hybrid 1.13.3 and hybrid 1.14.1
+
+**LogTimer usage in SecurityPolicy can cause a memory leak.**
+
+In some circumstances, Apigee hybrid's logger threads could consume all available memory. For example, frequent log entries documenting permissions errors associated with the Javacallout could cause OOM.
+
+**Note:** Apigee recommends that you upgrade to the latest patch release of hybrid v1.13 or v1.14, for example [version 1.13.3](/apigee/docs/hybrid/release-notes#hybrid_v1133) or [version 1.14.2](/apigee/docs/hybrid/release-notes#hybrid_v1142).
+
+421190799
+
+Apigee
+
+<span style="color:#008000">FIXED</span> in Apigee 1-15-0-apigee-7
+
+The Apigee Extension Processor does not support more than 100kb of data processing as part of request and response body events.
+
+432315283
+
+Apigee
+
+**<span style="color:#ec407a">OPEN</span>**
+
+When updating a keystore or truststore without creating a new keystore or truststore, runtime updates may fail and cause the following intermittent error:
+
+<div>
+
+</div>
+
+``` devsite-disable-click-to-copy
+  {"fault":{"faultstring":"SSL Handshake failed sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target","detail":{"errorcode":"messaging.adaptors.http.flow.SslHandshakeFailed"}}}
+```
+
+The error is intermittent because the keystore or truststore update may fail on one runtime pod but succeed on other pods. To avoid this issue, update the keystore or truststore by creating a new keystore or truststore. Repoint your reference to the new keystore or truststore, as described in [When a cert expires](/apigee/docs/api-platform/system-administration/options-configuring-tls#when-a-cert-expires).
+
+412740465
+
+hybrid 1.14.0 and later
+
+<span style="color:#008000">FIXED</span> in hybrid 1.14.3 and hybrid 1.15.1
+
+Starting with Apigee hybrid [version 1.14.0](/apigee/docs/hybrid/release-notes#hybrid_v1140), automatic addition of Zipkin trace headers (`x-b3-*`) has been removed.
+
+N/A
+
+Apigee hybrid
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Configuring non-API proxy forwarding using [`httpProxy`](/apigee/docs/hybrid/latest/config-prop-ref#httpproxy) without also setting [`envs.httpProxy`](/apigee/docs/hybrid/latest/config-prop-ref#envs) will not apply the proxy configuration to Apigee Runtime's external calls to services like Pub/Sub or other Google Cloud APIs.**
+
+If you only specify `httpProxy`, you must also ensure that `*.googleapis.com` is allowlisted for your Apigee Runtime pods to enable connectivity to these services.
+
+See [Configure forward proxying for API proxies](/apigee/docs/hybrid/latest/forward-proxy).
+
+416634326
+
+hybrid 1.14.2 and later
+
+<span style="color:#008000">FIXED</span> in hybrid 1.14.3 and hybrid 1.15.1
+
+**Presence of `istio.io` Custom Resource Definitions (CRDs) in an Apigee hybrid cluster may cause failure in `apigee-ingressgateway-manager` pods.**
+
+During Apigee Hybrid upgrade from older versions to 1.14.2 or later, presence of existing `istio.io` CRDs may cause failed readiness probes in the `discovery` containers of the `apigee-ingressgateway-manager` pods.
+
+**Workaround:** The `istio.io` CRDs are not required by Apigee hybrid v1.14.2 or newer. There are two options to fix this issue:
+
+- Delete the `istio.io` CRDs if you are not using Istio for any purpose other than Apigee in your cluster.
+- Update the `apigee-ingressgateway-manager clusterrole` to add permissions for `istio.io`.
+
+Afer each of the above options, you will need to restart your `apigee-ingressgateway-manager` pods.
+
+<div class="section">
+
+### Delete CRDs
+
+1.  List the `istio.io` CRDs in your cluster to a CSV file:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl get crd -o custom-columns=NAME:metadata.name | grep istio.io > istio-crd.csv
+    ```
+
+2.  Optional: Save the CRDs locally in case you need to recreate them:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl get crd $(cat istio-crd.csv) -o yaml > istio-crd.yaml
+    ```
+
+3.  Delete the `istio.io` CRDs:
+
+    Dry run:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl delete crd $(cat istio-crd.csv) --dry-run=client
+    ```
+
+    **Tip:** You can use either `--dry-run=client` or `--dry-run=server`. See <a href="https://kubernetes.io/docs/reference/kubectl/generated/kubectl_delete/#options" class="external"><code translate="no" dir="ltr">kubectl delete</code> options</a> for more information.
+
+    Execute:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl delete crd $(cat istio-crd.csv)
+    ```
+
+</div>
+
+<div class="section">
+
+### Update clusterrole
+
+1.  Get the current apigee-ingressgateway-manager clusterrole:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl get clusterrole apigee-ingressgateway-manager-apigee -o yaml > apigee-ingressgateway-manager-apigee-clusterrole.yaml
+    ```
+
+2.  Copy the clusterrole to a new location:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    cp apigee-ingressgateway-manager-apigee-clusterrole.yaml apigee-ingressgateway-manager-apigee-clusterrole-added-istio-permissions.yaml
+    ```
+
+3.  Add the following additional permissions to the end of the file:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+
+    - apiGroups:
+      - gateway.networking.k8s.io
+      resources:
+      - gatewayclasses
+      - gateways
+      - grpcroutes
+      - httproutes
+      - referencegrants
+      verbs:
+      - get
+      - list
+      - watch
+    - apiGroups:
+      - networking.istio.io
+      resources:
+      - sidecars
+      - destinationrules
+      - gateways
+      - virtualservices
+      - envoyfilters
+      - workloadentries
+      - serviceentries
+      - workloadgroups
+      - proxyconfigs
+      verbs:
+      - get
+      - list
+      - watch
+    - apiGroups:
+      - security.istio.io
+      resources:
+      - peerauthentications
+      - authorizationpolicies
+      - requestauthentications
+      verbs:
+      - get
+      - list
+      - watch
+    - apiGroups:
+      - telemetry.istio.io
+      resources:
+      - telemetries
+      verbs:
+      - get
+      - list
+      - watch
+    - apiGroups:
+      - extensions.istio.io
+      resources:
+      - wasmplugins
+      verbs:
+      - get
+      - list
+      - watch
+    ```
+
+4.  Apply the role:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl -n APIGEE_NAMESPACE apply -f apigee-ingressgateway-manager-apigee-clusterrole-added-istio-permissions.yaml
+    ```
+
+</div>
+
+After you have completed the above options, you will need to restart your `apigee-ingressgateway-manager` pods.
+
+1.  List the `ingress-manager` pods to reinstall or recreate:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl get deployments -n APIGEE_NAMESPACE
+    ```
+
+    Example output:
+
+    <div>
+
+    </div>
+
+    ``` devsite-disable-click-to-copy
+
+    NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
+    apigee-controller-manager       1/1     1            1           32d
+    apigee-ingressgateway-manager   2/2     2            2           32d
+    ```
+
+2.  Restart the `ingress-manager` pods:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl rollout restart deployment -n APIGEE_NAMESPACE apigee-ingressgateway-manager
+    ```
+
+3.  After a few minutes, monitor the `apigee-ingressgateway-manager` pods:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    watch -n 10 kubectl -n APIGEE_NAMESPACE get pods -l app=apigee-ingressgateway-manager
+    ```
+
+    Example output:
+
+    <div>
+
+    </div>
+
+    ``` devsite-disable-click-to-copy
+
+    NAME                                             READY   STATUS    RESTARTS   AGE
+    apigee-ingressgateway-manager-12345abcde-678wx   3/3     Running   0          10m
+    apigee-ingressgateway-manager-12345abcde-901yz   3/3     Running   0          10m
+    ```
+
+414499328
+
+hybrid 1.14.1
+
+<span style="color:#008000">FIXED</span> in hybrid 1.14.3 and hybrid 1.15.0
+
+**`ApigeeTelemetry` can become stuck in `creating` state.**
+
+This issue has been seen on OpenShift installations.
+
+**Workaround:** Modify the `apigee-operator` chart template to create the correct clusterrole access.
+
+1.  Edit the `helm-charts/apigee-operator/templates/apigee-operators.yaml` template file, and locate the definition of the `-apigee-manager-role-` clusterrole. It starts with:
+
+    <div>
+
+    </div>
+
+    ``` devsite-disable-click-to-copy
+
+    kind: ClusterRole
+    metadata:
+      name: apigee-manager-role-{{ include 'namespace' }}
+    rules:
+      ...
+                  
+    ```
+
+2.  Find the `- apiGroups: apiregistration.k8s.io` block, and add the `apiservices/finalizers` resource to the list of resources:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+
+    - apiGroups:
+      - apiregistration.k8s.io
+      resources:
+      - apiservices
+      - apiservices/finalizers
+      verbs:
+      - create
+      - delete
+      - get
+      - patch
+      - update
+      
+    ```
+
+3.  Find the `- apiGroups: authorization.k8s.io` block, and add the `- apiGroups: apigee.cloud.google.com` block after the end of the block with the following text:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+
+    - apiGroups:
+      - apigee.cloud.google.com
+      resources:
+      - apigeetelemetries/finalizers
+      verbs:
+      - get
+      - patch
+      - update
+    ```
+
+    For example:
+
+    <div>
+
+    </div>
+
+    ``` devsite-disable-click-to-copy
+
+    - apiGroups:
+      - authorization.k8s.io
+      resources:
+      - subjectaccessreviews
+      verbs:
+      - create
+      - get
+      - list
+    - apiGroups:
+      - apigee.cloud.google.com
+      resources:
+      - apigeetelemetries/finalizers
+      verbs:
+      - get
+      - patch
+      - update
+    ```
+
+4.  Apply the changes to the `apigee-operator` chart:
+
+    Dry run:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    helm upgrade operator apigee-operator/ \
+      --install \
+      --namespace APIGEE_NAMESPACE \
+      --atomic \
+      -f OVERRIDES_FILE \
+      --dry-run=server
+    ```
+
+    upgrade the chart:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    helm upgrade operator apigee-operator/ \
+      --install \
+      --namespace APIGEE_NAMESPACE \
+      --atomic \
+      -f OVERRIDES_FILE \
+    ```
+
+402739748
+
+Apigee
+
+**<span style="color:#ec407a">OPEN</span>**
+
+APIproducts are limited to 50 paths. If you add additional paths, an error message is displayed: `Operation group limit of 51 exceeded in Operation Config`
+
+**Workaround:** Use wildcard patterns to combine resource paths and operations as described in [Configuring resource paths](/apigee/docs/api-platform/publish/create-api-products#behavior-resource-path).
+
+**Workaround:** Create multiple API Products. This workaround has been verified and is viable for those who add a lot of API Proxies to an API Product. The App that is associated with your API Products would need to be updated to include the new one, but credentials and client-side request details have been proven to not need changing.
+
+291294211
+
+Apigee
+
+**<span style="color:#ec407a">OPEN</span>**
+
+Error using Custom Reports and Stats APIs when selecting by fee type for installations using Monetization.
+
+**Workaround:** Fetch all fee types on the client side before filtering.
+
+391140293
+
+Apigee  
+Apigee hybrid
+
+<span style="color:#008000">FIXED</span>
+
+**Scaling of Istio ingress pods can cause a `503` error.**
+
+Scaling of the Istio ingress pods can occasionally cause a `503` error. If a `503` error occurs, logs for the load balancer display the following message: `statusDetails: backend_connection_closed_before_data_sent_to_client`.
+
+**Workaround**: Manually scale the Istio ingress pods.
+
+368155212
+
+hybrid 1.14.0  
+hybrid 1.14.1
+
+<span style="color:#008000">FIXED</span> in hybrid 1.14.2
+
+**[ESS](/apigee/docs/hybrid/v1.14/rotating-cassandra-credentials-in-vault) and [non-ESS](/apigee/docs/hybrid/v1.14/rotating-cassandra-credentials-non-ess) Cassandra credential rotation does not work in organizations with Enhanced Proxy Limits.**
+
+**Runtime traffic is not affected.**
+
+401624396
+
+hybrid 1.13.x  
+hybrid 1.14.x
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**The Apigee restore job fails while restoring `GCP` or `HYBRID` Cloud Providers backups taken from a multi-region setup. This issue does not affect [`CSI`](/apigee/docs/hybrid/v1.14/cassandra-csi-backup-restore) restore.**
+
+Backups taken from the multi-region setup using `GCP` and `HYBRID` Cloud Providers contain information about all the Hybrid regions that existed when the snapshot was taken. And, since those regions do not exist anymore, the restore job will conflict with the current state of Cassandra and fail with the following error: `Unrecognized strategy option passed to NetworkTopologyStrategy`.
+
+**Note:** If at least one Hybrid region is still alive and healthy, you should follow the [region recovery guide](/apigee/docs/hybrid/v1.14/restore-cassandra-multi-region#recover-failed-region) instead of restoring Cassandra from a snapshot.
+
+401746333
+
+Apigee  
+hybrid 1.12.4  
+hybrid 1.13.3  
+hybrid 1.14.1
+
+<span style="color:#008000">FIXED</span>
+
+**The [Nimbus JOSE + JWT](https://connect2id.com/products/nimbus-jose-jwt) library may cause a `java.lang.ClassCircularityError` when using a JavaCallout policy .**
+
+If you have a Apigee hybrid-enabled organization with a JavaCallout policy that uses the Nimbus JOSE + JWT library, do not upgrade to hybrid 1.12.4, hybrid 1.13.3, hybrid 1.14.1.
+
+397693324
+
+hybrid 1.14.0  
+hybrid 1.14.1
+
+<span style="color:#008000">FIXED</span> in hybrid 1.14.2
+
+**[ESS](/apigee/docs/hybrid/v1.14/rotating-cassandra-credentials-in-vault#multi-region-setup) and [non-ESS](/apigee/docs/hybrid/v1.14/rotating-cassandra-credentials-non-ess#multi-region-credential-rotation) Multi-region Cassandra credential rotation will fail in every region except the first.**
+
+**Runtime traffic is not affected.**
+
+Follow the provided [workaround](/apigee/docs/api-platform/troubleshoot/playbooks/cassandra/ts-credential-rotation#ki-397693324) to resolve this issue.
+
+391861216
+
+hybrid 1.13.x  
+hybrid 1.14.x
+
+<span style="color:#008000">FIXED</span> in hybrid 1.13.3 and hybrid 1.14.1
+
+**Restarting Cassandra pods on a Hybrid cluster that has been restored using the [`GCP`](/apigee/docs/hybrid/v1.14/restore-cassandra-single-region) or `HYBRID` Cloud Providers will cause the pods to go into the CrashLoopBackoff state. This issue does not affect [`CSI`](/apigee/docs/hybrid/v1.14/cassandra-csi-backup-restore) restore.**
+
+Cassandra pods will be restarted after applying Cassandra overrides changes, such when re-enabling backup, which will trigger this issue. The logs of a Cassandra pod in the CrashLoopBackoff state will show the following error: `Cannot change the number of tokens from 512 to 256`.
+
+Follow the provided [workaround](/apigee/docs/api-platform/troubleshoot/playbooks/cassandra/ts-cassandra-restore#ki-391861216) to resolve this issue.
+
+388608440
+
+hybrid 1.11.x  
+hybrid 1.12.x
+
+<span style="color:#008000">FIXED</span> in hybrid 1.12.4 and later
+
+**The Apigee backup job doesn't clean up the Cassandra intermediate snapshots.**
+
+In some rare cases, the Apigee backup job doesn't clean up the Cassandra intermediate snapshots it creates while taking backups using [`HYBRID`](/apigee/docs/hybrid/v1.12/schedule-cassandra-backup-non-gcs) or [`GCP`](/apigee/docs/hybrid/v1.12/schedule-cassandra-backup-gcs) Cloud Providers. This only happens if an underlying issue prevents the backup process from successfully connecting to the remote server or Cloud Storage. If the connection issue persists, those leftover Cassandra snapshots can accumulate over time, utilizing storage on Cassandra's disks. **If you're affected, please fix the underlying connection issue and then follow the steps provided in the [Cassandra troubleshooting guide](/apigee/docs/api-platform/troubleshoot/playbooks/cassandra/ts-cassandra#ki-388608440) to clear Cassandra snapshots manually.**
+
+**Note:** This known issue doesn't affect the [CSI backup and restore](/apigee/docs/hybrid/v1.12/cassandra-csi-backup-restore).
+
+392135466
+
+hybrid 1.14.0
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Proxy chaining with mTLS is not supported when using [Enhanced per-environment proxy limits](/apigee/docs/hybrid/v1.14/enhanced-proxy-limits)**
+
+383334511
+
+Apigee
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**KVM entry created with unexpected name**
+
+When a KeyValueMapOperations policy is used with `apiproxy` scope, and the policy's `<Put>` operation is called in a shared flow via a flow hook, the KVM entry is created under the shared flow name. It is expected to be created under the API proxy name.
+
+384937220
+
+hybrid 1.14.0
+
+<span style="color:#008000">FIXED</span>
+
+**Helm release creation may fail when there are multiple virtual hosts.**
+
+**Note:** This has been fixed in version 1.14.2. Apigee recommends that you [upgrade to version 1.14.2 or newer](/apigee/docs/hybrid/v1.14/upgrade).
+
+When there are multiple virtual hosts, the Helm release creation may fail due to conflicting `ApigeeRoute` names. The workaround is to run the following commands for every virtual host when creating:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+kubectl annotate ar apigee-ingressgateway-internal-chaining-PROJECT_ID_SUFFIX -n APIGEE_NAMESPACE meta.helm.sh/release-name=NEW_ENV_GROUP_NAME --overwrite
+kubectl annotate cert apigee-ingressgateway-internal-chaining-PROJECT_ID_SUFFIX -n APIGEE_NAMESPACE meta.helm.sh/release-name=NEW_ENV_GROUP_NAME --overwrite
+```
+
+where:
+
+- `PROJECT_ID_SUFFIX` is a unique suffix for internal chaining for your project in Kubernetes. You can find this suffix with the following command:
+
+  <div>
+
+  </div>
+
+  ``` devsite-terminal
+  kubectl get svc -n apigee -l app=apigee-ingressgateway | grep internal-chaining
+  ```
+
+  Your output will look something like:
+
+  <div>
+
+  </div>
+
+  ``` devsite-disable-click-to-copy
+  kubectl get svc -n apigee -l app=apigee-ingressgateway | grep internal-chaining
+  apigee-ingressgateway-internal-chaining-my-project--1234567    ClusterIP  34.118.226.140  <none>    15021/TCP,443/TCP    5d6h
+  ```
+
+  In the example output, `my-project--1234567` is the `PROJECT_ID_SUFFIX`.
+
+- `APIGEE_NAMESPACE` is your Apigee namespace.
+
+- `NEW_ENV_GROUP_NAME` is the name the additional environment group. Update this value for each virtual host.
+
+N/A
+
+Apigee hybrid
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Invalid service account can send the UpdateControlPlaneAccess api into a retry loop.**
+
+If a user provides an invalid service account to the UpdateControlPlaneAccess api, the operation goes on a retry loop effectively locking the organization from invoking the API until the operation times out.
+
+373722434
+
+hybrid 1.13.x
+
+<span style="color:#008000">FIXED</span> starting in hybrid 1.13.2 and later
+
+**The Apigee backup job is unable to upload to Cloud Storage buckets with retention policies.**
+
+When using the `GCP` Cloud Provider, the Apigee backup job is unable to upload to Cloud Storage buckets with retention policies. Backup files may be left in the Cloud Storage bucket with 0 byte file size.
+
+**Workaround:** Disable retention policies on the Cloud Storage bucket.
+
+341099433
+
+Apigee hybrid
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**The `apigee-logger` component does not support [Workload Identity Federation](/apigee/docs/hybrid/latest/enable-workload-identity-federation).**
+
+`apigee-logger` utilizes Google IAM service accounts for shipping logs to Cloud Logging. This is due to FluentBit's lack of support for Workload Identity Federation, which prevents the `apigee-logger` from utilizing this feature.
+
+N/A
+
+Apigee hybrid
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Distributed trace in Apigee hybrid is not supported for orgs using [data residency](/apigee/docs/hybrid/latest/using-data-residency-with-apigee-hybrid).**
+
+N/A
+
+Apigee
+
+**<span style="color:#ec407a">OPEN</span>**
+
+Apigee does not support key re-encryption, which means even after rotation, the old key version will still be used and you cannot change the CMEK key after org creation.
+
+270574696
+
+Apigee
+
+<span style="color:#008000">FIXED</span>
+
+Apigee does not support [Cloud External Key Manager](/kms/docs/ekm).
+
+268104619
+
+Apigee  
+Apigee hybrid
+
+**<span style="color:#ec407a">OPEN</span>**
+
+In the OASValidation policy, when you specify an array type in header, the MP will throw an error, even if the input is valid.
+
+364872027
+
+Apigee  
+Apigee hybrid
+
+<span style="color:#008000">FIXED</span>
+
+**PEM parsing error in JWT/JWS policies due to non-standard format**
+
+For Apigee and Apigee hybrid versions 1.13 and higher, any deviations in the required PEM format of keys used in [Apigee JWS or JWT policies](/apigee/docs/api-platform/reference/policies/jwt-policies-overview) may result in a parsing error. For example, placing any character other an a newline (`/n`) immediately before the `"-----END"` line (post-encapsulation boundary) is not allowed and will result in an error.
+
+To prevent this error, make sure that no characters other than a newline, such as trailing spaces or slashes, immediately precede the post-encapsulation boundary.
+
+For more information about the encoding used for public or private keys, see <a href="https://datatracker.ietf.org/doc/html/rfc7468" class="external">IETF RFC 7468</a>.
+
+310191899
+
+Apigee  
+Apigee hybrid
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Timeouts when deploying API proxies and shared flows**
+
+The following endpoints may experience timeouts when used with a high volume of queries per second (QPS):
+
+- [organizations.environments.apis.revisions.  
+  deployments.deploy](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/deploy)
+- [organizations.environments.apis.revisions.  
+  deployments.undeploy](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/undeploy)
+- [organizations.environments.sharedflows.revisions.  
+  deployments.deploy](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.sharedflows.revisions.deployments/deploy)
+- [organizations.environments.sharedflows.revisions.  
+  deployments.undeploy](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.sharedflows.revisions.deployments/undeploy)
+
+To reduce the likelihood of timeouts, we recommend setting a target of 1 QPS when using these endpoints or checking the status of a deployment before attempting another deployment.
+
+329304975
+
+Apigee
+
+<span style="color:#008000">FIXED</span>
+
+**Limit on number of basepaths per environment**
+
+Apigee is enforcing a temporary limit of 1000 basepaths per environment to avoid potential failures when deploying API proxy revisions.
+
+While this limit is in place, you can deploy up to 1000 API proxy revisions (each containing a single basepath) per environment. If your API proxies or revisions contain more than one basepath, the total number of basepaths per environment must not exceed 1000.
+
+333791378
+
+hybrid 1.12.0
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Cassandra backup and restore features not supported by Helm migration tool**
+
+For the steps required to install a patch for the workaround, see [Troubleshooting](/apigee/docs/hybrid/v1.12/helm-migration#troubleshooting).
+
+310384001
+
+hybrid 1.11.0
+
+**<span style="color:#ec407a">OPEN</span>**
+
+Cert validation failures may return a 502 instead of a 503 error response when users add the tag `<Enforce>true</Enforce>` in the target `<SSLInfo>` block for default validation of TLS target endpoint certificates.
+
+289583112
+
+Apigee
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**OASValidation policy does not work with global security requirements in OpenAPI specifications**
+
+If the OASValidation policy specifies an \<OASResource\> with security requirements set at a *global* level, the security requirements are not enforced.
+
+**Workaround**: To ensure enforcement, all security requirements must be set at the *operation* level in the OpenAPI specification passed in the `<OASResource>` element of the OASValidation policy.
+
+205666368
+
+Apigee  
+hybrid 1.10.2  
+hybrid 1.10.3
+
+<span style="color:#008000">FIXED</span> in Apigee 1-10-0-apigee-6 and  
+Hybrid 1.10.3-hotfix.1
+
+**Apigee hybrid does not validate the target certificate by default.**
+
+See [About setting TLS options in a target endpoint or target server](/apigee/docs/api-platform/system-administration/options-configuring-tls#about-setting-tls-options-in-a-target-endpoint-target-server).
+
+295929616
+
+hybrid 1.10.0 and later
+
+<span style="color:#008000">FIXED</span> in hybrid 1.10.3
+
+**Installing Apigee hybrid 1.10 on OpenShift (OSE) can fail with out-of-memory errors.**
+
+Installing or upgrading to Apigee hybrid 1.10.0 through 1.10.2 could fail on OSE due to out-of-memory issues. Fixed in Apigee hybrid version 1.10.3.
+
+292118812
+
+hybrid 1.10.1
+
+<span style="color:#008000">FIXED</span>
+
+**`apigee-udca` may not honor the http proxy settings.**
+
+If the firewall forces all traffic through a forward-proxy, `apigee-udca` may go into a crash-loop backoff state.
+
+292558790
+
+Apigee  
+hybrid 1.8.0 and later
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**OASValidation policy fails with `Unable to parse JSON` error.**
+
+- The OASValidation Policy fails when the JSON content does not match the anticipated pattern. For example, if a header is expecting a value in the format `<`*`text`*`>@<`*`text`*`>` and is populated with text missing the `@` symbol, the policy will fail with an `Unable to parse JSON` error.
+
+- If the OASValidation policy specifies an \<OASResource\> containing a `path` parameter that utilizes a `$ref` schema, the policy will fail with an `Unable to parse JSON - Unrecognized token` error.
+
+  **Workaround**: Do not use `$ref` in the `path` parameters of the OpenAPI spec specified in the \<OASResource\> element.
+
+297012500
+
+Apigee  
+hybrid 1.8.0 and later
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Deployment Issues with OAS Validation while using circular reference.**
+
+Apigee deployment will fail for OAS Validation policy when using circular references for OpenAPI 3.0.0 specification as it gets into an infinite loop.
+
+**Workaround**: Use an OpenAPI specification yaml without circular references.
+
+289254725
+
+Apigee  
+Apigee 1-10-0-apigee-3  
+hybrid 1.8.8  
+hybrid 1.9.3
+
+<span style="color:#008000">FIXED</span> in Apigee 1-10-0-apigee-5  
+<span style="color:#008000">FIXED</span> in hybrid
+
+**Proxy deployments that include the OASValidation policy may fail.**
+
+Proxy deployments that include the OASValidation policy may fail if:
+
+- The OpenAPI specification used for validation in the OASValidation policy is in YAML format, and
+
+- The YAML-formatted OpenAPI specification contains a floating number. For example:
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+  schema:
+  type: number
+  example: 2.345
+  ```
+
+284500460
+
+Apigee  
+Apigee 1-10-0-apigee-1
+
+<span style="color:#008000">FIXED</span>
+
+**Increase in latency for Message Logging policy when used with Cloud Logging.**
+
+To avoid increasing latency in responses to the client, the Message Logging policy should be attached to the *PostClientFlow*. For more information on using policies in PostClientFlows, see [Controlling API proxies with flows](https://cloud.google.com/apigee/docs/api-platform/fundamentals/what-are-flows).
+
+282997216
+
+hybrid 1.8.0 and later  
+hybrid 1.9.0 and later
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Special characters not allowed in Cassandra Jolokia password**
+
+Use only alphanumeric characters for the Cassandra Jolokia password. Using special characters (including but not limited to "!", "@", "#", "\$", "%", "^", "&", & "\*") can cause Cassandra startup to fail.
+
+270371160
+
+hybrid 1.9.0 and later
+
+<span style="color:#008000">FIXED</span>
+
+**Apigee Ingress gateway supports TLS1.2+ protocol/ciphers only**
+
+Apigee Ingress gateway only supports TLS1.2+, and not earlier versions of TLS.
+
+269139342
+
+hybrid 1.7.0 and later
+
+<span style="color:#008000">FIXED</span>
+
+**`apigeectl getOrg` does not follow `HTTP_PROXY` settings in `overrides.yaml`**
+
+Apigee organization validation does not follow HTTP Forward proxy rules set in `overrides.yaml`. Set `validateOrg: false` to skip this validation.
+
+266452840
+
+Apigee  
+hybrid 1.7.0 and later  
+hybrid 1.8.0 and later  
+hybrid 1.9.0 and later
+
+<span style="color:#008000">FIXED</span>
+
+**Web sockets not working with Anthos Service Mesh 1.15.3 in Apigee X and Apigee Hybrid**
+
+In certain circumstances, web sockets are not working for Apigee X and Apigee Hybrid when using Anthos Service Mesh `1.15.3-asm.6`.
+
+287922301
+
+Apigee
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Inaccuracies in Monetization rates around volume-band thresholds**
+
+Due to current design, inaccurate monetization rates may be assessed for transactions that occur near a volume-band threshold. This manifests as too many transactions being assessed at the pre-threshold rate, and is more likely to occur when many transactions for a given developer and rate plan combination occur within a 30 second window. This means that monetization reporting will over-report charges with decreasing banded rates, and under-report charges when increasing banded rates. This issue occurs in Apigee X and Apigee Hybrid and has no known workaround. Resolution has begun and will be available in a future release.
+
+242213234
+
+Apigee
+
+<span style="color:#008000">FIXED</span>
+
+**API product fails to load with a "no connections available" error**
+
+This error might be returned when attempting to load API products: "Products were not loaded successfully. Error: no connections available from the Apigee connect agent(s)."
+
+The problem occurs after enabling VPC service control in the Google Cloud project and adding `iamcredentials.googleapis.com` as one of the restricted services in the service perimeter.
+
+**Workaround:** Manually create an egress rule, such as the following:
+
+<div>
+
+</div>
+
+```
+-egressTo:
+    operations:
+    -serviceName: "iamcredentials.googleapis.com"
+        methodSelectors:
+        -method:
+    resources:
+    -projects/608305225983
+  egressFrom:
+    identityType: ANY_IDENTITY
+```
+
+247540503
+
+hybrid 1.7.0 and later  
+hybrid 1.8.0 and later
+
+<span style="color:#008000">FIXED</span>
+
+**A race condition with encryption key lookup can cause KVM lookup failures.**
+
+In certain circumstances at very high throughput a race condition with encryption key lookup can cause KVM lookup failures.
+
+258699204
+
+hybrid 1.8.0 and later
+
+<span style="color:#008000">FIXED</span>
+
+**The default memory requests and limits for metrics pods have inadvertently changed in 1.8.x.**
+
+If you see problems with the apigee-telemetry-app or apigee-telemetry-proxy pods not running, change the `metrics` resources requests and resources limits properties to match the following defaults in [Configuration property reference: metrics](/apigee/docs/hybrid/v1.8/config-prop-ref#metrics).
+
+| Configuration property | Default value |
+|----|----|
+| `metrics.aggregator.resources.requests.memory`: | `512Mi` |
+| `metrics.aggregator.resources.limits.memory`: | `3Gi` |
+| `metrics.app.resources.requests.memory`: | `512Mi` |
+| `metrics.app.resources.limits.memory`: | `1Gi` |
+| `metrics.appStackdriverExporter.resources.requests.memory`: | `512Mi` |
+| `metrics.appStackdriverExporter.resources.limits.memory`: | `1Gi` |
+| `metrics.proxy.resources.requests.memory`: | `512Mi` |
+| `metrics.proxy.resources.limits.memory`: | `1Gi` |
+| `metrics.proxyStackdriverExporter.resources.requests.memory`: | `512Mi` |
+| `metrics.proxyStackdriverExporter.resources.limits.memory`: | `1Gi` |
+
+Apply the changes with `apigeectl apply` with the `‑‑telemetry` flag:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+apigeectl apply --telemetry -f overrides.yaml
+```
+
+260324159
+
+Apigee 1-9-0-apigee-16
+
+<span style="color:#008000">FIXED</span>
+
+**API proxy and shared flow deployments taking up to 30 minutes.**
+
+API proxies and shared flows could take around 20 to 30 minutes to deploy in the runtime plane in certain circumstances due to a 'socket closed' error in synchronizer.
+
+214447386
+
+All
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**The message "config not modified" is displayed in Apigee API [Data Access audit logs](/logging/docs/audit#data-access) as an `Error`.**
+
+This is expected to occur every minute and does not affect your billing cost.
+
+260772383
+
+hybrid 1.8.0 and later
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Socket bind error on the AKS platform**
+
+If installing hybrid on AKS, you may see this error:  
+  
+`envoy config listener '0.0.0.0_443' failed to bind or apply socket options: cannot bind '0.0.0.0:443': Permission denied`  
+  
+**Workaround:** Add the following `svcAnnotations` stanza to the overrides file:  
+  
+
+<div>
+
+</div>
+
+```
+ingressGateways:
+- name: INGRESS_NAME
+  ...
+  svcAnnotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+```
+
+  
+
+See [Configure the hybrid runtime](/apigee/docs/hybrid/v1.8/install-configure-cluster). See also <a href="https://learn.microsoft.com/en-us/azure/aks/internal-lb" class="external">Use an internal load balancer with AKS</a>.
+
+241786534
+
+hybrid 1.8.0 and later
+
+<span style="color:#008000">FIXED</span>
+
+**MART sometimes unable to connect to FluentD.**
+
+When using Org-scoped UDCA, MART is sometimes unable to connect to FluentD. Org-scoped UDCA is the default in Apigee hybrid version 1.8. See [`orgScopedUDCA`](/apigee/docs/hybrid/v1.8/config-prop-ref#orgscopedudca) in the Configuration property reference.
+
+N/A
+
+hybrid 1.6.0 and later
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**`apigee-logger` not working on Anthos BareMetal with CentOS or RHEL.**
+
+After migration of `apigee-logger` from `fluend` to `fluent-bit` in Apigee hybrid version 1.6.6, the logger stopped working on Anthos BareMetal with CentOS or RHEL.
+
+207762842
+
+hybrid 1.5.0 and later
+
+<span style="color:#008000">FIXED</span>
+
+**Logs not shipped to Cloud Logging by apigee-logger.**
+
+Current `apigee-logger` configurations, including liveness probes, are incompatible with the Kubernetes runtime, resulting in logs not being shipped to Cloud Logging as expected. This problem also causes the `apigee-logger` pods to crash regularly. This issue affects Apigee hybrid installations on AKS, Anthos Bare Metal, and other platforms. Note that in some cases this issue results in excessive log volume.
+
+191291501, 191000617
+
+Apigee
+
+<span style="color:#008000">FIXED</span>
+
+**Changing the email address of a developer entity will fail in the UI.**
+
+191002224
+
+hybrid 1.5.0 and later
+
+<span style="color:#008000">FIXED</span>
+
+**Changing an email address fails while using the [`PUT /organizations/{org_name}/developers/{developer_email}` API](https://apidocs.apigee.com/docs/developers/1/routes/organizations/%7Borg_name%7D/developers/%7Bdeveloper_email%7D/put).**
+
+184555974
+
+hybrid 1.5.0 and later
+
+<span style="color:#008000">FIXED</span>
+
+**The apigee-logger Fluentd can't parse logs in the OpenShift cluster.**
+
+N/A
+
+Archive deployments
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Managing and debugging Apigee archive deployments in the UI is not supported**
+
+In the Apigee UI, you **cannot** view, confirm deployment status, or manage your archive deployments, as described [Deploying an API proxy](/apigee/docs/api-platform/deploy/ui-deploy-new), or use the Debug UI as described in [Using Debug](/apigee/docs/api-platform/debug/trace-overview). As a workaround, you can use gcloud or the API to [List all archive deployments in an environment](/apigee/docs/api-platform/deploy/manage-archive-deployments#list-archive-deployments) and use the [Debug API](/apigee/docs/api-platform/debug/trace#apigee-api).
+
+N/A
+
+Archive deployments
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Rolling back an archive deployment is not supported**
+
+Rolling back an archive deployment is not currently supported. To remove a version of an archive deployment you need to either [redeploy a previous version of an archive](/apigee/docs/api-platform/deploy/manage-archive-deployments#deploy) or [delete the environment](/apigee/docs/api-platform/deploy/manage-archive-deployments#delete-archive-environments).
+
+421402073
+
+Apigee in VS Code
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Google Authentication in policies is not supported in Apigee in Visual Studio Code (VS Code)**
+
+Google authentication in ServiceCallout and ExternalCallout policies, as described in [Using Google Authentication](/apigee/docs/api-platform/security/google-auth/overview), is not supported in Apigee in VS Code.
+
+422757662
+
+Apigee 1-15-0-apigee-5  
+hybrid 1.15.0
+
+<span style="color:#008000">FIXED</span> in Apigee 1-15-0-apigee-7 and Apigee 1-15-0-apigee-8
+
+**x-b3 headers not available when DistributedTrace is disabled**
+
+In the Apigee 1-15-0-apigee-5 and hybrid 1.15.0 releases, Apigee stopped sending `x-b3` headers to target endpoints when Distributed Trace is disabled. However, some Apigee installations were relying on `x-b3` headers being sent regardless of whether Distributed Trace was enabled or disabled. Therefore this change has been reverted starting in Apigee 1-15-0-apigee-7.
+
+**Note:** In case you are experiencing this issue please reach out to Apigee to revert this change for now in your Apigee Org.
+
+**Caution:** Apigee does not recommend using `x-b3` headers when Distributed Trace is disabled. This will guard against future changes to this behavior.
+
+146222881
+
+hybrid 1.3.0 and later
+
+<span style="color:#008000">FIXED</span>
+
+**Invalid HTTP Header error**
+
+Invalid HTTP Header error: The Istio ingress switches all incoming target responses to the HTTP2 protocol. Because the hybrid message processor only supports HTTP1, you may see the following error when an API proxy is called:
+
+`http2 error: Invalid HTTP header field was received: frame type: 1, stream: 1,`
+
+` name: [:authority], value: [domain_name]`
+
+If you see this error, you can take either of the following actions to correct the problem:
+
+- Modify the target service to omit the Host header in the response.
+- Remove the Host header using the [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) in your API proxy if necessary.
+
+420985360
+
+Integrated portal
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**SmartDocs**
+
+- Apigee supports OpenAPI Specification 3.0 when you [publish your APIs](/apigee/docs/api-platform/publish/portal/publish-apis) using SmartDocs on your portal, though a subset of features are not yet supported. For example, `allOf` properties for combining and extending schemas.
+
+  If an unsupported feature is referenced in your OpenAPI Specification, in some cases the tools will ignore the feature but still render the API reference documentation. In other cases, an unsupported feature will cause errors that prevent the successful rendering of the API reference documentation. In either case, you will need to modify your OpenAPI Specification to avoid use of the unsupported feature until it is supported in a future release.
+
+- Try this API has the following limitations:
+  - The `Accept` header is set to `application/json` regardless of the value set for `consumes` in the OpenAPI Specification.
+  - Request headers of type other than string are not supported.
+
+N/A
+
+Integrated portal
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Portal admin**
+
+- Simultaneous portal updates (such as page, theme, CSS, or script edits) by multiple users is not supported at this time.
+- If you delete an API reference documentation page from the portal, there is no way to recreate it; you'll need to delete and re-add the API product, and regenerate the API reference documentation.
+- When [customizing your portal theme](/apigee/docs/api-platform/publish/portal/api-portal-themes), it may take up to 5 minutes for changes to fully apply.
+
+N/A
+
+Integrated portal
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**Portal features**
+
+Search will be integrated into the integrated portal in a future release.
+
+N/A
+
+Integrated portal
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**<span id="saml">SAML identity provider</span>**
+
+Single logout (SLO) with the SAML identity provider is not supported for custom domains. To enable a custom domain with a SAML identity provider, leave the Sign-out URL field blank when you [configure SAML settings](/apigee/docs/api-platform/publish/portal/portal-identity-provider#configuring_saml_settings).
+
+191815997
+
+hybrid 1.6.0 and later
+
+<span style="color:#008000">FIXED</span>
+
+**If a hybrid customer configures a forward proxy for the API proxy, Google token will not work unless it has direct access to `*.googleapis.com`.**
+
+N/A
+
+Apigee
+
+<span style="color:#008000">FIXED</span> in Apigee 1-12-0-apigee-2 and hybrid 1.12.0
+
+**API Monitoring and Cloud Monitoring show abnormal spikes**
+
+- API Proxy request and response counts (for proxy and targets) show abnormal spikes
+
+  Here is a sample showing such a spike:
+
+  (<a href="/static/apigee/docs/images/ki-metrics-explorer.png" target="_blank">view larger image</a>)
+
+  <img src="/static/apigee/docs/images/ki-metrics-explorer.png" />
+
+- Due to a bug, the system registers the count incorrectly for a brief period and the count is corrected. This happens where there is a reduction in API traffic (which results in a scale down of API gateways).
+
+- To distinguish actual spikes in requests vs. this issue, please consult the API Analytics page (specifically the **Proxy Performance** and **Target Performance** pages)
+
+Affected Metrics:
+
+- `apigee.googleapis.com/proxyv2/request_count`
+- `apigee.googleapis.com/proxyv2/response_count`
+- `apigee.googleapis.com/targetv2/request_count`
+- `apigee.googleapis.com/targetv2/response_count`
+
+New metrics
+
+You can use the new metrics to avoid this issue.
+
+**Note:** These metrics are currently available for Apigee and Apigee hybrid v1.12 and above. For Apigee hybrid v1.10 and v1.11, use the [original metrics](#original-metrics).
+
+Metric
+
+Description
+
+`apigee.googleapis.com/proxy/request_count`
+
+Number of requests to the Apigee proxy since the last sample was recorded.
+
+`apigee.googleapis.com/proxy/response_count`
+
+Number of responses sent by the Apigee API proxy.
+
+`apigee.googleapis.com/proxy/latencies`
+
+Distribution of latencies, which are calculated from the time the request was received by the Apigee proxy to the time the response was sent from the Apigee proxy to the client.
+
+`apigee.googleapis.com/target/request_count`
+
+Number of requests sent to the Apigee target since the last sample was recorded.
+
+`apigee.googleapis.com/target/response_count`
+
+Number of responses received from the Apigee target since the last sample was recorded.
+
+`apigee.googleapis.com/target/latencies`
+
+Distribution of latencies, which are calculated from the time the request was sent to the Apigee target to the time the response was received by the Apigee proxy. Time does not include the Apigee API proxy overhead.
+
+For Apigee hybrid, see: [Metrics collection overview](/apigee/docs/hybrid/v1.12/metrics-collection) and [View metrics](/apigee/docs/hybrid/v1.12/metrics-view).
+
+203778087
+
+hybrid 1.5.3 and later
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**`apigee-stackdriver-logging-agent` currently runs as root.**
+
+**Workaround:** Disable the logging agent on hybrid.
+
+205629443
+
+Apigee
+
+<span style="color:#008000">FIXED</span>
+
+**If ServiceCallout is fire and forget (no `<Response>` tag), a race condition can occur if there is another policy that occurs after it.**
+
+**Workaround:** To maintain the fire and forget behavior:
+
+1.  Add `<Response>calloutResponse</Response>` to the ServiceCallout.
+2.  Set `continueOnError` to `true`.
+
+207719377
+
+Apigee
+
+<span style="color:#008000">FIXED</span> in Apigee 1-11-0-apigee-1
+
+**If there is more than one SpikeArrest policy in a bundle, `502` errors will occur.**
+
+**Workaround:** Avoid using more than one SpikeArrest policy in the proxy to prevent the issue.
+
+209097822
+
+hybrid 1.5.0 and later  
+Apigee
+
+<span style="color:#008000">FIXED</span>
+
+**Dynamic updates to rate in spike arrest may not reflect immediately**
+
+For a particular key, if there is continuous traffic, the key may not be rate limited at the updated rate. If there is five minutes of no traffic for a particular key, the rate will be reflected.
+
+**Workaround:** Redeploy the proxy with a new reference variable if the rate has to take effect immediately. Or use two conditional spike arrests with different flow variables to adjust the rate.
+
+221305498
+
+Apigee
+
+**<span style="color:#ec407a">OPEN</span>**
+
+**API Monitoring may display fault code of '(not set)'.**
+
+API Monitoring of Configurable API Proxies may display a fault code of '(not set)' for responses with a non-2xx status from the target.
+
+246774745
+
+Apigee
+
+<span style="color:#008000">FIXED</span>
+
+**Value of `io.timeout.millis` is not honored when used with multiple dynamic targets.**
+
+If a proxy sets two or more `io.timeout.millis` values in two or more flows using the same target host, only one `io.timeout.millis` value is honored.
+
+245664917
+
+hybrid 1.8.x
+
+<span style="color:#008000">FIXED</span>
+
+**Apigee hybrid upgrade error can be ignored**
+
+During upgrade to Apigee hybrid 1.8.x, after running `apigeectl init` and confirming that `check-ready` succeeded, you may notice, if you view the pods, that the Cassandra schema validation job is in an error state. **This is a harmless condition**, and you can safely move to the next step in the upgrade procedure.
+
+300660653
+
+Apigee
+
+<span style="color:#008000">FIXED</span>
+
+**An error should be, but is not, returned when deploying proxies with the same path to multiple environments that are attached to the same instance and environment group**
+
+Deploying proxies with the same path to multiple environments that are attached to the same instance and environment group is not allowed and should return a warning message about a base path conflict. Instead, no error is shown and the deployments appear to succeed.  
+  
+**Workaround:** When deploying and after deployment, verify that there are not base path conflicts with deployed proxies and correct as needed.
+
+301458133
+
+Apigee
+
+<span style="color:#008000">FIXED</span>
+
+**Some proxy deployment attempts return an error that the revision is immutable**
+
+When attempting to save a previously deployed proxy, the deployment might fail with an error stating that the revision is immutable.  
+  
+**Workaround:** Click the dropdown arrow next to the **Save** button and select **Save as new revision**. Then reattempt the deployment.
+
+301845257
+
+Apigee
+
+<span style="color:#008000">FIXED</span>
+
+Attempting to deploy more than 800 proxies to an environment group fails with an error. The limit on which an error is returned is lower than 800 when the basepaths are longer than 15 characters.
+
+315820718
+
+Apigee
+
+<span style="color:#008000">FIXED</span>
+
+**With [gRPC proxy requests](/apigee/docs/api-platform/fundamentals/build-simple-api-proxy#creating-grpc-api-proxies), gRPC trailers are removed from the response**
+
+When a call is made to a gRPC Target Server, the only trailer that's returned is the "grpc-status" trailer. All other trailers are removed from the response.
+
+341157011
+
+Apigee
+
+<span style="color:#008000">FIXED</span>
+
+**Specs generated with Gemini Code Assist in Cloud Code that also include non-ASCII UTF-8 characters are not parsed correctly when uploaded to API hub.**  
+  
+As a result API hub won't extract operations, definitions, and other metadata correctly.
+
+338285095
+
+Apigee
+
+<span style="color:#008000">FIXED</span>
+
+**Apps associated with an AppGroup do not appear in the Apps list in the Apigee UI.** As a result, users cannot access the app's App Detail page in the console. Using search in the console with a partial app name or API key search for the app is not supported until this issue is resolved.  
+  
+Apigee hybrid organizations are not impacted by this problem, as they use the Classic UI to view the app details.  
+  
+Partial workaround: A list of all apps is available using the APIs. See [organizations.apps.list](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.apps/list).
+
+355714868
+
+Monetization  
+Apigee hybrid
+
+<span style="color:#008000">FIXED</span> in hybrid 1.14.3, hybrid 1.15.1, hybrid 1.16.0
+
+**Recurring, setup, and top-up fee data not captured or billed *for hybrid organizations***  
+  
+For hybrid organizations with monetization, the recurring (RECURRING_FEE), setup fee (SETUP_FEE) and top-up fee (TOPUP_FEE) data is not captured or billed for post-paid billing. For pre-paid billing, the wallet deduction occurs for these fees but is not reported.
+
+438850078
+
+Apigee
+
+**<span style="color:#ec407a">OPEN</span>**
+
+An infinite recursion occurs within the OASValidation policy when a backend response contains a discriminator type that is the same as the parent schema. This problem can lead to a `StackOverflowError`.
+
+449012244
+
+Apigee
+
+**<span style="color:#ec407a">OPEN</span>**
+
+Use separate target endpoint definitions for SSE (server sent-event) targets. Mixing SSE and non-SSE target endpoints together might result in inconsistent behavior such as empty `response.content` flow variables.
+
+445936920
+
+Apigee 1-16-0-apigee-2 and later
+
+**<span style="color:#ec407a">OPEN</span>**
+
+Previously undetected DNS configuration problems might now cause DNS errors. Apigee removed the automatic DNS fallback functionality that was in 1-16-0-apigee-2. This removal eliminates the platform's resiliency to DNS misconfigurations and might now result in DNS errors.
+
+Find related errors by checking the runtime logs for DNS resolution errors.
+
+383372330
+
+Apigee Emulator versions 1.13.0 up to but not including 1.15.1
+
+<span style="color:#008000">FIXED</span> in Apigee Emulator versions 1.15.1 and later
+
+All proxy deployments fail locally with error messages including `Error parsing deployment report as JSON`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+06/13/2025 6:45 PM EMULATOR INFO Deploying environment testenv, to Container apigee-1.14.2 (1.14.2)
+06/13/2025 6:45 PM EMULATOR ERROR Error parsing deployment report as JSON
+06/13/2025 6:45 PM EMULATOR ERROR null
+06/13/2025 6:45 PM EMULATOR ERROR Environment testenv deployment, to Container apigee-1.14.2 (1.14.2) failed with Error: 500
+06/13/2025 6:45 PM EMULATOR ERROR Deploy to Container apigee-1.14.2 (1.14.2), failed with Error: Environment testenv deployment, to Container apigee-1.14.2 (1.14.2) failed with Error: 500
+```
+
+**Fix:** Update to an Apigee Emulator version 1.15.1 or later.

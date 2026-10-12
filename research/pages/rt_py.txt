@@ -1,0 +1,225 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/troubleshoot/policies/runtime/python-script-runtime-errors" target="_blank">Apigee Edge</a> documentation.*</span>
+
+**Note:** Was this troubleshooting playbook helpful? Please let us know by clicking <a href="" class="google-feedback" data-p="1636213" data-b="docsite" data-context="troubleshooting-feedback">Send Feedback</a> .
+
+## ScriptEvaluationFailed
+
+### Error code
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+steps.script.ScriptEvaluationFailed
+```
+
+### Error response body
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+    "fault": {
+        "faultstring": "Evaluation of script pythonscript_name (py) failed with reason: error_type: error_description"",
+        "detail": {
+            "errorcode": "steps.script.ScriptEvaluationFailed"
+        }
+    }
+}
+```
+
+### Possible causes
+
+The [Python Script](/apigee/docs/api-platform/reference/policies/python-script-policy) policy can throw several different types of `ScriptEvaluationFailed` errors. The sections below describe some of these errors.
+
+## NameError
+
+If there is a variable in the PythonScript code which is referenced or operated on without being defined, then you get the Name error.
+
+### Error response body
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+    "fault": {
+        "faultstring": "Evaluation of script pythonscript_name (py) failed with reason: "NameError: variable_name is not defined"",
+        "detail": {
+            "errorcode": "steps.script.ScriptEvaluationFailed"
+        }
+    }
+}
+```
+
+### Example error response body
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+    "fault": {
+        "faultstring": "Evaluation of script myscript.py (py) failed with reason: "NameError: 'num3' is not defined"",
+        "detail": {
+            "errorcode": "steps.script.ScriptEvaluationFailed"
+        }
+    }
+}
+```
+
+### Diagnosis
+
+1.  Identify the PythonScript policy and the undefined variable name from the faultstring element of the error response. For example, in the following faultstring, the PythonScript name is `myscript.py` and the undefined variable name is **num3**:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    "faultstring": "Evaluation of script myscript.py (py) failed with reason: "NameError: 'num3' is not defined""
+    ```
+
+2.  Examine the PythonScript source file identified in step \#1 above and verify if the undefined variable identified in step \#1 above is being referenced. For example, the following PythonScript code references the undefined variable **num3**, which matches the faultstring:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    num1 = 1.5
+    num2 = 6.3
+    sum = float(num1) + float(num3)
+    print('The sum of {0} and {1} is {2}'.format(num1, num3 sum))
+    ```
+
+3.  Check if the specific variable is defined within the PythonScript code. If the variable is not defined, then that's the cause for the error.
+
+    In the example script shown above, the variable **num3** is undefined. Therefore, you will get the below error:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    "faultstring": "Evaluation of script myscript.py (py) failed with reason: "NameError: 'num3' is not defined""
+    ```
+
+### Resolution
+
+Ensure that all the variables referenced in the PythonScript code are properly defined.
+
+To fix the issue with the example PythonScript shown above, define the variable **num3** before using it. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+num1 = 1.5
+num2 = 6.3
+num3 = 8.7
+sum = float(num1) + float(num3)
+print('The sum of {0} and {1} is {2}'.format(num1, num3, sum))
+```
+
+## ZeroDivisionError
+
+This error is raised when the second argument of a division or modulo operation is zero.
+
+### Error response body
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+    "fault": {
+        "faultstring": "Evaluation of script pythonscript_name (py) failed with reason: "ZeroDivisionError: reason_for_error"",
+        "detail": {
+            "errorcode": "steps.script.ScriptEvaluationFailed"
+        }
+    }
+}
+```
+
+### Example error response body
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+    "fault": {
+        "faultstring": "Evaluation of script myscript.py (py) failed with reason: "ZeroDivisionError: integer division or modulo by zero"",
+        "detail": {
+            "errorcode": "steps.script.ScriptEvaluationFailed"
+        }
+    }
+}
+```
+
+### Diagnosis
+
+1.  Identify the PythonScript policy name and the reason for failure from the faultstring element of the error response. For example, in the following faultstring, the PythonScript name is `myscript.py` and the reason for failure is `integer division or modulo by zero`:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    "faultstring": "Evaluation of script myscript.py (py) failed with reason: "ZeroDivisionError: integer division or modulo by zero""
+    ```
+
+2.  Examine the PythonScript source file identified in step \#1 above and verify if there's a division or a modulus operation by zero. For example, the following PythonScript code performs division by zero, which matches with what's in the faultstring:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    a = 0
+    b = 5
+    c = b/a
+    print c
+    ```
+
+    In the example script shown above, because the second argument of the division operation is zero, you get the following error:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    "faultstring": "Evaluation of script myscript.py (py) failed with reason: "ZeroDivisionError: integer division or modulo by zero""
+    ```
+
+### Resolution
+
+Ensure that the second argument of a division or modulo operation is non zero in the PythonScript.
+
+To fix the issue with the example PythonScript shown above, use a non zero value as the second argument of a division or modulo operation. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+a = 3
+b = 5
+c = b/a
+print c
+```
+
+## More Information
+
+There are many other possible causes for the error `steps.script.ScriptEvaluationFailed` apart from the ones described above. Please refer to the official [Python documentation](https://docs.python.org/3/library/exceptions.html) for more information.

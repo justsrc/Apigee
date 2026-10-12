@@ -1,0 +1,62 @@
+URL: https://github.com/apigee/apigee-deploy-maven-plugin/issues/155
+TITLE: Maven deployment failed: Jar file: edgemicro-auth proxy: "The revision is deployed, but traffic cannot flow"
+STATE: open state_reason: None
+AUTHOR: vdineshTM association: NONE
+CREATED: 2021-02-18T10:00:58Z CLOSED: None
+LABELS: 
+MILESTONE: None
+--- BODY ---
+We are trying to install MicroGateway. Out of box, edgemicro-auth proxy doesn't satisfy our business requirement. Hence we added extra policies and it was working fine.
+
+To make production-ready, we created a repository for edgemicro-auth and tried to instal from Maven install command. edgemicro-auth deployment failed with Error in Apigee UI saying
+
+_**"Error in deployment for environment dev. The revision is deployed, but traffic cannot flow"**_
+
+Maven command failed with **_"Deployment failed: Bundle did not activate within the expected time. Please check deployment status manually before trying again "_**
+
+We contacted the APIGEE support and they mentioned it is **_"steps.javacallout.JavaCalloutInstantiationFailed"_** from jar file(1)
+
+If we _manually upload the JAR file(1) from UI, the same deployment works fine._
+
+Hence it is pointing to the problem in Maven deployment plugin.
+
+APIGEE support can't investigate further as it is an open-source maven plugin issue.
+
+Could you please help us to resolve the maven deployment error?
+
+
+
+(1) The output of Jar file content.
+```
+
+├── META-INF
+│   ├── MANIFEST.MF
+│   └── maven
+│   └── com.apigee.gateway
+│   └── edge-micro-javacallout
+│   ├── pom.properties
+│   └── pom.xml
+├── io
+│   └── apigee
+│   └── microgateway
+│   └── javacallout
+│   ├── Callout.class
+│   └── Products.class
+└── release.properties
+
+```
+
+--- COMMENTS (2) ---
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2021-02-18T17:34:15Z
+@vdineshTM 
+The above info is not enough to investigate. I have deployed many proxies that has a Java callout policy. For example check [this repo](https://github.com/ssvaidyanathan/apigee-java-callout-pemdecode/tree/main/bundle). It has the jar file in the resources/java directory and is referenced by the policy. You can try that to see if it gets deployed. 
+
+If you still see issues, please run the mvn command with "-X" to get the debug output and please share that. Make sure when you are sharing, you redact all the sensitive information like Apigee org, username, password, token, etc
+
+### comment by rad264 (association=NONE) at 2021-06-10T19:08:56Z
+I had the same or a very similar issue. Deployed with the plugin, the Maven command finished no problem, but in the Edge UI it said it failed to deploy with the same message. Called the [management API](https://apidocs.apigee.com/docs/deployments/1/routes/organizations/%7Borg_name%7D/environments/%7Benv_name%7D/apis/%7Bapi_name%7D/revisions/%7Brevision_number%7D/deployments/get) to get more info and saw the same error: "steps.javacallout.JavaCalloutInstantiationFailed". If I updated the jar manually through the Edge UI, it deployed successfully.
+
+In my case, it was because I had enabled filtering for the maven-resources-plugin (<filtering>true</filtering>) on the entire apiproxy folder, which included the jar. I guess it must have tried to filter the jar contents, and corrupted it, because once I disabled filtering, it deployed successfully.
+
+It's unlikely this was the OP's exact issue, but thought I'd share in case anyone else happens to have a similar problem! Make sure nothing is potentially altering the jar in any way when copying or packaging the bundle! I'll stick to using config.json for substitutions, as recommended 😰

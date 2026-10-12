@@ -1,0 +1,114 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/cassandra-backup-overview.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/cassandra-backup-overview.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+Apigee hybrid backup and restore feature lets you create backups of the hybrid data and, in case of disaster scenarios, restore the data to previous working snapshots. Backup availability and retention is based on the backup infrastructure provided by you.
+
+A typical installation of Apigee hybrid consists of the following components:
+
+- MART (admin service)
+- Controller and Watcher (manage Kubernetes objects)
+- Istio (manages Ingress)
+- Runtime, Sync, and UDCA (one per environment)
+- Telemetry (monitoring and logging)
+- Cert manager (manages certificates)
+- Datastores (Cassandra and Redis databases)
+
+All the components except for Cassandra are stateless and do not persist any data. Backup and restoration is not necessary for those components. During recovery, reinstallation of those components using the existing overrides is sufficient.
+
+**Note:** We recommend that you do not store your backup in a Kubernetes node inside your Apigee hybrid cluster. If you do so, Kubernetes nodes can be autoscaled, the host filesystem can be deleted, and instances can be terminated. You should store your backup in a network volume mount. Generally, a server used for storing backups should have high availability so that backups can be recovered from different locations.
+
+## Why take backups of Cassandra?
+
+Backups are an important measure of protection against disaster scenarios. Each backup acts as a consistent snapshot of the Cassandra data existing at the time the backup is created. In addition to Cassandra data, this snapshot includes schema and metadata within the Cassandra cluster. In the event of a disaster, backups enable you to restore your hybrid instance to a previously operational state. Depending on the size of the hybrid instance, a single backup set may contain one or more backup files.
+
+## What you need to know about Cassandra backups?
+
+Cassandra is a replicated database that is configured to have at least three copies of your data in each region or data center. Cassandra uses streaming replication and read repairs to maintain the data replicas in each region or data center at any given point.
+
+In hybrid, Cassandra backups are **not** enabled by default. It's a good practice to enable Cassandra backups in the event your data is lost to a catastrophic failure. Cassandra backups are intended for use in cases of disaster recovery and not for restoring data loss caused by accidental deletion.
+
+Backups are created according to the schedule set in your `overrides.yaml` file. Once a backup schedule is applied to your hybrid cluster, a Kubernetes backup job is executed according to the schedule. The job triggers a backup script on each Cassandra node in your hybrid cluster that collects all the data on the node, creates an archive file of the data, and sends the archive to Cloud Storage or a directory on a remote server.
+
+**Note:**
+
+- Take a backup of the overrides.yaml files(s).
+- Backup of Kubernetes entities like Secrets, Certificates, and ConfigMaps are out of scope of this document. Please consult your Kubernetes vendor for the backup procedure of such Kubernetes entities.
+
+## What is backed up?
+
+The hybrid scheduled backup is a complete backup of the persisted runtime data stored in Apigee's Cassandra at the time of backup. Any data modifications after the backup time will not be available in the backup. The scheduled backup consist of the following entities:
+
+- Cassandra schema, including the user schema (Apigee keyspace definitions).
+- Cassandra partition token information per Cassandra node in a cluster.
+- A snapshot of the Cassandra data.
+
+## Where is backup data stored?
+
+The location of the backup data depends on your backup method. Apigee hybrid supports the following methods for taking backups:
+
+- **Backup in Cloud Storage**: Backup is stored in the configured Cloud Storage buckets in your Google Cloud Project.
+- **Backup in a remote server**: Backup is stored in a directory on a remote server specified by you.
+
+**Note:** Timestamps included in the names of files and snapshots are in UTC.
+
+## How the data is secured?
+
+If you are using Cloud Storage for backup, the backup data is encrypted by default. In case of backups not on Cloud Storage, backup data is encrypted during the transfer to the remote server. But after the transfer, you must ensure that the backup data is encrypted in the remote server.
+
+## How to take backups?
+
+Use one of these two methods to configure backups. For both methods, you'll configure backup in your `overrides.yaml` file. Apigee recommends you make a copy of the `overrides.yaml` file, so that you can reuse it during the recovery process.
+
+- Use [Apigee hybrid CSI backup and restore](/apigee/docs/hybrid/v1.17/cassandra-csi-backup-restore), which uses Kubernetes CSI (Container Storage Interface) snapshots. This method is recommended for hybrid instances hosted in Google Cloud, AWS, or Azure.
+
+- Use non-CSI hybrid backup and restore, which copies schema and other data to backup files. This is the recommended method for on-prem installations.
+
+  The following sections describe in detail how to schedule backups in Cloud Storage and in a remote server.
+
+  - [Scheduling backups in Cloud Storage](/apigee/docs/hybrid/v1.17/schedule-cassandra-backup-gcs)
+  - [Scheduling backups in a remote server](/apigee/docs/hybrid/v1.17/schedule-cassandra-backup-non-gcs)

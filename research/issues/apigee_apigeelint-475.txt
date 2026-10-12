@@ -1,0 +1,22 @@
+URL: https://github.com/apigee/apigeelint/issues/475
+TITLE: new plugin: for Quota policy, if CountOnly found, should also have EnforceOnly
+STATE: closed state_reason: completed
+AUTHOR: DinoChiesa association: COLLABORATOR
+CREATED: 2024-09-27T14:32:19Z CLOSED: 2024-12-26T22:13:17Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+It should be the case that if there is an EnforceOnly Quota policy, we should also have a CountOnly policy attached. 
+
+@ssvaidyanathan @kurtkanaskie WDYT?    Are there cases where it makes sense to violate this? For example, a CountOnly policy in a FlowHook-attached sharedflow, and an EnforceOnly policy directly attached in the proxy? 
+
+--- COMMENTS (2) ---
+
+### comment by kurtkanaskie (association=CONTRIBUTOR) at 2024-09-27T15:24:01Z
+I've always used them in pairs. EnforceOnly doesn't increment the count so it's not useful on its own.
+I suppose they could be in different shared flows (e.g. PreFlow flow hook and PostFlow flow hook).
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2024-09-27T15:42:34Z
+> I've always used them in pairs. EnforceOnly doesn't increment the count so it's not useful on its own. I suppose they could be in different shared flows (e.g. PreFlow flow hook and PostFlow flow hook).
+
+Yes - thats how its been used, if they want it in two different sharedflows. Sometimes in request vs response flows as well

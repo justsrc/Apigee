@@ -1,0 +1,43 @@
+<span style="background-color: #f0f0f0; font-size:10pt"> You're viewing **Apigee Edge** documentation.  
+<a href="http://cloud.google.com/apigee/docs" data-title="The link may not always point to
+   the exact same topic in Apigee X. If the link does not take you to the information you are looking for, the information or feature
+      is not applicable to Apigee X, or it&#39;s moved to a page on a related topic.">Go to the <strong>Apigee X</strong> documentation</a>.</span> <span class="material-symbols-outlined" data-title="The link may not always point to
+     the exact same topic in Apigee X. If the link does not take you to the information you are looking for, the information or feature
+        is not applicable to Apigee X, or it's moved to a page on a related topic.">info</span>
+
+## Get started with 4.53.01 (latest version)
+
+- [Edge for Private Cloud overview](/private-cloud/latest/overview)
+- [Installation](/private-cloud/latest/installation-overview)
+- [Configuration](/private-cloud/latest/how-configure-edge)
+- [Operations](/private-cloud/latest/starting-stopping-and-restarting-apigee-edge)
+- [<span class="abbr" title="Identity Provider">IDP</span> authentication](/private-cloud/latest/idp-overview)
+- [Troubleshooting](/api-platform/troubleshoot/troubleshooting-introduction) ([PDF](/static/files/ApigeeEdgeTroubleshootingGuide.pdf))
+- [4.53.01 Release Notes](/release/notes/45301-edge-private-cloud-release-notes)
+
+## Previous versions
+
+This section provides links to release notes and other documentation for each of the earlier versions of Edge for Private Cloud.
+
+| Version | Installing | Operations & Config | Installing Portal | External Auth | Monitoring Dashboard * | Troubleshooting Guide | Release Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| v4.53.00 | HTML | HTML | N/A | HTML | n/a | HTML / PDF | HTML |
+| v4.52.00 | HTML | HTML | N/A | HTML | n/a | HTML / PDF | HTML |
+| v4.51.00 not_interested | HTML | HTML | HTML | HTML | n/a | HTML / PDF | HTML |
+| v4.50.00 not_interested | HTML | HTML | HTML | HTML | n/a | HTML / PDF | HTML |
+| v4.19.06 not_interested | HTML | HTML | HTML | HTML | n/a | HTML / PDF | HTML |
+| v4.19.01 not_interested | HTML | HTML | HTML | HTML | n/a | HTML / PDF | HTML |
+| v4.18.05 not_interested | HTML | HTML | HTML | HTML | n/a | HTML / PDF | HTML |
+| v4.18.01 not_interested | HTML | HTML | HTML | HTML | n/a | PDF | HTML |
+| v4.17.09 not_interested | HTML | HTML | HTML | HTML | HTML | PDF | HTML |
+| v4.17.05 not_interested | HTML | HTML | HTML | HTML | HTML | PDF | HTML |
+| v4.17.01 not_interested | HTML | HTML | HTML | HTML | HTML | PDF | HTML |
+| v4.16.09 not_interested | HTML | HTML | HTML | HTML | PDF (Beta) ** | n/a | HTML |
+| v4.16.05 not_interested | HTML / PDF | HTML / PDF | HTML / PDF | PDF | PDF (Alpha) | n/a | HTML |
+| v4.16.01 not_interested | HTML | n/a | n/a | n/a | n/a | n/a | HTML |
+| * Before you can install and use the Apigee Monitoring Dashboard, you must complete the Apigee Evaluation Agreement (PDF) and return it to Apigee by emailing it to orders@apigee.com . ** The Dashboard was in the Beta release stage for this release. To read about Beta releases and how they are supported, see Edge release stages . |  |  |  |  |  |  |  |
+| not_interested Versions marked with this icon are considered unsupported. For more information, see Apigee deprecation policy . |  |  |  |  |  |  |  |
+
+## Community
+
+The <a href="https://discuss.google.dev/c/google-cloud/cloud-apigee/104" class="external">Apigee Community</a> is a free resource where you can contact Apigee as well as other Apigee customers with questions, tips, and other issues. Before posting to the community, be sure to first search existing posts to see if your question has already been answered.

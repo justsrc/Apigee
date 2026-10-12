@@ -1,0 +1,138 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/base-path-routing.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/base-path-routing.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/base-path-routing.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/base-path-routing.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/base-path-routing.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/base-path-routing.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/base-path-routing.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/base-path-routing.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/base-path-routing.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/base-path-routing.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/base-path-routing.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/base-path-routing.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/base-path-routing.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/base-path-routing.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/base-path-routing.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/base-path-routing.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/base-path-routing.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/base-path-routing.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+This topic discusses the [virtualhosts](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts) configuration property. Virtual hosts allow Apigee hybrid to handle API requests to hostaliases associated with an environment group. For more information, see [Routing and base paths](/apigee/docs/api-platform/fundamentals/environments-overview#routing) in the [About environments and environment groups](/apigee/docs/api-platform/fundamentals/environments-overview) topic.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+virtualhosts:
+  - name: my-env-group
+    sslCertPath: ./certs/fullchain.pem
+    sslKeyPath: ./certs/privkey.key
+...
+```
+
+When an API proxy call comes, it is routed to the host alias(es) of the environment group where the API proxy is deployed.
+
+For instructions on how to apply `virtualhosts` to the cluster, see [Applying virtualhosts changes](#applying). For information about configuring TLS, see [Configuring TLS and mTLS on the Istio ingress](/apigee/docs/hybrid/v1.17/ingress-tls).
+
+## Adding multiple virtual hosts
+
+The [`virtualhosts[]`](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts) property is an array, and therefore you can create more than one.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+virtualhosts:
+  - name: my-env-group-1
+    sslCertPath: ./certs/fullchain1.pem
+    sslKeyPath: ./certs/privkey1.key
+
+  - name: my-env-group-2
+    sslCertPath: ./certs/fullchain2.pem
+    sslKeyPath: ./certs/privkey2.key
+...
+```
+
+**Tip:** For security purposes, it is best practice to have a separate TLS cert/key pair for each virtual host. If you are using a Subject Alternative Name (SAN ) certificate, this TLS cert/key pair should be used on one virtual host that is shared across the domain.
+
+For information about configuring TLS, see [Configuring TLS and mTLS on the Istio ingress](/apigee/docs/hybrid/v1.17/ingress-tls).
+
+## Applying `virtualhosts` changes
+
+If you only add or change the `virtualhosts` property, apply the changes with the `apigee-virtualhost` chart and the name of the environment group to which you are applying the changes:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade $ENV_GROUP apigee-virtualhost/ \
+  --namespace apigee \
+  --atomic \
+  --set envgroup=$ENV_GROUP \
+  -f OVERRIDES_FILE.yaml
+```
+
+**Note:** If you see an error saying `Error: UPGRADE FAILED: "`*`ENV_GROUP`*`" has no deployed releases`, replace `upgrade` with `install` and try the command again.
+
+If, for example, you change `virtualhosts` and `env`, then you must apply the change with `helm upgrade` without using the `ENV_GROUP`` apigee-virtualhost/`flag to update the cluster. For example:
+
+Run helm upgrade for each environment you want to update.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+helm upgrade $ENV_NAME apigee-env/ \
+  --namespace apigee \
+  --atomic \
+  --set env=$ENV_NAME \
+  -f OVERRIDES_FILE.yaml
+```
+
+**Note:** If you see an error saying `Error: UPGRADE FAILED: "`*`ENV_NAME`*`" has no deployed releases`, replace `upgrade` with `install` and try the command again.
+
+## TLS keys and certificates
+
+The `virtualhost` property requires a TLS key and certificate. The key/cert are used to provide secure communication with the ingress gateway and must be compatible with the host aliases used in the specified environment group.
+
+It is up to you how you generate proper TLS certificate/key pairs for your hybrid configuration. The following topics are provided as samples only, intended primarily for trying out or testing a new hybrid installation if it isn't feasible to obtain TLS credentials in another way:
+
+- See [Obtain TLS credentials](/apigee/docs/hybrid/v1.17/lets-encrypt) for a set of sample steps for creating an authorized TLS certificate/key pair.
+- You can use a self-signed certificate/key pair(s) for testing purposes only. See [Generate self-signed TLS credentials](/apigee/docs/hybrid/v1.17/environment-self-signed-tls).

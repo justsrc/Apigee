@@ -1,0 +1,803 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This document shows you how to get OAuth 2.0 access tokens and authorization codes with the Apigee API. We also show how to create policies for each OAuth 2.0 grant type and configure proxy endpoints to accept client requests.
+
+**Note:** These examples show the most basic configurations possible. The OAuthV2 policy includes many optional configurable elements that are not shown in this topic. For more information on those elements, see [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy).
+
+## Use the authorization code grant type
+
+This section explains how to get an access token using the authorization code grant type flow. The token request for this flow requires an authorization code. See [Get an authorization code](#requestAuthCode). See also [What are OAuth 2.0 grant types](/apigee/docs/api-platform/security/oauth/oauth-introduction#whatareoauth20granttypes).
+
+**Note:** The OAuthV2 policy configuration in this section uses the `GenerateAccessToken` [operation](/apigee/docs/api-platform/reference/policies/oauthv2-policy#operationelement). This operation generates an opaque string token format. You can also generate JWT-formatted tokens by substituting the `GenerateJWTAccessToken` operation. See also [Using JWT OAuth token operations](/apigee/docs/api-platform/security/oauth/using-jwt-oauth).
+
+### **Sample request**
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl -i -H 'Content-Type: application/x-www-form-urlencoded' \
+   -H 'Authorization: Basic c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ' \
+   -X POST 'https://apitest.acme.com/oauth/token' \
+   -d 'code=I9dMGHAN&grant_type=authorization_code&redirect_uri=http://example-callback.com' 
+```
+
+### **Required parameters**
+
+By default, these parameters must be `x-www-form-urlencoded` and specified in the request body (as shown in the sample above); however, it is possible to change this default by configuring the `<GrantType>`, `<Code>`, and `<RedirectUri>` elements in the OAuthV2 policy. See [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy).
+
+- **grant_type** - Must be set to the value `authorization_code`.
+- **code** - The authorization code. See [Requesting an authorization code](/apigee/docs/api-platform/security/oauth/access-tokens#requestinganauthorizationcode).
+- **redirect_uri** - You must provide this parameter if the `redirect_uri` parameter was included in the authorization code request. If the `redirect_uri` parameter was not included in the authorization code request, and if you do not provide this parameter, then this policy uses the value of the Callback URL provided in the registered developer app.
+
+### **Optional parameters**
+
+- **state** - A string that will be sent back with the response. Typically used to prevent cross-site request forgery attacks.
+- **scope** - Allows you to filter the list of API products with which the minted token can be used. For detailed information on scope, see [Working with OAuth2 scopes](/apigee/docs/api-platform/security/oauth/working-scopes).
+
+### **Authorization**
+
+You must pass the Client ID and Client Secret either as a Basic Authorization header (Base64-encoded) or as form parameters `client_id` and `client_secret`. You obtain these values from a registered developer app. See also [Encoding basic authentication credentials](#encoding).
+
+### Sample endpoint
+
+Here's a sample endpoint configuration for generating an access token. It'll execute the GenerateAccessToken policy, which must be configured to support the authorization_code grant type.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+       <Flow name="generate-access-token">
+            <Description>Generate a token</Description>
+            <Request>
+                <Step>
+                    <Name>GenerateAccessToken</Name>
+                </Step>
+            </Request>
+            <Response/>
+            <Condition>(proxy.pathsuffix MatchesPath "/token") and (request.verb = "POST")</Condition>
+        </Flow>
+...
+```
+
+### Sample policy
+
+This is a basic GenerateAccessToken policy that is configured to accept the `authorization_code` grant type. For information on optional configuration elements that you can configure with this policy, see [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OAuthV2 name="GenerateAccessToken">
+    <Operation>GenerateAccessToken</Operation>
+    <ExpiresIn>1800000</ExpiresIn>
+    <RefreshTokenExpiresIn>86400000</RefreshTokenExpiresIn>
+    <SupportedGrantTypes>
+      <GrantType>authorization_code</GrantType>
+    </SupportedGrantTypes>
+    <GenerateResponse enabled="true"/>
+</OAuthV2>
+```
+
+### **Returns**
+
+With `<GenerateResponse>` enabled, the policy returns a JSON response that includes the access token, as shown below. The `authorization_code` grant type creates an access token and a refresh tokens, so a response might look like this:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+    "issued_at": "1420262924658",
+    "scope": "READ",
+    "application_name": "ce1e94a2-9c3e-42fa-a2c6-1ee01815476b",
+    "refresh_token_issued_at": "1420262924658",
+    "status": "approved",
+    "refresh_token_status": "approved",
+    "api_product_list": "[PremiumWeatherAPI]",
+    "expires_in": "1799", //--in seconds
+    "developer.email": "tesla@weathersample.com",
+    "organization_id": "0",
+    "token_type": "BearerToken",
+    "refresh_token": "fYACGW7OCPtCNDEnRSnqFlEgogboFPMm",
+    "client_id": "5jUAdGv9pBouF0wOH5keAVI35GBtx3dT",
+    "access_token": "2l4IQtZXbn5WBJdL6EF7uenOWRsi",
+    "organization_name": "docs",
+    "refresh_token_expires_in": "86399", //--in seconds
+    "refresh_count": "0"
+}
+```
+
+**Note:** Yes, it's kind of unusual to specify the expiry values in milliseconds in the policy, but receive them in seconds in the response payload. We are aware.
+
+If `<GenerateResponse>` is set to false, the policy does not return a response. Instead, it populates the following set of flow variables with data pertaining to the access token grant.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+oauthv2accesstoken.{policy-name}.access_token
+oauthv2accesstoken.{policy-name}.expires_in //--in seconds
+oauthv2accesstoken.{policy-name}.refresh_token
+oauthv2accesstoken.{policy-name}.refresh_token_expires_in //--in seconds
+oauthv2accesstoken.{policy-name}.refresh_token_issued_at
+oauthv2accesstoken.{policy-name}.refresh_token_status
+```
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+oauthv2accesstoken.GenerateAccessToken.access_token
+oauthv2accesstoken.GenerateAccessToken.expires_in
+oauthv2accesstoken.GenerateAccessToken.refresh_token
+oauthv2accesstoken.GenerateAccessToken.refresh_token_expires_in
+oauthv2accesstoken.GenerateAccessToken.refresh_token_issued_at
+oauthv2accesstoken.GenerateAccessToken.refresh_token_status
+```
+
+## Use the client credentials grant type
+
+This section explains how to get an access token using the client credentials grant type flow. See also [What are OAuth 2.0 grant types](/apigee/docs/api-platform/security/oauth/oauth-introduction#whatareoauth20granttypes).
+
+**Note:** The OAuthV2 policy configuration in this section uses the `GenerateAccessToken` [operation](/apigee/docs/api-platform/reference/policies/oauthv2-policy#operationelement). This operation generates an opaque string token format. You can also generate JWT-formatted tokens by substituting the `GenerateJWTAccessToken` operation. See also [Using JWT OAuth token operations](/apigee/docs/api-platform/security/oauth/using-jwt-oauth).
+
+### **Sample request**
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+curl -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "Authorization: Basic c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ" \
+  -X POST "https://apitest.acme.com/oauth/token" \
+  -d "grant_type=client_credentials"
+```
+
+### **Required parameters**
+
+- **grant_type** - Must be set to the value `client_credentials`.
+
+  By default, the required `grant_type` parameter must be `x-www-form-urlencoded` and specified in the request body (as shown in the sample above); however, it is possible to change this default by configuring the `<GrantType>` element in the OAuthV2 policy. For example, you could elect to pass the parameter in a query parameter. For details, see [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy).
+
+### **Optional parameters**
+
+- **state** - A string that will be sent back with the response. Typically used to prevent cross-site request forgery attacks.
+- **scope** - Allows you to filter the list of API products with which the minted token can be used. For detailed information on scope, see [Working with OAuth2 scopes](/apigee/docs/api-platform/security/oauth/working-scopes).
+
+### **Authorization**
+
+You must pass the Client ID and Client Secret either as a Basic Authorization header (Base64-encoded) or as form parameters `client_id` and `client_secret`. You obtain these values from the registered developer app associated with the request. See also [Encoding basic authentication credentials](#encoding).
+
+### Sample endpoint
+
+Here's a sample endpoint configuration for generating an access token. It'll execute the GenerateAccessToken policy, which must be configured to support the client_credentials grant type.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+       <Flow name="generate-access-token">
+            <Request>
+                <Step>
+                    <Name>GenerateAccessToken</Name>
+                </Step>
+            </Request>
+            <Response/>
+            <Condition>(proxy.pathsuffix MatchesPath "/token") and (request.verb = "POST")</Condition>
+        </Flow>
+...
+```
+
+### Sample policy
+
+This is a basic GenerateAccessToken policy that is configured to accept the `client_credentials` grant type. For information on optional configuration elements that you can configure with this policy, see [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OAuthV2 name="GenerateAccessToken">
+    <Operation>GenerateAccessToken</Operation>
+    <ExpiresIn>1800000</ExpiresIn> <!-- 30 minutes -->
+    <SupportedGrantTypes>
+      <GrantType>client_credentials</GrantType>
+    </SupportedGrantTypes>
+    <GenerateResponse enabled="true"/>
+</OAuthV2>
+```
+
+### **Returns**
+
+With `<GenerateResponse>` enabled, the policy returns a JSON response. Note that with the `client_credentials` grant type, refresh tokens are not supported. Only an access token is minted. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+    "issued_at": "1420260525643",
+    "application_name": "ce1e94a2-9c3e-42fa-a2c6-1ee01815476b",
+    "scope": "READ",
+    "status": "approved",
+    "api_product_list": "[PremiumWeatherAPI]",
+    "expires_in": "1799", //--in seconds
+    "developer.email": "tesla@weathersample.com",
+    "organization_id": "0",
+    "token_type": "BearerToken",
+    "client_id": "5jUAdGv9pBouF0wOH5keAVI35GBtx3dT",
+    "access_token": "XkhU2DFnMGIVL2hvsRHLM00hRWav",
+    "organization_name": "docs"
+}
+```
+
+If `<GenerateResponse>` is set to false, the policy does not return a response. Instead, it populates the following set of flow variables with data pertaining to the access token grant.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+oauthv2accesstoken.{policy-name}.access_token
+oauthv2accesstoken.{policy-name}.expires_in //--in seconds
+```
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+oauthv2accesstoken.GenerateAccessToken.access_token
+oauthv2accesstoken.GenerateAccessToken.expires_in     //--in seconds
+```
+
+## <span id="passwordgranttype"></span>Use the password grant type
+
+This section explains how to get an access token using the resource owner password credentials (password) grant type flow. See also [Implementing the password grant type](/apigee/docs/api-platform/security/oauth/implementing-password-grant-type). See also [What are OAuth 2.0 grant types](/apigee/docs/api-platform/security/oauth/oauth-introduction#whatareoauth20granttypes).
+
+**Note:** The OAuthV2 policy configuration in this section uses the `GenerateAccessToken` [operation](/apigee/docs/api-platform/reference/policies/oauthv2-policy#operationelement). This operation generates an opaque string token format. You can also generate JWT-formatted tokens by substituting the `GenerateJWTAccessToken` operation. See also [Using JWT OAuth token operations](/apigee/docs/api-platform/security/oauth/using-jwt-oauth).
+
+### **Sample request**
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+curl -v -k -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "Authorization: Basic c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ" \
+  -X POST "https://apitest.acme.com/oauth/token" \
+  -d "grant_type=password&username=a_username&password=a_password"
+```
+
+### **Required parameters**
+
+By default, these parameters must be `x-www-form-urlencoded` and specified in the request body (as shown in the sample above); however, it is possible to change this default by configuring the `<GrantType>`, `<Username>`, and `<Password>` elements in the OAuthV2 policy. See [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy).
+
+User credentials are typically validated against a credential store using an LDAP or JavaScript policy.
+
+- **grant_type** - Must be set to the value `password`.
+- **username** - The resource owner's user name.
+- **password** - The resource owner's password.
+
+### **Optional parameters**
+
+- **state** - A string that will be sent back with the response. Typically used to prevent cross-site request forgery attacks.
+- **scope** - Allows you to filter the list of API products with which the minted token can be used. For detailed information on scope, see [Working with OAuth2 scopes](/apigee/docs/api-platform/security/oauth/working-scopes).
+
+### **Authorization**
+
+You must pass the Client ID and Client Secret either as a Basic Authorization header (Base64-encoded) or as form parameters `client_id` and `client_secret`. You obtain these values from the registered developer app associated with the request. See also [Encoding basic authentication credentials](#encoding).
+
+### Sample endpoint
+
+Here's a sample endpoint configuration for generating an access token. It'll execute the GenerateAccessToken policy, which must be configured to support the password grant type.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+       <Flow name="generate-access-token">
+            <Request>
+                <Step>
+                    <Name>GenerateAccessToken</Name>
+                </Step>
+            </Request>
+            <Response/>
+            <Condition>(proxy.pathsuffix MatchesPath "/token") and (request.verb = "POST")</Condition>
+        </Flow>
+...
+```
+
+### Sample policy
+
+This is a basic GenerateAccessToken policy that is configured to accept the password grant type. For information on optional configuration elements that you can configure with this policy, see [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OAuthV2 name="GenerateAccessToken">
+    <Operation>GenerateAccessToken</Operation>
+    <ExpiresIn>1800000</ExpiresIn> <!-- 30 minutes -->
+    <RefreshTokenExpiresIn>28800000</RefreshTokenExpiresIn> <!-- 8 hours -->
+    <SupportedGrantTypes>
+      <GrantType>password</GrantType>
+    </SupportedGrantTypes>
+    <GenerateResponse enabled="true"/>
+</OAuthV2>
+```
+
+### **Returns**
+
+With `<GenerateResponse>` enabled, the policy returns a JSON response. Note that with the password grant type, both an access token and refresh token are minted. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+    "issued_at": "1420258685042",
+    "scope": "READ",
+    "application_name": "ce1e94a2-9c3e-42fa-a2c6-1ee01815476b",
+    "refresh_token_issued_at": "1420258685042",
+    "status": "approved",
+    "refresh_token_status": "approved",
+    "api_product_list": "[PremiumWeatherAPI]",
+    "expires_in": "1799", //--in seconds
+    "developer.email": "tesla@weathersample.com",
+    "organization_id": "0",
+    "token_type": "BearerToken",
+    "refresh_token": "IFl7jlijYuexu6XVSSjLMJq8SVXGOAAq",
+    "client_id": "5jUAdGv9pBouF0wOH5keAVI35GBtx3dT",
+    "access_token": "I6daIgMSiUgYX1K2qgQWPi37ztS6",
+    "organization_name": "docs",
+    "refresh_token_expires_in": "28799", //--in seconds
+    "refresh_count": "0"
+}
+```
+
+If `<GenerateResponse>` is set to false, the policy does not return a response. Instead, it populates the following set of flow variables with data pertaining to the access token grant.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+oauthv2accesstoken.{policy-name}.access_token
+oauthv2accesstoken.{policy-name}.expires_in   //--in seconds
+oauthv2accesstoken.{policy-name}.refresh_token
+oauthv2accesstoken.{policy-name}.refresh_token_expires_in  //--in seconds
+oauthv2accesstoken.{policy-name}.refresh_token_issued_at
+oauthv2accesstoken.{policy-name}.refresh_token_status
+```
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+oauthv2accesstoken.GenerateAccessToken.access_token
+oauthv2accesstoken.GenerateAccessToken.expires_in
+oauthv2accesstoken.GenerateAccessToken.refresh_token
+oauthv2accesstoken.GenerateAccessToken.refresh_token_expires_in
+oauthv2accesstoken.GenerateAccessToken.refresh_token_issued_at
+oauthv2accesstoken.GenerateAccessToken.refresh_token_status
+```
+
+## Use the implicit grant type
+
+This section explains how to get an access token using the implicit grant type flow. See also [What are OAuth 2.0 grant types](/apigee/docs/api-platform/security/oauth/oauth-introduction#whatareoauth20granttypes).
+
+**Note:** The OAuthV2 policy configuration in this section uses the `GenerateAccessTokenImplicitGrant` [operation](/apigee/docs/api-platform/reference/policies/oauthv2-policy#operationelement). This operation generates an opaque string token format. You can also generate JWT-formatted tokens by substituting the `GenerateJWTAccessTokenImplicitGrant` operation. See also [Using JWT OAuth token operations](/apigee/docs/api-platform/security/oauth/using-jwt-oauth).
+
+### **Sample request**
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+$ curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' \
+  'https://apitest.acme.com/oauth/implicit?response_type=token&client_id=c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ&redirect_uri=http://callback-example.com'
+```
+
+### **Required parameters**
+
+By default, these parameters must be query parameters (as shown in the sample above); however, it is possible to change this default by configuring the `<ResponseType>`, `<ClientId>`, and `<RedirectUri>` elements in the OAuthV2 policy that is attached to this `/token` endpoint. For details, see [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy).
+
+User credentials are typically validated against a credential store using an LDAP service callout or JavaScript policy.
+
+- **response_type** - Must be set to the value `token`.
+- **client_id** - The client ID of a registered developer app.
+- **redirect_uri** - This parameter is mandatory if a Callback URI was not provided when the client developer app was registered. If a Callback URL was provided at client registration, it will be compared to this value and must match exactly.
+
+### **Optional parameters**
+
+- **state** - A string that will be sent back with the response. Typically used to prevent cross-site request forgery attacks.
+- **scope** - Allows you to filter the list of API products with which the minted token can be used. For detailed information on scope, see [Working with OAuth2 scopes](/apigee/docs/api-platform/security/oauth/working-scopes).
+
+### **Authorization**
+
+Does not require the Authorization header; however, you do need to pass a client ID as a request parameter.
+
+### Sample endpoint
+
+Here's a sample endpoint configuration for generating an access token. It'll execute the GenerateAccessTokenImplicitGrant policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+...
+       <Flow name="generate-access-token-implicit">
+            <Request>
+                <Step>
+                    <Name>GenerateAccessTokenImplicitGrant</Name>
+                </Step>
+            </Request>
+            <Response/>
+            <Condition>(proxy.pathsuffix MatchesPath "/implicit") and (request.verb = "POST")</Condition>
+        </Flow>
+...
+```
+
+### Sample policy
+
+This is a basic GenerateAccessTokenImplicitGrant policy that processes token requests for the implicit grant type flow. For information on optional configuration elements that you can configure with this policy, see [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OAuthV2 name="GenerateAccessTokenImplicit">
+    <DisplayName>GenerateAccessTokenImplicit</DisplayName>
+    <Operation>GenerateAccessTokenImplicitGrant</Operation>
+    <GenerateResponse enabled="true"/>
+</OAuthV2>
+```
+
+### **Returns**
+
+With `<GenerateResponse>` enabled, the policy returns a 302 Location redirect in the response header. The redirect points to the URL specified in the `redirect_uri` parameter and is appended with the access token and token expiration time. Note that the implicit grant type does not support refresh tokens. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+https://callback-example.com#expires_in=1799&access_token=In4dKm4ueoGZRbIYJhC9yZCmTFw5
+```
+
+If `<GenerateResponse>` is set to false, the policy does not return a response. Instead, it populates the following set of flow variables with data pertaining to the access token grant.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+oauthv2accesstoken.{policy-name}.access_token
+oauthv2accesstoken.{policy-name}.expires_in  //--in seconds
+```
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+oauthv2accesstoken.GenerateAccessToken.access_token
+oauthv2accesstoken.GenerateAccessToken.expires_in   //--in seconds
+```
+
+## <span id="requestAuthCode"></span>Get an authorization code
+
+In the authorization code grant type flow, an authorization code is required to obtain an access token. See [Use the authorization code grant type](#requestinganaccesstokenauthorizationcodegranttype). See also [What are OAuth 2.0 grant types](/apigee/docs/api-platform/security/oauth/oauth-introduction#whatareoauth20granttypes).
+
+**Note:** The authorization code flow takes place between a third-party user authentication service and Apigee. The intent of the authorization code grant type flow is that the client app never sees the user's credentials for the resource server. For a detailed look at this flow, see [Implementing the authorization code grant type](/apigee/docs/api-platform/security/oauth/oauth-v2-policy-authorization-code-grant-type).
+
+### **Sample request**
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+curl -X POST -H "Content-Type: application/x-www-form-urlencoded" \
+  "https://apitest.acme.com/oauth/authorize?response_type=code&client_id=c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ&redirect_uri=http://my-callback.com"
+```
+
+### **Required parameters**
+
+By default, these parameters must be query parameters (as shown in the sample above); however, it is possible to change this default by configuring the `<ResponseType>`, `<ClientId>`, and `<RedirectUri>` elements in the OAuthV2 policy. For details, see [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy).
+
+- **redirect_uri** - If a full (not partial) Callback URI is specified in the registered client app, this parameter is optional; otherwise, it is required. The callback is the URL where Apigee sends the newly minted auth code. See also [Register apps and manage API keys](/apigee/docs/api-platform/publish/creating-apps-surface-your-api).
+- **response_type** - Must be set to the value `code`.
+- **client_id** - The client ID of a registered developer app.
+
+### **Optional parameters**
+
+- **redirect_uri** - If a full (not partial) Callback URI is specified in the registered client app, this parameter is optional; otherwise, it is required. The callback is the URL where Apigee sends the newly minted auth code. See also [Register apps and manage API keys](/apigee/docs/api-platform/publish/creating-apps-surface-your-api).
+- **state** - A string that will be sent back with the response. Typically used to prevent cross-site request forgery attacks.
+- **scope** - Allows you to filter the list of API products with which the minted token can be used. For detailed information on scope, see [Working with OAuth2 scopes](/apigee/docs/api-platform/security/oauth/working-scopes).
+
+### **Authorization**
+
+Does not require the Authorization header, however the client ID of the registered client app must be supplied in the request.
+
+### Sample policy
+
+This is a basic GenerateAuthorizationCode policy. For more configuration options, see [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy):
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<OAuthV2 name="GenerateAuthorizationCode">
+    <Operation>GenerateAuthorizationCode</Operation>
+    <GenerateResponse enabled="true"/>
+</OAuthV2>
+```
+
+### **Returns**
+
+With `<GenerateResponse>` enabled, the policy returns `?code` query parameter to the `redirect_uri` (Callback URI) location with the authorization code attached. It is sent via a 302 browser redirect with the URL in the Location header of the response. For example: `?code=123456`.
+
+If `<GenerateResponse>` is set to `false`, the policy does not return a response. Instead, it populates the following set of flow variables with data pertaining to the authorization code.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+oauthv2authcode.{policy-name}.code
+oauthv2authcode.{policy-name}.scope
+oauthv2authcode.{policy-name}.redirect_uri
+oauthv2authcode.{policy-name}.client_id
+```
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+oauthv2authcode.GenerateAuthorizationCode.code
+oauthv2authcode.GenerateAuthorizationCode.scope
+oauthv2authcode.GenerateAuthorizationCode.redirect_uri
+oauthv2authcode.GenerateAuthorizationCode.client_id
+```
+
+**Note:** You can also set custom attributes in the OAuthV2 policy. Custom attributes will be returned in the same format pattern as the other variables: `oauthv2.{policy_name}.{attribute_name}`. When you generate an access token from the auth code, the access token will inherit any custom variables set in the auth code. See also [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy).
+
+## Refreshing an access token
+
+A refresh token is a credential you use to obtain an access token, typically after the access token has expired or becomes invalid. A refresh token is returned in the response when you receive an access token.
+
+**Note:** The OAuthV2 policy configuration in this section uses the `RefreshAccessToken` [operation](/apigee/docs/api-platform/reference/policies/oauthv2-policy#operationelement). This operation refreshes an opaque string token format. You can also refresh JWT-formatted tokens by substituting the `RefreshJWTAccessToken` operation. See also [Using JWT OAuth token operations](/apigee/docs/api-platform/security/oauth/using-jwt-oauth).
+
+**Note:** Existing attributes in an access token cannot be appended/deleted/modified during the `RefreshAccessToken` operation. Values inside the element are not processed in the `RefreshAccessToken` operation. Use `SetOAuthV2Info` policy to update the attributes.
+
+### **Sample request**
+
+For information on encoding the basic authentication header in the following call, see [Encoding basic authentication credentials](#encoding).
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+$ curl -X POST \
+  -H "Content-type: application/x-www-form-urlencoded" \
+  -H "Authorization: Basic c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ" \
+  https://apitest.acme.com/oauth/refresh \
+  -d "grant_type=refresh_token&refresh_token=yVSL38WpuN3Kzn1UTMoE6AQ4ANZM"
+```
+
+### **Required parameters**
+
+By default, the policy looks for these as `x-www-form-urlencoded` parameters specified in the request body, as shown in the example above. To configure an alternate location for these inputs, you can use the `<GrantType>` and `<RefreshToken>` elements in the OAuthV2 policy. For details, see [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy).
+
+- **grant_type** - Must be set to the value `refresh_token`.
+- **refresh_token** - The refresh token associated with the access token you wish to renew.
+
+### **Optional parameters**
+
+- **state** - A string that will be sent back with the response. Typically used to prevent cross-site request forgery attacks.
+- **scope** - Allows you to filter the list of API products with which the minted token can be used. For detailed information on scope, see [Working with OAuth2 scopes](/apigee/docs/api-platform/security/oauth/working-scopes).
+
+### **Authorization**
+
+Does not require the Authorization header, however the client ID of the registered client app must be supplied in the request.
+
+When refreshing an access token, there is no re-authentication of the user.
+
+Here's a sample endpoint configuration for generating an access token using a refresh token. It'll execute the RefreshAccessToken policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+ ...
+       <Flow name="generate-refresh-token">
+            <Request>
+                <Step>
+                    <Name>RefreshAccessToken</Name>
+                </Step>
+            </Request>
+            <Response/>
+            <Condition>(proxy.pathsuffix MatchesPath "/refresh") and (request.verb = "POST")</Condition>
+       </Flow>
+...
+```
+
+### Sample policy
+
+This is a basic RefreshAccessToken policy that is configured to accept the `refresh_token` grant type. For information on optional configuration elements that you can configure with this policy, see [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OAuthV2 name="RefreshAccessToken">
+    <Operation>RefreshAccessToken</Operation>
+    <GenerateResponse enabled="true"/>
+    <ExpiresIn>1800000</ExpiresIn> <!-- 30 minutes -->
+    <RefreshTokenExpiresIn>28800000</RefreshTokenExpiresIn> <!-- 8 hours -->
+</OAuthV2>
+```
+
+### **Returns**
+
+With `<GenerateResponse>` enabled, the policy returns a JSON response containing the new access token. The `refresh_token` grant type supports minting both access and new refresh tokens. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+    "issued_at": "1420301470489",
+    "application_name": "ce1e94a2-9c3e-42fa-a2c6-1ee01815476b",
+    "scope": "READ",
+    "refresh_token_issued_at": "1420301470489",
+    "status": "approved",
+    "refresh_token_status": "approved",
+    "api_product_list": "[PremiumWeatherAPI]",
+    "expires_in": "1799", //--in seconds
+    "developer.email": "tesla@weathersample.com",
+    "token_type": "BearerToken",
+    "refresh_token": "8fKDHLryAD9KFBsrpixlq3qPJnG2fdZ5",
+    "client_id": "5jUAdGv9pBouF0wOH5keAVI35GBtx3dT",
+    "access_token": "jmZ2Hqv3iNsABUtAAsfWR3QGNctw",
+    "organization_name": "docs",
+    "refresh_token_expires_in": "28799", //--in seconds
+    "refresh_count": "2"
+}
+```
+
+**Note:** The expiry of the access token and the refresh token noted in the response are 1 second less than specified in the policy configuration. This is due to transit time, and a margin of safety. And yes, it's kind of unusual to specify the expiry values in milliseconds in the policy, but receive them in seconds in the response payload. We are aware.
+
+You should know that after a new refresh token is minted, the original is no longer valid.
+
+The above response is what you get if `<GenerateResponse>` is set to true. If `<GenerateResponse>` is set to false, the policy does not return a response. Instead, it populates the following set of context (flow) variables with data pertaining to the access token grant.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+oauthv2accesstoken.{policy-name}.access_token
+oauthv2accesstoken.{policy-name}.expires_in   //--in seconds
+oauthv2accesstoken.{policy-name}.refresh_token
+oauthv2accesstoken.{policy-name}.refresh_token_expires_in  //--in seconds
+oauthv2accesstoken.{policy-name}.refresh_token_issued_at
+oauthv2accesstoken.{policy-name}.refresh_token_status
+```
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+oauthv2accesstoken.RefreshAccessToken.access_token
+oauthv2accesstoken.RefreshAccessToken.expires_in
+oauthv2accesstoken.RefreshAccessToken.refresh_token
+oauthv2accesstoken.RefreshAccessToken.refresh_token_expires_in
+oauthv2accesstoken.RefreshAccessToken.refresh_token_issued_at
+oauthv2accesstoken.RefreshAccessToken.refresh_token_status
+```
+
+## <span id="encoding"></span>Encoding basic authentication credentials
+
+When you make an API call to request a token or auth code, it's a good practice, and is recommended by the OAuth 2.0 specification to pass the client_id and client_secret values as an HTTP-Basic Authorization header, as described in [IETF RFC 2617](https://tools.ietf.org/html/rfc2617#section-2). To do this, you must base64-encode the result of joining the two values together with a colon separating them.
+
+In pseudo-code:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+result = Base64Encode(concat('ns4fQc14Zg4hKFCNaSzArVuwszX95X', ':', 'ZIjFyTsNgQNyxI'))
+```
+
+Where: `ns4fQc14Zg4hKFCNaSzArVuwszX95X` is the client_id and `ZIjFyTsNgQNyxI` is the client secret.
+
+## Examples
+
+This example command works on Linux and MacOS:
+
+<div>
+
+</div>
+
+```
+export CREDENTIALS=$(echo -n 'ns4fQc14Zg4hKFCNaSzArVuwszX95X:ZIjFyTsNgQNyxI' | base64)
+```
+
+Then, you can make the token request as follows:
+
+<div>
+
+</div>
+
+``` terminal
+
+$ curl -i -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "Authorization: Basic $CREDENTIALS" \
+  -X POST "https://apitest.acme.com/oauth/token" \
+  -d "grant_type=client_credentials"
+```
+
+## Hashing tokens in the database
+
+Apigee hashes all OAuth access and refresh tokens to protect them in the event of a database security breach. You use non-hashed tokens in API calls, and Apigee validates them against the hashed versions in the database.
+
+## Related topics
+
+- [Implementing the client credentials grant type](/apigee/docs/api-platform/security/oauth/oauth-20-client-credentials-grant-type)
+- [Implementing the authorization code grant type](/apigee/docs/api-platform/security/oauth/oauth-v2-policy-authorization-code-grant-type)
+- <a href="https://www.coursera.org/learn/api-security-apigee-gcp" class="external">API security online course</a> (includes OAuth)
+- [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy) -- Has lots of examples showing how to make requests to the authorization server and how to configure the OAuthV2 policy.

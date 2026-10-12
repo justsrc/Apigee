@@ -1,0 +1,194 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/ingress-tls.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/ingress-tls.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/ingress-tls.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/ingress-tls.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/ingress-tls.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/ingress-tls.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/ingress-tls.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/ingress-tls.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/ingress-tls.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/ingress-tls.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/ingress-tls.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/ingress-tls.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/ingress-tls.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/ingress-tls.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/ingress-tls.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/ingress-tls.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/ingress-tls.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/ingress-tls.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+This topic explains how to enable one-way TLS and mTLS on the ingressgateway.
+
+## Configuring one-way TLS
+
+Use one-way TLS to secure API proxy endpoints on the ingress gateway. To enable one-way TLS, you configure the ingress with TLS cert/key pairs or with a Kubernetes Secret, as explained in the following options.
+
+### Option 1: key/cert pair
+
+Provide SSL cert and key files in the `virtualhosts` property in your overrides file:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+virtualhosts:
+  - name: $ENVIRONMENT_GROUP_NAME
+    sslCertPath: "$CERT_FILE"
+    sslKeyPath: "$KEY_FILE"
+```
+
+**Note:** See
+
+[`virtualhosts.name`](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts-name)
+
+[`virtualhosts.sslCertPath`](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts-sslcertpath)
+
+[`virtualhosts.sslKeyPath`](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts-sslkeypath)
+
+Where `$ENVIRONMENT_GROUP_NAME` is the name of an environment group with corresponding host aliases, and `$CERT_FILE` and `$KEY_FILE` are TLS key and certificate files. See [Create TLS certificates](/apigee/docs/hybrid/v1.17/install-create-tls-certificates).
+
+**Tip:** For security purposes, it is best practice to have a separate TLS cert/key pair for each virtual host. If you are using a Subject Alternative Name (SAN ) certificate, this TLS cert/key pair should be used on one virtual host that is shared across the domain.
+
+### Option 2: Kubernetes Secret
+
+Create a <a href="https://kubernetes.io/docs/concepts/configuration/secret/" class="external">Kubernetes Secret</a> and add it to your overrides file.
+
+Create the Secret in the **`apigee`** namespace:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+kubectl create -n APIGEE_NAMESPACE secret generic $SECRET_NAME  \
+  --from-file=key=$KEY_FILE \
+  --from-file=cert=$CERT_FILE
+```
+
+Configure the `virtualhosts` property in your overrides file:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+virtualhosts:
+  - name: $ENVIRONMENT_GROUP_NAME
+    tlsMode: SIMPLE  # Note: SIMPLE is the default, so it is optional.
+    sslSecret: $SECRET_NAME
+```
+
+**Note:** See
+
+- [`virtualhosts.name`](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts-name)
+- [`virtualhosts.tlsMode`](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts-tlsmode)
+- [`virtualhosts.sslSecret`](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts-sslsecret)
+
+## Configuring mTLS
+
+Instead of one-way TLS, you can configure <a href="https://en.wikipedia.org/wiki/Mutual_authentication" class="external">mTLS</a> on the ingress gateway. There are two options for configuring mTLS, as explained below.
+
+### Option 1: key/cert pair and CA file
+
+Provide TLS certificate data containing Certificate Authority certificates:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+virtualhosts:
+  - name: $ENVIRONMENT_GROUP_NAME
+    tlsMode: MUTUAL
+    caCertPath: "$CA_FILE"
+    sslCertPath: "$CERT_FILE"
+    sslKeyPath: "$KEY_FILE"
+```
+
+**Note:** See
+
+- [`virtualhosts.name`](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts-name)
+- [`virtualhosts.tlsMode`](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts-tlsmode)
+- [`virtualhosts.caCertPath`](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts-cacertpath)
+- [`virtualhosts.sslCertPath`](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts-sslcertpath)
+- [`virtualhosts.sslKeyPath`](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts-sslkeypath)
+
+Where `$ENVIRONMENT_GROUP_NAME` is the name of an environment group with corresponding host aliases, `$CA_FILE` specifies TLS certificate data (CA bundle file) containing Certificate Authority certificates, and `$CERT_FILE` and `$KEY_FILE` are TLS key and certificate files. See [Create TLS certificates](/apigee/docs/hybrid/v1.17/install-create-tls-certificates).
+
+### Option 2: Kubernetes Secrets
+
+Create two Kubernetes Secrets. The first secret is for the SSL cert/key pair and the second is for the CA. Then, add them to your overrides file.
+
+Create two Kubernetes secrets the **`apigee`** namespace:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+kubectl create -n APIGEE_NAMESPACE secret generic $SECRET_NAME  \
+  --from-file=key=$KEY_FILE \
+  --from-file=cert=$CERT_FILE
+```
+
+Create a secret for the CA:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+kubectl create -n APIGEE_NAMESPACE secret generic $SECRET_NAME-cacert  \
+  --from-file=cacert=$CA_FILE
+```
+
+Configure the `virtualhosts` property in your overrides file:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+virtualhosts:
+  - name: $ENVIRONMENT_GROUP_NAME
+    tlsMode: MUTUAL  # Note: Be sure to specify MUTUAL
+    sslSecret: $SECRET_NAME
+```
+
+**Note:** See
+
+- [`virtualhosts.name`](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts-name)
+- [`virtualhosts.tlsMode`](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts-tlsmode)
+- [`virtualhosts.sslSecret`](/apigee/docs/hybrid/v1.17/config-prop-ref#virtualhosts-sslsecret)

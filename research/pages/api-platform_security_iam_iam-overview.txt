@@ -1,0 +1,335 @@
+*This page applies to **Apigee**, but not to **Apigee hybrid**.*
+
+Apigee supports IAM-based authentication and authorization for API proxies. To use this feature, include the [VerifyIAM policy](/apigee/docs/api-platform/reference/policies/verify-iam-policy) in the request flow of the proxy, and configure the user identifier (usually the email address) of the API consumer to have the necessary Google Cloud IAM role or permissions to invoke Apigee APIs. The API request should pass a valid Google Cloud access token for that user.
+
+Administrators may grant authorization to any [Google Cloud principal](https://cloud.google.com/iam/docs/overview), not only to individual users.
+
+## Use IAM-based access control
+
+This section describes the end-to-end process for setting up IAM-based authentication and authorization, how requests are evaluated once access is set up, and how to revoke access for API consumers who have previously had access.
+
+### Add access management
+
+To set up access management for an API proxy:
+
+1.  Add the [VerifyIAM policy](/apigee/docs/api-platform/reference/policies/verify-iam-policy) to the Apigee API proxy or proxies as part of the request flow.
+2.  The Cloud admin for the Apigee project:
+    1.  [Grants](https://cloud.google.com/iam/docs/granting-changing-revoking-access) the `deploymentInvoker` IAM role (or a custom role with the `apigee.deployments.invoke` IAM permission) to the API consumer's Google Cloud principal at the project level. This gives the API consumer access to invoke all the hosted APIs in the associated Apigee organization.  
+          
+        or  
+          
+    2.  Uses the `SetIamPolicy` action to grant the role or permission to the API consumer's Google Cloud principle at a particular deployment or iteratively at multiple deployments. Use the [list operation](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.deployments/list) on the deployment resource to see all of the deployments within an environment, including both API proxies and shared flows. The name of the deployment is the name of the API proxy or the shared flow.
+        **Note:** Adding the role or permission on shared flow deployments does not create a VerifyIAM policy check on the shared flows; apply the permissions to proxies only. For proxies calling shared flows, the permissions should be applied to the proxies. With proxy chaining, grant the permission on the proxy with the policy; the permission is not required on other proxies part of the chain.
+3.  Direct the API consumer to [generate an access token](https://developers.google.com/identity/protocols/oauth2), which they will pass inside the Apigee API request for the permission check. The generated token must have the `https://www.googleapis.com/auth/cloud-platform` auth scope.
+
+### Admin Operations
+
+This section lists actions API admins (API producers) take when managing IAM-based permissions.
+
+Documentation for API-based operations used when managing IAM-based access are found in the [organizations.environments](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments) and [organizations.environments.deployments](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.deployments) API reference documentation, and include the `SetIamPolicy`, `GetIamPolicy`, `TestIamPermissions`, and `GetDeployment` operations.
+
+This table maps operations to required permissions:
+
+| Admin operation | Action | IAM Permission needed | IAM Resource on which the permission is needed<sup>\*</sup> |
+|----|----|----|----|
+| GetDeployment | Retrieve information for a deployment in an Apigee environment | apigee.deployments.get | Google Cloud project or Apigee environment |
+| ListDeployments | List the deployments in an Apigee environment | apigee.deployments.list | Project or Apigee Environment |
+| SetIamPolicy | Set invoke access for API consumer(s) at a particular API deployment | apigee.deployments.setIamPolicy | Google Cloud project or Apigee environment |
+| GetIamPolicy | Fetch the set of invoke access settings for an API deployment | apigee.deployments.getIamPolicy | Google Cloud project or Apigee environment |
+| TestIamPermissions | Check whether the user calling this API has the permission mentioned in the payload | No IAM permission needed | N/A |
+
+<sup>\*</sup> The Google Cloud project is the project used to provision Apigee. Apigee environment-level permissions are set on the environment using [setIAMPolicy](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments/setIamPolicy).
+
+### Runtime access check
+
+When the API consumer attempts to access an API with IAM-based access control, a check is performed to see if they have the necessary access token and appropriate role or permission at either the project or deployment level. If so, they are allowed to continue with access to the proxy. Otherwise, they are blocked.
+
+### Remove access
+
+**To remove access at the project level:** To remove access for an API consumer that's managed at the project level, the Cloud admin for the Apigee project [revokes](https://cloud.google.com/iam/docs/granting-changing-revoking-access) the `deploymentInvoker` IAM role (or the custom role with the `apigee.deployments.invoke` IAM permission) from the API consumer's Google Cloud principal for the Google Cloud project.
+
+**If access was granted for individual deployments using `setIamPolicy`,** remove the role or permission from the deployment(s) using another `setIamPolicy` operation.
+
+## Characteristics and limitations of IAM-based access control
+
+Note these characteristics and limitations when using IAM-based authentication and authorization:
+
+- Typically, policy execution with VerifyIAM takes between 10 and 50 milliseconds. However, some calls might experience higher latencies. For example, in the `asia-east2` region specifically, average latency can rise to 50 ms, and some calls could take around 100 ms to complete.
+
+  Please note that these latency figures are not guaranteed.
+
+- Inclusion of the VerifyIAM policy for a proxy is a verified/not verified check only; the API consumer's specific roles and permissions are not considered in later processes in the request or response flow.
+
+- Since an authorization check is performed only at the time of VerifyIAM policy execution, VerifyIAM should be the first policy in the request flow, after only traffic management policies.
+
+- If the permission validation succeeds or the API producer has marked the VerifyIAM policy to continue on error, the request flow continues to execute the other policies, if any, ultimately reaching the target server. If the permission check fails and the API producer has not marked the policy to continue on error, the user receives an error.
+
+- Adding invoke access (`apigee.deployments.invoke`) at the environment level does not convey the invoke access on all API deployments within the environment.
+
+- IAM conditions are not supported on the deployment resource, and can't be used to control invoke access. See [Adding Apigee IAM Conditions to policies](/apigee/docs/api-platform/system-administration/add-iam-conditions) for more information.
+
+- IAM-based access control supports a maximum of 1,500 role bindings within a single policy and other limitations. See [IAM quotas and limits](https://cloud.google.com/iam/quotas#limits).
+
+- IAM-based access control is subject to [IAM propagation delays](/iam/docs/access-change-propagation).
+
+- Attempting to manage other `apigee.deployments` operations, such as `apigee.deployments.delete` via the deployment-level setIAMPolicy, will not be effective but also will not return an error. Only `apigee.deployements.invoke` is effective.
+
+- Access on a deployment is deleted when the corresponding proxy is undeployed from the environment or deleted; access needs to be re-added on redeployment.
+
+- IAM-based authentication and authorization is not available in hybrid at this time.
+
+## Examples
+
+This section provides examples for granting and revoking IAM-based access to APIs. These examples all assume that VerifyIAM has already been added to the appropriate API proxy.
+
+In these examples, use either the <a href="https://console.cloud.google.com/" class="external">Cloud console</a> or <a href="https://cloud.google.com/sdk/gcloud/" class="external">gcloud</a> (shown) to [manage roles or permissions](https://cloud.google.com/iam/docs/granting-changing-revoking-access) on the API consumer's Google Cloud principal.
+
+### Grant and revoke user access to invoke *all APIs* in an Apigee organization
+
+To add access, add the `deploymentInvoker` role:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+APIGEE_ORG=GCP_PROJECT
+USER=USER_EMAIL_HERE
+gcloud projects add-iam-policy-binding "${APIGEE_ORG}" --member="${USER}" \
+    --role='roles/apigee.deploymentInvoker'
+  
+```
+
+To revoke access, remove the `deploymentInvoker` role:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+APIGEE_ORG=GCP_PROJECT
+USER=USER_EMAIL_HERE
+gcloud projects remove-iam-policy-binding "${APIGEE_ORG}" --member="${USER}" \
+    --role='roles/apigee.deploymentInvoker'
+ 
+```
+
+### Grant and revoke user access to specific deployments within an environment
+
+To add the invoker role for a single user to a specific deployment:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+APIGEE_ORG=GCP_PROJECT
+ENV=APIGEE_ENVIRONMENT
+API=APIPROXY_NAME
+USER=USER_EMAIL_HERE
+TOKEN=$(gcloud auth print-access-token)
+curl "https://apigee.googleapis.com/v1/organizations/${APIGEE_ORG}/environments/${ENV}/deployments/${API}:setIamPolicy" \
+  --header "Authorization: Bearer $TOKEN" \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "policy": {
+    "bindings": [
+      {
+        "members": [
+          "user:'"$USER"'"
+        ],
+        "role": "roles/apigee.deploymentInvoker"
+      }
+    ]
+  }
+}'
+  
+```
+
+A success response should look something like:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+    "version": 1,
+    "etag": "BwYT8i40Vwo=",
+    "bindings": [
+      {
+        "role": "roles/apigee.deploymentInvoker",
+        "members": [
+          "user:user-email@example.com"
+        ]
+      }
+    ]
+  }
+```
+
+To add the invoker role for multiple users to a specific deployment:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+APIGEE_ORG=GCP_PROJECT
+ENV=APIGEE_ENVIRONMENT
+API=APIPROXY_NAME
+USER1=EMAIL_FOR_USER1
+USER2=EMAIL_FOR_USER2
+USER3=EMAIL_FOR_USER3
+TOKEN=$(gcloud auth print-access-token)
+curl "https://apigee.googleapis.com/v1/organizations/${APIGEE_ORG}/environments/${ENV}/deployments/${API}:setIamPolicy" \
+  --header "Authorization: Bearer $TOKEN" \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "policy": {
+    "bindings": [
+      {
+        "members": [
+        "user:'"$USER1"'",
+        "user:'"$USER2"'",
+        "user:'"$USER3"'"
+        ],
+        "role": "roles/apigee.deploymentInvoker"
+      }
+    ]
+  }
+}'
+  
+```
+
+To query the policy object that has been previously set:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+curl "https://apigee.googleapis.com/v1/organizations/${APIGEE_ORG}/environments/${ENV}/deployments/${API}:getIamPolicy" \
+  --header "Authorization: Bearer $TOKEN"
+  
+```
+
+You should see a success response like the one shown above.
+
+The user may verify whether they are able to access the specified deployment (whether the `apigee.deployments.invoke` permission is set for the user in a specified deployment), without invoking the deployed API directly. To do that, *the user* can submit this request using an access token they generate:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+APIGEE_ORG=GCP_PROJECT
+ENV=APIGEE_ENVIRONMENT
+API=APIPROXY_NAME
+USER=USER_EMAIL_HERE
+TOKEN=$(gcloud auth print-access-token)
+curl "https://apigee.googleapis.com/v1/organizations/${APIGEE_ORG}/environments/${ENV}/deployments/${API}:testIamPermissions" \
+    --header "Authorization: Bearer $TOKEN" \
+    --header 'Content-Type: application/json' \
+    --data '{"permissions":["apigee.deployments.invoke"]}'
+```
+
+The response should include the `apigee.deployments.invoke` permission for the user.
+
+To revoke access on a specific deployment for a single user, remove the `deploymentInvoker` role for that user. To do so, first get the policy object that is currently associated with the deployment:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+curl "https://apigee.googleapis.com/v1/organizations/${APIGEE_ORG}/environments/${ENV}/deployments/${API}:getIamPolicy" \
+  --header "Authorization: Bearer $TOKEN"
+  
+```
+
+The success response should look something like the following.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "version": 1,
+  "etag": "BwYT8i40Vwo=",
+  "bindings": [
+      {
+        "role": "roles/apigee.deploymentInvoker",
+        "members": [
+          "user:user1-email@example.com",
+          "user:user2-email@example.com",
+          "user:user3-email@example.com"
+        ]
+      }
+    ]
+  }
+```
+
+To remove the binding for a single user, use `setIamPolicy` and specify in the payload the users who should continue to have access, as you would when setting initial access for those users. Continuing with the example shown above, if you wanted to remove access for USER1, but retain access for USER2 and USER3, you would use this command:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+curl "https://apigee.googleapis.com/v1/organizations/${APIGEE_ORG}/environments/${ENV}/deployments/${API}:setIamPolicy" \
+  --header "Authorization: Bearer $TOKEN" \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "policy": {
+    "bindings": [
+      {
+        "members": [
+        "user:'"$USER2"'",
+        "user:'"$USER3"'"
+        ],
+        "role": "roles/apigee.deploymentInvoker"
+      }
+    ]
+  }
+}'
+```
+
+To remove the binding for all users on a specific deployment, specify an empty payload:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+  curl "https://apigee.googleapis.com/v1/organizations/${APIGEE_ORG}/environments/${ENV}/deployments/${API}:setIamPolicy" \
+    --header "Authorization: Bearer $TOKEN" \
+    --header 'Content-Type: application/json' \
+    --data '{}'
+  
+```
+
+To verify that the binding was removed, make sure that the `apigee.deployments.invoke` permission does not exist for the user on the deployment:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+curl "https://apigee.googleapis.com/v1/organizations/${APIGEE_ORG}/environments/${ENV}/deployments/${API}:testIamPermissions" \
+    --header "Authorization: Bearer $TOKEN" \
+    --header 'Content-Type: application/json' \
+    --data '{"permissions":["apigee.deployments.invoke"]}'
+```
+
+This should return an appropriate response; for example, an empty output if no users have the permission to invoke the API.

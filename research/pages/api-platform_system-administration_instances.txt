@@ -1,0 +1,178 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+An [instance](/apigee/docs/api-platform/get-started/create-instance) is a virtual machine where your API project and related services are stored. Instances correspond to regions. Both Apigee (managed) and Apigee hybrid instances are displayed in the Apigee UI. Typically, you start with a single instance and add new instances as your organization expands into more regions. This section explains how to:
+
+- [View your instances](#view-instances).
+- [Create a new Apigee (managed) instance](#create-a-new-instance).
+- [Attach or remove environments from an instance](#add-envs).
+- [Edit the accepted projects list](#accepted-projects)
+- [Enable or disable ingress access logs for an instance](#enable-logging).
+- [Delete an instance](#delete-an-instance).
+
+**Note:** You can view hybrid instances in the UI, but they are read-only. To create or manage hybrid instances, you must use the `helm` command-line tool.
+
+**Note:** Evaluation organizations can only have one instance (region). To expand beyond a single region and instance, you must have a [paid organization](/apigee/docs/api-platform/fundamentals/organization-structure#org_types). Your subscription entitlements limit the number of instances (regions) you can add. You can add more instances (regions) by purchasing an Org Pack. For more information, see [Subscription entitlements](/apigee/docs/api-platform/reference/subscription-entitlements).
+
+## View your instances
+
+You can view all your instances, both managed and hybrid, in the Apigee UI:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Management <span aria-label="and then">\></span> Instances** page.
+
+    <a href="https://console.cloud.google.com/apigee/instances" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Instances</a>
+
+2.  The **Instances** pane displays a list of existing instances.
+
+    For Apigee hybrid instances, the list displays the instance name, location, and runtime version. Apigee hybrid instances are read-only in the UI; you must use command-line tools to create or manage them.
+
+**Note:** In the following sections, **managed** instances refer to Apigee runtime instances where Google manages the underlying infrastructure. These are distinct from **Apigee hybrid** instances, where you manage the runtime plane within your own Kubernetes cluster (such as GKE, EKS, or AKS).
+
+## Create a new managed instance
+
+To create a new managed instance, you can use the [Instances API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances) or the Apigee UI. Each instance requires:
+
+- its own disk encryption key for the network. Apigee recommends that you also create a separate key ring for the new instance. For more information, see [About the Apigee encryption keys](/apigee/docs/api-platform/security/encryption-keys).
+- its own non-overlapping /22 and /28 CIDR ranges for network peering. The ranges cannot be shared between instances.
+
+**Note:** You must have a paid organization to add an instance. Evaluation accounts are limited to one region or instance and cannot be expanded to a second. Your entitlements limit the number of regions you can add. For more information, see [Apigee Pricing](https://cloud.google.com/apigee/pricing).
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+**Important:** This topic only applies to organizations that were created with VPC peering enabled. See also [Apigee networking options](/apigee/docs/api-platform/get-started/networking-options).
+
+To create a new instance in Apigee UI:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Management <span aria-label="and then">\></span> Instances** page.
+
+    <a href="https://console.cloud.google.com/apigee/instances" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Instances</a>
+
+    The **Instances** pane displays a list of existing instances.
+
+2.  Click **+ Create**. There might be a delay while the UI determines if your org has the proper entitlements to create a new instance.
+
+    The **Create new instance** page displays.
+
+3.  Enter details about your new instance in the fields:
+
+    | Field | Required | Description |
+| --- | --- | --- |
+| Runtime hosting location | Required | Select the region in which you want to create your new instance. You cannot create a new instance in a region that already has an instance. For more information about working with multiple regions, see Using multiple regions . |
+| Name | Required | Enter the ID of the new instance. The default value is the name of the runtime hosting region that you selected, but you can change it to any meaningful name that you want, as long as you follow the naming rules: Minimum length of 2. Maximum length of 32. Only use lower case letters, numbers, and hyphens (following the pattern /^[a-z0-9\-]+$/ ). Must start with a letter; doesn't have leading digits or hyphens. Must end with a number or letter; doesn't have trailing hyphens. Must be unique across your org. |
+| IP range allocation | Required | Specify how you want to allocate an IP range. Choose between these options: Note: Once created, you cannot change the IP range later. If you ever need to change the range, you will have to create a new instance. Automatic (Recommended) - Apigee selects an available CIDR range with a prefix size of /22. No further action on your part is required. Custom - In advanced use cases, you may need to specify exactly which IP range you want Apigee to use. For these cases, you specify a custom IP range, and it must have a prefix size of /22. The range must be available as part of a private connection between your project and Apigee. |
+| Disk encryption key | Required | Under Disk encryption key , choose a customer-managed encryption key. If a key already exists, you can pick it. The wizard lists all keys in the same location as the runtime hosting region across all key rings. If a key doesn't exist, or if you don't want to use an existing key, you can create a new key from within the wizard. To create a key: Click Create key . Select a key ring, or if one doesn't exist, enable Create key ring and enter a key ring name and pick a key ring location. Key ring names can contain letters, numbers, underscores (_), and hyphens (-). Key rings can't be renamed or deleted. Click Continue . Create a key. Enter a name and protection level. Note that key names can contain letters, numbers, underscores (_), and hyphens (-). Keys can't be renamed or deleted. For protection level, Software is a good choice. This is the same default used by Cloud KMS; however, you can change it if you wish. Click Continue and review your selections. Click Create . Click Grant to grant the service account permission to encrypt/decrypt with the selected key. |
+| Environments | Optional | Select the environments you want attached to this instance. To do this, click the Environments drop-down list and select the checkboxes next to the environments you want to attach. You can do this for as many environments as you want. Then click OK . Note that all instances' environments count towards the total number of environments that you can have allocated. For more information, see About environments and environment groups . Adding environments when you create a new instance is optional. If you do not add them now, you can instead use the Instances attachment create API or the UI to add and remove them later. See Attach or remove an environment . |
+| Accepted projects | Optional | Click Add accepted project to select one or more Cloud projects. The selected projects can privately connect to the service attachment for your instance. By default, the project associated with your Apigee organization is included in this list. |
+| Enable logging | Optional | Click the Enable logging toggle to enable Cloud Logging ingress access logs for the instance. This feature allows you to view the logs generated by ingress gateways in your Apigee infrastructure, such as an external Application Load Balancer or an Anthos gateway, to assist in troubleshooting Apigee API calls. For more information, see Logging Apigee access logs |
+| Filter | Optional | Select an HTTP response code from the response code box to act as a filter for the ingress access logs. If you want to include all logs, regardless of HTTP response code, select None (all HTTP responses) . To create a custom filter, select Custom and enter the filter in the following format: status_code > XX && status code <= YY For example: status_code >= 500 && status_code < 504 |
+
+    If your org cannot create a new instance, contact [Apigee Sales](https://pages.apigee.com/contact-sales-reg.html).
+
+4.  Click **Create**.
+
+    Apigee begins a long-running operation that can take 20 minutes or more to complete. When it's done, the new instance will appear in the list of instances in the **Instances** UI.
+
+</div>
+
+<div class="section">
+
+### Apigee API
+
+If Apigee was provisioned without VPC-peering, see [Create a runtime instance](/apigee/docs/api-platform/get-started/install-cli-non-peered#runtime-instance) in the non-VPC peering provisioning steps.
+
+If Apigee was provisioned with VPC-peering, see [Create a runtime instance](/apigee/docs/api-platform/get-started/install-cli#runtime-instance) in the VPC peering provisioning steps.
+
+</div>
+
+</div>
+
+## Attach or remove environments from a managed instance
+
+When you create an environment using the Apigee UI in Google Cloud console, you have the option to assign the environment to an existing instance. For more information, see [Creating a new environment in the UI](/apigee/docs/api-platform/fundamentals/environments-working-with#creating-a-new-environment-in-the-ui).
+
+If you did not attach your environment to an instance during environment creation, or you want to remove an environment from an instance, you can follow these steps. For more information on environments and instances, see [Environments and instances](/apigee/docs/api-platform/fundamentals/environments-working-with#environments-and-instances).
+
+To attach or remove an environment from an instance using the Apigee UI:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Management <span aria-label="and then">\></span> Instances** page.
+
+    <a href="https://console.cloud.google.com/apigee/instances" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Instances</a>
+
+2.  Click the instance that you want to edit.
+
+3.  In the **Instance details** page, click **Edit**.
+
+4.  In the **Edit Instance** page, click the **Environments (optional)** field and select the environment you want to attach to the instance, or deselect the environment you want to remove.
+
+5.  Click **OK**.
+
+6.  Click **Save** to save your changes.
+
+In addition to using the UI, you can also attach environments to an instance using the [Instances attachment create API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.attachments/create). For an example, see [Create an environment](/apigee/docs/api-platform/get-started/install-cli#create-environment) in the command-line provisioning documentation.
+
+## Edit the accepted projects list (managed only)
+
+You can add or remove projects from the **Accepted projects** list:
+
+1.  In the Google Cloud console, go to the **Management <span aria-label="and then">\></span> Instances** page.
+
+    <a href="https://console.cloud.google.com/apigee/instances" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Instances</a>
+
+2.  Click the instance that you want to edit.
+
+3.  In the **Instance details** page, click **Edit**.
+
+4.  In the **Accepted projects** section of the **Edit Instance** page, click <span class="material-icons" aria-hidden="true" translate="no"> delete </span> **Delete** next to a project to remove it. To add a project click **Add accepted project** and enter the ID of the project to add.
+
+5.  Click **Save** to save your changes.
+
+## Enable or disable ingress access logs for an instance
+
+After you create an instance, you can enable and disable Cloud Logging ingress access logs for the instance:
+
+1.  In the Google Cloud console, go to the **Management <span aria-label="and then">\></span> Instances** page.
+
+    <a href="https://console.cloud.google.com/apigee/instances" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Instances</a>
+
+2.  Click the instance that you want to edit.
+
+3.  In the **Instance details** page, click **Edit**.
+
+4.  the **Edit Instance** page, click the **Enable logging** toggle to disable the feature.
+
+5.  Click **Save** to save your changes.
+
+## Delete a managed instance
+
+You can use the Apigee UI to delete an existing instance, as described in this section. Alternatively, you can delete an instance using the [Instances API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances).
+
+Only one Apigee instance can be in a given Google Cloud region. When you delete an instance, it is completely removed from its region. See also [multi-region installation](/apigee/docs/api-platform/system-administration/multi-region).
+
+**Warning:** When you delete an instance, all data associated with that instance is lost. This step cannot be undone. Note, however, that if you have multiple instances, such as in a multi-region installation, your data will be lost only if you delete all of the instances. Before deleting the last instance, be sure to extract and back up any data you do not wish to lose.
+
+**Note:** Deleting an instance removes the association for any attached environments. You may need to move any attached environments to new instances by [Attaching and removing environments from an instance](#add-envs) before deleting the instance. All environments must be attached to at least one instance for their proxies to function.
+
+The following data is stored in an Apigee instance and will be deleted if you delete the instance:
+
+| Type of data | Description |
+|----|----|
+| Key management system (KMS) | KMS data includes API products, developers, developer apps, OAuth tokens (including access tokens, refresh tokens, and authorization codes), and API keys. Use the [AccessEntity policy](/apigee/docs/api-platform/reference/policies/access-entity-policy) or the related [Apigee API](https://apidocs.apigee.com/operations) to retrieve the data you wish to save. |
+| Key value map (KVM) | Any data that can be created or managed with KVM policies. See [Retrieving KVMs](/apigee/docs/api-platform/cache/key-value-maps#managingandusingkvms-retrievingkvms). |
+| Quota | Quota definitions, buckets, and counters. |
+| Environment cache | All cached data. |
+
+To delete an Apigee instance using the Apigee UI:
+
+1.  In the Google Cloud console, go to the **Management <span aria-label="and then">\></span> Instances** page.
+
+    <a href="https://console.cloud.google.com/apigee/instances" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Instances</a>
+
+2.  Click the instance that you want to delete.
+
+3.  In the **Instance Details** page, click **Delete**.

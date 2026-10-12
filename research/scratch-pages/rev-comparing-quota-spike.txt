@@ -1,0 +1,106 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+**Key Point:**
+
+The [Quota](/apigee/docs/api-platform/reference/policies/quota-policy), [SpikeArrest](/apigee/docs/api-platform/reference/policies/spike-arrest-policy), [PromptTokenLimit](/apigee/docs/api-platform/reference/policies/prompt-token-limit-policy), and [LLMTokenQuota](/apigee/docs/api-platform/reference/policies/llm-token-quota-policy) policies are all used for rate limiting, but they serve different purposes and operate on different metrics. While Quota and SpikeArrest focus on request counts, the PromptTokenLimit and LLMTokenQuota policies manage and control consumption based on tokens, which is crucial for AI and Large Language Model (LLM) workloads.
+
+While SpikeArrest and PromptTokenLimit maintain counts with high reliability, they are designed to use a <a href="https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/other_protocols/redis" class="external">Redis best-effort cache</a> to store their counts. Because the cache is not replicated, there are cases where counts may be lost, such as a restart of the cache servers, or other rare cases.
+
+For these reasons, we recommend against using SpikeArrest or PromptTokenLimit for use cases that require accurate counting. Only the synchronous Quota or LLMTokenQuota policy offers accurate counting across all regions in a given timeframe.
+
+Use the comparison chart below to help you decide which policy to use for your rate-limiting use case:
+
+<table class="fixed" style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th><strong>Quota</strong></th>
+<th><strong>SpikeArrest</strong></th>
+<th><strong>LLMTokenQuota</strong></th>
+<th><strong>PromptTokenLimit</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Use it to:</strong></td>
+<td>Limit the number of API proxy calls a developer app or developer can make over a specific period of time. It's best for rate limiting over longer time intervals like days, weeks, or months, especially when accurate counting is a requirement.</td>
+<td>Limit the number of API calls that can be made against an API proxy across all consumers over a short period of time, such as seconds or minutes.</td>
+<td>Manage and limit the total token consumption for LLM API calls over a specified period (minute, hour, day, week, or month). This allows you to control LLM expenditures and apply granular quota management based on API products.</td>
+<td>Protect your API proxy's target backend against token abuse, massive prompts, and potential denial-of-service attempts by limiting the rate of tokens sent in the input by throttling requests based on the number of tokens in the user's prompt message. It is a comparative paradigm to Spike Arrest for API traffic, but for tokens.</td>
+</tr>
+<tr>
+<td><strong>Don't use it to:</strong></td>
+<td>Protect your API proxy's target backend against traffic spikes. Use SpikeArrest or PromptTokenLimit for that.</td>
+<td>Count and limit the number of connections apps can make to your API proxy's target backend over a specific period of time, especially when accurate counting is required.</td>
+<td>Protect your API proxy's target backend against token abuse. Use PromptTokenLimit for that.</td>
+<td>Accurately count and limit the total number of tokens consumed for billing or long-term quota management. Use the LLMTokenQuota policy for that.</td>
+</tr>
+<tr>
+<td><strong>Stores a count?</strong></td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes, it maintains counters that track the number of tokens consumed by LLM responses.</td>
+<td>It counts tokens to enforce a rate limit but does not store a persistent, long-term count like the LLMTokenQuota policy.</td>
+</tr>
+<tr>
+<td><strong>Best practices for attaching the policy:</strong></td>
+<td><p>Attach it to the <strong>ProxyEndpoint Request PreFlow</strong>, generally after the authentication of the user.</p>
+<p>This enables the policy to check the quota counter at the entry point of your API proxy.</p></td>
+<td><p>Attach it to the <strong>ProxyEndpoint Request PreFlow</strong>, generally at the very beginning of the flow.</p>
+<p>This provides spike protection at the entry point of your API proxy.</p>
+<p>If you use both SpikeArrest and Quota policies in the same proxy, SpikeArrest should always be attached <em>before</em> the Quota policy in the ProxyEndpoint Request PreFlow. SpikeArrest acts as a first line of defense against sudden traffic bursts, smoothing traffic before requests are evaluated against longer-term Quota limits. This prevents spikes from prematurely exhausting quota.</p></td>
+<td><p>Apply the enforcement policy (<code translate="no" dir="ltr">EnforceOnly</code>) in the <strong>request flow</strong> and the counting policy (<code translate="no" dir="ltr">CountOnly</code>) in the <strong>response flow</strong>. For streaming responses, attach the counting policy to an <strong>EventFlow</strong>.</p></td>
+<td><p>Attach it to the <strong>ProxyEndpoint Request PreFlow</strong>, at the beginning of the flow, to protect your backend from oversized prompts.</p>
+<p>If you use both PromptTokenLimit and LLMTokenQuota policies in the same proxy, PromptTokenLimit should always be attached <em>before</em> the LLMTokenQuota policy in the ProxyEndpoint Request PreFlow. PromptTokenLimit acts as a first line of defense against oversized prompts, rejecting them before requests are evaluated against longer-term LLMTokenQuota limits. This prevents oversized prompts from prematurely exhausting token quota.</p></td>
+</tr>
+<tr>
+<td><strong>HTTP status code when limit has been reached:</strong></td>
+<td><code translate="no" dir="ltr">429</code> (Too Many Requests)</td>
+<td><code translate="no" dir="ltr">429</code> (Too Many Requests)</td>
+<td><code translate="no" dir="ltr">429</code> (Too Many Requests)</td>
+<td><code translate="no" dir="ltr">429</code> (Too Many Requests)</td>
+</tr>
+<tr>
+<td><strong>Good to know:</strong></td>
+<td><ul>
+<li>The Quota counter is stored in Cassandra.</li>
+<li>You can configure the policy to synchronize the counter asynchronously to save resources, but this may allow calls slightly in excess of the limit.</li>
+</ul></td>
+<td><ul>
+<li>Lets you choose between a <em>smoothing</em> algorithm or an effective count algorithm. The former smooths the number of requests that can occur in a specified period of time, and the latter limits the total number of requests that can occur within a specified time period, no matter how rapidly they are sent in succession.</li>
+<li>Smoothing is not coordinated across Message Processors.</li>
+</ul></td>
+<td><ul>
+<li>Can be configured as <code translate="no" dir="ltr">CountOnly</code> to track token usage or <code translate="no" dir="ltr">EnforceOnly</code> to reject requests that exceed the quota.</li>
+<li>It works with API Products to allow for granular quota configurations based on the app, developer, model, or a specific LLM operation set.</li>
+<li>Uses <code translate="no" dir="ltr">&lt;LLMTokenUsageSource&gt;</code> to extract token count from the LLM response and <code translate="no" dir="ltr">&lt;LLMModelSource&gt;</code> to identify the model used.</li>
+</ul></td>
+<td><ul>
+<li>The token calculation might differ slightly from the one used by the LLM.</li>
+<li>The <code translate="no" dir="ltr">&lt;UserPromptSource&gt;</code> element specifies the location of the user prompt in the request message.</li>
+</ul></td>
+</tr>
+<tr>
+<td><strong>Get more details:</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy">Quota policy</a></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/spike-arrest-policy">SpikeArrest policy</a></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/llm-token-quota-policy">LLMTokenQuota policy</a></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/prompt-token-limit-policy">PromptTokenLimit policy</a></td>
+</tr>
+</tbody>
+</table>
+
+**Tip:** You can also use the following to protect slow/sluggish backends without impacting the performance of the APIs:
+
+- [Creating reusable shared flows:](/apigee/docs/api-platform/fundamentals/shared-flows) Combine policies and resources into a shared flow that you can consume from multiple API proxies, and even from other shared flows.
+- [Chaining API proxies together](/apigee/docs/api-platform/fundamentals/connecting-proxies-other-proxies): Specify that one proxy is the target endpoint of another, effectively connecting the two proxies in a proxy chain. Chaining proxies in this way can help you avoid a network hop, and so improve overall performance.

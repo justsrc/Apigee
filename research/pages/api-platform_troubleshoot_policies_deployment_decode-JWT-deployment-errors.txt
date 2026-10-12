@@ -1,0 +1,107 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/troubleshoot/policies/deployment/decode-JWT-deployment-errors" target="_blank">Apigee Edge</a> documentation.*</span>
+
+Was this troubleshooting playbook helpful? Please let us know by clicking <a href="" class="google-feedback" data-p="1636213" data-b="docsite" data-context="troubleshooting-feedback">Send Feedback</a> .
+
+## InvalidEmptyElement
+
+### Error message
+
+Deployment of the API proxy through either the Apigee UI or API fails with this error message:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+Error Saving Revision
+Invalid empty element : policy(policy_name) element(Source)
+```
+
+### Example error message
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+Error Saving Revision
+Invalid empty element : policy(Decode_JWT) element(Source).
+```
+
+### Example screenshot
+
+In the Apigee UI, you will see a dialog box with an error:
+
+<img src="/static/apigee/docs/api-platform/images/decodeJWT-deploy-error.png" style="width:80.0%" alt="Error saving revision." />
+
+### Cause
+
+This error occurs if the flow variable containing JWT that is to be decoded is not specified in the `<Source>` element of the DecodeJWT policy.
+
+For example, the error will occur if the `<Source>` element does not contain a value, as shown below:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Source></Source>
+```
+
+### Diagnosis
+
+1.  Identify the name of the DecodeJWT policy and name of the element that is empty from the error message. For example, in the following error message, the name of DecodeJWT policy is `Decode_JWT` and the element name is `Source`.
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    Invalid empty element : policy(Decode_JWT) element(Source).
+    ```
+
+2.  Examine the DecodeJWT policy and verify if the element identified in Step 1 is empty. If the element is empty, then that's the cause of the error.
+
+    Here's a sample DecodeJWT policy:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    <DecodeJWT name="Decode_JWT">
+        <DisplayName>JWT Decode HS256</DisplayName>
+        <Source></Source>
+        <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+    </DecodeJWT>
+    ```
+
+    Because the `<Source>` element is empty, you get the error:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    Invalid empty element : policy(Decode_JWT) element(Source).
+    ```
+
+### Resolution
+
+Ensure that the `<Source>` element specifies a valid JWT in a flow variable.
+
+To fix the issue with the sample DecodeJWT policy, you can specify the flow variable containing a valid JWT in the `<Source>` element.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DecodeJWT name="Decode_JWT">
+    <DisplayName>JWT Decode HS256</DisplayName>
+    <Source>var.jwt</Source>
+    <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+</DecodeJWT>
+```

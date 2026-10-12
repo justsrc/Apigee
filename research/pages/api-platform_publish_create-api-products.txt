@@ -1,0 +1,269 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+API products bundle your APIs and make them available to app developers for consumption. For an overview of API products, see [What is an API product?](/apigee/docs/api-platform/publish/what-api-product)
+
+## Exploring the API products overview page
+
+The **Products** overview page displays all of your API products and some details about each one. From this page you can create a new API product, delete a product, or select one to view or edit.
+
+To access the **Products** overview page in the Apigee in Cloud console:
+
+<a href="https://console.cloud.google.com/apigee/apiproducts" class="button button-primary" target="console" data-track-type="commonIncludes" data-track-name="consoleLink">Go to API products</a>
+
+The Products UI lets you perform the following common tasks:
+
+- [Add an API product](#add)
+- [Edit](#edit) an API product
+- Search the list of API products
+- [Delete](#delete) an API product
+
+These tasks are described in the following sections.
+
+## Create an API product
+
+This section describes how to create an API product using the Apigee UIs.
+
+To create an API product using the Apigee UI:
+
+1.  Go to the **Apigee <span aria-label="and then">\></span> Products** overview page:
+
+    <a href="https://console.cloud.google.com/apigee/apiproducts" class="button button-primary" target="console" data-track-type="commonIncludes" data-track-name="consoleLink">Go to API products</a>
+
+2.  Click **+ Create**. The product configuration page displays.
+
+3.  Configure the API product. The parts of the product configuration page include the following:
+
+    - **[Product details](#productdetails):** Basic information about the API product such as its name, access level (private, public, or internal), and OAuth scopes.
+    - **[Operations](#operations):** Groups of API proxies, resource paths, and HTTP methods supported by this API product. You can also define quotas limits for each operation.
+    - **[LLM Operations](#llmoperations):** Groups of API proxies, models, resource paths, and HTTP methods for LLM operations supported by this API product. You can also define token quota limits for each operation.
+    - **[GraphQL Operations](#graphqloperations):** Groups of API proxies, resource paths, and GraphQL operation types supported by this API product. Supported GraphQL operation types include queries and mutations. You can specify one type or the other, or both. Just like for REST-based API proxies, you can define quota limits on each operation.
+    - **[gRPC Operations](#grpcoperations):** Specify gRPC API proxies and gRPC methods supported by this API product. Just like for REST-based API proxies, you can define quota limits on operations.
+    - **[Payload Operations](#payloadoperations):** Specify operations on API proxies whose operations are embedded in the request payload (such as JSON-RPC methods used by MCP servers) supported by this API product. You can also define quota limits for each payload operation.
+    - **[Custom attributes](#customattributes):** Key/value pairs that help you control API proxy execution.
+
+    Each of these main parts are described in the sections below.
+
+4.  When you're done, click **Save**. Apigee creates the new API product. You can now attach the product to a Developer app. See [Controlling access to your APIs by registering apps](/apigee/docs/api-platform/publish/creating-apps-surface-your-api). For additional examples, see [Secure an API by requiring API keys](/apigee/docs/api-platform/tutorials/secure-calls-your-api-through-api-key-validation) and [Secure an API with OAuth](/apigee/docs/api-platform/tutorials/secure-calls-your-api-through-oauth-20-client-credentials).
+
+### Product details
+
+In the **Product details** section, enter basic information about your new API product. The following table describes the fields in this section:
+
+| Field | Required? | Description |
+| --- | --- | --- |
+| Name | Required | Defines the internal name of the API product. You use this value in calls to the Apigee API that reference the API product. The value of the Name field can include alphanumeric characters, spaces, and the following: _ - . # $ % For example, My API Product or my-product . Note: If you use the API product with Apigee monetization, the product name must not contain any trailing spaces. Note: You cannot change the Name of an API product after you create it. |
+| Display name | Required | Defines the name used in the Apigee UI for the API product. You can edit the display name of the API product at any time. The Display name can include special characters. For example, <My> API Product!!! . |
+| Description | Optional | A string that can help you remember the purpose or function of the API product. The description can include special characters. For example, The one where I let dev apps read but not write to the "/accounts" endpoints. |
+| Space | Optional | If your organization has Apigee Spaces enabled, you can associate the API product with a Space selected from the list of available options. For more information, see Apigee Spaces overview . |
+| Environment | Optional | Identifies which environments the API product allows access to. If no environments are specified then all environments are allowed by the API Product. The environments that you select in this field restrict access to API proxies based on where they are deployed. For example, if API proxy A is deployed to both the test and prod environments, but the API product only has the test environment selected, then an API call for the corresponding developer app only allows access to API proxy A deployed in the test environment. For more information on environments, see About environments and environment groups . |
+| Access | Required | The access level given to users of this API product. For details, see Access levels . |
+| Automatically approve access requests | Optional (defaults to selected) | Enables automatic approval of key requests that come in for this API product from any app. To require manual key approval, disable this option. The default is selected, which means this API product automatically approves key requests. If you select manual key approval, you must approve key requests that come in from any app that uses this API product. To manually approve keys: UI: Select Publish > Apps , select the app and edit it. Then click Approve . API: Use the Developer app keys API . For more information, see Registering apps and managing API keys . |
+| API quota limit | Optional | Defines limits on the number of requests allowed for this API product. This value applies to the sum of all operations' requests for this API product. This value is superseded by more specific quota limits set on operations that you define on the API product. Entering a quota value does not automatically enforce restrictions on the number of calls that can be made through the API product. You must also add the Quota policy to API proxies that are referenced by the API product. For more information, see Quotas . |
+| LLM token quota limit | Optional | Sets a token quota for an API product. This allows you to manage and limit token consumption for Large Language Model (LLM) API calls over a specified time period (e.g., minute, hour, day, or month). When creating an API product, set LLM token quota limit to Enabled and then enter a value. For more information, see the LLMTokenQuota policy . |
+| Allowed OAuth scope | Optional | If you are using OAuth with the API product, enter a comma-separated list of OAuth scopes that you want the API product to allow (such as Read or other scopes that apps send with their API calls). For more information, see OAuth scopes . |
+
+### Operations
+
+Specify operations allowed on an HTTP-based API proxy, including resource paths, HTTP methods, and quotas. Operations let you control which REST methods and have access to which resource paths in an API product, and how many such calls can be made (with Quota).
+
+To configure operation details, click **+ ADD AN OPERATION** in the **Operations** section. The **Operation** view displays.
+
+| Field | Required? | Description |
+| --- | --- | --- |
+| API proxy | Required | Select the API proxy to associate with this operation. |
+| Path | Required | Enter the resource path for the operation. You can use the operation path to allow or disallow requests to specific URIs. For example, if you set the operation's source to the music API proxy with a base path of /music , the API product allows calls to all the subpaths under /music . However, if you want the API product to allow access to only the venues resource path which has a URI of /music/venues , add the /venues as the operation's path. You can do this for all operations, or specific operations. In this case, calls to /music/venues?name=paramount are allowed, but calls to /music/artists?name=Jack%Johnson are blocked. Note that there are special rules for wildcards in resource paths, as described in Configuring resource paths . |
+| Methods | Optional | Select one or more HTTP request methods in the drop-down list. (These methods are sometimes known as HTTP verbs .) Apigee allows requests to the API proxy that only match the methods you select. The default is no selection, which allows requests with any HTTP methods. If you do not select at least one method, Apigee inserts ALL as the value of this field when you save the operation. For information about the functionality of the HTTP request methods, see HTTP request methods . |
+| Quota | Optional | Specify quota limits for this operation. For details on how quotas are counted, see Understanding quota counters . |
+| Custom attributes | Optional | See Custom attributes . |
+
+### LLM Operations
+
+Specify operations allowed on an LLM-based API proxy, including resource paths, models, HTTP methods, and token quotas. LLM Operations let you control which models can be accessed and how many tokens can be used in an API product.
+
+To configure LLM operation details, click **+ ADD AN OPERATION** in the **LLM Operations** section. The **LLM Operation** view displays.
+
+| Field | Required? | Description |
+| --- | --- | --- |
+| Proxy | Required | Select the API proxy to associate with this LLM operation. |
+| Path | Required | Enter the resource path for the LLM operation. This is often the path to a specific LLM model or function. For example, if you have an API proxy with a base path of /llm , and you want to provide access to a specific model at /llm/gemini-pro , you would enter /gemini-pro as the operation's path. Wildcards can be used in the resource path. For example, a path of /models/* would allow access to all models under the /models/ path. |
+| Models | Required | Select the LLM model to associate with this operation. The available models will depend on the configuration of the API proxy. |
+| Method | Optional | Select one or more HTTP request methods. For LLM operations, this is typically POST . If no method is selected, Apigee allows requests with any HTTP method. When the operation is saved, ALL will be inserted as the value if no method is selected. |
+| LLM Token Quota | Optional | Specify token-based quota limits for this operation. This can include limits on the number of tokens per minute, per day, etc. |
+| Custom attributes | Optional | See Custom attributes . |
+
+### GraphQL Operations
+
+To configure GraphQL operation details, click **+ ADD AN OPERATION** in the **Graphql Operations** section. The **Operation** view displays. See also [Using GraphQL](/apigee/docs/api-platform/develop/graphql).
+
+| Field | Required? | Description |
+| --- | --- | --- |
+| API proxy | Required | Select the API proxy to associate with this operation. |
+| Operation name | Required | Specify a name for the operation |
+| Operation type | Optional | Select one or more GraphQL operation types in the drop-down list. Apigee allows requests to the API proxy that only match the operation types you select. The default is no selection, which allows requests with any operation type. If you do not select at least one type, Apigee inserts ALL as the value of this field when you save the operation. For information about the functionality of the GraphQL operation types, see Queries and Mutations . |
+| Quota | Optional | Specify quota limits for this operation. This quota supersedes the quota set on the API product. See Quota . |
+| Custom attributes | Optional | See Custom attributes . |
+
+### gRPC Operations
+
+To configure gRPC operation details, click **+ ADD AN OPERATION** in the **gRPC Operations** section. The **Operation** view displays. See also [Creating gRPC API proxies](/apigee/docs/api-platform/fundamentals/build-simple-api-proxy#creating-grpc-api-proxies).
+
+See [Creating gRPC API proxies](/apigee/docs/api-platform/fundamentals/build-simple-api-proxy#creating-grpc-api-proxies) for information on gRPC proxy support.
+
+| Field | Required? | Description |
+| --- | --- | --- |
+| API proxy | Required | Select the API proxy to associate with this operation. |
+| Service name | Required | Specify a name for the operation. For the current release, there is no option to provide the target server name. (The service name and the target server are the same.) |
+| gRPC methods in service | Optional | Enter the available gRPC methods, using a comma-separated list for multiple methods. |
+| Quota | Optional | Specify quota limits for these operations. This quota supersedes the quota set on the API product. See Quota . |
+| Custom attributes | Optional | See Custom attributes . |
+
+### Payload Operations
+
+Specify operations allowed on an API proxy whose operations are embedded in the request body rather than the URL path—for example, JSON-RPC based protocols such as the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/). Payload operations let you authorize and apply per-operation quotas to protocols where a single endpoint (such as `/mcp`) serves many logical operations.
+
+To configure payload operation details, click **+ ADD AN OPERATION** in the **Payload Operations** section. The **Payload Operation** view displays.
+
+**Note:** Payload operations require an API proxy that uses the **ParsePayload** policy to extract the operation name from the request body. For an end-to-end example using MCP, see [Manage MCP tool access with API products](/apigee/docs/api-platform/apigee-mcp/manage-mcp-tool-access).
+
+| Field | Required? | Description |
+| --- | --- | --- |
+| API proxy | Required | Select the API proxy to associate with this payload operation. The proxy must include a ParsePayload policy that extracts the operation name from the request body. |
+| Protocol | Required | Select the payload protocol. Currently, MCP is supported for parsing JSON-RPC payloads emitted by Model Context Protocol servers. |
+| Operation | Required | Specify one or more operations to authorize. The operation string identifies the request and is matched against the value extracted by the ParsePayload policy. For MCP, the operation string follows one of these forms: tools/list — matches a request to list the tools the client is authorized to call. tools/call/ TOOL_NAME — matches a request to invoke the named tool (for example, tools/call/get_weather ). You can list multiple operations under a single configuration to apply the same quota to all of them. |
+| Quota | Optional | Specify quota limits for these operations. This quota supersedes the quota set on the API product. See Quota . |
+| Custom attributes | Optional | See Custom attributes . |
+
+When you configure payload operations using the [API products API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apiproducts), populate the `payloadOperationGroup` field on the API product. Each entry in `payloadOperationGroup.operationConfigs` specifies an `apiSource` (the API proxy), one or more `operations`, and an optional `quota`. For the full schema, see [PayloadOperationGroup](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apiproducts#PayloadOperationGroup) in the API reference.
+
+**Note:** The MCP system methods `initialize`, `notifications/initialized`, and `ping` bypass payload operation matching: if they are not explicitly configured, the request is not blocked and falls back to the default quota and security settings of the API product. The `logging/setLevel` method is excluded from this bypass and must be explicitly authorized.
+
+### Custom attributes
+
+Custom attributes are key/value pairs that can be used in many ways, including helping control API proxy execution.
+
+In total, an API product can have up to 18 custom attributes, including those set on operations.
+
+For example, you can create a custom attribute called `deprecated` with a value of `true` or `false`. In your API proxy flow, you can check the value of the API product's `deprecated` attribute. If its value is `true`, you can throw an error with the [RaiseFault policy](/apigee/docs/api-platform/reference/policies/raise-fault-policy) because you want that operation to behave as if it is deprecated and no longer supported.
+
+**Tip:** When you want to refer to the custom attribute at runtime, you must use a [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy) in your API proxy. You access the value of the custom attribute as a flow variable with the following syntax:
+
+<div>
+
+</div>
+
+```
+verifyapikey.POLICY_NAME.apiproduct.ATTRIBUTE_NAME
+```
+
+**Warning:** Do not set the name of your custom attribute to `access`. This attribute name is reserved for use by Apigee and will cause an error if used.
+
+### Quota
+
+You can define the quota settings for the API product or per operation scope. There are three fields that you must specify when you define a quota:
+
+<img src="/static/apigee/docs/api-platform/publish/images/api-product-add-quota-empty.png" class="screenshot" style="width:50.0%" alt="Add a quota to an operation" />
+
+- The maximum number of requests to allow from a developer app for the specified period. This field corresponds to the [`<Allow>`](/apigee/docs/api-platform/reference/policies/quota-policy#allow) element in a Quota policy.
+- The reset time interval of the quota. This field corresponds to the [`<Interval>`](/apigee/docs/api-platform/reference/policies/quota-policy#interval) element in a Quota policy.
+- The reset period *unit* (or time unit), such as day, week, or month. This field corresponds to the [`<TimeUnit>`](/apigee/docs/api-platform/reference/policies/quota-policy#timeunit) element in a Quota policy.
+
+This example sets a limit of 1,000 requests to the API product per day, by adding:
+
+- **1000** for the maximum number of requests.
+- **1** for the reset time interval.
+- **day** for the reset period unit.
+
+<img src="/static/apigee/docs/api-platform/publish/images/api-product-add-quota-1000perday.png" class="screenshot" style="width:50.0%" alt="Add a new quota to an operation with 1,000 requests per day" />
+
+When you define a quota for an operation, you are required to enter values for all three fields in the **Quota** section.
+
+You can define a distinct quota for each operation. If an operation specifies multiple HTTP methods, the quota applies for all of the methods on that operation. To allow distinct quotas for each method, define multiple operations with a single method on each operation.
+
+If you set these values in both the [Quota policy](/apigee/docs/api-platform/reference/policies/quota-policy) and on the API product (in the UI as described here or with the [API products API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apiproducts), the API product UI/API settings take precedence.
+
+## Configuring resource paths
+
+Note the following rules for resource paths:
+
+- `/`: Indicates that the base path and all subpaths of the base path are supported.
+- `/**`: Indicates that all subpaths of the base path are supported (but not the base path).
+- `/*`: Indicates that only URIs one level down from the base path are supported.
+- Resource paths specified on the API product or on its operations apply to all API proxies added to the API product.
+- More inclusive, *less* specific resource paths take precedence over those that are more specific. For example, if you add `/` and `/**`, the `/` resource path takes precedence and the `/**` resource path is ignored.
+
+### Using wildcards in resource paths
+
+It is important to note that in Apigee's resource path definitions, a single asterisk (`*`) or double asterisk (`**`) is not permitted as *part* of a path segment's name (for example, `/abc*/a`), but is permitted when used as a *full* path segment to represent a wildcard (for example, `/*/a`) or a greedy path match (for example, `/abc/**`).
+
+For example:
+
+- Valid: `/*/a` or `/abc/**`. The wildcard is its own subpath.
+- Invalid: `/abc/*a` or `/abc*/a`. The wildcard is combined with other characters in the subpath.
+
+This rule ensures that the wildcard is interpreted as a clear and explicit placeholder for an entire path segment, rather than a pattern to be matched within a single path segment's name.
+
+### Default behavior of resource paths
+
+The following table shows the default behavior of an API product for different resource paths. In this example, the API proxy has a base path of `/v1/weatherapikey`. The API product resource path applies to the path suffix after the base path.
+
+| Request URI | Allowed for `/` | Allowed for `/*` | Allowed for `/**` | Allowed for `/*/2/**` | Allowed for `/*/2/*` |
+|----|----|----|----|----|----|
+| `/v1/weatherapikey` | <span class="compare-yes"></span> | <span class="compare-no"></span> | <span class="compare-no"></span> | <span class="compare-no"></span> | <span class="compare-no"></span> |
+| `/v1/weatherapikey`**`/`** | <span class="compare-yes"></span> | <span class="compare-no"></span> | <span class="compare-no"></span> | <span class="compare-no"></span> | <span class="compare-no"></span> |
+| `/v1/weatherapikey`**`/1`** | <span class="compare-yes"></span> | <span class="compare-yes"></span> | <span class="compare-yes"></span> | <span class="compare-no"></span> | <span class="compare-no"></span> |
+| `/v1/weatherapikey`**`/1/`** | <span class="compare-yes"></span> | <span class="compare-yes"></span> | <span class="compare-yes"></span> | <span class="compare-no"></span> | <span class="compare-no"></span> |
+| `/v1/weatherapikey`**`/1/2`** | <span class="compare-yes"></span> | <span class="compare-no"></span> | <span class="compare-yes"></span> | <span class="compare-no"></span> | <span class="compare-no"></span> |
+| `/v1/weatherapikey`**`/1/2/`** | <span class="compare-yes"></span> | <span class="compare-no"></span> | <span class="compare-yes"></span> | <span class="compare-yes"></span> | <span class="compare-no"></span> |
+| `/v1/weatherapikey`**`/1/2/3/`** | <span class="compare-yes"></span> | <span class="compare-no"></span> | <span class="compare-yes"></span> | <span class="compare-yes"></span> | <span class="compare-yes"></span> |
+| `/v1/weatherapikey`**`/1/a/2/3/`** | <span class="compare-yes"></span> | <span class="compare-no"></span> | <span class="compare-yes"></span> | <span class="compare-no"></span> | <span class="compare-no"></span> |
+
+A resource path of `/` in an API product supports the base path and all subpaths. For example, if the base path of the API proxy is `/v1/weatherapikey`, then the API product supports requests to `/v1/weatherapikey` and to any subpaths, such as `/v1/weatherapikey/forecastrss`, `/v1/weatherapikey/region/CA`, and so on.
+
+For additional information, see [Making sense of API Product configuration](https://discuss.google.dev/t/making-sense-of-api-product-configuration/17610.html).
+
+## Editing an API product
+
+**Note:** To improve performance, API product information, such as resource path definitions, are cached for a short time (approximately five minutes). As a result, edits that you make to an API product may not take effect immediately.
+
+**Note:** We recommend that you avoid making concurrent update requests for the same resource. Near-simultaneous writes to the same entity can result in conflicts and unexpected behavior. Ensure operations are sequential when modifying a single resource.
+
+To edit an API product:
+
+1.  Go to the **Products** overview page:
+
+    <a href="https://console.cloud.google.com/apigee/apiproducts" class="button button-primary" target="console" data-track-type="commonIncludes" data-track-name="consoleLink">Go to API products</a>
+
+2.  Click in the API product row that you want to edit. Apigee displays the API product details.
+
+3.  Click **<span class="material-icons" aria-hidden="true" translate="no">edit</span> EDIT**.
+
+4.  Edit the API product's settings, as required.
+
+    You cannot *edit* an existing API resource. Instead, you must delete the API resource and add a new version with the corrected values if you want to change it.
+
+    You might delete a resource if it is malfunctioning or requires more development. When deleted, that resource is no longer part of the current API product. Any app that uses the API product can no longer access the deleted resource. Deleted resources are removed from an API product but are not deleted from the system, so they can still be used by other API products.
+
+5.  (Optional) If Apigee Monetization is enabled, create a rate plan for the API product by clicking **Add rateplan**.
+
+6.  Click **Save**.
+
+Your changes take effect within a short period of time (approximately five minutes).
+
+## Deleting an API product
+
+**Note:** To improve performance, API product information such as resource path definitions are cached for a short period of time (approximately five minutes). As a result, when you delete an API product, it may not take effect immediately.
+
+Before you can delete an API product, you must unregister/unassociate any developer apps associated with the product. You can do so by either [deleting the apps](/apigee/docs/api-platform/publish/creating-apps-surface-your-api#delete) or [revoking the app API keys](/apigee/docs/api-platform/publish/creating-apps-surface-your-api#approve-revoke-app).
+
+To delete an API product:
+
+1.  Go to the **Products** overview page:
+
+    <a href="https://console.cloud.google.com/apigee/apiproducts" class="button button-primary" target="console" data-track-type="commonIncludes" data-track-name="consoleLink">Go to API products</a>
+
+2.  Open the **Actions** menu in the API product row to delete and select **Delete**.
+
+3.  After you confirm the delete operation, the deletion takes effect within a short period of time (approximately five minutes).

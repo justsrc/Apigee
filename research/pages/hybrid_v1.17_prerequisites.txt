@@ -1,0 +1,97 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/prerequisites.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/prerequisites.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/prerequisites.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/prerequisites.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/prerequisites.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/prerequisites.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/prerequisites.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/prerequisites.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/prerequisites.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/prerequisites.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/prerequisites.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/prerequisites.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/prerequisites.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/prerequisites.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/prerequisites.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/prerequisites.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/prerequisites.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/prerequisites.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+Before you can install Apigee hybrid, you must meet the following prerequisites:
+
+Done?
+
+Prerequisite
+
+Description
+
+**Google Cloud billing account**
+
+You must have a Google Cloud account with active billing. For more information, see [Create a new billing account](/billing/docs/how-to/manage-billing-account#create_a_new_billing_account).
+
+**Google Cloud project**
+
+Create a new Google Cloud project for the Apigee hybrid installation. For more information, see [Creating a project](/resource-manager/docs/creating-managing-projects#creating_a_project).
+
+If you'd prefer to use Cloud Identity to manage your organizational identity with Apigee, see <a href="https://support.google.com/cloudidentity#topic=7516500" class="external">Cloud Identity Help</a>. Although not needed for Apigee hybrid, Cloud Identity might be useful if you plan to use other Google Cloud services or have multiple members of your organization access the product.
+
+**Clock synchronization**
+
+Apigee hybrid uses the Cassandra database, and Cassandra relies on Network Time Protocol (NTP) synchronization to maintain data consistency. Before you begin your hybrid installation, we recommend you use Network Time Protocol (NTP) to synchronize the clocks on all nodes and application servers. If you plan to install hybrid into multiple regions, be sure they are synchronized with NTP across all regions.
+
+**Software**
+
+Install the following software on your administrative machine:
+
+- <a href="/sdk/docs/install" class="external">gcloud CLI</a> (required for command line provisioning steps).
+  - After the gcloud CLI is installed, run `gcloud components update` to get the latest gcloud components.
+- <a href="https://curl.haxx.se/" class="external"><code translate="no" dir="ltr">curl</code></a> (recommended)
+- If you are installing Apigee hybrid on EKS and you are using Kubernetes 1.24 or newer, install the <a href="https://github.com/kubernetes-sigs/aws-ebs-csi-driver" class="external">Kubernetes CSI driver for Amazon EBS</a>.
+
+**Hardware**
+
+Review the following information before installing hybrid:
+
+- [Minimum cluster configurations](/apigee/docs/hybrid/v1.17/cluster-overview)
+- [Configuring dedicated node pools](/apigee/docs/hybrid/v1.17/configure-dedicated-nodes)
+- [Configure Cassandra for production](/apigee/docs/hybrid/v1.17/cassandra-production)
+- [Configuring authentication for Cassandra](/apigee/docs/hybrid/v1.17/cassandra-tls)
+- [StorageClass configuration](/apigee/docs/hybrid/v1.17/cassandra-config)
+- [Secure ports usage](/apigee/docs/hybrid/v1.17/ports)
+
+**Note:** If you plan to enable Google Cloud [Virtual Private Cloud (VPC) Service Controls](https://cloud.google.com/vpc-service-controls) with your Apigee hybrid installation, see [Using VPC Service Controls with Apigee and Apigee hybrid](/apigee/docs/api-platform/security/vpc-sc) for instructions before you proceed.
+
+## Next step
+
+Each of these steps is described in the sections that follow.
+
+<a href="/apigee/docs/hybrid/v1.17/precog-overview" class="button button-primary">Let's Go!</a>

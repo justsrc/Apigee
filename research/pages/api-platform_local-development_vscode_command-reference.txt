@@ -1,0 +1,27 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+With Apigee in Cloud Code, you can run Apigee commands from the Command Palette by performing the following steps:
+
+1.  Open the Command Palette by selecting **View \> Command palette**.
+2.  Type **Apigee** in the field.
+3.  Select an Apigee command from the list.
+
+Apigee commands available in the Command Palette are summarized in the following table.
+
+| Command | Description |
+|----|----|
+| Cloud Code: Create Apigee environment | [Create an environment](/apigee/docs/api-platform/local-development/vscode/deploy-environment#create) to deploy your APIs. |
+| Cloud Code: Create Apigee proxy bundle | [Create an API proxy](/apigee/docs/api-platform/local-development/vscode/develop-apiproxies#create-proxy). |
+| Cloud Code: Create Apigee shared flow bundle | [Create a shared flow](/apigee/docs/api-platform/local-development/vscode/develop-sharedflows#create). |
+| Cloud Code: Create Apigee test bundle | [Create a test bundle](/apigee/docs/api-platform/local-development/vscode/build-test-resources#create) to define the resources required to test your APIs. |
+| Cloud Code: Create Apigee workspace | [Create an Apigee workspace](/apigee/docs/api-platform/local-development/vscode/manage-apigee-workspace#create). |
+| Cloud Code - Apigee: Focus on Emulators View | Change focus to the [Apigee Emulator](/apigee/docs/api-platform/local-development/vscode/explore#apigee-emulator). |
+| Cloud Code: Import Apigee proxy bundle | [Upload an API proxy bundle](/apigee/docs/api-platform/local-development/vscode/develop-apiproxies#upload-proxy) from your local directory. |
+| Cloud Code: Import Apigee shared flow bundle | [Upload a shared flow bundle](/apigee/docs/api-platform/local-development/vscode/develop-sharedflows#upload) from your local directory. |
+| Cloud Code: Open Apigee workspace | [Open an Apigee workspace](/apigee/docs/api-platform/local-development/vscode/manage-apigee-workspace#open). |
+| Cloud Code: Refresh Apigee Emulator view | [Refresh the Apigee Emulator view](/apigee/docs/api-platform/local-development/vscode/manage-apigee-emulator#refresh) to synchronize recent changes. |
+| Cloud Code: Refresh Apigee workspace view | [Refresh the Apigee workspace view](/apigee/docs/api-platform/local-development/vscode/manage-apigee-workspace#refreshing_the_apigee_workspace_view) to synchronize recent changes. |
+| View: Show Cloud Code - Apigee | [Access Apigee in VS Code](/apigee/docs/api-platform/local-development/vscode/explore#accessing_apigee_in_vs_code) to synchronize recent changes. |

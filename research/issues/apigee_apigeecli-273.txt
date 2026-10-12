@@ -1,0 +1,88 @@
+URL: https://github.com/apigee/apigeecli/issues/273
+TITLE: Documentation Incorrect - Causes unclear errors in Apigee X
+STATE: closed state_reason: completed
+AUTHOR: billabongrob association: NONE
+CREATED: 2023-08-22T15:17:20Z CLOSED: 2023-08-29T14:52:20Z
+LABELS: duplicate
+MILESTONE: None
+--- BODY ---
+We ran into this specifically during the creation of Shared Flows; however, unsure whether or not this affects other functions as well.  
+When including current working directory dot slash `apigeecli apis create -n petstore -f ./test/petstore.yaml` the imported error shared flow will complain that it is unable to find the file ./sharedflows/shared-flow-name.yaml and fails to properly deploy into Apigee X.  
+
+> This is where the dot slash ./ notation comes in. It means “Look in the current directory.” When you use ./, you tell Ubuntu or Fedora or SUSE or whatever Linux distribution you're using to look in the current directory for the command you wish to run, and completely ignore what's on the application PATH.
+
+We've test from Mac and GO based containers and it fails using ./ notation.  This caused a significant amount of lost time for our team troubleshooting this.  
+
+--- COMMENTS (8) ---
+
+### comment by srinandan (association=CONTRIBUTOR) at 2023-08-22T15:43:25Z
+I ran the following commands
+
+```sh
+apigeecli apis create oas -n petstore -f ./petstore.yaml -t $token --import=false
+```
+
+```sh
+apigeecli apis create oas -n petstore -f ./test/petstore.yaml -t $token --import=false
+``` 
+
+and they both worked fine on MacOS and Linux (GCP's Cloud Shell).
+
+Here is the version I'm using:
+`apigeecli version 1.122 date: 2023-07-27T20:30:08Z [commit: 9997413]`
+
+
+
+### comment by billabongrob (association=NONE) at 2023-08-22T15:48:52Z
+The following does not:
+`apigeecli sharedflows create -n fromscratch -f ./sharedflows/fromscratch/sharedflowbundle -t $GCLOUD_TOKEN -o $APIGEEORG` 
+
+Here is the version I'm using:
+`apigeecli version 1.122 date: 2023-07-27T20:30:08Z [commit: 9997413]`
+
+However.... using this _does_ work:
+`apigeecli sharedflows create -n fromscratch -f sharedflows/fromscratch/sharedflowbundle -t $GCLOUD_TOKEN -o $APIGEEORG` 
+
+Then when you attempt to deploy, command will exit fine and act as though it deploys, but the deployment of the revision fails in the UI with the unable to find filename xxxx.yaml 
+
+### comment by cygnus8595 (association=NONE) at 2023-08-22T16:15:13Z
+The real issue here is not in the creation (which works) but in the deploy after create. 
+
+When an API proxy is created with the path in a `./` notation and then deployed, the deployment fails with an error like so:
+
+```
+Status: instance "us-east1" reported error repository.FailedToLoadFile: "Failed to load file : /sharedflows/fromscratch.xml"
+```
+When an API proxy is created and the path is relative - i.e. no `./` in front - and then deployed, the deployment is successful.
+
+### comment by srinandan (association=CONTRIBUTOR) at 2023-08-22T16:26:56Z
+I'm confused a bit, the `deploy` command does not take a file path as a parameter. For ex: `apigeecli sharedflows deploy -n fromscratch -f ...` is invalid. `apigeecli sharedflows deploy` uses:
+
+```
+Deploys a revision of an existing Sharedflow to an environment in an organization
+
+Usage:
+  apigeecli sharedflows deploy [flags]
+
+Flags:
+  -e, --env string    Apigee environment name
+  -h, --help          help for deploy
+  -n, --name string   Sharedflow name
+  -r, --ovr           Forces deployment of the new revision
+  -v, --rev int       Sharedflow revision. If not set, the highest revision is used (default -1)
+  -s, --sa string     The format must be {ACCOUNT_ID}@{PROJECT}.iam.gserviceaccount.com.
+``` 
+
+What am I missing?
+
+### comment by cygnus8595 (association=NONE) at 2023-08-22T16:28:37Z
+I think that may have been just a typo. Rob works with me and we worked this issue together. I created a companion issue to fix what's actually wrong (as opposed to just the docs): https://github.com/apigee/apigeecli/issues/276
+
+### comment by billabongrob (association=NONE) at 2023-08-22T16:35:21Z
+Updated my comment to reflect the create, which does take the file flag, and a further explanation of the problem.  @srinandan 
+
+### comment by srinandan (association=CONTRIBUTOR) at 2023-08-23T15:25:09Z
+Looks like we have two issues for the same problem. I added some results from another test [here](https://github.com/apigee/apigeecli/issues/276#issuecomment-1690166034)
+
+### comment by srinandan (association=CONTRIBUTOR) at 2023-08-29T14:52:17Z
+Marking this as a duplicate. We will continue discussions in #276 

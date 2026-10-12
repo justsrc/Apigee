@@ -1,0 +1,1414 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The ExtractVariables policy extracts content from a request or response and sets the value of a variable to that content. You can extract any part of the message, including headers, URI paths, JSON/XML payloads, form parameters, and query parameters. The policy works by applying a text pattern to the message content and, upon finding a match, sets a variable with the specified message content.
+
+You can also use this policy to extract information from other sources, such as entities created by the [AccessEntity policy](/apigee/docs/api-platform/reference/policies/access-entity-policy), XML objects, or JSON objects.
+
+After extracting the specified message content, you can reference the variable in other policies as part of processing a request and response. For example, you could add the [RaiseFault policy](/apigee/docs/api-platform/reference/policies/raise-fault-policy) to return an error if the extracted value is invalid.
+
+**Note about Service Callouts**: You don't need to use this policy to extract variables from Service Callouts. The [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy) has its own request and response variables that you can use directly, for example in an [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy).
+
+When defining the ExtractVariables policy, you can choose:
+
+- Names of the variables to be set
+- Source of the variables
+- How many variables to extract and set
+
+When executed, the policy applies a text pattern to the content and, upon finding a match, sets the value of the designated variable with the content. Other policies and code can then consume those variables to enable dynamic behavior or to send business data to Apigee API Analytics.
+
+**Warning:** Apigee sets numerous variables automatically during request processing. See [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference). Use the ExtractVariables policy to set additional variables.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+## Samples
+
+These policy code samples illustrate how to extract variables from the following types of artifacts:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### URIs
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExtractVariables name="ExtractVariables-1">
+   <DisplayName>Extract a portion of the url path</DisplayName>
+   <Source>request</Source>
+   <URIPath>
+      <Pattern ignoreCase="true">/accounts/{id}</Pattern>
+   </URIPath>
+   <VariablePrefix>urirequest</VariablePrefix>
+   <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</ExtractVariables>
+```
+
+Consider the sample policy code above. The `<URIPath>` element tells the ExtractVariables policy to extract information from the URI path. The `<Pattern>` element specifies the pattern to apply to the URI path. The pattern is treated as a simple template, with the curly braces denoting the varying portion of the URI path.
+
+The name of the variable to be set is determined by the value specified in the `<VariablePrefix>` element, as well as the value enclosed in curly braces {} in the `<Pattern>` element. The two values are joined by an intervening dot, resulting in a variable name of `urirequest.id` for example. If there is no `<VariablePrefix>` element, then the variable name is just the value enclosed in curly braces.
+
+Consider the sample policy code above working with the following incoming request:
+
+`GET http://example.com/svc1/accounts/12797282`
+
+Suppose the basepath for the API Proxy is `/svc1`. When Apigee applies the ExtractVariables policy code above to this incoming request, it sets the variable `urirequest.id` to `12797282`. After Apigee executes the policy, subsequent policies or code in the processing flow can refer to the variable named `urirequest.id` to get the string value `12797282`.
+
+For example, the following [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) embeds the value of that variable into the payload of a new request message:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage async="false" continueOnError="false" enabled="true" name="AssignPayload">
+  <DisplayName>AssignPayload</DisplayName>
+    <Set>
+      <Payload contentType="text/xml">
+        <IdExtractedFromURI>{urirequest.id}</IdExtractedFromURI>
+      </Payload>
+    </Set>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <AssignTo createNew="true" transport="http" type="request">newRequest</AssignTo>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Query params
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExtractVariables name="ExtractVariables-2">
+   <DisplayName>Extract a value from a query parameter</DisplayName>
+   <Source>request</Source>
+   <QueryParam name="code">
+      <Pattern ignoreCase="true">DBN{dbncode}</Pattern>
+   </QueryParam>
+   <VariablePrefix>queryinfo</VariablePrefix>
+   <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</ExtractVariables>
+```
+
+Consider the sample policy code above working with the following incoming request:
+
+`GET http://example.com/accounts/12797282?code=DBN88271`
+
+When Apigee applies the ExtractVariables policy code above to this incoming request, it sets the variable `queryinfo.dbncode` to `88271`. After Apigee executes the policy, subsequent policies or code in the processing flow can refer to the variable named `queryinfo.dbncode` to get the string value `88271`.
+
+You can now access the variable `queryinfo.dbncode` in your proxy. For example, the following [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) copies it to the payload of the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage async="false" continueOnError="false" enabled="true" name="GetURIPath">
+  <DisplayName>GetQP</DisplayName>
+  <Set>
+   <Payload contentType="text/xml">
+    <ExtractQP>{queryinfo.dbncode}</ExtractQP>
+   </Payload>
+  </Set>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <AssignTo createNew="false" transport="http" type="request"/>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Multiple parameters
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExtractVariables name="ExtractVariables-2">
+  <DisplayName>Extract a value from a query parameter</DisplayName>
+  <Source>request</Source>
+  <QueryParam name="w">
+    <Pattern ignoreCase="true">{firstWeather}</Pattern>
+  </QueryParam>
+  <QueryParam name="w.2">
+    <Pattern ignoreCase="true">{secondWeather}</Pattern>
+  </QueryParam>
+  <VariablePrefix>queryinfo</VariablePrefix>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</ExtractVariables>
+```
+
+Suppose your API design allows you to specify multiple query parameters with the same name. You can use an ExtractVariables policy to extract the value of multiple instances of the query parameter. To reference query parameters with the same name in the policy, use indexes where the first instance of the query parameter has no index, the second is at index 2, the third at index 3, and so on.
+
+Consider the sample policy code above working with the following incoming request:
+
+`GET http://example.com/weather?w=Boston&w=Chicago`
+
+When Apigee applies the ExtractVariables policy code above to this incoming request, it sets the variable `queryinfo.firstWeather` to `Boston` and the variable `queryInfo.secondWeather` to `Chicago`.
+
+You can now access the variable `queryinfo.firstWeather` and `queryinfo.secondWeather` in your proxy. For example, the following [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) copies it to the payload of the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage async="false" continueOnError="false" enabled="true" name="GetURIPath">
+  <DisplayName>GetQP</DisplayName>
+  <Set>
+    <Payload contentType="text/xml">
+      <ExtractQP1>{queryinfo.firstWeather}</ExtractQP1>
+      <ExtractQP2>{queryinfo.secondWeather}</ExtractQP2>
+    </Payload>
+  </Set>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <AssignTo createNew="false" transport="http" type="request"/>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Headers
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExtractVariables name='ExtractVariable-OauthToken'>
+  <Source>request</Source>
+  <Header name="Authorization">
+    <Pattern ignoreCase="false">Bearer {oauthtoken}</Pattern>
+  </Header>
+  <VariablePrefix>clientrequest</VariablePrefix>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</ExtractVariables>
+```
+
+Suppose that your API uses OAuth v2.0 bearer tokens. Consider the sample policy code above working with a request carrying an OAuth v2.0 token that includes a header like this: `Authorization: Bearer TU08xptfFfeM7aS0xHqlxTgEAdAM.`
+
+As the API designer, suppose that you want to use the token value (but not the entire header) as a key in a cache lookup. You could use the ExtractVariables policy code above to extract the token.
+
+When Apigee applies the ExtractVariables policy code above to this header, it sets the variable `clientrequest.oauthtoken` to `TU08xptfFfeM7aS0xHqlxTgEAdAM`.
+
+You can now access the variable `clientrequest.oauthtoken` in your proxy. For example, the following AssignMessage policy copies it to the payload of the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage async="false" continueOnError="false" enabled="true" name="GetURIPath">
+  <DisplayName>GetHeader</DisplayName>
+  <Set>
+    <Payload contentType="text/xml">
+      <ExtractHeader>{clientrequest.oauthtoken}</ExtractHeader>
+    </Payload>
+  </Set>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <AssignTo createNew="false" transport="http" type="request"/>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### JSON
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExtractVariables name="ExtractVariables-3">
+  <Source>response</Source>
+  <JSONPayload>
+    <Variable name="latitude" type="float">
+      <JSONPath>$.results[0].geometry.location.lat</JSONPath>
+    </Variable>
+    <Variable name="longitude" type="float">
+      <JSONPath>$.results[0].geometry.location.lng</JSONPath>
+    </Variable>
+  </JSONPayload>
+  <VariablePrefix>geocoderesponse</VariablePrefix>
+</ExtractVariables>
+```
+
+Consider the following JSON response payload:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "results": [{
+    "geometry": {
+      "location": {
+        "lat": 37.42291810,
+        "lng": -122.08542120
+      },
+      "location_type": "ROOFTOP",
+      "viewport": {
+        "northeast": {
+          "lat": 37.42426708029149,
+          "lng": -122.0840722197085
+        },
+        "southwest": {
+          "lat": 37.42156911970850,
+          "lng": -122.0867701802915
+        }
+      }
+    }
+  }]
+}
+```
+
+When Apigee applies the ExtractVariables policy code above to this JSON message, it sets two variables: `geocoderesponse.latitude` and `geocoderesponse.longitude`. Both variables use the same variable prefix of `geocoderesponse`. The suffix for these variables is specified explicitly by the `<Variable>` element's `name` attribute.
+
+The variable `geocoderesponse.latitude` gets the value `37.42291810`. The variable `geocoderesponse.longitude` gets the value `-122.08542120`.
+
+You can now access the variable `geocoderesponse.latitude` in your proxy. For example, the following AssignMessage policy copies it to a header named `latitude` in the response:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage async="false" continueOnError="false" enabled="true" name="GetURIPath">
+  <DisplayName>GetJSONVar</DisplayName>
+  <Add>
+    <Headers>
+      <Header name="latitude">{geocoderesponse.latitude}</Header>
+    </Headers>
+  </Add>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <AssignTo createNew="false" transport="http" type="response"/>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### XML
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExtractVariables name="ExtractVariables-4">
+   <Source>response</Source>
+   <XMLPayload>
+      <Namespaces>
+         <Namespace prefix="dir">urn:43BFF88D-D204-4427-B6BA-140AF393142F</Namespace>
+      </Namespaces>
+      <Variable name="travelmode" type="string">
+         <XPath>/dir:Directions/dir:route/dir:leg/dir:step/@mode</XPath>
+      </Variable>
+      <Variable name="duration" type="string">
+         <XPath>/dir:Directions/dir:route/dir:leg/dir:step/dir:duration/dir:value</XPath>
+      </Variable>
+      <Variable name="timeunit" type="string">
+         <XPath>/dir:Directions/dir:route/dir:leg/dir:step/dir:duration/dir:text</XPath>
+      </Variable>
+   </XMLPayload>
+   <VariablePrefix>directionsresponse</VariablePrefix>
+</ExtractVariables>
+```
+
+Consider the following XML response payload:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Directions xmlns="urn:43BFF88D-D204-4427-B6BA-140AF393142F">
+   <status>OK</status>
+   <route>
+      <summary>I-40 W</summary>
+      <leg>
+         <step mode="DRIVING">
+            <start_location>
+               <lat>41.8507300</lat>
+               <lng>-87.6512600</lng>
+            </start_location>
+            <end_location>
+               <lat>41.8525800</lat>
+               <lng>-87.6514100</lng>
+            </end_location>
+            <duration>
+                <value>19</value>
+                <text>minutes</text>
+            </duration>
+         </step>
+      </leg>
+   </route>
+</Directions>
+```
+
+When Apigee applies the ExtractVariables policy code above to this XML message, it sets three variables:
+
+- `directionsresponse.travelmode`: Gets the value `DRIVING`
+- `directionsresponse.duration`: Gets the value `19`
+- `directionsresponse.timeunit`: Gets the value `minutes`
+
+All variables use the same variable prefix of `directionsresponse`. The suffix for these variables is specified explicitly by the `<Variable>` element's `name` attribute.
+
+You can now access the variable `directionresponse.travelmode` in your proxy. For example, the following [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) copies it to a header named `tmode` in the response:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage async="false" continueOnError="false" enabled="true" name="GetURIPath">
+  <DisplayName>GetXMLVar</DisplayName>
+  <Add>
+    <Headers>
+      <Header name="tmode">{directionsresponse.travelmode}</Header>
+    </Headers>
+  </Add>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <AssignTo createNew="false" transport="http" type="request"/>
+</AssignMessage>
+```
+
+**Note:** **Setting Content-Type**: When extracting variables from XML messages (including SOAP), the variable extraction works only when `Content-Type` is set in the message header (or SOAP header); for example, `application/xml`.
+
+</div>
+
+</div>
+
+## Variable Scope
+
+Variables set with the ExtractVariables policy have *global* scope. That is, after the ExtractVariables policy defines a new variable, you can access that variable from any policy or code in any stage of the flow that executes *after* the ExtractVariables policy. This includes:
+
+- **PreFlow:** ProxyEndpoint and TargetEndpoint (Request and Response)
+- **PostFlow:** ProxyEndpoint and TargetEndpoint (Request and Response)
+- **PostClientFlow:** ProxyEndpoint (Response only, using the [MessageLogging policy](/apigee/docs/api-platform/reference/policies/message-logging-policy)\>)
+- **Error Flows**
+
+**Tip:** If you do not see the newly extracted variable show up in the [Debug tool](/apigee/docs/api-platform/debug/trace-overview), try removing the `<VariablePrefix>` element if you added it. For more information, refer to this <a href="https://discuss.google.dev/t/extractvariables-not-shown-in-trace/276" class="external">ExtractVariables not shown in trace</a>.
+
+## Matching and variable creation
+
+The ExtractVariables policy extracts information from a request or response and writes that information to a variable. For each type of information that you can extract, such as URI path or XML data, you specify the pattern to match and the name of the variable used to hold the extracted information.
+
+However, the way pattern matching works depends on the source of the extraction. The following sections describe the two basic categories of information that you can extract.
+
+### Matching URI paths, query parameters, headers, form parameters, and variables
+
+When extracting information from a URI path, query parameters, headers, form parameters, and variables you use the `<Pattern>` tag to specify one or more patterns to match. For example, the following policy example shows a single matching pattern for the URI path:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExtractVariables name="ExtractVariables-1">
+   <Source>request</Source>
+   <URIPath>
+      <Pattern ignoreCase="true">/a/{pathSeg}</Pattern>
+   </URIPath>
+   <VariablePrefix>urirequest</VariablePrefix>
+   <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</ExtractVariables>
+```
+
+In this example, the `urirequest.pathSeg` variable is set to whatever appears in the proxy.pathsuffix after `/a/`. For example, suppose the base path for your API Proxy is `/basepath/v1` . With an inbound request to `http://myCo.com/basepath/v1/a/b` the variable is set to `b`.
+
+#### Specifying multiple patterns
+
+You can specify multiple patters to match, corresponding to `<Pattern>` tags, where:
+
+- All patterns are tested for match.
+- If none of the patterns match, the policy does nothing and the variable(s) is not created.
+- If more than one pattern matches, the pattern with longest path segments is used for extraction.
+- If two matched patterns has same longest path segments, then the pattern specified first in the policy is used for extraction.
+
+In the next example, you create a policy that contains three matching patterns for the URI path:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExtractVariables name="ExtractVariables-1">
+  <Source>request</Source>
+  <URIPath>
+    <Pattern ignoreCase="true">/a/{pathSeg}</Pattern>
+    <Pattern ignoreCase="true">/a/b/{pathSeg}</Pattern>
+    <Pattern ignoreCase="true">/a/b/c/{pathSeg}</Pattern>
+  </URIPath>
+  <VariablePrefix>urirequest</VariablePrefix>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</ExtractVariables>
+```
+
+Suppose, for an API Proxy with a basepath of `/basepath/v1` , the inbound request URL to the API proxy is of this form:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+http://myCo.com/basepath/v1/a/b
+```
+
+In this example, the first pattern matches the URI and the `urirequest.pathSeg` variable is set to `b`.
+
+If the request URL is:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+http://myCo.com/basepath/v1/a/b/c/d
+```
+
+...then the third pattern matches and the `urirequest.pathSeg` variable is set to `d`.
+
+#### Specifying patterns with multiple variables
+
+You can specify multiple variables in the matching pattern. For example, you specify a matching pattern with two variables:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExtractVariables name="ExtractVariables-1">
+  <Source>request</Source>
+  <URIPath>
+    <Pattern ignoreCase="true">/a/{pathSeg}</Pattern>
+    <Pattern ignoreCase="true">/a/b/{pathSeg}</Pattern>
+    <Pattern ignoreCase="true">/a/{pathSeg1}/c/{pathSeg2}</Pattern>
+  </URIPath>
+  <VariablePrefix>urirequest</VariablePrefix>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</ExtractVariables>
+```
+
+Again supposing an API Proxy with a base path of `/basepath/v1` , for the inbound request URL:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+http://myCo.com/basepath/v1/a/b/c/d
+```
+
+...the `urirequest.pathSeg1` variable is set to `b` and the `urirequest.pathSeg2` variable is set to `d`.
+
+#### Matching multiple instances in the pattern
+
+You can also match patterns when there are multiple instances of an item with the same name. For example, you can make a request that contains multiple query parameters or multiple headers with the same name. The following request contains two query parameters named "w":
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+http://myCo.com/basepath/v1/a/b/c/d?w=1&w=2
+```
+
+To reference these query parameters in the ExtractVariables policy, you use indexes, where the first instance of the query parameter has no index, the second is at index 2, the third at index 3, etc. For example, the following policy extracts the value of the second query parameter named "w" in the request:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExtractVariables name="ExtractVariables-1">
+  <Source>request</Source>
+  <QueryParam name="w.2">
+    <Pattern ignoreCase="true">{secondW}</Pattern>
+  </QueryParam>
+  <VariablePrefix>urirequest</VariablePrefix>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</ExtractVariables>
+```
+
+The `urirequest.secondW` variable is set to "2". If the second query parameter is omitted from the request, then the `urirequest.secondW` variable is empty. Use indexing any time there are multiple items with the same name in the request.
+
+#### Using special characters in the pattern
+
+When matching URI paths, you can use the "\*" and "\*\*" wildcard characters in the pattern, where:
+
+- "\*" matches any one segments of the path
+- "\*\*" matches multiple segments of the path
+
+For example, you specify patterns to the `<URIPath>` element as shown below:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<URIPath>
+  <Pattern ignoreCase="true">/a/*/{id}</Pattern>
+  <Pattern ignoreCase="true">/a/**/{id}</Pattern>
+</URIPath>
+```
+
+The first pattern matches requests with pathsuffixes (the portion of the URI path following the basepath) such as "/a/b/c", "/a/foo/bar", etc. The second pattern matches any number of path segments after "/a/", such as "/a/foo/bar/baz/c", as well as "/a/b/c" and "/a/foo/bar".
+
+When specifying patterns to query parameters, headers, and form parameters, the "\*"character specifies to match any number of characters. For example, when matching a header, specify the pattern as:
+
+<div>
+
+</div>
+
+```
+*;charset={encoding}
+```
+
+This pattern matches the values "text/xml;charset=UTF-16" and "application/xml;charset=ASCII".
+
+If the value passed to the ExtractVariables policy contains a special character, such as "{", use the "%" character to escape it. The following example escapes the "{" and "}" characters in the pattern because they are used as literal characters in the value of the query parameter:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<QueryParam>
+  <Pattern ignoreCase="true">%{user%} {name}</Pattern>
+</QueryParam>
+```
+
+In this example, the pattern matches the value "{user} Steve" but not the value "user Steve".
+
+### Matching JSON and XML
+
+When extracting data from JSON and XML, you specify one or more `<Variable>` tags in the policy. The `<Variable>` tag specifies the name of the destination variable where the extracted information is stored, and the JsonPath (JSON) or XPATH (XML) to the extracted information.
+
+All `<Variable>` tags in the policy are evaluated, so that you can populate multiple variables from a single policy. If the `<Variable>` tag does not evaluate to a valid field in the JSON or XML, then the corresponding variable is not created.
+
+The following example shows an ExtractVariables policy that populates two variables from the JSON body of a response:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExtractVariables name="ExtractVariables-3">
+   <Source>response</Source>
+   <JSONPayload>
+      <Variable name="latitude" type="float">
+         <JSONPath>$.results[0].geometry.location.lat</JSONPath>
+      </Variable>
+      <Variable name="longitude" type="float">
+         <JSONPath>$.results[0].geometry.location.lng</JSONPath>
+      </Variable>
+   </JSONPayload>
+   <VariablePrefix>geocoderesponse</VariablePrefix>
+</ExtractVariables>
+```
+
+### Writing to the same variable in multiple places
+
+Take care when choosing the names of variables to set. The policy executes sequentially from the first extraction pattern to the last. If the policy writes a value to the same variable from multiple places, the last write in the policy determines the value of the variable. (This may be what you want.)
+
+For example, you want to extract a token value that can be passed either in a query parameter or in a header, as shown below:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<!-- If token only in query param, the query param determines the value.
+     If token is found in both the query param and header, header sets value. -->
+<QueryParam name="token">
+  <Pattern ignoreCase="true">{tokenValue}</Pattern>
+</QueryParam>
+
+<!-- Overwrite tokenValue even if it was found in query parameter. -->
+<Header name="Token">
+  <Pattern ignoreCase="true">{tokenValue}</Pattern>
+</Header>
+```
+
+### Controlling what happens when no match occurs
+
+If the pattern does not match, then the corresponding variable is not created. Therefore, if another policy references the variable, it can cause an error.
+
+One option is to set `<IgnoreUnresolvedVariables>` to true in a policy that references the variable to configure the policy to treat any unresolvable variable as an empty string (null):
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+```
+
+## Element reference
+
+The element reference describes the elements and attributes of the ExtractVariables policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExtractVariables async="false" continueOnError="false" enabled="true" name="Extract-Variables-1">
+   <DisplayName> 1</DisplayName>
+   <Source clearPayload="true|false">request</Source>
+   <VariablePrefix>myprefix</VariablePrefix>
+   <IgnoreUnresolvedVariables>true|false</IgnoreUnresolvedVariables>
+   <URIPath>
+      <Pattern ignoreCase="false">/accounts/{id}</Pattern>
+   </URIPath>
+   <QueryParam name="code">
+      <Pattern ignoreCase="true">DBN{dbncode}</Pattern>
+   </QueryParam>
+   <Header name="Authorization">
+      <Pattern ignoreCase="false">Bearer {oauthtoken}</Pattern>
+   </Header>
+   <FormParam name="greeting">
+      <Pattern>hello {user}</Pattern>
+   </FormParam>
+   <Variable name="request.content">
+       <Pattern>hello {user}</Pattern>
+   </Variable>
+   <JSONPayload>
+      <Variable name="name">
+         <JSONPath>{example}</JSONPath>
+      </Variable>
+   </JSONPayload>
+   <XMLPayload stopPayloadProcessing="false">
+      <Namespaces/>
+      <Variable name="name" type="boolean">
+         <XPath>/test/example</XPath>
+      </Variable>
+   </XMLPayload>
+</ExtractVariables>
+```
+
+## \<ExtractVariables\> attributes
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExtractVariables async="false" continueOnError="false" enabled="true" name="Extract-Variables-1">
+```
+
+The following table describes attributes that are common to all policy parent elements:
+
+| Attribute | Description | Default | Presence |
+| --- | --- | --- | --- |
+| name | The internal name of the policy. The value of the name attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters. Optionally, use the <DisplayName> element to label the policy in the management UI proxy editor with a different, natural-language name. | N/A | Required |
+| continueOnError | Set to false to return an error when a policy fails. This is expected behavior for most policies. Set to true to have flow execution continue even after a policy fails. See also: Fault rules are triggered ONLY in an error state (about continueOnError) Handling faults within the current flow | false | Optional |
+| enabled | Set to true to enforce the policy. Set to false to turn off the policy. The policy will not be enforced even if it remains attached to a flow. | true | Optional |
+| async | This attribute is deprecated. | false | Deprecated |
+
+## \<DisplayName\> element
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, natural-language name.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+| Default | N/A If you omit this element, the value of the policy's name attribute is used. |
+| --- | --- |
+| Presence | Optional |
+| Type | String |
+
+## \<Source\> element
+
+(Optional) Specifies the variable to be parsed. The value of `<Source>` defaults to `message`. The `message` value is context-sensitive. In a request flow, `message` resolves to the request message. In a response flow, `message` resolves to the response message.
+
+While you often use this policy to extract information from a request or response message, you can use it to extract information from any variable. For example, you can use it to extract information from an entity created by the [AccessEntity policy](/apigee/docs/api-platform/reference/policies/access-entity-policy), from data returned by the [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy), or extract information from an XML or JSON object.  
+  
+If `<Source>` cannot be resolved, or resolves to a non-message type, the policy will fail to respond.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Source clearPayload="true|false">request</Source>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | message  |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+### Attributes
+
+| Attribute | Description | Default | Presence | Type |
+| --- | --- | --- | --- | --- |
+| clearPayload | Set to true if you want to clear the payload specified in <Source> after extracting data from it. Use the <clearPayload> option only if the source message is not required after ExtractVariables is executed. Setting to true frees up the memory used by the message. | false | Optional | Boolean |
+
+## \<VariablePrefix\> element
+
+(Optional) The complete variable name is created by joining the `<VariablePrefix>`, a dot, and the name you define in {curly braces} in the `<Pattern>` element or `<Variable>` element. For example: `myprefix.id`, `myprefix.dbncode`, or `myprefix.oauthtoken.`
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VariablePrefix>myprefix</VariablePrefix>
+```
+
+For example, suppose the value of name is "user".
+
+- If `<VariablePrefix>` is not specified, the extracted values are assigned to a variable named `user`.
+- If `<VariablePrefix>` is specified as myprefix, the extracted values are assigned to a variable named `myprefix.user`.
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+## \<IgnoreUnresolvedVariables\> element
+
+(Optional) Set to `true` to treat any unresolvable variable as an empty string (null). Set to `false` if you want the policy to throw an error when any referenced variable is unresolvable.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | False    |
+| **Presence:** | Optional |
+| **Type:**     | Boolean  |
+
+## \<URIPath\> element
+
+(Optional, but see the Presence row in the table below for more information.) Extracts a value from the proxy.pathsuffix of a `request` source message. The path applied to the pattern is the proxy.pathsuffix, which does not include the basepath for the API Proxy. If the source message resolves to a message type of `response`, then this element does nothing.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<URIPath>
+   <Pattern ignoreCase="false">/accounts/{id}</Pattern>
+</URIPath>
+```
+
+It is possible to use multiple `<Pattern>` elements:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<URIPath>
+   <Pattern ignoreCase="false">/accounts/{id}</Pattern>
+   <Pattern ignoreCase="false">/accounts/{id}/transactions/{index}</Pattern>
+</URIPath>
+```
+
+|  |  |
+|----|----|
+| **Default:** | N/A |
+| **Presence:** | Optional. However, you must include at least one of the following: `<URIPath>`, `<QueryParam>`, `<Header>`, `<FormParam>`, `<JSONPayload>`, or `<XMLPayload>.` |
+| **Type:** | N/A |
+
+### Attributes
+
+|  |  |  |  |  |
+|----|----|----|----|----|
+| Attribute | Description | Default | Presence | Type |
+| ignoreCase | Specifies to ignore case when matching the patern. | false | Optional | Boolean |
+
+## \<QueryParam\> element
+
+(Optional, but see the Presence row in the table below for more information.) Extracts a value from the specified query parameter of a `request` source message. If the source message resolves to a message type of `response`, then this element does nothing.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<QueryParam name="code">
+   <Pattern ignoreCase="true">DBN{dbncode}</Pattern>
+</QueryParam>
+```
+
+If multiple query parameters have the same name, use indexes to reference the parameters:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<QueryParam name="w.2">
+   <Pattern ignoreCase="true">{secondW}</Pattern>
+</QueryParam>
+```
+
+|  |  |
+|----|----|
+| **Default:** | N/A |
+| **Presence:** | Optional. However, you must include at least one of the following: `<URIPath>`, `<QueryParam>`, `<Header>`, `<FormParam>`, `<JSONPayload>`, or `<XMLPayload>.` |
+| **Type:** | N/A |
+
+### Attributes
+
+|  |  |  |  |  |
+|----|----|----|----|----|
+| Attribute | Description | Default | Presence | Type |
+| name | Specifies the name of the query parameter. If multiple query parameters have the same name, use indexed referencing, where the first instance of the query parameter has no index, the second is at index 2, the third at index 3, etc. | N/A | Required | String |
+
+## \<Header\> element
+
+(Optional, but see the Presence row in the table below for more information.) Extracts a value from the specified HTTP header of the specified `request` or `response` message. If multiple headers have the same name, their values are stored in an array.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<!-- The name is the actual header name. -->
+<Header name="Authorization">
+<!-- Provide a name for your new custom variable here. -->
+   <Pattern ignoreCase="false">Bearer {oauthtoken}</Pattern>
+</Header>
+```
+
+If multiple headers have the same name, use indexes to reference individual headers in the array:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Header name="myHeader.2">
+   <Pattern ignoreCase="true">{secondHeader}</Pattern>
+</Header>
+```
+
+Or the following to list all the headers in the array:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Header name="myHeader.values">
+   <Pattern ignoreCase="true">{myHeaders}</Pattern>
+</Header>
+```
+
+|  |  |
+|----|----|
+| **Default:** | N/A |
+| **Presence:** | Optional. However, you must include at least one of the following: `<URIPath>`, `<QueryParam>`, `<Header>`, `<FormParam>`, `<JSONPayload>`, or `<XMLPayload>.` |
+| **Type:** | N/A |
+
+### Attributes
+
+|  |  |  |  |  |
+|----|----|----|----|----|
+| Attribute | Description | Default | Presence | Type |
+| name | Specifies the name of the header from which you extract the value. If multiple headers have the same name, use indexed referencing, where the first instance of the header has no index, the second is at index 2, the third at index 3, etc. Use `.values` to get all headers in the array. | N/A | Required | String |
+
+## \<FormParam\> element
+
+(Optional, but see the Presence row in the table below for more information.) Extracts a value from the specified form parameter of the specified `request` or `response` message. Form parameters can be extracted only when the `Content-Type` header of the specified message is `application/x-www-form-urlencoded`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FormParam name="greeting">
+    <Pattern>hello {user}</Pattern>
+</FormParam>
+```
+
+|  |  |
+|----|----|
+| **Default:** | N/A |
+| **Presence:** | Optional. However, you must include at least one of the following: `<URIPath>`, `<QueryParam>`, `<Header>`, `<FormParam>`, `<JSONPayload>`, or `<XMLPayload>.` |
+| **Type:** | N/A |
+
+### Attributes
+
+|  |  |  |  |  |
+|----|----|----|----|----|
+| Attribute | Description | Default | Presence | Type |
+| name | The name of the form parameter from which you extract the value. | N/A | Required | String |
+
+## \<Variable\> element
+
+(Optional, but see the Presence row in the table below for more information.) Specifies the name of a variable from which to extract a value.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Variable name="myVar">
+    <Pattern>hello {user}</Pattern>
+</Variable>
+```
+
+To extract two values from the variable:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Variable name="myVar">
+   <Pattern>hello {firstName} {lastName}</Pattern>
+</Variable>
+```
+
+|  |  |
+|----|----|
+| **Default:** | N/A |
+| **Presence:** | Optional. However, you must include at least one of the following: `<URIPath>`, `<QueryParam>`, `<Header>`, `<FormParam>`, `<JSONPayload>`, or `<XMLPayload>.` |
+| **Type:** | N/A |
+
+### Attributes
+
+|  |  |  |  |  |
+|----|----|----|----|----|
+| Attribute | Description | Default | Presence | Type |
+| name | The name of the variable from which to extract the value. | N/A | Required | String |
+
+## \<JSONPayload\> element
+
+(Optional, but see the Presence row in the table below for more information.) Specifies the JSON-formatted message from which the value of the variable will be extracted. JSON extraction is performed only when message's `Content-Type` header is `application/json`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<JSONPayload>
+   <Variable name="name" type="string">
+      <JSONPath>{example}</JSONPath>
+   </Variable>
+</JSONPayload>
+```
+
+|  |  |
+|----|----|
+| **Default:** | N/A |
+| **Presence:** | Optional. However, you must include at least one of the following: `<URIPath>`, `<QueryParam>`, `<Header>`, `<FormParam>`, `<JSONPayload>`, or `<XMLPayload>.` |
+| **Type:** | N/A |
+
+### \<JSONPayload\>/\<Variable\> element
+
+(Required within the JSONPayload element.) Specifies the variable where the extracted value is assigned. You can include multiple `<Variable>` tags in the `<JSONPayload>` element to populate multiple variables.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Variable name="name" type="string">
+   <JSONPath>{example}</JSONPath>
+</Variable>
+```
+
+|               |                                          |
+|---------------|------------------------------------------|
+| **Default:**  | N/A                                      |
+| **Presence:** | Required within the JSONPayload element. |
+| **Type:**     | N/A                                      |
+
+#### Attributes
+
+| Attribute | Description | Default | Presence | Type |
+| --- | --- | --- | --- | --- |
+| name | Specifies the name of the variable to which the extracted value will be assigned. | name | Required | String |
+| type | Specifies the data type of the variable value. | N/A | Optional | String. Select from: string boolean integer long float double nodeset (returns JSON fragment) |
+
+### \<JSONPayload\>/\<Variable\>/\<JSONPath\> element
+
+(Required within the JSONPayload:Variable element.) Specifies the JSON path used to extract a value from a JSON-formatted message.
+
+**Note:** The `<JSONPath>` element supports the dynamic string substitution feature called [message templating](/apigee/docs/api-platform/reference/message-template-intro).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Variable name="name">
+  <JSONPath>$.rss.channel.title</JSONPath>
+</Variable>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Required |
+| **Type:**     | String   |
+
+## \<XMLPayload\> element
+
+(Optional, but see the Presence row in the table below for more information.) Specifies the XML-formatted message from which the value of the variable will be extracted. XML payloads are extracted only when the `Content-Type` header of the message is `text/xml`, `application/xml`, or `application/*+xml`.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<XMLPayload stopPayloadProcessing="false">
+  <Namespaces>
+    <Namespace prefix="apigee">http://www.apigee.com</Namespace>
+    <Namespace prefix="gmail">http://mail.google.com</Namespace>
+  </Namespaces>
+  <Variable name="name" type="boolean">
+    <XPath>/apigee:test/apigee:example</XPath>
+  </Variable>
+</XMLPayload>
+```
+
+|  |  |
+|----|----|
+| **Default:** | N/A |
+| **Presence:** | Optional. However, you must include at least one of the following: `<URIPath>`, `<QueryParam>`, `<Header>`, `<FormParam>`, `<JSONPayload>`, or `<XMLPayload>.` |
+| **Type:** | N/A |
+
+### Attributes
+
+|  |  |  |  |  |
+|----|----|----|----|----|
+| Attribute | Description | Default | Presence | Type |
+| `stopPayloadProcessing` | Set to `true` to stop XPath evaluation after one variable is populated. This means only a single variable is populated by the policy. | false | Optional | Boolean |
+
+### \<XMLPayload\>/\<Namespaces\> element
+
+(Optional) Specifies the namespace to be used in the XPath evaluation. If you're using namespaces in your XPath expressions, you must declare the namespaces here, as shown in the following example.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<XMLPayload stopPayloadProcessing="false">
+  <Namespaces>
+     <Namespace prefix="apigee">http://www.apigee.com</Namespace>
+     <Namespace prefix="gmail">http://mail.google.com</Namespace>
+  </Namespaces>
+  <Variable name="legName" type="string">
+    <XPath>/apigee:Directions/apigee:route/apigee:leg/apigee:name</XPath>
+  </Variable>
+</XMLPayload>
+```
+
+If you are not using namespaces in your XPath expressions, you can omit or comment out the `<Namespaces>` element, as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<XMLPayload stopPayloadProcessing="false">
+  <!-- <Namespaces/> -->
+  <Variable name="legName" type="string">
+    <XPath>/Directions/route/leg/name</XPath>
+  </Variable>
+</XMLPayload>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | String   |
+
+#### Attributes
+
+|           |                       |         |          |        |
+|-----------|-----------------------|---------|----------|--------|
+| Attribute | Description           | Default | Presence | Type   |
+| `prefix`  | The namespace prefix. | N/A     | Required | String |
+
+### \<XMLPayload\>/\<Variable\> element
+
+(Optional) Specifies variable to which the extracted value will be assigned.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Variable name="name" type="boolean">
+   <XPath>/test/example</XPath>
+</Variable>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Optional |
+| **Type:**     | N/A      |
+
+#### Attributes
+
+| Attribute | Description | Default | Presence | Type |
+| --- | --- | --- | --- | --- |
+| name | Specifies the name of the variable to which the extracted value will be assigned. | name | Required | String |
+| type | Specifies the data type of the variable value. | Boolean | Optional | String. Select from: string boolean integer long float double nodeset (returns an XML fragment) |
+
+### \<XMLPayload\>/\<Variable\>/\<XPath\> element
+
+(Required within the XMLPayload:Variable element.) Specifies the XPath defined for the variable. Only XPath 1.0 expressions are supported.
+
+The `<XPath>` element does not support [message templating](/apigee/docs/api-platform/reference/message-template-intro).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Variable name="name" type="boolean">
+   <XPath>/test/example</XPath>
+</Variable>
+```
+
+Example with a namespace. If you use namespaces in your XPath expressions, you must declare the namespaces in the [`<XMLPayload><Namespaces>`](#xmlpayloadelement-xmlpayloadnamespaceselement) section of the policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Variable name="name" type="boolean">
+   <XPath>/foo:test/foo:example</XPath>
+</Variable>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | N/A      |
+| **Presence:** | Required |
+| **Type:**     | String   |
+
+**Note:** Using `parent`, `ancestor`, `following`, and `preceding` in XPath expressions is not supported in Apigee. To get the same matching results, try explicit node name matching or indexing. For example:
+
+- `<XPath>/Attributes/Attribute[@Name=’foo_attribute']/Value</XPath>`  
+  gets the value of `foo_attribute`.
+- `<XPath>/Attributes/Attribute[4]/Value</XPath>`  
+  gets the value of the 4th attribute.
+
+## Error reference
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+**Tip:** Need help resolving an error? Click *build* in the Fix column for detailed troubleshooting information.
+
+| Fault code | HTTP status | Cause | Fix |
+| --- | --- | --- | --- |
+| steps.extractvariables.ExecutionFailed | 500 | This error occurs when: The input payload (JSON, XML) is empty. The input (JSON, XML, etc) passed to the policy is invalid or malformed. | build |
+| steps.extractvariables.ImmutableVariable | 500 | A variable used in the policy is immutable. The policy was unable to set this variable. | N/A |
+| steps.extractvariables.InvalidJSONPath | 500 | This error occurs if an invalid JSON path is used in the JSONPath element of the policy. For example, if a JSON payload does not have the object Name , but you specify Name as the path in the policy, then this error occurs. | build |
+| steps.extractvariables.JsonPathParsingFailure | 500 | This error occurs when the policy is unable to parse a JSON path and extract data from the flow variable specified in Source element. Typically this happens if the flow variable specified in the Source element does not exist in the current flow. | build |
+| steps.extractvariables.SetVariableFailed | 500 | This error occurs if the policy could not set the value to a variable. The error generally happens if you try to assign values to multiple variables whose names start with the same words in a nested dot-separated format. | build |
+| steps.extractvariables.SourceMessageNotAvailable | 500 | This error occurs if the message variable specified in the Source element of the policy is either: Out of scope (not available in the specific flow where the policy is being executed) or Can't be resolved (is not defined) | build |
+| steps.extractvariables.UnableToCast | 500 | This error occurs if the policy was unable to cast the extracted value to a variable. Typically this happens if you attempt to set the value of one data type to a variable of another data type. | build |
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+**Tip:** Need help resolving an error? Click *build* next to the error's cause description to visit the troubleshooting page.
+
+| Error name | Cause | Fix |
+| --- | --- | --- |
+| NothingToExtract | If the policy does not have any of the elements URIPath , QueryParam , Header , FormParam , XMLPayload , or JSONPayload , the deployment of the API Proxy fails, because there's nothing to extract. | build |
+| NONEmptyPrefixMappedToEmptyURI | This error occurs if the policy has a prefix defined in the Namespace element under the XMLPayload element, but no URI is defined. | build |
+| DuplicatePrefix | This error occurs if the policy has the same prefix defined more than once in the Namespace element under the XMLPayload element. | build |
+| NoXPathsToEvaluate | If the policy does not have the XPath element within the XMLPayload element, then the deployment of the API proxy fails with this error. If you want to extract variables from an XML Payload, then an XPath child element must be specified. | build |
+| EmptyXPathExpression | If the policy has an empty XPath expression within the XMLPayload element, then the deployment of the API proxy fails. | build |
+| NoJSONPathsToEvaluate | If the policy does not have the JSONPath element within the JSONPayload element, then the deployment of the API proxy fails with this error. | build |
+| EmptyJSONPathExpression | If the policy has an empty XPath expression within the XMLPayload element, then the deployment of the API proxy fails. | build |
+| MissingName | If the policy does not have the name attribute in any of the policy elements like QueryParam , Header , FormParam or Variable , where it is required, then the deployment of the API proxy fails. | build |
+| PatternWithoutVariable | If the policy does not have a variable specified within the Pattern element, then the deployment of the API proxy fails. The Pattern element requires the name of the variable in which extracted data will be stored. | build |
+| CannotBeConvertedToNodeset | If the policy has an XPath expression where the Variable type is defined as nodeset , but the expression cannot be converted to nodeset, then the deployment of the API proxy fails. | build |
+| JSONPathCompilationFailed | The policy could not compile a specified JSON Path. | N/A |
+| InstantiationFailed | The policy could not be instantiated. | N/A |
+| XPathCompilationFailed | If the prefix or the value used in the XPath element is not part of any of the declared namespaces in the policy, then the deployment of the API proxy fails. | build |
+| InvalidPattern | If the Pattern element definition is invalid in any of the elements like URIPath , QueryParam , Header , FormParam , XMLPayload or JSONPayload within the policy, then the deployment of the API proxy fails. The Pattern element is considered invalid if it doesn't include a variable. For more information about pattern matching, see About matching and variable creation . | build |
+
+### Fault variables
+
+These variables are set when this policy triggers an error at runtime. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``fault_name``"` | `fault_name` is the name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name = "SourceMessageNotAvailable"` |
+| `extractvariables.``policy_name``.failed` | `policy_name` is the user-specified name of the policy that threw the fault. | `extractvariables.EV-ParseJsonResponse.failed = true` |
+
+### Example error response
+
+**Note:** For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+   "fault":{
+      "detail":{
+         "errorcode":"steps.extractvariables.SourceMessageNotAvailable"
+      },
+      "faultstring":"request message is not available for ExtractVariable: EV-ParseJsonResponse"
+   }
+}
+```
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name="Extract Variable Faults">
+    <Step>
+        <Name>AM-CustomErrorMessage</Name>
+        <Condition>(fault.name = "SourceMessageNotAvailable") </Condition>
+    </Step>
+    <Condition>(extractvariables.EM-ParseJsonResponse.failed = true) </Condition>
+</FaultRule>
+```
+
+## Schemas
+
+**Sample:** See our <a href="https://github.com/apigee/api-platform-samples/tree/master/schemas/policy" class="external">GitHub repository</a> samples for the most recent schemas.
+
+## Related topics
+
+[Flow variables reference](/apigee/docs/api-platform/reference/variables-reference)
+
+Send feedback
+
+<div class="devsite-floating-action-buttons">
+
+</div>
+
+Except as otherwise noted, the content of this page is licensed under the [Creative Commons Attribution 4.0 License](https://creativecommons.org/licenses/by/4.0/), and code samples are licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0). For details, see the [Google Developers Site Policies](https://developers.google.com/site-policies). Java is a registered trademark of Oracle and/or its affiliates.
+
+Last updated 2026-10-09 UTC.
+
+<div class="devsite-content-data">
+
+Need to tell us more?
+
+\[\[\["Easy to understand","easyToUnderstand","thumb-up"\],\["Solved my problem","solvedMyProblem","thumb-up"\],\["Other","otherUp","thumb-up"\]\],\[\["Hard to understand","hardToUnderstand","thumb-down"\],\["Incorrect information or sample code","incorrectInformationOrSampleCode","thumb-down"\],\["Missing the information/samples I need","missingTheInformationSamplesINeed","thumb-down"\],\["Other","otherDown","thumb-down"\]\],\["Last updated 2026-10-09 UTC."\],\[\],\[\]\]
+
+</div>
+
+- ### Products and pricing
+
+  - <a href="//cloud.google.com/products/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 1)" data-track-name="see all products" data-track-metadata-eventdetail="cloud.google.com/products/" data-track-metadata-module="footer" data-track-metadata-child_headline="products and pricing" data-track-type="footer link" data-track-metadata-position="footer">See all products</a>
+  - <a href="//cloud.google.com/pricing/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 2)" data-track-name="google cloud pricing" data-track-type="footer link" data-track-metadata-child_headline="products and pricing" data-track-metadata-module="footer" data-track-metadata-eventdetail="cloud.google.com/pricing/" data-track-metadata-position="footer">Google Cloud pricing</a>
+  - <a href="//cloud.google.com/marketplace/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 3)" data-track-metadata-module="footer" data-track-name="google cloud marketplace" data-track-metadata-eventdetail="cloud.google.com/marketplace/" data-track-metadata-position="footer" data-track-metadata-child_headline="resources" data-track-type="footer link">Google Cloud Marketplace</a>
+  - <a href="//cloud.google.com/contact/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 4)" data-track-metadata-position="footer" data-track-name="contact sales" data-track-metadata-child_headline="engage" data-track-metadata-module="footer" data-track-metadata-eventdetail="cloud.google.com/contact/" data-track-type="footer link">Contact sales</a>
+
+- ### Support
+
+  - <a href="//discuss.google.dev/c/google-cloud/14/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 1)" data-track-metadata-module="footer" data-track-name="google cloud community" data-track-type="footer link" data-track-metadata-position="footer" data-track-metadata-child_headline="engage" data-track-metadata-eventdetail="www.googlecloudcommunity.com" rel="noopener" target="_blank">Community forums</a>
+  - <a href="//cloud.google.com/support-hub/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 2)" data-track-name="support" data-track-metadata-child_headline="resources" data-track-metadata-eventdetail="cloud.google.com/support-hub/" data-track-type="footer link" data-track-metadata-module="footer" data-track-metadata-position="footer">Support</a>
+  - <a href="//docs.cloud.google.com/release-notes" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 3)" data-track-type="footer link" data-track-metadata-child_headline="resources" data-track-metadata-module="footer" data-track-metadata-position="footer" data-track-metadata-eventdetail="cloud.google.com/release-notes/" data-track-name="release notes">Release Notes</a>
+  - <a href="//status.cloud.google.com" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 4)" data-track-name="system status" data-track-metadata-child_headline="resources" data-track-metadata-module="footer" target="_blank" data-track-metadata-position="footer" data-track-metadata-eventdetail="status.cloud.google.com" data-track-type="footer link">System status</a>
+
+- ### Resources
+
+  - <a href="//github.com/googlecloudPlatform/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 1)" data-track-name="github" data-track-metadata-eventdetail="github.com/googlecloudPlatform/" data-track-metadata-module="footer" data-track-type="footer link" data-track-metadata-position="footer" data-track-metadata-child_headline="resources">GitHub</a>
+  - <a href="/docs/get-started/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 2)" data-track-name="google cloud quickstarts" data-track-metadata-child_headline="resources" data-track-metadata-position="footer" data-track-metadata-eventdetail="cloud.google.com/docs/get-started/" data-track-type="footer link" data-track-metadata-module="footer">Getting Started with Google Cloud</a>
+  - <a href="/docs/samples" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 3)" data-track-name="code samples" data-track-metadata-child_headline="resources" data-track-metadata-eventdetail="cloud.google.com/docs/samples" data-track-metadata-module="footer" data-track-metadata-position="footer" data-track-type="footer link">Code samples</a>
+  - <a href="/architecture/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 4)" data-track-metadata-position="footer" data-track-name="cloud architecture center" data-track-type="footer link" data-track-metadata-module="footer" data-track-metadata-eventdetail="cloud.google.com/architecture/" data-track-metadata-child_headline="resources">Cloud Architecture Center</a>
+  - <a href="//cloud.google.com/learn/training/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 5)" data-track-name="training" data-track-metadata-module="footer" data-track-metadata-eventdetail="cloud.google.com/learn/training/" data-track-metadata-child_headline="resources" data-track-metadata-position="footer" data-track-type="footer link">Training and Certification</a>
+
+- ### Engage
+
+  - <a href="//cloud.google.com/blog/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 1)" data-track-name="blog" data-track-metadata-child_headline="engage" data-track-metadata-position="footer" data-track-metadata-eventdetail="cloud.google.com/blog/" data-track-type="footer link" data-track-metadata-module="footer">Blog</a>
+  - <a href="//cloud.google.com/events/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 2)" data-track-metadata-eventdetail="cloud.google.com/events/" data-track-metadata-module="footer" data-track-metadata-child_headline="engage" data-track-type="footer link" data-track-name="events" data-track-metadata-position="footer">Events</a>
+  - <a href="//x.com/googlecloud" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 3)" data-track-metadata-position="footer" data-track-metadata-eventdetail="x.com/googlecloud" rel="noopener" data-track-name="follow on x" data-track-metadata-child_headline="engage" data-track-metadata-module="footer" data-track-type="footer link" target="_blank">X (Twitter)</a>
+  - <a href="//www.youtube.com/googlecloud" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 4)" data-track-metadata-child_headline="engage" data-track-metadata-eventdetail="www.youtube.com/googlecloud" target="_blank" data-track-type="footer link" data-track-metadata-position="footer" data-track-metadata-module="footer" rel="noopener" data-track-name="google cloud on youtube">Google Cloud on YouTube</a>
+  - <a href="//www.youtube.com/googlecloudplatform" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 5)" rel="noopener" data-track-metadata-position="footer" data-track-type="footer link" data-track-metadata-module="footer" data-track-metadata-child_headline="engage" target="_blank" data-track-metadata-eventdetail="www.youtube.com/googlecloudplatform" data-track-name="google cloud tech on youtube">Google Cloud Tech on YouTube</a>
+
+<div class="devsite-footer-utility nocontent" nosnippet="">
+
+<img src="https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/clouddocs/images/lockup-google-for-developers.svg" class="devsite-footer-sites-logo" loading="lazy" alt="Google Developers" />
+
+- <a href="https://developer.android.com/" class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Android Developers Link">Android</a>
+- <a href="https://developer.chrome.com/" class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Chrome Link">Chrome</a>
+- <a href="https://firebase.google.com/" class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Firebase Link">Firebase</a>
+- <a href="https://ai.google.com/" class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Google AI Link">Google AI</a>
+
+<!-- -->
+
+- <a href="//about.google/" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer About Google link" data-track-type="footer link" data-track-metadata-module="utility footer" data-track-metadata-position="footer" target="_blank" data-track-metadata-eventdetail="//about.google/" data-track-name="about google">About Google</a>
+- <a href="//policies.google.com/privacy" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Privacy link" data-track-name="privacy" data-track-metadata-eventdetail="//policies.google.com/privacy" data-track-metadata-module="utility footer" data-track-metadata-position="footer" target="_blank" data-track-type="footer link">Privacy</a>
+- <a href="//policies.google.com/terms?hl=en" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Site terms link" data-track-metadata-eventdetail="//www.google.com/intl/en/policies/terms/regional.html" data-track-type="footer link" data-track-metadata-module="utility footer" data-track-name="site terms" data-track-metadata-position="footer" target="_blank">Site terms</a>
+- <a href="//cloud.google.com/product-terms" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Google Cloud terms link" data-track-metadata-position="footer" data-track-type="footer link" data-track-metadata-eventdetail="//cloud.google.com/product-terms" data-track-metadata-module="utility footer" data-track-name="google cloud terms">Google Cloud terms</a>
+- <a href="#" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Manage cookies link" aria-hidden="true" data-track-metadata-eventdetail="#" data-track-metadata-module="utility footer" data-track-type="footer link" data-track-name="Manage cookies" data-track-metadata-position="footer">Manage cookies</a>
+- <a href="//cloud.google.com/sustainability" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Our third decade of climate action: join us link" data-track-type="footer link" data-track-metadata-module="utility footer" data-track-metadata-eventdetail="/sustainability/" data-track-metadata-position="footer" data-track-name="Our third decade of climate action: join us">Our third decade of climate action: join us</a>
+- <span class="devsite-footer-utility-description">Sign up for the Google Cloud newsletter</span> <a href="//cloud.google.com/newsletter/" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Subscribe link" data-track-metadata-module="utility footer" data-track-metadata-position="footer" data-track-type="footer link" data-track-name="subscribe" data-track-metadata-eventdetail="/newsletter/">Subscribe</a>
+
+<!-- -->
+
+- <span role="menuitem" lang="en">English</span>
+- <span role="menuitem" lang="de">Deutsch</span>
+- <span role="menuitem" lang="es">Español</span>
+- <span role="menuitem" lang="es_419">Español – América Latina</span>
+- <span role="menuitem" lang="fr">Français</span>
+- <span role="menuitem" lang="id">Indonesia</span>
+- <span role="menuitem" lang="it">Italiano</span>
+- <span role="menuitem" lang="pt">Português</span>
+- <span role="menuitem" lang="pt_br">Português – Brasil</span>
+- <span role="menuitem" lang="he">עברית</span>
+- <span role="menuitem" lang="zh_cn">中文 – 简体</span>
+- <span role="menuitem" lang="zh_tw">中文 – 繁體</span>
+- <span role="menuitem" lang="ja">日本語</span>
+- <span role="menuitem" lang="ko">한국어</span>
+
+</div>

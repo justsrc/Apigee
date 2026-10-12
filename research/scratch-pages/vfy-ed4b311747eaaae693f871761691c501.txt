@@ -1,0 +1,82 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.revisions.deployments/list" class="section">
+
+- [HTTP request](#body.HTTP_TEMPLATE)
+- [Path parameters](#body.PATH_PARAMETERS)
+- [Request body](#body.request_body)
+- [Response body](#body.response_body)
+- [Authorization scopes](#body.aspect)
+- [Try it!](#try-it)
+
+<div id="google.cloud.apigee.v1.DeploymentService.ListApiRevisionDeployments" class="section">
+
+</div>
+
+<div id="description" class="section">
+
+Lists all deployments of an API proxy revision.
+
+</div>
+
+<div id="body" class="section">
+
+<div id="body.HTTP_TEMPLATE" class="section">
+
+### HTTP request
+
+`GET https://apigee.googleapis.com/v1/{parent=organizations/*/apis/*/revisions/*}/deployments`
+
+The URL uses [gRPC Transcoding](https://google.aip.dev/127) syntax.
+
+</div>
+
+<div id="body.PATH_PARAMETERS" class="section">
+
+### Path parameters
+
+| Parameters |  |
+| --- | --- |
+| parent | string Required. Name of the API proxy revision for which to return deployment information in the following format: organizations/{org}/apis/{api}/revisions/{rev} . If the API proxy resource has the space attribute set, IAM permissions are checked differently . To learn more, read the Apigee Spaces Overview . Authorization requires the following IAM permission on the specified resource parent : apigee.deployments.list |
+
+</div>
+
+<div id="body.request_body" class="section">
+
+### Request body
+
+The request body must be empty.
+
+</div>
+
+<div id="body.response_body" class="section">
+
+### Response body
+
+If successful, the response body contains an instance of [`ListDeploymentsResponse`](/apigee/docs/reference/apis/apigee/rest/v1/ListDeploymentsResponse).
+
+</div>
+
+<div id="body.aspect" class="section">
+
+### Authorization scopes
+
+Requires the following OAuth scope:
+
+- `https://www.googleapis.com/auth/cloud-platform`
+
+</div>
+
+</div>
+
+<div id="try-it" class="section">
+
+<div class="devsite-apix">
+
+<div class="apis-explorer" discovery-rest-url="https://apigee.googleapis.com/$discovery/rest?version=v1" method-id="apigee.organizations.apis.revisions.deployments.list" params="">
+
+</div>
+
+</div>
+
+</div>
+
+</div>

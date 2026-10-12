@@ -1,0 +1,125 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/big-picture.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/big-picture.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/big-picture.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/big-picture.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/big-picture.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/big-picture.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/big-picture.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/big-picture.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/big-picture.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/big-picture.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/big-picture.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/big-picture.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/big-picture.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/big-picture.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/big-picture.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/big-picture.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/big-picture.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/big-picture.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+Using Apigee hybrid is a three-part process:
+
+| Part 1: CONFIGURE GOOGLE CLOUD AND UI Get your project and organization set up with Google Cloud and hybrid UI. Prerequisites: Created Google Cloud account and project Install gcloud CLI When you're done: Enabled APIs Created an organization Created an environment and environment group 1: Configure it | Part 1: CONFIGURE GOOGLE CLOUD AND UI | Get your project and organization set up with Google Cloud and hybrid UI. Prerequisites: Created Google Cloud account and project Install gcloud CLI When you're done: Enabled APIs Created an organization Created an environment and environment group | 1: Configure it |
+| --- | --- | --- | --- |
+| Part 1: CONFIGURE GOOGLE CLOUD AND UI |  |  |  |
+| Get your project and organization set up with Google Cloud and hybrid UI. Prerequisites: Created Google Cloud account and project Install gcloud CLI When you're done: Enabled APIs Created an organization Created an environment and environment group |  |  |  |
+| 1: Configure it |  |  |  |</td>
+<td width="33%"><table class="pink">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<tbody>
+<tr>
+<th><h3 id="part-2:-install-the-runtime" data-text="Part 2:                   INSTALL THE RUNTIME" tabindex="-1"><span style="font-size: 24pt; line-height:36px">Part 2:</span><br />
+INSTALL THE RUNTIME</h3></th>
+</tr>
+&#10;<tr>
+<td class="alt"><p>Install the runtime in your cluster with this quickstart.</p>
+<p><strong>Prerequisites:</strong></p>
+<ul>
+<li>Complete <a href="/apigee/docs/hybrid/v1.17/precog-overview">Part 1</a></li>
+<li>Verify <a href="/apigee/docs/hybrid/v1.17/prerequisites">Prerequisites</a></li>
+<li> </li>
+</ul>
+<p><strong>When you're done:</strong></p>
+<ul>
+<li>Created a Kubernetes cluster.</li>
+<li>installed and set up <a href="https://helm.sh/docs/intro/install/" class="external">Helm v3.14.2+</a>.</li>
+<li>Created the required service accounts and configured service account authentication.</li>
+<li>Customized your Apigee instance.</li>
+<li>Set up Synchronizer access.</li>
+<li>Installed the Apigee runtime.</li>
+<li> </li>
+</ul></td>
+</tr>
+<tr>
+<td class="alt" style="text-align: center;"><p><a href="/apigee/docs/hybrid/v1.17/install-before-begin" class="button button-primary">2: Install it</a></p></td>
+</tr>
+</tbody>
+</table></td>
+<td width="33%"><table class="green">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<tbody>
+<tr>
+<th><h3 id="part-3:-create-a-proxy-and-test-your-hybrid-installation" data-text="Part 3:                   CREATE A PROXY AND TEST YOUR HYBRID INSTALLATION" tabindex="-1"><span style="font-size: 24pt; line-height:36px">Part 3:</span><br />
+CREATE A PROXY AND TEST YOUR HYBRID INSTALLATION</h3></th>
+</tr>
+&#10;<tr>
+<td class="alt"><p>Get your project and organization set up with Google Cloud and hybrid UI.</p>
+<p><strong>Prerequisites:</strong></p>
+<ul>
+<li>Configured your overrides</li>
+<li>Installed the Apigee hybrid runtime</li>
+<li> </li>
+</ul>
+<p><strong>When you're done:</strong></p>
+<ul>
+<li>Set up and exposed your ingress gateway</li>
+<li>Created your first proxy</li>
+<li>Tested your Hybrid installation</li>
+<li> </li>
+</ul></td>
+</tr>
+<tr>
+<td class="alt" style="text-align: center;"><p><a href="/apigee/docs/hybrid/v1.17/install-expose-apigee-ingress" class="button button-primary">3: Test it</a></p></td>
+</tr>
+</tbody>
+</table></td>
+</tr>
+</tbody>
+</table>
+
+**Note:** The procedures in this guide contain code samples you can copy and modify. Many code samples include variables in `red text` that you can edit before copying.
+
+Most samples are written for the Linux/UNIX/Mac command shell. If you are using Windows, substitute the correct Windows command line syntax. When there are significant differences between the Linux/UNIX/Mac and the Windows syntax, the examples are followed by specific Windows examples.

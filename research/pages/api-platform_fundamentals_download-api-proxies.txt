@@ -1,0 +1,122 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+You may want to download an API proxy configuration bundle (as a zip file) from Apigee to perform one of the following tasks:
+
+- Import an API proxy using the API proxy configuration bundle to another organization, as described in [Importing an API proxy from an API proxy bundle](/apigee/docs/api-platform/fundamentals/build-simple-api-proxy#importinganapiproxyfromanapiproxybundle).
+- Unzip the API proxy to your local system. This is useful for setting up file-based API proxy development in source control or viewing the file-based version of the resources. If you modify the API proxy configuration locally, you can [upload your changes as a new revision of your API proxy](#upload).
+
+The following sections describe how to [download](#download) and [upload](#upload) an API proxy configuration bundle. For information about the expanded contents of the zip file, see [API proxy configuration directory structure](/apigee/docs/api-platform/reference/api-proxy-configuration-reference).
+
+## Video
+
+**Note:** This video was recorded with a previous version of the Apigee UI; however, the concepts are still valid.
+
+Watch the following video to learn more about downloading and uploading an API proxy configuration bundle.
+
+| Video | Description |
+|----|----|
+| <a href="https://www.youtube.com/watch?v=acVv859BlsM" class="external">Download API proxy (Apigee)</a> | Download an API proxy using the Apigee UI and API. |
+
+## Downloading an API proxy configuration bundle
+
+Download an API proxy configuration bundle, as described in the following sections.
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+To download an API proxy configuration bundle using the Google Cloud console:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Proxy development <span aria-label="and then">\></span> API proxies** page.
+
+    <a href="https://console.cloud.google.com/apigee/proxies" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to API proxies</a>
+
+2.  Select the desired API proxy.
+
+3.  Click the **Develop** tab.
+
+4.  Select the API proxy revision that you want to download in the **Revision** menu.
+
+5.  Click <span class="material-icons" aria-hidden="true" translate="no"> more_vert </span>**More revision actions <span aria-label="and then">\></span> Export revision `n`**, where `n` specifies the selected revision.
+
+</div>
+
+<div class="section">
+
+### Apigee API
+
+To download an API proxy configuration bundle using the API, see [Get API proxy revision](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.revisions/get).
+
+</div>
+
+</div>
+
+To view the contents of the API proxy configuration bundle, create a new directory and expand the zip file using a utility such as `unzip`, as shown in the following example:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+mkdir myappdir
+unzip ./my-app_app_rev3_2019_04_20.zip -d myappdir
+```
+
+For more information about the expanded contents of the zip file, see [API proxy configuration directory structure](/apigee/docs/api-platform/reference/api-proxy-configuration-reference#apiproxystructure).
+
+## Uploading an API proxy configuration bundle
+
+Before you upload an API proxy configuration bundle, re-archive the API proxy configuration bundle directory if you have modified it, including any new or changed files. You can use a utility such as `zip`, as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+zip my-new-proxy.zip -r .
+```
+
+The top-level directory in the zip file must be `/apiproxy`. For more information about the required directory structure, see [API proxy configuration directory structure](/apigee/docs/api-platform/reference/api-proxy-configuration-reference#apiproxystructure).
+
+**Note:** There are no special requirements for the zip file name. For example, you do not need to increment the revision number or specify the date in the file name, unless you find it useful for debugging or source control.
+
+Upload an API proxy configuration bundle, as described in the following sections.
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+To upload an API proxy configuration bundle and create a **new revision of an existing API proxy**:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Proxy development <span aria-label="and then">\></span> API proxies** page.
+
+    <a href="https://console.cloud.google.com/apigee/proxies" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to API proxies</a>
+
+2.  Select the desired API proxy.
+
+3.  Click the **Develop** tab.
+
+4.  Click <span class="material-icons" aria-hidden="true" translate="no"> more_vert </span>**More revision actions <span aria-label="and then">\></span> Import revision** .
+
+5.  Click **Browse** and navigate to the zip file in your local directory and click **Open**.
+
+6.  Click **Import**.
+
+</div>
+
+<div class="section">
+
+### Apigee API
+
+To upload an API proxy configuration using the API, see [Update an existing API proxy revision](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.revisions/updateApiProxyRevision)
+
+</div>
+
+</div>

@@ -1,0 +1,131 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+**Note:** To undeploy API proxies in environments enabled for [archive deployments](/apigee/docs/api-platform/fundamentals/environments-overview#deployment-types), see [Deploying and managing archives in an Apigee environment](/apigee/docs/api-platform/deploy/manage-archive-deployments).
+
+Undeploy an API proxy revision from your cluster as described in the following sections.
+
+Note that when you undeploy a revision:
+
+- Apigee does not roll the revision back to the previously deployed revision.
+- After undeploying, no revisions of the API proxy are deployed in the environment.
+
+Undeploying an API proxy is similar to [deleting an API proxy](/apigee/docs/api-platform/develop/ui-delete-proxy), except that when you undeploy a revision you can choose to edit it in the UI and later re-deploy it. If you *delete* the API proxy, it is no longer available to edit.
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+To undeploy an API proxy using the UI:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Proxy Development <span aria-label="and then">\></span> API Proxies** page.
+
+    <a href="https://console.cloud.google.com/apigee/proxies" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to API Proxies</a>
+
+2.  Select the API proxy that you want to undeploy. The UI displays the API proxy's **Overview** view.
+
+3.  In the **Deployments** section, click **Undeploy**.
+
+    <img src="/static/apigee/docs/api-platform/develop/images/undeploy.png" class="screenshot" style="width:80.0%" alt="Undeploy screenshot" />
+
+4.  In the **Undeploy** dialog, click **Confirm**.
+
+</div>
+
+<div class="section">
+
+### Apigee API
+
+To undeploy an API proxy, use the following API call:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/apis/$API/revisions/$REV/deployments" \
+  -X DELETE \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+The following provides an example of the response output (an empty response):
+
+<div>
+
+</div>
+
+```
+{}
+```
+
+For more information, see the [Undeploy API proxy revision API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/undeploy).
+
+</div>
+
+<div class="section">
+
+### gcloud
+
+The following sections provide examples of using `gcloud alpha apigee` CLI commands to undeploy API proxy revisions and validate the undeployment.
+
+- [Undeploying an API proxy revision using the gcloud CLI](#undeploy-api-revision-cli)
+- [Validating the undeployment of an API proxy revision using the gcloud CLI](#validate-undeployment-cli)
+
+For more information and a description of the environment variables used in the examples, see [Getting started using gcloud with Apigee](/apigee/docs/api-platform/get-started/gcloud-get-started).
+
+#### Undeploying an API proxy revision using the gcloud CLI
+
+To undeploy an API proxy revision, use the following gcloud command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+gcloud alpha apigee apis undeploy $REV --api=$API --environment=$ENV
+```
+
+The following provides an example of the response:
+
+<div>
+
+</div>
+
+``` pretty-print
+Using Apigee organization `my-org`
+```
+
+#### Validating the undeployment of an API proxy revision using the gcloud CLI
+
+To validate that the API proxy revision has been undeployed from the environment, use the following gcloud command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+gcloud alpha apigee deployments list --api=$API --environment=$ENV
+```
+
+The following provides an example of the response:
+
+<div>
+
+</div>
+
+``` pretty-print
+Using Apigee organization `my-org`
+Listed 0 items.
+```
+
+For more information, see [List deployments CLI](/sdk/gcloud/reference/alpha/apigee/deployments/list).
+
+</div>
+
+</div>

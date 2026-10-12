@@ -1,0 +1,396 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This section discusses how to use key value maps (KVMs).
+
+## Overview
+
+There are times when you want to store data for retrieval at runtime—non-expiring data that shouldn't be hard-coded in your API proxy logic. Key value maps (KVMs) are ideal for this. A KVM is a custom collection of encrypted key/value String pairs.
+
+The following lists three broad use cases for storing data in KVMs:
+
+- **User session data:** Data that is created and deleted by the runtime only. For example, shopping cart contents.
+
+- **Configuration (such as routing rules and look up tables):** Data that is typically created outside of the runtime but is read by the runtime. This data is configured using the UI or API, and then made available to the gateway (as variables or read-only content).
+
+  For example: You have an API proxy that needs to call one target (or Service Callout) URL in a test environment and another target URL in a production environment. Instead of hard-coding URLs in your API proxy, you can have it detect which environment it's in, execute the related [KeyValueMapOperations policy](/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy), and retrieve the correct target URL from the appropriate KVM.
+
+  Later, if one or both of your targets change, you simply update the KVMs with the new URLs. The API proxy picks up the new values; no redeployment is required.
+
+- **Credentials:** Store credentials, private keys, or tokens—such as tokens for external services, credentials required to generate OAuth tokens, or private keys used in JavaCallout policies or JavaScript for encryption or JSON Web Token (JWT) signing. Instead of passing credentials, keys, or tokens in the request, or hard-coding them in your proxy logic, you can store them in a KVM and dynamically retrieve them in calls to targets that require them.
+
+You'll discover other situations where storage of key/value String pairs is useful. In general, consider using KVMs when:
+
+- Specific sections in your code require different values at runtime.
+- Sensitive data needs to be passed without hard-coding it.
+- You want to store values that don't expire like a cache might.
+
+In some cases, property sets are a good alternative to KVMs as they can be easier to use. For more information, see [Using property sets](/apigee/docs/api-platform/cache/property-sets).
+
+## About KVM scope
+
+Scope defines where a KVM is available. KVMs can be created at the following scopes:
+
+| Scope | Description |
+|----|----|
+| API proxy | Only the API proxy can access the KVM. |
+| Environment | All API proxies in a specific environment can access the KVM. For example, you may want API proxies deployed in the `prod` environment to not have access to KVMs in the `test` environment. If you want the same KVM keys to be available in production, create a parallel KVM scoped to the `prod` environment. |
+| Organization | All API proxies in all environments can access the KVM. |
+
+**Note:** Using the Apigee UI, you can create and manage KVMs at the environment scope only.
+
+## About KVM encryption
+
+In **Apigee**, all KVM entries for API proxy, organization and environment scopes are protected using the <a href="https://cloud.google.com/security-key-management" class="external">Cloud KMS</a> key provided when an Apigee organization is provisioned (see the `runtimeDatabaseEncryptionKey` field in the [Organization](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations#Organization) resource). Apigee uses AES256 as the encryption standard.
+
+In **Apigee hybrid**, you can provide separate encryption keys for all KVM entries for API proxy, organization and environment scopes. Apigee accepts cipher sizes of AES128, AES196 or AES256 as the encryption standard.
+
+## About KVM masking
+
+By default, KVM values are displayed as plain text. You can turn on KVM masking to mask values with asterisks (\*\*\*\*\*). To turn on or off KVM masking, use the **Mask values** setting in the UI or the `maskedValues` flag in your API request.
+
+Values are masked at the KVM level. You can't mask individual KVM entries; either all values within a KVM are masked, or none are.
+
+<div class="note">
+
+**Note:** KVM masking won't be automatically turned on for existing KMVs. You will need to explicitly update existing KVMs to use KVM masking.
+
+</div>
+
+## Create KVMs
+
+Create KVMs as described in the following sections.
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+**Note:** KVMs can be scoped to an environment only.
+
+To create a new (empty) KVM or view a list of KVMs:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Management <span aria-label="and then">\></span> Environments** page.
+
+    <a href="https://console.cloud.google.com/apigee/environments" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Environments</a>
+
+2.  Select the environment you wish to edit from the list of available environments.
+
+3.  Click the **Key value maps** tab on the **Environment details** page.
+
+    The **Key value maps** page displays a list of existing KVMs. If you have not created any KVMs, then the list is empty.
+
+4.  To create a new (empty) KVM, click **+ Create Key value map**.
+
+    The **Create key value map** dialog opens.
+
+5.  Enter a name for the KVM in the **Key value map name** field.
+
+    The name can contain only letters, numbers, and hyphens and cannot be longer than 255 characters. It cannot include spaces or other special characters. For example: `my-kvm-1`
+
+6.  Click **Mask values** to mask all values. If not selected, KVM values are shown in plain text. See [About KVM masking](#aboutmasking) for more information.
+
+7.  Click **Create**.
+
+    The new KVM is displayed in the list.
+
+</div>
+
+<div class="section">
+
+### Apigee API
+
+Use the Apigee APIs to create, list, and delete KVMs for the following scopes:
+
+- [API proxy-scoped key value maps API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.keyvaluemaps)
+- [Environment-scoped key value maps API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.keyvaluemaps)
+- [Organization-scoped key value maps API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.keyvaluemaps)
+
+**Note:**
+
+- When creating a KVM using the API, you must set the `encrypted` flag to `true`. Only encrypted KVMs are supported.
+
+</div>
+
+<div class="section">
+
+### KVM Policy
+
+To create KVMs at runtime and update them in your API proxies, use the [KeyValueMapOperations policy](/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy). In the policy, you specify the name of the KVM in the **`mapIdentifier`** attribute on the parent element.
+
+The `<InitialEntries>` element lets you create and populate a baseline set of entries in a new KVM as soon as you save the policy in the UI or deploy the API proxy (if you developed it offline). If the values change in the policy, the existing values are overwritten. Any new key/value pairs are added to the existing KVM alongside the existing key/value pairs.
+
+The `<Put>` element creates a new KVM if one doesn't already exist, and it creates a key with one or more values. If the KVM already exists, they key/value pairs are added (or updated if the key already exists). You can use multiple `<Put>` elements in a KVM policy.
+
+#### Debug
+
+When you use the [KeyValueMapOperations policy](/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy) to retrieve encrypted KVM values, you supply the name of a variable to store the value. Because all KVM values are encrypted, you need to add the `private.` prefix to the variable name, which prevents the KVM key/value pairs from appearing in Debug sessions.
+
+</div>
+
+</div>
+
+## Get KVMs
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+To view a list of KVMs and their details in the Apigee UI:
+
+1.  Access the list of KVMs for your environment (see [Create KVMs](#console)).
+2.  The **Key value maps** page displays a list of existing KVMs.
+3.  Select the name of a KVM to see its entries and settings.
+
+</div>
+
+<div class="section">
+
+### Apigee API
+
+Use the Apigee APIs to get KVMs for the following scopes:
+
+- [API proxy-scoped key value maps API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.keyvaluemaps)
+- [Environment-scoped key value maps API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.keyvaluemaps)
+- [Organization-scoped key value maps API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.keyvaluemaps)
+
+For example, to get an API proxy-scoped KVM, enter a `GET` request to the following URL:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+https://apigee.googleapis.com/v1/organizations/ORG/apis/API/keyvaluemaps/KVM
+```
+
+</div>
+
+</div>
+
+## Update KVMs
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+To update the **Mask values** setting for an existing KVM in the Apigee UI:
+
+1.  Access the list of KVMs for your environment (see [Create KVMs](#console)).
+2.  Select the name of the KVM to open its details page.
+3.  Toggle the **Mask values** setting.
+4.  Click **Save**.
+
+</div>
+
+<div class="section">
+
+### Apigee API
+
+Use the Apigee APIs to update KVMs for the following scopes:
+
+- [API proxy-scoped key value maps API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.keyvaluemaps)
+- [Environment-scoped key value maps API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.keyvaluemaps)
+- [Organization-scoped key value maps API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.keyvaluemaps)
+
+For example, to update an API proxy-scoped KVM, enter a `PUT` request to the following URL:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+https://apigee.googleapis.com/v1/organizations/ORG/apis/API/keyvaluemaps/KVM
+```
+
+</div>
+
+</div>
+
+## Manage KVM values
+
+You can manage KVM values using the following methods:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+To manage KVM entries in the Apigee UI:
+
+1.  Access the list of KVMs for your environment (see [Create KVMs](#console)).
+2.  Select the name of the KVM to open its details page.
+3.  To manage entries:
+    - **Add an entry**: Click **+ Add**. Fill in the **Key** and **Value** fields and click **Add**.
+    - **Edit an entry**: Click *edit* **Edit** next to an entry. Update the **Value** and click **Save**.
+    - **Delete an entry**: Click *delete* **Delete** next to an entry. Click **Delete** in the confirmation dialog.
+
+</div>
+
+<div class="section">
+
+### Apigee API
+
+Use the Apigee APIs to manage KVM values for the following scopes:
+
+- [API proxy-scoped key value map entries API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.keyvaluemaps.entries)
+- [Environment-scoped key value map entries API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.keyvaluemaps.entries)
+- [Organization-scoped key value map entries API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.keyvaluemaps.entries)
+
+</div>
+
+<div class="section">
+
+### KeyValueMapOperations policy
+
+Use the [`KeyValueMapOperations` policy](/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy) to add, get, or delete values from KVMs.
+
+Add KVM keys and values using the `<Put>` element of the [KeyValueMapOperations policy](/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy). The `<Put>` element creates a new KVM if one doesn't already exist, and it creates a key with one or more values. If the KVM already exists, the key/value pairs are added (or updated if the key already exists). You can use multiple `<Put>` elements in a KVM policy. For more information, see [\<Put\> element](/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy#PutElement).
+
+Get KVM values using the `<Get>` element of the [KeyValueMapOperations policy](/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy). Because all KVM values are encrypted, add a `private.` prefix to the name of the variable that will contain the retrieved value. That prefix hides the value from debug sessions while you're debugging API proxies. For more information, see [\<Get\> element](/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy#GetElement).
+
+Delete KVM values using the `<Delete>` element of the [KeyValueMapOperations policy](/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy). For more information, see [\<Delete\> element](/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy#DeleteElement).
+
+</div>
+
+</div>
+
+## Delete KVMs
+
+Delete KVMs as described in the following sections.
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Apigee UI
+
+To delete a KVM:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Management <span aria-label="and then">\></span> Environments** page.
+
+    <a href="https://console.cloud.google.com/apigee/environments" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to Environments</a>
+
+2.  Select the environment name you wish to edit from the list of available environments.
+
+3.  Click the **Key value maps** tab on the **Environment details** page.
+
+    The **Key value maps** page displays a list of existing KVMs.
+
+4.  Locate the row of the KVM that you want to delete.
+
+5.  Click *delete* **Delete** in the **Actions** column.
+
+6.  Click **Delete Key Value Map** in the dialog to confirm the operation.
+
+    The KVM is deleted and removed from the list.
+
+</div>
+
+<div class="section">
+
+### Apigee API
+
+Use the one of the following Apigee APIs to delete a KVM based on it's scope:
+
+- [Delete KVM at API proxy scope](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.keyvaluemaps/delete)
+- [Delete KVM at environment scope](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.keyvaluemaps/delete)
+- [Delete KVM at organization scope](/apigee/docs/reference/apis/apigee/rest/v1/organizations.keyvaluemaps/delete)
+
+Send feedback
+
+<div class="devsite-floating-action-buttons">
+
+</div>
+
+Except as otherwise noted, the content of this page is licensed under the [Creative Commons Attribution 4.0 License](https://creativecommons.org/licenses/by/4.0/), and code samples are licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0). For details, see the [Google Developers Site Policies](https://developers.google.com/site-policies). Java is a registered trademark of Oracle and/or its affiliates.
+
+Last updated 2026-10-09 UTC.
+
+<div class="devsite-content-data">
+
+Need to tell us more?
+
+\[\[\["Easy to understand","easyToUnderstand","thumb-up"\],\["Solved my problem","solvedMyProblem","thumb-up"\],\["Other","otherUp","thumb-up"\]\],\[\["Hard to understand","hardToUnderstand","thumb-down"\],\["Incorrect information or sample code","incorrectInformationOrSampleCode","thumb-down"\],\["Missing the information/samples I need","missingTheInformationSamplesINeed","thumb-down"\],\["Other","otherDown","thumb-down"\]\],\["Last updated 2026-10-09 UTC."\],\[\],\[\]\]
+
+</div>
+
+- ### Products and pricing
+
+  - <a href="//cloud.google.com/products/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 1)" data-track-metadata-module="footer" data-track-metadata-eventdetail="cloud.google.com/products/" data-track-name="see all products" data-track-metadata-position="footer" data-track-metadata-child_headline="products and pricing" data-track-type="footer link">See all products</a>
+  - <a href="//cloud.google.com/pricing/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 2)" data-track-name="google cloud pricing" data-track-metadata-position="footer" data-track-metadata-child_headline="products and pricing" data-track-metadata-eventdetail="cloud.google.com/pricing/" data-track-type="footer link" data-track-metadata-module="footer">Google Cloud pricing</a>
+  - <a href="//cloud.google.com/marketplace/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 3)" data-track-metadata-eventdetail="cloud.google.com/marketplace/" data-track-type="footer link" data-track-metadata-position="footer" data-track-metadata-child_headline="resources" data-track-metadata-module="footer" data-track-name="google cloud marketplace">Google Cloud Marketplace</a>
+  - <a href="//cloud.google.com/contact/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 4)" data-track-type="footer link" data-track-metadata-child_headline="engage" data-track-name="contact sales" data-track-metadata-position="footer" data-track-metadata-module="footer" data-track-metadata-eventdetail="cloud.google.com/contact/">Contact sales</a>
+
+- ### Support
+
+  - <a href="//discuss.google.dev/c/google-cloud/14/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 1)" data-track-metadata-child_headline="engage" data-track-metadata-position="footer" data-track-type="footer link" rel="noopener" target="_blank" data-track-name="google cloud community" data-track-metadata-module="footer" data-track-metadata-eventdetail="www.googlecloudcommunity.com">Community forums</a>
+  - <a href="//cloud.google.com/support-hub/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 2)" data-track-metadata-eventdetail="cloud.google.com/support-hub/" data-track-type="footer link" data-track-metadata-position="footer" data-track-metadata-module="footer" data-track-name="support" data-track-metadata-child_headline="resources">Support</a>
+  - <a href="//docs.cloud.google.com/release-notes" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 3)" data-track-metadata-child_headline="resources" data-track-type="footer link" data-track-metadata-module="footer" data-track-name="release notes" data-track-metadata-eventdetail="cloud.google.com/release-notes/" data-track-metadata-position="footer">Release Notes</a>
+  - <a href="//status.cloud.google.com" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 4)" data-track-metadata-child_headline="resources" data-track-type="footer link" data-track-metadata-position="footer" data-track-metadata-module="footer" data-track-name="system status" data-track-metadata-eventdetail="status.cloud.google.com" target="_blank">System status</a>
+
+- ### Resources
+
+  - <a href="//github.com/googlecloudPlatform/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 1)" data-track-metadata-eventdetail="github.com/googlecloudPlatform/" data-track-name="github" data-track-metadata-position="footer" data-track-metadata-child_headline="resources" data-track-type="footer link" data-track-metadata-module="footer">GitHub</a>
+  - <a href="/docs/get-started/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 2)" data-track-type="footer link" data-track-metadata-child_headline="resources" data-track-metadata-position="footer" data-track-name="google cloud quickstarts" data-track-metadata-module="footer" data-track-metadata-eventdetail="cloud.google.com/docs/get-started/">Getting Started with Google Cloud</a>
+  - <a href="/docs/samples" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 3)" data-track-metadata-child_headline="resources" data-track-metadata-position="footer" data-track-name="code samples" data-track-metadata-eventdetail="cloud.google.com/docs/samples" data-track-type="footer link" data-track-metadata-module="footer">Code samples</a>
+  - <a href="/architecture/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 4)" data-track-metadata-child_headline="resources" data-track-type="footer link" data-track-metadata-module="footer" data-track-metadata-position="footer" data-track-metadata-eventdetail="cloud.google.com/architecture/" data-track-name="cloud architecture center">Cloud Architecture Center</a>
+  - <a href="//cloud.google.com/learn/training/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 5)" data-track-type="footer link" data-track-metadata-eventdetail="cloud.google.com/learn/training/" data-track-metadata-module="footer" data-track-name="training" data-track-metadata-position="footer" data-track-metadata-child_headline="resources">Training and Certification</a>
+
+- ### Engage
+
+  - <a href="//cloud.google.com/blog/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 1)" data-track-type="footer link" data-track-metadata-module="footer" data-track-metadata-child_headline="engage" data-track-metadata-eventdetail="cloud.google.com/blog/" data-track-name="blog" data-track-metadata-position="footer">Blog</a>
+  - <a href="//cloud.google.com/events/" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 2)" data-track-type="footer link" data-track-metadata-eventdetail="cloud.google.com/events/" data-track-name="events" data-track-metadata-position="footer" data-track-metadata-child_headline="engage" data-track-metadata-module="footer">Events</a>
+  - <a href="//x.com/googlecloud" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 3)" rel="noopener" data-track-type="footer link" data-track-metadata-eventdetail="x.com/googlecloud" data-track-metadata-child_headline="engage" data-track-name="follow on x" data-track-metadata-module="footer" data-track-metadata-position="footer" target="_blank">X (Twitter)</a>
+  - <a href="//www.youtube.com/googlecloud" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 4)" data-track-metadata-child_headline="engage" data-track-type="footer link" data-track-metadata-position="footer" target="_blank" data-track-metadata-module="footer" rel="noopener" data-track-name="google cloud on youtube" data-track-metadata-eventdetail="www.youtube.com/googlecloud">Google Cloud on YouTube</a>
+  - <a href="//www.youtube.com/googlecloudplatform" class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 5)" data-track-type="footer link" data-track-metadata-module="footer" rel="noopener" data-track-metadata-position="footer" target="_blank" data-track-name="google cloud tech on youtube" data-track-metadata-eventdetail="www.youtube.com/googlecloudplatform" data-track-metadata-child_headline="engage">Google Cloud Tech on YouTube</a>
+
+<div class="devsite-footer-utility nocontent" nosnippet="">
+
+<img src="https://www.gstatic.com/devrel-devsite/prod/v097103d8ccd7b257790809ea4cc5e5fee6daa6e24890a4af388296e58364bc31/clouddocs/images/lockup-google-for-developers.svg" class="devsite-footer-sites-logo" loading="lazy" alt="Google Developers" />
+
+- <a href="https://developer.android.com/" class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Android Developers Link">Android</a>
+- <a href="https://developer.chrome.com/" class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Chrome Link">Chrome</a>
+- <a href="https://firebase.google.com/" class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Firebase Link">Firebase</a>
+- <a href="https://ai.google.com/" class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Google AI Link">Google AI</a>
+
+<!-- -->
+
+- <a href="//about.google/" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer About Google link" data-track-metadata-module="utility footer" data-track-name="about google" data-track-metadata-eventdetail="//about.google/" data-track-metadata-position="footer" target="_blank" data-track-type="footer link">About Google</a>
+- <a href="//policies.google.com/privacy" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Privacy link" data-track-metadata-module="utility footer" data-track-metadata-position="footer" target="_blank" data-track-name="privacy" data-track-metadata-eventdetail="//policies.google.com/privacy" data-track-type="footer link">Privacy</a>
+- <a href="//policies.google.com/terms?hl=en" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Site terms link" data-track-metadata-module="utility footer" data-track-name="site terms" data-track-metadata-position="footer" data-track-metadata-eventdetail="//www.google.com/intl/en/policies/terms/regional.html" data-track-type="footer link" target="_blank">Site terms</a>
+- <a href="//cloud.google.com/product-terms" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Google Cloud terms link" data-track-metadata-eventdetail="//cloud.google.com/product-terms" data-track-name="google cloud terms" data-track-metadata-module="utility footer" data-track-type="footer link" data-track-metadata-position="footer">Google Cloud terms</a>
+- <a href="#" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Manage cookies link" data-track-metadata-module="utility footer" data-track-metadata-eventdetail="#" data-track-name="Manage cookies" aria-hidden="true" data-track-metadata-position="footer" data-track-type="footer link">Manage cookies</a>
+- <a href="//cloud.google.com/sustainability" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Our third decade of climate action: join us link" data-track-metadata-module="utility footer" data-track-metadata-eventdetail="/sustainability/" data-track-name="Our third decade of climate action: join us" data-track-metadata-position="footer" data-track-type="footer link">Our third decade of climate action: join us</a>
+- <span class="devsite-footer-utility-description">Sign up for the Google Cloud newsletter</span> <a href="//cloud.google.com/newsletter/" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Subscribe link" data-track-name="subscribe" data-track-metadata-eventdetail="/newsletter/" data-track-metadata-module="utility footer" data-track-metadata-position="footer" data-track-type="footer link">Subscribe</a>
+
+<!-- -->
+
+- <span role="menuitem" lang="en">English</span>
+- <span role="menuitem" lang="de">Deutsch</span>
+- <span role="menuitem" lang="es">Español</span>
+- <span role="menuitem" lang="es_419">Español – América Latina</span>
+- <span role="menuitem" lang="fr">Français</span>
+- <span role="menuitem" lang="id">Indonesia</span>
+- <span role="menuitem" lang="it">Italiano</span>
+- <span role="menuitem" lang="pt">Português</span>
+- <span role="menuitem" lang="pt_br">Português – Brasil</span>
+- <span role="menuitem" lang="he">עברית</span>
+- <span role="menuitem" lang="zh_cn">中文 – 简体</span>
+- <span role="menuitem" lang="zh_tw">中文 – 繁體</span>
+- <span role="menuitem" lang="ja">日本語</span>
+- <span role="menuitem" lang="ko">한국어</span>
+
+</div>
+
+</div>
+
+</div>

@@ -1,0 +1,63 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+Welcome to the home page for OAuth 2.0 on Apigee. This landing page provides links to documentation, samples, and other resources related to using OAuth 2.0 on Apigee.
+
+## The OAuth 2.0 framework
+
+Secure your APIs with OAuth 2.0. This section lists resources, sample code, videos, and other topics to help you be successful using OAuth 2.0 on Apigee.
+
+### <span id="orientation"></span>Learn about OAuth 2.0
+
+This collection of resources will help you get up to speed on OAuth 2.0.
+
+- **Apigee documentation:**
+  - [Introduction to OAuth 2.0](/apigee/docs/api-platform/security/oauth/oauth-introduction) -- Covers basic OAuth 2.0 concepts and terms. Focuses using OAuth 2.0 on Apigee.
+- **Apigee training and certifications:**
+  - Apigee offers online training for API developers, including a course on <a href="https://www.coursera.org/learn/api-security-apigee-gcp" target="external">API security</a>, which includes OAuth 2.0.
+- **IETF Specification:**
+  - [IETF Specification](https://tools.ietf.org/html/draft-ietf-oauth-v2-31) -- Apigee highly recommends that you review this specification. It includes a good basic introduction and conceptual overview.
+- **Apigee e-book:**
+  - [OAuth the Big Picture](https://cloud.google.com//apigee/resources/ebook/oauth-big-picture-register/), a free Apigee e-book.
+
+------------------------------------------------------------------------
+
+### Implement the grant type flows
+
+The following topics explain how to implement the OAuth 2.0 grant types on Apigee:
+
+- [Implementing the client credentials grant type](/apigee/docs/api-platform/security/oauth/oauth-20-client-credentials-grant-type) - Introduces the grant type, with an emphasis on the steps you need to follow to implement this grant type on Apigee.
+- [Implementing the authorization code grant type](/apigee/docs/api-platform/security/oauth/oauth-v2-policy-authorization-code-grant-type) -- Introduces the grant type, with an emphasis on the steps you need to follow to implement this grant type on Apigee.
+- [Use the implicit grant type](/apigee/docs/api-platform/security/oauth/access-tokens#requestinganaccesstokenimplicitgranttype) -- Shows how to request tokens with the implicit grant type.
+- [Implementing the password grant type](/apigee/docs/api-platform/security/oauth/implementing-password-grant-type) -- Introduces the grant type, with an emphasis on the steps you need to follow to implement this grant type on Apigee.
+
+------------------------------------------------------------------------
+
+### How-to topics
+
+These topics explain how to handle common OAuth 2.0 tasks in Apigee:
+
+- [OAuth 2.0: Configuring a new API proxy](/apigee/docs/api-platform/security/oauth/understanding-default-oauth-20-configuration)
+- [Registering client apps](/apigee/docs/api-platform/security/registering-client-apps)
+- [Obtaining client credentials](/apigee/docs/api-platform/security/oauth/obtaining-developer-keys)
+- [Understanding OAuth endpoints](/apigee/docs/api-platform/security/oauth/configuring-oauth-endpoints-and-policies)
+- [Get OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/access-tokens)
+- [Customizing tokens and authorization codes](/apigee/docs/api-platform/security/oauth/customizing-access-tokens)
+- [Revoking and approving tokens](/apigee/docs/api-platform/security/oauth/validating-and-invalidating-access-tokens)
+- [Sending an access token](/apigee/docs/api-platform/security/oauth/sending-access-token)
+- [Verifying access tokens](/apigee/docs/api-platform/security/oauth/using-access-tokens)
+- [Working with OAuth 2.0 scopes](/apigee/docs/api-platform/security/oauth/working-scopes)
+- [Advanced OAuth 2.0 topics](/apigee/docs/api-platform/security/oauth/advanced-oauth-20-topics)
+- [Using JWT OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/using-jwt-oauth#refreshing-a-jwt-access-token)
+
+### <span id="reference"></span>OAuth 2.0 policies
+
+These policies allow you to perform OAuth 2.0 operations in an Apigee API proxy:
+
+- [OAuthV2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy): The heart of the Apigee OAuth 2.0 implementation. It lets you configure OAuth 2.0 *operations* on Apigee that generate access and refresh tokens, issue authorization codes, and validate tokens. This topic includes code samples to help illustrate how things work.
+- [GetOAuthV2Info policy](/apigee/docs/api-platform/reference/policies/get-oauth-v2-info-policy): Gets attributes of tokens and makes them available to policies and code executing in an API proxy. This policy type can be useful when you need to configure dynamic, conditional behavior based on a value in an access token. See also [Customizing access tokens](/apigee/docs/api-platform/security/oauth/customizing-access-tokens).
+- [SetOAuthV2Info policy](/apigee/docs/api-platform/reference/policies/set-oauth-v2-info-policy): Updates the profile of an access token. For example, you may want to embed a tag that is unique to your business. See also [Customizing access tokens](/apigee/docs/api-platform/security/oauth/customizing-access-tokens).
+
+------------------------------------------------------------------------

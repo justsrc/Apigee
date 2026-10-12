@@ -1,0 +1,254 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This topic summarizes the features in Apigee, and compares the features and functionality between Apigee and Apigee hybrid.
+
+Tip: For a comparison of the features in Apigee versus Apigee Edge, see [Compare Apigee Edge to Apigee](https://docs.apigee.com/migration-to-x/compare-apigee-edge-to-apigee-x).
+
+The following table lists the Apigee API management products that are compared in this topic:
+
+| Product | Where hosted | Managed by |
+|----|----|----|
+| [Apigee](/apigee/docs) | Google Cloud | Apigee |
+| [Apigee hybrid](/apigee/docs/hybrid/latest/what-is-hybrid) | Both Google Cloud and the customer's private data center | Apigee manages the management plane and the customer manages the runtime plane. |
+
+## Summary of Apigee features
+
+The following table provides a feature-level summary of Apigee (and hybrid).
+
+Feature
+
+Support in Apigee and hybrid
+
+**API Proxy Revisions**
+
+Immutable when deployed
+
+**Apigee Adapter for Istio**
+
+**Deprecated:** We recommend you use [Apigee Adapter for Envoy](/apigee/docs/api-platform/envoy-adapter/v1.2.x/concepts) instead.
+
+**App organization**
+
+Organize apps using AppGroups or developer-app associations. See [Organizing client app ownership](/apigee/docs/api-platform/publish/organizing-client-app-ownership).
+
+**Deployments**
+
+- Asynchronous deployments
+- Retrieving deployment status is based on the last time the runtime plane "checked-in" with the management plane
+
+**Environments**
+
+- Support for environment groups
+- Self-service through the Apigee UI and APIs
+- Flexibility in serving topology
+- An MP pod can only serve one environment
+
+For more information, see [About environments and environment groups](/apigee/docs/api-platform/fundamentals/environments-overview).
+
+**gRPC-based proxy support**
+
+Process unary gRPC-protocol API requests to a gRPC target server. See [Creating gRPC API proxies](/apigee/docs/api-platform/fundamentals/build-simple-api-proxy#creating-grpc-api-proxies).
+
+**HTTP/1.1 header field name case**
+
+Converts HTTP/1.1 header field names to lowercase when forwarded to the backend. This behavior may affect applications that expect case to be preserved.
+
+**Keystores/Truststores**
+
+- Northbound managed as Kubernetes secrets
+
+**KVMs**
+
+- You can create encrypted, environment-scoped KVMs in the Apigee UI. KVMs are always encrypted. You cannot add, update, or view KVM entries in the UI.
+- Use the `private.` attribute with all variables when accessing a KVM with the `GET` command to hide the KVM information in a debug (Trace) session. If the **`private.`** attribute is not used, the KVM is still encrypted; however, the KVM information will appear decrypted in the debug Trace) session and no exception will be thrown.
+- You can manage KVM entries using the [keyvaluemaps.entries API](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest#rest-resource:-v1.organizations.apis.keyvaluemaps.entries) or the [KeyValueMapOperations policy](/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy).
+- You can use property sets for some of the same use cases as KVMs. See [Using property sets](/apigee/docs/api-platform/cache/property-sets).
+- The `<MapName>` element enables the KeyValueMapOperations policy to identify which KVM to use dynamically, at runtime.
+
+For more information on creating KVMs in the UI, see [Using key value maps](/apigee/docs/api-platform/cache/key-value-maps). See also [Accessing configuration data](/apigee/docs/api-platform/develop/accessing-config-data) for information on how to choose the right data persistence mechanism.
+
+**Monetization**
+
+Supported in Apigee and Apigee hybrid. See [Monetization overview](/apigee/docs/api-platform/monetization/overview) for features.
+
+**Node.js**
+
+- Node.js API proxies are not supported.
+- Apigee recommends that you host Node.js applications as separate containers in Kubernetes (same or different cluster)
+
+**OAuth**
+
+New [RevokeOAuthv2 policy](/apigee/docs/api-platform/reference/policies/revoke-oauth-v2-policy) revokes by end user ID, app ID, or both.
+
+**Policies**
+
+See [Policy overview](/apigee/docs/api-platform/reference/policies/reference-overview-policy).
+
+**Resources**
+
+Cannot use organization-level resources
+
+**Roles and Permissions**
+
+- Managed through Google Cloud console's IAM service
+- Some curated out-of-the-box roles are available
+- You can create custom roles which can include other Google Cloud permissions
+
+For more information, see [Users and roles](/apigee/docs/api-platform/system-administration/users-roles-overview).
+
+**SOAP services in the Build a proxy wizard**
+
+Not supported. See <a href="https://github.com/apigee/wsdl2apigee" class="external">wsdl2apigee</a>, an open source project that provides SOAP utilities for use with Apigee.
+
+**Trace/Debug Sessions**
+
+See [Trace support](#trace-support).
+
+**Virtual Hosts**
+
+For hybrid:
+
+- The ingress is implemented through Anthos Service Mesh.
+- The keys and certs are deployed directly to Kubernetes.
+
+For Apigee:
+
+- Each instance exposes an HTTPS endpoint via self-signed certificate. The CA for the certificate can be downloaded by querying the org.
+
+### Trace/Debug support
+
+The following table shows the Apigee and hybrid Trace support:
+
+| Feature | Apigee and hybrid support |
+| --- | --- |
+| Timeliness | Slight delay; asynchronous |
+| Session name/ID | Doesn't accept session name from the user |
+| Filters | Support for complex filtering logic, including both AND and OR logical operations. Access to any flow variable mentioned in the flow variables reference . Syntax is the same as used with conditionals, as shown in the conditions reference . |
+| Session timeout | Defines only the length of the debug session. The starting point is when the Message Processor receives the request to run in debug mode. Default value is 5 minutes if the session was initiated with the API and 10 minutes if it was initiated in the UI. Data is persisted for 24 hours before hybrid automatically deletes it. |
+| Session validity | Length of time in which the session creation request is valid. If the debug session does not start within this amount of time, the Synchronizers can disregard the session creation request. Be sure to keep your Synchronizers' clocks in synch, as described in Prerequisites . |
+| Trace request count | Default is 10 per Message Processor; maximum is 15. |
+| APIs | Apigee exposes the Debug Session API and Debug Session Data API |
+
+## API overview
+
+The following summarizes Apigee APIs and functionality.
+
+Behavior
+
+Apigee APIs
+
+Base domain
+
+`apigee.googleapis.com`
+
+Media types
+
+`application/json`
+
+Authentication
+
+OAuth2
+
+Timestamps in keys
+
+`String` format
+
+<div>
+
+</div>
+
+```
+{
+  "createdAt": "1234",
+  "lastModifiedAt": "5678"
+}
+```
+
+Structure of `expand=false` query parameter
+
+<div>
+
+</div>
+
+```
+{
+  "proxies": [
+    {
+      "name": "helloworld"
+    },
+    {
+      "name": "weather"
+    }
+  ]
+}
+```
+
+Query parameters prefixed by underscore
+
+Not supported (`optimal=true`)
+
+Properties in payloads:
+
+- `created_by`
+- `modified_by`
+- `self`
+
+Not supported
+
+Default values in payloads
+
+Not included
+
+Error handling structure
+
+<div>
+
+</div>
+
+```
+{
+  "error": {
+    "code": 409,
+    "message": "...",
+    "status": "ABORTED",
+    "details": [...]
+  }
+}
+```
+
+Cache deletion response
+
+Returns: `204 No Content`
+
+Cache API operations
+
+[List](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.caches/list) and [delete](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.caches/delete) only. Short-lived L1 cache is automatically created when you deploy an API proxy. For more information, see [Cache internals](/apigee/docs/api-platform/cache/cache-internals).
+
+### Apigee metrics APIs
+
+Summary of Apigee metric APIs:
+
+| Feature | Apigee APIs |
+|----|----|
+| API endpoint | `apigee.googleapis.com` |
+| Daily analytics emails | No APIs supported |
+| Async Query List API | The `userId` property is omitted from the response. See [Method: organizations.environments.queries.list](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.queries/list). |
+| Custom report APIs | The `createdBy` and `lastModifiedBy` properties have been removed from the response. See [Reports API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.reports). |
+
+## Apigee hybrid features
+
+The following table summaizes hybrid features:
+
+| Service | hybrid Area |
+|----|----|
+| **Analytics** | A data collection pod in the runtime plane uses **fluentd** and **UDCA** (Universal Data Collection Agent) to gather analytics and feed the data to the **UAP** (Unified Analytics Platform) in the management plane. |
+| **API Proxy Gateway** | The **Message Processor (MP)** processes incoming requests. MPs are implemented as one or more containerized apps in the runtime plane. |
+| **Persistence** | **Cassandra** provides persistence for the KMS, KVM, quota, and cache features. |
+| **Deployment** | The **Synchronizer** ensures that API proxy configurations, environment information, and other data is kept up to date between the management plane and runtime plane. |
+| **Administrative User Interface** | The **Apigee UI** is a containerized app hosted on the management plane. |
+| **Load Balancing** | An **Istio Ingress** controller hands requests to the **Router/Message Processor (RMP)** containerized app in the runtime plane. |
+| **APIs** | **Apigee APIs** are accessed through the **Management Server** and **MART**. MART interacts with the local Cassandra datastore and serves as an API provider for the Apigee APIs to access and manage runtime data entities. |
+| **Metrics** | Managed by a single **Prometheus** server per cluster for all services. |

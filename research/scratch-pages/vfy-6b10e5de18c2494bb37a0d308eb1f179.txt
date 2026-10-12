@@ -1,0 +1,28 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+You can develop and test your Apigee APIs and API proxies in a local environment using Cloud Code. Cloud Code is an extension that integrates your Apigee API development, testing, and deployment into the <a href="https://code.visualstudio.com/" class="external">Visual Studio Code (VS Code) IDE</a>, including verifying the functionality through unit and manual testing using the Apigee Emulator (local runtime).
+
+During **local development**, use Apigee in Cloud Code to develop your API proxies and verify the functionality through unit and manual testing using the Apigee Emulator (local runtime).
+
+During **archive deployment**, deploy to Apigee for integration testing and release, leveraging an archive that contains the complete environment and API proxy configuration.
+
+**Preview — Archive deployment**
+
+This feature is subject to the "Pre-GA Offerings Terms" in the General Service Terms section of the <a href="/terms/service-terms#1" data-track-type="commonIncludes">Service Specific Terms</a>. Pre-GA features are available "as is" and might have limited support. For more information, see the <a href="https://cloud.google.com/products/#product-launch-stages" data-track-type="commonIncludes">launch stage descriptions</a>.
+
+## Benefits of local development with Apigee
+
+The benefits of local development with Apigee include:
+
+- Quickly iterate through build and test cycles without impact to other dependent applications
+- Access and manage APIs in your API hub catalog, including publishing new APIs to API hub
+- Create and run repeatable unit tests that verify that the code is producing the intended outcome
+- Identify the set of changes that are deployed as part of a release
+- Track who made changes to a specific deployment
+
+## Prevented actions with archive deployment
+
+To support local development, you must [enable archive deployment](/apigee/docs/api-platform/deploy/manage-archive-deployments#enable-archive-deployment) for an environment in your Apigee organization. When you enable archive deployment in an Apigee environment, you will be **prevented from performing certain actions within the environment** to prevent conflicts with local development. For complete details, see [Summary of prevented actions with archive deployment](/apigee/docs/api-platform/fundamentals/environments-overview#archive-prevented-actions).

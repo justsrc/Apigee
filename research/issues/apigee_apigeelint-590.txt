@@ -1,0 +1,35 @@
+URL: https://github.com/apigee/apigeelint/issues/590
+TITLE: PO042 false positive with UseEffectiveCount
+STATE: closed state_reason: completed
+AUTHOR: guycall association: NONE
+CREATED: 2026-01-08T00:01:28Z CLOSED: 2026-01-08T00:24:23Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+Upgrading from v2.75.0 to v2.76.0 has introduced a new linting error in our project.
+
+```
+PO042 The element <UseEffectiveCount> is not allowed here in profile=apigee
+```
+
+This occurs in all our Spike Arrest policies. From a look at the docs our usage is correct and also these policies are deployed and appear to be working as expected. 
+
+```
+<SpikeArrest name="SA-ThrottleOnSomething">
+  <Rate ref="somevariable">10ps</Rate>
+  <UseEffectiveCount>true</UseEffectiveCount>
+</SpikeArrest>
+```
+
+--- COMMENTS (3) ---
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2026-01-08T00:16:57Z
+@guycall - thanks for reporting
+A fix is pushed.. Will release it shortly
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2026-01-08T00:21:14Z
+Released a patch v2.77.1
+Can you please test using that and close this issue if it resolved it
+
+### comment by guycall (association=NONE) at 2026-01-08T00:24:23Z
+Fixed! Thanks

@@ -1,0 +1,90 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/install-create-namespace.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/install-create-namespace.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/install-create-namespace.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/install-create-namespace.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/install-create-namespace.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/install-create-namespace.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/install-create-namespace.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/install-create-namespace.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/install-create-namespace.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/install-create-namespace.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/install-create-namespace.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/install-create-namespace.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/install-create-namespace.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/install-create-namespace.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/install-create-namespace.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/install-create-namespace.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/install-create-namespace.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/install-create-namespace.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+This step explains how to create the `apigee` Kubernetes namespace in which the Apigee hybrid components operate.
+
+Create the namespace that will be used for the Apigee hybrid resources. This should match the `namespace` field in the `overrides.yaml` file. If this is not present in `overrides.yaml`, the default namespace is `apigee`.
+
+**Note:** You can use any namespace. `apigee` is the default namespace. Be sure to replace `APIGEE_NAMESPACE` with the name of your namespace in the following commands.
+
+1.  Check if the namespace already exists:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl get namespace APIGEE_NAMESPACE
+    ```
+
+    If the namespace exists, your output will include:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    NAME     STATUS   AGE
+    apigee   Active   1d
+    ```
+
+2.  If the namespace does not already exist, create it:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl create namespace APIGEE_NAMESPACE
+    ```
+
+Now that hybrid has a space to operate in, the next step is to create the Google Cloud service accounts and credentials required to configure hybrid runtime components
+
+## Next step
+
+<a href="/apigee/docs/hybrid/v1.17/install-create-cluster" class="button">1</a> <a href="/apigee/docs/hybrid/v1.17/install-download-charts" class="button">2</a> <a href="/apigee/docs/hybrid/v1.17/install-create-namespace" class="button button-disabled">3</a> <a href="/apigee/docs/hybrid/v1.17/install-service-accounts" class="button button-primary">(NEXT) Step 4: Set up service accounts</a> <a href="/apigee/docs/hybrid/v1.17/install-sa-authentication" class="button">5</a> <a href="/apigee/docs/hybrid/v1.17/install-create-tls-certificates" class="button">6</a> <a href="/apigee/docs/hybrid/v1.17/install-create-overrides" class="button">7</a> <a href="/apigee/docs/hybrid/v1.17/install-enable-control-plane-access" class="button">8</a> <a href="/apigee/docs/hybrid/v1.17/install-cert-manager" class="button">9</a> <a href="/apigee/docs/hybrid/v1.17/install-crds" class="button">10</a> <a href="/apigee/docs/hybrid/v1.17/install-helm-charts" class="button">11</a>

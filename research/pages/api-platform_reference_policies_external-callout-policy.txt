@@ -1,0 +1,577 @@
+[<span class="devsite-label" background="google-blue">Standard policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The ExternalCallout policy enables you to send [gRPC](https://grpc.io/) requests to your gRPC server to implement custom behavior that isn't supported by Apigee policies. In your server's code, you can easily access and modify flow variables within a proxy's flow.
+
+Apigee communicates with a gRPC server through an ExternalCallout policy via an API. Apigee uses the API to send [flow variables](/apigee/docs/api-platform/fundamentals/introduction-flow-variables) to the gRPC server. Within your gRPC server, you can read—and depending on the variable, modify— the flow variables listed in the [Flow variables](/apigee/docs/api-platform/reference/variables-reference) reference page, as well as additional variables you specify within the policy's XML.
+
+If you configure the gRPC server with Apigee and include this policy in a proxy, Apigee will handle API requests as follows:
+
+1.  Apigee sends a message containing the flow variables to your gRPC server.
+2.  Your gRPC server code executes, accessing and modifying variables as defined in the code. The gRPC server then sends a response containing all the flow variables back to Apigee.
+3.  Apigee reads the response from your gRPC server. If any variables are added or modifiable flow variables are modified, they are updated in Apigee.
+
+This policy is a *Standard policy* and can be deployed to any environment type. For information on policy types and availability with each environment type, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+To learn more about sending gRPC requests, see the following links:
+
+- [gRPC](https://grpc.io/)
+- [Protocol Buffers](https://developers.google.com/protocol-buffers)
+
+## `<ExternalCallout>`
+
+Defines an ExternalCallout policy.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExternalCallout async="true" continueOnError="true" enabled="true" name="EC">
+```
+
+This element has the following attributes that are common to all policies:
+
+**Attribute**
+
+**Default**
+
+**Required?**
+
+**Description**
+
+`name`
+
+N/A
+
+**Required**
+
+The internal name of the policy. The value of the `name` attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters.
+
+Optionally, use the `<DisplayName>` element to label the policy in the management UI proxy editor with a different, natural-language name.
+
+`continueOnError`
+
+false
+
+Optional
+
+Set to `false` to return an error when a policy fails. This is expected behavior for most policies. Set to `true` to have flow execution continue even after a policy fails. See also:
+
+- [Fault rules are triggered ONLY in an error state (about continueOnError)](/apigee/docs/api-platform/fundamentals/fault-handling#multiplefaultrulesandexecutionlogic-faultrulesaretriggeredonlyinanerrorstateaboutcontinueonerror)
+- [Handling faults within the current flow](/apigee/docs/api-platform/fundamentals/fault-handling#continueonerror)
+
+`enabled`
+
+true
+
+Optional
+
+Set to `true` to enforce the policy. Set to `false` to *turn off* the policy. The policy will not be enforced even if it remains attached to a flow.
+
+`async`  <span class="material-icons" title="Deprecated" aria-hidden="true" translate="no"><span style="color:gray">not_interested</span></span>
+
+false
+
+Deprecated
+
+This attribute is deprecated.
+
+The following table describes the child elements of `<ExternalCallout>`.
+
+| Child Element | Required | Description |
+|----|----|----|
+| [`<TimeoutMs>`](#timeoutms) | Required | The request timeout in milliseconds for gRPC requests. |
+| [`<GrpcConnection>`](#grpcconnection) | Required | Specifies the name of an existing `TargetServer` to be the gRPC server to send requests to. |
+| [`<Configurations>`](#configurations) | Optional | Allows you to configure various aspects of the ExternalCallout policy, including the `<Property>` and `<FlowVariable>` elements. |
+
+## Example 1
+
+Working examples of ExternalCallout are available at [External Callout Samples](https://github.com/srinandan/external-callout-samples) on GitHub.
+
+The following example illustrates an ExternalCallout policy configuration.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExternalCallout enabled="true" continueOnError="false" name="ExternalCallout-1">
+  <DisplayName>External Callout 1</DisplayName>
+  <TimeoutMs>5000</TimeoutMs>
+  <GrpcConnection>
+    <Server name="external-target-server"/>
+  </GrpcConnection>
+  <Configurations>
+    <Property name="with.request.content">true</Property>
+    <Property name="with.request.headers">false</Property>
+    <Property name="with.response.content">true</Property>
+    <Property name="with.response.headers">false</Property>
+    <FlowVariable>example1.flow.variable</FlowVariable>
+    <FlowVariable>example2.flow.variable</FlowVariable>
+  </Configurations>
+<ExternalCallout>
+```
+
+The example sends a request to an external gRPC server represented by the [TargetServer](/apigee/docs/api-platform/deploy/load-balancing-across-backend-servers#about-the-targetserver-configuration) named `external-target-server`, with the following configurations:
+
+- `<Property>`: Include request and response content, but not the request and response headers, in the request sent to the gRPC server.
+- `<FlowVariable>`: Include additional [flow variables](/apigee/docs/api-platform/fundamentals/introduction-flow-variables) `example1.flow.variable` and `example2.flow.variable`, specified by the `FlowVariable` elements, in the request sent to the gRPC server.
+
+## Example 2
+
+In the following example, the `useTargetUrl` attribute of the `Audience` element is set to `true`. When `useTargetUrl` is `true`, the hostname of the gRPC target server is used as the audience. For example, if the host of the server is `my-grpc-server-java.a.run.app`, then the audience used will be `https://my-grpc-server-java.a.run.app`.
+
+**Apigee hybrid users:** If you use Apigee hybrid, note that the `useTargetUrl` attribute is available in Apigee hybrid version 1.8 and later versions.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExternalCallout continueOnError="false" enabled="true" name="External-Callout-1">
+  <DisplayName>External-Callout-1</DisplayName>
+  <GrpcConnection>
+    <Server name="cloud_run_server_name"/>
+    <Authentication>
+      <GoogleIDToken>
+        <Audience useTargetUrl="true"/>
+      </GoogleIDToken>
+    </Authentication>
+  </GrpcConnection>
+  <TimeoutMs>5000</TimeoutMs>
+  <Configurations>
+    <Property name="with.request.content">true</Property>
+    <Property name="with.request.headers">true</Property>
+    <Property name="with.response.content">true</Property>
+    <Property name="with.response.headers">true</Property>
+    <FlowVariable>example.flow.variable</FlowVariable>
+    <FlowVariable>another.flow.variable</FlowVariable>
+  </Configurations>
+</ExternalCallout>
+```
+
+## Child element reference
+
+The following sections describe the child elements of `ExternalCallout`.
+
+### `<TimeoutMs>`
+
+The request timeout in milliseconds for gRPC requests. `<TimeoutMs>` must be a positive number.
+
+### \<GrpcConnection\>
+
+The `<GrpcConnection>` element sets the gRPC server to be an existing `TargetServer`, specified by the `name` attribute. See the [`TargetServer`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.targetservers) resource reference page.
+
+**Note:** The [protocol](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.targetservers#protocol) for the `TargetServer` must be `GRPC`.
+
+For example, the following code
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<GrpcConnection>
+  <Server name="external-target-server"/>
+</GrpcConnection>
+```
+
+specifies the gRPC server to be an existing `TargetServer` named `external-target-server`.
+
+Use the `<Authentication>` element (described later in this section) to generate a Google-issued <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" class="external">OpenID Connect</a> token to make authenticated calls to gRPC-based services, such as custom services hosted in <a href="https://cloud.google.com/run" class="external">Cloud Run</a>.
+
+The following table describes the child elements of `<GrpcConnection>`.
+
+| Child Element | Required? | Description |
+|----|----|----|
+| `<Server>` element | **Required** | Specifies the gRPC server. |
+| `<Authentication>` element | **Optional** | Generates a Google-issued <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" class="external">OpenID Connect</a> token to make authenticated calls to gRPC-based services, such as <a href="https://cloud.google.com/run" class="external">Cloud Run</a>. |
+
+#### `<Server>` element
+
+Specifies the gRPC server.
+
+The following table describes the attributes of the `<Server>` element.
+
+|  |  |  |  |  |
+|----|----|----|----|----|
+| Attribute | Description | Default | Presence | Type |
+| `name` | The name of an existing `TargetServer` to be the gRPC server to send requests to. | N/A | Required | String |
+
+#### `<Authentication>` element
+
+**Apigee hybrid users:** If you are using Apigee hybrid, note that this feature is only supported for Apigee hybrid v1.6.x and later versions.
+
+Generates a Google-issued <a href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken" class="external">OpenID Connect</a> token to make authenticated calls to gRPC-based services, such as custom services hosted in <a href="https://cloud.google.com/run" class="external">Cloud Run</a>. Use of this element requires setup and deployment steps described in [Using Google authentication](/apigee/docs/api-platform/security/google-auth/overview). With proper setup, the policy creates an authentication token for you and adds it to the service request.
+
+This element has one required child element: `GoogleIDToken`.
+
+|                    |                                       |
+|--------------------|---------------------------------------|
+| **Default**        | N/A                                   |
+| **Required?**      | Optional.                             |
+| **Type**           | Complex type                          |
+| **Parent Element** | [`<GrpcConnection>`](#grpcconnection) |
+| **Child Elements** | [`<GoogleIDToken>`](#googleidtoken)   |
+
+The `Authentication` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExternalCallout>
+...
+  <GrpcConnection>
+    <Server name="cloud_run_server_name"/>
+    <Authentication>
+      <HeaderName ref="FLOW_VARIABLE">STRING</HeaderName>
+      <GoogleIDToken>
+         <Audience ref="variable-1">STRING</Audience>
+         <IncludeEmail ref="variable-2">BOOLEAN</IncludeEmail>
+      </GoogleIDToken>
+    </Authentication>
+  </GrpcConnection>
+</ExternalCallout>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+The following example shows the `GoogleIDToken` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExternalCallout continueOnError="false" enabled="true" name="External-Callout-1">
+  <DisplayName>External-Callout-1</DisplayName>
+  <GrpcConnection>
+     <Server name="cloud_run_server_name"/>
+     <Authentication>
+        <HeaderName ref='my-variable'>X-Serverless-Authorization</HeaderName>
+        <GoogleIDToken>
+           <Audience>https://cloudrun-hostname.a.run.app</Audience>
+        </GoogleIDToken>
+     </Authentication>
+  </GrpcConnection>
+  <TimeoutMs>5000</TimeoutMs>
+  <Configurations>
+    <Property name="with.request.content">true</Property>
+    <Property name="with.request.headers">true</Property>
+    <Property name="with.response.content">true</Property>
+    <Property name="with.response.headers">true</Property>
+    <FlowVariable>example.flow.variable</FlowVariable>
+    <FlowVariable>another.flow.variable</FlowVariable>
+  </Configurations>
+</ExternalCallout>
+```
+
+</div>
+
+</div>
+
+##### Attributes
+
+None.
+
+##### \<HeaderName\> child element
+
+By default, when an Authentication configuration is present, Apigee generates a bearer token and injects it into the `Authorization` header in the message sent to the target system. The `HeaderName` element allows you to specify the name of a different header to hold that bearer token. This feature is particularly useful when the target is a Cloud Run service that uses the `X-Serverless-Authorization` header. The `Authorization` header, if present, is left unmodified and also sent in the request.
+
+|                    |                                       |
+|--------------------|---------------------------------------|
+| **Default**        | N/A                                   |
+| **Required?**      | No                                    |
+| **Type**           | String                                |
+| **Parent Element** | [`<Authentication>`](#authentication) |
+| **Child Elements** | None                                  |
+
+The `HeaderName` element uses the following syntax:
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExternalCallout>
+...
+  <Authentication>
+    <HeaderName ref="FLOW_VARIABLE">STRING</HeaderName>
+    <GoogleIDToken>
+    ...
+    </GoogleIDToken>
+  </Authentication>
+  ...
+</ExternalCallout>
+```
+
+</div>
+
+<div class="section">
+
+### With static string
+
+In this example, the generated bearer token is added, by default, to a header named `X-Serverless-Authorization` that is sent to the target system. The `Authorization` header, if present, is left unmodified and also sent in the request.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Authentication>
+  <HeaderName>X-Serverless-Authorization</HeaderName>
+  <GoogleIDToken>
+    <Audience>https://cloudrun-hostname.a.run.app</Audience>
+  </GoogleIDToken>
+</Authentication>
+```
+
+</div>
+
+<div class="section">
+
+### With variable reference
+
+In this example, the generated bearer token is added, by default, to a header named `X-Serverless-Authorization` that is sent to the target system. If `my-variable` has a value, that value is used instead of the default string. The `Authorization` header, if present, is left unmodified and also sent in the request.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Authentication>
+  <HeaderName ref='my-variable'>X-Serverless-Authorization</HeaderName>
+  <GoogleIDToken>
+    <Audience>https://cloudrun-hostname.a.run.app</Audience>
+  </GoogleIDToken>
+</Authentication>
+```
+
+</div>
+
+##### \<GoogleIDToken\> child element
+
+Generates Google-issued OpenID Connect tokens to make authenticated calls to Google services, such as custom services hosted in <a href="https://cloud.google.com/run" class="external">Cloud Run</a>.
+
+| Default | N/A |
+| --- | --- |
+| Required? | Required |
+| Type | String |
+| Parent Element | <Authentication> |
+| Child Elements | <Audience> <IncludeEmail> |
+
+The `GoogleIDToken` element uses the following syntax:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Syntax
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExternalCallout>
+...
+  <GrpcConnection>
+    <Server name="cloud_run_server_name"/>
+    <Authentication>
+      <GoogleIDToken>
+        <Audience ref="context-variable" useTargetUrl='BOOLEAN'>STRING</Audience>
+        <IncludeEmail ref="context-variable">BOOLEAN</IncludeEmail>
+      </GoogleIDToken>
+    </Authentication>
+  </GrpcConnection>
+</ExternalCallout>
+```
+
+</div>
+
+<div class="section">
+
+### Example
+
+The following example shows the `GoogleIDToken` element:
+
+<div>
+
+</div>
+
+```
+
+<Authentication>
+  <GoogleIDToken>
+      <Audience>https://httpserver0-bar.run.app</Audience>
+      <IncludeEmail>true</IncludeEmail>
+  </GoogleIDToken>
+</Authentication>
+```
+
+</div>
+
+</div>
+
+##### \<Audience\> child element
+
+The audience for the generated authentication token, such as the API or account that the token grants access to.
+
+If the value of `Audience` is empty, the `ref` is empty or resolves to an empty value, and `useTargetUrl` is `true`, then "https://" + (hostname of the gRPC target server) is used as the audience. For example, if the host of the server is `my-grpc-server-java.a.run.app`, then the audience used will be `https://my-grpc-server-java.a.run.app`.
+
+By default, `useTargetUrl` is `false`.
+
+**Apigee hybrid users:** If you use Apigee hybrid, note that the `useTargetUrl` attribute is available in Apigee hybrid version 1.8 and later versions.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Audience>explicit-audience-value-here</Audience>
+
+or:
+
+<Audience ref='variable-name-here'/>
+
+or:
+
+<Audience ref='variable-name-here' useTargetUrl='true'/>
+
+or:
+
+<Audience useTargetUrl='true'/>
+```
+
+|                    |                                     |
+|--------------------|-------------------------------------|
+| **Default**        | N/A                                 |
+| **Required?**      | Required                            |
+| **Type**           | String                              |
+| **Parent Element** | [`<GoogleIDToken>`](#googleidtoken) |
+| **Child Elements** | None.                               |
+
+##### \<IncludeEmail\> child element
+
+If set to `true`, the generated authentication token will contain the service account `email` and `email_verified` claims.
+
+|                    |                                     |
+|--------------------|-------------------------------------|
+| **Default**        | false                               |
+| **Required?**      | Optional                            |
+| **Type**           | Boolean                             |
+| **Parent Element** | [`<GoogleIDToken>`](#googleidtoken) |
+| **Child Elements** | None.                               |
+
+### \<Configurations\>
+
+The `<Configurations>` element allows you to configure various aspects of the ExternalCallout policy, including `<Property>` and `<FlowVariable>`.
+
+The following table describes the child elements of `<Configurations>`.
+
+Child Element
+
+Required?
+
+Description
+
+[`<Property>`](#property)
+
+**Required**
+
+Specifies whether request/response headers and/or content will be sent to the server. Possible values are `true` or `false`. The default is `false`.
+
+[`<FlowVariable>`](#flow-variable)
+
+**Required**
+
+Specifies what additional flow variables should be sent to the server.
+
+#### \<Property\>
+
+The `<Property>` element specifies whether request/response headers and/or content will be sent to the server. Possible values are `true` (the item will be sent) or `false` (the item won't be sent). The default value is `false`.
+
+The following table describes the attributes of the `<Property>` element.
+
+| Attribute | Description | Default | Presence | Type |
+| --- | --- | --- | --- | --- |
+| name | Specifies what content will be sent to the server. Possible values for name are: with.request.content with.request.headers with.response.content with.response.headers | N/A | Required | String |
+
+#### \<FlowVariable\>
+
+The `<FlowVariable>` element specifies what additional flow variables will be sent to the server. The value of `<FlowVariable>` is a prefix of a variable, rather than the full variable name. For example , if the element is `a.b.c`, the value of a variable named `a.b.c` will be sent to the server. Similarly, the value of a variable named `a.b.c.my-variable` will be sent to the server. But the value of a variable named `a.x.another-variable` will not be sent, because it does not have the prefix `a.b.c`. Here are some examples
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Configurations>
+  <FlowVariable>a.b.c</FlowVariable>
+  <FlowVariable>d.e.f</FlowVariable>
+</Configurations>
+```
+
+## Error Reference
+
+### Deployment errors
+
+| Error name | Cause |
+| --- | --- |
+| FAILED_PRECONDITION | This error happens if the service account is missing when the proxy is configured with the <Authentication> tag. For example: Deployment of \"organizations/foo/apis/apiproxy/revisions/1\" requires a service account identity, but one was not provided with the request. |
+| PERMISSION_DENIED | This error happens if there is a permission problem with the service account if the proxy is configured with the <Authentication> tag. Possible causes: The service account does not exist. The service account was not created in the same Google Cloud project as the Apigee organization. The deployer does have iam.serviceAccounts.actAs permission on the service account. For details, see About service account permissions . |
+
+### Runtime errors
+
+The table below describes runtime errors, which can occur when the policy executes.
+
+| Fault code | HTTP Status | Cause |
+| --- | --- | --- |
+| GrpcTlsInitFailed | 500 | This error will occur if there are any issues with initializing TLS with the gRPC server (such as Keystore or truststore issues). |
+| steps.externalcallout.[error_code] | 500 | [error_code] is determined by the Fault message's errorCode field. The fault string of the error will be the fault message's faultstring field. |
+| steps.externalcallout.ExecutionError | 500 | This error will occur if any other exception occurs during the execution of this policy. The underlying exception will be exposed in the faultstring. If there was an issue with the credentials to the gRPC server, the error will look something like this: { "fault": { "faultstring": "Encountered the following exception while sending the gRPC request or processing the response: [io.grpc.StatusRuntimeException: UNAVAILABLE: Credentials failed to obtain metadata].", "detail": { "errorcode": "steps.externalcallout.ExecutionError" } } } You can look at the logs of the MP for further debugging pointers. |
+| googletoken.EmptyIDTokenAudience | 500 | <GoogleIDToken> is enabled but useTargetUrl is set to false and no value is provided to <Audience> either directly or through reference at the time of error. |
+| steps.externalcallout.ExecutionError with fault string: Encountered the following exception while sending the gRPC request or processing the response: [io.grpc.StatusRuntimeException: UNAVAILABLE: Credentials failed to obtain metadata] | 500 | This error happens if the API proxy is configured with the <Authentication> element. Possible causes: The service account deployed with the proxy: does not exist in your project (it existed when deployed, but was deleted after deployment) has been disabled (Apigee hybrid only) has not granted the roles/iam.serviceAccountTokenCreator role on the apigee-runtime service account. (Apigee hybrid only) The IAMCredentials API is disabled in the source project of the apigee-runtime service account. Note: For Apigee hybrid only, check the runtime container's log and search for externalcallout.ExecutionError to find more detailed error messages that may help with debugging the problem. |
+| steps.externalcallout.ExecutionError with faultstring containing PERMISSION DENIED . For example, the faultstring will look like the following for Cloud Run: Encountered the following exception while sending the gRPC request or processing the response: [io.grpc.StatusRuntimeException: PERMISSION_DENIED: HTTP status code 403 …] | 500 | This error happens if the API proxy is configured with the <Authentication> element. Possible causes: The proxy service account exists and is enabled but does not have the right permissions to access the service. The service requires authentication but the request did not have an authentication header (For example: the authentication XML was not included in the policy XML). |
+
+### Miscellaneous errors
+
+The table below describes miscellaneous errors. See the cause for more details.
+
+| Fault code | Cause |
+|----|----|
+| `ReferencesExistToGrpcServer` | This error will occur if a user tries to delete a gRPC target server, but the server is still being used by other policies. |
+
+### Faults
+
+The fault variables in the following table are set for all policies by default. See [Variables specific to policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors#variablesspecifictopolicyerrors).
+
+| Variables | Where | Examples |
+|----|----|----|
+| `fault.name="fault_name"` | `fault_name` is the name of the fault, as listed in the Runtime errors table above. The fault name is the last part of the fault code. | `fault.name` matches "ExecutionError". |
+| `externalcallout.[policy_name].failed` | `policy_name` is the user-specified name of the policy that threw the fault. | `externalcallout.ExternalCallout-1.failed = true` |
+
+## Related topics
+
+- [JavaCallout policy](/apigee/docs/api-platform/reference/policies/java-callout-policy)

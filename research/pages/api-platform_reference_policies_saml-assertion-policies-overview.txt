@@ -1,0 +1,30 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+The SAMLAssertion policies enable API proxies to validate SAML assertions that are attached to inbound SOAP requests, or to attach SAML assertions to outbound XML requests. The SAML policy validates incoming messages that contain a digitally-signed SAML assertion, rejects them if they are invalid, and sets variables that allow additional policies, or the backend services itself, to further validate the information in the assertion.
+
+Apigee provides two SAML-related policies:
+
+- **Inbound authentication and authorization: [Validate SAML Assertion policy](/apigee/docs/api-platform/reference/policies/validate-saml-assertion-policy)**  
+  The SAML policy type enables API proxies to validate SAML assertions that are attached to inbound SOAP requests. The SAML policy validates incoming messages that contain a digitally-signed SAML assertion, rejects them if they are invalid, and sets variables that allow additional policies, or the backend services itself, to further validate the information in the assertion.
+- **Outbound token generation: [Generate SAML Assertion policy](/apigee/docs/api-platform/reference/policies/generate-saml-assertion-policy)**  
+  The SAML policy type enables API proxies to attach SAML assertions to outbound XML requests. Those assertions are then available to enable backend services to apply further security processing for authentication and authorization.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+## Usage notes
+
+The Security Assertion Markup Language (SAML) specification defines formats and protocols that enable applications to exchange XML-formatted information for authentication and authorization.
+
+A "security assertion" is a trusted token that describes an attribute of an app, an app user, or some other participant in a transaction. Security assertions are managed and consumed by two types of entities:
+
+- Identity providers: Generate security assertions on behalf of participants
+- Service providers: Validate security assertions through trusted relationships with identity providers
+
+The API platform can act as an identity provider and as a service provider. It acts as an identity provider by generating assertions and attaching them to request messages, making those assertions available for processing by backend services. It acts as a service provider by validating assertions on inbound request messages.
+
+The SAML policy type supports SAML assertions that match version 2.0 of the SAML Core Specification and Version 1.0 of the WS-Security SAML Token Profile specification.

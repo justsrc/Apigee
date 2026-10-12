@@ -1,0 +1,576 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+When a developer registers an app on Apigee, Apigee automatically generates a consumer key and secret pair. You can see the app's consumer key and secret pair in the Apigee UI or access them from the Apigee API.
+
+**Note:** API keys go by many names. You may see them referred to as 'API keys', 'app keys', and 'consumer keys'. All of these names are synonymous.
+
+At the time of app registration, the developer selects one or more *API products* to associate with the app, where an API product is a collection of *resources* accessible through API proxies. The developer then passes the API key (consumer key) as part of every request to an API in an API product associated with the app. See [Publishing overview](/apigee/docs/api-platform/publish/publishing-overview) for information.
+
+The VerifyAPIKey policy lets you enforce verification of API keys at runtime, letting only apps with approved API keys access your APIs. This policy ensures that API keys are valid, have not been revoked, and are approved to consume the specific resources associated with your API products.
+
+API keys can be used as authentication tokens, or they can be used to obtain OAuth access tokens. In OAuth, API keys are referred to as "client id". The names can be used interchangeably. See [OAuth home](/apigee/docs/api-platform/security/oauth/oauth-home) for more.
+
+Apigee automatically populates a set of flow variables when executing the Verify API Key policy. See [Flow variables](/apigee/docs/api-platform/reference/policies/verify-api-key-policy#variables) below for more.
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+For a tutorial showing how to build an API proxy that uses the Verify API Key policy, see [Secure an API by requiring API keys](/apigee/docs/api-platform/tutorials/secure-calls-your-api-through-api-key-validation).
+
+## Samples
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Key in query param
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyAPIKey name="APIKeyVerifier">
+    <APIKey ref="request.queryparam.apikey" />
+</VerifyAPIKey>
+```
+
+In this example, the policy expects to find the API key in a flow variable called `request.queryparam.apikey`. The variable `request.queryparam.{name}` is a standard Apigee flow variable that is populated with the value of a query param passed in the client request.
+
+The following `curl` command passes the API key in a query param:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl http://myorg-test.apigee.net/mocktarget?apikey=IEYRtW2cb7A5Gs54A1wKElECBL65GVls
+```
+
+While allowed, it's generally a poor practice to pass the API key in a query parameter. The reason is because query params can appear in the browser history and network logs, which presents a possible security risk. A better practice is to place the API key in a header, which will not appear in log files. See the "KEY IN HEADER" example on the next tab.
+
+</div>
+
+<div class="section">
+
+### Key in header
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyAPIKey name="APIKeyVerifier">
+    <APIKey ref="request.header.x-apikey" />
+</VerifyAPIKey>
+```
+
+In this example, the policy expects to find the API key in a flow variable called `request.header.x-apikey`. The variable `request.header.{name}` is a standard Apigee flow variable that is populated with the value of a header passed in the client request.
+
+The following cURL shows how to pass the API key in a header:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "http://myorg-test.apigee.net/mocktarget" -H "x-apikey:IEYRtW2cb7A5Gs54A1wKElECBL65GVls"
+```
+
+It's a good practice to pass the API key in a header rather than in a query parameter. The reason is because headers do not appear in the browser history or network logs, which could present a possible security risk.
+
+</div>
+
+<div class="section">
+
+### Key in variable
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyAPIKey name="APIKeyVerifier">
+    <APIKey ref="requestAPIKey.key"/>
+</VerifyAPIKey>
+```
+
+The policy can reference any variable that contains the key. The policy in this example extracts the API key from a variable named <span style="font-family:courier new,courier,monospace;">requestAPIKey.key</span>.
+
+How that variable is populated is up to you. For example, you could use the Extract Variables policy to populate <span style="font-family:courier new,courier,monospace;">requestAPIKey.key</span> from a query parameter named <span style="font-family:courier new,courier,monospace;">myKey</span>, as shown below:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExtractVariables async="false" continueOnError="false" enabled="true" name="SetAPIKeyVar">
+    <Source>request</Source>
+    <QueryParam name="myKey">
+        <Pattern ignoreCase="true">{key}</Pattern>
+    </QueryParam>
+    <VariablePrefix>requestAPIKey</VariablePrefix>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</ExtractVariables>
+```
+
+</div>
+
+<div class="section">
+
+### Access policy flow variables
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage async="false" continueOnError="false" enabled="true" name="accessverifyvars">
+    <AssignVariable>
+        <Name>devFirstName</Name>
+        <Ref>verifyapikey.verify-api-key.developer.firstName</Ref>
+        <Value>ErrorOnCopy</Value>
+    </AssignVariable>
+    <AssignVariable>
+        <Name>devLastName</Name>
+        <Ref>verifyapikey.verify-api-key.developer.lastName</Ref>
+        <Value>ErrorOnCopy</Value>
+    </AssignVariable>
+    <AssignVariable>
+        <Name>devEmail</Name>
+        <Ref>verifyapikey.verify-api-key.developer.email</Ref>
+        <Value>ErrorOnCopy</Value>
+    </AssignVariable>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+    <AssignTo createNew="false" transport="http" type="request"/>
+</AssignMessage>
+```
+
+Apigee automatically populates a set of flow variables when executing the Verify API Key policy for a valid API key. You can use these variables to access information such as the app name, app ID, and information about the developer or company who registered the app. In the example above, you use the Assign Message policy to access the developer's first name, last name, and email address after the Verify API Key executes.
+
+These variables are all prefixed by:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+verifyapikey.{policy_name}
+```
+
+In this example, the Verify API key policy name is "<span style="font-family:courier new,courier,monospace;">verify-api-key</span>". Therefore, you reference the first name of the developer making the request by accessing the variable `verifyapikey.verify-api-key.developer.firstName.`
+
+</div>
+
+<div class="section">
+
+### Learn Apigee
+
+**Sample:** **Learn by doing!**  
+The <a href="https://github.com/apigee/api-platform-samples/tree/master/learn-edge/apikey-security-1" target="_blank">Secure the proxy with an API key</a> example secures an API proxy with an API key, and the [Remove the apikey query parameter](https://github.com/apigee/api-platform-samples/tree/master/learn-edge/apikey-security-2) shows you how to remove the API key from the request to prevent it from being passed to the backend target (a best practice). Just clone the repository and follow the instructions in the README files.
+
+</div>
+
+</div>
+
+------------------------------------------------------------------------
+
+## Element Reference
+
+Following are elements and attributes you can configure on this policy:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyAPIKey async="false" continueOnError="false" enabled="true" name="Verify-API-Key-1">
+    <DisplayName>Custom label used in UI</DisplayName>
+    <APIKey ref="variable_containing_api_key"/>
+    <CacheExpiryInSeconds ref="request.queryparam.cache_expiry">Default value</CacheExpiryInSeconds/>
+</VerifyAPIKey>
+```
+
+## \<VerifyAPIKey\> attributes
+
+The following example shows the attributes on the `<VerifyAPIKey>` tag:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyAPIKey async="false" continueOnError="false" enabled="true" name="Verify-API-Key-1">
+```
+
+The following table describes attributes that are common to all policy parent elements:
+
+| Attribute | Description | Default | Presence |
+| --- | --- | --- | --- |
+| name | The internal name of the policy. The value of the name attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters. Optionally, use the <DisplayName> element to label the policy in the management UI proxy editor with a different, natural-language name. | N/A | Required |
+| continueOnError | Set to false to return an error when a policy fails. This is expected behavior for most policies. Set to true to have flow execution continue even after a policy fails. See also: Fault rules are triggered ONLY in an error state (about continueOnError) Handling faults within the current flow | false | Optional |
+| enabled | Set to true to enforce the policy. Set to false to turn off the policy. The policy will not be enforced even if it remains attached to a flow. | true | Optional |
+| async | This attribute is deprecated. | false | Deprecated |
+
+## \<DisplayName\> element
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, natural-language name.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+| Default | N/A If you omit this element, the value of the policy's name attribute is used. |
+| --- | --- |
+| Presence | Optional |
+| Type | String |
+
+## \<APIKey\> element
+
+This element specifies the flow variable that contains the API key. Typically, the client sends the API key in a query parameter, HTTP header or a form parameter. For example, if the key is sent in a header called `x-apikey`, the key will be found in the variable: `request.header.x-apikey`
+
+|          |          |
+|----------|----------|
+| Default  | NA       |
+| Presence | Required |
+| Type     | String   |
+
+### Attributes
+
+The following table describes the attributes of the `<APIKey>` element
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| ref | A reference to the variable that contains the API key. Only one location is allowed per policy. | N/A | Required |
+
+It's a good practice to pass the API key in a header or form parameter rather than in a query parameter. The reason is because query parameters can show up in browser histories and network logs, which could present a possible security risk.
+
+### Examples
+
+In these examples, the key is passed in parameters and a header called `x-apikey`.
+
+As a query parameter:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyAPIKey name="APIKeyVerifier">
+    <APIKey ref="request.queryparam.x-apikey"/>
+</VerifyAPIKey>
+```
+
+As an HTTP header:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyAPIKey name="APIKeyVerifier">
+    <APIKey ref="request.header.x-apikey"/>
+</VerifyAPIKey>
+```
+
+As an HTTP form parameter:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<VerifyAPIKey name="APIKeyVerifier">
+    <APIKey ref="request.formparam.x-apikey"/>
+</VerifyAPIKey>
+```
+
+## \<CacheExpiryInSeconds\> element
+
+This element enforces TTL on the cache, which enables customization of the time period for cached API key expiration. You can provide a flow variable and a default variable. If provided, the flow variable value takes precedence over the specified default value.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<CacheExpiryInSeconds ref="request.queryparam.cache_expiry">Value 1</CacheExpiryInSeconds>
+```
+
+**Note**: There is a drop in performance when the caching interval is decreased.
+
+| Default | N/A If you omit this element, the default expiration period for the cached API key is 180 seconds. |
+| --- | --- |
+| Presence | Optional |
+| Type | Integer |
+| Valid values | An integer from 1 to 180, inclusive. Specifies the expiration time in seconds. |
+
+### Attributes
+
+The following table describes the attributes of the `<CacheExpiryInSeconds>` element
+
+| Attribute | Description | Default | Presence |
+| --- | --- | --- | --- |
+| ref | A reference to the flow variable containing the value for the cache expiration, expressed in seconds. If provided, the flow variable value takes precedence over the specified default value. | N/A | Optional |
+
+## Schemas
+
+**Sample:** See our [GitHub repository](https://github.com/apigee/api-platform-samples/tree/master/schemas/policy) samples for the most recent schemas.
+
+## Flow variables
+
+When a Verify API Key policy is enforced on a valid API key, Apigee populates a set of flow variables. These variables are available to policies or code executed later in the flow, and are often used to perform custom processing based on attributes of the API key such as the app name, the API product used to authorize the key, or custom attributes of the API key.
+
+The policy populates several different types of flow variables, including:
+
+- General
+- App
+- Developer
+- Analytics
+- Monetization
+
+Each type of flow variable has a different prefix. All variables are scalars except those specifically indicated as arrays.
+
+### General flow variables
+
+The following table lists the general flow variables populated by the Verify API Key policy. These variables are all prefixed by:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+verifyapikey.{policy_name}
+```
+
+For example: `verifyapikey.{policy_name}.client_id`
+
+The available variables include:
+
+| Variable | Description |
+| --- | --- |
+| client_id | The consumer key (aka API key or app key) supplied by the requesting app. |
+| client_secret | The consumer secret associated with the consumer key. |
+| redirection_uris | Any redirect URIs in the request. |
+| developer.app.id | The ID of the developer or AppGroup app making the request. Note: Do not use the developer.app.id variable for any of the following purposes: identifier for the Quota policy Key Value Map (KVM) keys Identifiers sent to targets to be used in backend business logic This ID is generated internally by Apigee and is not guaranteed to stay the same over time. For example, Apigee could change the format or length of this variable. |
+| developer.app.name | The app name of the developer or AppGroup app making the request. |
+| developer.id | The ID of the developer or AppGroup registered as the owner of the requesting app. Note: Do not use the developer.id variable for any of the following purposes: Quota Identifier KVM keys Identifiers sent to targets to be used in backend business logic This ID is generated internally by Apigee and is not guaranteed to stay the same over time. For example, Apigee could change the format or length of this variable. |
+| developer.{custom_attrib_name} | Any custom attributes derived from the app key profile. |
+| DisplayName | The value of the policy's <DisplayName> attribute. |
+| failed | Set to "true" when API Key validation fails. |
+| {custom_app_attrib} | Any custom attribute derived from the app profile. Specify the name of the custom attribute. Note: If the App custom attribute and App key custom attribute have the same name, then the App key custom attribute will take precedence. |
+| apiproduct.name* | The name of the API product used to validate the request. |
+| apiproduct.{custom_attrib_name}* | Any custom attribute derived from the API product profile. |
+| apiproduct.developer.quota.limit* | The quota limit set on the API product, if any. |
+| apiproduct.developer.quota.interval* | The quota interval set on the API product, if any. |
+| apiproduct.developer.quota.timeunit* | The quota time unit set on the API product, if any. |
+| * API product variables are populated automatically if the API products are configured with valid environment, proxies, and resources (derived from the proxy.pathsuffix ). For instructions on setting up API products, see Managing API products . |  |
+
+### App flow variables
+
+The following flow variables containing information about the app are populated by the policy. These variables are all prefixed by:
+
+`verifyapikey.{policy_name}.app`.
+
+For example:
+
+`verifyapikey.{policy_name}.app.name`
+
+The available variables include:
+
+| Variable | Description |
+|----|----|
+| `name` | The name of the app. |
+| `id` | The ID of the app. |
+| `accessType` | Unused by Apigee. |
+| `callbackUrl` | The callback URL of the app. Typically used only for OAuth. |
+| `DisplayName` | The app's display name. |
+| `status` | The app status, such as 'approved' or 'revoked'. |
+| `apiproducts` | An array containing the list of API products associated with the app. |
+| `appFamily` | Any app family containing the app, or "default". |
+| `appParentStatus` | The status of the app's parent, such as 'active' or 'inactive' |
+| `appType` | The app type as "Developer". |
+| `appParentId` | The ID of the parent app. |
+| `created_at` | The date/time stamp when the app was created. |
+| `created_by` | The email address of the developer who created the app. |
+| `last_modified_at` | The date/time stamp when the app was last updated. |
+| `last_modified_by` | The email address of the developer who last updated the app. |
+| `{app_custom_attributes}` | Any custom app attribute. Specify the name of the custom attribute. |
+
+#### AppGroup flow variables
+
+The following flow variables containing information about the [AppGroups](/apigee/docs/api-platform/publish/organizing-client-app-ownership#using-appgroups-to-organize-app-ownership) are populated by the policy. These AppGroup attributes populate only if `verifyapikey.{policy_name}.app.appType` is "AppGroup".
+
+These variables are all prefixed by:
+
+`verifyapikey.{policy_name}.appgroup`.
+
+For example:
+
+`verifyapikey.{policy_name}.appgroup.name`
+
+**Note:** If you migrate from Apigee Edge, your [company flow variables](https://docs.apigee.com/api-platform/reference/policies/verify-api-key-policy#flowvariables-companyflowvariables) are automatically available in the corresponding AppGroup attribute after migration. No changes are needed to the bundles during migration.
+
+The available variables include:
+
+| Variable | Description |
+| --- | --- |
+| name | The name of the AppGroup. |
+| id | The AppGroup ID. Note: This ID is generated internally by Apigee and is not guaranteed to stay the same over time. Do not use the appgroup.id variable for any of the following purposes: Quota Identifier KVM keys Identifiers sent to targets to be used in backend business logic |
+| displayName | The AppGroup display name. |
+| appOwnerStatus | The status of the app owner: 'active', 'inactive', or 'login_lock'. |
+| created_at | The date/time stamp when the AppGroup was created. |
+| created_by | The email address of the developer who created the AppGroup. |
+| last_modified_at | The date/time stamp when the AppGroup was last modified. |
+| last_modified_by | The email address of the developer who last modified the AppGroup. |
+| {appgroup_custom_attributes} | Any custom AppGroup attribute. Specify the name of the custom attribute. |
+
+### Developer flow variables
+
+The following flow variables containing information about the developer are populated by the policy. These variables are all prefixed by:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+verifyapikey.{policy_name}.developer
+```
+
+For example:
+
+`verifyapikey.{policy_name}.developer.id`
+
+The available variables include:
+
+| Variable | Description |
+| --- | --- |
+| id | Returns {org_name}@@@{developer_id} |
+| userName | The developer's user name. |
+| firstName | The developer's first name. |
+| lastName | The developer's last name. |
+| email | The developer's email address. |
+| status | The developer's status, as active, inactive, or login_lock. |
+| apps | An array of apps associated with the developer. Note : Accessing this variable will result in high latency when the number of apps is greater than 10. |
+| created_at | The date/time stamp when the developer was created. |
+| created_by | The email address of the user who created the developer. |
+| last_modified_at | The date/time stamp when the developer was last modified. |
+| last_modified_by | The email address of the user who modified the developer. |
+| {developer_custom_attributes} | Any custom developer attribute. Specify the name of the custom attribute. |
+
+### Analytics variables
+
+The following variables are automatically populated in Analytics when a Verify API Key policy is enforced for a valid API key. These variables are only populated by the Verify API Key policy and the OAuth policies.
+
+The variables and values can be used as dimensions to build Analytics reports to gain visibility into consumption patterns by developers and apps.
+
+- `apiproduct.name`
+- `developer.app.name`
+- `client_id`
+- `developer.id`
+
+### Monetization flow variables
+
+After authenticating the user, the VerifyAPIKey policy checks all published rate plans to determine which, if any, is active based on their activation and expiration times. If an active published rate plan is found, the following flow variables are populated:
+
+| Variable | Description |
+|----|----|
+| `mint.mintng_is_apiproduct_monetized` | `true` if active published rate plan is found. |
+| `mint.mintng_rate_plan_id` | Rate plan ID. |
+| `mint.rateplan_end_time_ms` | Expiration time for the rate plan. For example: `1619433556408` |
+| `mint.rateplan_start_time_ms` | Activation time of the rate plan. For example: `1618433956209` |
+
+## Error reference
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+| Fault code | HTTP status | Cause |
+| --- | --- | --- |
+| keymanagement.service.consumer_key_missing_api_product_association | 400 | The application credential is missing an API product association. Please associate the key's application with an API product. Note that this applies for all application types, such as developer apps and AppGroup apps. |
+| keymanagement.service.DeveloperStatusNotActive | 401 | The developer who created the Developer App that has the API key you are using has an inactive status. When an App Developer's status is set to inactive, any Developer Apps created by that developer are deactivated. An admin user with appropriate permissions (such as Organization Administrator) can change a developer's status in the following ways: Apigee API: Set Developer Status Apigee UI: In Register app developers , see the instructions for deactivating (and activating) a developer. |
+| keymanagement.service.invalid_client-app_not_approved | 401 | The Developer App associated with the API key is revoked. A revoked app cannot access any API products and cannot invoke any API managed by Apigee. An org admin can change the status of a Developer App using the Apigee API. See Generate Key Pair or Update Developer App Status . |
+| oauth.v2.FailedToResolveAPIKey | 401 | The policy expects to find the API key in a variable that is specified in the policy's <APIKey> element . This error arises when the expected variable does not exist (it cannot be resolved). |
+| oauth.v2.InvalidApiKey | 401 | An API key was received by Apigee, but it is invalid. When Apigee looks up the key in its database, it must exactly match the one that was sent in the request. If the API worked previously, make sure the key was not regenerated. If the key was regenerated, you will see this error if you try to use the old key. For details, see Controlling access to your APIs by registering apps . |
+| oauth.v2.InvalidApiKeyForGivenResource | 401 | An API key was received by Apigee, and it is valid; however, it does not match an approved key in the Developer App associated with your API proxy through a Product. |
+
+**Note:** Currently, Apigee does not report the `ApiKeyNotApproved` error accurately. Instead, if a key is not approved (its status is set to `revoked` or `pending`), you will get the `FailedToResolveAPIKey` error instead. For more information and a possible workaround, see <a href="https://discuss.google.dev/t/verify-api-key-not-reporting-api-key-not-approved/1705" class="external">Verify api key not reporting api key not approved</a>.
+
+### Deployment errors
+
+These errors can occur when you deploy a proxy containing this policy.
+
+| Error name | Cause |
+|----|----|
+| `SpecifyValueOrRefApiKey` | The `<APIKey>` element does not have a value or key specified. |
+
+### Fault variables
+
+These variables are set when a runtime error occurs. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``fault_name``"` | `fault_name` is the name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name Matches "FailedToResolveAPIKey"` |
+| `oauthV2.``policy_name``.failed` | `policy_name` is the user-specified name of the policy that threw the fault. | `oauthV2.VK-VerifyAPIKey.failed = true` |
+
+### Example error responses
+
+**Note:** For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+   "fault":{
+      "faultstring":"Invalid ApiKey",
+      "detail":{
+         "errorcode":"oauth.v2.InvalidApiKey"
+      }
+   }
+}
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+   "fault":{
+      "detail":{
+         "errorcode":"keymanagement.service.DeveloperStatusNotActive"
+      },
+      "faultstring":"Developer Status is not Active"
+   }
+}
+```
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRule name="FailedToResolveAPIKey">
+    <Step>
+        <Name>AM-FailedToResolveAPIKey</Name>
+    </Step>
+    <Condition>(fault.name Matches "FailedToResolveAPIKey") </Condition>
+</FaultRule>
+```

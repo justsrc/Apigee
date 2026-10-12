@@ -1,0 +1,73 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups" class="section">
+
+- [Resource: EnvironmentGroup](#EnvironmentGroup)
+  - [JSON representation](#EnvironmentGroup.SCHEMA_REPRESENTATION)
+- [Methods](#METHODS_SUMMARY)
+
+<div id="EnvironmentGroup" class="section">
+
+## Resource: EnvironmentGroup
+
+<div id="EnvironmentGroup.description" class="section">
+
+EnvironmentGroup configuration. An environment group is used to group one or more Apigee environments under a single host name.
+
+</div>
+
+<div id="EnvironmentGroup.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;name&quot;: string,
+  &quot;hostnames&quot;: [
+    string
+  ],
+  &quot;createdAt&quot;: string,
+  &quot;lastModifiedAt&quot;: string,
+  &quot;state&quot;: enum (State)
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="EnvironmentGroup.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| name | string ID of the environment group. |
+| hostnames[] | string Required. Host names for this environment group. |
+| createdAt | string ( int64 format) Output only. The time at which the environment group was created as milliseconds since epoch. |
+| lastModifiedAt | string ( int64 format) Output only. The time at which the environment group was last updated as milliseconds since epoch. |
+| state | enum ( State ) Output only. State of the environment group. Values other than ACTIVE means the resource is not ready to use. |
+
+</div>
+
+</div>
+
+<div id="METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | Creates a new environment group. |
+| delete | Deletes an environment group. |
+| get | Gets an environment group. |
+| list | Lists all environment groups. |
+| patch | Updates an environment group. |
+
+</div>
+
+</div>

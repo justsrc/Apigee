@@ -1,0 +1,285 @@
+URL: https://github.com/apigee/api-platform-samples/issues/7
+TITLE: weatheroauthauthcode/oauth/accesstoken request fails
+STATE: closed state_reason: completed
+AUTHOR: gershbn association: NONE
+CREATED: 2013-01-21T14:53:21Z CLOSED: 2013-04-02T21:22:40Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+when running invoke script getting "invalid request" reply due to:
+Error :"Required param : grant_type" or
+Error :"Invalid redirect_uri"
+
+grant_type was set to authorization_code properly by the invoke script
+and also redirect_url seems to be correct
+
+
+--- COMMENTS (12) ---
+
+### comment by baskaran-md (association=CONTRIBUTOR) at 2013-01-23T01:53:29Z
+Can you please confirm, that your GenerateAccessEntity Policy is looking like the one @ https://github.com/apigee/api-platform-samples/blob/master/sample-proxies/oauth-client-credentials/apiproxy/policies/GenerateAccessToken.xml, if not can you please post yours?
+And also can you make sure that you are redirect-url that you are passing in the request and the one that is provided in the Developer App are same?
+
+
+### comment by gershbn (association=NONE) at 2013-01-23T14:50:43Z
+Thank you for your response!
+
+Sorry, the question is related to the oauth-authcode sample.  Therefore, the GenerateAccessToken Policy looks as following: https://github.com/apigee/api-platform-samples/blob/master/sample-proxies/oauth-authcode/apiproxy/policies/GenerateAccessToken.xml
+
+The url eventually called is as following: https://oanda-test.apigee.net/weatheroauthauthcode/oauth/accesstoken?grant_type=authorization_code&code=DqxJFR4l&redirect_uri=http%3a%2f%2fjoe.app%2flogin%3fscope%3dREAD%26state%3dfoobar%26code%3dDqxJFR4l&scope=READ
+
+I am getting inconsistent results. Instead of errors described earlier I am currently getting: {ErrorCode : "invalid_request", Error :"The request is missing a required parameter : response_type"}
+
+Thank you for your assistance.
+
+
+### comment by ap-andrew (association=CONTRIBUTOR) at 2013-01-23T15:02:13Z
+Are you using the included invoke.sh script? If so, would you be able to provide the complete output of the script  for us? (Be sure to strip out any confidential info of course. . .)
+Thanks
+
+
+### comment by gershbn (association=NONE) at 2013-01-23T17:44:06Z
+Except of some additional printouts I'm using the invoke.sh from the sample-proxies/oauth-authcode.
+Here is the output:
+
+Using org and environment configured in /setup/setenv.sh
+Be sure to run scripts under ./setup/provisioning
+Get app profile
+Fetching callback URL and consumer key for developer application 'joe-app'
+appdata: {
+  "accessType" : "read",
+  "apiProducts" : [ ],
+  "appFamily" : "default",
+  "appId" : "29cf141f-bae6-40b2-ad53-f1495ca5f541",
+  "attributes" : [ {
+    "name" : "DisplayName",
+    "value" : "Josiah's Weather App"
+  } ],
+  "callbackUrl" : "http://joe.app/login",
+  "createdAt" : 1358542528862,
+  "createdBy" : "...",
+  "credentials" : [ {
+    "apiProducts" : [ {
+      "apiproduct" : "ExpensiveProduct",
+      "status" : "approved"
+    } ],
+    "attributes" : [ ],
+    "consumerKey" : "...",
+    "consumerSecret" : "...",
+    "scopes" : [ ],
+    "status" : "approved"
+  } ],
+  "developerId" : "2I4eGEFCB63kxFy6",
+  "lastModifiedAt" : 1358542528862,
+  "lastModifiedBy" : "...",
+  "name" : "joe-app",
+  "scopes" : [ ],
+  "status" : "approved"
+}
+Fetching redirect URL
+HTTP/1.1 302 Found
+Location: http://joe.app/login?scope=READ&state=foobar&code=ztGCgrDS
+Content-Length: 0
+
+redirect_url: http://joe.app/login?scope=READ&state=foobar&code=ztGCgrDS
+The app would now redirect to http://joe.app/login?scope=READ&state=foobar&code=ztGCgrDS
+We will now simulate what would happen when authentication succeeded there.
+Authorization code is ztGCgrDS
+Calling https://org-test.apigee.net/weatheroauthauthcode/oauth/accesstoken?grant_type=authorization_code&code=ztGCgrDS&redirect_uri=http%3a%2f%2fjoe.app%2flogin%3fscope%3dREAD%26state%3dfoobar%26code%3dztGCgrDS&scope=READ
+{ErrorCode : "invalid_request", Error :"The request is missing a required parameter : response_type"}
+
+Thank you for your time!
+
+
+### comment by ap-andrew (association=CONTRIBUTOR) at 2013-01-23T18:05:00Z
+Can you try adding the following query param to the request?:
+
+response_type=code
+
+On Wed, Jan 23, 2013 at 9:44 AM, Natalia Leibenzon <notifications@github.com
+
+> wrote:
+> 
+> Except of some additional printouts I'm using the invoke.sh from the
+> sample-proxies/oauth-authcode.
+> Here is the output:
+> 
+> Using org and environment configured in /setup/setenv.sh
+> Be sure to run scripts under ./setup/provisioning
+> Get app profile
+> Fetching callback URL and consumer key for developer application 'joe-app'
+> appdata: {
+> "accessType" : "read",
+> "apiProducts" : [ ],
+> "appFamily" : "default",
+> "appId" : "29cf141f-bae6-40b2-ad53-f1495ca5f541",
+> "attributes" : [ {
+> "name" : "DisplayName",
+> "value" : "Josiah's Weather App"
+> } ],
+> "callbackUrl" : "http://joe.app/login",
+> "createdAt" : 1358542528862,
+> "createdBy" : "...",
+> "credentials" : [ {
+> "apiProducts" : [ {
+> "apiproduct" : "ExpensiveProduct",
+> "status" : "approved"
+> } ],
+> "attributes" : [ ],
+> "consumerKey" : "...",
+> "consumerSecret" : "...",
+> "scopes" : [ ],
+> "status" : "approved"
+> } ],
+> "developerId" : "2I4eGEFCB63kxFy6",
+> "lastModifiedAt" : 1358542528862,
+> "lastModifiedBy" : "...",
+> "name" : "joe-app",
+> "scopes" : [ ],
+> "status" : "approved"
+> }
+> Fetching redirect URL
+> HTTP/1.1 302 Found
+> Location: http://joe.app/login?scope=READ&state=foobar&code=ztGCgrDS
+> Content-Length: 0
+> 
+> redirect_url: http://joe.app/login?scope=READ&state=foobar&code=ztGCgrDS
+> The app would now redirect to
+> http://joe.app/login?scope=READ&state=foobar&code=ztGCgrDS
+> We will now simulate what would happen when authentication succeeded there.
+> Authorization code is ztGCgrDS
+> Calling
+> https://org-test.apigee.net/weatheroauthauthcode/oauth/accesstoken?grant_type=authorization_code&code=ztGCgrDS&redirect_uri=http%3a%2f%2fjoe.app%2flogin%3fscope%3dREAD%26state%3dfoobar%26code%3dztGCgrDS&scope=READ
+> 
+> {ErrorCode : "invalid_request", Error :"The request is missing a required
+> parameter : response_type"}
+> 
+> Thank you for your time!
+> 
+> —
+> Reply to this email directly or view it on GitHubhttps://github.com/apigee/api-platform-samples/issues/7#issuecomment-12612094.
+
+
+### comment by gershbn (association=NONE) at 2013-01-23T18:16:01Z
+After adding response_type, got: {ErrorCode : "invalid_request", Error 
+:"The request is missing a required parameter : client_id"}
+After adding client_id, got: {ErrorCode : "invalid_request", Error 
+:"Invalid redirection uri 
+http://joe.app/login?scope=READ&state=foobar&code=n9BZ8TiX"}
+
+On 13-01-23 01:05 PM, ap-andrew wrote:
+
+> Can you try adding the following query param to the request?:
+> 
+> response_type=code
+> 
+> On Wed, Jan 23, 2013 at 9:44 AM, Natalia Leibenzon 
+> <notifications@github.com
+> 
+> > wrote:
+> > 
+> > Except of some additional printouts I'm using the invoke.sh from the
+> > sample-proxies/oauth-authcode.
+> > Here is the output:
+> > 
+> > Using org and environment configured in /setup/setenv.sh
+> > Be sure to run scripts under ./setup/provisioning
+> > Get app profile
+> > Fetching callback URL and consumer key for developer application 
+> > 'joe-app'
+> > appdata: {
+> > "accessType" : "read",
+> > "apiProducts" : [ ],
+> > "appFamily" : "default",
+> > "appId" : "29cf141f-bae6-40b2-ad53-f1495ca5f541",
+> > "attributes" : [ {
+> > "name" : "DisplayName",
+> > "value" : "Josiah's Weather App"
+> > } ],
+> > "callbackUrl" : "http://joe.app/login",
+> > "createdAt" : 1358542528862,
+> > "createdBy" : "...",
+> > "credentials" : [ {
+> > "apiProducts" : [ {
+> > "apiproduct" : "ExpensiveProduct",
+> > "status" : "approved"
+> > } ],
+> > "attributes" : [ ],
+> > "consumerKey" : "...",
+> > "consumerSecret" : "...",
+> > "scopes" : [ ],
+> > "status" : "approved"
+> > } ],
+> > "developerId" : "2I4eGEFCB63kxFy6",
+> > "lastModifiedAt" : 1358542528862,
+> > "lastModifiedBy" : "...",
+> > "name" : "joe-app",
+> > "scopes" : [ ],
+> > "status" : "approved"
+> > }
+> > Fetching redirect URL
+> > HTTP/1.1 302 Found
+> > Location: http://joe.app/login?scope=READ&state=foobar&code=ztGCgrDS
+> > Content-Length: 0
+> > 
+> > redirect_url: 
+> > http://joe.app/login?scope=READ&state=foobar&code=ztGCgrDS
+> > The app would now redirect to
+> > http://joe.app/login?scope=READ&state=foobar&code=ztGCgrDS
+> > We will now simulate what would happen when authentication succeeded 
+> > there.
+> > Authorization code is ztGCgrDS
+> > Calling
+> > 
+> > https://org-test.apigee.net/weatheroauthauthcode/oauth/accesstoken?grant_type=authorization_code&code=ztGCgrDS&redirect_uri=http%3a%2f%2fjoe.app%2flogin%3fscope%3dREAD%26state%3dfoobar%26code%3dztGCgrDS&scope=READ
+> > 
+> > {ErrorCode : "invalid_request", Error :"The request is missing a 
+> > required
+> > parameter : response_type"}
+> > 
+> > Thank you for your time!
+> > 
+> > —
+> > Reply to this email directly or view it on 
+> > GitHubhttps://github.com/apigee/api-platform-samples/issues/7#issuecomment-12612094.
+> 
+> —
+> Reply to this email directly or view it on GitHub 
+> https://github.com/apigee/api-platform-samples/issues/7#issuecomment-12613118. 
+
+
+### comment by baskaran-md (association=CONTRIBUTOR) at 2013-01-23T18:45:20Z
+The typical request for AuthotizationCode will be like 
+
+> http://authorization_server_ip/get_authcode_resource/?response_type_=code&client_id_=${key}&redirect_uri**=${redirect_uri}&scope=${scope}&state=${state}
+
+ * mandatory parameters
+
+ *\* redirect_uri is mandatory when the Callback URL is not provided or more than one Callback URL is provided in the developer app.
+ If redirect_uri is provided, it should a singleton subset of Callback URL(s) in the developer app.
+
+
+### comment by gershbn (association=NONE) at 2013-01-23T20:55:32Z
+It's a request for access token and not authorisation code. According to 
+documentation, response_type and client_id are involved in getting an 
+authorisation code...
+Uri matches the one registered with the application, however, it also 
+contains request parameters. Anyway, it's part of the original invoke 
+script.
+
+
+### comment by baskaran-md (association=CONTRIBUTOR) at 2013-01-23T21:47:37Z
+Looks like your request to accesstoken ( https://org-test.apigee.net/weatheroauthauthcode/oauth/accesstoken?... ) is wrongly getting classified as authorization code request, that is when you will see the error message you have specified.. I will debug into it and ll get back to you. Thanks.  
+
+
+### comment by baskaran-md (association=CONTRIBUTOR) at 2013-01-24T00:24:43Z
+Checked the deployments. It was not deployed properly. Fixed it. Can you please confirm it from your side?
+
+
+### comment by gershbn (association=NONE) at 2013-01-24T14:42:11Z
+Thank you, Baskaran! It works for me now. Can you please provide more details regarding the deployment problem? Is that something I could fix from the web interface? In the "code"  mode, the classification conditions look the same as before. 
+
+
+### comment by baskaran-md (association=CONTRIBUTOR) at 2013-01-24T19:56:01Z
+There is a notion of deployment basepath apart from the proxy basepath which is provided in the proxy. You cannot set that deployment basepath from the UI. However, if its not set, it defaults to '/' . There seems to some problem around that in UI. Just un-deploying your proxy and deploying again through API made it to work. 
+

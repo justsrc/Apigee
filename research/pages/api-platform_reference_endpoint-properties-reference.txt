@@ -1,0 +1,276 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This topic describes transport properties that can be set in `TargetEndpoint` and `ProxyEndpoint` configurations to control messaging and connection behavior. For full coverage of the `TargetEndpoint` and `ProxyEndpoint` configuration options, see [API proxy configuration reference](/apigee/docs/api-platform/reference/api-proxy-configuration-reference).
+
+## TargetEndpoint Transport Properties
+
+The `HTTPTargetConnection` element in `TargetEndpoint` configurations defines a set of HTTP transport properties. You can use these properties to set transport-level configurations.
+
+Properties are set on `TargetEndpoint` `HTTPTargetConnection` elements as shown in this example configuration:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<TargetEndpoint name="default">
+  <HTTPTargetConnection>
+    <URL>http://mocktarget.apigee.net</URL>
+    <Properties>
+      <Property name="request.retain.headers">User-Agent,Referer,Accept-Language</Property>
+      <Property name="retain.queryparams">apikey</Property>
+    </Properties>
+  </HTTPTargetConnection>
+</TargetEndpoint>
+```
+
+**Note:** Property values can only be literals. You cannot set values using variables.
+
+## TargetEndpoint Transport Property Specification
+
+Property Name
+
+Default Value
+
+Description
+
+`allow.post.without.content.length`
+
+false
+
+Lets you send POST requests with no content in the body.
+
+`allow.put.without.content.length`
+
+false
+
+Lets you send PUT requests with no content in the body.
+
+`allow.tls.session.resumption`
+
+true
+
+If `true` (the default) clients reuse TLS sessions when making new connections to the target. Set to `false` if you do not want TLS session reuse. Session reuse generally means shorter connection times, but some targets may not support session reuse or have difficulty with it.
+
+`keepalive.timeout.millis`
+
+60000
+
+Connection idle timeout for the target connection in the connection pool. If the connection in the pool is idle beyond the specified limit, then the connection is closed.
+
+`connect.timeout.millis`
+
+3000
+
+Target connection timeout. Apigee returns an HTTP `503` status code if a connection timeout occurs. In some cases an HTTP `504` status code may be returned when `LoadBalancer` is used in the [TargetServer definition](/apigee/docs/api-platform/deploy/load-balancing-across-backend-servers#configuringatargetendpointtoloadbalanceacrossnamedtargetservers) and a timeout occurs.
+
+**Note:** When a `<LoadBalancer>` is configured and `<RetryEnabled>` is true, Apigee automatically retries the connection up to three times. As a result, the total retry time might exceed what is configured for `connect.timeout.millis`. Standard `<URL>` targets without a LoadBalancer do not automatically retry.
+
+`ignore.allow.header.for.405`
+
+true
+
+Lets you pass the 405 status code back to the client. By enabling the flag Apigee will return 405 instead of 502 status code.
+
+`io.timeout.millis`
+
+55000
+
+If there is no data to read for the specified number of milliseconds, or if the socket is not ready to write data for a specified number of milliseconds, then the transaction is treated as a timeout.
+
+- If a timeout happens while reading the HTTP request from ingress, `408 Request Timeout` is retuned. `408 Request Timeout` will not be returned if a timeout happens while writing a request to the target.
+- If a timeout happens while writing the HTTP request or reading the HTTP response, `504 Gateway Timeout` is returned.
+
+See [Setting io.timeout.millis and api.timeout](#cloud-timeouts).
+
+`supports.http11`
+
+true
+
+If this is `true` and the client sends a `1.1` request, the target is also sent a `1.1` request, otherwise `1.0` request is sent to the target.
+
+`use.proxy`
+
+true
+
+If the Apigee hybrid overrides file contains the `HTTP_PROXY` configuration, as described in [Configure forward proxying for API proxies](/apigee/docs/hybrid/latest/forward-proxy), then use this property to manage/control which proxies should not use the proxy configuration.
+
+If set to `false`, the API Proxy will skip the HTTP proxy configurations specified in the Apigee hybrid overrides file for target connections set in the proxy.
+
+`use.proxy.tunneling`
+
+true
+
+If this is set to true, and proxy configurations are specified Apigee hybrid overrides file as described in [Configure forward proxying for API proxies](/apigee/docs/hybrid/latest/forward-proxy), then target connections are set to use the specified tunnel. If the target uses TLS/SSL, then this property is ignored, and the message is always sent using a tunnel.
+
+`use.proxy.host.header.with.target.uri`
+
+true
+
+Sets the target host and port as a `Host` header. By default, the proxy host and port are set as `Host` headers. You can only set this property in the Target Endpoint. For example:
+
+<div>
+
+</div>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+  <HTTPTargetConnection>
+    <Properties>
+        <Property name="use.proxy.host.header.with.target.uri">true</Property>
+    </Properties>
+    <URL>https://mocktarget.apigee.net/my-target</URL>
+  </HTTPTargetConnection>
+```
+
+`response.payload.`  
+`parse.limit`
+
+`10M`
+
+By default (`10M`). Use the property `response.payload.parse.limit` to set the maximum payload size that can be processed in the response flow, in megabytes (M). The minimum configurable limit is 10M and the maximum configurable limit is 30M. If the property is not set, the default limit is 10M.
+
+See also [Message payload size](/apigee/docs/api-platform/fundamentals/best-practices-api-proxy-design-and-development#size).
+
+`request.streaming.enabled`
+
+false
+
+By default (`false`), HTTP request payloads are read into a buffer, and policies that can operate on the payload work as expected. In cases where the payloads are larger than the buffer size (10 MB in Apigee), you can set this attribute to `true`. When `true`, HTTP request payloads are not read into a buffer; they are streamed as-is to the target endpoint. In this case, any policies that operate on the payload in the `TargetEndpoint` request flow are bypassed. See also [Streaming requests and responses](/apigee/docs/api-platform/develop/enabling-streaming).
+
+`response.streaming.enabled`
+
+false
+
+By default (false), HTTP response payloads are read into a buffer, and policies that can operate on the payload work as expected. In cases where the payloads are larger than the buffer size (10 MB in Apigee), you can set this attribute to true. When true, HTTP response payloads are not read into a buffer; they are streamed as-is to the `ProxyEndpoint` response flow. In this case, any policies that operate on the payload in the `TargetEndpoint` response flow are bypassed. See also [Streaming requests and responses](/apigee/docs/api-platform/develop/enabling-streaming).
+
+`success.codes`
+
+N/A
+
+By default, Apigee treats HTTP code `4XX` or `5XX` as errors, and it treats HTTP code `1XX`, `2XX`, `3XX` as success. This property enables explicit definition of success codes, for example, `2XX, 1XX, 505` treats any `100`, `200` and `505` HTTP response codes as success.
+
+Setting this property overwrites the default values. Therefore, if you want to add HTTP code `400` to the list of default success codes, set this property as:
+
+`<Property name="success.codes">1xx,2xx,3xx,400</Property>`
+
+If you want only HTTP code `400` to be treated as a success code, set the property as:
+
+`<Property name="success.codes">400</Property>`
+
+By setting HTTP code `400` as the only success code, the codes `1xx`, `2xx`, and `3xx` are treated as failures.
+
+`compression.algorithm`
+
+N/A
+
+By default, Apigee honors the compression type set (gzip, deflate or none) for messages received. If the request is received from the client using, for example, gzip compression, then Apigee forwards the request to the target using gzip compression. If the response received from target uses deflate, then Apigee forwards the response to the client using deflate. Supported values are:
+
+- **gzip:** always send message using gzip compression
+- **deflate:** always send message using deflate compression
+- **none:** always send message without any compression
+
+See also: <a href="https://discuss.google.dev/t/does-apigee-support-compression-de-compression-with-gzip-deflate-compression/7335.html" class="external">Does Apigee support compression/de-compression with GZIP/deflate compression?</a>
+
+`request.retain.headers.`  
+`enabled`
+
+true
+
+By default, Apigee always retains all HTTP headers on outbound messages. When set to `true`, all HTTP headers present on the inbound request are set on the outbound request.
+
+`request.retain.headers`
+
+N/A
+
+Defines specific HTTP headers from the request that should be set on the outbound request to the target service. For example, to *passthrough* the `User-Agent` header, set the value of `request.retain.headers` to `User-Agent`. Multiple HTTP headers are specified as a comma-separated list, for example, `User-Agent,Referer,Accept-Language`. This property overrides `request.retain.headers.enabled`. If `request.retain.headers.enabled` is set to `false`, any headers specified in the `request.retain.headers` property are still set on the outbound message.
+
+`response.retain.headers.`  
+`enabled`
+
+true
+
+By default, Apigee always retains all HTTP headers on outbound messages. When set to `true`, all HTTP headers present on the inbound response from the target service are set on the outbound response before it is passed to the `ProxyEndpoint`.
+
+`response.retain.headers`
+
+N/A
+
+Defines specific HTTP headers from the response that should be set on the outbound response before it is passed to the `ProxyEndpoint`. For example, to *passthrough* the `Expires` header, set the value of `response.retain.headers` to `Expires`. Multiple HTTP headers are specified as a comma-separated list, for example, `Expires,Set-Cookie`. This property overrides `response.retain.headers.enabled`. If `response.retain.headers.enabled` is set to `false`, any headers specified in the `response.retain.headers` property are still set on the outbound message.
+
+`retain.queryparams.`  
+`enabled`
+
+true
+
+By default, Apigee always retains all query parameters on outbound requests. When set to `true`, all query parameters present on the inbound request are set on the outbound request to the target service.
+
+`retain.queryparams`
+
+N/A
+
+Defines specific query parameters to set on the outbound request. For example, to include the query parameter `apikey` from the request message, set `retain.queryparams` to `apikey`. Multiple query parameters are specified as a comma-separated list, for example, `apikey,environment`. This property overrides `retain.queryparams.enabled`.
+
+## ProxyEndpoint Transport Properties
+
+`ProxyEndpoint` `HTTPTargetConnection` elements define a set of HTTP transport properties. These properties can be used to set transport-level configurations.
+
+Properties are set on `ProxyEndpoint` `HTTPProxyConnection` elements as shown in this example configuration:
+
+```
+
+<ProxyEndpoint name="default">
+  <HTTPProxyConnection>
+    <BasePath>/v1/weather</BasePath>
+    <Properties>
+      <Property name="request.streaming.enabled">true</Property>
+    </Properties>
+  </HTTPProxyConnection>
+</ProxyEndpoint>
+```
+
+## Request headers
+
+An incoming HTTP request includes the HTTP headers sent by the client. Headers with names that match the `X-Apigee-*` pattern are removed from incoming requests if a client sends them. This name pattern is reserved for Apigee.
+
+## ProxyEndpoint Transport Property Specification
+
+| Property Name | Default Value | Description |
+| --- | --- | --- |
+| X-Forwarded-For | false | When set to true, the virtual host's IP address is added to the outbound request as the value of the HTTP X-Forwarded-For header. |
+| request.streaming. enabled | false | By default ( false ), HTTP request payloads are read into a buffer, and policies that can operate on the payload work as expected. In cases where the payloads are larger than the buffer size (10 MB in Apigee), you can set this attribute to true . When true , HTTP request payloads are not read into a buffer; they are streamed as-is to the TargetEndpoint request flow. In this case, any policies that operate on the payload in the ProxyEndpoint request flow are bypassed. See also Streaming requests and responses . |
+| request.payload. parse.limit | 10M | By default ( 10M ). Use the property request.payload.parse.limit to set the maximum payload size that can be processed in the request flow, in megabytes (M). The minimum configurable limit is 10M and the maximum configurable limit is 30M. If the property is not set, the default limit is 10M. See also Message payload size . |
+| response.streaming. enabled | false | By default (false), HTTP response payloads are read into a buffer, and policies that can operate on the payload work as expected. In cases where the payloads are larger than the buffer size (10 MB in Apigee), you can set this attribute to true . When true , HTTP response payloads are not read into a buffer; they are streamed as-is to the client. In this case, any policies that operate on the payload in the ProxyEndpoint response flow are bypassed. See also Streaming requests and responses . |
+| compression.algorithm | N/A | By default, Apigee honors the compression type set (gzip, deflate or none) for messages received. For example, where a client submits a request that uses gzip compression, Apigee forwards the request to the target using gzip compression. You can configure compression algorithms to be explicitly applied by setting this property on the TargetEndpoint or ProxyEndpoint . Supported values are: gzip: always send message using gzip compression deflate: always send message using deflate compression none: always send message without any compression See also: Does Apigee support compression/de-compression with GZIP/deflate compression? |
+| api.timeout | N/A | Configure the timeout for individual API proxies (in milliseconds) You can configure API proxies, even those with streaming enabled, to time out after a specified time with a 504 Gateway Timeout status. Important: The specified timeout must be shorter than the standard Message Processor timeout of 300 seconds. For example, to configure a proxy to time out after 180000 milliseconds (three minutes), add the following property to HTTPProxyConnection : <Property name="api.timeout">180000</Property> You cannot set this property with a variable. See Setting io.timeout.millis and api.timeout . |
+| HTTPHeader.allowDuplicates | N/A | Use this setting to allow duplicate headers (for specific headers). <HTTPProxyConnection> <Properties> <Property name="HTTPHeader.allowDuplicates">Content-Type,Authorization</Property> </Properties> </HTTPProxyConnection> |
+| HTTPHeader.multiValued | N/A | Use this setting to allow duplicate headers (for specific headers). <HTTPProxyConnection> <Properties> <Property name="HTTPHeader.multiValued">Content-Type,Authorization</Property> </Properties> </HTTPProxyConnection> |
+
+## Setting io.timeout.millis and api.timeout
+
+The operation of `io.timeout.millis` and `api.timeout` are related. On every request to an API proxy:
+
+1.  The Ingress (aka Internal Load Balancer) sends its timeout value to the Message Processor. This timeout value defaults to 300 seconds and is not configurable.
+
+2.  The Message Processor then sets `api.timeout`:
+    1.  If `api.timeout` is **not** set at the proxy level, use the timeout set by the Ingress.
+    2.  If `api.timeout` is set at the proxy level, set it on the Message Processor to the lesser of the Ingress timeout or the value of `api.timeout`.
+
+3.  The value of `api.timeout` specifies the maximum amount of time an API proxy has to execute from the API request to the response.
+
+    After each policy in the API proxy executes, or before the Message Processor sends the request to the target endpoint, the Message Processor calculates (`api.timeout` - elapsed time from the start of the request).
+
+    If the value is less than zero, then the maximum amount of time to handle the request has expired and the Message Processor returns a `504 Gateway Timeout`.
+
+4.  The value of `io.timeout.millis` specifies the maximum amount of time that the target endpoint has to respond.
+
+    Before connecting to a target endpoint, the Message Processor determines the lesser of (`api.timeout` - elapsed time from the start of the request) and `io.timeout.millis`. It then sets `io.timeout.millis` to that value.
+
+    If a timeout happens while writing the HTTP request or reading the HTTP response, `504 Gateway Timeout` is returned.

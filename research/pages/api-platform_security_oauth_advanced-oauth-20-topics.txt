@@ -1,0 +1,60 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+## Using third-party OAuth tokens
+
+See [Using third-party OAuth tokens](/apigee/docs/api-platform/security/oauth/use-third-party-oauth-system).
+
+## Designating multiple redirect URIs
+
+When using the authorization code grant type, you must specify a redirect URI when you register your developer app. The redirect URI specifies the URI of an app that is designated to receive an authorization code on behalf of the client app. The client is required to send this URI to Apigee when requesting authorization codes and tokens, and the `redirect_uri` parameter must match the one that is registered. See also [Get OAuth 2.0 tokens](/apigee/docs/api-platform/security/oauth/access-tokens).
+
+For example:
+
+<div>
+
+</div>
+
+```
+
+https://mydomain.com/authorize?\
+client_id=123456&\
+response_type=code&\
+redirect_uri=https%3A%2F%2Fmydomain.com%2Fcallback&scope=scope1%20scope2&state=abc
+```
+
+There is a use case for specifying multiple redirect URIs in a single proxy application. For example, you may want to authenticate for multiple domains. For instance:
+
+- `https://mydomain.com/callback`
+- `https://mydomain.uk/callback`
+- `https://mydomain.ja/callback`
+
+To specify multiple redirect URIs in the developer app, add them as a comma-separated list in the **Callback URL** field in the developer app UI. For example:
+
+<div>
+
+</div>
+
+```
+https://mydomain.com/callback,https://mydomain.uk/callback,https://mydomain.ja/callback
+```
+
+Note that the `/authorize` request must only carry **one** URI in the `redirect_uri` parameter. As long as the redirect URI matches one of the URIs specified in the **Callback URL** field in developer app UI, the request will succeed.
+
+## Changing the default return behavior of a GenerateAuthCode operation
+
+By default, the GenerateAuthCode operation of the [OAuthv2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy) returns a `302` redirect to the redirect URI with a `?code` query parameter containing the authorization code.
+
+In some cases, you may want to change this behavior. For example, you may want to return a `200` response with structured JSON containing the code.
+
+One way to accomplish this use case is to set the OAuthV2 policy's [GenerateResponse property](/apigee/docs/api-platform/reference/policies/oauthv2-policy#generateresponseelement) to `false`. Use the [ExtractVariable policy](/apigee/docs/api-platform/reference/policies/extract-variables-policy) to get the value of the authorization code from the variable `oauthv2authcode.{policy_name}.code`. Then, you can use the [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) to return the code in a JSON payload with a status of 200.
+
+## Auditing app end user consent
+
+You may be required to verify that an app end user authorized an app. You can use the Apigee Audit API to do so.
+
+## Outbound OAuth sample
+
+See the <a href="https://github.com/apigee/api-platform-samples/tree/master/sample-proxies/outbound-oauth" class="external">outbound-oauth</a> sample in the Apigee api-platform-samples repository on GitHub. You can clone the sample, deploy it, and run it. This sample uses the Microsoft Azure translator API to translate tweets. To do so, it makes an outbound call to obtain an OAuth access token, and then caches the token using the API Services caching policies, reusing the cached token each time an outbound call is made. Also, includes a demonstration browser app used to invoke the API proxy.

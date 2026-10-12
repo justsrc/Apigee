@@ -1,0 +1,54 @@
+URL: https://github.com/apigee/apigeelint/issues/501
+TITLE: #494 added new undocumented required `EX-` plugin prefix
+STATE: closed state_reason: completed
+AUTHOR: valentine195 association: NONE
+CREATED: 2025-02-21T15:51:37Z CLOSED: 2025-03-14T17:04:00Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+Hello!
+
+My team found today that #494 added a new prefix requirement for external plugins. While the example external plugins _do_ have this prefix, there doesn't appear to be any documentation showing this prefix as a requirement. Is this intended for going forward? We created all of our tooling around a different, custom prefix 😄
+
+Thanks.
+
+edit: specifically, this was the change: https://github.com/apigee/apigeelint/pull/494/files#diff-a637ad58de019d2c54d81639ea3d761a116f33422d158ccf82d3e17340af0da3R63
+
+--- COMMENTS (7) ---
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2025-02-21T23:19:03Z
+>While the example external plugins do have this prefix, there doesn't appear to be any documentation showing this prefix as a requirement. Is this intended for going forward?
+
+Hmmm... You're right. I hadn't thought people would need to use a different prefix.  I'll have to look at it. 
+
+Your view is valid that if this is the restriction, we should have documented it. At this point I'm not sure we need to have this restriction going forward. 
+
+The idea behind having a fixed prefix for external plugins was to distinguish between "external" and "bundled" plugins. But that may be an artificial requirement. We might be able to relax that requirement. 
+
+There's one catch I can think of (without having tested this): Requiring ALL external plugins to have a name like EX000 implicitly avoids name clashes. I am not sure if there would be any problem if there was an external plugin with the same name as a bundled plugin.  I'll have to test it. 
+
+
+
+### comment by valentine195 (association=NONE) at 2025-03-13T18:52:20Z
+Hey @DinoChiesa is there any updates on this?
+
+Thanks!
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2025-03-13T23:00:22Z
+Thanks for the reminder.  
+I am talking with Sai and Kurt, basically the team that manages the tool.  And we are thinking that we might want to just keep it simple and document  the EX prefix as a restriction. 
+
+What is your view - do you believe that will represent a hardship for you? 
+Or will it be acceptable (even if a momentary hassle) ? 
+
+### comment by valentine195 (association=NONE) at 2025-03-13T23:09:49Z
+Thanks for the update! I’ll have to talk to the rest of my team, I am not sure if our analytic tooling has references to these rule IDs that would require updates. 
+
+### comment by valentine195 (association=NONE) at 2025-03-14T15:05:54Z
+Hey @DinoChiesa I spoke to the team and we can handle this update, so no worries. Thanks! Do you want me to leave this open for the documentation?
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2025-03-14T15:51:36Z
+ok very good.  yes, thanks. Keep it open. I'm going to update the documentation.  
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2025-03-14T17:04:00Z
+Fixed in #503 . 

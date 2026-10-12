@@ -1,0 +1,590 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This section provides reference information about the following common Apigee flow variables:
+
+|  |  |  |
+|----|----|----|
+| [`apigee`](#apigee) | [`is`](#is) | [`request`](#request) |
+| [`apiproduct`](#apiproduct) | [`loadbalancing`](#loadbalancing) | [`response`](#response) |
+| [`apiproxy`](#apiproxy) | [`message`](#message) | [`route`](#route) |
+| [`client`](#client) | [`messageid`](#messageid) | [`servicecallout`](#servicecallout) |
+| [`current`](#current) | [`mint`](#mint) | [`system`](#system) |
+| [`environment`](#environment) | [`organization`](#organization) | [`target`](#target) |
+| [`error`](#error) | [`proxy`](#proxy) | [`variable`](#variable) |
+| [`fault`](#fault) | [`publishmessage`](#publishmessage) |  |
+| [`graphql`](#graphql) | [`ratelimit`](#ratelimit) |  |
+
+Each of these variables is described in the sections that follow.
+
+This document does not include flow variables that are specific to a single policy. Those flow variables are documented with the policy that introduces them. For example, the `responsecache` flow variable is documented with the [ResponseCache policy](/apigee/docs/api-platform/reference/policies/response-cache-policy). For the list of available policies, see [Policy reference overview](/apigee/docs/api-platform/reference/policies/reference-overview-policy).
+
+<div class="section expandable">
+
+### Flow variable terminology
+
+A *flow variable* refers to a value within a context. The value of a flow variable can be either a primitive type (such as a string, boolean, or integer) or a reference to a specific object, such as an object instantiated by Apigee during request/response processing.
+
+Whether a flow variable refers to a primitive type or an object depends on the context—the time at which you refer to it. The *context* for a flow variable is the flow segment in which an API proxy processes a request/response. For example, in any segment of the response flow context, the `response` flow variable refers to the [`response`](/apigee/docs/api-platform/reference/variables-reference#response) object.
+
+In most cases, you can think of flow variables as referencing an object. To refer to properties of that object, you use dot notation. For example, to access the `content` property of `response`, use `response.content`.
+
+</div>
+
+<div class="section expandable">
+
+### Working with flow variables
+
+For information on using flow variables, see [Flow variables overview](/apigee/docs/api-platform/fundamentals/introduction-flow-variables).
+
+Keep the following in mind when working with flow variables:
+
+- Each flow variable, such as `request`, has properties that you access using dot-notation syntax. For example:
+
+  <div>
+
+  </div>
+
+  ``` devsite-click-to-copy
+  request.headers.count
+  ```
+
+- Not all flow variables are accessible from all policies or tools. For example, in the request PreFlow, you won't be able to access the [`response`](/apigee/docs/api-platform/reference/variables-reference#response).
+
+- Most properties are read only. Where some are read/write, they might be read only, too, depending on where in the flow you access them.
+
+- Some policies define *policy-specific* flow variables. For example, the [ResponseCache policy](/apigee/docs/api-platform/reference/policies/response-cache-policy) defines a `responsecache` variable. For more information, see the [policies reference](/apigee/docs/api-platform/reference/policies/reference-overview-policy).
+
+- Do not rely on undocumented variables in your API proxies and apps. For example, do not rely on the values in the undocumented X-Apigee.\* headers in your API proxies as these headers are not intended for customer use and can be removed or changed by Apigee at any time.
+
+For more information, see:
+
+- **Get started:**
+  - [What are flow variables?](/apigee/docs/api-platform/fundamentals/introduction-flow-variables#whatareflowvariables)
+  - [Understanding flow variable scope](/apigee/docs/api-platform/fundamentals/introduction-flow-variables#understandingflowvariablescope)
+  - [Configuring flows](/apigee/docs/api-platform/fundamentals/flow-configurations)
+- **Tools and policies:**
+  - The [Debug tool](/apigee/docs/api-platform/debug/trace-overview) lets you see the values of flow variables as you step through the API proxy flow. 
+  - The [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) lets you modify the variables in your API proxy flow.
+
+</div>
+
+## `apigee`
+
+A helper variable that provides information about execution time of the policy.
+
+The following table describes the properties of the `apigee` variable:
+
+| Property | Type | Read/Write | Description | [Scope begins](/apigee/docs/api-platform/fundamentals/introduction-flow-variables#understandingflowvariablescope) |
+|----|----|----|----|----|
+| `apigee.metrics.policy.``policy_name``.timeTaken` | Integer | Read only | The time, in nanoseconds, that the policy took to execute. | Policy |
+
+## `apiproduct`
+
+A helper variable that provides information about API products.
+
+The following table describes the properties of the `apiproduct` variable:
+
+| Property | Type | Read/Write | Description | Scope begins |
+| --- | --- | --- | --- | --- |
+| apiproduct.operation | String | Read only | Name of the API product's operation. This variable helps you differentiate between the Quota policy 's settings and the quota settings on an API product's operation. For example, my-operation . | Proxy request |
+| apiproduct.operation.resource | String | Read only | The resource name of the operation that is matched to a request. | Proxy request |
+| apiproduct.operation.methods | Array | Read only | An array of HTTP methods that the operation being matched allows. | Proxy request |
+| apiproduct.operation.attributes. key_name | Array | Read only | Gets the custom attribute value that matches the key_name . | Proxy request |
+
+For more information, see the following:
+
+- [`<UseQuotaConfigInAPIProduct>`](/apigee/docs/api-platform/reference/policies/quota-policy#usequotaconfiginapiproduct)
+- [What is an API product?](/apigee/docs/api-platform/publish/what-api-product)
+- [Managing API products](/apigee/docs/api-platform/publish/create-api-products)
+
+## `apiproxy`
+
+Describes the API proxy.
+
+The following table describes the properties of the `apiproxy` variable:
+
+| Property | Type | Read/Write | Description | [Scope begins](/apigee/docs/api-platform/fundamentals/introduction-flow-variables#understandingflowvariablescope) |
+|----|----|----|----|----|
+| `apiproxy.name` | String | Read only | Name of the API proxy. For example, `My Proxy`. | Proxy request |
+| `apiproxy.revision` | String | Read only | The revision number of an API proxy. For example, `6`. | Proxy request |
+| `apiproxy.basepath` | String | Read only | The deployment base path (specified during API deployment). | Proxy request |
+
+For more information on working with API proxies, see [Understanding APIs and API proxies](/apigee/docs/api-platform/fundamentals/understanding-apis-and-api-proxies).
+
+## `client`
+
+The application or system that sent a request to the load balancer.
+
+The following table describes the properties of the `client` variable:
+
+| Property | Type | Read/Write | Description | Scope begins |
+| --- | --- | --- | --- | --- |
+| client.cn | String | Read only | The common name specified in the TLS/SSL certificate presented by the client app. | Proxy request |
+| client.country | String | Read only | The country in the TLS/SSL certificate presented by the client app. | Proxy request |
+| client.email.address | String | Read only | The email address in the TLS/SSL certificate presented by the client app. | Proxy request |
+| client.host | String | Read only | The HTTP host IP associated with the request received by the ProxyEndpoint. | Proxy request |
+| client.ip | String | Read only | The IP address of the client or system sending the message to the load balancer. For example, this could be the original client IP or a load balancer IP. | Proxy request |
+| client.locality | String | Read only | The locality (City) in the TLS/SSL certificate presented by the client. | Proxy request |
+| client.organization | String | Read only | The organization in the TLS/SSL certificate presented by the client. (Not necessarily equivalent to the organization on Apigee.) | Proxy request |
+| client.organization.unit | String | Read only | The organizational unit in the TLS/SSL certificate presented by the client. | Proxy request |
+| client.port | Integer | Read only | The HTTP port associated with the originating client request to the ProxyEndpoint. | Proxy request |
+| client.received.end.time | String | Read only | The time, expressed in string form, at which the proxy finished receiving the request from the originating client at the ProxyEndpoint. For example: Wed, 21 Aug 2013 19:16:47 UTC. This time value is the string representation of the corresponding 32-bit timestamp quantity. For example, Wed, 21 Aug 2013 19:16:47 UTC corresponds to the timestamp value of 1377112607413. | Proxy request |
+| client.received.end.timestamp | Long | Read only | The timestamp value specifying when the proxy finished receiving the request from the originating client at the ProxyEndpoint. This value is a 64-bit (long) integer containing the number of milliseconds elapsed since midnight, on January 1, 1970 UTC. | Proxy request |
+| client.received.start.time | String | Read only | The time, expressed in string form, at which the proxy began receiving the request from the originating client at the ProxyEndpoint. For example: Wed, 21 Aug 2013 19:16:47 UTC This time value is the string representation of the corresponding 32-bit timestamp quantity. For example, Wed, 21 Aug 2013 19:16:47 UTC corresponds to the timestamp value of 1377112607413. | Proxy request |
+| client.received.start.timestamp | Long | Read only | The timestamp value specifying when the proxy began receiving the request from the originating client at the ProxyEndpoint. This value is a 64-bit (long) integer containing the number of milliseconds elapsed since midnight, on January 1, 1970 UTC. Note : This time value is used to calculate traffic metrics for API proxies in the analytics dashboards. | Proxy request |
+| client.resolved.ip | String | Read only | The resolved client IP address. This is either the value determined from a configured client IP resolution setting or from the default algorithm, if a client IP resolution setting is not specified. See Client IP resolution for information. | Proxy request |
+| client.scheme | String | Read only | Returns HTTP or HTTPS depending on the transport used by client app to send the request message. | Proxy request |
+| client.sent.end.time | String | Read only | The time, expressed in string form, at which the proxy finished sending the response from the ProxyEndpoint to the client. For example: Wed, 21 Aug 2013 19:16:47 UTC. This value is a string representation of the corresponding 32-bit client.sent.end.timestamp . For example, Wed, 21 Aug 2013 19:16:47 UTC corresponds to the timestamp value of 1377112607413. Note: This property is only available in the ProxyEndpoint response's PostClientFlow. In all other flows, the value of this property is the empty string. For information about accessing this property, see MessageLogging policy . | PostClientFlow |
+| client.sent.end.timestamp | Long | Read only | The timestamp value specifying when the ProxyEndpoint finished returning the response to the originating client app. This value is a 64-bit (long) integer containing the number of milliseconds elapsed since midnight, on January 1, 1970 UTC. Note: This property is only available in the ProxyEndpoint response's PostClientFlow. In all other flows, the value of this property is -1. For information about accessing this property, see MessageLogging policy . | PostClientFlow |
+| client.sent.start.time | String | Read only | The time, expressed in string form, when the ProxyEndpoint started returning the response to the originating client app. For example, Wed, 21 Aug 2013 19:16:47 UTC. This value is a string representation of the corresponding 32-bit client.sent.start.timestamp . For example, Wed, 21 Aug 2013 19:16:47 UTC corresponds to the timestamp value of 1377112607413. Note: This property is only available in the ProxyEndpoint response's PostClientFlow. In all other flows, the value of this property is the empty string. For information about accessing this property, see MessageLogging policy . | PostClientFlow |
+| client.sent.start.timestamp | Long | Read only | When the proxy began sending the response to the client from the ProxyEndpoint. This value is expressed as a 64-bit (long) integer containing the number of milliseconds elapsed since midnight, on January 1, 1970 UTC. Note: This property is only available in the ProxyEndpoint response's PostClientFlow. In all other flows, the value of this property is -1. For information about accessing this property, see MessageLogging policy . | PostClientFlow |
+| client.ssl.enabled | String | Read only | true if the ProxyEndpoint is configured for TLS/SSL; otherwise false . | Proxy request |
+| client.state | String | Read only | The state in the TLS/SSL certificate presented by the client. | Proxy request |
+
+## `current`
+
+Contains information about the current API proxy flow.
+
+The following table describes the properties of the `current` variable:
+
+| Property | Type | Read/Write | Description | [Scope begins](/apigee/docs/api-platform/fundamentals/introduction-flow-variables#understandingflowvariablescope) |
+|----|----|----|----|----|
+| `current.flow.name` | String | Read only | The name of the flow that is currently executing (such as `PreFlow`, `PostFlow`, or the name of a conditional flow). | Proxy request |
+| `current.flow.description` | String | Read only | The description of the currently executing flow. This is the same as the value of the `<Description>` element in the flow's XML configuration. | Proxy request |
+
+You can view these properties in the Apigee UI's Trace view.
+
+## `environment`
+
+A container for the `environment.name` property.
+
+The following table describes the properties of the `environment` variable:
+
+| Property | Type | Read/Write | Description | [Scope begins](/apigee/docs/api-platform/fundamentals/introduction-flow-variables#understandingflowvariablescope) |
+|----|----|----|----|----|
+| `environment.name` | String | Read only | Name of the environment in which the transaction ran. | Proxy request |
+
+## `error`
+
+A contextual object that represents an error message in the [error flow](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+**Note:** Error variables are only available in the error flow.
+
+The following table describes the properties of the `error` variable:
+
+| Property | Type | Read/Write | Description | [Scope begins](/apigee/docs/api-platform/fundamentals/introduction-flow-variables#understandingflowvariablescope) |
+|----|----|----|----|----|
+| `error` | [`message`](/apigee/docs/api-platform/reference/variables-reference#message) | Read/Write | Error of type [`message`](/apigee/docs/api-platform/reference/variables-reference#message), which is a contextual object in the error flow. | Error |
+| `error.content` | String | Read/Write | Content of the error. | Error |
+| `error.message` | String | Read only | Message associated with an error, whose value is available only before the error Flow is executed. | Error |
+| `error.status.code` | Integer | Read only | The HTTP status code associated with the error. For example, `400`. | Error |
+| `error.transport.message` | TransportMessage | Read only | Any error of type `TransportMessage`. | Error |
+| `error.state` | Integer | Read only | State in the Flow where an error occurred. | Error |
+| `error.header.``header_name` | String | Read/Write | Get or set the response header. | Error |
+
+## `fault`
+
+Provides information about a runtime error source, reason, and details. Apigee sets these variables when a policy throws an error, and values are specific to each policy. To understand when the `fault` variables are set, see [About policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors#variablesspecifictopolicyerrors-thefaultnamevariable).
+
+| Property | Type | Read/Write | Description | [Scope begins](/apigee/docs/api-platform/fundamentals/introduction-flow-variables#understandingflowvariablescope) |
+|----|----|----|----|----|
+| `fault.name` | String | Read only | The name of the fault, as described in the **Runtime errors** table included in each [policy reference](/apigee/docs/api-platform/reference/policies/reference-overview-policy) topic. This variable may be useful in Conditions applied to FaultRules. | Error |
+| `fault.reason` | String | Read only | The reason for the fault. For example, when the [OASValidation policy](/apigee/docs/api-platform/reference/policies/oas-validation-policy) detects that an inbound request does not validate against the OpenAPI Specification, it will set this variable to a string that describes the policy name, the specification name, and the detail describing why the request does not validate against the specification. Other policies will set this variable to messages appropriate for their faults. | Error |
+| `fault.category` | String | Read only | The category. For example if the fault occurs in a policy step, this variable might hold the value "Step". This variable may be useful in Conditions applied to FaultRules. | Error |
+| `fault.subcategory` | String | Read only | The subcategory. For example, if the [OASValidation policy](/apigee/docs/api-platform/reference/policies/oas-validation-policy) detects that a request does not validate against an OpenAPI Specification, it will set this variable to "OASValidationFailure". This variable may be useful in Conditions applied to FaultRules. | Error |
+
+## `graphql`
+
+Gives you access to the results of a GraphQL query at runtime. For more information, see [GraphQL policy](/apigee/docs/api-platform/reference/policies/graphql-policy).
+
+The following table describes the properties of the `graphql` variable:
+
+| Property | Type | Read/Write | Description |  |
+| --- | --- | --- | --- | --- |
+| graphql | Complex type | READ ONLY/READ WRITE | The root GraphQL query. | SCOPE |
+| graphql.fragment | Complex type | READ ONLY/READ WRITE | A reference to the default fragment for this query. | SCOPE |
+| graphql.fragment.count | Integer | Read Only | The number of framents spawned by this GraqhQL query. | SCOPE |
+| graphql.fragment. INDEX .selectionSet. INDEX | TYPE | READ ONLY/READ WRITE | A reference to the selection set at the specified index. | SCOPE |
+| graphql.fragment. INDEX .selectionSet. INDEX .name | String | READ ONLY/READ WRITE | The name of the selection set at the specified index. | SCOPE |
+| graphql.fragment. INDEX .selectionSet.count | Integer | Read Only | The number of selection sets in this fragment. | SCOPE |
+| graphql.fragment. INDEX .selectionSet.name | String | READ ONLY/READ WRITE | The name of the default selection set in the fragment. | SCOPE |
+| graphql.operation | Complex type | READ ONLY/READ WRITE | A reference to the query's default operation. You cannot set quotas at the operation level. Instead, set them at the environment level. | SCOPE |
+| graphql.operation.name | String | Read Only | The name of the query's default operation. | SCOPE |
+| graphql.operation.operationType | Enumeration | Read Only | The type of query's default operation that can be executed against this API proxy. Possible values are query , mutation , or all . | SCOPE |
+| graphql.operation.selectionSet | Complex Type |  | The default selection set for the query's default operation. | SCOPE |
+| graphql.operation.selectionSet.count | Integer | Read Only | The number of selection sets in the query's default operation. | SCOPE |
+| graphql.operation.selectionSet.name | String | Read Only | The name of the query's default operation's default selection set. | SCOPE |
+| graphql.operation.selectionSet. INDEX | Integer | Read Only | A reference to the selection set at the specified index in the list of selection sets. | SCOPE |
+| graphql.operation.selectionSet. INDEX .name | String | Read Only | The name of the selection at the specified index in the list of selection sets for this operation. | SCOPE |
+| graphql.operation.selectionSet. INDEX .[selectionSet] | Complex type | READ ONLY/READ WRITE | One or more additional selection set objects. Selection sets can be accessed recursively. For example, after a selectionSet.index , you can have another selectionSet.index rather than a name property. And after that another and so on until you reach the value of <MaxCount> that you set in the GraphQL policy . | SCOPE |
+| graphql.operation.selectionSet. INDEX .directive | Complex type |  | A reference to the default directive in the specified selection set. | SCOPE |
+| graphql.operation.selectionSet. INDEX .directive.count | Complex type |  |  | SCOPE |
+| graphql.operation.selectionSet. INDEX .directive. INDEX | Integer | Read Only | A reference to the directive at the specified index. | SCOPE |
+| graphql.operation.selectionSet. INDEX .directive. INDEX .argument. INDEX | Integer | Read Only | A reference to the argument at the specified index. | SCOPE |
+| graphql.operation.selectionSet. INDEX .directive. INDEX .argument. INDEX .name | String |  | The name of the argument at the specified index. | SCOPE |
+| graphql.operation.selectionSet. INDEX .directive. INDEX .argument. INDEX .value | String |  | The value of the argument at the specified index. | SCOPE |
+| graphql.operation.selectionSet. INDEX .directive.name | String |  |  | SCOPE |
+| graphql.operation.variableDefinitions | Complex type |  | A reference to a list of variable definitions for the query's default operation. | SCOPE |
+| graphql.operation.variableDefinitions.count | Integer |  | The number of variable definitions for the query's default operation. | SCOPE |
+| graphql.operation.variableDefinitions. INDEX | Integer |  | A reference to the variable definition at the specified index. | SCOPE |
+| graphql.operation.variableDefinitions. INDEX .name | String |  | The name of the variable definition at the specified index. | SCOPE |
+| graphql.operation.variableDefinitions. INDEX .type |  |  | The type of the variable definition's value at the specified index. | SCOPE |
+
+## `is`
+
+A container for the `is.error` property.
+
+The following table describes the properties of the `is` variable:
+
+| Property | Type | Read/Write | Description | [Scope begins](/apigee/docs/api-platform/fundamentals/introduction-flow-variables#understandingflowvariablescope) |
+|----|----|----|----|----|
+| `is.error` | Boolean | Read only | Error flag. | Proxy request |
+
+## `loadbalancing`
+
+Provides information about the TargetEndpoint's load balancing status.
+
+The following table describes the properties of the `loadbalancing` variable:
+
+| Property | Type | Read/Write | Description | [Scope begins](/apigee/docs/api-platform/fundamentals/introduction-flow-variables#understandingflowvariablescope) |
+|----|----|----|----|----|
+| `loadbalancing.failedservers` | Array of Strings | Read only | List of failed TargetServers during load balancing at TargetEndpoint. | Target response |
+| `loadbalancing.isfallback` | Boolean | Read only | `true` if fallback is enabled for the TargetServer invoked during load balancing at TargetEndpoint. | Target response |
+| `loadbalancing.targetserver` | String | Read only | TargetServer invoked during load balancing at TargetEndpoint. Set only if the `<Path>` element is set while defining the load balancer element. | Target response |
+
+## `message`
+
+A contextual object, with the same value as [`request`](/apigee/docs/api-platform/reference/variables-reference#request) in the request flow or as [`response`](/apigee/docs/api-platform/reference/variables-reference#response) in the response flow or as [`error`](/apigee/docs/api-platform/reference/variables-reference#error) in the error flow.
+
+The following table describes the properties of the `message` variable:
+
+| Property | Type | Read/Write | Description | Scope begins |
+| --- | --- | --- | --- | --- |
+| message | message | Read/Write | A contextual object, with the same value as request in the request Flow or as response in the response Flow or as error in the Error flow. | Proxy request |
+| message.content | String | Read/Write | Content of the request, response, or error message. | Proxy request |
+| message.content.as.base64 | String | Read only | Base64-encoded payload content of the request, response, or error message. | Proxy request |
+| message.content.as.url.safe.base64 | String | Read only | URL-safe base64-encoded payload content of the request, response, or error message. | Proxy request |
+| message.formparam. param_name | String | Read/Write | Value of the specified form parameter. | Proxy request |
+| message.formparam. param_name . values | Collection | Read only | All values of the specified form parameter in the message. | Proxy request |
+| message.formparam. param_name . values.count | Integer | Read only | Count of the values of the specified form parameters in the message. | Proxy request |
+| message.formparams.count | Integer | Read only | Count of all form parameters in the message. | Proxy request |
+| message.formparams.names | Collection | Read only | Value of all form parameters in the message. | Proxy request |
+| message.formparams.names.string | String | Read only | A comma-separated list of names of all the form parameters in the message. | Proxy request |
+| message.formstring | String | Read only | Value of form string in the message. | Proxy request |
+| message.header. header_name | String | Read/Write | Gets or sets the value of a particular header found in the request. If the header contains a comma, upon read you will receive only the segment of the text up to the first comma. For example, if the Cache-control header is public, maxage=16544 , then the return value of message.header.cache-control is public . If you want the entire header as a string, use a variable like message.header. header_name .values.string . | Proxy request |
+| message.header. header_name . N | String | Read/Write | The value of the Nth particular header value in the message, either request or response, depending on the state of the flow. Apigee splits header text values by commas. The index starts at 1 for the left-most value. For example, if the Cache-control header is public,maxage=16544 , then the return value of message.header.cache-control.2 is maxage=16544 . | Proxy request |
+| message.header. header_name . values | Collection | Read only | All values of the specified HTTP header name in the message. | Proxy request |
+| message.header. header_name . values.count | Integer | Read only | Count of the values of the specified HTTP header name in the message. | Proxy request |
+| message.header. header_name . values.string | String | Read only | All the values of a particular header in the message, in the form of a single string. For example, if the Cache-control header is public,maxage=16544 , then the return value of message.header.cache-control.values.string is public,maxage=16544 . | Proxy request |
+| message.headers.count | Integer | Read only | Count of all HTTP headers in the message. | Proxy request |
+| message.headers.names | Collection | Read only | Value of all HTTP headers in the message. | Proxy request |
+| message.headers.names.string | String | Read only | A comma-separated list of names of all the headers in the message. | Proxy request |
+| message.path | String | Read/Write | The complete request message path in URL excluding any query parameters. | Proxy request |
+| message.queryparam. param_name | String | Read only | Returns the specified message query parameter. | Proxy request |
+| message.queryparam. param_name . N | String | Read/Write | The value of the Nth query parameter in the message. For example, if the request.querystring is a=hello&a=world , then the return value of message.queryparam.a.1 is hello . As an example of writing multiple values for a single query parameter name, such as type=siteid:1&type=language:us-en&type=currency:USD , set the following: message.queryparam.type.1 to siteid:1 message.queryparam.type.2 to language:en-us message.queryparam.type.3 to currency:USD | Proxy request |
+| message.queryparam. param_name . values | Collection | Read only | All the values of a particular query parameter in the message, formatted as a comma-separated list. For example, if the query string is a=hello&a=world , then the value of message.queryparam.a.values is ['hello', 'world'] code>. | Proxy request |
+| message.queryparam. param_name . values.count | Integer | Read only | The total count of a specified query parameter associated with the request sent to the ProxyEndpoint from the client app. | Proxy request |
+| message.queryparams.count | Integer | Read only | The total count of all query parameters associated with the request sent to the ProxyEndpoint from the client app. | Proxy request |
+| message.queryparams.names | Collection | Read only | A list of all query parameter names associated with the request sent to the ProxyEndpoint from the client app. | Proxy request |
+| message.queryparams.names.string | String | Read only | A comma-separated list of names of all the query parameters in the message. | Proxy request |
+| message.querystring | String | Read only | A string containing all query parameter names and values associated with the request sent to the ProxyEndpoint from the client app. For example, for the request http://api.apifactory.com/inventors?name=nick&surname=danger , the value of message.querystring is name=nick&surname=danger . | Proxy request |
+| message.status.code | Integer | Read only | HTTP status code of the response message from target. | Target response |
+| message.transport.message | TransportMessage | Read only | Message of type TransportMessage which is a contextual object. | Proxy request |
+| message.uri | String | Read only | The complete URI path (following the domain URL) including query parameters. For example, for the request http://api.apifactory.com/inventors?name=nikola&surname=tesla , this variable returns inventors?name=nikola&surname=tesla . | Proxy request |
+| message.verb | String | Read only | The HTTP verb ( GET , PUT , POST , DELETE , etc.) associated with the request. | Proxy request |
+| message.version | String | Read/Write | The HTTP version associated with the request sent to the ProxyEndpoint from the client application. | Proxy request |
+
+For more information on messages, see [Message template function reference](/apigee/docs/api-platform/reference/message-template-intro).
+
+## `messageid`
+
+A container for the globally unique ID for the request.
+
+The following table describes the properties of the `messageid` variable:
+
+| Property | Type | Read/Write | Description | Scope begins |
+| --- | --- | --- | --- | --- |
+| messageid | String | Read only | Holds the globally unique ID for the request, which includes the load balancer host name. This ID allows requests received at the load balancer to be tracked after they are sent to the message processor. This ID is logged in Apigee error logs to correlate the messageid with the errors. | Proxy request |
+
+## `mint`
+
+A helper variable that provides information about monetization.
+
+The following table describes the properties of the `mint` variable:
+
+| Property | Type | Read/Write | Description | Scope begins |
+| --- | --- | --- | --- | --- |
+| mint.limitscheck.is_request_blocked | Boolean | Read only | Flag that specifies whether the API request is blocked. Set to true if is_subscription_found is false . This flow variable is available if the MonetizationLimitsCheck policy is attached to the API proxy. See MonetizationLimitsChecks Flow variables . | Proxy request |
+| mint.limitscheck.is_subscription_found | Boolean | Read only | Flag that specifies whether the developer has an active subscription to the API product. Set to true if a developer has a subscription. This flow variable is available if the MonetizationLimitsCheck policy is attached to the API proxy. See MonetizationLimitsChecks Flow variables . | Proxy request |
+| mint.limitscheck.prepaid_developer_balance | Numeric | Read only | Current balance in the developer's or AppGroup's prepaid account wallet, associated with the rate plan's currency. | Proxy request |
+| mint.limitscheck.prepaid_developer_currency | String | Read only | Currency of the balance available in the mint.limitscheck.prepaid_developer_balance variable. Could apply to an individual app developer or an AppGroup. | Proxy request |
+| mint.limitscheck.purchased_product_name | String | Read only | Name of the associated API product. This flow variable is available if the MonetizationLimitsCheck policy is attached to the API proxy. See MonetizationLimitsChecks Flow variables . | Proxy request |
+| mint.limitscheck.status_message | String | Read only | Additional information about the execution of the MonetizationLimitsCheck policy for debugging purposes. This flow variable is available if the MonetizationLimitsCheck policy is attached to the API proxy. See MonetizationLimitsChecks Flow variables . | Proxy request |
+| mint.mintng_consumption_pricing_rates | String | Read only | Consumption-based fees. Set the fees when creating a rate plan . | PostClientFlow |
+| mint.mintng_consumption_pricing_type | String | Read only | Consumption-based pricing type. For example: FIXED_PER_UNIT Set the consumption-based fees when creating a rate plan . | PostClientFlow |
+| mint.mintng_currency | String | Read only | Currency for calculating the revenue. This flow variable has the value of the currency monetization variable . | DataCapture policy |
+| mint.mintng_dev_share | Numeric | Read only | Revenue to be shared with developer or AppGroup. Set the revenue to be shared with the developer or AppGroup when creating a rate plan . | PostClientFlow |
+| mint.mintng_is_apiproduct_monetized | Boolean | Read only | Flag that specifies whether the API product is currently monetized (that is, if there is an active rate plan in effect). This flow variable is added by the VerifyAPIKey or VerifyAccessToken policy attached to the API proxy. See Adding an authentication policy . | Proxy request |
+| mint.mintng_price | Numeric | Read only | Revenue for calculating the developer's share. The flow variable has the value of the revShareGrossPrice monetization variable . | DataCapture policy and PostClientFlow |
+| mint.mintng_price_multiplier | Numeric | Read only | Factor (multiplier) by which the per-transaction cost is multiplied. The flow variable has the value of the perUnitPriceMultiplier monetization variable . | DataCapture policy and PostClientFlow |
+| mint.mintng_rate | Numeric | Read only | Rate charged for the API call. This flow variable shows the consumption-based fee per API call. Set the consumption-based fee when creating a rate plan . If you have configured the perUnitPriceMultiplier monetization variable in your DataCapture policy, Apigee calculates the cost of the transaction after considering the value of the perUnitPriceMultiplier variable. For more information, see Api price multiplier in Metrics . | PostClientFlow |
+| mint.mintng_rate_before_multipliers | Numeric | Read only | Rate charged for the API call without the perUnitPriceMultiplier calculation. If the DataCapture policy captures the perUnitPriceMultiplier monetization variable , this flow variable shows the transaction cost before multiplying the cost by perUnitPriceMultiplier . | PostClientFlow |
+| mint.mintng_rate_plan_id | String | Read only | ID of the rate plan. This flow variable is added by the VerifyAPIKey or VerifyAccessToken policy attached to the API proxy. See Adding an authentication policy . | Proxy request |
+| mint.mintng_revenue_share_rates | String | Read only | Revenue share rates. Set the revenue share rate when creating a rate plan . | PostClientFlow |
+| mint.mintng_revenue_share_type | String | Read only | Revenue share type. For example: FIXED Set the revenue share type when creating a rate plan . | PostClientFlow |
+| mint.mintng_tx_success | Boolean | Read only | Specifies if the transaction is monetized. This flow variable has the value of the transactionSuccess monetization variable . | DataCapture policy |
+| mint.prepaid_updated_developer_usage | Numeric | Read only | Current usage of the prepaid developer or AppGroup. The usage is calculated based on your rate plan configuration and the value of the perUnitPriceMultiplier monetization variable. | PostClientFlow |
+| mint.rateplan_end_time_ms | Numeric | Read only | Expiration time for the rate plan in milliseconds since epoch. This flow variable is added by the VerifyAPIKey or VerifyAccessToken policy attached to the API proxy. See Adding an authentication policy . | Proxy request |
+| mint.rateplan_start_time_ms | Numeric | Read only | Activation time for the rate plan in milliseconds since epoch. This flow variable is added by the VerifyAPIKey or VerifyAccessToken policy attached to the API proxy. See Adding an authentication policy . | Proxy request |
+| mint.status | String | Read only | Status of the monetized call. Populated only on error. | PostClientFlow |
+| mint.status_code | Numeric | Read only | HTTP status code of the monetized call. Populated only on error. | PostClientFlow |
+| mint.subscription_end_time_ms | Numeric | Read only | Expiration time for the API product subscription in milliseconds since epoch. This flow variable is available if the MonetizationLimitsCheck policy is attached to the API proxy. See MonetizationLimitsChecks Flow variables . | Proxy request |
+| mint.subscription_start_time_ms | Numeric | Read only | Activation time for the API product subscription in milliseconds since epoch. This flow variable is available if the MonetizationLimitsCheck policy is attached to the API proxy. See MonetizationLimitsChecks Flow variables . | Proxy request |
+| mint.tx_success_result | Boolean | Read only | Indicates whether monetization is successful for the transaction. The mint.tx_success_result variable can have the following values: tx_success set to true : The transactionSuccess variable is true , and the transaction is monetized. Because the transaction is monetized, the values of mint.mintng_rate and mint.mintng_dev_share variables are calculated. tx_success set to false : The transactionSuccess variable is false , and the transaction is not monetized. Because the transaction is not monetized, the values of mint.mintng_rate and mint.mintng_dev_share variables are not calculated. tx_success not found. Message status code was non 2xx : The transactionSuccess variable is not captured and the HTTP status code ( message.status.code ) of the transaction is not 2xx. The transaction is not monetized. tx_success not found. Message status code was 2xx : The transactionSuccess variable is not captured and the HTTP status code ( message.status.code ) of the transaction is 2xx. The transaction is monetized. | PostClientFlow |
+
+For more information, see the following:
+
+- [Enforcing monetization limits](/apigee/docs/api-platform/monetization/enforce-monetization-limits)
+- [MonetizationLimitsCheckPolicy](/apigee/docs/api-platform/reference/policies/monetization-limits-check-policy)
+
+## `organization`
+
+A container for the `organization.name` property.
+
+The following table describes the properties of the `organization` variable:
+
+| Property | Type | Read/Write | Description | [Scope begins](/apigee/docs/api-platform/fundamentals/introduction-flow-variables#understandingflowvariablescope) |
+|----|----|----|----|----|
+| `organization.name` | String | Read only | Name of the organization. | Proxy request |
+
+For more information on organizations, see [Understanding organizations](/apigee/docs/api-platform/fundamentals/organization-structure).
+
+## `proxy`
+
+The API proxy configuration.
+
+The following table describes the properties of the `proxy` variable:
+
+| Property | Type | Read/Write | Description | Scope begins |
+| --- | --- | --- | --- | --- |
+| proxy.basepath | String | Read only | The value of the Base Path in your API proxy endpoint configuration. The base path is the left-most URI fragment that follows the host in the URL. Conditional flow URIs follow the base path. Suppose that you have an API Proxy Endpoint configured with a basepath of /v2/weatherapi . (See Proxy Endpoint configuration for details.) In that case, if the inbound request uses the URL https://myhost.example.net/v2/weatherapi/forecastrss?w=12797282 , then: The host name is myhost.example.net . You can retrieve this by reading the variable request.header.host . The base path is /v2/weatherapi . Retrieve this by reading the variable proxy.basepath . The path suffix is /forecastrss . Retrieve this by reading the variable proxy.pathsuffix . If you define a dynamic Base Path in your API proxy configuration, such as /v2/*/weatherapi code>, then the proxy.basepath variable is set to the dynamic path. To retrieve the actual URL for the request, read and parse the variable proxy.url . | Proxy request |
+| proxy.client.ip | String | Read only | The X-Forwarded-For address of the inbound call, which is the IP address Apigee received from the last external TCP handshake. This could be the calling client or a load balancer. | Proxy request |
+| proxy.name | String | Read only | The name attribute configured for the ProxyEndpoint. | Proxy request |
+| proxy.pathsuffix | String | Read only | The value of the path suffix in the URL that is sent from the client and received at the ProxyEndpoint. The basepath is the left-most path component that uniquely identifies an API proxy within an Environment Group. Suppose that you have an API Proxy endpoint configured with a basepath of /v2/weatherapi . In that case, a request sent to https://myhost.example.net/v2/weatherapi/forecastrss?w=12797282 , the proxy.pathsuffix variable will hold the string /forecastrss . | Proxy request |
+| proxy.url | String | Read only | Gets the complete URL associated with the proxy request received by the ProxyEndpoint, including any query parameters present. For an example that constructs a request URL using the original request host (rather than the router host used in proxy.url ), see Access request messages . | Proxy request |
+
+For more information on working with API proxies, see [Understanding APIs and API proxies](/apigee/docs/api-platform/fundamentals/understanding-apis-and-api-proxies).
+
+## `publishmessage`
+
+Populated when a the PublishMessage policy executes.
+
+| Property | Type | Read/Write | Description | Scope begins |
+| --- | --- | --- | --- | --- |
+| publishmessage.message.id | String | Read-Only | Returns the messageId (ID of the published message) from the Pub/Sub server. Apigee sets this flow variable only if the publish request is successful. | Proxy request |
+
+## `ratelimit`
+
+Populated when a Quota or SpikeArrest policy executes.
+
+**Note:** For SpikeArrest policy, refer to variables `ratelimit.``policy_name``.available.count`, `ratelimit.``policy_name``.exceed.count`, and `ratelimit.``policy_name``.failed`. To check if the SpikeArrest limit has been enforced, use the `exceed.count > 0` or `available.count < 1` variables. The `failed` variable should only be used to detect if the policy itself failed to execute due to an internal error.
+
+The following table describes the properties of the `ratelimit` variable:
+
+| Property | Type | Read/Write | Description | Scope begins |
+| --- | --- | --- | --- | --- |
+| ratelimit. policy_name .allowed.count | Long | Read-Only | Returns the allowed quota count. | PostClientFlow |
+| ratelimit. policy_name .used.count | Long | Read-Only | Returns the current quota used within a quota interval. | PostClientFlow |
+| ratelimit. policy_name .available.count | Long | Read-Only | Returns the available quota count in the quota interval. | PostClientFlow |
+| ratelimit. policy_name .exceed.count | Long | Read-Only | Returns 1 after the quota is exceeded. | PostClientFlow |
+| ratelimit. policy_name .total.exceed.count | Long | Read-Only | Returns 1 after the quota is exceeded. | PostClientFlow |
+| ratelimit. policy_name .expiry.time | Long | Read-Only | Returns the UTC time (in milliseconds), which determines when the quota expires and when the new quota interval starts. When the Quota policy's type is rollingwindow , this value is not valid because the quota interval never expires. | PostClientFlow |
+| ratelimit. policy_name .identifier | String | Read-Only | Returns the (client) identifier reference attached to the policy | PostClientFlow |
+| ratelimit. policy_name .class | String | Read-Only | Returns the class associated with the client identifier | PostClientFlow |
+| ratelimit. policy_name .class.allowed.count | Long | Read-Only | Returns the allowed quota count defined in the class | PostClientFlow |
+| ratelimit. policy_name .class.used.count | Long | Read-Only | Returns the used quota within a class | PostClientFlow |
+| ratelimit. policy_name .class.available.count | Long | Read-Only | Returns the available quota count in the class | PostClientFlow |
+| ratelimit. policy_name .class.exceed.count | Long | Read-Only | Returns the count of requests that exceeds the limit in the class in the current quota interval | PostClientFlow |
+| ratelimit. policy_name .class.total.exceed.count | Long | Read-Only | Returns the total count of requests that exceeds the limit in the class across all quota intervals, so it is the sum of class.exceed.count for all quota intervals. | PostClientFlow |
+| ratelimit. policy_name .failed | Boolean | Read-Only | This variable is true if the policy experienced an internal execution failure. This variable should not be used to check if a rate limit has been exceeded. It may be set to true under high load due to SpikeArrest's "fail-open" design. | PostClientFlow |
+
+For more information, see the following:
+
+- [Rate limiting](/apigee/docs/api-platform/develop/rate-limiting)
+- [Comparing Quota and SpikeArrest policies](/apigee/docs/api-platform/develop/comparing-quota-and-spike-arrest-policies)
+- [Quota policy](/apigee/docs/api-platform/reference/policies/quota-policy)
+- [SpikeArrest policy](/apigee/docs/api-platform/reference/policies/spike-arrest-policy)
+
+## `request`
+
+The complete request, including any payload present.
+
+For more information about request data, see [How is request data passed to the backend server?](/apigee/docs/api-platform/fundamentals/understanding-handling-request-response-data#howrequestdatapassedtothebackendserver)
+
+The following table describes the properties of the `request` variable:
+
+| Property | Type | Read/Write | Description | Scope begins |
+| --- | --- | --- | --- | --- |
+| request | message | Read only | The complete request, including any payload present. | Proxy request |
+| request.content | String | Read/Write | Gets or sets the payload of the request message. | Proxy request |
+| request.content.as.base64 | String | Read only | Base64-encoded payload content of the request message. | Proxy request |
+| request.content.as.url.safe.base64 | String | Read only | URL-safe base64-encoded payload content of the request message. | Proxy request |
+| request.formparam. param_name | String | Read/Write | Gets or sets the value of the specified form parameter in the request sent from the client application. | Proxy request |
+| request.formparam. param_name . values | Collection | Read only | All the values of a particular form parameter in the request, formatted as a comma-separated list. For example, if the payload is a=hello&x=greeting&a=world , then the value of request.formparam.a.values is ['hello', 'world'] . | Proxy request |
+| request.formparam. param_name . values.count | Integer | Read only | Count of all values for the specified form parameter associated with the request. | Proxy request |
+| request.formparam. param_name . N | String | Read/Write | The value of the Nth particular form parameter in the message. For example, if the form string is a=hello&a=world , then the return value of request.formparam.a.1 is hello . | Proxy request |
+| request.formparams.count | Integer | Read only | Count of all parameters associated with the request sent from the client application. | Proxy request |
+| request.formparams.names | Collection | Read only | A list of all parameter names associated with the request. | Proxy request |
+| request.formparams.names.string | String | Read only | A comma-separated list of all form parameter names associated with the request. | Proxy request |
+| request.formstring | String | Read only | The complete formparam in the request sent from the client app. For example, name=test&type=first&group=A . | Proxy request |
+| request.grpc.rpc.name | String | Read only | Applicable only when using a gRPC target server. The RPC name. For information on gRPC proxies, see Creating gRPC API proxies . | Proxy request |
+| request.grpc.service.name | String | Read only | Applicable only when using a gRPC target server. The gRPC status service name. For information on gRPC proxies, see Creating gRPC API proxies . | Proxy request |
+| request.header. header_name | String | Read/Write | Gets or sets the value of a particular header found in the request. If the header contains a comma, upon read you will receive only the segment of the text up to the first comma. For example, if the Cache-control header is public, maxage=16544 , then the return value of request.header.cache-control is public . If you want the entire header as a string, use a variable like request.header. header_name .values.string . | Proxy request |
+| request.header. header_name . N | String | Read/Write | The value of the Nth particular header value in the request. Apigee splits header text values by commas. The index starts at 1 for the left-most value. For example, if the Cache-control header is public, maxage=16544 , then the return value of request.header.cache-control.2 is maxage=16544 . | Proxy request |
+| request.header. header_name . values | Collection | Read only | All the values of a particular header in the request. | Proxy request |
+| request.header. header_name . values.count | Integer | Read only | Count of all the values of a particular header in the request. | Proxy request |
+| request.header. header_name . values.string | String | Read only | All the values of a particular header in the request, in the form of a single string. For example, if the Cache-control header is public, maxage=16544 , then the return value of request.header.cache-control.values.string is public, maxage=16544 . | Proxy request |
+| request.headers.count | Integer | Read only | Count of all the headers in the request. | Proxy request |
+| request.headers.names | Collection | Read only | Names of all the headers in the request. | Proxy request |
+| request.headers.names.string | String | Read only | A comma-separated list of names of all the headers in the request. | Proxy request |
+| request.path | String | Read only | The un-proxied resource path (not including the host) to the backend service, excluding query parameters. For example, if the URI to the backend service is https://example.com/rest/api/latest , then the value of request.path is /rest/api/latest . | Proxy request |
+| request.queryparam. param_name | String | Read/Write | The value of a particular query parameter found in the request. | Proxy request |
+| request.queryparam. param_name . N | String | Read/Write | The value of the Nth query parameter in the request. For example, if the request.querystring is a=hello&a=world , then the return value of is request.queryparam.a.1 is hello . As an example of writing multiple values for a single query parameter name, such as type=siteid:1&type=language:us-en&type=currency:USD , set the following: request.queryparam.type.1 to siteid:1 request.queryparam.type.2 to language:en-us request.queryparam.type.3 to currency:USD | Proxy request |
+| request.queryparam. param_name . values | Collection | Read only | All the values of a particular query parameter in the request, formatted as a comma-separated list. For example, if request.querystring is a=hello&b=lovely&a=world , then the value of request.queryparam.a.values is ['hello', 'world'] . | Proxy request |
+| request.queryparam. param_name . values.count | Integer | Read only | The count of all the values of a particular query parameter in the request. | Proxy request |
+| request.queryparams.count | Integer | Read only | The count of all the query parameters in the request. | Proxy request |
+| request.queryparams.names | Collection | Read only | The names of all the query parameters in the request. | Proxy request |
+| request.queryparams.names.string | String | Read only | A comma-separated list of the names of all the query parameters in the request. | Proxy request |
+| request.querystring | String | Read only | The complete list of query parameters in the request sent from the client app. For example, if the request is http://host.com/123?name=first&surname=second&place=address , then this variable returns name=first&surname=second&place=address . | Proxy request |
+| request.transportid | String | Read only | ID of the request as type TransportMessage which is contextual. | Proxy request |
+| request.transport.message | Transport-Message | Read only | Request of type TransportMessage which is contexual. | Proxy request |
+| request.uri | String | Read only | In an API proxy, the proxy <BasePath> in the ProxyEndpoint (in addition to the proxy's base URL) maps to the target service URL in the TargetEndpoint. For example: <ProxyEndpoint> ... <BasePath>/my-mock-proxy</BasePath> Points to <TargetEndpoint> ... <HTTPTargetConnection> http://mocktarget.apigee.net </HTTPTargetConnection> In the request , request.uri is the proxy base path + the remainder of the address, including query parameters. In the response , request.uri is the remainder of the address, including query parameters, after the HTTPTargetConnection. The difference is because the original request came into the proxy, but then the proxy makes another request to the target service. Let's say the following call is made to our sample proxy, which has a base path of /my-mock-proxy : http://my_org-test.apigee.net/my-mock-proxy/ user?user=Dude And the proxy calls: http://mocktarget.apigee.net Which appends /user?user=Dude to that URL. Request: request.uri = /my-mock-proxy/user?user=Dude Response: request.uri = /user?user=Dude | Proxy request (differs in the response) |
+| request.url | String | Read only | The complete URL of the request made to the target endpoint, including the query string parameters, but not including the port number (if specified). For example, if you make a call to a sample proxy http://my_org-test.apigee.net/my-mock-proxy/user?user=Dude , and the target endpoint is http://example.com:8080 , then the value is: Request: n/a Response: http://example.com/user?user=Dude | Target response |
+| request.verb | String | Read only | The HTTP verb used for the request. For example, GET , PUT , and DELETE . | Proxy request |
+| request.version | String | Read only | The HTTP version of the request. For example, 1.1 . | Proxy request |
+
+## `response`
+
+The complete response, including any payload present.
+
+The following table describes the properties of the `response` variable:
+
+| Property | Type | Read/Write | Description | Scope begins |
+| --- | --- | --- | --- | --- |
+| response | message | Read/Write | Complete response message returned by target. | Target response |
+| response.content | String | Read/Write | Payload content of the response message returned by the target. | Target response |
+| response.content.as.base64 | String | Read only | Base64-encoded payload content of the response message. | Target response |
+| response.content.as.url.safe.base64 | String | Read only | URL-safe base64-encoded payload content of the response message. | Target response |
+| response.event.current.content | String | Read/Write | The content returned in an EventFlow streaming response. See Streaming server-sent events for more information. | EventFlow response |
+| response.event.current.count | Integer | Read | Incrementally counts the number of response events sent. This value is updated for each received event. See Streaming server-sent events for more information. . | EventFlow response |
+| response.event.current.data | String | Read/Write | A string containing the data payload of the current event in an EventFlow streaming response. See Streaming server-sent events for more information. | EventFlow response |
+| response.header. header_name | String | Read/Write | Gets or sets the value of a specified HTTP header in the response. If the header text includes a comma, Apigee infers multiple values. In this case, response.header. header_name returns the first value only. For example, if the Cache-control header is public,maxage=16544 , then the return value of response.header.cache-control is public . If you want the entire header as a string, use a variable like response.header. header_name .values.string . | Target response |
+| response.header. header_name . values | Collection | Read only | All the values of a specified HTTP header in response. | Target response |
+| response.header. header_name . values.count | Integer | Read only | Count of all the values of the specified HTTP header in response. | Target response |
+| response.header. header_name . values.string | String | Read only | All the values of a particular header in the response, in the form of a single string. For example, if the Cache-control header is public,maxage=16544 , then the return value of response.header.cache-control.values.string is public,maxage=16544 . | Target response |
+| response.header. header_name . N | String | Read/Write | The value of the Nth particular header value in the response. Apigee splits header text values by commas. The index starts at 1 for the left-most value. For example, if the Cache-control header is public,maxage=16544 , then response.header.cache-control.2 returns maxage=16544 . | Target response |
+| response.headers.count | Integer | Read only | Count of all the headers in the response. | Target response |
+| response.headers.names | Collection | Read only | The names of all the headers in the response. | Target response |
+| response.headers.names.string | String | Read only | A comma-separated list of the names of all the headers in the response. | Target response |
+| response.status.code | Integer | Read/Write | The response code returned for a request. You can use this variable to override the response status code, which is stored in message.status.code . For more, see message . | Target response |
+| response.version | String | Read only | The HTTP version of the response received from the target server, for example, "HTTP/1.1". | Target response |
+| response.transport.message | String | Read only | Response of type TransportMessage which is a contexual object. | Target response |
+
+## `route`
+
+Specifies the names of the `<RouteRule>` and TargetEndpoint.
+
+The following table describes the properties of the `route` variable:
+
+| Property | Type | Read/Write | Description | [Scope begins](/apigee/docs/api-platform/fundamentals/introduction-flow-variables#understandingflowvariablescope) |
+|----|----|----|----|----|
+| `route.name` | String | Read only | The name of the `<RouteRule>` that was executed in the ProxyEndpoint. For example, `default`. A RouteRule references an API proxy TargetEndpoint to execute. | Target request |
+| `route.target` | String | Read only | The name of the TargetEndpoint that was executed. For example, `default`. | Target request |
+
+## `servicecallout`
+
+Describes the TargetEndpoint for a [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy).
+
+The following table describes the properties of the `servicecallout` variable:
+
+| Property | Type | Read/Write | Description | [Scope begins](/apigee/docs/api-platform/fundamentals/introduction-flow-variables#understandingflowvariablescope) |
+|----|----|----|----|----|
+| `servicecallout.``policy_name``.expectedcn` | String | Read/Write | The expected Common Name of the TargetEndpoint as referred to in a [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy). This is meaningful only when the TargetEndpoint refers to an TLS/SSL endpoint. | Proxy request |
+| `servicecallout.``policy_name``.target.url` | String | Read/Write | The TargetEndpoint URL for a particular [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy). | Proxy request |
+| `servicecallout.requesturi` | String | Read/Write | The TargetEndpoint URI for a [ServiceCallout policy](/apigee/docs/api-platform/reference/policies/service-callout-policy). The URI is the TargetEndpoint URL without the protocol and domain specification. | Proxy request |
+
+## `system`
+
+Specifies the IP address of the system, as well as details about the proxy.
+
+The following table describes the properties of the `system` variable:
+
+| Property | Type | Read/Write | Description | Scope begins |
+| --- | --- | --- | --- | --- |
+| system.interface. interface_name | String | Read only | IP address of the system. | Proxy request |
+| system.pod.name | String | Read only | The name of the pod where the proxy is running. | Proxy request |
+| system.region.name | String | Read only | The name of the data center region where the proxy is running. | Proxy request |
+| system.time | String | Read only | The time when this variable was read. For example, Wed, 21 Aug 2013 19:16:47 GMT. This value is the string representation of the corresponding value of system.timestamp . For example, Wed, 21 Aug 2013 19:16:47 GMT corresponds to the timestamp value of 1377112607413. | Proxy request |
+| system.time.year | Integer | Read only | The year portion of system.time . | Proxy request |
+| system.time.month | Integer | Read only | The month portion of system.time . | Proxy request |
+| system.time.day | Integer | Read only | The day of month portion of system.time . | Proxy request |
+| system.time.dayofweek | Integer | Read only | The day of the week portion of system.time . | Proxy request |
+| system.time.hour | Integer | Read only | The hour portion of system.time . | Proxy request |
+| system.time.minute | Integer | Read only | The minute portion of system.time . | Proxy request |
+| system.time.second | Integer | Read only | The second portion of system.time . | Proxy request |
+| system.time.millisecond | Integer | Read only | The millisecond portion of system.time . | Proxy request |
+| system.time.zone | String | Read only | Timezone of the system. | Proxy request |
+| system.timestamp | Long | Read only | The 64-bit (long) integer representing the time that this variable was read. The value is the number of milliseconds elapsed since midnight, on January 1, 1970 UTC. For example, 1534783015000 . | Proxy request |
+| system.uuid | String | Read only | The UUID of the message processor handling the proxy. | Proxy request |
+
+## `target`
+
+Describes the target of the request.
+
+The following table describes the properties of the `target` variable:
+
+| Property | Type | Read/Write | Description | Scope begins |
+| --- | --- | --- | --- | --- |
+| target.basepath | String | Read only | The resource path (not including the domain) to the target service, excluding query parameters, that is defined in the proxy's TargetEndpoint. For example, say an API proxy calls the following target: <TargetEndpoint name="default"> ... <HTTPTargetConnection> <URL>http://mocktarget.apigee.net/user?user=Dude</URL> </HTTPTargetConnection> In this example, the target.basepath is /user . If the target were this: <TargetEndpoint name="default"> ... <HTTPTargetConnection> <URL>http://mocktarget.apigee.net</URL> </HTTPTargetConnection> The target.basepath would be null. | Target request |
+| target.copy.pathsuffix | Boolean | Read/Write | When true , the request forwarded from ProxyEndpoint to TargetEndpoint retains the path suffix (the URI path fragment following the URI defined in the ProxyEndpoint base path). | Target request |
+| target.copy.queryparams | Boolean | Read/Write | When true , request forwarded from ProxyEndpoint to TargetEndpoint retains query parameters. | Target request |
+| target.country | String | Read only | Country of the TLS/SSL certificate presented by the target server | Target response |
+| target.cn | String | Read only | The Common Name of the TargetEndpoint. This is meaningful only when the TargetEndpoint refers to an TLS/SSL endpoint. | Target request |
+| target.email.address | String | Read only | Email address of the TLS/SSL certificate presented by the target server | Target response |
+| target.evaluated.url | String | Read/Write | The URL configured in the TargetEndpoint XML file or the dynamic target URL (if target.evaluated.url is set during the message flow). The variable does not include any additional path elements or query parameters. Returns null if called out of scope or otherwise unset. You can use a JavaScript policy or an AssignMessage policy that uses the AssignVariable element to set this variable. Attach the policy to the TargetEndpoint Request flow. Important: target.evaluated.url and target.url serve the same purpose except that target.evaluated.url should be used whenever the URL is dynamically constructed based on user input. | Target request |
+| target.expectedcn | String | Read/Write | The expected Common Name of the TargetEndpoint. This is meaningful only when the TargetEndpoint refers to an TLS/SSL endpoint. | Proxy request |
+| target.header.host | String | Read/Write | The flow variable used by Apigee to set the Host header value for the outgoing request to the target. Used to set the value to a hostname in situations when an IP address is used in the Target URL or Target Server, as would be the case with a PSC Endpoint based target. | Target request |
+| target.host | String | Read only | The domain name of the target service returning the response to the API proxy. | Target response |
+| target.ip | String | Read only | The IP address of the target service returning the response to the API proxy. | Target response |
+| target.locality | String | Read only | Locality (city) of the TLS/SSL certificate presented by the target server | Target response |
+| target.name | String | Read only | Target to which message is reaching from targetendpoint. | Target request |
+| target.organization | String | Read only | Organization of the TLS/SSL certificate presented by the target server. | Target response |
+| target.organization.unit | String | Read only | Organization unit of the TLS/SSL certificate presented by the target server. | Target response |
+| target.port | Integer | Read only | The port number of the target service returning the response to the API proxy. | Target response |
+| target.received.end.time | String | Read only | The time, expressed in string form, at which the TargetEndpoint finished receiving the response from the target. For example, Wed, 21 Aug 2013 19:16:47 UTC. This time value is the string representation of the corresponding 32-bit timestamp quantity. For example, Wed, 21 Aug 2013 19:16:47 UTC corresponds to the timestamp value of 1377112607413.. | Target response |
+| target.received.end. timestamp | Long | Read only | The timestamp value specifying when the TargetEndpoint finished receiving the response from the target. For example, 1534783015000 . This value is a 64-bit (long) integer specifying the number of milliseconds elapsed since midnight, on January 1, 1970 UTC. | Target response |
+| target.received.start.time | String | Read only | The time, expressed in string form, at which the TargetEndpoint started receiving the response from the target. For example, Wed, 21 Aug 2013 19:16:47 UTC. This time value is the string representation of the corresponding 32-bit timestamp quantity. For example, Wed, 21 Aug 2013 19:16:47 UTC corresponds to the timestamp value of 1377112607413. | Target response |
+| target.received.start. timestamp | Long | Read only | The timestamp value specifying when the TargetEndpoint started receiving the response from the target. For example, 1534783015000 . This value is a 64-bit (long) integer specifying the number of milliseconds elapsed since midnight, on January 1, 1970 UTC. | Target response |
+| target.scheme | String | Read only | Scope begins : Target response Type : String Permission : Read/Write Returns http or https depending on the request message. | Target request |
+| target.sent.end.time | String | Read only | The time, expressed in string form, at which the proxy stopped sending the request to the URL specified in the TargetEndpoint. For example, Wed, 21 Aug 2013 19:16:47 UTC. This time value is the string representation of the corresponding 32-bit timestamp quantity. For example, Wed, 21 Aug 2013 19:16:47 UTC corresponds to the timestamp value of 1377112607413. | Target request |
+| target.sent.end.timestamp | Long | Read only | The timestamp value specifying when the proxy finished sending the request to the URL specified in the TargetEndpoint. For example, 1377112607413. This value is a 64-bit (long) integer containing the number of milliseconds elapsed since midnight, on January 1, 1970 UTC. | Target request |
+| target.sent.start.time | String | Read only | The time, expressed in string form, at which the proxy began sending the request to the URL specified in the TargetEndpoint. For example, Wed, 21 Aug 2013 19:16:47 UTC. This time value is the string representation of the corresponding 32-bit timestamp quantity. For example, Wed, 21 Aug 2013 19:16:47 UTC corresponds to the timestamp value of 1377112607413. | Target request |
+| target.sent.start.timestamp | Long | Read only | The timestamp value specifying when the proxy started sending the request to the URL specified in the TargetEndpoint. For example, 1534783015000 . This value is a 64-bit (long) integer specifying the number of milliseconds elapsed since midnight, on January 1, 1970 UTC. | Target request |
+| target.ssl.enabled | Boolean | Read only | Whether TargetEndpoint is running on TLS/SSL. | Proxy request |
+| target.state | String | Read only | State of the TLS/SSL certificate presented by the target server. | Target response |
+| target.url | String | Read/Write | The URL configured in the TargetEndpoint XML file or the dynamic target URL (if target.url is set during the message flow). The variable does not include any additional path elements or query parameters. Returns null if called out of scope or otherwise unset. You can use a JavaScript policy or an AssignMessage policy that uses the AssignVariable element to set this variable. Attach the policy to the TargetEndpoint Request flow. Important: target.url and target.evaluated.url serve the same purpose except that target.evaluated.url should be used whenever the URL is dynamically constructed based on user input. target.url should not be used for dynamically constructed URLs based on user input. | Target request |
+
+## `variable`
+
+A container for the `variable.expectedcn` property.
+
+The following table describes the properties of the `variable` variable:
+
+| Property | Type | Read/Write | Description | [Scope begins](/apigee/docs/api-platform/fundamentals/introduction-flow-variables#understandingflowvariablescope) |
+|----|----|----|----|----|
+| `variable.expectedcn` | String | Read/Write | Variable exposed for the common name if it's running on TLS/SSL. | Proxy request |
+
+For more information on working with TLS, see [Options for configuring TLS](/apigee/docs/api-platform/system-administration/options-configuring-tls).

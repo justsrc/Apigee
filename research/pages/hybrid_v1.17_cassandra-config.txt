@@ -1,0 +1,266 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/cassandra-config.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/cassandra-config.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/cassandra-config.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/cassandra-config.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/cassandra-config.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/cassandra-config.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/cassandra-config.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/cassandra-config.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/cassandra-config.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/cassandra-config.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/cassandra-config.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/cassandra-config.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/cassandra-config.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/cassandra-config.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/cassandra-config.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/cassandra-config.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/cassandra-config.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/cassandra-config.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+The Cassandra database uses [dynamically created](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#dynamic) persistent volumes to store data. For proper database functioning, Apigee requires you to configure a [StorageClass](https://kubernetes.io/docs/concepts/storage/storage-classes) definition that is backed by a solid-state drive (SSD).
+
+If you do not currently have SSD configured for Cassandra, this topic explains how to create a new StorageClass that uses SSD and make it the default class. When Cassandra starts, it will use this default StorageClass.
+
+**KEY POINT:** Apigee requires the use of SSD for Cassandra.
+
+The steps outlined in this topic for StorageClass configuration are only applicable to a *new* Cassandra installation. If you already have a Cassandra class installed, you must decommission the existing cluster in order to configure the StorageClass definition. Changes to the StorageClass definition of an existing Cassandra cluster after installation are not supported.
+
+Apigee recommends deploying hybrid in [two or more regions](/apigee/docs/hybrid/v1.17/multi-region), in order to decommission and re-install one region while preserving data in the secondary region. Alternatively, you can use a [non-CSI hybrid backup](/apigee/docs/hybrid/v1.17/cassandra-backup-overview#how-to-take-backups) to restore data in a single-region installation, after decommissioning and configuring the required StorageClass definition.
+
+## Change the default StorageClass
+
+The following steps explain how to create a StorageClass and make it the default class. For more information, see <a href="https://kubernetes.io/docs/tasks/administer-cluster/change-default-storage-class/" class="external">Change the default storage class</a> in the Kubernetes documentation.
+
+1.  Get the name of the current default StorageClass:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl get sc
+    ```
+
+    For example:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    kubectl get sc
+        NAME                    PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+        premium-rwo             pd.csi.storage.gke.io   Delete          WaitForFirstConsumer   true                   15h
+        standard                kubernetes.io/gce-pd    Delete          Immediate              true                   15h
+        standard-rwo (default)  pd.csi.storage.gke.io   Delete          WaitForFirstConsumer   true                   15h
+      
+    ```
+
+2.  Describe the StorageClass named `standard-rwo`. Note that its type is `pd-balanced`:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl describe sc standard-rwo
+    ```
+
+    For example:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    kubectl describe sc standard-rwo
+    ```
+
+    <div>
+
+    </div>
+
+    ```
+    Name:                  standard-rwo
+    IsDefaultClass:        Yes
+    Annotations:           components.gke.io/layer=addon,storageclass.kubernetes.io/is-default-class=false
+    Provisioner:           pd.csi.storage.gke.io
+    Parameters:            type=pd-balanced
+    AllowVolumeExpansion:  True
+    MountOptions:          <none>
+    ReclaimPolicy:         Delete
+    VolumeBindingMode:     WaitForFirstConsumer
+    Events:                <none>
+    ```
+
+3.  Create a new file called `storageclass.yaml`.
+
+4.  Add this code to the file. Note that the name of the new class is `apigee-sc`. You can use any name you like. Also, note that the storage type is `pd-ssd`:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    ---
+    kind: StorageClass
+    apiVersion: storage.k8s.io/v1
+    metadata:
+      name: "apigee-sc"
+    provisioner: pd.csi.storage.gke.io
+    parameters:
+      type: pd-ssd
+      replication-type: none
+    volumeBindingMode: WaitForFirstConsumer
+    allowVolumeExpansion: true
+    ```
+
+5.  Apply the new StorageClass to your Kubernetes cluster:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl apply -f storageclass.yaml
+    ```
+
+6.  Execute the following two commands to change the default StorageClass:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl patch storageclass standard-rwo \
+      -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+    ```
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl patch storageclass apigee-sc \
+      -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+    ```
+
+7.  Execute this command to verify that the new default StorageClass is called `apigee-sc`:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl get sc
+    ```
+
+    For example:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    kubectl get sc
+    ```
+
+    <div>
+
+    </div>
+
+    ```
+
+      NAME                  PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+        apigee-sc (default)   pd.csi.storage.gke.io   Delete          WaitForFirstConsumer   true                   14h
+        premium-rwo           pd.csi.storage.gke.io   Delete          WaitForFirstConsumer   true                   15h
+        standard              kubernetes.io/gce-pd    Delete          Immediate              true                   15h
+        standard-rwo          pd.csi.storage.gke.io   Delete          WaitForFirstConsumer   true                   15h
+      
+    ```
+
+8.  Describe both the StorageClass to verify the value of **IsDefaultClass**.
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl describe sc apigee-sc
+    ```
+
+    <div>
+
+    </div>
+
+    ```
+
+        Name:            apigee-sc
+        IsDefaultClass:  Yes
+        Annotations:     kubectl.kubernetes.io/last-applied-configuration={"allowVolumeExpansion":true,"apiVersion":"storage.k8s.io/v1","kind":"StorageClass","metadata":{"annotations":{},"name":"apigee-sc"},"parameters":{"replication-type":"none","type":"pd-ssd"},"provisioner":"pd.csi.storage.gke.io","volumeBindingMode":"WaitForFirstConsumer"}
+        ,storageclass.kubernetes.io/is-default-class=true
+        Provisioner:           pd.csi.storage.gke.io
+        Parameters:            replication-type=none,type=pd-ssd
+        AllowVolumeExpansion:  True
+        MountOptions:          
+        ReclaimPolicy:         Delete
+        VolumeBindingMode:     WaitForFirstConsumer
+        Events:                
+        
+    ```
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    kubectl describe sc standard-rwo
+    ```
+
+    <div>
+
+    </div>
+
+    ```
+
+        Name:                  standard-rwo
+        IsDefaultClass:        No
+        Annotations:           components.gke.io/layer=addon,storageclass.kubernetes.io/is-default-class=false
+        Provisioner:           pd.csi.storage.gke.io
+        Parameters:            type=pd-balanced
+        AllowVolumeExpansion:  True
+        MountOptions:          
+        ReclaimPolicy:         Delete
+        VolumeBindingMode:     WaitForFirstConsumer
+        Events:                
+        
+    ```

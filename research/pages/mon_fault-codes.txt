@@ -1,0 +1,113 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+Apigee provides a set of fault codes for various features that help you to diagnose issues. For example, a typical `4xx` or `5xx` HTTP status code can be classified using one or more fault codes.
+
+Fault codes provide you with useful information about runtime errors, including information about the source and name of the error in the following format: `[prefix].[error_name]`
+
+For example: `steps.raisefault.RaiseFault`
+
+In this example:
+
+- `steps.raisefault` is the prefix that indicates the RaiseFault policy generated the error.
+
+- `RaiseFault` is the error name that helps you determine the cause of the error. In this case, more information would be provided by the fault string.
+
+  **Notes**:
+
+  - For policy errors, error-specific flow variables are populated that are useful for fault handling. See [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+  - When [setting up alerts](/apigee/docs/api-monitoring/alerts-notifications), fault codes are organized by category and subcategory, and display the human-readable name. When using the [Investigate](/apigee/docs/api-monitoring/investigate) dashboard, the raw fault codes are displayed.
+
+The following table summarizes the fault codes, organized by category and sub-category.
+
+| Category | Sub-category | Name | Fault Code |
+| --- | --- | --- | --- |
+| API protocol | HTTP | HTTP BadFormData | protocol.http.BadFormData |
+| HTTP BadRequestPath | protocol.http.BadPath |  |  |
+| HTTP DuplicateHeader | protocol.http.DuplicateHeader |  |  |
+| HTTP EmptyHeaderName | protocol.http.EmptyHeaderName |  |  |
+| HTTP HeaderNameWithNonASCIICharacter | protocol.http.HeaderNameWithNonAsciiChar |  |  |
+| HTTP HeaderWithInvalidCharacter | protocol.http.HeaderWithInvalidChar |  |  |
+| HTTP InvalidRequestPath | protocol.http.InvalidPath |  |  |
+| HTTP LengthRequired | messaging.adaptors.http.flow.LengthRequired |  |  |
+| HTTP ProxyTunnelCreationFailed | protocol.http.ProxyTunnelCreationFailed |  |  |
+| HTTP RequestHasABigBody | protocol.http.TooBigBody |  |  |
+| HTTP RequestsHaveABigLine | protocol.http.TooBigLine |  |  |
+| HTTP Response306IsReserved | protocol.http.Response306Reserved |  |  |
+| HTTP Response405WithoutAllowHeader | protocol.http.Response405WithoutAllowHeader |  |  |
+| ResponseWithBodyForIncorrectStatusCode | protocol.http.ResponseWithBody |  |  |
+| HTTP TargetURLHasEmptyPath | protocol.http.EmptyPath |  |  |
+| HTTP TooBigHeaders | protocol.http.TooBigHeaders |  |  |
+| HTTP UnsupportedEncoding | protocol.http.UnsupportedEncoding |  |  |
+| Developer/app | Key Management | KeyManagement AccessTokenNotApproved | keymanagement.service.access_token_not_approved |
+| KeyManagement APIProductNotFound | keymanagement.service.InvalidAPICallAsNoApiProductMatchFound |  |  |
+| KeyManagement AppNotApproved | keymanagement.service.invalid_client-app_not_approved |  |  |
+| KeyManagement AppNotApproved | keymanagement.service.app_not_approved |  |  |
+| KeyManagement AuthorizationCodeExpired | keymanagement.service.access_denied-authorization_code_expired |  |  |
+| KeyManagement AuthorizationCodeinvalid | keymanagement.service.invalid_request-authorization_code_invalid |  |  |
+| KeyManagement ClientIDAuthorizationCodeMismatch | keymanagement.service.invalid_client-client_id_authorzation_code_mismatch |  |  |
+| KeyManagement ClientIDNotApproved | keymanagement.service.invalid_client-client_id_not_approved |  |  |
+| KeyManagement CompanyStatusNotActive | keymanagement.service.CompanyStatusNotActive |  |  |
+| KeyManagement Consumer Key Expired | keymanagement.service.consumer_key_expired |  |  |
+| KeyManagement DeveloperNotActive | keymanagement.service.DeveloperStatusNotActive |  |  |
+| KeyManagement InvalidAccessToken | keymanagement.service.oauth10_access_token_doesnotexist |  |  |
+| KeyManagement InvalidClientID | keymanagement.service.InvalidClientIdForGivenResource |  |  |
+| KeyManagement InvalidClientID | keymanagement.service.invalid_client-client_id_authorzation_code_mismatch |  |  |
+| KeyManagement InvalidClientID | keymanagement.service.invalid_client-invalid_client_id |  |  |
+| KeyManagement InvalidConsumerKey | keymanagement.service.invalid_consumer_key |  |  |
+| KeyManagement InvalidRefreshToken | keymanagement.service.invalid_refresh_token |  |  |
+| KeyManagement RefreshTokenExpired | keymanagement.service.refresh_token_expired |  |  |
+| Extension Policy | JavaCallout | JavaCallout errorname | See JavaCallout policy runtime errors |
+| JavaScript Callout | JavaScriptCallout errorname | See JavaScript policy runtime errors |  |
+| MessageLogging | MessageLogging StepDefinitionExecutionFailed | steps.messagelogging.StepDefinitionExecutionFailed |  |
+| Node Script | NodeScript ExecutionError | scripts.node.ScriptExecutionError |  |
+| PythonScript | PythonScript errorname | See PythonScript policy runtime errors |  |
+| Script | Script EvaluationFailed | steps.script.ScriptEvaluationFailed |  |
+| ServiceCallout | ServiceCallout errorname | See ServiceCallout policy runtime errors |  |
+| Gateway | Proxy | Gateway APITimedOut | flow.APITimedOut |
+| Gateway ApplicationNotFound | messaging.adaptors.http.flow.ApplicationNotFound |  |  |
+| Gateway DecompressionFailureAtRequest | messaging.adaptors.http.flow.DecompressionFailureAtRequest |  |  |
+| Gateway DecompressionFailureAtResponse | messaging.adaptors.http.flow.DecompressionFailureAtResponse |  |  |
+| Gateway KeyAliasNotFound | security.util.KeyAliasNotFound |  |  |
+| Gateway RouteToTargetFailed | messaging.runtime.RouteFailed |  |  |
+| Gateway SharedFlowNotFound | flow.SharedFlowNotFound |  |  |
+| Gateway TargetIsMissing | messaging.runtime.TargetMissing |  |  |
+| Target | Gateway FailedHandshakeWithTargetEndpoint | messaging.adaptors.http.flow.SslHandshakeFailed |  |
+| Gateway TimeoutWithTargetOrCallout | messaging.adaptors.http.flow.GatewayTimeout |  |  |
+| Gateway TargetOrCalloutEndpointsNotAvailable | messaging.adaptors.http.flow.ServiceUnavailable |  |  |
+| Gateway TargetServerConfiguredInLoadBalancerIsDown | messaging.adaptors.http.flow.NoActiveTargets |  |  |
+| Gateway UnexpectedEOFAtTarget | messaging.adaptors.http.flow.UnexpectedEOFAtTarget |  |  |
+| Virtual Host | VirtualHost InvalidKeystoreOrTrustStore | messaging.runtime.SecurityStoreNotConfigured |  |
+| VirtualHost SecurityStoreNotConfigured | messaging.runtime.SecurityStoreNotConfigured |  |  |
+| Other | Gateway HTTPErrorResponseCode | messaging.adaptors.http.flow.ErrorResponseCode |  |
+| Mediation Policy | AssignMessage | AssignMessage errorname | See AssignMessage policy runtime errors |
+| ExtractVariables | ExtractVariables errorname | See ExtractVariables policy runtime errors |  |
+| JSONtoXML | JSONtoXML errorname | See JSONtoXML policy runtime errors |  |
+| KeyValueMap | KeyValueMap errorname | See KeyValueMapOperations policy runtime errors |  |
+| MessageValidation | MessageValidation errorname | See SOAPMessageValidation policy runtime errors |  |
+| RaiseFault | RaiseFault RaiseFaultException | steps.raisefault.RaiseFault |  |
+| XMLtoJSON | XMLtoJSON errorname | See XMLtoJSON policy runtime errors |  |
+| XSLTransformation | XSLTransformation errorname | See XSLTransform policy runtime errors |  |
+| Monetization |  | Mint UndefinedProduct | mintstep.undefinedProduct |
+| Security Policy | AccessControl | AccessControl errorname | See AccessControl policy runtime errors |
+| BasicAuthentication | BasicAuthentication errorname | See BasicAuthentication policy runtime errors |  |
+| JSONThreatProtection | JSONThreatProtection errorname | See JSONThreatProtection policy runtime errors |  |
+| JWT | JWT errorname | See JWT policy runtime errors |  |
+| OAuth | OAuth errorname | See OAuth V2 policy runtime errors |  |
+| Regex Protection | RegexProtection errorname | See RegularExpressionProtection policy runtime errors |  |
+| SAMLAssertion | SAMLAssertion InvalidKeyStore | steps.saml.generate.InvalidKeyStore |  |
+| SAMLAssertion InvalidMediaType | steps.saml.generate.InvalidMediaTpe |  |  |
+| SAMLAssertion InvalidTrustStore | steps.saml.validate.InvalidTrustStore |  |  |
+| SAMLAssertion SAMLAssertionForNotBeforeConditionViolated | steps.saml.validate.NotBeforeConditionViolated |  |  |
+| SAMLAssertion SignatureValidationFailed | steps.saml.validate.SignatureValidationFailed |  |  |
+| SAMLAssertion XPathResolutionFailed | steps.saml.validate.XPathResolutionFailed |  |  |
+| XMLThreatProtection | XMLThreatProtection errorname | See XMLThreatProtection policy runtime errors |  |
+| Sense | Sense | Sense RaiseFault | messaging.runtime.SenseRaiseFault |
+| Traffic Mgmt Policy | Caching | Caching InvalidExpiryDatForCacheEntry | messaging.config.beans.InvalidExpiryDateForCacheEntry |
+| ConcurrentRateLimit | ConcurrentRateLimit ConcurrentRateLimitViolation | policies.concurrentratelimit.ConcurrentRatelimitViolation |  |
+| Quota | Quota errorname | See Quota policy runtime errors |  |
+| Quota or SpikeArrest | QuotaOrSpikeArrest InvalidMessageWeight | policies.ratelimit.InvalidMessageWeight |  |
+| ResetQuota | ResetQuota errorname | See ResetQuota policy runtime errors |  |
+| SpikeArrest | SpikeArrest errorname | See SpikeArrest policy runtime errors |  |

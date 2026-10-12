@@ -1,0 +1,1682 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/index" class="section">
+
+Use the Apigee API to programmatically develop and manage APIs with a set of RESTful operations. Develop and secure API proxies, deploy and undeploy API proxy revisions, monitor APIs, configure environments, manage users, and more.
+
+Note: This product is available as a free trial for a time period of 60 days.
+
+- [REST Resource: v1.organizations](#v1.organizations)
+- [REST Resource: v1.organizations.analytics.datastores](#v1.organizations.analytics.datastores)
+- [REST Resource: v1.organizations.apimServiceExtensions](#v1.organizations.apimServiceExtensions)
+- [REST Resource: v1.organizations.apiproducts](#v1.organizations.apiproducts)
+- [REST Resource: v1.organizations.apiproducts.attributes](#v1.organizations.apiproducts.attributes)
+- [REST Resource: v1.organizations.apiproducts.rateplans](#v1.organizations.apiproducts.rateplans)
+- [REST Resource: v1.organizations.apis](#v1.organizations.apis)
+- [REST Resource: v1.organizations.apis.debugsessions](#v1.organizations.apis.debugsessions)
+- [REST Resource: v1.organizations.apis.deployments](#v1.organizations.apis.deployments)
+- [REST Resource: v1.organizations.apis.keyvaluemaps](#v1.organizations.apis.keyvaluemaps)
+- [REST Resource: v1.organizations.apis.keyvaluemaps.entries](#v1.organizations.apis.keyvaluemaps.entries)
+- [REST Resource: v1.organizations.apis.revisions](#v1.organizations.apis.revisions)
+- [REST Resource: v1.organizations.apis.revisions.deployments](#v1.organizations.apis.revisions.deployments)
+- [REST Resource: v1.organizations.appgroups](#v1.organizations.appgroups)
+- [REST Resource: v1.organizations.appgroups.apps](#v1.organizations.appgroups.apps)
+- [REST Resource: v1.organizations.appgroups.apps.keys](#v1.organizations.appgroups.apps.keys)
+- [REST Resource: v1.organizations.appgroups.apps.keys.apiproducts](#v1.organizations.appgroups.apps.keys.apiproducts)
+- [REST Resource: v1.organizations.appgroups.balance](#v1.organizations.appgroups.balance)
+- [REST Resource: v1.organizations.appgroups.subscriptions](#v1.organizations.appgroups.subscriptions)
+- [REST Resource: v1.organizations.apps](#v1.organizations.apps)
+- [REST Resource: v1.organizations.datacollectors](#v1.organizations.datacollectors)
+- [REST Resource: v1.organizations.deployments](#v1.organizations.deployments)
+- [REST Resource: v1.organizations.developers](#v1.organizations.developers)
+- [REST Resource: v1.organizations.developers.apps](#v1.organizations.developers.apps)
+- [REST Resource: v1.organizations.developers.apps.attributes](#v1.organizations.developers.apps.attributes)
+- [REST Resource: v1.organizations.developers.apps.keys](#v1.organizations.developers.apps.keys)
+- [REST Resource: v1.organizations.developers.apps.keys.apiproducts](#v1.organizations.developers.apps.keys.apiproducts)
+- [REST Resource: v1.organizations.developers.apps.keys.create](#v1.organizations.developers.apps.keys.create)
+- [REST Resource: v1.organizations.developers.attributes](#v1.organizations.developers.attributes)
+- [REST Resource: v1.organizations.developers.balance](#v1.organizations.developers.balance)
+- [REST Resource: v1.organizations.developers.subscriptions](#v1.organizations.developers.subscriptions)
+- [REST Resource: v1.organizations.dnsZones](#v1.organizations.dnsZones)
+- [REST Resource: v1.organizations.endpointAttachments](#v1.organizations.endpointAttachments)
+- [REST Resource: v1.organizations.envgroups](#v1.organizations.envgroups)
+- [REST Resource: v1.organizations.envgroups.attachments](#v1.organizations.envgroups.attachments)
+- [REST Resource: v1.organizations.environments](#v1.organizations.environments)
+- [REST Resource: v1.organizations.environments.addonsConfig](#v1.organizations.environments.addonsConfig)
+- [REST Resource: v1.organizations.environments.analytics.admin](#v1.organizations.environments.analytics.admin)
+- [REST Resource: v1.organizations.environments.analytics.exports](#v1.organizations.environments.analytics.exports)
+- [REST Resource: v1.organizations.environments.apis.deployments](#v1.organizations.environments.apis.deployments)
+- [REST Resource: v1.organizations.environments.apis.revisions](#v1.organizations.environments.apis.revisions)
+- [REST Resource: v1.organizations.environments.apis.revisions.debugsessions](#v1.organizations.environments.apis.revisions.debugsessions)
+- [REST Resource: v1.organizations.environments.apis.revisions.debugsessions.data](#v1.organizations.environments.apis.revisions.debugsessions.data)
+- [REST Resource: v1.organizations.environments.apis.revisions.deployments](#v1.organizations.environments.apis.revisions.deployments)
+- [REST Resource: v1.organizations.environments.archiveDeployments](#v1.organizations.environments.archiveDeployments)
+- [REST Resource: v1.organizations.environments.caches](#v1.organizations.environments.caches)
+- [REST Resource: v1.organizations.environments.deployments](#v1.organizations.environments.deployments)
+- [REST Resource: v1.organizations.environments.flowhooks](#v1.organizations.environments.flowhooks)
+- [REST Resource: v1.organizations.environments.keystores](#v1.organizations.environments.keystores)
+- [REST Resource: v1.organizations.environments.keystores.aliases](#v1.organizations.environments.keystores.aliases)
+- [REST Resource: v1.organizations.environments.keyvaluemaps](#v1.organizations.environments.keyvaluemaps)
+- [REST Resource: v1.organizations.environments.keyvaluemaps.entries](#v1.organizations.environments.keyvaluemaps.entries)
+- [REST Resource: v1.organizations.environments.optimizedStats](#v1.organizations.environments.optimizedStats)
+- [REST Resource: v1.organizations.environments.queries](#v1.organizations.environments.queries)
+- [REST Resource: v1.organizations.environments.references](#v1.organizations.environments.references)
+- [REST Resource: v1.organizations.environments.resourcefiles](#v1.organizations.environments.resourcefiles)
+- [REST Resource: v1.organizations.environments.securityActions](#v1.organizations.environments.securityActions)
+- [REST Resource: v1.organizations.environments.securityIncidents](#v1.organizations.environments.securityIncidents)
+- [REST Resource: v1.organizations.environments.securityReports](#v1.organizations.environments.securityReports)
+- [REST Resource: v1.organizations.environments.securityStats](#v1.organizations.environments.securityStats)
+- [REST Resource: v1.organizations.environments.sharedflows.deployments](#v1.organizations.environments.sharedflows.deployments)
+- [REST Resource: v1.organizations.environments.sharedflows.revisions](#v1.organizations.environments.sharedflows.revisions)
+- [REST Resource: v1.organizations.environments.stats](#v1.organizations.environments.stats)
+- [REST Resource: v1.organizations.environments.targetservers](#v1.organizations.environments.targetservers)
+- [REST Resource: v1.organizations.environments.traceConfig.overrides](#v1.organizations.environments.traceConfig.overrides)
+- [REST Resource: v1.organizations.hostQueries](#v1.organizations.hostQueries)
+- [REST Resource: v1.organizations.hostSecurityReports](#v1.organizations.hostSecurityReports)
+- [REST Resource: v1.organizations.hostStats](#v1.organizations.hostStats)
+- [REST Resource: v1.organizations.instances](#v1.organizations.instances)
+- [REST Resource: v1.organizations.instances.attachments](#v1.organizations.instances.attachments)
+- [REST Resource: v1.organizations.instances.natAddresses](#v1.organizations.instances.natAddresses)
+- [REST Resource: v1.organizations.keyvaluemaps](#v1.organizations.keyvaluemaps)
+- [REST Resource: v1.organizations.keyvaluemaps.entries](#v1.organizations.keyvaluemaps.entries)
+- [REST Resource: v1.organizations.operations](#v1.organizations.operations)
+- [REST Resource: v1.organizations.optimizedHostStats](#v1.organizations.optimizedHostStats)
+- [REST Resource: v1.organizations.reports](#v1.organizations.reports)
+- [REST Resource: v1.organizations.securityAssessmentResults](#v1.organizations.securityAssessmentResults)
+- [REST Resource: v1.organizations.securityFeedback](#v1.organizations.securityFeedback)
+- [REST Resource: v1.organizations.securityMonitoringConditions](#v1.organizations.securityMonitoringConditions)
+- [REST Resource: v1.organizations.securityProfiles](#v1.organizations.securityProfiles)
+- [REST Resource: v1.organizations.securityProfiles.environments](#v1.organizations.securityProfiles.environments)
+- [REST Resource: v1.organizations.securityProfilesV2](#v1.organizations.securityProfilesV2)
+- [REST Resource: v1.organizations.sharedflows](#v1.organizations.sharedflows)
+- [REST Resource: v1.organizations.sharedflows.deployments](#v1.organizations.sharedflows.deployments)
+- [REST Resource: v1.organizations.sharedflows.revisions](#v1.organizations.sharedflows.revisions)
+- [REST Resource: v1.organizations.sharedflows.revisions.deployments](#v1.organizations.sharedflows.revisions.deployments)
+- [REST Resource: v1.organizations.sites.apicategories](#v1.organizations.sites.apicategories)
+- [REST Resource: v1.organizations.sites.apidocs](#v1.organizations.sites.apidocs)
+- [REST Resource: v1.organizations.spaces](#v1.organizations.spaces)
+- [REST Resource: v1.projects](#v1.projects)
+
+<div id="apigee.googleapis.com" class="section">
+
+## Service: apigee.googleapis.com
+
+To call this service, we recommend that you use the Google-provided [client libraries](https://cloud.google.com/apis/docs/client-libraries-explained). If your application needs to use your own libraries to call this service, use the following information when you make the API requests.
+
+<div id="apigee.googleapis.com.discovery" class="section">
+
+### Discovery document
+
+A [Discovery Document](https://developers.google.com/discovery/v1/reference/apis) is a machine-readable specification for describing and consuming REST APIs. It is used to build client libraries, IDE plugins, and other tools that interact with Google APIs. One service may provide multiple discovery documents. This service provides the following discovery document:
+
+- <https://apigee.googleapis.com/$discovery/rest?version=v1>
+
+</div>
+
+<div id="apigee.googleapis.com.endpoints" class="section">
+
+### Service endpoint
+
+<div id="rest_endpoints">
+
+</div>
+
+A [service endpoint](https://cloud.google.com/apis/design/glossary#api_service_endpoint) is a base URL that specifies the network address of an API service. One service might have multiple service endpoints. This service has the following service endpoint and all URIs below are relative to this service endpoint:
+
+- `https://apigee.googleapis.com`
+
+</div>
+
+</div>
+
+<div id="v1.organizations" class="section">
+
+## REST Resource: [v1.organizations](/apigee/docs/reference/apis/apigee/rest/v1/organizations)
+
+<div id="v1.organizations.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/organizations Creates an Apigee organization. |
+| delete | DELETE /v1/{name=organizations/*} Delete an Apigee organization. |
+| get | GET /v1/{name=organizations/*} Gets the profile for an Apigee organization. |
+| getControlPlaneAccess | GET /v1/{name=organizations/*/controlPlaneAccess} Lists the service accounts allowed to access Apigee control plane directly for limited functionality. |
+| getProjectMapping | GET /v1/{name=organizations/*}:getProjectMapping Gets the project ID and region for an Apigee organization. |
+| getSecuritySettings | GET /v1/{name=organizations/*/securitySettings} GetSecuritySettings gets the security settings for API Security. |
+| getSyncAuthorization | POST /v1/{name=organizations/*}:getSyncAuthorization Lists the service accounts with the permissions required to allow the Synchronizer to download environment data from the control plane. |
+| list | GET /v1/{parent=organizations} Lists the Apigee organizations and associated Google Cloud projects that you have permission to access. |
+| setAddons | POST /v1/{org=organizations/*}:setAddons Configures the add-ons for the Apigee organization. |
+| setSyncAuthorization | POST /v1/{name=organizations/*}:setSyncAuthorization Sets the permissions required to allow the Synchronizer to download environment data from the control plane. |
+| update | PUT /v1/{name=organizations/*} Updates the properties for an Apigee organization. |
+| updateControlPlaneAccess | PATCH /v1/{controlPlaneAccess.name=organizations/*/controlPlaneAccess} Updates the permissions required to allow Apigee runtime-plane components access to the control plane. |
+| updateSecuritySettings | PATCH /v1/{securitySettings.name=organizations/*/securitySettings} UpdateSecuritySettings updates the current security settings for API Security. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.analytics.datastores" class="section">
+
+## REST Resource: [v1.organizations.analytics.datastores](/apigee/docs/reference/apis/apigee/rest/v1/organizations.analytics.datastores)
+
+<div id="v1.organizations.analytics.datastores.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/analytics/datastores Create a Datastore for an org |
+| delete | DELETE /v1/{name=organizations/*/analytics/datastores/*} Delete a Datastore from an org. |
+| get | GET /v1/{name=organizations/*/analytics/datastores/*} Get a Datastore |
+| list | GET /v1/{parent=organizations/*}/analytics/datastores List Datastores |
+| test | POST /v1/{parent=organizations/*}/analytics/datastores:test Test if Datastore configuration is correct. |
+| update | PUT /v1/{name=organizations/*/analytics/datastores/*} Update a Datastore |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.apimServiceExtensions" class="section">
+
+## REST Resource: [v1.organizations.apimServiceExtensions](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apimServiceExtensions)
+
+<div id="v1.organizations.apimServiceExtensions.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/apimServiceExtensions Creates an APIM ServiceExtension in an organization. |
+| delete | DELETE /v1/{name=organizations/*/apimServiceExtensions/*} Deletes APIM service extension from an organization. |
+| get | GET /v1/{name=organizations/*/apimServiceExtensions/*} Gets APIM service extension details. |
+| list | GET /v1/{parent=organizations/*}/apimServiceExtensions Lists all APIM service extensions in an organization. |
+| patch | PATCH /v1/{apimServiceExtension.name=organizations/*/apimServiceExtensions/*} Updates an APIM service extension in an organization. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.apiproducts" class="section">
+
+## REST Resource: [v1.organizations.apiproducts](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apiproducts)
+
+<div id="v1.organizations.apiproducts.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| attributes | POST /v1/{name=organizations/*/apiproducts/*}/attributes Updates or creates API product attributes. |
+| create | POST /v1/{parent=organizations/*}/apiproducts Creates an API product in an organization. |
+| delete | DELETE /v1/{name=organizations/*/apiproducts/*} Deletes an API product from an organization. |
+| get | GET /v1/{name=organizations/*/apiproducts/*} Gets configuration details for an API product. |
+| list | GET /v1/{parent=organizations/*}/apiproducts Lists all API product names for an organization. |
+| move | POST /v1/{name=organizations/*/apiproducts/*}:move Moves an API product to a different space. |
+| update | PUT /v1/{name=organizations/*/apiproducts/*} Updates an existing API product. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.apiproducts.attributes" class="section">
+
+## REST Resource: [v1.organizations.apiproducts.attributes](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apiproducts/attributes)
+
+<div id="v1.organizations.apiproducts.attributes.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| delete | DELETE /v1/{name=organizations/*/apiproducts/*/attributes/*} Deletes an API product attribute. |
+| get | GET /v1/{name=organizations/*/apiproducts/*/attributes/*} Gets the value of an API product attribute. |
+| list | GET /v1/{parent=organizations/*/apiproducts/*}/attributes Lists all API product attributes. |
+| updateApiProductAttribute | POST /v1/{name=organizations/*/apiproducts/*/attributes/*} Updates the value of an API product attribute. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.apiproducts.rateplans" class="section">
+
+## REST Resource: [v1.organizations.apiproducts.rateplans](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apiproducts.rateplans)
+
+<div id="v1.organizations.apiproducts.rateplans.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/apiproducts/*}/rateplans Create a rate plan that is associated with an API product in an organization. |
+| delete | DELETE /v1/{name=organizations/*/apiproducts/*/rateplans/*} Deletes a rate plan. |
+| get | GET /v1/{name=organizations/*/apiproducts/*/rateplans/*} Gets the details of a rate plan. |
+| list | GET /v1/{parent=organizations/*/apiproducts/*}/rateplans Lists all the rate plans for an API product. |
+| update | PUT /v1/{name=organizations/*/apiproducts/*/rateplans/*} Updates an existing rate plan. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.apis" class="section">
+
+## REST Resource: [v1.organizations.apis](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis)
+
+<div id="v1.organizations.apis.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/apis Creates an API proxy. |
+| delete | DELETE /v1/{name=organizations/*/apis/*} Deletes an API proxy and all associated endpoints, policies, resources, and revisions. |
+| get | GET /v1/{name=organizations/*/apis/*} Gets an API proxy including a list of existing revisions. |
+| list | GET /v1/{parent=organizations/*}/apis Lists the names of all API proxies in an organization. |
+| move | POST /v1/{name=organizations/*/apis/*}:move Moves an API proxy to a different space. |
+| patch | PATCH /v1/{name=organizations/*/apis/*} Updates an existing API proxy. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.apis.debugsessions" class="section">
+
+## REST Resource: [v1.organizations.apis.debugsessions](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.debugsessions)
+
+<div id="v1.organizations.apis.debugsessions.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| list | GET /v1/{parent=organizations/*/apis/*}/debugsessions Lists debug sessions that are currently active in the given API Proxy. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.apis.deployments" class="section">
+
+## REST Resource: [v1.organizations.apis.deployments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.deployments)
+
+<div id="v1.organizations.apis.deployments.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| list | GET /v1/{parent=organizations/*/apis/*}/deployments Lists all deployments of an API proxy. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.apis.keyvaluemaps" class="section">
+
+## REST Resource: [v1.organizations.apis.keyvaluemaps](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.keyvaluemaps)
+
+<div id="v1.organizations.apis.keyvaluemaps.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/apis/*}/keyvaluemaps Creates a key value map in an API proxy. |
+| delete | DELETE /v1/{name=organizations/*/apis/*/keyvaluemaps/*} Deletes a key value map from an API proxy. |
+| get | GET /v1/{name=organizations/*/apis/*/keyvaluemaps/*} Get the key value map scoped to an organization, environment, or API proxy. |
+| list | GET /v1/{parent=organizations/*/apis/*}/keyvaluemaps Lists key value maps in an API proxy. |
+| update | PUT /v1/{name=organizations/*/apis/*/keyvaluemaps/*} Update the key value map scoped to an organization, environment, or API proxy. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.apis.keyvaluemaps.entries" class="section">
+
+## REST Resource: [v1.organizations.apis.keyvaluemaps.entries](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.keyvaluemaps.entries)
+
+<div id="v1.organizations.apis.keyvaluemaps.entries.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/apis/*/keyvaluemaps/*}/entries Creates key value entries in a key value map scoped to an organization, environment, or API proxy. |
+| delete | DELETE /v1/{name=organizations/*/apis/*/keyvaluemaps/*/entries/*} Deletes a key value entry from a key value map scoped to an organization, environment, or API proxy. |
+| get | GET /v1/{name=organizations/*/apis/*/keyvaluemaps/*/entries/*} Get the key value entry value for a key value map scoped to an organization, environment, or API proxy. |
+| list | GET /v1/{parent=organizations/*/apis/*/keyvaluemaps/*}/entries Lists key value entries for key values maps scoped to an organization, environment, or API proxy. |
+| update | PUT /v1/{name=organizations/*/apis/*/keyvaluemaps/*/entries/*} Update key value entry scoped to an organization, environment, or API proxy for an existing key. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.apis.revisions" class="section">
+
+## REST Resource: [v1.organizations.apis.revisions](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.revisions)
+
+<div id="v1.organizations.apis.revisions.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| delete | DELETE /v1/{name=organizations/*/apis/*/revisions/*} Deletes an API proxy revision and all policies, resources, endpoints, and revisions associated with it. |
+| get | GET /v1/{name=organizations/*/apis/*/revisions/*} Gets an API proxy revision. |
+| list | GET /v1/{parent=organizations/*/apis/*}/revisions Lists all revisions for an API proxy. |
+| updateApiProxyRevision | POST /v1/{name=organizations/*/apis/*/revisions/*} Updates an existing API proxy revision by uploading the API proxy configuration bundle as a zip file from your local machine. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.apis.revisions.deployments" class="section">
+
+## REST Resource: [v1.organizations.apis.revisions.deployments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.revisions.deployments)
+
+<div id="v1.organizations.apis.revisions.deployments.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| list | GET /v1/{parent=organizations/*/apis/*/revisions/*}/deployments Lists all deployments of an API proxy revision. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.appgroups" class="section">
+
+## REST Resource: [v1.organizations.appgroups](/apigee/docs/reference/apis/apigee/rest/v1/organizations.appgroups)
+
+<div id="v1.organizations.appgroups.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/appgroups Creates an AppGroup. |
+| delete | DELETE /v1/{name=organizations/*/appgroups/*} Deletes an AppGroup. |
+| get | GET /v1/{name=organizations/*/appgroups/*} Returns the AppGroup details for the provided AppGroup name in the request URI. |
+| getBalance | GET /v1/{name=organizations/*/appgroups/*/balance} Gets the account balance for the AppGroup. |
+| getMonetizationConfig | GET /v1/{name=organizations/*/appgroups/*/monetizationConfig} Gets the monetization configuration for the AppGroup. |
+| list | GET /v1/{parent=organizations/*}/appgroups Lists all AppGroups in an organization. |
+| update | PUT /v1/{name=organizations/*/appgroups/*} Updates an AppGroup. |
+| updateMonetizationConfig | PUT /v1/{name=organizations/*/appgroups/*/monetizationConfig} Updates the monetization configuration for the AppGroup. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.appgroups.apps" class="section">
+
+## REST Resource: [v1.organizations.appgroups.apps](/apigee/docs/reference/apis/apigee/rest/v1/organizations.appgroups.apps)
+
+<div id="v1.organizations.appgroups.apps.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/appgroups/*}/apps Creates an app and associates it with an AppGroup. |
+| delete | DELETE /v1/{name=organizations/*/appgroups/*/apps/*} Deletes an AppGroup app. |
+| get | GET /v1/{name=organizations/*/appgroups/*/apps/*} Returns the details for an AppGroup app. |
+| list | GET /v1/{parent=organizations/*/appgroups/*}/apps Lists all apps created by an AppGroup in an Apigee organization. |
+| update | PUT /v1/{name=organizations/*/appgroups/*/apps/*} Updates the details for an AppGroup app. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.appgroups.apps.keys" class="section">
+
+## REST Resource: [v1.organizations.appgroups.apps.keys](/apigee/docs/reference/apis/apigee/rest/v1/organizations.appgroups.apps.keys)
+
+<div id="v1.organizations.appgroups.apps.keys.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/appgroups/*/apps/*}/keys Creates a custom consumer key and secret for a AppGroup app. |
+| delete | DELETE /v1/{name=organizations/*/appgroups/*/apps/*/keys/*} Deletes an app's consumer key and removes all API products associated with the app. |
+| get | GET /v1/{name=organizations/*/appgroups/*/apps/*/keys/*} Gets details for a consumer key for a AppGroup app, including the key and secret value, associated API products, and other information. |
+| updateAppGroupAppKey | POST /v1/{name=organizations/*/appgroups/*/apps/*/keys/*} Adds an API product to an AppGroupAppKey, enabling the app that holds the key to access the API resources bundled in the API product. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.appgroups.apps.keys.apiproducts" class="section">
+
+## REST Resource: [v1.organizations.appgroups.apps.keys.apiproducts](/apigee/docs/reference/apis/apigee/rest/v1/organizations.appgroups.apps.keys.apiproducts)
+
+<div id="v1.organizations.appgroups.apps.keys.apiproducts.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| delete | DELETE /v1/{name=organizations/*/appgroups/*/apps/*/keys/*/apiproducts/*} Removes an API product from an app's consumer key. |
+| updateAppGroupAppKeyApiProduct | POST /v1/{name=organizations/*/appgroups/*/apps/*/keys/*/apiproducts/*} Approves or revokes the consumer key for an API product. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.appgroups.balance" class="section">
+
+## REST Resource: [v1.organizations.appgroups.balance](/apigee/docs/reference/apis/apigee/rest/v1/organizations.appgroups.balance)
+
+<div id="v1.organizations.appgroups.balance.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| adjust | POST /v1/{name=organizations/*/appgroups/*/balance}:adjust Adjust the prepaid balance for the AppGroup. |
+| credit | POST /v1/{name=organizations/*/appgroups/*/balance}:credit Credits the account balance for the AppGroup. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.appgroups.subscriptions" class="section">
+
+## REST Resource: [v1.organizations.appgroups.subscriptions](/apigee/docs/reference/apis/apigee/rest/v1/organizations.appgroups.subscriptions)
+
+<div id="v1.organizations.appgroups.subscriptions.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/appgroups/*}/subscriptions Creates a subscription to an API product. |
+| expire | POST /v1/{name=organizations/*/appgroups/*/subscriptions/*}:expire Expires an API product subscription immediately. |
+| get | GET /v1/{name=organizations/*/appgroups/*/subscriptions/*} Get an api product subscription for an appgroup. |
+| list | GET /v1/{parent=organizations/*/appgroups/*}/subscriptions List all api product subscriptions for an appgroup. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.apps" class="section">
+
+## REST Resource: [v1.organizations.apps](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apps)
+
+<div id="v1.organizations.apps.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| get | GET /v1/{name=organizations/*/apps/*} Gets the app profile for the specified app ID. |
+| list | GET /v1/{parent=organizations/*}/apps Lists IDs of apps within an organization that have the specified app status (approved or revoked) or are of the specified app type (developer or company). |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.datacollectors" class="section">
+
+## REST Resource: [v1.organizations.datacollectors](/apigee/docs/reference/apis/apigee/rest/v1/organizations.datacollectors)
+
+<div id="v1.organizations.datacollectors.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/datacollectors Creates a new data collector. |
+| delete | DELETE /v1/{name=organizations/*/datacollectors/*} Deletes a data collector. |
+| get | GET /v1/{name=organizations/*/datacollectors/*} Gets a data collector. |
+| list | GET /v1/{parent=organizations/*}/datacollectors Lists all data collectors. |
+| patch | PATCH /v1/{name=organizations/*/datacollectors/*} Updates a data collector. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.deployments" class="section">
+
+## REST Resource: [v1.organizations.deployments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.deployments)
+
+<div id="v1.organizations.deployments.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| list | GET /v1/{parent=organizations/*}/deployments Lists all deployments of API proxies or shared flows. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.developers" class="section">
+
+## REST Resource: [v1.organizations.developers](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers)
+
+<div id="v1.organizations.developers.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| attributes | POST /v1/{parent=organizations/*/developers/*}/attributes Updates developer attributes. |
+| create | POST /v1/{parent=organizations/*}/developers Creates a developer. |
+| delete | DELETE /v1/{name=organizations/*/developers/*} Deletes a developer. |
+| get | GET /v1/{name=organizations/*/developers/*} Returns the developer details, including the developer's name, email address, apps, and other information. |
+| getBalance | GET /v1/{name=organizations/*/developers/*/balance} Gets the account balance for the developer. |
+| getMonetizationConfig | GET /v1/{name=organizations/*/developers/*/monetizationConfig} Gets the monetization configuration for the developer. |
+| list | GET /v1/{parent=organizations/*}/developers Lists all developers in an organization by email address. |
+| setDeveloperStatus | POST /v1/{name=organizations/*/developers/*} Sets the status of a developer. |
+| update | PUT /v1/{name=organizations/*/developers/*} Updates a developer. |
+| updateMonetizationConfig | PUT /v1/{name=organizations/*/developers/*/monetizationConfig} Updates the monetization configuration for the developer. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.developers.apps" class="section">
+
+## REST Resource: [v1.organizations.developers.apps](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.apps)
+
+<div id="v1.organizations.developers.apps.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| attributes | POST /v1/{name=organizations/*/developers/*/apps/*}/attributes Updates attributes for a developer app. |
+| create | POST /v1/{parent=organizations/*/developers/*}/apps Creates an app associated with a developer. |
+| delete | DELETE /v1/{name=organizations/*/developers/*/apps/*} Deletes a developer app. |
+| generateKeyPairOrUpdateDeveloperAppStatus | POST /v1/{name=organizations/*/developers/*/apps/*} Manages access to a developer app by enabling you to: Approve or revoke a developer app Generate a new consumer key and secret for a developer app To approve or revoke a developer app, set the action query parameter to approve or revoke , respectively, and the Content-Type header to application/octet-stream . |
+| get | GET /v1/{name=organizations/*/developers/*/apps/*} Returns the details for a developer app. |
+| list | GET /v1/{parent=organizations/*/developers/*}/apps Lists all apps created by a developer in an Apigee organization. |
+| update | PUT /v1/{name=organizations/*/developers/*/apps/*} Updates the details for a developer app. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.developers.apps.attributes" class="section">
+
+## REST Resource: [v1.organizations.developers.apps.attributes](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.apps/attributes)
+
+<div id="v1.organizations.developers.apps.attributes.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| delete | DELETE /v1/{name=organizations/*/developers/*/apps/*/attributes/*} Deletes a developer app attribute. |
+| get | GET /v1/{name=organizations/*/developers/*/apps/*/attributes/*} Returns a developer app attribute. |
+| list | GET /v1/{parent=organizations/*/developers/*/apps/*}/attributes Returns a list of all developer app attributes. |
+| updateDeveloperAppAttribute | POST /v1/{name=organizations/*/developers/*/apps/*/attributes/*} Updates a developer app attribute. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.developers.apps.keys" class="section">
+
+## REST Resource: [v1.organizations.developers.apps.keys](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.apps.keys)
+
+<div id="v1.organizations.developers.apps.keys.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/developers/*/apps/*}/keys Creates a custom consumer key and secret for a developer app. |
+| delete | DELETE /v1/{name=organizations/*/developers/*/apps/*/keys/*} Deletes an app's consumer key and removes all API products associated with the app. |
+| get | GET /v1/{name=organizations/*/developers/*/apps/*/keys/*} Gets details for a consumer key for a developer app, including the key and secret value, associated API products, and other information. |
+| replaceDeveloperAppKey | PUT /v1/{name=organizations/*/developers/*/apps/*/keys/*} Updates the scope of an app. |
+| updateDeveloperAppKey | POST /v1/{name=organizations/*/developers/*/apps/*/keys/*} Adds an API product to a developer app key, enabling the app that holds the key to access the API resources bundled in the API product. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.developers.apps.keys.apiproducts" class="section">
+
+## REST Resource: [v1.organizations.developers.apps.keys.apiproducts](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.apps.keys.apiproducts)
+
+<div id="v1.organizations.developers.apps.keys.apiproducts.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| delete | DELETE /v1/{name=organizations/*/developers/*/apps/*/keys/*/apiproducts/*} Removes an API product from an app's consumer key. |
+| updateDeveloperAppKeyApiProduct | POST /v1/{name=organizations/*/developers/*/apps/*/keys/*/apiproducts/*} Approves or revokes the consumer key for an API product. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.developers.apps.keys.create" class="section">
+
+## REST Resource: [v1.organizations.developers.apps.keys.create](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.apps.keys/create)
+
+<div id="v1.organizations.developers.apps.keys.create.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/developers/*/apps/*}/keys/create Creates a custom consumer key and secret for a developer app. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.developers.attributes" class="section">
+
+## REST Resource: [v1.organizations.developers.attributes](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers/attributes)
+
+<div id="v1.organizations.developers.attributes.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| delete | DELETE /v1/{name=organizations/*/developers/*/attributes/*} Deletes a developer attribute. |
+| get | GET /v1/{name=organizations/*/developers/*/attributes/*} Returns the value of the specified developer attribute. |
+| list | GET /v1/{parent=organizations/*/developers/*}/attributes Returns a list of all developer attributes. |
+| updateDeveloperAttribute | POST /v1/{name=organizations/*/developers/*/attributes/*} Updates a developer attribute. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.developers.balance" class="section">
+
+## REST Resource: [v1.organizations.developers.balance](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.balance)
+
+<div id="v1.organizations.developers.balance.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| adjust | POST /v1/{name=organizations/*/developers/*/balance}:adjust Adjust the prepaid balance for the developer. |
+| credit | POST /v1/{name=organizations/*/developers/*/balance}:credit Credits the account balance for the developer. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.developers.subscriptions" class="section">
+
+## REST Resource: [v1.organizations.developers.subscriptions](/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers.subscriptions)
+
+<div id="v1.organizations.developers.subscriptions.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/developers/*}/subscriptions Creates a subscription to an API product. |
+| expire | POST /v1/{name=organizations/*/developers/*/subscriptions/*}:expire Expires an API product subscription immediately. |
+| get | GET /v1/{name=organizations/*/developers/*/subscriptions/*} Gets details for an API product subscription. |
+| list | GET /v1/{parent=organizations/*/developers/*}/subscriptions Lists all API product subscriptions for a developer. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.dnsZones" class="section">
+
+## REST Resource: [v1.organizations.dnsZones](/apigee/docs/reference/apis/apigee/rest/v1/organizations.dnsZones)
+
+<div id="v1.organizations.dnsZones.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/dnsZones Creates a new DNS zone. |
+| delete | DELETE /v1/{name=organizations/*/dnsZones/*} Deletes a previously created DNS zone. |
+| get | GET /v1/{name=organizations/*/dnsZones/*} Fetches the representation of an existing DNS zone. |
+| list | GET /v1/{parent=organizations/*}/dnsZones Enumerates DNS zones that have been created but not yet deleted. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.endpointAttachments" class="section">
+
+## REST Resource: [v1.organizations.endpointAttachments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.endpointAttachments)
+
+<div id="v1.organizations.endpointAttachments.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/endpointAttachments Creates an endpoint attachment. |
+| delete | DELETE /v1/{name=organizations/*/endpointAttachments/*} Deletes an endpoint attachment. |
+| get | GET /v1/{name=organizations/*/endpointAttachments/*} Gets the endpoint attachment. |
+| list | GET /v1/{parent=organizations/*}/endpointAttachments Lists the endpoint attachments in an organization. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.envgroups" class="section">
+
+## REST Resource: [v1.organizations.envgroups](/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups)
+
+<div id="v1.organizations.envgroups.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/envgroups Creates a new environment group. |
+| delete | DELETE /v1/{name=organizations/*/envgroups/*} Deletes an environment group. |
+| get | GET /v1/{name=organizations/*/envgroups/*} Gets an environment group. |
+| list | GET /v1/{parent=organizations/*}/envgroups Lists all environment groups. |
+| patch | PATCH /v1/{name=organizations/*/envgroups/*} Updates an environment group. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.envgroups.attachments" class="section">
+
+## REST Resource: [v1.organizations.envgroups.attachments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups.attachments)
+
+<div id="v1.organizations.envgroups.attachments.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/envgroups/*}/attachments Creates a new attachment of an environment to an environment group. |
+| delete | DELETE /v1/{name=organizations/*/envgroups/*/attachments/*} Deletes an environment group attachment. |
+| get | GET /v1/{name=organizations/*/envgroups/*/attachments/*} Gets an environment group attachment. |
+| list | GET /v1/{parent=organizations/*/envgroups/*}/attachments Lists all attachments of an environment group. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments" class="section">
+
+## REST Resource: [v1.organizations.environments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments)
+
+<div id="v1.organizations.environments.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/environments Creates an environment in an organization. |
+| delete | DELETE /v1/{name=organizations/*/environments/*} Deletes an environment from an organization. |
+| get | GET /v1/{name=organizations/*/environments/*} Gets environment details. |
+| getAddonsConfig | GET /v1/{name=organizations/*/environments/*/addonsConfig} Gets the add-ons config of an environment. |
+| getApiSecurityRuntimeConfig | GET /v1/{name=organizations/*/environments/*/apiSecurityRuntimeConfig} Gets the API Security runtime configuration for an environment. |
+| getDebugmask | GET /v1/{name=organizations/*/environments/*/debugmask} Gets the debug mask singleton resource for an environment. |
+| getIamPolicy | GET /v1/{resource=organizations/*/environments/*}:getIamPolicy Gets the IAM policy on an environment. |
+| getSecurityActionsConfig | GET /v1/{name=organizations/*/environments/*/securityActionsConfig} GetSecurityActionConfig returns the current SecurityActions configuration. |
+| getTraceConfig | GET /v1/{name=organizations/*/environments/*/traceConfig} Get distributed trace configuration in an environment. |
+| list | GET /v1/{parent=organizations/*}/environments Lists all environments in an organization. |
+| modifyEnvironment | PATCH /v1/{name=organizations/*/environments/*} Updates properties for an Apigee environment with patch semantics using a field mask. |
+| setIamPolicy | POST /v1/{resource=organizations/*/environments/*}:setIamPolicy Sets the IAM policy on an environment, if the policy already exists it will be replaced. |
+| testIamPermissions | POST /v1/{resource=organizations/*/environments/*}:testIamPermissions Tests the permissions of a user on an environment, and returns a subset of permissions that the user has on the environment. |
+| update | PUT /v1/{name=organizations/*/environments/*} Updates an existing environment. |
+| updateDebugmask | PATCH /v1/{debugMask.name=organizations/*/environments/*/debugmask} Updates the debug mask singleton resource for an environment. |
+| updateEnvironment | POST /v1/{name=organizations/*/environments/*} Updates an existing environment. |
+| updateSecurityActionsConfig | PATCH /v1/{securityActionsConfig.name=organizations/*/environments/*/securityActionsConfig} UpdateSecurityActionConfig updates the current SecurityActions configuration. |
+| updateTraceConfig | PATCH /v1/{name=organizations/*/environments/*/traceConfig} Updates the trace configurations in an environment. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.addonsConfig" class="section">
+
+## REST Resource: [v1.organizations.environments.addonsConfig](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.addonsConfig)
+
+<div id="v1.organizations.environments.addonsConfig.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| setAddonEnablement | POST /v1/{name=organizations/*/environments/*/addonsConfig}:setAddonEnablement Updates an add-on enablement status of an environment. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.analytics.admin" class="section">
+
+## REST Resource: [v1.organizations.environments.analytics.admin](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.analytics.admin)
+
+<div id="v1.organizations.environments.analytics.admin.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| getSchemav2 | GET /v1/{name=organizations/*/environments/*/analytics/admin/schemav2} Gets a list of metrics and dimensions that can be used to create analytics queries and reports. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.analytics.exports" class="section">
+
+## REST Resource: [v1.organizations.environments.analytics.exports](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.analytics.exports)
+
+<div id="v1.organizations.environments.analytics.exports.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/environments/*}/analytics/exports Submit a data export job to be processed in the background. |
+| get | GET /v1/{name=organizations/*/environments/*/analytics/exports/*} Gets the details and status of an analytics export job. |
+| list | GET /v1/{parent=organizations/*/environments/*}/analytics/exports Lists the details and status of all analytics export jobs belonging to the parent organization and environment. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.apis.deployments" class="section">
+
+## REST Resource: [v1.organizations.environments.apis.deployments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.deployments)
+
+<div id="v1.organizations.environments.apis.deployments.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| list | GET /v1/{parent=organizations/*/environments/*/apis/*}/deployments Lists all deployments of an API proxy in an environment. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.apis.revisions.debugsessions" class="section">
+
+## REST Resource: [v1.organizations.environments.apis.revisions.debugsessions](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.debugsessions)
+
+<div id="v1.organizations.environments.apis.revisions.debugsessions.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/environments/*/apis/*/revisions/*}/debugsessions Creates a debug session for a deployed API Proxy revision. |
+| deleteData | DELETE /v1/{name=organizations/*/environments/*/apis/*/revisions/*/debugsessions/*}/data Deletes the data from a debug session. |
+| get | GET /v1/{name=organizations/*/environments/*/apis/*/revisions/*/debugsessions/*} Retrieves a debug session. |
+| list | GET /v1/{parent=organizations/*/environments/*/apis/*/revisions/*}/debugsessions Lists debug sessions that are currently active in the given API Proxy revision. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.apis.revisions.debugsessions.data" class="section">
+
+## REST Resource: [v1.organizations.environments.apis.revisions.debugsessions.data](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.debugsessions.data)
+
+<div id="v1.organizations.environments.apis.revisions.debugsessions.data.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| get | GET /v1/{name=organizations/*/environments/*/apis/*/revisions/*/debugsessions/*/data/*} Gets the debug data from a transaction. |
+| list | GET /v1/{parent=organizations/*/environments/*/apis/*/revisions/*/debugsessions/*}/data Lists the transaction IDs from a debug session. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.apis.revisions.deployments" class="section">
+
+## REST Resource: [v1.organizations.environments.apis.revisions.deployments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments)
+
+<div id="v1.organizations.environments.apis.revisions.deployments.METHODS_SUMMARY" class="section">
+
+Methods
+
+</div>
+
+</div>
+
+</div>
+
+[`deploy`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/deploy)
+
+`POST /v1/{name=organizations/*/environments/*/apis/*/revisions/*}/deployments`  
+Deploys a revision of an API proxy.
+
+[`generateDeployChangeReport`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/generateDeployChangeReport)
+
+`POST /v1/{name=organizations/*/environments/*/apis/*/revisions/*}/deployments:generateDeployChangeReport`  
+Generates a report for a dry run analysis of a DeployApiProxy request without committing the deployment.
+
+[`generateUndeployChangeReport`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/generateUndeployChangeReport)
+
+`POST /v1/{name=organizations/*/environments/*/apis/*/revisions/*}/deployments:generateUndeployChangeReport`  
+Generates a report for a dry run analysis of an UndeployApiProxy request without committing the undeploy.
+
+[`get`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/get)
+
+`GET /v1/{name=organizations/*/environments/*/apis/*/revisions/*}/deployments`  
+Gets the deployment of an API proxy revision and actual state reported by runtime pods.
+
+[`undeploy`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/undeploy)
+
+`DELETE /v1/{name=organizations/*/environments/*/apis/*/revisions/*}/deployments`  
+Undeploys an API proxy revision from an environment.
+
+<div id="v1.organizations.environments.archiveDeployments" class="section">
+
+## REST Resource: [v1.organizations.environments.archiveDeployments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.archiveDeployments)
+
+<div id="v1.organizations.environments.archiveDeployments.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/environments/*}/archiveDeployments Creates a new ArchiveDeployment. |
+| delete | DELETE /v1/{name=organizations/*/environments/*/archiveDeployments/*} Deletes an archive deployment. |
+| generateDownloadUrl | POST /v1/{name=organizations/*/environments/*/archiveDeployments/*}:generateDownloadUrl Generates a signed URL for downloading the original zip file used to create an Archive Deployment. |
+| generateUploadUrl | POST /v1/{parent=organizations/*/environments/*}/archiveDeployments:generateUploadUrl Generates a signed URL for uploading an Archive zip file to Google Cloud Storage. |
+| get | GET /v1/{name=organizations/*/environments/*/archiveDeployments/*} Gets the specified ArchiveDeployment. |
+| list | GET /v1/{parent=organizations/*/environments/*}/archiveDeployments Lists the ArchiveDeployments in the specified Environment. |
+| patch | PATCH /v1/{archiveDeployment.name=organizations/*/environments/*/archiveDeployments/*} Updates an existing ArchiveDeployment. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.caches" class="section">
+
+## REST Resource: [v1.organizations.environments.caches](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.caches)
+
+<div id="v1.organizations.environments.caches.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| delete | DELETE /v1/{name=organizations/*/environments/*/caches/*} Deletes a cache. |
+| list | GET /v1/{parent=organizations/*/environments/*}/caches Lists all caches in an environment. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.deployments" class="section">
+
+## REST Resource: [v1.organizations.environments.deployments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.deployments)
+
+<div id="v1.organizations.environments.deployments.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| get | GET /v1/{name=organizations/*/environments/*/deployments/*} Gets a particular deployment of Api proxy or a shared flow in an environment |
+| getIamPolicy | GET /v1/{resource=organizations/*/environments/*/deployments/*}:getIamPolicy Gets the IAM policy on a deployment. |
+| list | GET /v1/{parent=organizations/*/environments/*}/deployments Lists all deployments of API proxies or shared flows in an environment. |
+| setIamPolicy | POST /v1/{resource=organizations/*/environments/*/deployments/*}:setIamPolicy Sets the IAM policy on a deployment, if the policy already exists it will be replaced. |
+| testIamPermissions | POST /v1/{resource=organizations/*/environments/*/deployments/*}:testIamPermissions Tests the permissions of a user on a deployment, and returns a subset of permissions that the user has on the deployment. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.flowhooks" class="section">
+
+## REST Resource: [v1.organizations.environments.flowhooks](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.flowhooks)
+
+<div id="v1.organizations.environments.flowhooks.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| attachSharedFlowToFlowHook | PUT /v1/{name=organizations/*/environments/*/flowhooks/*} Attaches a shared flow to a flow hook. |
+| detachSharedFlowFromFlowHook | DELETE /v1/{name=organizations/*/environments/*/flowhooks/*} Detaches a shared flow from a flow hook. |
+| get | GET /v1/{name=organizations/*/environments/*/flowhooks/*} Returns the name of the shared flow attached to the specified flow hook. |
+| list | GET /v1/{parent=organizations/*/environments/*}/flowhooks Lists the flow hooks attached to an environment. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.keystores" class="section">
+
+## REST Resource: [v1.organizations.environments.keystores](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.keystores)
+
+<div id="v1.organizations.environments.keystores.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/environments/*}/keystores Creates a keystore or truststore. |
+| delete | DELETE /v1/{name=organizations/*/environments/*/keystores/*} Deletes a keystore or truststore. |
+| get | GET /v1/{name=organizations/*/environments/*/keystores/*} Gets a keystore or truststore. |
+| list | GET /v1/{parent=organizations/*/environments/*}/keystores Lists all keystores and truststores. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.keystores.aliases" class="section">
+
+## REST Resource: [v1.organizations.environments.keystores.aliases](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.keystores.aliases)
+
+<div id="v1.organizations.environments.keystores.aliases.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/environments/*/keystores/*}/aliases Creates an alias from a key/certificate pair. |
+| csr | GET /v1/{name=organizations/*/environments/*/keystores/*/aliases/*}/csr Generates a PKCS #10 Certificate Signing Request for the private key in an alias. |
+| delete | DELETE /v1/{name=organizations/*/environments/*/keystores/*/aliases/*} Deletes an alias. |
+| get | GET /v1/{name=organizations/*/environments/*/keystores/*/aliases/*} Gets an alias. |
+| getCertificate | GET /v1/{name=organizations/*/environments/*/keystores/*/aliases/*}/certificate Gets the certificate from an alias in PEM-encoded form. |
+| list | GET /v1/{parent=organizations/*/environments/*/keystores/*}/aliases Lists all aliases. |
+| update | PUT /v1/{name=organizations/*/environments/*/keystores/*/aliases/*} Updates the certificate in an alias. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.keyvaluemaps" class="section">
+
+## REST Resource: [v1.organizations.environments.keyvaluemaps](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.keyvaluemaps)
+
+<div id="v1.organizations.environments.keyvaluemaps.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/environments/*}/keyvaluemaps Creates a key value map in an environment. |
+| delete | DELETE /v1/{name=organizations/*/environments/*/keyvaluemaps/*} Deletes a key value map from an environment. |
+| get | GET /v1/{name=organizations/*/environments/*/keyvaluemaps/*} Get the key value map scoped to an organization, environment, or API proxy. |
+| list | GET /v1/{parent=organizations/*/environments/*}/keyvaluemaps Lists key value maps in an environment. |
+| update | PUT /v1/{name=organizations/*/environments/*/keyvaluemaps/*} Update the key value map scoped to an organization, environment, or API proxy. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.keyvaluemaps.entries" class="section">
+
+## REST Resource: [v1.organizations.environments.keyvaluemaps.entries](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.keyvaluemaps.entries)
+
+<div id="v1.organizations.environments.keyvaluemaps.entries.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/environments/*/keyvaluemaps/*}/entries Creates key value entries in a key value map scoped to an organization, environment, or API proxy. |
+| delete | DELETE /v1/{name=organizations/*/environments/*/keyvaluemaps/*/entries/*} Deletes a key value entry from a key value map scoped to an organization, environment, or API proxy. |
+| get | GET /v1/{name=organizations/*/environments/*/keyvaluemaps/*/entries/*} Get the key value entry value for a key value map scoped to an organization, environment, or API proxy. |
+| list | GET /v1/{parent=organizations/*/environments/*/keyvaluemaps/*}/entries Lists key value entries for key values maps scoped to an organization, environment, or API proxy. |
+| update | PUT /v1/{name=organizations/*/environments/*/keyvaluemaps/*/entries/*} Update key value entry scoped to an organization, environment, or API proxy for an existing key. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.optimizedStats" class="section">
+
+## REST Resource: [v1.organizations.environments.optimizedStats](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.optimizedStats)
+
+<div id="v1.organizations.environments.optimizedStats.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| get | GET /v1/{name=organizations/*/environments/*/optimizedStats/**} Similar to GetStats except that the response is less verbose. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.queries" class="section">
+
+## REST Resource: [v1.organizations.environments.queries](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.queries)
+
+<div id="v1.organizations.environments.queries.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/environments/*}/queries Submit a query to be processed in the background. |
+| get | GET /v1/{name=organizations/*/environments/*/queries/*} Get query status If the query is still in progress, the state is set to "running" After the query has completed successfully, state is set to "completed" |
+| getResult | GET /v1/{name=organizations/*/environments/*/queries/*/result} After the query is completed, use this API to retrieve the results. |
+| getResulturl | GET /v1/{name=organizations/*/environments/*/queries/*/resulturl} After the query is completed, use this API to retrieve the results. |
+| list | GET /v1/{parent=organizations/*/environments/*}/queries Return a list of Asynchronous Queries |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.references" class="section">
+
+## REST Resource: [v1.organizations.environments.references](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.references)
+
+<div id="v1.organizations.environments.references.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/environments/*}/references Creates a Reference in the specified environment. |
+| delete | DELETE /v1/{name=organizations/*/environments/*/references/*} Deletes a Reference from an environment. |
+| get | GET /v1/{name=organizations/*/environments/*/references/*} Gets a Reference resource. |
+| list | GET /v1/{parent=organizations/*/environments/*}/references Lists all References in an environment as a JSON array. |
+| update | PUT /v1/{name=organizations/*/environments/*/references/*} Updates an existing Reference. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.resourcefiles" class="section">
+
+## REST Resource: [v1.organizations.environments.resourcefiles](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.resourcefiles)
+
+<div id="v1.organizations.environments.resourcefiles.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/environments/*}/resourcefiles Creates a resource file. |
+| delete | DELETE /v1/{parent=organizations/*/environments/*}/resourcefiles/{type}/{name} Deletes a resource file. |
+| get | GET /v1/{parent=organizations/*/environments/*}/resourcefiles/{type}/{name} Gets the contents of a resource file. |
+| list | GET /v1/{parent=organizations/*/environments/*}/resourcefiles Lists all resource files, optionally filtering by type. |
+| listEnvironmentResources | GET /v1/{parent=organizations/*/environments/*}/resourcefiles/{type} Lists all resource files, optionally filtering by type. |
+| update | PUT /v1/{parent=organizations/*/environments/*}/resourcefiles/{type}/{name} Updates a resource file. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.securityActions" class="section">
+
+## REST Resource: [v1.organizations.environments.securityActions](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.securityActions)
+
+<div id="v1.organizations.environments.securityActions.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/environments/*}/securityActions CreateSecurityAction creates a SecurityAction. |
+| delete | DELETE /v1/{name=organizations/*/environments/*/securityActions/*} Delete a SecurityAction. |
+| disable | POST /v1/{name=organizations/*/environments/*/securityActions/*}:disable Disable a SecurityAction. |
+| enable | POST /v1/{name=organizations/*/environments/*/securityActions/*}:enable Enable a SecurityAction. |
+| get | GET /v1/{name=organizations/*/environments/*/securityActions/*} Get a SecurityAction by name. |
+| list | GET /v1/{parent=organizations/*/environments/*}/securityActions Returns a list of SecurityActions. |
+| patch | PATCH /v1/{securityAction.name=organizations/*/environments/*/securityActions/*} Update a SecurityAction. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.securityIncidents" class="section">
+
+## REST Resource: [v1.organizations.environments.securityIncidents](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.securityIncidents)
+
+<div id="v1.organizations.environments.securityIncidents.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| batchUpdate | POST /v1/{parent=organizations/*/environments/*}/securityIncidents:batchUpdate BatchUpdateSecurityIncident updates multiple existing security incidents. |
+| get | GET /v1/{name=organizations/*/environments/*/securityIncidents/*} GetSecurityIncident gets the specified security incident. |
+| list | GET /v1/{parent=organizations/*/environments/*}/securityIncidents ListSecurityIncidents lists all the security incident associated with the environment. |
+| patch | PATCH /v1/{securityIncident.name=organizations/*/environments/*/securityIncidents/*} UpdateSecurityIncidents updates an existing security incident. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.securityReports" class="section">
+
+## REST Resource: [v1.organizations.environments.securityReports](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.securityReports)
+
+<div id="v1.organizations.environments.securityReports.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/environments/*}/securityReports Submit a report request to be processed in the background. |
+| get | GET /v1/{name=organizations/*/environments/*/securityReports/*} Get security report status If the query is still in progress, the state is set to "running" After the query has completed successfully, state is set to "completed" |
+| getResult | GET /v1/{name=organizations/*/environments/*/securityReports/*/result} After the query is completed, use this API to retrieve the results as file. |
+| getResultView | GET /v1/{name=organizations/*/environments/*/securityReports/*/resultView} After the query is completed, use this API to view the query result when result size is small. |
+| list | GET /v1/{parent=organizations/*/environments/*}/securityReports Return a list of Security Reports |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.securityStats" class="section">
+
+## REST Resource: [v1.organizations.environments.securityStats](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.securityStats)
+
+<div id="v1.organizations.environments.securityStats.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| queryTabularStats | POST /v1/{orgenv=organizations/*/environments/*}/securityStats:queryTabularStats Retrieve security statistics as tabular rows. |
+| queryTimeSeriesStats | POST /v1/{orgenv=organizations/*/environments/*}/securityStats:queryTimeSeriesStats Retrieve security statistics as a collection of time series. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.sharedflows.deployments" class="section">
+
+## REST Resource: [v1.organizations.environments.sharedflows.deployments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.sharedflows.deployments)
+
+<div id="v1.organizations.environments.sharedflows.deployments.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| list | GET /v1/{parent=organizations/*/environments/*/sharedflows/*}/deployments Lists all deployments of a shared flow in an environment. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.sharedflows.revisions.deployments" class="section">
+
+## REST Resource: [v1.organizations.environments.sharedflows.revisions.deployments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.sharedflows.revisions.deployments)
+
+<div id="v1.organizations.environments.sharedflows.revisions.deployments.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| deploy | POST /v1/{name=organizations/*/environments/*/sharedflows/*/revisions/*}/deployments Deploys a revision of a shared flow. |
+| get | GET /v1/{name=organizations/*/environments/*/sharedflows/*/revisions/*}/deployments Gets the deployment of a shared flow revision and actual state reported by runtime pods. |
+| undeploy | DELETE /v1/{name=organizations/*/environments/*/sharedflows/*/revisions/*}/deployments Undeploys a shared flow revision from an environment. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.stats" class="section">
+
+## REST Resource: [v1.organizations.environments.stats](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.stats)
+
+<div id="v1.organizations.environments.stats.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| get | GET /v1/{name=organizations/*/environments/*/stats/**} Retrieve metrics grouped by dimensions. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.targetservers" class="section">
+
+## REST Resource: [v1.organizations.environments.targetservers](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.targetservers)
+
+<div id="v1.organizations.environments.targetservers.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/environments/*}/targetservers Creates a TargetServer in the specified environment. |
+| delete | DELETE /v1/{name=organizations/*/environments/*/targetservers/*} Deletes a TargetServer from an environment. |
+| get | GET /v1/{name=organizations/*/environments/*/targetservers/*} Gets a TargetServer resource. |
+| list | GET /v1/{parent=organizations/*/environments/*}/targetservers Lists all TargetServers in an environment as a JSON array. |
+| update | PUT /v1/{name=organizations/*/environments/*/targetservers/*} Updates an existing TargetServer. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.environments.traceConfig.overrides" class="section">
+
+## REST Resource: [v1.organizations.environments.traceConfig.overrides](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.traceConfig.overrides)
+
+<div id="v1.organizations.environments.traceConfig.overrides.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/environments/*/traceConfig}/overrides Creates a trace configuration override. |
+| delete | DELETE /v1/{name=organizations/*/environments/*/traceConfig/overrides/*} Deletes a distributed trace configuration override. |
+| get | GET /v1/{name=organizations/*/environments/*/traceConfig/overrides/*} Gets a trace configuration override. |
+| list | GET /v1/{parent=organizations/*/environments/*/traceConfig}/overrides Lists all of the distributed trace configuration overrides in an environment. |
+| patch | PATCH /v1/{name=organizations/*/environments/*/traceConfig/overrides/*} Updates a distributed trace configuration override. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.hostQueries" class="section">
+
+## REST Resource: [v1.organizations.hostQueries](/apigee/docs/reference/apis/apigee/rest/v1/organizations.hostQueries)
+
+<div id="v1.organizations.hostQueries.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/hostQueries Submit a query at host level to be processed in the background. |
+| get | GET /v1/{name=organizations/*/hostQueries/*} Get status of a query submitted at host level. |
+| getResult | GET /v1/{name=organizations/*/hostQueries/*/result} After the query is completed, use this API to retrieve the results. |
+| getResultView | GET /v1/{name=organizations/*/hostQueries/*/resultView} |
+| list | GET /v1/{parent=organizations/*}/hostQueries Return a list of Asynchronous Queries at host level. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.hostSecurityReports" class="section">
+
+## REST Resource: [v1.organizations.hostSecurityReports](/apigee/docs/reference/apis/apigee/rest/v1/organizations.hostSecurityReports)
+
+<div id="v1.organizations.hostSecurityReports.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/hostSecurityReports Submit a query at host level to be processed in the background. |
+| get | GET /v1/{name=organizations/*/hostSecurityReports/*} Get status of a query submitted at host level. |
+| getResult | GET /v1/{name=organizations/*/hostSecurityReports/*/result} After the query is completed, use this API to retrieve the results. |
+| getResultView | GET /v1/{name=organizations/*/hostSecurityReports/*/resultView} After the query is completed, use this API to view the query result when result size is small. |
+| list | GET /v1/{parent=organizations/*}/hostSecurityReports Return a list of Security Reports at host level. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.hostStats" class="section">
+
+## REST Resource: [v1.organizations.hostStats](/apigee/docs/reference/apis/apigee/rest/v1/organizations.hostStats)
+
+<div id="v1.organizations.hostStats.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| get | GET /v1/{name=organizations/*/hostStats/**} Retrieve metrics grouped by dimensions in host level. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.instances" class="section">
+
+## REST Resource: [v1.organizations.instances](/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances)
+
+<div id="v1.organizations.instances.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/instances Creates an Apigee runtime instance. |
+| delete | DELETE /v1/{name=organizations/*/instances/*} Deletes an Apigee runtime instance. |
+| get | GET /v1/{name=organizations/*/instances/*} Gets the details for an Apigee runtime instance. |
+| list | GET /v1/{parent=organizations/*}/instances Lists all Apigee runtime instances for the organization. |
+| patch | PATCH /v1/{name=organizations/*/instances/*} Updates an Apigee runtime instance. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.instances.attachments" class="section">
+
+## REST Resource: [v1.organizations.instances.attachments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.attachments)
+
+<div id="v1.organizations.instances.attachments.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/instances/*}/attachments Creates a new attachment of an environment to an instance. |
+| delete | DELETE /v1/{name=organizations/*/instances/*/attachments/*} Deletes an attachment. |
+| get | GET /v1/{name=organizations/*/instances/*/attachments/*} Gets an attachment. |
+| list | GET /v1/{parent=organizations/*/instances/*}/attachments Lists all attachments to an instance. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.instances.natAddresses" class="section">
+
+## REST Resource: [v1.organizations.instances.natAddresses](/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses)
+
+<div id="v1.organizations.instances.natAddresses.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| activate | POST /v1/{name=organizations/*/instances/*/natAddresses/*}:activate Activates the NAT address. |
+| create | POST /v1/{parent=organizations/*/instances/*}/natAddresses Creates a NAT address. |
+| delete | DELETE /v1/{name=organizations/*/instances/*/natAddresses/*} Deletes the NAT address. |
+| get | GET /v1/{name=organizations/*/instances/*/natAddresses/*} Gets the details of a NAT address. |
+| list | GET /v1/{parent=organizations/*/instances/*}/natAddresses Lists the NAT addresses for an Apigee instance. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.keyvaluemaps" class="section">
+
+## REST Resource: [v1.organizations.keyvaluemaps](/apigee/docs/reference/apis/apigee/rest/v1/organizations.keyvaluemaps)
+
+<div id="v1.organizations.keyvaluemaps.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/keyvaluemaps Creates a key value map in an organization. |
+| delete | DELETE /v1/{name=organizations/*/keyvaluemaps/*} Deletes a key value map from an organization. |
+| get | GET /v1/{name=organizations/*/keyvaluemaps/*} Get the key value map scoped to an organization, environment, or API proxy. |
+| list | GET /v1/{parent=organizations/*}/keyvaluemaps Lists key value maps in an organization. |
+| update | PUT /v1/{name=organizations/*/keyvaluemaps/*} Update the key value map scoped to an organization, environment, or API proxy. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.keyvaluemaps.entries" class="section">
+
+## REST Resource: [v1.organizations.keyvaluemaps.entries](/apigee/docs/reference/apis/apigee/rest/v1/organizations.keyvaluemaps.entries)
+
+<div id="v1.organizations.keyvaluemaps.entries.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/keyvaluemaps/*}/entries Creates key value entries in a key value map scoped to an organization, environment, or API proxy. |
+| delete | DELETE /v1/{name=organizations/*/keyvaluemaps/*/entries/*} Deletes a key value entry from a key value map scoped to an organization, environment, or API proxy. |
+| get | GET /v1/{name=organizations/*/keyvaluemaps/*/entries/*} Get the key value entry value for a key value map scoped to an organization, environment, or API proxy. |
+| list | GET /v1/{parent=organizations/*/keyvaluemaps/*}/entries Lists key value entries for key values maps scoped to an organization, environment, or API proxy. |
+| update | PUT /v1/{name=organizations/*/keyvaluemaps/*/entries/*} Update key value entry scoped to an organization, environment, or API proxy for an existing key. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.operations" class="section">
+
+## REST Resource: [v1.organizations.operations](/apigee/docs/reference/apis/apigee/rest/v1/organizations.operations)
+
+<div id="v1.organizations.operations.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| get | GET /v1/{name=organizations/*/operations/*} Gets the latest state of a long-running operation. |
+| list | GET /v1/{name=organizations/*}/operations Lists operations that match the specified filter in the request. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.optimizedHostStats" class="section">
+
+## REST Resource: [v1.organizations.optimizedHostStats](/apigee/docs/reference/apis/apigee/rest/v1/organizations.optimizedHostStats)
+
+<div id="v1.organizations.optimizedHostStats.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| get | GET /v1/{name=organizations/*/optimizedHostStats/**} Similar to GetHostStats except that the response is less verbose. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.reports" class="section">
+
+## REST Resource: [v1.organizations.reports](/apigee/docs/reference/apis/apigee/rest/v1/organizations.reports)
+
+<div id="v1.organizations.reports.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/reports Creates a Custom Report for an Organization. |
+| delete | DELETE /v1/{name=organizations/*/reports/*} Deletes an existing custom report definition |
+| get | GET /v1/{name=organizations/*/reports/*} Retrieve a custom report definition. |
+| list | GET /v1/{parent=organizations/*}/reports Return a list of Custom Reports |
+| update | PUT /v1/{name=organizations/*/reports/*} Update an existing custom report definition |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.securityAssessmentResults" class="section">
+
+## REST Resource: [v1.organizations.securityAssessmentResults](/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityAssessmentResults)
+
+<div id="v1.organizations.securityAssessmentResults.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| batchCompute | POST /v1/{name=organizations/*/securityAssessmentResults}:batchCompute Compute RAV2 security scores for a set of resources. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.securityFeedback" class="section">
+
+## REST Resource: [v1.organizations.securityFeedback](/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityFeedback)
+
+<div id="v1.organizations.securityFeedback.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/securityFeedback Creates a new report containing customer feedback. |
+| delete | DELETE /v1/{name=organizations/*/securityFeedback/*} Deletes a specific feedback report. |
+| get | GET /v1/{name=organizations/*/securityFeedback/*} Gets a specific customer feedback report. |
+| list | GET /v1/{parent=organizations/*}/securityFeedback Lists all feedback reports which have already been submitted. |
+| patch | PATCH /v1/{securityFeedback.name=organizations/*/securityFeedback/*} Updates a specific feedback report. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.securityMonitoringConditions" class="section">
+
+## REST Resource: [v1.organizations.securityMonitoringConditions](/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityMonitoringConditions)
+
+<div id="v1.organizations.securityMonitoringConditions.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/securityMonitoringConditions Create a security monitoring condition. |
+| delete | DELETE /v1/{name=organizations/*/securityMonitoringConditions/*} Delete a security monitoring condition. |
+| get | GET /v1/{name=organizations/*/securityMonitoringConditions/*} Get a security monitoring condition. |
+| list | GET /v1/{parent=organizations/*}/securityMonitoringConditions List security monitoring conditions. |
+| patch | PATCH /v1/{securityMonitoringCondition.name=organizations/*/securityMonitoringConditions/*} Update a security monitoring condition. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.securityProfiles" class="section">
+
+## REST Resource: [v1.organizations.securityProfiles](/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityProfiles)
+
+<div id="v1.organizations.securityProfiles.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/securityProfiles CreateSecurityProfile create a new custom security profile. |
+| delete | DELETE /v1/{name=organizations/*/securityProfiles/*} DeleteSecurityProfile delete a profile with all its revisions. |
+| get | GET /v1/{name=organizations/*/securityProfiles/*} GetSecurityProfile gets the specified security profile. |
+| list | GET /v1/{parent=organizations/*}/securityProfiles ListSecurityProfiles lists all the security profiles associated with the org including attached and unattached profiles. |
+| listRevisions | GET /v1/{name=organizations/*/securityProfiles/*}:listRevisions ListSecurityProfileRevisions lists all the revisions of the security profile. |
+| patch | PATCH /v1/{securityProfile.name=organizations/*/securityProfiles/*} UpdateSecurityProfile update the metadata of security profile. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.securityProfiles.environments" class="section">
+
+## REST Resource: [v1.organizations.securityProfiles.environments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityProfiles.environments)
+
+<div id="v1.organizations.securityProfiles.environments.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| computeEnvironmentScores | POST /v1/{profileEnvironment=organizations/*/securityProfiles/*/environments/*}:computeEnvironmentScores ComputeEnvironmentScores calculates scores for requested time range for the specified security profile and environment. |
+| create | POST /v1/{parent=organizations/*/securityProfiles/*}/environments CreateSecurityProfileEnvironmentAssociation creates profile environment association i.e. |
+| delete | DELETE /v1/{name=organizations/*/securityProfiles/*/environments/*} DeleteSecurityProfileEnvironmentAssociation removes profile environment association i.e. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.securityProfilesV2" class="section">
+
+## REST Resource: [v1.organizations.securityProfilesV2](/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityProfilesV2)
+
+<div id="v1.organizations.securityProfilesV2.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/securityProfilesV2 Create a security profile v2. |
+| delete | DELETE /v1/{name=organizations/*/securityProfilesV2/*} Delete a security profile v2. |
+| get | GET /v1/{name=organizations/*/securityProfilesV2/*} Get a security profile v2. |
+| list | GET /v1/{parent=organizations/*}/securityProfilesV2 List security profiles v2. |
+| patch | PATCH /v1/{securityProfileV2.name=organizations/*/securityProfilesV2/*} Update a security profile V2. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.sharedflows" class="section">
+
+## REST Resource: [v1.organizations.sharedflows](/apigee/docs/reference/apis/apigee/rest/v1/organizations.sharedflows)
+
+<div id="v1.organizations.sharedflows.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/sharedflows Uploads a ZIP-formatted shared flow configuration bundle to an organization. |
+| delete | DELETE /v1/{name=organizations/*/sharedflows/*} Deletes a shared flow and all it's revisions. |
+| get | GET /v1/{name=organizations/*/sharedflows/*} Gets a shared flow by name, including a list of its revisions. |
+| list | GET /v1/{parent=organizations/*}/sharedflows Lists all shared flows in the organization. |
+| move | POST /v1/{name=organizations/*/sharedflows/*}:move Moves an shared flow to a different space. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.sharedflows.deployments" class="section">
+
+## REST Resource: [v1.organizations.sharedflows.deployments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.sharedflows.deployments)
+
+<div id="v1.organizations.sharedflows.deployments.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| list | GET /v1/{parent=organizations/*/sharedflows/*}/deployments Lists all deployments of a shared flow. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.sharedflows.revisions" class="section">
+
+## REST Resource: [v1.organizations.sharedflows.revisions](/apigee/docs/reference/apis/apigee/rest/v1/organizations.sharedflows.revisions)
+
+<div id="v1.organizations.sharedflows.revisions.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| delete | DELETE /v1/{name=organizations/*/sharedflows/*/revisions/*} Deletes a shared flow and all associated policies, resources, and revisions. |
+| get | GET /v1/{name=organizations/*/sharedflows/*/revisions/*} Gets a revision of a shared flow. |
+| list | GET /v1/{parent=organizations/*/sharedflows/*}/revisions Lists all revisions for a shared flow. |
+| updateSharedFlowRevision | POST /v1/{name=organizations/*/sharedflows/*/revisions/*} Updates a shared flow revision. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.sharedflows.revisions.deployments" class="section">
+
+## REST Resource: [v1.organizations.sharedflows.revisions.deployments](/apigee/docs/reference/apis/apigee/rest/v1/organizations.sharedflows.revisions.deployments)
+
+<div id="v1.organizations.sharedflows.revisions.deployments.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| list | GET /v1/{parent=organizations/*/sharedflows/*/revisions/*}/deployments Lists all deployments of a shared flow revision. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.sites.apicategories" class="section">
+
+## REST Resource: [v1.organizations.sites.apicategories](/apigee/docs/reference/apis/apigee/rest/v1/organizations.sites.apicategories)
+
+<div id="v1.organizations.sites.apicategories.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/sites/*}/apicategories Creates a new API category. |
+| delete | DELETE /v1/{name=organizations/*/sites/*/apicategories/*} Deletes an API category. |
+| get | GET /v1/{name=organizations/*/sites/*/apicategories/*} Gets an API category. |
+| list | GET /v1/{parent=organizations/*/sites/*}/apicategories Returns the API categories associated with a portal. |
+| patch | PATCH /v1/{name=organizations/*/sites/*/apicategories/*} Updates an API category. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.sites.apidocs" class="section">
+
+## REST Resource: [v1.organizations.sites.apidocs](/apigee/docs/reference/apis/apigee/rest/v1/organizations.sites.apidocs)
+
+<div id="v1.organizations.sites.apidocs.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*/sites/*}/apidocs Creates a new catalog item. |
+| delete | DELETE /v1/{name=organizations/*/sites/*/apidocs/*} Deletes a catalog item. |
+| get | GET /v1/{name=organizations/*/sites/*/apidocs/*} Gets a catalog item. |
+| getDocumentation | GET /v1/{name=organizations/*/sites/*/apidocs/*/documentation} Gets the documentation for the specified catalog item. |
+| list | GET /v1/{parent=organizations/*/sites/*}/apidocs Returns the catalog items associated with a portal. |
+| update | PUT /v1/{name=organizations/*/sites/*/apidocs/*} Updates a catalog item. |
+| updateDocumentation | PATCH /v1/{name=organizations/*/sites/*/apidocs/*/documentation} Updates the documentation for the specified catalog item. |
+
+</div>
+
+</div>
+
+<div id="v1.organizations.spaces" class="section">
+
+## REST Resource: [v1.organizations.spaces](/apigee/docs/reference/apis/apigee/rest/v1/organizations.spaces)
+
+<div id="v1.organizations.spaces.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | POST /v1/{parent=organizations/*}/spaces Create a space under an organization. |
+| delete | DELETE /v1/{name=organizations/*/spaces/*} Deletes an organization space. |
+| get | GET /v1/{name=organizations/*/spaces/*} Get a space under an Organization. |
+| getIamPolicy | GET /v1/{resource=organizations/*/spaces/*}:getIamPolicy Callers must have apigee.spaces.getIamPolicy. |
+| list | GET /v1/{parent=organizations/*}/spaces Lists spaces under an organization. |
+| patch | PATCH /v1/{name=organizations/*/spaces/*} Updates a space. |
+| setIamPolicy | POST /v1/{resource=organizations/*/spaces/*}:setIamPolicy IAM META APIs Callers must have apigee.spaces.setIamPolicy. |
+| testIamPermissions | POST /v1/{resource=organizations/*/spaces/*}:testIamPermissions Callers don't need any permissions. |
+
+</div>
+
+</div>
+
+<div id="v1.projects" class="section">
+
+## REST Resource: [v1.projects](/apigee/docs/reference/apis/apigee/rest/v1/projects)
+
+<div id="v1.projects.METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| provisionOrganization | POST /v1/{project=projects/*}:provisionOrganization Provisions a new Apigee organization with a functioning runtime. |
+
+</div>
+
+</div>

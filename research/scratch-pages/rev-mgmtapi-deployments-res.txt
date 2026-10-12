@@ -1,0 +1,52 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments" class="section">
+
+- [Resource](#RESOURCE_REPRESENTATION)
+- [Methods](#METHODS_SUMMARY)
+
+<div id="RESOURCE_REPRESENTATION" class="section">
+
+## Resource
+
+There is no persistent data associated with this resource.
+
+</div>
+
+<div id="METHODS_SUMMARY" class="section">
+
+<table id="METHODS_SUMMARY-table" class="methods responsive fixed" style="width:25%;">
+<colgroup>
+<col style="width: 25%" />
+<col />
+</colgroup>
+<thead>
+<tr>
+<th colspan="2"><h2 id="methods" data-text="Methods" tabindex="-1">Methods</h2></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><h3 id="deploy" data-text="deploy" tabindex="-1"><a href="/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/deploy"><code translate="no" dir="ltr">deploy</code></a></h3></td>
+<td>Deploys a revision of an existing API proxy to an environment.</td>
+</tr>
+<tr>
+<td><h3 id="generatedeploychangereport" data-text="generateDeployChangeReport" tabindex="-1"><a href="/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/generateDeployChangeReport"><code translate="no" dir="ltr">generateDeployChangeReport</code></a></h3></td>
+<td>Generates a report for a dry run analysis of a DeployApiProxy request without committing the deployment.</td>
+</tr>
+<tr>
+<td><h3 id="generateundeploychangereport" data-text="generateUndeployChangeReport" tabindex="-1"><a href="/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/generateUndeployChangeReport"><code translate="no" dir="ltr">generateUndeployChangeReport</code></a></h3></td>
+<td>Generates a report for a dry run analysis of an UndeployApiProxy request without committing the undeploy.</td>
+</tr>
+<tr>
+<td><h3 id="get" data-text="get" tabindex="-1"><a href="/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/get"><code translate="no" dir="ltr">get</code></a></h3></td>
+<td>Gets the deployment of an API proxy revision and actual state reported by runtime pods.</td>
+</tr>
+<tr>
+<td><h3 id="undeploy" data-text="undeploy" tabindex="-1"><a href="/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/undeploy"><code translate="no" dir="ltr">undeploy</code></a></h3></td>
+<td>Undeploys an API proxy revision from an environment.</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+</div>

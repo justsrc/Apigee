@@ -1,0 +1,193 @@
+URL: https://github.com/apigee/apigee-config-maven-plugin/issues/192
+TITLE: Bug: Keyvaluemaps goal and update build option deletes existing KVM in versions >2.4.0
+STATE: closed state_reason: completed
+AUTHOR: michael-kirkegaard-solita association: NONE
+CREATED: 2023-11-16T15:05:31Z CLOSED: 2024-03-15T17:49:22Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+In the versions greater than 2.4.0 the keyvaluemaps goal for existing KVMs is incorrectly deleting and recreating the KVM. Expected behavior is to only update, not delete and re-create.
+
+In version 1.x.x, we see only updates as expected
+![image](https://github.com/apigee/apigee-config-maven-plugin/assets/119622241/241cdcd2-f0d1-40c0-80f6-a88e0cff0cce)
+
+In version 2.x.x the sync and and the update options are equivalent, but the update should NOT delete and re-create
+![image](https://github.com/apigee/apigee-config-maven-plugin/assets/119622241/df398b76-f482-4a7a-868e-0f1a3b0ead82)
+
+--- COMMENTS (21) ---
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-11-16T16:53:30Z
+Ack @michael-kirkegaard-solita 
+
+Initially, the APIs for managing the entries were not available, so the plugin was only supporting creation and deletion of the KVM itself. Now they are available, so let me do some analysis and find if it can be similar to what was available in 1.x.x
+
+Will get back to you
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-11-22T15:33:55Z
+@michael-kirkegaard-solita - Did some analysis, in Apigee X/hybrid we do not have an API similar to [this](https://apidocs.apigee.com/docs/key-value-maps/1/routes/organizations/%7Borg_name%7D/environments/%7Benv_name%7D/keyvaluemaps/%7Bmap_name%7D/entries/%7Bentry_name%7D/post) one available in Edge. 
+
+So in Edge, using 1.x, we were able to update the entries directly. But the same does not exist in X, only operations available were to individually create and update the entries. 
+
+I could make the plugin use that to delete and create each entry from the json you provide. Do you think that's better than deleting and creating the KVM? The issue with this approach is that, lets say you had 3 entries in your json file and you run the command, it will create those entries for you. Any updates you make to existing entries will also get updated as each of those entries are deleted and recreated. Now lets say you want to delete one of the three entries and you remove that from your json. The plugin will not be able to delete that from Apigee as that is not available in the source json itself. The only option for you in that case is to run the plugin using the "sync" option which will delete the entire KVM and create the KVM again with the two entries you have now in the json.
+
+And that is exactly what the current feature is providing for update. 
+
+Let me know your thoughts. My preference is to leave the way it is as it will be more consistent and will be in sync with what you have in your json file. 
+
+### comment by michael-kirkegaard-solita (association=NONE) at 2023-11-23T14:57:27Z
+@ssvaidyanathan Since the Apigee X API does not support upsert via POST method, deleting and creating individual entries would be the closest to an "upsert" operation we could get, that would support the expected behavior. 
+
+The description of the `update` build options is the following:
+`update - Update when found; create when not found, updates individual entries for kvms. Refreshes all config to reflect edge.json.`
+Whereas the `sync` description is;
+`sync - Delete and recreate`
+So the behavior you want to maintain in the `update` build-option, is actually what `sync` is documented to do.
+
+As you describe it yourself - you are trying to sync the json-file and the deployed configurations and that should be performed with a "sync" build-option. The `sync` build-option is documented as a create-and-delete option. This true for both 1.x and 2.x.
+
+However, in 1.x the `update` build options is different from the `sync` option, in that it does not delete any entries, It only updates and overwrites what is defined in json-file. Doing exactly as documented in the description above.
+In 2,.x `update` and `sync` is performing the exact same steps, although they are still documented differently. I would expect the two build-options to have at least some difference in behavior, because If the `update` and the `sync` build-options are both doing the same thing, why even have two different ones?
+
+### comment by michael-kirkegaard-solita (association=NONE) at 2023-11-23T15:02:43Z
+@ssvaidyanathan Furthermore for my specific use-case, the problem with deleting the entire KVM is that I lose the ability to have a distributed setup.
+
+Lets say you have 2 different pom-projects, A and B, each with their own edge.json file (they are stored in different git-repos). Both projects uses the same KVM; Deployment A defines some of the values ("a.1", "a.2", "a.3"), Deployment B defines some of the values ("b.1", "b.2", "b.3").
+In 1.x - both of these can deploy independently of each other and all entries will be guaranteed to exist in the KVM at the same time - regardless of order of deployment.
+in 2.x there is no option to do this, because `update` is now deleting other entries, i.e. only the latest deployment is guaranteed to exist. This mean that in 2.x I will be forced to combine all projects into a single centralized deployment, instead of many independent distributed deployments, which is not really a good option for scalability.
+
+It is still possible to achieve what you described above by using the appropriately name `sync` option, but in 2.x it is no longer possible to achieve my use-case. My organization has just migrated to Apigee X and since we have 200+ distributed deployments, we will be forced to find another ci/cd tool for our deployment-pipelines, since centralizing all edge.json files into a single one is not an option for us.
+
+### comment by michael-kirkegaard-solita (association=NONE) at 2023-11-23T15:30:03Z
+@ssvaidyanathan for using the new Apigee X/Hybrid APIs to replace the Apigee Edge resource you mentioned above, I propose that the `update` logic should be similar to the pseudocode below:
+
+```
+for each json-kvm in edge.json {
+    // create if not found
+    if (json-kvm does not exist in apigee) {
+        POST kvm to apigee
+    }
+    // updates individual entries for kvms
+    for each entry in json-kvm {
+        if (entry exist in apigee-kvm) {
+            DELETE entry from apigee-kvm
+        }
+        POST entry to apigee-kvm
+    }
+}
+```
+
+This would guarantee the all apigee config is refreshed to reflect the edge.json, but anything not defined in the edge.json is unaltered. So it would update, but not sync.
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-11-23T17:32:00Z
+Thanks for the great discussion. This is exactly what I wanted to know. As i said in my earlier comment, the update option of KVM is like sync due to the unavailability of the POST /entries API that can update existing KVM entries. 
+
+Are you ok if you still have an entry in the KVM but not in your actual json ? Lets say you had 3 entries and now you removed one from your json. The plugin might not be able to pick that as its using json file as the source. So the 3rd entry will still be in Apigee's KVM. Are you ok with that?
+
+### comment by michael-kirkegaard-solita (association=NONE) at 2023-11-23T17:53:52Z
+Yes, that is acceptable in my opinion.
+
+The `update` build-option will then be a guarantee that the edge.json config exists and are changed to reflect the edge.json, but will not impact any other config.
+
+And if you want to guarantee that no other config exists except the edge.json config, then the `sync` build-option will still do that.
+
+I think the benefits of allowing a distributed deployment setup is worth the potential manual clean-up when entries are removed from an edge.json file. But is a fine disclaimer to make, that the `update` build-option will potentially create orphaned entries in the KVM.
+
+I would expect other organizations using version 1.x when moving from Apigee Edge to Apigee X/Hybrid would also prefer the `update` build-option logic to remain (almost) unchanged in 2.x.
+
+I am of course a little bit biased on this matter.
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-11-27T02:40:26Z
+@michael-kirkegaard-solita - let me work on that change (I will need to add this logic to all the different KVM scopes)
+Let me release a rc version of the plugin with the change. Would appreciate if you can run some tests for me and confirm if its working as expected. 
+
+### comment by michael-kirkegaard-solita (association=NONE) at 2023-12-04T07:31:46Z
+Hi @ssvaidyanathan, any news on the release candidate version?
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-12-04T17:46:25Z
+HI @michael-kirkegaard-solita - Apologies
+
+I was out on vacation. Will work on it this week. 
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-12-05T17:09:08Z
+@michael-kirkegaard-solita - I just released a "rc" with the fix (version: `v2.6.1-rc1`)
+Please update your pom file to point to that version and test it out. Let me know if it works as we discussed.
+
+Appreciate if you can test the other scopes of KVM too using the plugin - "proxy" and "org" 
+Also try various scenarios with the config options - create, update, delete, sync
+
+Once you confirm, I will release it as `v2.7.0`
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-12-11T16:35:22Z
+@michael-kirkegaard-solita - were you able to test?
+
+### comment by michael-kirkegaard-solita (association=NONE) at 2023-12-12T13:38:00Z
+Hi @ssvaidyanathan 
+
+I have found three potential issues:
+
+With this kvm config for environment kvm:
+![image](https://github.com/apigee/apigee-config-maven-plugin/assets/119622241/4953ca88-cb41-475f-bf18-33b611896b36)
+
+I observe the following output
+![image](https://github.com/apigee/apigee-config-maven-plugin/assets/119622241/c48ee6c7-f372-452b-a88f-7565d7fcadd8)
+
+This to me looks like two issues:
+
+1) The entry-names of the urls should be url-encoded otherwise entry-names that contain special characters will fail.
+The POST method succeeds, which mean that the special characters are allowed as a valid entry-name. But the GET requests fails, because it has not encoded the special characters in the url-request.
+
+2) I would think, that it's a bug that the maven goals succeeds, even though an error while updating the individual entries occurred. - although the POST method did succeed, so maybe that is still a successful deployment.
+
+Furthermore:
+
+I am observing that parts of the urls is encoded but it is applied only to the DELETE operation, and only to the "/entries/" part of the path is encoded, not the entry-name:
+
+![image](https://github.com/apigee/apigee-config-maven-plugin/assets/119622241/b22c819b-ed17-4852-a3d7-da8b1b3d0be7)
+
+Finally; everything seems to work correctly with the logic we agreed upon earlier in this discussion, when not using special characters. I have tested the other build options as well without special characters and they all work as intended.
+
+### comment by michael-kirkegaard-solita (association=NONE) at 2023-12-12T14:00:03Z
+I see that forward-slash encoding is a problem although it is allowed in the body, so here is a simpler example for the entry-names issue with special characters from above:
+
+![image](https://github.com/apigee/apigee-config-maven-plugin/assets/119622241/50f7c379-fa96-464f-b139-399e66b5957a)
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-12-13T19:46:34Z
+Thanks a lot @michael-kirkegaard-solita 
+Let me fix those and release a rc2 so that we test all those scenarios as well.
+Am glad you tested these cases. I clearly had not. Was focussing on getting the flow we discussed to work :)
+will provide an update as soon as I have the rc2 pushed
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-12-14T17:09:26Z
+@michael-kirkegaard-solita - quick update
+
+I have the fix for characters like `#?+` but the API is failing if the entry includes a `/`. I am working with the team to see what can be done.  Will release rc2 once I find a way out for `/`
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-12-18T17:29:02Z
+@michael-kirkegaard-solita - looks like the Google Front End (thats in front of the Apigee API) is not allowing the "/" even if they are URL encoded. So am thinking of implementing a check to see if there are any "/" in the key names and throw an error while creating or updating. 
+
+And this is only with Apigee APIs (used by Apigee X or hybrid)
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2023-12-18T21:38:44Z
+@michael-kirkegaard-solita - Just released `v2.6.1-rc2`, can you please try out some test cases
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2024-01-22T19:13:36Z
+@michael-kirkegaard-solita - were you able to test?
+
+### comment by michael-kirkegaard-solita (association=NONE) at 2024-02-13T07:43:35Z
+Hi @ssvaidyanathan 
+Sorry about the delay, thanks for the patience.
+
+Yes I was able to test the release candidate. The functionality seems to work as intended using "update" build option
+- KVMs are created if they don't exist
+- KVM entries are deployed
+- Other KVM entries are not deleted if the KVM existed before the update
+- Invalid keys (containing "/") are correctly blocked.
+
+Overall, very satisfied with the results.
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2024-02-13T17:05:34Z
+@michael-kirkegaard-solita - thanks for confirming
+
+Not sure you saw the latest [Apigee release note](https://cloud.google.com/apigee/docs/release/release-notes#February_08_2024) - [Update for KVM entry](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.keyvaluemaps.entries/update) is now available as an Apigee API :)
+
+So I went ahead and released v2.7.0 just now with the update command (instead of the delete/create calls). Ran some test and they all seem to work as expected. Appreciate if you can try the new version and let me know if there are any issues. Thanks again for all the collaboration 

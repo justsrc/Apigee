@@ -1,0 +1,94 @@
+<div id="NAME" class="section">
+
+NAME
+
+<span class="normalfont"> gcloud apigee environments - manage Apigee environments </span>
+
+</div>
+
+<div id="SYNOPSIS" class="section">
+
+SYNOPSIS
+
+<span class="normalfont"> `gcloud apigee environments` [`COMMAND`](#COMMAND) \[[`GCLOUD_WIDE_FLAG`](#GCLOUD-WIDE-FLAGS)` …`\] </span>
+
+</div>
+
+<div id="DESCRIPTION" class="section">
+
+DESCRIPTION
+
+Manage Apigee environments.
+
+</div>
+
+<div id="EXAMPLES" class="section">
+
+EXAMPLES
+
+To list all environments for the active Cloud Platform project, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee environments list
+```
+
+To get a JSON array of all environments in an Apigee organization called `my-org`, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee environments list --organization=my-org --format=json
+```
+
+</div>
+
+<div id="GCLOUD-WIDE-FLAGS" class="section">
+
+GCLOUD WIDE FLAGS
+
+These flags are available to all commands: [`--help`](/sdk/gcloud/reference#--help).
+
+Run `$ `[`gcloud help`](/sdk/gcloud/reference) for details.
+
+</div>
+
+<div id="COMMAND" class="section">
+
+COMMANDS
+
+`COMMAND` is one of the following:
+
+<span class="normalfont">[`list`](/sdk/gcloud/reference/apigee/environments/list)</span>  
+List Apigee deployment environments.
+
+</div>
+
+<div id="NOTES" class="section">
+
+NOTES
+
+These variants are also available:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud alpha apigee environments
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee environments
+```
+
+</div>

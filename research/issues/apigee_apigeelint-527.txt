@@ -1,0 +1,19 @@
+URL: https://github.com/apigee/apigeelint/issues/527
+TITLE: PO023 does not correctly handle Quota policy attached to a FaultRule
+STATE: closed state_reason: completed
+AUTHOR: DinoChiesa association: COLLABORATOR
+CREATED: 2025-06-01T19:55:32Z CLOSED: 2025-06-02T16:43:38Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+If PO023 encounters a Quota policy attached to a FaultRule, it results in a runtime error:
+
+```
+plugin error: PO023-quotaPolicyReuseCheck.js TypeError: step.getParent(...).getPhase is not a function
+    at getFlowKey (/usr/local/lib/node_modules/apigeelint/lib/package/plugins/PO023-quotaPolicyReuseCheck.js:92:45)
+    at onPolicy (/usr/local/lib/node_modules/apigeelint/lib/package/plugins/PO023-quotaPolicyReuseCheck.js:43:19)
+   ...
+```
+@ssvaidyanathan FYI
+
+--- COMMENTS (0) ---

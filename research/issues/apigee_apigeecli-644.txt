@@ -1,0 +1,47 @@
+URL: https://github.com/apigee/apigeecli/issues/644
+TITLE: apigeecli sharedflow deploy does not exit with a non-0 status when failing
+STATE: closed state_reason: completed
+AUTHOR: ascopes association: CONTRIBUTOR
+CREATED: 2025-02-27T13:13:08Z CLOSED: 2025-03-26T16:52:02Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+If the `apigeecli sharedflows deploy` command fails, we still get an exit status of 0. This means we are unable to fail our builds if sharedflow deployments fail.
+
+The equivalent command for `apigeecli apis deploy` _does_ fail with a non-zero exit code, which means the process of deploying sharedflows and apiproxies does not appear to work consistently.
+
+```
+➜ code git:(task/test) >>> apigeecli sharedflows deploy --org my-org --account  ~/.gcloud/my-key.json --env my-env --name sharedflow-x-powered-by --rev 12 --ovr --wait
+{
+        "environment": "my-env",
+        "apiProxy": "sharedflow-x-powered-by",
+        "revision": "12",
+        "deployStartTime": "1740661465612"
+}
+
+Checking deployment status in 10 seconds
+Sharedflow deployment failed with status:  ERROR
+➜ code git:(task/test) >>> echo $? 
+0
+```
+
+--- COMMENTS (5) ---
+
+### comment by kurtkanaskie (association=COLLABORATOR) at 2025-03-03T17:52:29Z
+I think I see the issue, the sharedflows Wait function is not setting err correctly when it fails.
+
+Thanks for reporting this.
+
+### comment by kurtkanaskie (association=COLLABORATOR) at 2025-03-24T20:08:57Z
+@ascopes I was able to reproduce by forcing a JS syntax error.
+
+### comment by kurtkanaskie (association=COLLABORATOR) at 2025-03-25T12:14:39Z
+@ascopes A fix has been merged into main.
+
+
+
+### comment by ascopes (association=CONTRIBUTOR) at 2025-03-26T16:37:14Z
+Thanks for the quick fix!
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2025-03-26T16:52:02Z
+Released in v2.10.1

@@ -1,0 +1,141 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/deploy" class="section">
+
+- [HTTP request](#body.HTTP_TEMPLATE)
+- [Path parameters](#body.PATH_PARAMETERS)
+- [Query parameters](#body.QUERY_PARAMETERS)
+- [Request body](#body.request_body)
+- [Response body](#body.response_body)
+- [Authorization scopes](#body.aspect)
+
+<div id="google.cloud.apigee.v1.DeploymentService.DeployApiProxy" class="section">
+
+</div>
+
+<div id="description" class="section">
+
+Deploys a revision of an API proxy.
+
+If another revision of the same API proxy revision is currently deployed, set the `override` parameter to `true` to have this revision replace the currently deployed revision.
+
+You cannot invoke an API proxy until it has been deployed to an environment. After you deploy an API proxy revision, you cannot edit it. To edit the API proxy, you must create and deploy a new revision.
+
+For a request path `organizations/{org}/environments/{env}/apis/{api}/revisions/{rev}/deployments`, two permissions are required:
+
+- `apigee.deployments.create` on the resource `organizations/{org}/environments/{env}`
+- `apigee.proxyrevisions.deploy` on the resource `organizations/{org}/apis/{api}/revisions/{rev}`
+
+All successful API proxy deployments to Apigee are [zero-downtime deployments](https://cloud.google.com/apigee/docs/api-platform/deploy/ui-deploy-overview#zero-downtime-deployment).
+
+Apigee hybrid validates the dependencies between shared flows and API proxies at deployment time. For example, if the Flow Callout policy in an API proxy references a shared flow that either doesn't exist or isn't deployed, the API proxy deployment fails.
+
+</div>
+
+<div id="body" class="section">
+
+<div id="body.HTTP_TEMPLATE" class="section">
+
+### HTTP request
+
+`POST https://apigee.googleapis.com/v1/{name=organizations/*/environments/*/apis/*/revisions/*}/deployments`
+
+The URL uses [gRPC Transcoding](https://google.aip.dev/127) syntax.
+
+</div>
+
+<div id="body.PATH_PARAMETERS" class="section">
+
+### Path parameters
+
+<table id="body.PATH_PARAMETERS-table" class="properties responsive fixed" style="width:25%;">
+<colgroup>
+<col style="width: 25%" />
+<col />
+</colgroup>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr id="body.PATH_PARAMETERS.name">
+<td><code translate="no" dir="ltr">name</code></td>
+<td><p><code class="apitype" translate="no" dir="ltr">string</code></p>
+<p>Required. Name of the API proxy revision deployment in the following format: <code translate="no" dir="ltr">organizations/{org}/environments/{env}/apis/{api}/revisions/{rev}</code></p>
+<p>If the API proxy resource being deployed has the <code translate="no" dir="ltr">space</code> attribute set, IAM permissions are checked differently . To learn more, read the <a href="https://cloud.google.com/apigee/docs/api-platform/system-administration/spaces/apigee-spaces-overview">Apigee Spaces Overview</a>.</p></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="body.QUERY_PARAMETERS" class="section">
+
+### Query parameters
+
+<table id="body.QUERY_PARAMETERS-table" class="properties responsive fixed" style="width:25%;">
+<colgroup>
+<col style="width: 25%" />
+<col />
+</colgroup>
+<thead>
+<tr>
+<th colspan="2">Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr id="body.QUERY_PARAMETERS.override">
+<td><code translate="no" dir="ltr">override</code></td>
+<td><p><code class="apitype" translate="no" dir="ltr">boolean</code></p>
+<p>Flag that specifies whether the new deployment replaces other deployed revisions of the API proxy in the environment. Set <code translate="no" dir="ltr">override</code> to <code translate="no" dir="ltr">true</code> to replace other deployed revisions. By default, <code translate="no" dir="ltr">override</code> is <code translate="no" dir="ltr">false</code> and the deployment is rejected if other revisions of the API proxy are deployed in the environment.</p></td>
+</tr>
+<tr id="body.QUERY_PARAMETERS.sequenced_rollout">
+<td><code translate="no" dir="ltr">sequencedRollout</code></td>
+<td><p><code class="apitype" translate="no" dir="ltr">boolean</code></p>
+<p>Flag that specifies whether to enable sequenced rollout.</p>
+<p>If set to <code translate="no" dir="ltr">true</code>, the routing rules for this deployment and the environment changes to add the deployment will be rolled out in a safe order. This reduces the risk of downtime that could be caused by changing the environment group's routing before the new destination for the affected traffic is ready to receive it. This should only be necessary if the new deployment will be capturing traffic from another environment under a shared environment group or if traffic will be rerouted to a different environment due to a base path removal.</p>
+<p>The [generateDeployChangeReport API][DeploymentService.GenerateDeployChangeReport] may be used to examine routing changes before issuing the deployment request, and its response will indicate if a sequenced rollout is recommended for the deployment.</p></td>
+</tr>
+<tr id="body.QUERY_PARAMETERS.service_account">
+<td><code translate="no" dir="ltr">serviceAccount</code></td>
+<td><p><code class="apitype" translate="no" dir="ltr">string</code></p>
+<p>Google Cloud IAM service account.</p>
+<p>The service account represents the identity of the deployed proxy, and determines what permissions it has. The format must be <code translate="no" dir="ltr">{ACCOUNT_ID}@{PROJECT}.iam.gserviceaccount.com</code>.</p>
+<p>Authorization requires the following <a href="https://cloud.google.com/iam/docs/">IAM</a> permission on the specified resource <code translate="no" dir="ltr">serviceAccount</code>:</p>
+<ul>
+<li><code translate="no" dir="ltr">iam.serviceAccounts.actAs</code></li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="body.request_body" class="section">
+
+### Request body
+
+The request body must be empty.
+
+</div>
+
+<div id="body.response_body" class="section">
+
+### Response body
+
+If successful, the response body contains an instance of [`Deployment`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.deployments#Deployment).
+
+</div>
+
+<div id="body.aspect" class="section">
+
+### Authorization scopes
+
+Requires the following OAuth scope:
+
+- `https://www.googleapis.com/auth/cloud-platform`
+
+</div>
+
+</div>
+
+</div>

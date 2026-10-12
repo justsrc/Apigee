@@ -1,0 +1,31 @@
+URL: https://github.com/apigee/apigeetool-node/issues/57
+TITLE: Error: Path /myproxy conflicts with existing deployment path for revision 13 of the APIProxy authorization in organization foo-organization
+STATE: open state_reason: None
+AUTHOR: rvdbogerd association: NONE
+CREATED: 2016-10-27T15:04:08Z CLOSED: None
+LABELS: 
+MILESTONE: None
+--- BODY ---
+My CI tool just updated the npm package to 0.6.4 and now my deployments are broken because of the message 
+
+> "Error: Path /myproxy conflicts with existing deployment path for revision 13 of the APIProxy authorization in foo-organization".
+
+When I reverted back to 0.6.3 the deploy worked again, so there is something wrong with the version matching. It could well be that it is broken because of issue #54 . This was also broken for me, so I switched to the --api flag instead of -n.
+
+The command that I ran:
+`apigeetool deployproxy -u ${bamboo_APIGEE_USERNAME} -p ${bamboo_APIGEE_PASSWORD} -o ${bamboo_APIGEE_ORGANIZATION} -e ${bamboo_APIGEE_ENVIRONMENT} --api $apiname -d .`
+
+
+--- COMMENTS (2) ---
+
+### comment by mukundha (association=CONTRIBUTOR) at 2016-10-27T18:36:13Z
+@rvdbogerd - yes, we noticed the `--api` issue and i think we have a fix pending merge.
+
+but the basepath conflict issue look different. If its the same proxy, then `deployproxy` would override the previous revisions. But if the basepath conflict happens across proxies, then it would fail with the above error you mentioned. 
+I tried the former case, it seemed to work - but i can look into it again - can you confirm?
+
+
+### comment by mukundha (association=CONTRIBUTOR) at 2016-10-28T18:16:17Z
+we just published v0.6.6 to npm, with these https://github.com/apigee/apigeetool-node/pull/60
+let me know if it fixes your issue
+

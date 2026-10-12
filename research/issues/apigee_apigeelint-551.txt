@@ -1,0 +1,71 @@
+URL: https://github.com/apigee/apigeelint/issues/551
+TITLE: CC005 - new false positives after v2.68.0
+STATE: closed state_reason: completed
+AUTHOR: dangrasso association: NONE
+CREATED: 2025-06-11T17:44:29Z CLOSED: 2025-06-27T15:18:24Z
+LABELS: 
+MILESTONE: None
+--- BODY ---
+```
+error CC005 : Invalid Condition - cannot parse 
+```
+   
+example
+```
+<Condition>notValidJson == true</Condition>
+```
+
+This is likely a regression due to the fix in https://github.com/apigee/apigeelint/pull/544/files#diff-da821e73288e51a008df7f71c9da3c764aa1cf983978ef7ecdf72881c9a72aaeR483
+
+Would an option be to explicitly replace only `not(` and `not ` but not everything starting with `not`?
+
+--- COMMENTS (10) ---
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2025-06-11T18:09:44Z
+yes, thanks for reporting this.  I'll get that fixed.
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2025-06-23T22:46:30Z
+Can you check to see if the false positives continue, with the forthcoming release?
+
+@ssvaidyanathan will deliver a release shortly I think.   Or you can  pull latest main, and try that.
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2025-06-23T22:56:31Z
+v2.69.0 is released
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2025-06-24T19:08:08Z
+@dangrasso did you confirm that v2.69.0 works for you?  I would expect that it would, but I'd love to hear your confirmation.
+
+### comment by dangrasso (association=NONE) at 2025-06-25T19:20:49Z
+Thanks for checking @DinoChiesa. It actually doesn't work. I don't understand why this time. 
+
+The failure points to the same condition:
+```
+<Condition>notValidJson == true</Condition>
+```
+
+I tried your new regex directly on my condition and as expected it doesn't replace the `not` this time. But still CC005 is marked as failed for that condition block. I also tried switching between different versions:
+
+2.67.0 Pass 🟢 
+2.68.0 Fail 🔴 
+2.69.0 Fail 🔴 
+
+
+### comment by dangrasso (association=NONE) at 2025-06-26T07:37:48Z
+Actually I know why it still fails @DinoChiesa @ssvaidyanathan I see that this replacement still happens a few lines above: https://github.com/DinoChiesa/apigeelint/blob/bc113b92f6f39ae7868f27f8b6f4480c32898514/lib/package/TruthTable.js#L484
+
+The * quantifier will match on 0 or more occurrences of the space, so any condition starting with a variable starting with not... will be affected.
+
+You probably want to match only on `^ *NOT +` to ensure there is a space after the not.
+
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2025-06-26T17:12:41Z
+looking
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2025-06-27T02:57:55Z
+Yes, thanks for the diagnosis.
+
+### comment by ssvaidyanathan (association=COLLABORATOR) at 2025-06-27T15:18:24Z
+released as v2.69.1
+
+### comment by DinoChiesa (association=COLLABORATOR) at 2025-06-27T17:18:18Z
+How 'bout now , Dan?  Works?

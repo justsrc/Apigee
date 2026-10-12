@@ -1,0 +1,723 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+**Note:** **This topic is deprecated.** The error names and HTTP response codes associated with the OAuthV2 policies are described in each policy's reference documentation:
+
+- [OAuthv2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy)
+- [GetOAuthv2Info policy](/apigee/docs/api-platform/reference/policies/get-oauth-v2-info-policy)
+- [SetOAuth v2 Info policy](/apigee/docs/api-platform/reference/policies/set-oauth-v2-info-policy)
+- [DeleteOAuthv2Info policy](/apigee/docs/api-platform/reference/policies/delete-oauth-v2-info)
+
+This topic provides HTTP status codes you may encounter when an OAuth policy throws errors in Apigee.
+
+For guidance on handling errors, see [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+For policy-specific error codes, see [OAuth v2 policy error reference](/apigee/docs/api-platform/reference/policies/oauthv2-policy#errorreference).
+
+## Authorization Code
+
+### Invalid Redirect URI
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Invalid redirection uri http://www.invalid_example.com"}
+```
+
+</div>
+
+### No Redirect URI
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request {"ErrorCode" : "invalid_request", "Error" :"Redirection URI is required"}
+```
+
+</div>
+
+### Invalid Key
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 401 Unauthorized {"ErrorCode" : "invalid_request", "Error" :"Invalid client id : AVD7ztXReEYyjpLFkkPiZpLEjeF2aYAz. ClientId is Invalid"}
+```
+
+</div>
+
+### Missing Key
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"The request is missing a required parameter : client_id"}
+```
+
+</div>
+
+### Invalid Response Type
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Response type must be code"}
+```
+
+</div>
+
+### Missing Response Type
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"The request is missing a required parameter : response_type"}
+```
+
+</div>
+
+## Generate AccessToken
+
+### Invalid Auth Code
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP status: 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Invalid Authorization Code"}
+```
+
+</div>
+
+### No Redirect URI
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Required param : redirect_uri"}
+```
+
+</div>
+
+### Invalid Redirect URI
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Invalid redirect_uri : oob"}
+```
+
+</div>
+
+### Invalid Client ID when GenerateResponse is false
+
+This error is returned when the `<GenerateResponse>` property is set to **false** and the client credentials are invalid.
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+    "fault": {
+        "faultstring": "Invalid client identifier {0}",
+        "detail": {
+            "errorcode": "oauth.v2.InvalidClientIdentifier"
+        }
+    }
+}
+```
+
+</div>
+
+### Invalid Client ID when GenerateResponse is true
+
+This error is returned when the `<GenerateResponse>` property is set to **true** and the client credentials are invalid.
+
+<div id="well2">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{"ErrorCode" : "invalid_client", "Error" :"ClientId is Invalid"}
+```
+
+</div>
+
+### Invalid GrantType
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Unsupported grant type : client_credentials_invalid"}
+```
+
+</div>
+
+### No Username
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Required param : username"}
+```
+
+</div>
+
+### No Password
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Required param : password"}
+```
+
+</div>
+
+### No GrantType (Custom Policy)
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Required param : grant_type"}
+```
+
+</div>
+
+### No AuthCode
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Required param : code"}
+```
+
+</div>
+
+## Implicit
+
+### Invalid Client ID
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 401 Unauthorized
+{"ErrorCode" : "invalid_request", "Error" :"Invalid client id : AVD7ztXReEYyjpLFkkPiZpLEjeF2aYAz. ClientId is Invalid"}
+```
+
+</div>
+
+### No Client ID
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"The request is missing a required parameter : client_id"}
+```
+
+</div>
+
+### Invalid Response Type
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Response type must be token"}
+```
+
+</div>
+
+### No Response Type
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"The request is missing a required parameter : response_type"}
+```
+
+</div>
+
+### Invalid Redirect URI
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Invalid redirection uri http://www.invalid_example.com"}
+```
+
+</div>
+
+### No Redirect URI
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Redirection URI is required"}
+```
+
+</div>
+
+## Refresh Token
+
+### Invalid RefreshToken
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Invalid Refresh Token"}
+```
+
+### Expired RefreshToken
+
+<div id="well" style="font-size: 12px;">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Refresh Token expired"}
+```
+
+</div>
+
+</div>
+
+### Invalid Scope
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 400 Bad Request
+{"ErrorCode" : "invalid_request", "Error" :"Invalid Scope"}
+```
+
+</div>
+
+### Invalid Client ID when GenerateResponse is false
+
+This error is returned when the GenerateResponse property is set to **false** and the client credentials are invalid.
+
+<div id="well3">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+    "fault": {
+        "faultstring": "Invalid client identifier {0}",
+        "detail": {
+            "errorcode": "oauth.v2.InvalidClientIdentifier"
+        }
+    }
+}
+```
+
+</div>
+
+### Invalid Client ID when GenerateResponse is true
+
+This error is returned when the GenerateResponse property is set to **true** and the client credentials are invalid.
+
+<div id="well4">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{"ErrorCode" : "invalid_client", "Error" :"ClientId is Invalid"}
+```
+
+</div>
+
+## Verify AccessToken
+
+### Invalid AccessToken
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 401 Unauthorized
+{"fault":{"faultstring":"Invalid Access Token","detail":{"errorcode":"keymanagement.service.invalid_access_token"}}}
+```
+
+</div>
+
+### Invalid Resource
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 401 Unauthorized
+{"fault":{"faultstring":"APIResource \/facebook\/acer does not exist","detail":{"errorcode":"keymanagement.service.apiresource_doesnot_exist"}}}
+```
+
+</div>
+
+### Invalid Scope
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 403 Forbidden
+{"fault":{"faultstring":"Required scope(s) : VerifyAccessToken.scopeSet","detail":{"errorcode":"steps.oauth.v2.InsufficientScope"}}}
+```
+
+</div>
+
+### No Auth Header
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 401 Unauthorized
+{"fault":{"faultstring":"Invalid access token","detail":{"errorcode":"oauth.v2.InvalidAccessToken"}}}
+```
+
+</div>
+
+### No match for ApiProduct (With Env & Proxy Configured)
+
+<div id="well">
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 401 Unauthorized
+{"fault":{"faultstring":"Invalid API call as no apiproduct match found","detail":{"errorcode":"keymanagement.service.InvalidAPICallAsNoApiProductMatchFound"}}}
+```
+
+</div>
+
+### Access token expired
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 401 Unauthorized
+{"fault":{"faultstring":"Access Token expired","detail":{"errorcode":"keymanagement.service.access_token_expired"}}}
+```
+
+### Access token revoked
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 401 Unauthorized
+{"fault":{"faultstring":"Access Token not approved","detail":{"errorcode":"keymanagement.service.access_token_not_approved"}}}
+```
+
+## Get OAuth V2 Info
+
+### Invalid Refresh Token
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 404 Not Found
+{"fault::{"detail":{"errorcode":"keymanagement.service.invalid_refresh_token"},"faultstring":"Invalid Refresh Token"}}
+```
+
+### Invalid Access Token
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 404 Not Found
+{
+  "fault": {
+    "faultstring": "Invalid Access Token",
+    "detail": {
+      "errorcode": "keymanagement.service.invalid_access_token"
+    }
+  }
+}
+```
+
+### Expired Access Token
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 500 Not Found
+{
+  "fault": {
+    "faultstring": "Access Token expired",
+    "detail": {
+      "errorcode": "keymanagement.service.access_token_expired"
+    }
+  }
+}
+```
+
+### Expired Refresh Token
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 500 Not Found
+{
+  "fault": {
+    "faultstring": "Refresh Token expired",
+    "detail": {
+      "errorcode": "keymanagement.service.refresh_token_expired"
+    }
+  }
+}
+```
+
+### Invalid Client ID
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 404 Not Found
+{
+  "fault": {
+    "faultstring": "Invalid Client Id",
+    "detail": {
+      "errorcode": "keymanagement.service.invalid_client-invalid_client_id"
+    }
+  }
+}
+```
+
+### Invalid Authorization Code
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 404 Not Found
+{
+  "fault": {
+    "faultstring": "Invalid Authorization Code",
+    "detail": {
+      "errorcode": "keymanagement.service.invalid_request-authorization_code_invalid"
+    }
+  }
+}
+```
+
+### Expired Authorization Code
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 500 Not Found
+{
+  "fault": {
+    "faultstring": "Authorization Code expired",
+    "detail": {
+      "errorcode": "keymanagement.service.authorization_code_expired"
+    }
+  }
+}
+```
+
+## Set OAuth V2 Info
+
+### Invalid Access Token
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 404 Not Found
+{
+  "fault": {
+    "faultstring": "Invalid Access Token",
+    "detail": {
+      "errorcode": "keymanagement.service.invalid_access_token"
+    }
+  }
+}
+```
+
+### Expired Access Token
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 500 Not Found
+{
+  "fault": {
+    "faultstring": "Access Token expired",
+    "detail": {
+      "errorcode": "keymanagement.service.access_token_expired"
+    }
+  }
+}
+```
+
+## Delete OAuth V2 Info
+
+On success, the policy returns a 200 status.
+
+On failure, the policy returns 404 and output similar to the following (depending on whether you are deleting an access token or an auth code):
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+Content-Length: 144
+Connection: keep-alive
+
+{"fault":{"faultstring":"Invalid Authorization Code","detail":{"errorcode":"keymanagement.service.invalid_request-authorization_code_invalid"}}}
+```

@@ -1,0 +1,104 @@
+<div style="margin-top: 10px; margin-bottom: 10px">
+
+Version 1.17 (latest)
+
+keyboard_arrow_down
+
+-    Supported versions:
+
+- <a href="/apigee/docs/hybrid/v1.17/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.17 (latest)                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.17/runtime-logs.html" role="menuitem" tabindex="-1">v1.17 (latest)                        </a>
+
+- <a href="/apigee/docs/hybrid/v1.16/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.16                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.16/runtime-logs.html" role="menuitem" tabindex="-1">v1.16                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.15/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.15                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.15/runtime-logs.html" role="menuitem" tabindex="-1">v1.15                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.14/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.14                        " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.14/runtime-logs.html" role="menuitem" tabindex="-1">v1.14                        </a>
+
+- <a href="/apigee/docs/hybrid/supported-platforms#supported-versions" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="List of supported versions" data-track-metadata-eventdetail="/apigee/docs/hybrid/supported-platforms#supported-versions" role="menuitem" tabindex="-1">List of supported versions</a>
+
+     Unsupported versions:
+
+- <a href="/apigee/docs/hybrid/v1.13/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.13                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.13/runtime-logs.html" role="menuitem" tabindex="-1">v1.13                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.12/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.12                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.12/runtime-logs.html" role="menuitem" tabindex="-1">v1.12                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.11/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.11                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.11/runtime-logs.html" role="menuitem" tabindex="-1">v1.11                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.10/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.10                                      " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.10/runtime-logs.html" role="menuitem" tabindex="-1">v1.10                                      </a>
+
+- <a href="/apigee/docs/hybrid/v1.9/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.9                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.9/runtime-logs.html" role="menuitem" tabindex="-1">v1.9                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.8/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.8                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.8/runtime-logs.html" role="menuitem" tabindex="-1">v1.8                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.7/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.7                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.7/runtime-logs.html" role="menuitem" tabindex="-1">v1.7                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.6/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.6                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.6/runtime-logs.html" role="menuitem" tabindex="-1">v1.6                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.5/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.5                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.5/runtime-logs.html" role="menuitem" tabindex="-1">v1.5                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.4/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.4                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.4/runtime-logs.html" role="menuitem" tabindex="-1">v1.4                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.3/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.3                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.3/runtime-logs.html" role="menuitem" tabindex="-1">v1.3                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.2/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.2                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.2/runtime-logs.html" role="menuitem" tabindex="-1">v1.2                                         </a>
+
+- <a href="/apigee/docs/hybrid/v1.1/runtime-logs.html" class="cloud-select-dropdown__item-link" data-track-type="cloud select dropdown" data-track-name="v1.1                                         " data-track-metadata-eventdetail="/apigee/docs/hybrid/v1.1/runtime-logs.html" role="menuitem" tabindex="-1">v1.1                                         </a>
+
+</div>
+
+Use the runtime logs to help diagnose problems with the `apigee-runtime` pods. Each runtime pod contains a message processor, which is responsible for processing API proxy traffic, executing policies, routing requests, and more.
+
+## Using runtime logs
+
+Logs are a good way to troubleshoot problems with your installation. See [Logging](/apigee/docs/hybrid/v1.17/logging) for details.
+
+### Use the logs command
+
+You can view runtime system logs using the `kubectl logs` command. For example:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+kubectl logs -f -n APIGEE_NAMESPACE apigee-runtime-apigee-gcp-prod1-test-blue-hd77q
+```
+
+### Contract version information
+
+The following table briefly describes log entries related to loading the contract from the management plane:
+
+|  |  |
+|----|----|
+| **Log Entry** | **Meaning** |
+| `hybrid-runtime Apigee-Timer-9 INFO RUNTIME-SYNC-SERVICE - RuntimeSyncServiceImpl.updateToVersion() : Switched to newer version 750 from version null` | The MP changed to a newer version of the configuration contract. |
+| `hybrid-runtime Apigee-Timer-6 INFO RUNTIME-SYNC-SERVICE - RuntimeSyncServiceImpl.loadLatestVersionIfAvailable() : Found a newer version 750` | The MP loaded the latest contract configuration version from `version.properties`. |
+| `hybrid-runtime Apigee-Timer-6 INFO RUNTIME-SYNC-SERVICE - RuntimeSyncServiceImpl.updateToVersion() : Attempting to update to a newer version 750` | The MP is updating to a newer version of the configuration contract. |
+| `hybrid-runtime Apigee-Timer-6 INFO RUNTIME-SYNC-SERVICE - RuntimeSyncServiceImpl.updateToVersion() : Switched to newer version 751 from version 750` | The MP loaded the latest contract configuration version from `version.properties`. |
+
+### Deployment errors
+
+The following runtime errors relate to proxy deployments:
+
+|  |  |
+|----|----|
+| **Log Entry** | **Meaning** |
+| `hybrid-runtime org:hybrid env:prod Apigee-Main-6 ERROR i.a.h.e.i.HermesEngineImpl - HermesEngineImpl.handleHermesException() : Keyspace cache_hybrid_hybrid does not exist` | Keyspace `cache_``orgname``_hybrid` is not provisioned in Cassandra. |
+| `hybrid-runtime org:hybrid Apigee-Timer-9 ERROR c.a.s.e.k.HybridEncryptionKeyServiceImpl - HybridEncryptionKeyServiceImpl.getEncryptionKey() : Encryption key does not exist for organization hybrid and type KmsKey` | Keyspace `kms_``orgname``_hybrid` is not provisioned in Cassandra. |
+
+### Message processor deployment error logs
+
+Look for the following deployment error entries in the message processor logs:
+
+| Log entry | Description |
+| --- | --- |
+| hybrid-runtime org:hybrid env:prod Apigee-Main-6 ERROR i.a.h.e.i.HermesEngineImpl - HermesEngineImpl.handleHermesException() : Keyspace cache_hybrid_hybrid does not exist | Keyspace cache_ orgname _hybrid is not provisioned in Cassandra. |
+| hybrid-runtime org:hybrid Apigee-Timer-9 ERROR c.a.s.e.k.HybridEncryptionKeyServiceImpl - HybridEncryptionKeyS erviceImpl.getEncryptionKey() : Encryption key does not exist for organization hybrid and type KmsKey | Keyspace kms_ orgname _hybrid is not provisioned in Cassandra. |
+
+## Message processor error codes
+
+Error codes for the message processor start with `runtime.sync.``error-name`. For example:
+
+| Log Entry | Meaning |
+| --- | --- |
+| runtime.sync.ContractLoadFailedMessage: Error loading spec file | Reason : The error could be caused by an invalid schema, corrupted contract specification file, or invalid contract. Any of these issues could prevent the message processor from loading the spec file. Remedy : Make sure either the contract specification file is available, the file system is not corrupted, or the schema/contract is valid. |

@@ -1,0 +1,436 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+Apigee provides a set of fault codes for various features that help you to diagnose issues. For example, a typical `4xx` or `5xx` HTTP status code can be classified using one or more fault codes.
+
+Fault codes provide you with useful information about runtime errors, including information about the source and name of the error in the following format: `[prefix].[error_name]`
+
+For example: `steps.raisefault.RaiseFault`
+
+In this example:
+
+- `steps.raisefault` is the prefix that indicates the RaiseFault policy generated the error.
+
+- `RaiseFault` is the error name that helps you determine the cause of the error. In this case, more information would be provided by the fault string.
+
+  **Notes**:
+
+  - For policy errors, error-specific flow variables are populated that are useful for fault handling. See [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+  - When [setting up alerts](/apigee/docs/api-monitoring/alerts-notifications), fault codes are organized by category and subcategory, and display the human-readable name. When using the [Investigate](/apigee/docs/api-monitoring/investigate) dashboard, the raw fault codes are displayed.
+
+The following table summarizes the fault codes, organized by category and sub-category.
+
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Category</th>
+<th>Sub-category</th>
+<th>Name</th>
+<th>Fault Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td rowspan="17"><h2 id="api-protocol" data-text="API protocol" tabindex="-1">API protocol</h2></td>
+<td rowspan="17"><h3 id="http" data-text="HTTP" tabindex="-1">HTTP</h3></td>
+<td>HTTP BadFormData</td>
+<td><code translate="no" dir="ltr">protocol.http.BadFormData</code></td>
+</tr>
+<tr>
+<td>HTTP BadRequestPath</td>
+<td><code translate="no" dir="ltr">protocol.http.BadPath</code></td>
+</tr>
+<tr>
+<td>HTTP DuplicateHeader</td>
+<td><code translate="no" dir="ltr">protocol.http.DuplicateHeader</code></td>
+</tr>
+<tr>
+<td>HTTP EmptyHeaderName</td>
+<td><code translate="no" dir="ltr">protocol.http.EmptyHeaderName</code></td>
+</tr>
+<tr>
+<td>HTTP HeaderNameWithNonASCIICharacter</td>
+<td><code translate="no" dir="ltr">protocol.http.HeaderNameWithNonAsciiChar</code></td>
+</tr>
+<tr>
+<td>HTTP HeaderWithInvalidCharacter</td>
+<td><code translate="no" dir="ltr">protocol.http.HeaderWithInvalidChar</code></td>
+</tr>
+<tr>
+<td>HTTP InvalidRequestPath</td>
+<td><code translate="no" dir="ltr">protocol.http.InvalidPath</code></td>
+</tr>
+<tr>
+<td>HTTP LengthRequired</td>
+<td><code translate="no" dir="ltr">messaging.adaptors.http.flow.LengthRequired</code></td>
+</tr>
+<tr>
+<td>HTTP ProxyTunnelCreationFailed</td>
+<td><code translate="no" dir="ltr">protocol.http.ProxyTunnelCreationFailed</code></td>
+</tr>
+<tr>
+<td>HTTP RequestHasABigBody</td>
+<td><a href="/apigee/docs/api-platform/fundamentals/best-practices-api-proxy-design-and-development#size"><code translate="no" dir="ltr">protocol.http.TooBigBody</code></a></td>
+</tr>
+<tr>
+<td>HTTP RequestsHaveABigLine</td>
+<td><code translate="no" dir="ltr">protocol.http.TooBigLine</code></td>
+</tr>
+<tr>
+<td>HTTP Response306IsReserved</td>
+<td><code translate="no" dir="ltr">protocol.http.Response306Reserved</code></td>
+</tr>
+<tr>
+<td>HTTP Response405WithoutAllowHeader</td>
+<td><code translate="no" dir="ltr">protocol.http.Response405WithoutAllowHeader</code></td>
+</tr>
+<tr>
+<td>ResponseWithBodyForIncorrectStatusCode</td>
+<td><code translate="no" dir="ltr">protocol.http.ResponseWithBody</code></td>
+</tr>
+<tr>
+<td>HTTP TargetURLHasEmptyPath</td>
+<td><code translate="no" dir="ltr">protocol.http.EmptyPath</code></td>
+</tr>
+<tr>
+<td>HTTP TooBigHeaders</td>
+<td><code translate="no" dir="ltr">protocol.http.TooBigHeaders</code></td>
+</tr>
+<tr>
+<td>HTTP UnsupportedEncoding</td>
+<td><code translate="no" dir="ltr">protocol.http.UnsupportedEncoding</code></td>
+</tr>
+<tr>
+<td rowspan="18"><h2 id="developerapp" data-text="Developer/app" tabindex="-1">Developer/app</h2></td>
+<td rowspan="18"><h3 id="key-management" data-text="Key Management" tabindex="-1">Key Management</h3></td>
+<td>KeyManagement AccessTokenNotApproved</td>
+<td><code translate="no" dir="ltr">keymanagement.service.access_token_not_approved</code></td>
+</tr>
+<tr>
+<td>KeyManagement APIProductNotFound</td>
+<td><code translate="no" dir="ltr">keymanagement.service.InvalidAPICallAsNoApiProductMatchFound</code></td>
+</tr>
+<tr>
+<td>KeyManagement AppNotApproved</td>
+<td><code translate="no" dir="ltr">keymanagement.service.invalid_client-app_not_approved</code></td>
+</tr>
+<tr>
+<td>KeyManagement AppNotApproved</td>
+<td><code translate="no" dir="ltr">keymanagement.service.app_not_approved</code></td>
+</tr>
+<tr>
+<td>KeyManagement AuthorizationCodeExpired</td>
+<td><code translate="no" dir="ltr">keymanagement.service.access_denied-authorization_code_expired</code></td>
+</tr>
+<tr>
+<td>KeyManagement AuthorizationCodeinvalid</td>
+<td><code translate="no" dir="ltr">keymanagement.service.invalid_request-authorization_code_invalid</code></td>
+</tr>
+<tr>
+<td>KeyManagement ClientIDAuthorizationCodeMismatch</td>
+<td><code translate="no" dir="ltr">keymanagement.service.invalid_client-client_id_authorzation_code_mismatch</code></td>
+</tr>
+<tr>
+<td>KeyManagement ClientIDNotApproved</td>
+<td><code translate="no" dir="ltr">keymanagement.service.invalid_client-client_id_not_approved</code></td>
+</tr>
+<tr>
+<td>KeyManagement CompanyStatusNotActive</td>
+<td><code translate="no" dir="ltr">keymanagement.service.CompanyStatusNotActive</code></td>
+</tr>
+<tr>
+<td>KeyManagement Consumer Key Expired</td>
+<td><code translate="no" dir="ltr">keymanagement.service.consumer_key_expired</code></td>
+</tr>
+<tr>
+<td>KeyManagement DeveloperNotActive</td>
+<td><code translate="no" dir="ltr">keymanagement.service.DeveloperStatusNotActive</code></td>
+</tr>
+<tr>
+<td>KeyManagement InvalidAccessToken</td>
+<td><code translate="no" dir="ltr">keymanagement.service.oauth10_access_token_doesnotexist</code></td>
+</tr>
+<tr>
+<td>KeyManagement InvalidClientID</td>
+<td><code translate="no" dir="ltr">keymanagement.service.InvalidClientIdForGivenResource</code></td>
+</tr>
+<tr>
+<td>KeyManagement InvalidClientID</td>
+<td><code translate="no" dir="ltr">keymanagement.service.invalid_client-client_id_authorzation_code_mismatch</code></td>
+</tr>
+<tr>
+<td>KeyManagement InvalidClientID</td>
+<td><code translate="no" dir="ltr">keymanagement.service.invalid_client-invalid_client_id</code></td>
+</tr>
+<tr>
+<td>KeyManagement InvalidConsumerKey</td>
+<td><code translate="no" dir="ltr">keymanagement.service.invalid_consumer_key</code></td>
+</tr>
+<tr>
+<td>KeyManagement InvalidRefreshToken</td>
+<td><code translate="no" dir="ltr">keymanagement.service.invalid_refresh_token</code></td>
+</tr>
+<tr>
+<td>KeyManagement RefreshTokenExpired</td>
+<td><code translate="no" dir="ltr">keymanagement.service.refresh_token_expired</code></td>
+</tr>
+<tr>
+<td rowspan="7"><h2 id="extension-policy" data-text="Extension Policy" tabindex="-1">Extension Policy</h2></td>
+<td><h3 id="javacallout" data-text="JavaCallout" tabindex="-1">JavaCallout</h3></td>
+<td>JavaCallout <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/java-callout-policy#runtime-errors">JavaCallout policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="javascript-callout" data-text="JavaScript Callout" tabindex="-1">JavaScript Callout</h3></td>
+<td>JavaScriptCallout <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/javascript-policy#runtime-errors">JavaScript policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="messagelogging" data-text="MessageLogging" tabindex="-1">MessageLogging</h3></td>
+<td>MessageLogging StepDefinitionExecutionFailed</td>
+<td><code translate="no" dir="ltr">steps.messagelogging.StepDefinitionExecutionFailed</code></td>
+</tr>
+<tr>
+<td><h3 id="node-script" data-text="Node Script" tabindex="-1">Node Script</h3></td>
+<td>NodeScript ExecutionError</td>
+<td><code translate="no" dir="ltr">scripts.node.ScriptExecutionError</code></td>
+</tr>
+<tr>
+<td><h3 id="pythonscript" data-text="PythonScript" tabindex="-1">PythonScript</h3></td>
+<td>PythonScript <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/python-script-policy#runtime-errors">PythonScript policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="script" data-text="Script" tabindex="-1">Script</h3></td>
+<td>Script EvaluationFailed</td>
+<td><code translate="no" dir="ltr">steps.script.ScriptEvaluationFailed</code></td>
+</tr>
+<tr>
+<td><h3 id="servicecallout" data-text="ServiceCallout" tabindex="-1">ServiceCallout</h3></td>
+<td>ServiceCallout <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/service-callout-policy#runtime-errors">ServiceCallout policy runtime errors</a></td>
+</tr>
+<tr>
+<td rowspan="16"><h2 id="gateway" data-text="Gateway" tabindex="-1">Gateway</h2></td>
+<td rowspan="8"><h3 id="proxy" data-text="Proxy" tabindex="-1">Proxy</h3></td>
+<td>Gateway APITimedOut</td>
+<td><code translate="no" dir="ltr">flow.APITimedOut</code></td>
+</tr>
+<tr>
+<td>Gateway ApplicationNotFound</td>
+<td><code translate="no" dir="ltr">messaging.adaptors.http.flow.ApplicationNotFound</code></td>
+</tr>
+<tr>
+<td>Gateway DecompressionFailureAtRequest</td>
+<td><code translate="no" dir="ltr">messaging.adaptors.http.flow.DecompressionFailureAtRequest</code></td>
+</tr>
+<tr>
+<td>Gateway DecompressionFailureAtResponse</td>
+<td><code translate="no" dir="ltr">messaging.adaptors.http.flow.DecompressionFailureAtResponse</code></td>
+</tr>
+<tr>
+<td>Gateway KeyAliasNotFound</td>
+<td><code translate="no" dir="ltr">security.util.KeyAliasNotFound</code></td>
+</tr>
+<tr>
+<td>Gateway RouteToTargetFailed</td>
+<td><code translate="no" dir="ltr">messaging.runtime.RouteFailed</code></td>
+</tr>
+<tr>
+<td>Gateway SharedFlowNotFound</td>
+<td><code translate="no" dir="ltr">flow.SharedFlowNotFound</code></td>
+</tr>
+<tr>
+<td>Gateway TargetIsMissing</td>
+<td><code translate="no" dir="ltr">messaging.runtime.TargetMissing</code></td>
+</tr>
+<tr>
+<td rowspan="5"><h3 id="target" data-text="Target" tabindex="-1">Target</h3></td>
+<td>Gateway FailedHandshakeWithTargetEndpoint</td>
+<td><code translate="no" dir="ltr">messaging.adaptors.http.flow.SslHandshakeFailed</code></td>
+</tr>
+<tr>
+<td>Gateway TimeoutWithTargetOrCallout</td>
+<td><code translate="no" dir="ltr">messaging.adaptors.http.flow.GatewayTimeout</code></td>
+</tr>
+<tr>
+<td>Gateway TargetOrCalloutEndpointsNotAvailable</td>
+<td><code translate="no" dir="ltr">messaging.adaptors.http.flow.ServiceUnavailable</code></td>
+</tr>
+<tr>
+<td>Gateway TargetServerConfiguredInLoadBalancerIsDown</td>
+<td><code translate="no" dir="ltr">messaging.adaptors.http.flow.NoActiveTargets</code></td>
+</tr>
+<tr>
+<td>Gateway UnexpectedEOFAtTarget</td>
+<td><code translate="no" dir="ltr">messaging.adaptors.http.flow.UnexpectedEOFAtTarget</code></td>
+</tr>
+<tr>
+<td rowspan="2"><h3 id="virtual-host" data-text="Virtual Host" tabindex="-1">Virtual Host</h3></td>
+<td>VirtualHost InvalidKeystoreOrTrustStore</td>
+<td><code translate="no" dir="ltr">messaging.runtime.SecurityStoreNotConfigured</code></td>
+</tr>
+<tr>
+<td>VirtualHost SecurityStoreNotConfigured</td>
+<td><code translate="no" dir="ltr">messaging.runtime.SecurityStoreNotConfigured</code></td>
+</tr>
+<tr>
+<td><h3 id="other" data-text="Other" tabindex="-1">Other</h3></td>
+<td>Gateway HTTPErrorResponseCode</td>
+<td><code translate="no" dir="ltr">messaging.adaptors.http.flow.ErrorResponseCode</code></td>
+</tr>
+<tr>
+<td rowspan="8"><h2 id="mediation-policy" data-text="Mediation Policy" tabindex="-1">Mediation Policy</h2></td>
+<td><h3 id="assignmessage" data-text="AssignMessage" tabindex="-1">AssignMessage</h3></td>
+<td>AssignMessage <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/assign-message-policy#runtime-errors">AssignMessage policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="extractvariables" data-text="ExtractVariables" tabindex="-1">ExtractVariables</h3></td>
+<td>ExtractVariables <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/extract-variables-policy#runtime-errors">ExtractVariables policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="jsontoxml" data-text="JSONtoXML" tabindex="-1">JSONtoXML</h3></td>
+<td>JSONtoXML <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/json-xml-policy#runtime-errors">JSONtoXML policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="keyvaluemap" data-text="KeyValueMap" tabindex="-1">KeyValueMap</h3></td>
+<td>KeyValueMap <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/error-code-reference#keyvaluemapoperationspolicy">KeyValueMapOperations policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="messagevalidation" data-text="MessageValidation" tabindex="-1">MessageValidation</h3></td>
+<td>MessageValidation <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/error-code-reference#soapmessagevalidationpolicy">SOAPMessageValidation policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="raisefault" data-text="RaiseFault" tabindex="-1">RaiseFault</h3></td>
+<td>RaiseFault RaiseFaultException</td>
+<td><code translate="no" dir="ltr">steps.raisefault.RaiseFault</code></td>
+</tr>
+<tr>
+<td><h3 id="xmltojson" data-text="XMLtoJSON" tabindex="-1">XMLtoJSON</h3></td>
+<td>XMLtoJSON <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/xml-json-policy#runtime-errors">XMLtoJSON policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="xsltransformation" data-text="XSLTransformation" tabindex="-1">XSLTransformation</h3></td>
+<td>XSLTransformation <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/xsl-transform-policy#runtime-errors">XSLTransform policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h2 id="monetization" data-text="Monetization" tabindex="-1">Monetization</h2></td>
+<td></td>
+<td>Mint UndefinedProduct</td>
+<td><code translate="no" dir="ltr">mintstep.undefinedProduct</code></td>
+</tr>
+<tr>
+<td rowspan="13"><h2 id="security-policy" data-text="Security Policy" tabindex="-1">Security Policy</h2></td>
+<td><h3 id="accesscontrol" data-text="AccessControl" tabindex="-1">AccessControl</h3></td>
+<td>AccessControl <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/error-code-reference#runtime-errors">AccessControl policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="basicauthentication" data-text="BasicAuthentication" tabindex="-1">BasicAuthentication</h3></td>
+<td>BasicAuthentication <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/basic-authentication-policy#runtime-errors">BasicAuthentication policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="jsonthreatprotection" data-text="JSONThreatProtection" tabindex="-1">JSONThreatProtection</h3></td>
+<td>JSONThreatProtection <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/json-threat-protection-policy#runtime-errors">JSONThreatProtection policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="jwt" data-text="JWT" tabindex="-1">JWT</h3></td>
+<td>JWT <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/generate-jwt-policy#generate-jwt-runtime-errors">JWT policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="oauth" data-text="OAuth" tabindex="-1">OAuth</h3></td>
+<td>OAuth <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/oauthv2-policy#runtime-errors">OAuth V2 policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="regex-protection" data-text="Regex Protection" tabindex="-1">Regex Protection</h3></td>
+<td>RegexProtection <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/regular-expression-protection#runtime-errors">RegularExpressionProtection policy runtime errors</a></td>
+</tr>
+<tr>
+<td rowspan="6"><h3 id="samlassertion" data-text="SAMLAssertion" tabindex="-1">SAMLAssertion</h3></td>
+<td>SAMLAssertion InvalidKeyStore</td>
+<td><code translate="no" dir="ltr">steps.saml.generate.InvalidKeyStore</code></td>
+</tr>
+<tr>
+<td>SAMLAssertion InvalidMediaType</td>
+<td><code translate="no" dir="ltr">steps.saml.generate.InvalidMediaTpe</code></td>
+</tr>
+<tr>
+<td>SAMLAssertion InvalidTrustStore</td>
+<td><code translate="no" dir="ltr">steps.saml.validate.InvalidTrustStore</code></td>
+</tr>
+<tr>
+<td>SAMLAssertion SAMLAssertionForNotBeforeConditionViolated</td>
+<td><code translate="no" dir="ltr">steps.saml.validate.NotBeforeConditionViolated</code></td>
+</tr>
+<tr>
+<td>SAMLAssertion SignatureValidationFailed</td>
+<td><code translate="no" dir="ltr">steps.saml.validate.SignatureValidationFailed</code></td>
+</tr>
+<tr>
+<td>SAMLAssertion XPathResolutionFailed</td>
+<td><code translate="no" dir="ltr">steps.saml.validate.XPathResolutionFailed</code></td>
+</tr>
+<tr>
+<td><h3 id="xmlthreatprotection" data-text="XMLThreatProtection" tabindex="-1">XMLThreatProtection</h3></td>
+<td>XMLThreatProtection <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/xml-threat-protection-policy#runtime-errors">XMLThreatProtection policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h2 id="sense" data-text="Sense" tabindex="-1">Sense</h2></td>
+<td><h3 id="sense_1" data-text="Sense" tabindex="-1">Sense</h3></td>
+<td>Sense RaiseFault</td>
+<td><code translate="no" dir="ltr">messaging.runtime.SenseRaiseFault</code></td>
+</tr>
+<tr>
+<td rowspan="6"><h2 id="traffic-mgmt-policy" data-text="Traffic Mgmt Policy" tabindex="-1">Traffic Mgmt Policy</h2></td>
+<td><h3 id="caching" data-text="Caching" tabindex="-1">Caching</h3></td>
+<td>Caching InvalidExpiryDatForCacheEntry</td>
+<td><code translate="no" dir="ltr">messaging.config.beans.InvalidExpiryDateForCacheEntry</code></td>
+</tr>
+<tr>
+<td><h3 id="concurrentratelimit" data-text="ConcurrentRateLimit" tabindex="-1">ConcurrentRateLimit</h3></td>
+<td>ConcurrentRateLimit ConcurrentRateLimitViolation</td>
+<td><code translate="no" dir="ltr">policies.concurrentratelimit.ConcurrentRatelimitViolation</code></td>
+</tr>
+<tr>
+<td><h3 id="quota" data-text="Quota" tabindex="-1">Quota</h3></td>
+<td>Quota <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/quota-policy#runtime-errors">Quota policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="quota-or-spikearrest" data-text="Quota or SpikeArrest" tabindex="-1">Quota or SpikeArrest</h3></td>
+<td>QuotaOrSpikeArrest InvalidMessageWeight</td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#runtime-errors">policies.ratelimit.InvalidMessageWeight</a></td>
+</tr>
+<tr>
+<td><h3 id="resetquota" data-text="ResetQuota" tabindex="-1">ResetQuota</h3></td>
+<td>ResetQuota <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/reset-quota-policy#errorcodes">ResetQuota policy runtime errors</a></td>
+</tr>
+<tr>
+<td><h3 id="spikearrest" data-text="SpikeArrest" tabindex="-1">SpikeArrest</h3></td>
+<td>SpikeArrest <em>errorname</em></td>
+<td>See <a href="/apigee/docs/api-platform/reference/policies/spike-arrest-policy#runtime-errors">SpikeArrest policy runtime errors</a></td>
+</tr>
+</tbody>
+</table>

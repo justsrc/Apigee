@@ -1,0 +1,160 @@
+<div id="NAME" class="section">
+
+NAME
+
+<span class="normalfont"> gcloud apigee apis deploy - deploy an Apigee API proxy to an environment </span>
+
+</div>
+
+<div id="SYNOPSIS" class="section">
+
+SYNOPSIS
+
+<span class="normalfont"> `gcloud apigee apis deploy` \[\[[`REVISION`](#REVISION)\] <span class="flag">[`--api`](#--api)=`API`</span> <span class="flag">[`--environment`](#--environment)=`ENVIRONMENT`</span> <span class="flag">[`--organization`](#--organization)=`ORGANIZATION`\]</span> \[<span class="flag">[`--override`](#--override)\]</span> \[[`GCLOUD_WIDE_FLAG`](#GCLOUD-WIDE-FLAGS)` …`\] </span>
+
+</div>
+
+<div id="DESCRIPTION" class="section">
+
+DESCRIPTION
+
+Deploy an Apigee API proxy to an environment.
+
+`gcloud apigee apis deploy` installs an API proxy revision in an Apigee runtime environment.
+
+By default, the API proxy's base path must not already be in use by a deployed proxy in the target environment. To allow Apigee to undeploy any conflicting API proxy as part of the deployment, use the `--override` command.
+
+Once a particular revision of an API proxy has been deployed, that revision can no longer be modified. Any updates to the API proxy must be saved as a new revision.
+
+</div>
+
+<div id="EXAMPLES" class="section">
+
+EXAMPLES
+
+To deploy the latest revision of the API proxy named `demo` to the `test` environment, given that the API proxy and environment's matching Cloud Platform project has been set in gcloud settings, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee apis deploy --environment=test --api=demo
+```
+
+To deploy revision 3 of that proxy, owned by an organization named `my-org`, run, and replace any conflicting deployment that might already exist, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee apis deploy 3 --organization=my-org --environment=test --api=demo --override
+```
+
+To deploy that proxy and print the resulting deployment as a JSON object, run:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud apigee apis deploy 3 --organization=my-org --environment=test --api=demo --format=json
+```
+
+</div>
+
+<div id="POSITIONAL-ARGUMENTS" class="section">
+
+POSITIONAL ARGUMENTS
+
+Revision resource - API proxy revision to be deployed and environment in which to deploy it. Revisions can either be a positive revision number, or the special value `latest`, which will deploy the latest revision of the API proxy. If revision is unspecified, the default is `latest`. The arguments in this group can be used to specify the attributes of this resource.
+
+<span class="normalfont">\[`REVISION`\]</span>
+
+ID of the revision or fully qualified identifier for the revision.
+
+To set the `revision` attribute:
+
+- provide the argument `REVISION` on the command line;
+- leave the argument unspecified for it to be chosen automatically.
+
+<span class="normalfont">`--api`=`API`</span>
+
+API proxy to be deployed. To get a list of available API proxies, run [`gcloud apigee apis list`](/sdk/gcloud/reference/apigee/apis/list).
+
+To set the `api` attribute:
+
+- provide the argument `REVISION` on the command line with a fully specified name;
+- leave the argument unspecified for it to be chosen automatically with a fully specified name;
+- provide the argument `--api` on the command line.
+
+<span class="normalfont">`--environment`=`ENVIRONMENT`</span>
+
+Environment in which to deploy the API proxy. To get a list of available environments, run [`gcloud apigee environments list`](/sdk/gcloud/reference/apigee/environments/list).
+
+To set the `environment` attribute:
+
+- provide the argument `REVISION` on the command line with a fully specified name;
+- leave the argument unspecified for it to be chosen automatically with a fully specified name;
+- provide the argument `--environment` on the command line.
+
+<span class="normalfont">`--organization`=`ORGANIZATION`</span>
+
+Apigee organization of the proxy and environment. If unspecified, the Cloud Platform project's associated organization will be used.
+
+To set the `organization` attribute:
+
+- provide the argument `REVISION` on the command line with a fully specified name;
+- leave the argument unspecified for it to be chosen automatically with a fully specified name;
+- provide the argument `--organization` on the command line;
+- set the property \[project\] or provide the argument \[--project\] on the command line, using a Cloud Platform project with an associated Apigee organization.
+
+</div>
+
+<div id="FLAGS" class="section">
+
+FLAGS
+
+<span class="normalfont">`--override`</span>  
+Force the deployment of the new revision, overriding any currently deployed revision that would conflict with it.
+
+If an existing API proxy revision is deployed, set this flag to ensure seamless deployment with zero downtime. In this case, the existing revision remains deployed until the new revision is fully deployed.
+
+If unset, `gcloud apigee apis deploy` will fail unless all conflicting API proxies are first undeployed from the environment. To do this, run [`gcloud apigee apis undeploy`](/sdk/gcloud/reference/apigee/apis/undeploy) on the conflicting deployment.
+
+</div>
+
+<div id="GCLOUD-WIDE-FLAGS" class="section">
+
+GCLOUD WIDE FLAGS
+
+These flags are available to all commands: [`--access-token-file`](/sdk/gcloud/reference#--access-token-file), [`--account`](/sdk/gcloud/reference#--account), [`--billing-project`](/sdk/gcloud/reference#--billing-project), [`--configuration`](/sdk/gcloud/reference#--configuration), [`--flags-file`](/sdk/gcloud/reference#--flags-file), [`--flatten`](/sdk/gcloud/reference#--flatten), [`--format`](/sdk/gcloud/reference#--format), [`--help`](/sdk/gcloud/reference#--help), [`--impersonate-service-account`](/sdk/gcloud/reference#--impersonate-service-account), [`--log-http`](/sdk/gcloud/reference#--log-http), [`--project`](/sdk/gcloud/reference#--project), [`--quiet`](/sdk/gcloud/reference#--quiet), [`--trace-token`](/sdk/gcloud/reference#--trace-token), [`--user-output-enabled`](/sdk/gcloud/reference#--user-output-enabled), [`--verbosity`](/sdk/gcloud/reference#--verbosity).
+
+Run `$ `[`gcloud help`](/sdk/gcloud/reference) for details.
+
+</div>
+
+<div id="NOTES" class="section">
+
+NOTES
+
+These variants are also available:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud alpha apigee apis deploy
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+gcloud beta apigee apis deploy
+```
+
+</div>

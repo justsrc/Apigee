@@ -1,0 +1,109 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis/create" class="section">
+
+- [HTTP request](#body.HTTP_TEMPLATE)
+- [Path parameters](#body.PATH_PARAMETERS)
+- [Query parameters](#body.QUERY_PARAMETERS)
+- [Request body](#body.request_body)
+- [Response body](#body.response_body)
+- [Authorization scopes](#body.aspect)
+- [Try it!](#try-it)
+
+<div id="google.cloud.apigee.v1.ApiProxyService.CreateApiProxyRevision" class="section">
+
+</div>
+
+<div id="description" class="section">
+
+Creates an API proxy. The API proxy created will not be accessible at runtime until it is deployed to an environment.
+
+Create a new API proxy by setting the `name` query parameter to the name of the API proxy.
+
+Import an API proxy configuration bundle stored in zip format on your local machine to your organization by doing the following:
+
+- Set the `name` query parameter to the name of the API proxy.
+- Set the `action` query parameter to `import`.
+- Set the `Content-Type` header to `multipart/form-data`.
+- Pass as a file the name of API proxy configuration bundle stored in zip format on your local machine using the `file` form field.
+
+**Note**: To validate the API proxy configuration bundle only without importing it, set the `action` query parameter to `validate`.
+
+When importing an API proxy configuration bundle, if the API proxy does not exist, it will be created. If the API proxy exists, then a new revision is created. Invalid API proxy configurations are rejected, and a list of validation errors is returned to the client.
+
+</div>
+
+<div id="body" class="section">
+
+<div id="body.HTTP_TEMPLATE" class="section">
+
+### HTTP request
+
+`POST https://apigee.googleapis.com/v1/{parent=organizations/*}/apis`
+
+The URL uses [gRPC Transcoding](https://google.aip.dev/127) syntax.
+
+</div>
+
+<div id="body.PATH_PARAMETERS" class="section">
+
+### Path parameters
+
+| Parameters |  |
+| --- | --- |
+| parent | string Required. Name of the organization in the following format: organizations/{org} If the API Proxy resource has the space attribute set, IAM permissions are checked against the Space resource path. To learn more, read the Apigee Spaces Overview . Authorization requires the following IAM permission on the specified resource parent : apigee.proxies.create |
+
+</div>
+
+<div id="body.QUERY_PARAMETERS" class="section">
+
+### Query parameters
+
+| Parameters |  |
+| --- | --- |
+| name | string Name of the API proxy. Restrict the characters used to: A-Za-z0-9._- |
+| action | string Action to perform when importing an API proxy configuration bundle. Set this parameter to one of the following values: import to import the API proxy configuration bundle. validate to validate the API proxy configuration bundle without importing it. |
+| validate | boolean Ignored. All uploads are validated regardless of the value of this field. Maintained for compatibility with Apigee Edge API. |
+| space | string Optional. The ID of the space associated with this proxy. Any IAM policies applied to the space will affect access to this proxy. Note that this field is only respected when creating a new proxy. It has no effect when creating a new revision for an existing proxy. |
+
+</div>
+
+<div id="body.request_body" class="section">
+
+### Request body
+
+The request body contains an instance of [`HttpBody`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.keystores.aliases#HttpBody).
+
+</div>
+
+<div id="body.response_body" class="section">
+
+### Response body
+
+If successful, the response body contains a newly created instance of [`ApiProxyRevision`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apis.revisions#ApiProxyRevision).
+
+</div>
+
+<div id="body.aspect" class="section">
+
+### Authorization scopes
+
+Requires the following OAuth scope:
+
+- `https://www.googleapis.com/auth/cloud-platform`
+
+</div>
+
+</div>
+
+<div id="try-it" class="section">
+
+<div class="devsite-apix">
+
+<div class="apis-explorer" discovery-rest-url="https://apigee.googleapis.com/$discovery/rest?version=v1" method-id="apigee.organizations.apis.create" params="">
+
+</div>
+
+</div>
+
+</div>
+
+</div>

@@ -1,0 +1,30 @@
+*This page applies to **Apigee**, but not to **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+An API proxy must be deployed before developers can access and use it.
+
+In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Proxy development <span aria-label="and then">\></span> API proxies** page.
+
+<a href="https://console.cloud.google.com//apigee/proxies" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to API proxies</a>
+
+Make sure the same Google Cloud project where you created the API proxy is selected from the dropdown at the top of the page.
+
+Select **myproxy** in the proxies list.
+
+Click **Deploy** to display the **Deploy** dialog, and enter the following information:
+
+- **Revision**: Select the revision number of the proxy you want to deploy. If you're doing this tutorial from scratch, there's only one revision to choose from.
+- **Environment**: Select the environment where you want to deploy the proxy. An environment is a runtime execution context for the API proxies in an Apigee organization. You must deploy an API proxy to an environment before it can be accessed.
+- **Service account** (optional): A <a href="https://cloud.google.com/iam/docs/service-accounts" class="external">service account</a> for the proxy. The service account represents the identity of the deployed proxy, and determines what permissions it has. This is an advanced feature, and for the purpose of this tutorial, you can ignore it.
+
+Click **Deploy**.
+
+**Note:** It may take a few moments for Apigee to deploy the new proxy.
+
+When the proxy is deployed, the **Status** column in the **Deployments** section displays a green icon to show that the API proxy revision is deployed. You can hover the cursor over the status icon to see more information about the deployment.
+
+The next step explains how to call the API proxy you just deployed.
+
+<a href="/apigee/docs/api-platform/get-started/create-proxy" class="button">1</a> <a href="/apigee/docs/api-platform/get-started/deploy-proxy" class="button button-disabled">2</a> <a href="/apigee/docs/api-platform/get-started/test-proxy" class="button button-primary">(NEXT) Step 3: Test the API proxy</a> <a href="/apigee/docs/api-platform/get-started/change-endpoint" class="button">4</a> <a href="/apigee/docs/api-platform/get-started/add-policy" class="button">5</a>

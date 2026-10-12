@@ -1,0 +1,1943 @@
+[<span class="devsite-label" background="google-green">Extensible policy</span>](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types)
+
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+A *quota* is an allotment of requests that an API proxy will accept over a time period, such as minute, hour, day, week, or month. The Quota policy maintains counters that tally the number of requests received by the API proxy. This capability enables API providers to enforce limits on the number of API calls made by apps over an interval of time. Using Quota policies you can, for example, limit apps to 1 request per minute, or to 10,000 requests per month.
+
+When an API proxy reaches its quota limit, Apigee rejects subsequent API calls and returns an error message until the Quota counter automatically resets at the end of the specified time interval, or until the Quota is explicitly reset using the [ResetQuota policy](/apigee/docs/api-platform/reference/policies/reset-quota-policy).
+
+For example, if a Quota is defined as 10,000 messages per month, rate-limiting begins after the 10,000th message. It doesn't matter whether 10,000 messages were counted on the first day or the last day of that month.
+
+Quotas apply to individual API proxies and are not distributed among API proxies. For example, if you have three API proxies in an API product, a single quota is not shared across all three even if all three use the same quota policy configuration.
+
+You can set the same quota for all apps accessing the API proxy, or you can set different quota limits, depending on:
+
+- An API product that contains the API proxy
+- The app requesting the API
+- The app developer
+- The upstream service
+- Many other criteria
+- Combinations of any of the available criteria
+
+Each API call can be dynamically weighted. For example, with a Large Language Model (LLM) API, you can enforce a rate limit based on the number of tokens in the request or the response, or both. Also, the quota limits themselves can be dynamic, which means you can enforce more strict quotas when the system is busier, or relax quotas during non-peak hours. See [Configure dynamic quotas](#dynamic-quotas) for information.
+
+You can also configure conditional quotas, which allow you to determine whether quota policies apply based on the values of flow variables. For information and usage, see [`<Allow>`](/apigee/docs/api-platform/reference/policies/quota-policy#allow) and [`<Class>`](/apigee/docs/api-platform/reference/policies/quota-policy#class), and the [Class example](#class-example).
+
+This policy is an *Extensible policy* and use of this policy might have cost or utilization implications, depending on your Apigee license. For information on policy types and usage implications, see [Policy types](/apigee/docs/api-platform/reference/policies/reference-overview-policy#policy-types).
+
+**Note:** A variation on the Quota policy, [SpikeArrest policy](/apigee/docs/api-platform/reference/policies/spike-arrest-policy), prevents traffic spikes (or bursts) that can be caused by a sudden increase in usage, buggy clients, or malicious attacks. Don't use the Quota policy to shield against overall traffic spikes. For that, use the [SpikeArrest policy](/apigee/docs/api-platform/reference/policies/spike-arrest-policy).  
+  
+Need help deciding which rate limiting policy to use? See [Comparing Quota and SpikeArrest policies](/apigee/docs/api-platform/develop/comparing-quota-and-spike-arrest-policies).
+
+### Quota policy types
+
+The Quota policy supports several different ways in which the quota counter starts and resets. You can define which to use with the `type` attribute on the [`<Quota>`](/apigee/docs/api-platform/reference/policies/quota-policy#quota) element, as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Quota name="QuotaPolicy" type="calendar">
+  ...
+</Quota>
+```
+
+Valid values of `type` include:
+
+- `calendar`: Configures a quota based on an explicit start time. The Quota counter for each app is refreshed based on the [`<StartTime>`](/apigee/docs/api-platform/reference/policies/quota-policy#starttime), [`<Interval>`](/apigee/docs/api-platform/reference/policies/quota-policy#interval), and [`<TimeUnit>`](/apigee/docs/api-platform/reference/policies/quota-policy#timeunit) values that you set.
+- `rollingwindow`: Configures a quota that uses a "rolling window" to determine quota usage. You specify the size of the window with the `<Interval>` and `<TimeUnit>` elements; for example, 1 day. When a new request is received, Apigee counts the number of requests received during the preceding interval. For example, with a 1-day window, when a request is received at 5:01 p.m., the policy counts the number of requests received since 5:01 p.m. the previous day to determine if the latest request will exceed the quota.
+- `flexi`: Configures a quota that causes the counter to begin when the first request message is received from an app, and resets based on the `<Interval>` and `<TimeUnit>` values.
+
+The following table describes when the quota resets for each type:
+
+<table class="green">
+<thead>
+<tr>
+<th rowspan="2">Time Unit</th>
+<th colspan="3">Type</th>
+</tr>
+<tr>
+<th><code translate="no" dir="ltr">default</code> (or null)</th>
+<th><code translate="no" dir="ltr">calendar</code></th>
+<th><code translate="no" dir="ltr">flexi</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="alt">minute</td>
+<td>Start of next minute</td>
+<td>One minute after <code translate="no" dir="ltr">&lt;StartTime&gt;</code></td>
+<td>One minute after first request</td>
+</tr>
+<tr>
+<td class="alt">hour</td>
+<td>Top of next hour</td>
+<td>One hour after <code translate="no" dir="ltr">&lt;StartTime&gt;</code></td>
+<td>One hour after first request</td>
+</tr>
+<tr>
+<td class="alt">day</td>
+<td>Midnight GMT of the current day</td>
+<td>24 hours after <code translate="no" dir="ltr">&lt;StartTime&gt;</code></td>
+<td>24 hours after first request</td>
+</tr>
+<tr>
+<td class="alt">week</td>
+<td>Midnight GMT Sunday at the end of the week</td>
+<td>One week after <code translate="no" dir="ltr">&lt;StartTime&gt;</code></td>
+<td>One week after first request</td>
+</tr>
+<tr>
+<td class="alt">month</td>
+<td>Midnight GMT of the last day of the month</td>
+<td>One month (28 days) after <code translate="no" dir="ltr">&lt;StartTime&gt;</code></td>
+<td>One month (28 days) after first request</td>
+</tr>
+</tbody>
+</table>
+
+**Note:** If you need to limit spikes in request traffic using a time interval measured in seconds, we recommend using the [SpikeArrest policy](/apigee/docs/api-platform/reference/policies/spike-arrest-policy) instead of the Quota policy.
+
+For `type="calendar"`, you must specify the value of [`<StartTime>`](/apigee/docs/api-platform/reference/policies/quota-policy#starttime).
+
+The table does not describe when the count resets for the `rollingwindow` type. That's because rolling window quotas work a little differently, based on a *lookback window*, such as a one hour or one day. For the `rollingwindow` type, the counter never resets, but is recalculated on each request. When a new request comes in, the policy determines if the quota has been exceeded in the past window of time.
+
+For example, you define a two hour window that allows 1000 requests. A new request comes in at 4:45 PM.The policy calculates the quota count for the past two hour window, meaning the number of requests since 2:45 PM. If the quota limit has not been exceeded in that two-hour window, then the request is allowed.
+
+One minute later, at 4:46 PM, another request comes in. Now the policy calculates the quota count since 2:46 PM to determine if the limit has been exceeded.
+
+### Understand quota counters
+
+When a quota policy executes in an API proxy flow, a quota counter is incremented. When the counter reaches its limit, no further API calls associated with that counter are permitted. Depending on the configuration you use for your API Product, the quota policy may employ a single counter, or multiple independent counters. It's important to understand the scenarios under which multiple counters will be used, and how they behave.
+
+#### Configure quota settings for API products
+
+An API product can specify quota settings at the [product level](/apigee/docs/api-platform/publish/create-api-products#productdetails) or at the [individual operation level](/apigee/docs/api-platform/publish/create-api-products#operations), or both. If your API proxy is included in an API product, you can configure the Quota policy to use the quota settings (allow count, time unit, and interval) that are defined in that product. The easiest way to do this is via the [`useQuotaConfigInAPIProduct`](#usequotaconfiginapiproduct) element. Alternatively, you can reference these settings in the Quota policy via individual variable references.
+
+#### How quotas are counted
+
+By default, Apigee maintains a separate quota counter for each operation defined in an API product, and the following rules are observed:
+
+If an operation has a quota defined for it, then the operation's quota settings take precedence over the quota settings defined at the product level.
+
+If an operation does not have a quota defined for it, then the product-level quota settings apply.
+
+If the API product does not include any quota settings — neither at the product nor operation level — quota settings for allow count, time unit, and interval as specified in the Quota policy apply.
+
+In all cases, Apigee maintains a separate quota counter for each operation defined in an API product. Any API calls that match an operation will increment its counter.
+
+#### Configure the quota policy to use API product quota settings
+
+To configure your quota policy to use quota settings from an API product that the proxy belongs to:
+
+1.  Create or update an API product and specify the `quotaCounterScope` attribute as `PRODUCT` to enforce quota at the API product level, or specify `PROXY` to enforce quota at the API proxy level.
+2.  For all API proxies in the API product, add a [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy) or an [OAuthv2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy) with a VerifyAccessToken operation in the request flow *before the Quota policy*. These policies identify the API product for each request.
+    **Note:** If you don't add one of these operations to the request flow, the API proxy quota policy does not know which API product's quota configuration to apply to the request and the API product's quota counter is not updated for API calls.
+3.  Configure the Quota policy to use the limits defined in the API Product, with [`UseQuotaConfigInAPIProduct`](#usequotaconfiginapiproduct).
+
+#### Configure API proxy-level counters
+
+It is possible to configure an API product to maintain a quota count at the API proxy scope. In this case, the quota configuration specified at the API product level is shared by all operations that do not have their own quota specified. The effect of this configuration is to create a counter at the API proxy level for this API product.
+
+To achieve this configuration, you must use the [/apiproducts Apigee API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apiproducts/create) to create or update the product and set the [`quotaCounterScope` attribute](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apiproducts#quotacounterscope) to `PROXY` in the create or update request. With the `PROXY` configuration, requests matching any of the operations defined for the API product that are associated with the same proxy, and do not have their own quota settings, will share a common quota counter for that proxy.
+
+In Figure 1, Operation 1 and 2 are associated with Proxy1 and Operation 4 and 5 are associated with Proxy3. Because `quotaCounterScope=PROXY` is set in the API product, each of these operations uses the API product-level quota setting. Operation 1 and 2, associated with Proxy1, use a shared counter, and Operation 4 and 5, associated with Proxy3, use a separate shared counter. Operation 3 has its own quota configuration setting, and because of that uses its own counter, irrespective of the value of the `quotaCounterScope` attribute.
+
+**Figure 1: Use of the quotaCounterScope flag**  
+<img src="/static/apigee/docs/api-platform/images/quotacounterscope-1.png" class="screenshot" style="width:70.0%" />
+
+#### How quotas are counted if no API products are in use
+
+If there is no API product associated with an API proxy, a quota policy maintains a single counter, regardless of how many times you reference it in an API proxy. The name of the quota counter is based on the `name` attribute of the policy.
+
+For example, you create a Quota policy named `MyQuotaPolicy` with a limit of 5 requests and place it on multiple flows (Flow A, B, and C) in the API proxy. Even though it is used in multiple flows, it maintains a single counter that is updated by all instances of the policy:
+
+- Flow A is executed -\> MyQuotaPolicy is executed and its counter = 1
+- Flow B is executed -\> MyQuotaPolicy is executed and its counter = 2
+- Flow A is executed -\> MyQuotaPolicy is executed and its counter = 3
+- Flow C is executed -\> MyQuotaPolicy is executed and its counter = 4
+- Flow A is executed -\> MyQuotaPolicy is executed and its counter = 5
+
+The next request to any of the three flows is rejected because the quota counter has reached its limit.
+
+Using the same Quota policy in more than one place in an API proxy flow, which can unintentionally cause Quota to run out faster than you expected, is an anti-pattern described in [Introduction to antipatterns](/apigee/docs/api-platform/antipatterns/intro).
+
+Alternatively, you can define multiple Quota policies in your API proxy and use a different policy in each flow. Each Quota policy maintains its own counter, based on the `name` attribute of the policy.
+
+#### Create multiple counters through policy configuration
+
+You can use the [`<Class>`](/apigee/docs/api-platform/reference/policies/quota-policy#class) or [`<Identifier>`](/apigee/docs/api-platform/reference/policies/quota-policy#identifier) elements in the Quota policy to define multiple, unique counters in a single policy. By using these elements, a single policy can maintain different counters based on the app making the request, the app developer making the request, a client ID or other client identifier, and more. See the examples above for more information on using the `<Class>` or `<Identifier>` elements.
+
+**Note:** Quota counters are scoped to the API proxy that contains the Quota policy. If multiple API proxies contain Quota policies with the same name, the counters are maintained separately.
+
+### Time notation
+
+All Quota times are set to the <a href="https://en.wikipedia.org/wiki/Coordinated_Universal_Time" target="new">Coordinated Universal Time</a> (UTC) time zone.
+
+Quota time notation follows the international standard date notation defined in International Standard [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
+
+Dates are defined as year, month, and day, in the following format: `YYYY-MM-DD`. For example, `2021-02-04` represents February 4, 2021.
+
+Time of day is defined as hours, minutes, and seconds in the following format: `hours:minutes:seconds`. For example, `23:59:59` represents the time one second before midnight.
+
+Note that two notations, `00:00:00` and `24:00:00`, are available to distinguish the two midnights that can be associated with one date. Therefore `2021-02-04 24:00:00` is the same date and time as `2021-02-05 00:00:00`. The latter is usually the preferred notation.
+
+### Get quota settings from the API product configuration
+
+You can set quota limits in API product configurations. Those limits don't automatically enforce quota. Instead, you must also add a Quota policy to the API proxy, to read the API product values. Here are some advantages to setting a quota on the API product:
+
+- Quota policies can use a uniform setting across all API proxies in the API product.
+- You can make runtime changes to the quota setting on an API product, and quota policies that reference the value automatically have updated quota values.
+
+For more information on using quota settings from an API product, see the "Dynamic Quota" example above.
+
+For info on configuring API products with quota limits, see [Managing API products](/apigee/docs/api-platform/publish/create-api-products).
+
+### Configure shared quota counters
+
+In the simple case, the Quota policy increments its counter once for each request sent to an API proxy, during initial request processing. In some cases, you may want to check if the quota is exceeded on initial handling of the incoming request, but increment the counter only during response handling. This makes sense when the cost or weight of the API call can be known only after the upstream or target system responds. In the case of an LLM API, the size of the response in tokens might determine the cost. In the case of a BigQuery API, the `total_slot_ms` in the response might determine the cost.
+
+Three Quota policy elements—[`<SharedName>`](#sharedname), [`<CountOnly>`](#countonly), and [`<EnforceOnly>`](#enforceonly)—when used together, allow you to customize the Quota policy to enforce the quota on the incoming request, and accrue counts against the quota based on information derived from target responses.
+
+For example, suppose you have an API proxy that uses an LLM as a target, and you wish to enforce a quota of 100,000 tokens per hour. The LLM responses provide a `totalTokenCount` value. To achieve this, do the following:
+
+- Attach a Quota policy to the ProxyEndpoint Request flow with the `<SharedName>` element set with a name value and the `<EnforceOnly>` element set to `true`.
+- To the ProxyEndpoint Response flow, attach an ExtractVariables policy to extract the `totalTokenCount` value from the response received from the LLM target.
+- Attach a second Quota policy to the ProxyEndpoint Response flow with the `<SharedName>` element set to the same name value as the first Quota policy and the `<CountOnly>` element set to `true`. Set the `<MessageWeight>` element to use the extracted `totalTokenCount` value.
+
+For an example showing how to use shared counters, see **Shared counters** in the [Samples](#samples) section.
+
+### Configure dynamic quotas
+
+Dynamic quotas enable you to configure a single Quota policy that enforces different quota settings based on information passed to the Quota policy. Another term for Quota settings in this context is *service plan*. The dynamic quota checks the apps' service plan and then enforces those settings.
+
+You can use any variable to set the parameters of the Quota policy. Those variables can come from:
+
+- Flow variables
+- Properties on the API product, app, or developer
+- A key value map (KVM)
+- A header, query parameter, form parameter, and others
+
+For each API proxy, you can add a Quota policy that references either the same variable as all the other Quota policies in all the other proxies or variables unique for that policy and proxy.
+
+See [Dynamic Quotas](#dynamic-quotas-sample) for an example of how to implement dynamic quotas.
+
+### Samples
+
+These policy code samples illustrate how to configure different quota types and settings:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Dynamic Quotas
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Quota name="CheckQuota">
+  <Interval ref="verifyapikey.verify-api-key.apiproduct.developer.quota.interval">1</Interval>
+  <TimeUnit ref="verifyapikey.verify-api-key.apiproduct.developer.quota.timeunit">hour</TimeUnit>
+  <Allow count="200" countRef="verifyapikey.verify-api-key.apiproduct.developer.quota.limit"/>
+</Quota>
+```
+
+In this example, the API proxy containing the Quota policy uses a [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy), named `verify-api-key`, to validate the API key passed in a request. The Quota policy then accesses the flow variables from the VerifyAPIKey policy to read the quota values set on the API product.
+
+**Note**: If you specify both a value and a reference for an element, then reference gets the priority. If reference does not resolve at runtime, then the value is used.
+
+Another option is to set custom attributes on individual developers or apps, and then read those values in the Quota policy. For example, to set different quota values per developer. You set custom attributes on the developer containing the limit, time unit, and interval. You then reference these values in the Quota policy. This example also uses the VerifyAPIKey flow variables to reference the custom attributes set on the developer:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Quota name="DeveloperQuota">
+  <Identifier ref="verifyapikey.verify-api-key.client_id"/>
+  <Interval ref="verifyapikey.verify-api-key.developer.timeInterval"/>
+  <TimeUnit ref="verifyapikey.verify-api-key.developer.timeUnit"/>
+  <Allow countRef="verifyapikey.verify-api-key.developer.limit"/>
+</Quota>
+```
+
+</div>
+
+<div class="section">
+
+### Start time
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Quota name="QuotaPolicy" type="calendar">
+  <StartTime>2021-02-18 10:30:00</StartTime>
+  <Interval>5</Interval>
+  <TimeUnit>hour</TimeUnit>
+  <Allow count="99"/>
+</Quota>
+```
+
+For a Quota with `type` set to `calendar`, you must define an explicit [`<StartTime>`](/apigee/docs/api-platform/reference/policies/quota-policy#starttime) value. The time value is the GMT time, not local time. If you do not provide a `<StartTime>` value for a policy of type `calendar`, Apigee issues an error.
+
+The Quota counter for each app is refreshed based on the `<StartTime>`, [`<Interval>`](/apigee/docs/api-platform/reference/policies/quota-policy#interval), and [`<TimeUnit>`](/apigee/docs/api-platform/reference/policies/quota-policy#timeunit) values. For this example, the Quota begins counting at 10:30 am GMT on February 18, 2021, and refreshes every 5 hours. Therefore, the next refresh is at 3:30 pm GMT on February 18, 2021.
+
+</div>
+
+<div class="section">
+
+### Access Counter
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Quota name="QuotaPolicy">
+  <Interval>5</Interval>
+  <TimeUnit>hour</TimeUnit>
+  <Allow count="99"/>
+</Quota>
+```
+
+An API proxy has access to the flow variables set by the Quota policy. You can access these flow variables in the API proxy to perform conditional processing, monitor the policy as it gets close to the quota limit, return the current quota counter to an app, or for other reasons.
+
+Because access the flow variables for the policy is based on the policies `name` attribute, for the policy above named `<Quota>` you access its flow variables in the form:
+
+- `ratelimit.QuotaPolicy.allowed.count`: Allowed count.
+- `ratelimit.QuotaPolicy.used.count`: Current counter value.
+- `ratelimit.QuotaPolicy.expiry.time`: UTC time when the counter resets.
+
+There are many other flow variables that you can access, as described below.
+
+For example, you can use the following [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) to return the values of Quota flow variables as response headers:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AssignMessage continueOnError="false" enabled="true" name="ReturnQuotaVars">
+  <AssignTo createNew="false" type="response"/>
+  <Set>
+    <Headers>
+      <Header name="QuotaLimit">{ratelimit.QuotaPolicy.allowed.count}</Header>
+      <Header name="QuotaUsed">{ratelimit.QuotaPolicy.used.count}</Header>
+      <Header name="QuotaResetUTC">{ratelimit.QuotaPolicy.expiry.time}</Header>
+    </Headers>
+  </Set>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+</AssignMessage>
+```
+
+</div>
+
+<div class="section">
+
+### Shared counters
+
+The following example illustrates how to configure a shared counter for an API proxy, where the quota counter is also incremented when the target response is HTTP status `200`. Because both the Quota policies use the same `<SharedName>` value, both of the Quota policies will share the same quota counter. For more information, see [Configuring shared quota counters](#sharedcounters).
+
+ProxyEndpoint configuration example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ProxyEndpoint name="default">
+  <PreFlow name="PreFlow">
+    <Request>
+      <Step>
+        <Name>Quota-Enforce-Only</Name>
+      </Step>
+    </Request>
+    <Response>
+      <Step>
+        <Name>EV-Token-Count</Name>
+      </Step>
+      <Step>
+        <Name>Quota-Count-Only</Name>
+      </Step>
+    </Response>
+    <Response/>
+  </PreFlow>
+  <Flows/>
+  <PostFlow name="PostFlow">
+    <Request/>
+    <Response/>
+  </PostFlow>
+  <HTTPProxyConnection>
+    <BasePath>/quota-shared-name</BasePath>
+  </HTTPProxyConnection>
+  <RouteRule name="noroute"/>
+</ProxyEndpoint>
+```
+
+First quota policy example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Quota name="Quota-Enforce-Only" type="rollingwindow">
+  <SharedName>common-counter</SharedName>
+  <EnforceOnly>true</EnforceOnly>
+  <Allow count="15000"/>
+  <Interval>30</Interval>
+  <TimeUnit>minute</TimeUnit>
+  <Distributed>true</Distributed>
+</Quota>
+```
+
+ExtractVariable policy example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<ExtractVariables name='EV-Token-Count'>
+  <Source>response</Source>
+  <VariablePrefix>extracted</VariablePrefix>
+  <JSONPayload>
+    <Variable name='tokenCount'>
+      <JSONPath>$[1].usageMetadata.totalTokenCount</JSONPath>
+    </Variable>
+  </JSONPayload>
+</ExtractVariables>
+```
+
+Second Quota policy example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Quota name="Quota-Count-Only" type="rollingwindow">
+  <SharedName>common-counter</SharedName>  <!-- Same name as the first Quota policy -->
+  <CountOnly>true</CountOnly>
+  <Allow count="15000"/>
+  <Interval>30</Interval>
+  <TimeUnit>minute</TimeUnit>
+  <Distributed>true</Distributed>
+  <MessageWeight ref="extracted.tokenCount"/>
+</Quota>
+```
+
+</div>
+
+<div class="section">
+
+### First Request
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Quota name="MyQuota">
+  <Interval>1</Interval>
+  <TimeUnit>hour</TimeUnit>
+  <Allow count="10000"/>
+</Quota>
+```
+
+Use this sample code to enforce a quota of 10,000 calls per one hour. The policy resets the quota counter at the top of each hour. If the counter reaches the 10,000-call quota before the end of the hour, calls beyond 10,000 are rejected.
+
+For example, if the counter starts at `2021-07-08 07:00:00`, then it resets to 0 at `2021-07-08 08:00:00` (1 hour from the start time). If the first message is received at `2021-07-08 07:35:28` and the message count reaches 10,000 before `2021-07-08 08:00:00`, calls beyond that count are rejected until the count resets at the top of the hour.
+
+The counter reset time is based on the combination of [`<Interval>`](/apigee/docs/api-platform/reference/policies/quota-policy#interval) and [`<TimeUnit>`](/apigee/docs/api-platform/reference/policies/quota-policy#timeunit). For example, if you set `<Interval>` to 12 for a `<TimeUnit>` of hour, then the counter resets every twelve hours. You can set `<TimeUnit>` to minute, hour, day, week, or month.
+
+You can reference this policy in multiple places in your API proxy. For example, you could place it on the Proxy PreFlow so it is executed on on every request. Or, you could place it on multiple flows in the API proxy. If you use this policy in multiple places in the proxy, it maintains a single counter that is updated by all instances of the policy.
+
+Alternatively, you can define multiple Quota policies in your API proxy. Each Quota policy maintains its own counter, based on the `name` attribute of the policy.
+
+</div>
+
+<div class="section">
+
+### Set identifier
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Quota name="QuotaPolicy" type="calendar">
+  <Identifier ref="request.header.clientId"/>
+  <StartTime>2021-02-18 10:00:00</StartTime>
+  <Interval>5</Interval>
+  <TimeUnit>hour</TimeUnit>
+  <Allow count="99"/>
+</Quota>
+```
+
+By default, a Quota policy defines a single counter for the API proxy, regardless of the origin of a request. Alternatively, you can use the [`<Identifier>`](/apigee/docs/api-platform/reference/policies/quota-policy#identifier) attribute with a Quota policy to maintain separate counters based on the value of the `<Identifier>` attribute.
+
+For example, use the `<Identifier>` tag to define separate counters for every client ID. On a request to your proxy, the client app then passes a header containing the `clientID`, as shown in the example above.
+
+You can specify any flow variable to the `<Identifier>` attribute. For example, you could specify that a query param named `id` contains the unique identifier:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Identifier ref="request.queryparam.id"/>
+```
+
+If you use the [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy) to validate the API key, or the OAuthV2 policies with OAuth tokens, you can use information in the API key or token to define individual counters for the same Quota policy. For example, the following [`<Identifier>`](/apigee/docs/api-platform/reference/policies/quota-policy#identifier) element uses the `client_id` flow variable of a VerifyAPIKey policy named `verify-api-key`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Identifier ref="verifyapikey.verify-api-key.client_id"></Identifier>
+```
+
+Each unique `client_id` value now defines its own counter in the Quota policy.
+
+</div>
+
+<div class="section">
+
+### Class
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Quota name="QuotaPolicy">
+  <Interval>1</Interval>
+  <TimeUnit>day</TimeUnit>
+  <Allow>
+    <Class ref="request.header.developer_segment">
+      <Allow class="platinum" count="10000"/>
+      <Allow class="silver" count="1000" />
+    </Class>
+  </Allow>
+</Quota>
+```
+
+You can set Quota limits dynamically by using a class-based Quota count. In this example, the quota limit is determined by the value of the `developer_segment` header passed with each request. That variable can have a value of `platinum` or `silver`. If the header has an invalid value, the policy returns a quota violation error.
+
+</div>
+
+</div>
+
+------------------------------------------------------------------------
+
+**Note:** To access a tutorial featuring a complete functional example proxy that integrates a Quota policy after `VerifyAPIKey` policy, refer to the [Apigee samples repository](https://github.com/GoogleCloudPlatform/apigee-samples/tree/main/basic-quota).
+
+## `<Quota>` element
+
+Following are attributes and child elements of `<Quota>`. Note that some element combinations are mutually exclusive or not required. See the samples for specific usage.
+
+The `verifyapikey.my-verify-key-policy.apiproduct.*` variables below are available by default when a [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy) called `my-verify-key-policy` is used to check the app's API key in the request. The variable values come from the quota settings on the API product that the key is associated with, as described in [Getting quota settings from the API product configuration](#product).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Quota continueOnError="false" enabled="true" name="Quota-3" type="calendar">
+   <DisplayName>Quota 3</DisplayName>
+   <Allow count="UPPER_REQUEST_LIMIT" countRef="verifyapikey.my-verify-key-policy.apiproduct.developer.quota.limit"/>
+   <Allow>
+      <Class ref="request.queryparam.time_variable">
+        <Allow class="peak_time" count="UPPER_LIMIT_DURING_PEAK"/>
+        <Allow class="off_peak_time" count="UPPER_LIMIT_DURING_OFFPEAK"/>
+      </Class>
+   </Allow>
+   <Interval ref="verifyapikey.my-verify-key-policy.apiproduct.developer.quota.interval">1</Interval>
+   <TimeUnit ref="verifyapikey.my-verify-key-policy.apiproduct.developer.quota.timeunit">month</TimeUnit>
+   <StartTime>2021-7-16 12:00:00</StartTime>
+   <Distributed>false</Distributed>
+   <Synchronous>false</Synchronous>
+   <AsynchronousConfiguration>
+      <SyncIntervalInSeconds>20</SyncIntervalInSeconds>
+      <SyncMessageCount>5</SyncMessageCount>
+   </AsynchronousConfiguration>
+   <Identifier/>
+   <MessageWeight/>
+   <UseQuotaConfigInAPIProduct>
+     <DefaultConfig>
+       <Allow>
+          <Class ref="request.queryparam.time_variable">
+            <Allow class="peak_time" count="5000"/>
+            <Allow class="off_peak_time" count="1000"/>
+          </Class>
+       </Allow>
+       <Interval ref="verifyapikey.my-verify-key-policy.apiproduct.developer.quota.interval">1</Interval>
+       <TimeUnit ref="verifyapikey.my-verify-key-policy.apiproduct.developer.quota.timeunit">month</TimeUnit>
+     </DefaultConfig>
+   </UseQuotaConfigInAPIProduct>
+   </SharedName>
+   </CountOnly>
+   </EnforceOnly>
+</Quota>
+```
+
+The following attributes are specific to this policy:
+
+<table width="650">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<tbody>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Default</th>
+<th>Presence</th>
+</tr>
+&#10;<tr>
+<td>type</td>
+<td><p>Sets the <a href="#quotapolicytypes">Quota policy type</a>, which determines when and how the quota counter checks quota usage as well as how it resets.</p>
+<p>If you don't set <code translate="no" dir="ltr">type</code>, the counter begins at the beginning of the minute/hour/day/week/month.</p>
+<p>Valid values include:</p>
+<ul>
+<li><code translate="no" dir="ltr">calendar</code></li>
+<li><code translate="no" dir="ltr">rollingwindow</code></li>
+<li><code translate="no" dir="ltr">flexi</code></li>
+</ul>
+<p>For a complete description of each type, see <a href="#quotapolicytypes">Quota policy types</a>.</p></td>
+<td>N/A</td>
+<td>Optional</td>
+</tr>
+</tbody>
+</table>
+
+The following table describes attributes that are common to all policy parent elements:
+
+<table width="650">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<tbody>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Default</th>
+<th>Presence</th>
+</tr>
+&#10;<tr>
+<td><code translate="no" dir="ltr">name</code></td>
+<td><p>The internal name of the policy. The value of the <code translate="no" dir="ltr">name</code> attribute can contain letters, numbers, spaces, hyphens, underscores, and periods. This value cannot exceed 255 characters.</p>
+<p>Optionally, use the <code translate="no" dir="ltr">&lt;DisplayName&gt;</code> element to label the policy in the management UI proxy editor with a different, natural-language name.</p></td>
+<td>N/A</td>
+<td>Required</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">continueOnError</code></td>
+<td><p>Set to <code translate="no" dir="ltr">false</code> to return an error when a policy fails. This is expected behavior for most policies.</p>
+<p>Set to <code translate="no" dir="ltr">true</code> to have flow execution continue even after a policy fails. See also:</p>
+<ul>
+<li><a href="/apigee/docs/api-platform/fundamentals/fault-handling#multiplefaultrulesandexecutionlogic-faultrulesaretriggeredonlyinanerrorstateaboutcontinueonerror">Fault rules are triggered ONLY in an error state (about continueOnError)</a></li>
+<li><a href="/apigee/docs/api-platform/fundamentals/fault-handling#continueonerror">Handling faults within the current flow</a></li>
+</ul></td>
+<td>false</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">enabled</code></td>
+<td><p>Set to <code translate="no" dir="ltr">true</code> to enforce the policy.</p>
+<p>Set to <code translate="no" dir="ltr">false</code> to <em>turn off</em> the policy. The policy will not be enforced even if it remains attached to a flow.</p></td>
+<td>true</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td><code translate="no" dir="ltr">async</code></td>
+<td><p>This attribute is deprecated.</p></td>
+<td>false</td>
+<td>Deprecated</td>
+</tr>
+</tbody>
+</table>
+
+## \<DisplayName\> element
+
+Use in addition to the `name` attribute to label the policy in the management UI proxy editor with a different, natural-language name.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DisplayName>Policy Display Name</DisplayName>
+```
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<th width="75" scope="row">Default</th>
+<td><p>N/A</p>
+<p>If you omit this element, the value of the policy's <code translate="no" dir="ltr">name</code> attribute is used.</p></td>
+</tr>
+<tr>
+<th scope="row">Presence</th>
+<td>Optional</td>
+</tr>
+<tr>
+<th scope="row">Type</th>
+<td>String</td>
+</tr>
+</tbody>
+</table>
+
+## `<Allow>`
+
+Specifies the count limit for the quota. If the counter for the policy reaches this limit value, subsequent calls are rejected until the counter resets.
+
+Can also contain a [`<Class>`](/apigee/docs/api-platform/reference/policies/quota-policy#class) element that conditionalizes the `<Allow>` element based on a flow variable.
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>n/a</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>Integer or Complex type</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#quota"><code translate="no" dir="ltr">&lt;Quota&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#class"><code translate="no" dir="ltr">&lt;Class&gt;</code></a><br />
+</td>
+</tr>
+</tbody>
+</table>
+
+Shown below are three ways to set the `<Allow>` element:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Allow count="2000"/>
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Allow countRef="verifyapikey.VerifyAPIKey.apiproduct.developer.quota.limit"/>
+```
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Allow count="2000" countRef="verifyapikey.VerifyAPIKey.apiproduct.developer.quota.limit"/> 
+```
+
+If you specify both `count` and `countRef`, then `countRef` gets the priority. If `countRef` does not resolve at runtime, then the value of `count` is used.
+
+You can also specify a [`<Class>`](/apigee/docs/api-platform/reference/policies/quota-policy#class) element as a child of `<Allow>` to determine the allowed count of the policy based on a flow variable. Apigee matches the value of the flow variable to the `class` attribute of the `<Allow>` element, as shown below:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Allow>
+  <Class ref="request.queryparam.time_variable">
+    <Allow class="peak_time" count="5000"/>
+    <Allow class="off_peak_time" count="1000"/>
+  </Class>
+</Allow>
+```
+
+The following table lists attributes of `<Allow>`:
+
+<table width="650">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<tbody>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Default</th>
+<th>Presence</th>
+</tr>
+&#10;<tr>
+<td>count</td>
+<td><p>Use to specify a message count for the quota.</p>
+<p>For example, a <code translate="no" dir="ltr">count</code> attribute value of 100, <code translate="no" dir="ltr">Interval</code> of 1, and a <code translate="no" dir="ltr">TimeUnit</code> of month specify a quota of 100 messages per month.</p></td>
+<td>2000</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td>countRef</td>
+<td><p>Use to specify a flow variable containing the message count for a quota. <code translate="no" dir="ltr">countRef</code> takes precedence over the <code translate="no" dir="ltr">count</code> attribute.</p></td>
+<td>none</td>
+<td>Optional</td>
+</tr>
+</tbody>
+</table>
+
+### `<Class>`
+
+Lets you conditionalize the value of the [`<Allow>`](/apigee/docs/api-platform/reference/policies/quota-policy#allow) element based on the value of a flow variable. For each different `<Allow>` child tag of `<Class>`, the policy maintains a different counter.
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>n/a</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>Complex type</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#allow"><code translate="no" dir="ltr">&lt;Allow&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#classallow"><code translate="no" dir="ltr">&lt;Allow&gt;</code></a> (child of <code translate="no" dir="ltr">&lt;Class&gt;</code>)<br />
+</td>
+</tr>
+</tbody>
+</table>
+
+To use the `<Class>` element, specify a flow variable using the `ref` attribute to the `<Class>` element. Apigee then uses the value of the flow variable to select one of the `<Allow>` child elements to determine the allowed count of the policy. Apigee matches the value of the flow variable to the `class` attribute of the `<Allow>` element, as shown below:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Allow>
+  <Class ref="request.queryparam.time_variable">
+    <Allow class="peak_time" count="5000"/>
+    <Allow class="off_peak_time" count="1000"/>
+  </Class>
+</Allow>
+```
+
+In this example, the current quota counter is determined by the value of the `time_variable` query param passed with each request. That variable can have a value of `peak_time` or `off_peak_time`. If the query param contains an invalid value, the policy returns a quota violation error.
+
+**Note:** You cannot use both the `<Class>` and [`<Identifier>`](/apigee/docs/api-platform/reference/policies/quota-policy#identifier) elements in the same Quota policy.
+
+The following table lists attributes of `<Class>`:
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| ref | Use to specify a flow variable containing the quota class for a quota. | none | Required |
+
+### `<Allow>` (child of `<Class>`)
+
+Specifies the limit for a quota counter defined by the [`<Class>`](/apigee/docs/api-platform/reference/policies/quota-policy#class) element. For each different `<Allow>` child tag of `<Class>`, the policy maintains a different counter.
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>n/a</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>Complex type</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#class"><code translate="no" dir="ltr">&lt;Class&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td>None<br />
+</td>
+</tr>
+</tbody>
+</table>
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+    <Allow>
+      <Class ref="request.queryparam.time_variable">
+        <Allow count="5000"/>
+        <Allow count="1000"/>
+      </Class>
+    </Allow>
+```
+
+In this example, the Quota policy maintains two quota counters named `peak_time` and `off_peak_time`. Which of these is used depends on the query parameter passed in, as shown in [`<Class>`](/apigee/docs/api-platform/reference/policies/quota-policy#class) example.
+
+The following table lists attributes of `<Allow>`:
+
+|           |                                            |         |          |
+|-----------|--------------------------------------------|---------|----------|
+| Attribute | Description                                | Default | Presence |
+| class     | Defines the name of the quota counter.     | none    | Required |
+| count     | Specifies the quota limit for the counter. | none    | Required |
+
+## `<Interval>`
+
+Specifies the number of time periods in which quotas are calculated.
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>n/a</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Required</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>Integer</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#quota"><code translate="no" dir="ltr">&lt;Quota&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td>None<br />
+</td>
+</tr>
+</tbody>
+</table>
+
+Use to specify an integer (for example, 1, 2, 5, 60, and so on) that will be paired with the [`<TimeUnit>`](/apigee/docs/api-platform/reference/policies/quota-policy#timeunit) element you specify (minute, hour, day, week, or month) to determine a time period during which Apigee calculates quota use.
+
+For example, an interval of `24` with a [`<TimeUnit>`](/apigee/docs/api-platform/reference/policies/quota-policy#timeunit) of `hour` means that the quota will be calculated over the course of 24 hours.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Interval ref="verifyapikey.VerifyAPIKey.apiproduct.developer.quota.interval">1</Interval>
+```
+
+The following table lists attributes of `<Interval>`:
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| ref | Use to specify a flow variable containing the interval for a quota. `ref` takes precedence over an explicit interval value. If both reference and value are specified, then reference gets the priority. If `ref` does not resolve at runtime, then the value is used. | none | Optional |
+
+## `<TimeUnit>`
+
+Specifies the unit of time applicable to the quota.
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>n/a</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Required</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#quota"><code translate="no" dir="ltr">&lt;Quota&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td>None<br />
+</td>
+</tr>
+</tbody>
+</table>
+
+Select from `minute`, `hour`, `day`, `week`, `month`, or `year`.
+
+**Note:** The Quota policy also supports `second` as the time unit. However, `second` is only supported for non-distributed counters (when [`<Distributed>`](/apigee/docs/api-platform/reference/policies/quota-policy#distributed) is set to `false`). Google recommends that you use the [SpikeArrest policy](/apigee/docs/api-platform/reference/policies/spike-arrest-policy) to limit spikes in request traffic at the second level rather than use the `second` value here.
+
+For example, an `Interval` of `24` with a `TimeUnit` of `hour` means that the quota will be calculated over the course of 24 hours.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<TimeUnit ref="verifyapikey.VerifyAPIKey.apiproduct.developer.quota.timeunit">month</TimeUnit>
+```
+
+|               |          |
+|---------------|----------|
+| **Default:**  | none     |
+| **Presence:** | Required |
+| **Type:**     | String   |
+
+The following table lists attributes of `<TimeUnit>`:
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| ref | Specifies a flow variable containing the time unit for a quota. `ref` takes precedence over an explicit interval value. If `ref` does not resolve at runtime, then the interval value is used. | none | Optional |
+
+## `<StartTime>`
+
+When `type` is set to `calendar`, specifies the date and time when the quota counter begins counting, regardless of whether any requests have been received from any apps.
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>n/a</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional (Required when <code translate="no" dir="ltr">type</code> is set to <code translate="no" dir="ltr">calendar</code>)</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>String in <a href="https://en.wikipedia.org/wiki/ISO_8601" target="new">ISO 8601</a> date and time format</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#quota"><code translate="no" dir="ltr">&lt;Quota&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td>None<br />
+</td>
+</tr>
+</tbody>
+</table>
+
+**Important:** If you omit the `<StartTime>` element from your Quota policy configuration, the quota period will start on the first day of the current month, by default.
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<StartTime>2021-7-16 12:00:00</StartTime>
+```
+
+## `<Distributed>`
+
+Determines whether Apigee uses one or more nodes to process requests.
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>false</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#quota"><code translate="no" dir="ltr">&lt;Quota&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td>None<br />
+</td>
+</tr>
+</tbody>
+</table>
+
+Set to `true` to specify that the policy should maintain a central counter and continuously synchronize it across all nodes. The nodes can be across availability zones and/or regions.
+
+**Note:** If you have a paid Apigee account, you typically have multiple Message Processors in your installation, and that number can vary based on your traffic load. Evaluation accounts typically have two Message Processors.
+
+If you use the default value of `false`, then you might exceed your quota because the count for each node is not shared:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Distributed>false</Distributed>
+```
+
+To guarantee that the counters are synchronized, and updated on every request, set [`<Distributed>`](/apigee/docs/api-platform/reference/policies/quota-policy#distributed) and [`<Synchronous>`](/apigee/docs/api-platform/reference/policies/quota-policy#synchronous) to `true`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Distributed>true</Distributed>
+<Synchronous>true</Synchronous>
+```
+
+## `<Synchronous>`
+
+Determines whether to update a distributed quota counter synchronously.
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>false</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#quota"><code translate="no" dir="ltr">&lt;Quota&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td>None<br />
+</td>
+</tr>
+</tbody>
+</table>
+
+Set to `true` to update a distributed quota counter synchronously. This means that the updates to the counters are made at the same time the quota is checked on a request to the API. Set to `true` if it is essential that you not allow any API calls over the quota.
+
+**Note:** By implementing synchronous updates to the counter, there is the potential for performance impacts and lower throughputs. In some cases, use of `<Synchronous>true</Synchronous>` could cause the quota policy to fail to process some transactions.
+
+Set to `false` to update the quota counter asynchronously. This means that it is possible that some API calls exceeding the quota will go through, depending on when the quota counter in the central repository is asynchronously updated. However, you will not face the potential performance impacts associated with synchronous updates.
+
+The default asynchronous update interval is 10 seconds. Use the `<AsynchronousConfiguration>` element to configure this asynchronous behavior.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Synchronous>false</Synchronous>
+```
+
+## `<AsynchronousConfiguration>`
+
+Configures the synchronization interval among distributed quota counters when the policy configuration element [`<Synchronous>`](/apigee/docs/api-platform/reference/policies/quota-policy#synchronous) is either not present or present and set to `false`. Apigee ignores this element when `<Synchronous>` is set to `true`.
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>n/a</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>Complex type</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#quota"><code translate="no" dir="ltr">&lt;Quota&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#syncintervalinseconds"><code translate="no" dir="ltr">&lt;SyncIntervalInSeconds&gt;</code></a><br />
+<a href="/apigee/docs/api-platform/reference/policies/quota-policy#syncmessagecount"><code translate="no" dir="ltr">&lt;SyncMessageCount&gt;</code></a><br />
+</td>
+</tr>
+</tbody>
+</table>
+
+You can specify the synchronization behavior using the [`<SyncIntervalInSeconds>`](/apigee/docs/api-platform/reference/policies/quota-policy#syncintervalinseconds) or [`<SyncMessageCount>`](/apigee/docs/api-platform/reference/policies/quota-policy#syncmessagecount) child elements. Use either or both elements. For example,
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AsynchronousConfiguration>
+   <SyncIntervalInSeconds>20</SyncIntervalInSeconds>
+</AsynchronousConfiguration>
+```
+
+or
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AsynchronousConfiguration>
+   <SyncIntervalInSeconds>20</SyncIntervalInSeconds>
+   <SyncMessageCount>5</SyncMessageCount>
+</AsynchronousConfiguration>
+```
+
+- When only `<SyncIntervalInSeconds>` is present, the quota synchronizes every N seconds, where N is the value specified in the element, irrespective of how many messages have been handled.
+- When only `<SyncMessageCount>` is present, the quota synchronizes every M messages, where M is the value specified in the element, or every 10 seconds, whichever comes first.
+- When both elements are present, the quota synchronizes every M messages or every N seconds, whichever comes first.
+- When `<AsynchronousConfiguration>` is not present or neither child element is present, the quota synchronizes every 10 seconds, irrespective of how many messages have been handled.
+
+### `<SyncIntervalInSeconds>`
+
+Overrides the default behavior in which asynchronous updates are performed after an interval of 10 seconds.
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>10 seconds</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>Integer</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#asynchronousconfiguration"><code translate="no" dir="ltr">&lt;AsynchronousConfiguration&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td>None<br />
+</td>
+</tr>
+</tbody>
+</table>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AsynchronousConfiguration>
+   <SyncIntervalInSeconds>20</SyncIntervalInSeconds>
+</AsynchronousConfiguration>
+```
+
+The sync interval must be \>= 10 seconds, as described in [Limits](/apigee/docs/api-platform/reference/limits#quota).
+
+### `<SyncMessageCount>`
+
+Specifies the number of requests to process before synchronizing the quota counter.
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>n/a</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>Integer</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#asynchronousconfiguration"><code translate="no" dir="ltr">&lt;AsynchronousConfiguration&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td>None<br />
+</td>
+</tr>
+</tbody>
+</table>
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<AsynchronousConfiguration>
+   <SyncMessageCount>5</SyncMessageCount>
+</AsynchronousConfiguration>
+```
+
+Using the configuration in this example, on each node, the quota count will synchronize after every 5 requests, or every 10 seconds, whichever comes first.
+
+## `<Identifier>`
+
+Configures the policy to create unique counters based on a flow variable.
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>n/a</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#quota"><code translate="no" dir="ltr">&lt;Quota&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td>None<br />
+</td>
+</tr>
+</tbody>
+</table>
+
+Via the Identifier element, you can allot call counts to distinct buckets defined by the value in a flow variable. For example, you can use the `developer.id` variable, which is populated after a [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy), to enforce one quota limit to all instances of all apps created by each specific developer, or you can use the `client_id` to enforce a quota limit for each particular app. The configuration for the latter looks like this:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<Identifier ref="client_id"/>
+```
+
+You can refer to either a custom variable that you might set with the [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) or the [JavaScript policy](/apigee/docs/api-platform/reference/policies/javascript-policy), or a variable that is implicitly set, such as those set by the [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy) or the [VerifyJWT policy](/apigee/docs/api-platform/reference/policies/verify-jwt-policy). For more on variables, see [Using Flow Variables](/apigee/docs/api-platform/fundamentals/introduction-flow-variables), and for a list of well-known variables defined by Apigee, see the [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference).
+
+If you don't use this element, the policy allots all call counts into a single counter for the particular Quota policy.
+
+If you refer to `developer.id` or `developer.app.id` for the quota `<Identifier>`, or use those variables as one element in a custom variable used as the `<Identifier>`, be aware that the values of these variables may change, during some future maintenance period. This would be rare, not a regular occurrence. But if it were to occur, and if you had a Quota policy using one of those variables as the `<Identifier>`, then the quota wouldn't be strictly enforced during the time window in which the change occurred.
+
+This element is also discussed in [How does the Quota policy work when no Identifier is specified?](https://www.googlecloudcommunity.com/gc/Apigee/How-does-the-Quota-policy-work-when-no-Identifier-is-specified/td-p/34536)
+
+**Note:** You cannot use both the [`<Class>`](/apigee/docs/api-platform/reference/policies/quota-policy#class) and [`<Identifier>`](/apigee/docs/api-platform/reference/policies/quota-policy#identifier) elements in the same Quota policy.
+
+The following table describes the attributes of `<Identifier>`:
+
+<table width="650">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<tbody>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Default</th>
+<th>Presence</th>
+</tr>
+&#10;<tr>
+<td>ref</td>
+<td><p>Specifies a flow variable that identifies the counter to use for the request. The variable can refer to an HTTP header, a query parameter, a form parameter, or an element of the message content, or, some other value to identify how to allot call counts.</p>
+<p>The <code translate="no" dir="ltr">client_id</code> is commonly used as the variable. The <code translate="no" dir="ltr">client_id</code> is also known as the API key or consumer key, and is generated for an app when it is registered in an organization on Apigee. You can use this identifier if you have enabled API key or OAuth authorization policies for your API.</p></td>
+<td>N/A</td>
+<td>Optional</td>
+</tr>
+</tbody>
+</table>
+
+## `<MessageWeight>`
+
+Specifies the weight assigned to each message for quota purposes. If `<MessageWeight>` is not specified, all requests have the same weight towards the quota count. Use this element to configure weighted quotas based on message content or type.
+
+For example, you can use the message weight to specify that `POST` messages use more quota than `GET` messages.
+
+When working with LLM-based APIs, you can assign different weights based on the token counts in the requests, responses, or both.
+
+**Note:** To create conditional quotas that differ based on criteria such as the requesting app developer, use the `<Allow>` and `<Class>` elements.
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>n/a</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>Integer</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#quota"><code translate="no" dir="ltr">&lt;Quota&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td>None<br />
+</td>
+</tr>
+</tbody>
+</table>
+
+If you want to count `POST` messages as having double the weight as `GET` messages, set the `<MessageWeight>` to 2 for a `POST` and 1 for a `GET`. If the quota is 10 messages per minute and the proxy processes 5 `POST` requests in the first 35 seconds, the proxy rejects any additional requests, `POST` or `GET`, until the counter resets.
+
+A value representing `<MessageWeight>` must be specified using a flow variable, and can be extracted from HTTP headers, query parameters, an XML or JSON request payload, or any other flow variable. For example, you can extract the value from a response payload into a variable named `extracted.message_weight`, and then use this for `<MessageWeight>`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<MessageWeight ref="extracted.message_weight"/>
+```
+
+If the flow variable resolves to 0, the request will not affect the counter.
+
+## `<UseQuotaConfigInAPIProduct>`
+
+Defines quota settings for an API product, such as the time units, interval, and allowed maximum.
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>n/a</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>Complex type</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#quota"><code translate="no" dir="ltr">&lt;Quota&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#defaultconfig"><code translate="no" dir="ltr">&lt;DefaultConfig&gt;</code></a><br />
+</td>
+</tr>
+</tbody>
+</table>
+
+If you add the `<UseQuotaConfigInAPIProduct>` element to the Quota policy, then Apigee ignores any `<Allow>`, `<Interval>`, and `<TimeUnit>` child elements of `<Quota>`.
+
+The `<UseQuotaConfigInAPIProduct>` element is simply a container for the default settings that you define using the `<DefaultConfig>` element, as the following example shows:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<UseQuotaConfigInAPIProduct stepName="POLICY_NAME">
+  <DefaultConfig>...</DefaultConfig>
+</UseQuotaConfigInAPIProduct>
+```
+
+You can use the `stepName` attribute to reference either a [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy) or a `ValidateToken` policy operation of the [OAuthv2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy) in the flow.
+
+The following table describes the attributes of `<UseQuotaConfigInAPIProduct>`:
+
+|  |  |  |  |
+|----|----|----|----|
+| Attribute | Description | Default | Presence |
+| stepName | Identifies the name of the authentication policy in the flow. The target can be either a [VerifyAPIKey policy](/apigee/docs/api-platform/reference/policies/verify-api-key-policy) or an [OAuthv2 policy](/apigee/docs/api-platform/reference/policies/oauthv2-policy). | N/A | Required |
+
+For more information, see the following:
+
+- [`<DefaultConfig>`](/apigee/docs/api-platform/reference/policies/quota-policy#defaultconfig)
+- [What is an API product?](/apigee/docs/api-platform/publish/what-api-product)
+- [Managing API products](/apigee/docs/api-platform/publish/create-api-products)
+
+### `<DefaultConfig>`
+
+Contains default values for an API product's quota. When you define a `<DefaultConfig>`, all three child elements are required.
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>n/a</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>Complex type</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#usequotaconfiginapiproduct"><code translate="no" dir="ltr">&lt;UseQuotaConfigInAPIProduct&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#allow"><code translate="no" dir="ltr">&lt;Allow&gt;</code></a><br />
+<a href="/apigee/docs/api-platform/reference/policies/quota-policy#interval"><code translate="no" dir="ltr">&lt;Interval&gt;</code></a><br />
+<a href="/apigee/docs/api-platform/reference/policies/quota-policy#timeunit"><code translate="no" dir="ltr">&lt;TimeUnit&gt;</code></a><br />
+</td>
+</tr>
+</tbody>
+</table>
+
+It's possible to define these values on both the API product's operation (either with the UI or the [API products API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.apiproducts) and in the Quota policy. If you do that, however, the settings on the API product take precedence and the settings on the Quota policy are ignored.
+
+The syntax for this element is as follows:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<UseQuotaConfigInAPIProduct stepName="POLICY_NAME">
+  <DefaultConfig>
+    <Allow>allow_count</Allow>
+    <Interval>interval</Interval>
+    <TimeUnit>[minute|hour|day|week|month]</TimeUnit>
+  </DefaultConfig>
+</UseQuotaConfigInAPIProduct>
+```
+
+The following example specifies a quota of 10,000 every week:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<DefaultConfig>
+  <Allow>10000</Allow>
+  <Interval>1</Interval>
+  <TimeUnit>week</TimeUnit>
+</DefaultConfig>
+```
+
+For more information, see the following:
+
+- [What is an API product?](/apigee/docs/api-platform/publish/what-api-product)
+- [Managing API products](/apigee/docs/api-platform/publish/create-api-products)
+
+## `<SharedName>`
+
+Identifies this Quota policy as *shared*. All Quota policies in an API proxy with the same `<SharedName>` value share the same underlying quota counter.
+
+For more information and examples, see [Configuring shared quota counters](#sharedcounters).
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>n/a</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#quota"><code translate="no" dir="ltr">&lt;Quota&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td>None<br />
+</td>
+</tr>
+</tbody>
+</table>
+
+## `<CountOnly>`
+
+Place a Quota policy with this element set to `true` in a step in the ProxyEndpoint response flow to increment the underlying quota counter without sending an error back to the client when the quota limit is exceeded. If this element is present, the `<SharedName>` element must also be present and the `<EnforceOnly>` element must not be present.
+
+For more information and examples, see [Configuring shared quota counters](#sharedcounters).
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>false</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#quota"><code translate="no" dir="ltr">&lt;Quota&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td>None<br />
+</td>
+</tr>
+</tbody>
+</table>
+
+## `<EnforceOnly>`
+
+Place a Quota policy with this element set to `true` in the request flow of an API proxy to enforce a quota without incrementing the quota counter. This configuration allows deferred enforcement of rate limits based on message weights that can be known only in the response flow. If this element is present, the `<SharedName>` must also be present and the `<CountOnly>` element must not be present.
+
+For more information and examples, see [Configuring shared quota counters](#sharedcounters).
+
+<table class="green">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="alt" width="120px"><strong>Default Value</strong></td>
+<td>false</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Required?</strong></td>
+<td>Optional</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Type</strong></td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Parent Element</strong></td>
+<td><a href="/apigee/docs/api-platform/reference/policies/quota-policy#quota"><code translate="no" dir="ltr">&lt;Quota&gt;</code></a></td>
+</tr>
+<tr>
+<td class="alt" width="120px"><strong>Child Elements</strong></td>
+<td>None<br />
+</td>
+</tr>
+</tbody>
+</table>
+
+## Flow variables
+
+The following predefined Flow variables are automatically populated when a Quota policy executes. For more information, see [Flow variables reference](/apigee/docs/api-platform/reference/variables-reference).
+
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Variables</th>
+<th>Type</th>
+<th>Permissions</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ratelimit.{policy_name}.allowed.count</td>
+<td>Long</td>
+<td>Read-Only</td>
+<td>Returns the allowed quota count.</td>
+</tr>
+<tr>
+<td>ratelimit.{policy_name}.used.count</td>
+<td>Long</td>
+<td>Read-Only</td>
+<td>Returns the current quota used within a quota interval.</td>
+</tr>
+<tr>
+<td>ratelimit.{policy_name}.available.count</td>
+<td>Long</td>
+<td>Read-Only</td>
+<td>Returns the available quota count in the quota interval.</td>
+</tr>
+<tr>
+<td>ratelimit.{policy_name}.exceed.count</td>
+<td>Long</td>
+<td>Read-Only</td>
+<td>Returns 1 after the quota is exceeded.</td>
+</tr>
+<tr>
+<td>ratelimit.{policy_name}.total.exceed.count</td>
+<td>Long</td>
+<td>Read-Only</td>
+<td>Returns 1 after the quota is exceeded.</td>
+</tr>
+<tr>
+<td>ratelimit.{policy_name}.expiry.time</td>
+<td>Long</td>
+<td>Read-Only</td>
+<td><p>Returns the UTC time (in milliseconds), which determines when the quota expires and when the new quota interval starts.</p>
+<p>When the Quota policy's type is <code translate="no" dir="ltr">rollingwindow</code>, this value is not valid because the quota interval never expires.</p></td>
+</tr>
+<tr>
+<td>ratelimit.{policy_name}.identifier</td>
+<td>String</td>
+<td>Read-Only</td>
+<td>Returns the (client) identifier reference attached to the policy</td>
+</tr>
+<tr>
+<td>ratelimit.{policy_name}.class</td>
+<td>String</td>
+<td>Read-Only</td>
+<td>Returns the class associated with the client identifier</td>
+</tr>
+<tr>
+<td>ratelimit.{policy_name}.class.allowed.count</td>
+<td>Long</td>
+<td>Read-Only</td>
+<td>Returns the allowed quota count defined in the class</td>
+</tr>
+<tr>
+<td>ratelimit.{policy_name}.class.used.count</td>
+<td>Long</td>
+<td>Read-Only</td>
+<td>Returns the used quota within a class</td>
+</tr>
+<tr>
+<td>ratelimit.{policy_name}.class.available.count</td>
+<td>Long</td>
+<td>Read-Only</td>
+<td>Returns the available quota count in the class</td>
+</tr>
+<tr>
+<td>ratelimit.{policy_name}.class.exceed.count</td>
+<td>Long</td>
+<td>Read-Only</td>
+<td>Returns the count of requests that exceeds the limit in the class in the current quota interval</td>
+</tr>
+<tr>
+<td>ratelimit.{policy_name}.class.total.exceed.count</td>
+<td>Long</td>
+<td>Read-Only</td>
+<td>Returns the total count of requests that exceeds the limit in the class across all quota intervals, so it is the sum of <code translate="no" dir="ltr">class.exceed.count</code> for all quota intervals.</td>
+</tr>
+<tr>
+<td>ratelimit.{policy_name}.failed</td>
+<td>Boolean</td>
+<td>Read-Only</td>
+<td><p>Indicates whether or not the policy failed (true or false).</p></td>
+</tr>
+</tbody>
+</table>
+
+## Error reference
+
+This section describes the fault codes and error messages that are returned and fault variables that are set by Apigee when this policy triggers an error. This information is important to know if you are developing fault rules to handle faults. To learn more, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors) and [Handling faults](/apigee/docs/api-platform/fundamentals/fault-handling).
+
+### Runtime errors
+
+These errors can occur when the policy executes.
+
+**Tip:** Need help resolving an error? Click *build* in the Fix column for detailed troubleshooting information.
+
+| Fault code | HTTP status | Cause | Fix |
+|----|----|----|----|
+| `policies.ratelimit.FailedToResolveQuotaIntervalReference` | `500` | Occurs if the `<Interval>` element is not defined within the `Quota` policy. This element is mandatory and used to specify the interval of time applicable to the quota. The time interval can be minutes, hours, days, weeks, or months as defined with the `<TimeUnit>` element. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/quota-runtime-errors#failedtoresolvequotaintervalreference) |
+| `policies.ratelimit.FailedToResolveQuotaIntervalTimeUnitReference` | `500` | Occurs if the `<TimeUnit>` element is not defined within the `Quota` policy. This element is mandatory and used to specify the unit of time applicable to the quota. The time interval can be in minutes, hours, days, weeks, or months. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/quota-runtime-errors#failedtoresolvequotaintervaltimeunitreference) |
+| `policies.ratelimit.InvalidMessageWeight` | `500` | Occurs if the value of the `<MessageWeight>` element specified through a flow variable is invalid (a non-integer value). | [*build*](/apigee/docs/api-platform/troubleshoot/policies/runtime/quota-runtime-errors#invalidmessageweight) |
+| `policies.ratelimit.QuotaViolation` | `500` | The quota limit was exceeded. | N/A |
+
+### Deployment errors
+
+**Tip:** Need help resolving an error? Click *build* in the Fix column for detailed troubleshooting information.
+
+| Error name | Cause | Fix |
+|----|----|----|
+| `InvalidQuotaInterval` | If the quota interval specified in the `<Interval>` element is not an integer, then the deployment of the API proxy fails. For example, if the quota interval specified is 0.1 in the `<Interval>` element, then the deployment of the API proxy fails. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/quota-deployment-errors#invalidquotainterval) |
+| `InvalidQuotaTimeUnit` | If the time unit specified in the `<TimeUnit>` element is unsupported, then the deployment of the API proxy fails. The supported time units are `minute`, `hour`, `day`, `week`, and `month`. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/quota-deployment-errors#invalidquotatimeunit) |
+| `InvalidQuotaType` | If the type of the quota specified by the `type` attribute in the `<Quota>` element is invalid, then the deployment of the API proxy fails. The supported quota types are `default`, `calendar`, `flexi`, and `rollingwindow`. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/quota-deployment-errors#invalidquotatype) |
+| `InvalidStartTime` | If the format of the time specified in the `<StartTime>` element is invalid, then the deployment of the API proxy fails. The valid format is `yyyy-MM-dd HH:mm:ss`, which is the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date and time format. For example, if the time specified in the `<StartTime>` element is `7-16-2017 12:00:00` then the deployment of the API proxy fails. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/quota-deployment-errors#invalidstarttime) |
+| `StartTimeNotSupported` | If the `<StartTime>` element is specified whose quota type is not `calendar` type, then the deployment of the API proxy fails. The `<StartTime>` element is supported only for the `calendar` quota type. For example, if the `type` attribute is set to `flexi` or `rollingwindow` in the `<Quota>` element, then the deployment of the API proxy fails. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/quota-deployment-errors#starttimenotsupported) |
+| `InvalidSynchronizeIntervalForAsyncConfiguration` | If the value specified for the `<SyncIntervalInSeconds>` element within the `<AsynchronousConfiguration>` element in a `Quota` policy is less than zero, then the deployment of the API proxy fails. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/quota-deployment-errors#invalidsynchronizeintervalforasyncconfiguration) |
+| `InvalidAsynchronizeConfigurationForSynchronousQuota` | If the value of the `<AsynchronousConfiguration>` element is set to `true` in a `Quota` policy, which also has asynchronous configuration defined using the `<AsynchronousConfiguration>` element, then the deployment of the API proxy fails. | [*build*](/apigee/docs/api-platform/troubleshoot/policies/deployment/quota-deployment-errors#invalidasynchronizeconfigurationforsynchronousquota) |
+
+### Fault variables
+
+These variables are set when this policy triggers an error. For more information, see [What you need to know about policy errors](/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors).
+
+|  |  |  |
+|----|----|----|
+| Variables | Where | Example |
+| `fault.name="``fault_name``"` | `fault_name` is the name of the fault, as listed in the [Runtime errors](#runtime-errors) table above. The fault name is the last part of the fault code. | `fault.name Matches "QuotaViolation"` |
+| `ratelimit.``policy_name``.failed` | `policy_name` is the user-specified name of the policy that threw the fault. | `ratelimit.QT-QuotaPolicy.failed = true` |
+
+### Example error response
+
+**Note:** For error handling, the best practice is to trap the `errorcode` part of the error response. Do not rely on the text in the `faultstring`, because it could change.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{  
+   "fault":{  
+      "detail":{  
+         "errorcode":"policies.ratelimit.QuotaViolation"
+      },
+      "faultstring":"Rate limit quota violation. Quota limit  exceeded. Identifier : _default"
+   }
+}
+```
+
+### Example fault rule
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<FaultRules>
+    <FaultRule name="Quota Errors">
+        <Step>
+            <Name>JavaScript-1</Name>
+            <Condition>(fault.name Matches "QuotaViolation") </Condition>
+        </Step>
+        <Condition>ratelimit.Quota-1.failed=true</Condition>
+    </FaultRule>
+</FaultRules>
+```
+
+**Note:** When the rate of incoming requests exceeds the thresholds set by Quota or SpikeArrest policy, the system returns an HTTP status code` 429 Too Many Requests`.
+
+## Schemas
+
+**Sample:** See our [GitHub repository](https://github.com/apigee/api-platform-samples/tree/master/schemas/policy) samples for the most recent schemas.
+
+## Related topics
+
+[ResetQuota policy](/apigee/docs/api-platform/reference/policies/reset-quota-policy)
+
+[SpikeArrest policy](/apigee/docs/api-platform/reference/policies/spike-arrest-policy)
+
+[Comparing rate-limiting policies](/apigee/docs/api-platform/develop/comparing-quota-and-spike-arrest-policies)
