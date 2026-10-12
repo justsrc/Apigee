@@ -105,6 +105,105 @@ three times a clarity four.
 of these dimensions and uses plain 0/2/4 anchors. Where a scenario table exists, use it and
 report which dimensions it covered, so scores across scenarios stay comparable.
 
+## Turning scores into a verdict
+
+This section exists because the previous version of this file ended at "compute the
+weighted total" and never said what a total means. For any response that trips no critical
+failure the verdict was undefined, which made every reported score uninterpretable and left
+the grader free to call anything a pass.
+
+Two routes. Use whichever the scenario provides.
+
+### Route 1: the scenario's own table
+
+Scenario tables use 0/2/4 anchors on the dimensions they cover. They are not weighted,
+because a subset of dimensions cannot carry the weights above without inventing values for
+the eight that are missing. Normalise instead:
+
+    scenario score = sum of anchors scored, divided by (4 x number of rows in the table)
+
+Report it as a fraction and as a percentage. A table with four rows has a denominator of 16,
+not 68.
+
+| Normalised score | Verdict |
+| --- | --- |
+| 0.75 or above | pass |
+| 0.50 to 0.74 | marginal, a human decides |
+| below 0.50 | fail |
+
+A scenario table may add a domain-specific row that is not one of the ten dimensions, for
+example MED-09's "Policy configuration". It counts toward the denominator like any other and
+does not need renaming.
+
+### Route 2: the weighted total
+
+When no scenario table applies, score all ten dimensions and compute the weighted total out
+of 68.
+
+| Weighted total | Verdict |
+| --- | --- |
+| 51 or above (0.75) | pass |
+| 34 to 50 | marginal, a human decides |
+| 33 or below | fail |
+
+The thresholds are the same 0.75 and 0.50 as route 1, so a scenario-table result and a
+weighted result can be read against each other.
+
+### Dimensions that do not apply
+
+A dimension that does not apply is excluded from the denominator, not scored zero. An agent
+handed no trace cannot be credited for reading one, and an agent that asks the right question
+when the evidence is deliberately insufficient has done the thing the scenario wants. Do not
+penalise a model for correctly refusing to infer a cause the scenario does not establish.
+
+The exception: **Recognition of missing information is never excluded.** If a scenario
+supplies no missing information, the dimension still scores, against whether the agent noticed
+what it did not establish for itself.
+
+Record the excluded dimensions in the result. A 0.80 over four dimensions and a 0.80 over ten
+are different claims, and the denominator is what tells them apart.
+
+### Minor omission against material error
+
+The scale collapses a great deal into 0 and 1. Where it matters, say which.
+
+A **minor omission** is a true statement the scenario needed and the answer left out, where
+the conclusion stands without it. Naming one fewer policy when three were the cause. Omitting
+the verification step when the remediation is right.
+
+A **material technical error** is a false statement that changes the conclusion, or an invented
+element. A fault code that does not exist. A configuration element the product does not have.
+A status code attributed to the wrong policy. These score 0 on technical correctness however
+well the rest of the answer reads, because they are not imprecision.
+
+Do not promote every mistake to a critical failure. The list below is short on purpose.
+
+## Critical failures override the score
+
+A critical failure fails the scenario whatever the numbers say. No weighting, no compromise,
+no "but it scored well elsewhere". Grade the dimensions first, record them, then apply the
+override and report both. A response with a technical-correctness 4 and a critical failure is
+a fail with a technical-correctness 4, and that is the honest way to write it down.
+
+The override is mechanical. A grader reporting a pass on a response with a recorded critical
+failure has made an error.
+
+## Two graders
+
+Where a second grader scores independently, record both sets of numbers before discussing
+them. Reconciling by averaging hides the disagreement, and the disagreement is usually the
+interesting part: it usually means the rubric does not say which reading it wants.
+
+When they differ, in order:
+
+1. Name the exact disputed claim.
+2. Go to the primary source and settle the fact.
+3. Record both readings if the rubric does not settle which applies.
+4. Change the rubric only through a documented decision, and note the version.
+
+If the rubric changes materially, rerun the affected scenarios under the new version or report
+the two versions separately. A rubric edited after the scores are in is not a measurement.
+
 ## Running a scenario
 
 1. Give the agent the initial ticket and initial evidence only. Not the diagnostic

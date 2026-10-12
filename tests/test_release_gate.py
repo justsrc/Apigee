@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -279,6 +280,65 @@ def _declared_inventory():
     assert rep.criteria[1].evidence_kind == EXECUTED, \
         "the default must be EXECUTED, not DECLARED"
     assert rep.evidence_counts() == {DECLARED: 1, EXECUTED: 1}, rep.evidence_counts()
+
+
+@case("rubric-defines-a-verdict-threshold")
+def _rubric_threshold():
+    """A weighted total with no pass mark is not a measurement.
+
+    Every one of the 103 scenario rubrics uses 0/2/4 anchors on a subset of the dimensions,
+    with no stated normalisation and no stated pass mark. Two reviewers of the medium
+    scenarios both reported the same thing independently: for any response that trips no
+    critical failure, the verdict is undefined.
+    """
+    txt = (Path(__file__).resolve().parent.parent / "evaluation" / "rubric.md")
+    assert txt.is_file(), "evaluation/rubric.md is missing"
+    body = txt.read_text(encoding="utf-8")
+
+    assert re.search(r"divided by \(4 x number of rows", body), \
+        "the scenario-table normalisation rule is missing"
+    for threshold in ("0.75", "0.50"):
+        assert threshold in body, f"no {threshold} pass threshold in the rubric"
+    assert re.search(r"not applicable|does not apply", body, re.I), \
+        "the rubric does not say how to treat a dimension that does not apply"
+    assert re.search(r"excluded from the denominator", body), \
+        "an inapplicable dimension must be excluded from the denominator, not scored zero"
+    assert re.search(r"never excluded", body), \
+        "Recognition of missing information must be non-excludable; it is the dimension " \
+        "that carries calibration, and excluding it is how a confident wrong answer scores"
+
+
+@case("scenario-rubric-tables-are-scorable")
+def _scenario_tables():
+    """Every per-scenario rubric must have anchors on all its rows.
+
+    A row with an empty anchor column cannot be scored, so the scenario's own denominator
+    overstates what was measured.
+    """
+    root = Path(__file__).resolve().parent.parent
+    bad, checked = [], 0
+    for f in sorted((root / "scenarios").glob("*.md")):
+        if f.name == "index.md":
+            continue
+        in_table = False
+        rows = 0
+        for line in f.read_text(errors="replace").splitlines():
+            if line.startswith("#### Evaluation rubric"):
+                in_table = True
+                continue
+            if in_table and line.startswith("####"):
+                in_table = False
+            if not in_table or not line.startswith("|"):
+                continue
+            cells = [c.strip() for c in line.strip("|").split("|")]
+            if len(cells) < 4 or set("".join(cells)) <= set("-: "):
+                continue
+            rows += 1
+            checked += 1
+            if len(cells) < 4 or not cells[2] or not cells[3]:
+                bad.append(f"{f.name}: row with a missing 0 or 4 anchor: {cells[0][:40]}")
+    assert not bad, "\n".join(bad[:8])
+    assert checked >= 200, f"only {checked} rubric rows found; the sweep did not run"
 
 
 def main() -> int:
