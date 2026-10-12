@@ -17,5 +17,5 @@ Rules for this exercise:
 > same token. Both use OAuthV2. Why is the behavior different?
 
 ## Initial Evidence
-Both proxies use OAuthV2 with `VerifyAccessToken`. One returns 401, the other returns 500.
-The token is expired.
+The team reports both proxies use OAuthV2 with `VerifyAccessToken`. One returns 401, the
+other returns 500. The token is expired.

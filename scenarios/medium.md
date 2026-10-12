@@ -1123,15 +1123,15 @@ answer; stopping there without completing the remediation is incomplete, not wro
 
 #### Initial evidence
 
-Both proxies use OAuthV2 with `VerifyAccessToken`. One returns 401, the other returns 500.
-The token is expired.
+The team reports both proxies use OAuthV2 with `VerifyAccessToken`. One returns 401, the
+other returns 500. The token is expired.
 
 #### Expected investigation
 
 The agent should recall that status codes vary by policy rather than by the underlying
 condition. Expired tokens return 401 from `VerifyAccessToken` and 500 from
-`GetOAuthV2Info` or `SetOAuthV2Info`. The second proxy probably has an info policy that the
-first does not.
+`GetOAuthV2Info` or `SetOAuthV2Info`. Both proxies turn out to carry the info policies, so
+the difference has to come from somewhere else.
 
 #### Diagnostic evidence
 
@@ -1175,7 +1175,10 @@ inconsistent status.
 Telling them to regenerate tokens client-side, which does not address why two proxies
 disagree.
 
-Assuming one proxy is misconfigured. Both behave as documented.
+Concluding one of the two proxies is simply broken, without reporting that the failing
+proxy has no `VerifyAccessToken` step. That gap is a real finding in its own right: a
+proxy protecting an API with only an info policy is not verifying tokens at all, which is
+a security gap independent of the 500.
 
 #### Evaluation rubric
 

@@ -32,7 +32,10 @@ inconsistent status.
 Telling them to regenerate tokens client-side, which does not address why two proxies
 disagree.
 
-Assuming one proxy is misconfigured. Both behave as documented.
+Concluding one of the two proxies is simply broken, without reporting that the failing
+proxy has no `VerifyAccessToken` step. That gap is a real finding in its own right: a
+proxy protecting an API with only an info policy is not verifying tokens at all, which is
+a security gap independent of the 500.
 
 ## Evaluation Rubric
 | Dimension | 0 | 2 | 4 |
