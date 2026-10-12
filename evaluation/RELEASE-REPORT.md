@@ -50,10 +50,13 @@ had to be merged after D-001, not the size of the index.
 
 ### What is still not true
 
-- No model has answered these scenarios under a declared protocol. The central claim this
-  project would want to make is still unevidenced.
-- Whether the skills change an answer is an open question. The only run on record covers
-  seven scenarios with one grader and one model.
+- No model has answered these scenarios under the A/B design `evaluation/test-protocol.md`
+  describes. Run 2 answered four of them under a declared protocol
+  (`evaluation/model-eval-protocol.md`) with one arm and no baseline, which is a path
+  exercise and not an evaluation. Its scores are in `evaluation/results/run-2/` and are not
+  a claim about any model.
+- Whether the skills change an answer is an open question. Run 1 covered seven scenarios with
+  one grader, one model and no turn 2. Run 2 has no baseline arm.
 - Two documentation conflicts remain unresolved, in section 5 of the record below.
 - B3 and D4 are DECLARED. They rest on the review in `evaluation/audit-*.md`, not on a
   check this run performed.
@@ -69,6 +72,8 @@ had to be merged after D-001, not the size of the index.
 | `1f23d4c` | The rubric defined weights and no pass threshold; thresholds and a two-grader procedure added |
 | `444579a`, `2ffb8bd`, `c53d527`, `d0115e6`, `29ec460`, `7bdcefa` | Scenario ground truths that contradicted their own sources or rubrics |
 | `cb057df`, `135006b`, `970e75a`, `30e42a8`, `f94ef05`, `0755e82` | MED-09, MED-20, MED-18, MED-12, MED-14, MED-16 |
+| `83be335` | E5 reads the run record instead of asserting that no run exists; five cases added |
+| `1aeb0d3`, `a8df013` | Two defects run 2 found in the suite: MED-27's unscoreable rubric row and HARD-09's ground truth contradicting its own evidence |
 
 ## 1. Verdict as recorded at 832bbca (superseded by section 0)
 
