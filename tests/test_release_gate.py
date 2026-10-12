@@ -57,6 +57,90 @@ def crit(cid: str, status: str, mandatory: bool = True) -> Criterion:
 
 
 # ---------------------------------------------------------------------------
+# The run auditor behind E5
+# ---------------------------------------------------------------------------
+
+
+def _run_record(tmp: Path, body: str) -> Path:
+    p = tmp / "RUNS.md"
+    p.write_text(body, encoding="utf-8")
+    return p
+
+
+@case("a-complete-ab-run-qualifies")
+def _run_qualifies():
+    import release_gate
+    with tempfile.TemporaryDirectory() as d:
+        p = _run_record(Path(d), (
+            "## Run 9, 2026-01-01\n\n"
+            "| Field | Value |\n| --- | --- |\n"
+            "| Arms | A baseline, B assisted |\n"
+            "| Turns released | Both |\n"
+            "| Model | some/model-1 |\n"
+            "| Protocol | protocol.md |\n"))
+        runs = release_gate.audit_eval_runs(p)
+        assert len(runs) == 1 and runs[0]["qualifies"], runs
+
+
+@case("an-assisted-only-run-does-not-qualify")
+def _run_one_arm():
+    """Run 2's own wording is the trap: "1, assisted. **No baseline arm.**"
+
+    The word "baseline" is present, in a negation. An auditor that tests for the substring
+    reads that run as a completed A/B and the gate starts implying an evaluation exists.
+    """
+    import release_gate
+    with tempfile.TemporaryDirectory() as d:
+        p = _run_record(Path(d), (
+            "## Run 2, 2026-10-13\n\n"
+            "| Field | Value |\n| --- | --- |\n"
+            "| Arms | 1, assisted. **No baseline arm.** |\n"
+            "| Turns released | Both |\n"
+            "| Model | some/model-1 |\n"
+            "| Protocol | protocol.md |\n"))
+        runs = release_gate.audit_eval_runs(p)
+        assert len(runs) == 1, runs
+        assert not runs[0]["qualifies"], runs
+        assert runs[0]["missing"] == ["a baseline arm"], runs
+
+
+@case("a-turn-one-run-does-not-qualify")
+def _run_one_turn():
+    import release_gate
+    with tempfile.TemporaryDirectory() as d:
+        p = _run_record(Path(d), (
+            "## Run 1, 2026-10-11\n\n"
+            "| Field | Value |\n| --- | --- |\n"
+            "| Arms | A no skill, B with skill |\n"
+            "| Turns released | **1 only.** Diagnostic evidence was never released. |\n"
+            "| Model | Subagent via the harness. Exact model id not captured. |\n"))
+        runs = release_gate.audit_eval_runs(p)
+        assert not runs[0]["qualifies"], runs
+        assert "both turns released" in runs[0]["missing"], runs
+        assert "a captured model id" in runs[0]["missing"], runs
+
+
+@case("a-plan-section-is-not-a-run")
+def _run_plan_section():
+    """RUNS.md carries "## Runs not yet performed". Counting it would invent a failed run."""
+    import release_gate
+    with tempfile.TemporaryDirectory() as d:
+        p = _run_record(Path(d), "## Runs not yet performed\n\nNothing yet.\n")
+        assert release_gate.audit_eval_runs(p) == [], p
+
+
+@case("the-repository-runs-do-not-qualify")
+def _run_real_record():
+    """Whatever this repository records today, the honest state has to be visible."""
+    import release_gate
+    runs = release_gate.audit_eval_runs(
+        Path(release_gate.__file__).resolve().parent.parent / "evaluation/results/RUNS.md")
+    assert runs, "the run record is empty or unreadable"
+    assert not any(r["qualifies"] for r in runs), \
+        f"a recorded run now qualifies: {[r['name'] for r in runs if r['qualifies']]}"
+
+
+# ---------------------------------------------------------------------------
 # Verdict semantics
 # ---------------------------------------------------------------------------
 

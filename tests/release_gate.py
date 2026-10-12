@@ -134,6 +134,50 @@ def decide(criteria: list[Criterion]) -> tuple[str, int, list[str]]:
     return QUALIFIED, 0, []
 
 
+def audit_eval_runs(path: Path) -> list[dict]:
+    """Read the run record and report what qualifies as a model evaluation.
+
+    E5 used to be a hardcoded UNVERIFIED carrying a hardcoded sentence, which is the same
+    shape as the C2 tautology this gate was fixed for: it could not change whatever the
+    repository contained, and it had nothing to say about a run that did happen. It now
+    reads `evaluation/results/RUNS.md`.
+
+    A run qualifies when it has both arms, both turns released, a named model, and a
+    declared protocol. Run 1 has both arms but released only turn 1 and captured no model
+    id. Run 2 released both turns and named its model but ran one arm. Neither qualifies,
+    so E5 stays UNVERIFIED and reports which condition each run failed, which is more
+    useful than a sentence that has been true since it was written.
+    """
+    if not path.is_file():
+        return []
+    # Only numbered runs are runs. The file also carries "## Runs not yet performed", which is
+    # a plan and must not be counted as a run that failed to qualify.
+    blocks = re.split(r"^## (Run \d+[^\n]*)$", path.read_text(errors="replace"), flags=re.M)
+    runs = []
+    for i in range(1, len(blocks), 2):
+        heading, body = blocks[i], blocks[i + 1]
+        fields = dict(re.findall(r"^\|\s*([^|]+?)\s*\|\s*(.+?)\s*\|$", body, re.M))
+        low = {k.lower(): v.lower() for k, v in fields.items()}
+        arms = low.get("arms", "")
+        model = low.get("model", "")
+        turns = low.get("turns released", "")
+        protocol = low.get("protocol", "")
+        has_baseline = ("baseline" in arms or "no skill" in arms or "run a" in arms) and \
+            not re.search(r"\bno (baseline|skill)|baseline arm\.\*?\*?\s*$|only,? assisted", arms)
+        missing = []
+        if not (has_baseline and "assist" in arms):
+            missing.append("a baseline arm")
+        if not turns or re.search(r"\b1 only\b|\bonly turn\b|\bnever released\b", turns):
+            missing.append("both turns released")
+        if not model or re.search(r"not captured|not recorded|unknown", model):
+            missing.append("a captured model id")
+        if not protocol:
+            missing.append("a declared protocol")
+        runs.append({"name": heading.strip(), "fields": fields, "missing": missing,
+                     "qualifies": not missing})
+    return runs
+
+
 def run(cmd: list[str], timeout: int = 1800) -> tuple[int, str]:
     try:
         p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=ROOT)
@@ -366,11 +410,23 @@ def main() -> int:
             "the declaration is verified here; enforcement at grading time is performed by the "
             "grader and is not checked by this script", kind=DERIVED)
 
+    # E5 was a hardcoded UNVERIFIED with a hardcoded sentence. It now reads the run record,
+    # because a criterion that cannot change with what the repository contains is a comment,
+    # and because a run has now happened that the old sentence did not describe.
+    runs = audit_eval_runs(ROOT / "evaluation" / "results" / "RUNS.md")
+    qualifying = [r for r in runs if r["qualifies"]]
+    if qualifying:
+        e5_evidence = (f"{len(qualifying)} of {len(runs)} recorded runs meet the A/B design "
+                       f"in evaluation/test-protocol.md: "
+                       + ", ".join(r["name"] for r in qualifying))
+    else:
+        e5_evidence = (f"{len(runs)} model runs are recorded and none meets the A/B design "
+                       "in evaluation/test-protocol.md")
+    e5_detail = "; ".join(
+        f"{r['name']} lacks " + ", ".join(r["missing"]) for r in runs if r["missing"]
+    ) or "every recorded run meets the design; this criterion should be revisited by hand"
     rep.add("E5", "Evaluation integrity", "Model evaluation executed", UNVERIFIED,
-            "No model-execution budget was available in this environment. Structural "
-            "validation and technical review are reported separately and are never counted "
-            "as model evaluation.",
-            "The single prior A/B run covers 7 scenarios with one grader and is a smoke test")
+            e5_evidence, e5_detail)
 
     # ---- F. Checker integrity -----------------------------------------------
     code_fp, out_fp = run([sys.executable, "tests/fault_probe.py"], timeout=3600)
@@ -411,16 +467,24 @@ def main() -> int:
             + (gm.group(0) if gm else "no case summary"))
 
     # ---- G. End-to-end ------------------------------------------------------
-    # G1, G2 and E5 stay UNVERIFIED until a model has actually been run over these scenarios.
-    # They are mandatory, and decide() refuses to return QUALIFIED while they are outstanding.
+    # G1, G2 and E5 stay UNVERIFIED until a model has actually been run over these scenarios
+    # under the A/B design. They are mandatory, and decide() refuses to return QUALIFIED while
+    # they are outstanding. Their detail now names the runs that exist rather than asserting
+    # that no budget was available, which stopped being true when run 2 was recorded.
+    covered = ", ".join(r["name"] for r in runs) or "none"
     rep.add("G1", "End-to-end behavior", "Representative easy/medium/hard cases evaluated",
             UNVERIFIED,
-            "Requires model execution. No execution budget in this environment.",
+            f"Requires a model evaluation meeting evaluation/test-protocol.md. Runs recorded: "
+            f"{covered}. No recorded run evaluates a representative sample of all three "
+            f"suites with a baseline arm.",
             "This is not reported as a pass anywhere in the project")
 
     rep.add("G2", "End-to-end behavior", "Adversarial and regression suites evaluated",
             UNVERIFIED,
-            "Requires model execution. No execution budget in this environment.")
+            f"Requires a model evaluation meeting evaluation/test-protocol.md. Runs recorded: "
+            f"{covered}. No recorded run evaluates adversarial and regression suites to a "
+            f"standard that supports a claim about them.",
+            "A smoke test covering one scenario from each suite is not an evaluation of them")
 
     rep.add("G3", "End-to-end behavior", "Known regressions tested",
             PASS,
