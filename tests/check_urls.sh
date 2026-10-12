@@ -2,7 +2,7 @@
 # Verify every URL cited in a skill, reference, or scenario.
 #
 # Why this is a script and not a habit. Fabricated and stale citations are the failure
-# this project is built to prevent, and they are easy to miss by eye across 55 scenarios
+# this project is built to prevent, and they are easy to miss by eye across 101 scenarios
 # and three skills. A 200 is also not sufficient on its own: cloud.google.com serves a
 # stub page reading "The equivalent page does not exist in Apigee" at HTTP 200, so every
 # URL is fetched and its body checked too.

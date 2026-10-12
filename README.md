@@ -23,9 +23,10 @@ The two OPDK skills were already in this repository. They are good and they were
 The audit changed their version pins and added a warning about a URL trap that had already
 cost us once.
 
-Four reference files hang off the core skill and load on demand, not with it:
-`error-codes.md`, `products.md`, `security.md` and `sources.md`. They are listed in the
-core skill so the agent knows what exists and when to reach for it.
+Six reference files hang off the core skill and load on demand, not with it:
+`error-codes.md`, `hybrid.md`, `policy-mechanics.md`, `products.md`, `security.md` and
+`sources.md`. They are listed in the core skill so the agent knows what exists and when to
+reach for it.
 
 ## Installing
 
@@ -42,7 +43,7 @@ needed to use the skills.
 
 The core skill names its reference files in a table near the end. They are not inlined into
 the skill, so an agent that does not read them will not have fault codes or product
-differences available. That is deliberate. Inlining 165 fault codes into the skill would
+differences available. That is deliberate. Inlining 173 fault codes into the skill would
 bloat every prompt and make the workflow instructions harder to find.
 
 If your platform does not support reference files, inline them manually and accept the
@@ -53,12 +54,12 @@ prompt cost.
 | File | Count | What it is for |
 | --- | --- | --- |
 | `scenarios/easy.md` | 15 | Narrow cases with a short path to an answer |
-| `scenarios/medium.md` | 15 | Two or more live hypotheses, or a component interaction |
-| `scenarios/hard.md` | 15 | Competing causes, some with deliberately insufficient evidence |
-| `scenarios/adversarial.md` | 12 | Built to break a specific behaviour. Not incidents. |
+| `scenarios/medium.md` | 43 | Two or more live hypotheses, or a component interaction |
+| `scenarios/hard.md` | 22 | Competing causes, some with deliberately insufficient evidence |
+| `scenarios/adversarial.md` | 13 | Built to break a specific behaviour. Not incidents. |
 | `scenarios/regression.md` | 8 | Cheaper to run, sharp to fail on. Rerun after any skill change. |
 
-`scenarios/index.md` is generated from those files. 65 scenarios in total.
+`scenarios/index.md` is generated from those files. 101 scenarios in total.
 
 Every scenario in the three graded files carries the same sections: metadata, the initial
 ticket, initial evidence, expected investigation, diagnostic evidence, ground truth,
@@ -91,7 +92,7 @@ for a correct suite. Read that block. Add `--strict` to fail on warnings.
 their grading and metadata, the hostile reviews of the scenario library, and
 `baseline.md`, which records the measured correctness baseline.
 
-The honest current numbers: 72 scenarios, and `baseline.md` records what blind review found
+The honest current numbers: 101 scenarios, and `baseline.md` records what blind review found
 and what it did not. Roughly a quarter of the library was materially wrong at first review.
 Read `baseline.md` before trusting any single scenario as ground truth.
 
@@ -135,7 +136,7 @@ fixed, highest severity first. Read it before trusting any scenario as ground tr
 `build_error_index.py` regenerates `references/error-codes.md` from the fetched pages.
 `build_doc_index.py` regenerates the documentation index and can re-verify every URL.
 `normalize_pages.py` converts HTML tables that pandoc leaves behind, which is what took the
-fault code count from 129 to 165.
+fault code count from 129 to 173.
 `build_scenario_index.py` regenerates `scenarios/index.md` from the scenario files.
 
 `notes-*.md` are the research write-ups. They are where the "could not verify" lists live,
