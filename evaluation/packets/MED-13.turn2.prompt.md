@@ -15,14 +15,18 @@ Rules for this exercise:
 The customer has replied with more information.
 
 ## Diagnostic Evidence
-The full fault string reads:
+The full fault strings from two failing requests read:
 
 ```
 Execution of ParseJSONResponse failed with error: Javascript runtime error: "TypeError: Cannot read property "length" from undefined. (ParseJSONResponse.js:7)"
 ```
 
-The error description on its own does not say which of the two policies failed. It is the
-policy name and the source line inside the same fault string that discriminate: this one
-is `ParseJSONResponse` at line 7, not the query-parameter policy. On the requests that
-fail, the client sends a body that is an empty array, and the script reads
-`response.content[0].length`.
+```
+Execution of ReadItemList failed with error: Javascript runtime error: "TypeError: Cannot read property "length" from undefined. (ReadItemList.js:11)"
+```
+
+The code is identical and so is the inner description. What differs is the policy name and
+the source line, which is what says which script to open. On the requests that fail, the
+client either sends a body that is an empty array or omits the `items` query parameter. The
+first script parses `response.content` with `JSON.parse` and then reads `body[0].length`;
+the second reads `request.queryparam.items` and then `.length` on it.

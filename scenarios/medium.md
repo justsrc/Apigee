@@ -1448,47 +1448,55 @@ timeout to 500.
 - ID: MED-13
 - Difficulty: medium
 - Primary topic: fault rules
-- Secondary topics: debugging, trace reading
+- Secondary topics: debugging, fault-string reading
 - Product: Apigee or hybrid
-- Origin: documented
+- Origin: synthetic, constructed from the documented fault-string format and one
+  verified runtime example
 - Versions: checked 2026-10-11
-- Evaluation objectives: one error code, several causes; the trace step is the
-  discriminator, not the code
+- Evaluation objectives: one error code, several causes; the policy name carried inside
+  the fault string is the discriminator, not the code and not the description
 - Skills expected: apigee-support-core
 
 #### Initial support ticket
 
-> We get a JavaScript policy failure roughly once an hour. Every time it says
-> `ScriptExecutionFailed` and the fault string is always the same. Two different policies
-> are involved and both look fine. What is it failing on?
+> We get a JavaScript policy failure roughly once an hour. Every time it is the same
+> `ScriptExecutionFailed`. Two different policies are involved and both look fine. What is
+> it failing on?
 
 #### Initial evidence
 
 Two JavaScript policies doing small amounts of work: one parses a JSON body, the other
-reads a query parameter list. Roughly one failure per hour, always at peak. The team
-pasted the error code but not the fault string.
+reads a query parameter list. Roughly one failure per hour, always at peak. Their log
+export captures only the `errorcode` column, so "the same error" in their report means the
+code, not the full `faultstring` field, which is not recorded at all.
 
 #### Expected investigation
 
 The documented cause of `steps.javascript.ScriptExecutionFailed` is that the policy can
 throw many different types of errors, and the fault string is where the detail lives. The
-agent should ask for the fault string in full, not just the code, and note that this is
-the one case where reading the prose is useful as a diagnostic aid even though matching on
-it is fragile.
+documented fault string is built from the policy name, the error type, the error
+description and the source file and line, so it identifies the policy as well as the
+failure. The agent should ask for the fault string in full, not just the code, and note
+that this is the one case where reading the prose is useful as a diagnostic aid even though
+matching on it is fragile.
 
 #### Diagnostic evidence
 
-The full fault string reads:
+The full fault strings from two failing requests read:
 
 ```
 Execution of ParseJSONResponse failed with error: Javascript runtime error: "TypeError: Cannot read property "length" from undefined. (ParseJSONResponse.js:7)"
 ```
 
-The error description on its own does not say which of the two policies failed. It is the
-policy name and the source line inside the same fault string that discriminate: this one
-is `ParseJSONResponse` at line 7, not the query-parameter policy. On the requests that
-fail, the client sends a body that is an empty array, and the script reads
-`response.content[0].length`.
+```
+Execution of ReadItemList failed with error: Javascript runtime error: "TypeError: Cannot read property "length" from undefined. (ReadItemList.js:11)"
+```
+
+The code is identical and so is the inner description. What differs is the policy name and
+the source line, which is what says which script to open. On the requests that fail, the
+client either sends a body that is an empty array or omits the `items` query parameter. The
+first script parses `response.content` with `JSON.parse` and then reads `body[0].length`;
+the second reads `request.queryparam.items` and then `.length` on it.
 
 #### Ground-truth resolution
 
@@ -1506,13 +1514,21 @@ the client traffic that omits the parameter and sends the empty array.
 
 #### Correct remediation
 
-Guard both accesses, keyed on the fault string's policy name:
+Guard both dereferences, keyed on the policy named in the fault string:
 
 ```javascript
 // ParseJSONResponse.js
 var parsed = context.getVariable("response.content");
-var body = parsed ? JSON.parse(parsed) : [];
+var body = [];
+if (parsed) {
+  try {
+    body = JSON.parse(parsed) || [];
+  } catch (e) {
+    body = [];
+  }
+}
 var first = body.length > 0 ? body[0] : null;
+var len = first && typeof first.length === "number" ? first.length : 0;
 ```
 
 ```javascript
@@ -1521,14 +1537,19 @@ var raw = context.getVariable("request.queryparam.items");
 var items = raw ? String(raw).split(",") : [];
 ```
 
+The parse needs the `try` because the ground truth names a malformed body as one of the
+two conditions, and an unguarded `JSON.parse` throws a `SyntaxError` that surfaces as the
+same `ScriptExecutionFailed`.
+
 Treat the fault string as a diagnostic aid here while still keying any error handling on
 the fault code.
 
 #### Verification
 
-Send requests with and without the parameter, and with an empty array, a populated array
-and no body. Confirm all succeed and that behavior for the well-formed cases is unchanged.
-Confirm from the trace that the two conditions are now distinguishable by policy name.
+Send requests with and without the parameter, and with an empty array, a populated array,
+no body, and a body that is not valid JSON. Confirm all succeed and that behavior for the
+well-formed cases is unchanged. Confirm from the trace that the two conditions are now
+distinguishable by policy name.
 
 #### Common incorrect answers
 
@@ -1537,11 +1558,15 @@ Raising the JavaScript timeout, which does not apply to a null dereference.
 Treating `ScriptExecutionFailed` as one specific bug and rewriting a single script blind.
 The code is shared by two conditions in two policies.
 
-Fixing only the policy whose name the team mentioned. The fault string names the one that
-actually failed, and it may not be that one.
+Fixing the one policy named in the first fault string pasted, without noticing that a
+second fault string names a different policy. The customer reported a single repeated
+error; the log had dropped the field that distinguished them.
 
 Ignoring the fault string because matching on prose is discouraged. It is discouraged for
 error handling and useful for diagnosis, and conflating the two is its own error.
+
+Guarding `body.length` but leaving `JSON.parse` bare, which leaves the malformed-body case
+throwing the same fault code.
 
 #### Evaluation rubric
 

@@ -14,13 +14,21 @@ The correlation with peak traffic is because peak traffic includes proportionall
 the client traffic that omits the parameter and sends the empty array.
 
 ## Correct Remediation
-Guard both accesses, keyed on the fault string's policy name:
+Guard both dereferences, keyed on the policy named in the fault string:
 
 ```javascript
 // ParseJSONResponse.js
 var parsed = context.getVariable("response.content");
-var body = parsed ? JSON.parse(parsed) : [];
+var body = [];
+if (parsed) {
+  try {
+    body = JSON.parse(parsed) || [];
+  } catch (e) {
+    body = [];
+  }
+}
 var first = body.length > 0 ? body[0] : null;
+var len = first && typeof first.length === "number" ? first.length : 0;
 ```
 
 ```javascript
@@ -29,13 +37,18 @@ var raw = context.getVariable("request.queryparam.items");
 var items = raw ? String(raw).split(",") : [];
 ```
 
+The parse needs the `try` because the ground truth names a malformed body as one of the
+two conditions, and an unguarded `JSON.parse` throws a `SyntaxError` that surfaces as the
+same `ScriptExecutionFailed`.
+
 Treat the fault string as a diagnostic aid here while still keying any error handling on
 the fault code.
 
 ## Verification
-Send requests with and without the parameter, and with an empty array, a populated array
-and no body. Confirm all succeed and that behavior for the well-formed cases is unchanged.
-Confirm from the trace that the two conditions are now distinguishable by policy name.
+Send requests with and without the parameter, and with an empty array, a populated array,
+no body, and a body that is not valid JSON. Confirm all succeed and that behavior for the
+well-formed cases is unchanged. Confirm from the trace that the two conditions are now
+distinguishable by policy name.
 
 ## Common Incorrect Answers
 Raising the JavaScript timeout, which does not apply to a null dereference.
@@ -43,11 +56,15 @@ Raising the JavaScript timeout, which does not apply to a null dereference.
 Treating `ScriptExecutionFailed` as one specific bug and rewriting a single script blind.
 The code is shared by two conditions in two policies.
 
-Fixing only the policy whose name the team mentioned. The fault string names the one that
-actually failed, and it may not be that one.
+Fixing the one policy named in the first fault string pasted, without noticing that a
+second fault string names a different policy. The customer reported a single repeated
+error; the log had dropped the field that distinguished them.
 
 Ignoring the fault string because matching on prose is discouraged. It is discouraged for
 error handling and useful for diagnosis, and conflating the two is its own error.
+
+Guarding `body.length` but leaving `JSON.parse` bare, which leaves the malformed-body case
+throwing the same fault code.
 
 ## Evaluation Rubric
 | Dimension | 0 | 2 | 4 |
