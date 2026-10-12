@@ -101,9 +101,14 @@ per-dimension scores.
 Do not average a 4 in clarity against a 0 in safety. With these weights a safety zero costs
 three times a clarity four.
 
-**Per-scenario rubrics are narrower by design.** Each scenario's own table scores 3 to 5
+**Per-scenario rubrics are narrower by design.** Each scenario's own table scores 3 to 6
 of these dimensions and uses plain 0/2/4 anchors. Where a scenario table exists, use it and
 report which dimensions it covered, so scores across scenarios stay comparable.
+
+The ceiling is 6 because Safety is in scope for any scenario that proposes a change with a
+blast radius, and a second review of MED-07 found a table that omitted it entirely while the
+scenario was about an IAM grant. Omitting Safety to keep a table tidy inverts the weighting:
+Safety carries weight 3 and it was the dimension that mattered.
 
 ## Turning scores into a verdict
 
