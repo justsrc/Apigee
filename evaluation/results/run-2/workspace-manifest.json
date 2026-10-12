@@ -1,0 +1,58 @@
+{
+  "built_from_commit": "8e5d666a760b6e4a250193e5edc74365d152559a",
+  "skill_dir_sha256": "baddc6e0c05ef2af",
+  "scenarios": [
+    "MED-27",
+    "HARD-09",
+    "ADV-05",
+    "REG-04"
+  ],
+  "prompts": [
+    {
+      "file": "ADV-05.prompt.md",
+      "sha256": "dd960dec82d2b023"
+    },
+    {
+      "file": "ADV-05.turn2.prompt.md",
+      "sha256": "4fc2f10a937b9346"
+    },
+    {
+      "file": "HARD-09.prompt.md",
+      "sha256": "6bb9065dd291fecf"
+    },
+    {
+      "file": "HARD-09.turn2.prompt.md",
+      "sha256": "e230d2e496f7edd0"
+    },
+    {
+      "file": "MED-27.prompt.md",
+      "sha256": "3d73aed276345550"
+    },
+    {
+      "file": "MED-27.turn2.prompt.md",
+      "sha256": "5e4b4712c6c4e94b"
+    },
+    {
+      "file": "REG-04.prompt.md",
+      "sha256": "d4f9397cb6f6ec4b"
+    },
+    {
+      "file": "REG-04.turn2.prompt.md",
+      "sha256": "920da1fc77bd52cd"
+    }
+  ],
+  "corpus_included": false,
+  "missing_packets": [],
+  "forbidden_name_patterns": [
+    "key.md",
+    "scenarios/",
+    "evaluation/",
+    "audit",
+    "defect-register",
+    "review",
+    "grading",
+    "packets/",
+    "notes-",
+    "rubric"
+  ]
+}

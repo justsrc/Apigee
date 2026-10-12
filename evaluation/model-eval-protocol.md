@@ -89,3 +89,32 @@ All of these, in `evaluation/results/run-2/`:
 ## Deviation log
 
 Any departure from the above gets a dated line here before the result is read.
+
+### 2026-10-13, before any answer was collected
+
+**No fresh-context model is available to this session.** The harness refuses to spawn
+subagents here (subagent depth limit 1), which is the only mechanism this session has for
+getting a model with an empty context. The agent that answered run 2 is therefore the
+reviewing agent that wrote this protocol, in the same conversation, with the repository open
+around it.
+
+Three consequences, recorded before the run so they cannot be read as results:
+
+1. The model is the one that just reviewed and repaired the scenario library. It has read
+   seven ground truths in full (MED-09, MED-12, MED-13, MED-14, MED-16, MED-18, MED-20) and
+   a large part of `research/pages/`. None of the four sampled scenarios is among them, but
+   the corpus exclusion that the workspace enforces does not mean anything for this run,
+   because the answering model has already read those pages from the repository.
+2. There is no enforced isolation. The working directory is the repository root and the
+   answer keys are one directory away. The rule against reading them is an instruction and
+   the file-read log is self-reported.
+3. Grading is done by the same model that produced the answers. A single grader is already a
+   stated weakness of the design; here the grader and the candidate are the same process,
+   which is worse.
+
+What is left is worth doing anyway, because it is the path the gate has never exercised: a
+model reading a packet out of a workspace that provably contains no answer key, answering it
+under the scenario's own rubric, and being scored. **No claim about model quality, skill
+effectiveness or scenario difficulty comes out of this run.** The scores check that the
+machinery produces numbers at all, and a defect found by reading an answer is a finding
+about the scenario or the skill, not about the model.
