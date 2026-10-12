@@ -13,11 +13,12 @@ Rules for this exercise:
 # Support case MED-07
 
 ## Initial Support Ticket
-> We created a new environment in our hybrid install and deployed our proxy to it. The
-> deployment call succeeded. Requests to the new environment hostname return 404. The
-> other environments on the same cluster are fine. Please advise.
+> We onboarded a second organization on our hybrid install and created its first
+> environment. We deployed our proxy to it. The deployment call succeeded. Requests to
+> the new environment hostname return 404. Our original organization is completely
+> unaffected. Please advise.
 
 ## Initial Evidence
-The deployment list shows the revision deployed to `prod2`. The new environment was
-created in the same Google Cloud project as the existing ones. Nothing was redeployed
-elsewhere.
+The deployment list for the new organization shows the revision deployed to `prod`. The
+same proxy revision serves traffic normally in the original organization. Nothing was
+redeployed there, and both organizations run in the same Google Cloud project.

@@ -25,8 +25,9 @@ requests hang longer.
 
 Adding a cache to hide the latency, which trades a latency problem for a staleness problem.
 
-Claiming "no deploys, so it is Apigee". The absence of a deploy is not evidence of
-applause; it is the absence of one class of cause.
+Claiming "no deploys, so it is Apigee". The absence of a deploy eliminates one class of
+cause. It does not establish the other, and the remaining candidates still have to be
+tested.
 
 ## Evaluation Rubric
 | Dimension | 0 | 2 | 4 |

@@ -15,5 +15,6 @@ Rules for this exercise:
 The customer has replied with more information.
 
 ## Diagnostic Evidence
-A trace of the failing proxy shows `OAuthV2/VerifyAccessToken` succeeded at the
-validate step and the failure occurs at a later `SetOAuthV2Info` step.
+A trace of the failing proxy has no `VerifyAccessToken` step at all. The first token policy
+on that path is `GetOAuthV2Info`, and the failure occurs there. The working proxy's trace
+shows `VerifyAccessToken` running before the info policies, and failing.

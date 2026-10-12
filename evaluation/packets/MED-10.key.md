@@ -5,6 +5,11 @@ The token is expired, which is a single condition. The status differs because th
 proxies use different policies to handle it: `VerifyAccessToken` surfaces 401, while
 `GetOAuthV2Info` and `SetOAuthV2Info` surface 500 for an expired token.
 
+An expired token cannot pass `VerifyAccessToken`, so a trace showing that step succeeding
+would contradict the ground truth rather than explain the difference. What the trace
+establishes is which policies are on each path, and that is what makes the status
+difference legible.
+
 The client's experience is consistent, not contradictory, once you know the status codes
 are policy-specific.
 

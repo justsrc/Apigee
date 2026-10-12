@@ -18,8 +18,8 @@ Severity, as defined for this project:
 | Status | Count |
 | --- | --- |
 | Open, blocking release | 0 |
-| Fixed and covered by a test | 17 |
-| Fixed, coverage recorded, no dedicated probe yet | 3 |
+| Fixed and covered by a test | 18 |
+| Fixed, coverage recorded, no dedicated probe yet | 6 |
 | Open, accepted with documented reason | 8 |
 | Open, awaiting external evidence | 2 |
 
@@ -491,3 +491,113 @@ Tracked so a 64%-redirected citation set is not mistaken for a clean one.
 | D-025 | `docs.apigee.com` Edge slugs carry the release, so a page verified at one release 404s at another | Real and unavoidable. Recorded in `notes-known-404.txt`; the OPDK skills pin a release. |
 | D-026 | The known-issues register contains no OPDK entries | By design: it scopes itself to "Apigee and Apigee hybrid". Recorded in `evaluation/source-notes-opdk-knownissues.md` rather than worked around. |
 | D-027 | Two current official pages contradict each other on load-balanced target rotation | Unresolvable from the sources. Both statements are recorded verbatim in `evaluation/source-conflicts-loadbalancing.md`; neither is chosen. |
+---
+
+## Audit of medium.md, MED-01 through MED-22
+
+Added by `evaluation/audit-medium-A.md`, which closes release-gate criterion D3. Twelve of
+the 22 scenarios carried a defect. Recorded here as one entry each, because the pattern
+matters more than the individual instances.
+
+### D-028 HIGH — Scenario ground truth asserted mechanisms that cannot produce the stated fault
+
+- **Affected** `scenarios/medium.md` — MED-02, MED-07, MED-10, MED-14, MED-18
+
+**What failed.** Five scenarios stated a mechanism that is impossible or inverted, and in
+each case the scenario's own ground truth contradicted it.
+
+| Scenario | The assertion | What the source says |
+| --- | --- | --- |
+| MED-02 | The 404 is "the environment group issue from MED-01" | `environmentgroups-working-with.txt:95` — an environment in no group has no hostname at all. MED-02's own evidence has that hostname serving traffic. |
+| MED-07 | `setSyncAuthorization` "was never configured for this environment" | `hybrid_v1.17_synchronizer-access.txt:94,111` — the call is `organizations/{org}:setSyncAuthorization`, org-scoped. It cannot be absent for one environment and present for its siblings. |
+| MED-10 | A trace shows `VerifyAccessToken` succeeded on an expired token | `oauthv2-policy.txt:1330` — an expired token makes that step fail 401, so the request never reaches the later policy. |
+| MED-14 | Remediation is upstream IdP revocation; the lever is never mentioned | `oauthv2-policy.txt:442` — `<CacheExpiryInSeconds>` exists and is documented for exactly this case: "if you sometimes revoke tokens, and you want to reduce the time window". |
+| MED-18 | One gating check coming back negative does not rule the issue out | `apigee-known-issues.txt:265` — WIF **and** a forward proxy, together. A missing condition excludes it. |
+
+MED-14 and MED-18 are the worst shape, because in both the rubric's top anchor rewarded the
+wrong action. A correct answer scored at or near the zero anchor, and MED-18's wrong rule had
+been inherited into `references/hybrid.md:96`, which the skill loads.
+
+**Why it matters.** A scenario whose ground truth describes an impossible mechanism does not
+just misinform; it actively penalises the answer the documentation supports. That is worse
+than a gap, because a gap can be noticed.
+
+**Fix.** All five rewritten so the ground truth names only what the cited source supports.
+MED-07's premise moved from "a new environment" to "a second organization", which is the
+scope the API actually has. MED-18's inverted conjunction was corrected in
+`references/hybrid.md` as well, since the scenario inherited it. MED-14 now names
+`<CacheExpiryInSeconds>` with its documented 1–180 range.
+
+**Status: FIXED**, covered by `evaluation/audit-medium-A.md`.
+
+### D-029 HIGH — The fault-code generator silently dropped every error on two policy pages
+
+- **Affected** `research/build_error_index.py` → `.agents/skills/apigee-support-core/references/error-codes.md`
+
+**What failed.** The page parser matched its section marker with `^## Error reference$`.
+Two policy pages publish that heading as `## <span id="errorcodes"></span>Error reference`,
+so the match failed and the function returned `None`, discarding the page whole:
+
+- `api-platform_reference_policies_oauthv2-policy.txt` — 18 runtime codes
+- `api-platform_reference_policies_verify-iam-policy.txt` — its runtime and deployment tables
+
+The index went from 173 to 195 runtime codes, 107 to 116 deployment errors, and 28 to 33
+fault variables once the match tolerated leading inline markup.
+
+**Why it matters.** `medium.md` tells agents the index is authoritative and that codes not
+in it should not be used. `steps.oauth.v2.InvalidRequest` is documented on the OAuthV2 page
+and was absent from the index, so MED-16 broke the suite's own rule while being correct.
+The project had already recorded the principle: a generated reference that is quietly
+incomplete is worse than none, because it is trusted. Nothing reported the loss, because
+the page-level failure is indistinguishable from a page that has no error section.
+
+**Fix.** The heading match now tolerates leading inline markup.
+
+**Status: FIXED and covered.** `tests/fault_probe.py` probe
+`error-index-generator-drops-anchored-error-sections` reverts the regex and confirms the
+checker catches the resulting stale index.
+
+### D-030 MEDIUM — Quoted facts carried outside the scope their source gives them
+
+- **Affected** `scenarios/medium.md` — MED-16, MED-20, MED-22, MED-12
+
+**What failed.** Four scenarios moved a correct quotation out of the boundary its source
+sets. MED-20 imported known issue 246774745 into a hybrid scenario, and made it
+load-bearing in both remediation and verification, though the register scopes it to Apigee
+and not hybrid at all. MED-22 required verifying Cassandra backup and restore "because
+[it] cannot work with mixed hybrid versions", while stating twice that both clusters run
+the same version with no upgrade in progress. MED-12's metadata claimed a callout timeout
+and a target timeout "both present as a 500", where the target timeout is 504 in
+`endpoint-properties-reference.txt:85,276` and in the 504 playbook. MED-16's fault code is
+real but was outside the index, which D-029 explains.
+
+**Why it matters.** Quote-matching review cannot catch this class. Each sentence is
+verbatim and each is false, because a true statement about one scope was placed in another.
+
+**Fix.** Each boundary is now stated where the fact is used, so an agent applying it has to
+notice the scope. MED-20 keeps 246774745 as an explicit near miss, with the register's own
+Affects column as the thing that rules it out, because excluding it is the diagnostic work.
+
+**Status: FIXED.**
+
+### D-031 LOW — Prose corruption inside a graded answer-key block
+
+- **Affected** `scenarios/medium.md` MED-06
+
+**What failed.** The "Common incorrect answers" block read "The absence of a deploy is not
+evidence of applause; it is the absence of one class of cause." The word appears nowhere
+else in the corpus. The sentence's argument is sound and its wording is not.
+
+**Fix.** Rewritten. Recorded separately because it is the only defect found that no source
+check could catch: it contradicts nothing, it is simply not English that anyone wrote.
+
+**Status: FIXED.**
+
+### Note on titles, recorded so the next pass does not re-raise it
+
+Two reviewers reported title leakage as a defect. `tests/make_packets.py` writes
+`# Support case <ID>` into the prompt and omits the scenario title deliberately, so a title
+phrased as a conclusion cannot reach the agent. Titles survive only in the answer key, for
+the grader. The probes `title-leak-reintroduced` and the comment at `make_packets.py:206`
+cover this; `audit-hard-reg.md` and `audit-medium-B.md` predate the change and their
+title-leak findings are superseded rather than outstanding.

@@ -36,8 +36,14 @@ cert-manager, otherwise a rotation may already be triggered.
 ## Verification
 Confirm `rotationPolicy: Never` on `apigee-ca` with
 `kubectl get certificate apigee-ca -n cert-manager -o yaml`. Then confirm the runtime components
-are healthy. Separately, verify Cassandra backup and restore across the clusters, because
-Cassandra backup and restore cannot work with mixed hybrid versions.
+are healthy and that certificate connections are succeeding. Check the same value on both
+clusters, since the defect distinguishes upgraded clusters from fresh installs rather than
+by version.
+
+The Cassandra backup and restore check does not belong here. That constraint is documented
+for a rolling hybrid version upgrade, and both clusters in this incident are on the same
+version with no upgrade in progress. Raising it would send the customer to verify something
+the change does not put at risk.
 
 ## Common Incorrect Answers
 Restarting the affected pods to clear the connection failures. It masks the symptom until the next
@@ -49,6 +55,9 @@ clusters from fresh installs at the same version, so version alone cannot discri
 Rebuilding the `apigee-ca` certificate from scratch. That forces a rotation immediately, which is
 the outcome being avoided.
 
+Raising Cassandra backup and restore as a verification step. It is a real constraint, but it
+governs a rolling version upgrade, and this incident has none in progress.
+
 ## Evaluation Rubric
 | Dimension | 0 | 2 | 4 |
 | --- | --- | --- | --- |
@@ -56,6 +65,7 @@ the outcome being avoided.
 | Diagnostic method | Compares hybrid versions only | Compares the two clusters | Inspects apigee-ca rotationPolicy on both |
 | Product and version | Gives Apigee X advice | Identifies hybrid | Names cert-manager 1.18 default and the fresh-vs-upgraded split |
 | Quality of next step | Restarts | Rebuilds the CA | Patches rotationPolicy to Never before any further change |
+| Relevance | Adds unrelated verification | Over-scopes the check | Verifies the certificate path on both clusters only |
 
 ## References
 - Known issues register (entry 465834046):

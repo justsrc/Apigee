@@ -328,6 +328,17 @@ def _p_stale_index(sb: Sandbox) -> None:
     p.write_text(t)
 
 
+@probe("error-index-generator-drops-anchored-error-sections", "FAIL",
+       "revert the tolerant 'Error reference' heading match in build_error_index.py; the "
+       "unfixed generator silently drops every runtime, deployment and fault-variable row "
+       "on a page whose heading is published as '## <span id=\"errorcodes\"></span>Error "
+       "reference', which is how OAuthV2 and VerifyIAM are published")
+def _p_index_heading_anchor(sb: Sandbox) -> None:
+    sb.edit("research/build_error_index.py",
+            r'r"^##\s*(?:<[^>]+>\s*)*Error reference\s*$"',
+            r'r"^## Error reference\s*$"')
+
+
 @probe("scenario-id-numbering-gap", "FAIL",
        "an unexplained gap in the ID sequence should be visible, not silent")
 def _p_id_gap(sb: Sandbox) -> None:

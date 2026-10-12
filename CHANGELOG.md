@@ -1,5 +1,53 @@
 # Changelog
 
+## 2026-10-12, medium.md reviewed and repaired
+
+`evaluation/audit-medium-A.md` records a technical review of MED-01 through MED-22, closing
+the last of the four audit files the release gate requires. Twelve of the 22 scenarios
+carried a defect: five high, four medium, three low. Ten were sound.
+
+The five high-severity defects all asserted a mechanism that cannot produce the stated
+fault, and each contradicted its own ground truth. MED-02 explained a 404 by borrowing
+MED-01's environment-group verdict, though an environment in no group has no hostname at
+all. MED-07 claimed `setSyncAuthorization` was unconfigured "for this environment", when
+the API is org-scoped. MED-10 traced an expired token passing `VerifyAccessToken`. MED-14
+omitted `<CacheExpiryInSeconds>`, the lever the OAuthV2 page documents for precisely this
+situation. MED-18 inverted a conjunction, so one negative check was scored as insufficient;
+that rule had been inherited into `references/hybrid.md` and was corrected there too.
+
+Two of those were worse than misinforming, because the rubric's top anchor rewarded the
+wrong action, so a correct answer scored near zero.
+
+### Fixed, high
+
+- **The fault-code index was missing every error on two policy pages.** The generator
+  matched its section marker as `^## Error reference$`, but two pages publish that heading
+  as `## <span id="errorcodes"></span>Error reference`. Both were discarded whole, which
+  included 18 documented OAuthV2 runtime codes such as `steps.oauth.v2.InvalidRequest`.
+  The match now tolerates leading inline markup: 173 → 195 runtime codes, 107 → 116
+  deployment errors, 28 → 33 fault variables. A probe reverts the fix and confirms the
+  checker catches it. Nothing had reported the loss, because a page that fails to parse
+  looks exactly like a page with no error section.
+
+### Fixed, medium and low
+
+- MED-16, MED-20, MED-22 and MED-12 carried true quotations placed outside the scope their
+  source gives them. MED-20 imported a defect the register scopes to Apigee into a hybrid
+  scenario and made it load-bearing; MED-22 demanded a Cassandra check premised on a
+  version upgrade it also said was not happening; MED-12's metadata called a target timeout
+  a 500 where the docs say 504. Each boundary is now stated where the fact is used.
+- MED-09's evidence claimed a retry inside the same quota window succeeds, against
+  "subsequent calls are rejected until the counter resets".
+- MED-13 promised two conditions producing one error code and supplied one. It now supplies
+  two, sharing a description whose discriminator is the policy name inside the fault string.
+- MED-06's answer key read "not evidence of applause".
+
+### Not defects
+
+Scenario titles never reach the agent: `make_packets.py` writes `# Support case <ID>` and
+omits the title deliberately. Two reviewers reported title leakage anyway. Those findings
+are recorded as superseded rather than outstanding, so the next pass does not re-raise them.
+
 ## 2026-10-12, audit and repair
 
 An audit of the whole project found two critical defects, several high ones, and eight

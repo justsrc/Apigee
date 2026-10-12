@@ -43,7 +43,7 @@ needed to use the skills.
 
 The core skill names its reference files in a table near the end. They are not inlined into
 the skill, so an agent that does not read them will not have fault codes or product
-differences available. That is deliberate. Inlining 173 fault codes into the skill would
+differences available. That is deliberate. Inlining 195 fault codes into the skill would
 bloat every prompt and make the workflow instructions harder to find.
 
 If your platform does not support reference files, inline them manually and accept the
@@ -166,7 +166,10 @@ fixed, highest severity first. Read it before trusting any scenario as ground tr
 `build_error_index.py` regenerates `references/error-codes.md` from the fetched pages.
 `build_doc_index.py` regenerates the documentation index and can re-verify every URL.
 `normalize_pages.py` converts HTML tables that pandoc leaves behind, which is what took the
-fault code count from 129 to 173.
+fault code count from 129 to 173. A later fix to `build_error_index.py` took it to 195: two
+policy pages publish their error section as `## <span id="errorcodes"></span>Error
+reference`, and a heading match that did not tolerate the leading span discarded every
+error on them. See D-029 in `evaluation/defect-register.md`.
 `build_scenario_index.py` regenerates `scenarios/index.md` from the scenario files.
 
 `notes-*.md` are the research write-ups. They are where the "could not verify" lists live,

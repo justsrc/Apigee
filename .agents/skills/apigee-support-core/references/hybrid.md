@@ -94,8 +94,9 @@ organization <org> and type KmsKey`.
 ## Two-factor causes
 
 **MART credential regression** is gated on workload identity federation **and** a forward
-proxy **together**. Checking either one alone rules it out wrongly, which is a trap when
-the two configurations arrived at different times.
+proxy **together**. Both conditions must be present to implicate it, so a single check that
+comes back negative rules it out; you need both before you conclude it. Saying
+"you are not using WIF" is sufficient to close this off.
 
 **cert-manager 1.18 and later** flips `rotationPolicy` to `Always`. Clusters that were
 upgraded are affected; fresh installs are not. Same hybrid version, different behaviour,

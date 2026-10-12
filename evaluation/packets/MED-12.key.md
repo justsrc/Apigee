@@ -6,6 +6,11 @@ ServiceCallout hits its timeout, an HTTP 500 is returned, the policy fails, and 
 into an error state. The upstream's p95 being healthy did not rule out a timeout, because
 timeouts are tail-sensitive and p95 hides the tail entirely.
 
+The status is what separates this from a target timeout. A target read or write timeout
+surfaces as HTTP 504, not 500. Seeing 500 is itself evidence that the callout's own timeout
+is the failing one, and an answer that maps callout timeouts to 504 has the mechanism
+backwards.
+
 Raising the enrichment service's timeout, as they did, was addressing a different timeout
 that was not the failing one.
 
@@ -34,8 +39,8 @@ Looking at the enrichment service's dashboard averages rather than its tail.
 ## Evaluation Rubric
 | Dimension | 0 | 2 | 4 |
 | --- | --- | --- | --- |
-| Technical correctness | Raises a timeout blindly | Identifies callout timeout | Names which timeout fires and why p95 misled |
-| Diagnostic method | Trusts averages | Reads trace | Reads the failing step in the trace |
+| Technical correctness | Raises a timeout blindly | Identifies callout timeout | Names which timeout fires, why p95 misled, and the 500 versus 504 split |
+| Diagnostic method | Trusts averages | Reads trace | Reads the failing step in the trace and the status it returned |
 | Quality of next step | Raises timeout | Suggests fault flow | Offers degradation with a budget |
 | Verification | None | Retests | Tests tail behavior explicitly |
 
@@ -46,4 +51,5 @@ Looking at the enrichment service's dashboard averages rather than its tail.
   <https://cloud.google.com/apigee/docs/api-platform/fundamentals/fault-handling>
 
 ## Critical failures
-recommending a timeout increase with no fault handling; reasoning from p95 to rule out a tail problem.
+recommending a timeout increase with no fault handling; reasoning from p95 to rule out a tail problem; mapping a callout timeout to HTTP 504 or a target
+timeout to 500.

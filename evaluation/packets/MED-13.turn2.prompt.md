@@ -18,8 +18,11 @@ The customer has replied with more information.
 The full fault string reads:
 
 ```
-TypeError: Cannot read property 'length' of undefined
+Execution of ParseJSONResponse failed with error: Javascript runtime error: "TypeError: Cannot read property "length" from undefined. (ParseJSONResponse.js:7)"
 ```
 
-The script reads `request.queryparam.items`, which is absent on requests with no items
-query parameter.
+The error description on its own does not say which of the two policies failed. It is the
+policy name and the source line inside the same fault string that discriminate: this one
+is `ParseJSONResponse` at line 7, not the query-parameter policy. On the requests that
+fail, the client sends a body that is an empty array, and the script reads
+`response.content[0].length`.

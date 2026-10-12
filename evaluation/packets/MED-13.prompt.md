@@ -13,9 +13,11 @@ Rules for this exercise:
 # Support case MED-13
 
 ## Initial Support Ticket
-> We get a JavaScript policy failure roughly once an hour. It says `ScriptExecutionFailed`
-> but the script is trivial and works most of the time. What is it failing on?
+> We get a JavaScript policy failure roughly once an hour. Every time it says
+> `ScriptExecutionFailed` and the fault string is always the same. Two different policies
+> are involved and both look fine. What is it failing on?
 
 ## Initial Evidence
-A JavaScript policy doing a small amount of work. Roughly one failure per hour, always at
-peak. The fault string is not included in what the team pasted.
+Two JavaScript policies doing small amounts of work: one parses a JSON body, the other
+reads a query parameter list. Roughly one failure per hour, always at peak. The team
+pasted the error code but not the fault string.

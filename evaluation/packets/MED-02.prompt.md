@@ -19,4 +19,5 @@ Rules for this exercise:
 
 ## Initial Evidence
 The deployment call returned success. Requests from the deploying team succeed with new
-behavior. Requests from another region return 404. Analytics shows traffic in both.
+behavior. The colleague in the other region still gets the old behavior, and one customer
+reports 404 on the `prod` hostname. Analytics shows traffic in both regions.

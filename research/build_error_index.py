@@ -170,7 +170,12 @@ def truncate(text: str, limit: int = 150) -> str:
 
 def parse_policy_page(text: str) -> dict | None:
     """Pull runtime and deployment error tables out of one policy page."""
-    m = re.search(r"^## Error reference\s*$", text, re.MULTILINE)
+    # The heading is sometimes published with an anchor span in front of the text:
+    #   ## <span id="errorcodes"></span>Error reference
+    # Matching the bare string dropped those pages wholesale, which is worse than a
+    # partial parse: an agent told to trust the index has no way to tell that a page
+    # it cites is missing from it. Tolerate any leading inline markup instead.
+    m = re.search(r"^##\s*(?:<[^>]+>\s*)*Error reference\s*$", text, re.MULTILINE)
     if not m:
         return None
 

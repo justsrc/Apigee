@@ -6,8 +6,8 @@ produces is exactly the documented consequence.
 
 The real issue is policy choice. The documented recommendation is to use SpikeArrest for
 spike protection and Quota for longer-window allowances, and not to use Quota to shield
-against spikes. Retries landing after a counter reset is normal window behavior, not a
-flaw.
+against spikes. A retry that lands after the counter resets succeeding, and one that lands
+inside the window being rejected, is the documented behavior rather than a flaw.
 
 The fault code is the evidence for which policy is firing. `QuotaViolation` is the Quota
 policy's error and `SpikeArrestViolation` is SpikeArrest's, and this proxy has no

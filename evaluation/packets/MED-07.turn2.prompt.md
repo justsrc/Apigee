@@ -15,8 +15,9 @@ Rules for this exercise:
 The customer has replied with more information.
 
 ## Diagnostic Evidence
-The runtime pod log for the environment contains no line of the form
+The Message Processor log for the new organization contains no line of the form
 `Switched to newer version N from version M`, which is the documented marker that the
-Message Processor applied a contract. Checking the org's sync authorization shows it was
-never configured for this environment, and the service account the Synchronizer runs as
-does not hold the Apigee Synchronizer Manager role.
+MP applied a newer contract version. Reading the sync authorization for the new
+organization returns no identities. The same service account that is registered for the
+original organization holds the Apigee Synchronizer Manager role, so the identity was
+available and was simply never registered against the new organization.

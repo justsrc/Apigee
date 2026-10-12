@@ -15,6 +15,7 @@ Rules for this exercise:
 The customer has replied with more information.
 
 ## Diagnostic Evidence
-Counting requests per client per minute shows the quota is enforced accurately. Clients
-that retry within the same window succeed, because the counter resets on the window
-boundary rather than on the retry.
+Counting requests per client per minute shows the quota is enforced accurately. A retry
+issued inside the same window is rejected as well, because the documented behavior is that
+requests are rejected until the counter resets. Only retries that land after the window
+boundary succeed.

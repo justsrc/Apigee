@@ -133,45 +133,54 @@ path works in `test`.
 #### Initial evidence
 
 The deployment call returned success. Requests from the deploying team succeed with new
-behavior. Requests from another region return 404. Analytics shows traffic in both.
+behavior. The colleague in the other region still gets the old behavior, and one customer
+reports 404 on the `prod` hostname. Analytics shows traffic in both regions.
 
 #### Expected investigation
 
 The agent should separate three things that are easy to conflate: whether the revision was
 saved, whether the runtime reports the revision as ready, and whether a given route
-serves it. The documented model is eventually consistent across Message Processors.
+serves it. The documented model is eventually consistent: Message Processors act
+independently of one another and any given MP can be in a different state than the
+others. Two different symptoms in two different places is the expected shape of a
+deployment that is still propagating, not evidence of two separate faults.
 
 #### Diagnostic evidence
 
-Checking deployment state shows the `test` environment deployment reported as `READY`, while
-the `prod` deployment has not reached that state and its per-pod deployment status is not
-`deployed`. The colleague and the customer both use the `prod` environment hostname.
+Checking deployment state shows the `test` environment deployment reported as `READY`,
+while the `prod` deployment has not reached that state and its per-pod deployment status
+is not `deployed`. The colleague and the customer both use the `prod` environment
+hostname.
 
 #### Ground-truth resolution
 
-Revision 12 is deployed to `test` and ready. The `prod` deployment is still propagating.
+Revision 12 is deployed to `test` and ready. The `prod` deployment is still propagating
+across Message Processors.
 
 The deployment API call returning success means the deployment was accepted, not that
 every runtime has finished loading it. Deployment state is a separate check, which is why
 it exists.
 
-The old behavior the colleague saw is the previous revision still serving on part of the
-runtime, and the 404 is the environment group issue from MED-01 affecting one hostname.
+Both symptoms have this one cause. An MP that is still serving revision 11 gives the
+colleague the old behavior. An MP that has not finished applying revision 12 at all has
+no route for the request and returns 404. Splitting the 404 off as a separate fault,
+whether a routing problem or an addressing one, is the trap here, because the evidence
+does not support a second cause and the fix for the first one clears the second.
 
 #### Correct remediation
 
-This mostly needs time and observation, not intervention. Confirm the `prod` deployment
-reaches `READY`, and separately resolve the environment group membership that is causing
-the 404.
+This needs time and observation, not intervention. Confirm the `prod` deployment reaches
+`READY`.
 
 Do not redeploy to "speed it up". Redeploying does not shorten propagation and adds a
 revision to the history.
 
 #### Verification
 
-Wait for `READY` on `prod`, then confirm requests from the second region serve revision 12.
-Keep checking the 404 separately, because propagation and environment group membership
-are independent problems that happen to present together.
+Wait for `READY` on `prod`, then confirm requests from the second region serve revision
+12. If the 404 persists after the deployment reports `READY`, it is a different fault and
+needs its own investigation, which is the point at which to start looking beyond
+deployment state.
 
 #### Common incorrect answers
 
@@ -180,7 +189,8 @@ Redeploying to force propagation.
 Claiming deployments are regional by design. Nothing in the evidence supports a regional
 deployment model, and that framing would mislead the team about their topology.
 
-Blaming the customer's DNS without checking the deployment state.
+Diagnosing the 404 as an environment group or routing problem while `prod` is still
+propagating. It fits the symptom and not the evidence.
 
 #### Evaluation rubric
 
@@ -188,10 +198,12 @@ Blaming the customer's DNS without checking the deployment state.
 | --- | --- | --- | --- |
 | Technical correctness | Says deployments are regional | Identifies propagation | Separates save, state, and routing |
 | Diagnostic method | Redeploys | Checks traffic | Checks deployment state per environment |
-| Handling of competing causes | Merges both into one | Notes both | Keeps them independent |
-| Safety | Redeploys | Waits | Waits and fixes the other issue separately |
+| Handling of competing causes | Invents a second unrelated cause | Notes both symptoms | Holds both symptoms to one cause while `prod` is propagating |
+| Safety | Redeploys | Waits | Waits without redeploying and says when to look further |
+| Verification | None | Retests | Waits for `READY`, retests, and sets a condition for escalating |
 
-#### Critical failures: asserting a regional deployment model without evidence.
+#### Critical failures: asserting a regional deployment model without evidence; prescribing
+a second fix for the 404 before the deployment reaches `READY`.
 
 #### References
 
@@ -703,8 +715,9 @@ requests hang longer.
 
 Adding a cache to hide the latency, which trades a latency problem for a staleness problem.
 
-Claiming "no deploys, so it is Apigee". The absence of a deploy is not evidence of
-applause; it is the absence of one class of cause.
+Claiming "no deploys, so it is Apigee". The absence of a deploy eliminates one class of
+cause. It does not establish the other, and the remaining candidates still have to be
+tested.
 
 #### Evaluation rubric
 
@@ -745,15 +758,16 @@ cause without measurement.
 
 #### Initial support ticket
 
-> We created a new environment in our hybrid install and deployed our proxy to it. The
-> deployment call succeeded. Requests to the new environment hostname return 404. The
-> other environments on the same cluster are fine. Please advise.
+> We onboarded a second organization on our hybrid install and created its first
+> environment. We deployed our proxy to it. The deployment call succeeded. Requests to
+> the new environment hostname return 404. Our original organization is completely
+> unaffected. Please advise.
 
 #### Initial evidence
 
-The deployment list shows the revision deployed to `prod2`. The new environment was
-created in the same Google Cloud project as the existing ones. Nothing was redeployed
-elsewhere.
+The deployment list for the new organization shows the revision deployed to `prod`. The
+same proxy revision serves traffic normally in the original organization. Nothing was
+redeployed there, and both organizations run in the same Google Cloud project.
 
 #### Expected investigation
 
@@ -764,41 +778,46 @@ contract, the Message Processor applies it, and the Watcher reports status.
 
 #### Diagnostic evidence
 
-The runtime pod log for the environment contains no line of the form
+The Message Processor log for the new organization contains no line of the form
 `Switched to newer version N from version M`, which is the documented marker that the
-Message Processor applied a contract. Checking the org's sync authorization shows it was
-never configured for this environment, and the service account the Synchronizer runs as
-does not hold the Apigee Synchronizer Manager role.
+MP applied a newer contract version. Reading the sync authorization for the new
+organization returns no identities. The same service account that is registered for the
+original organization holds the Apigee Synchronizer Manager role, so the identity was
+available and was simply never registered against the new organization.
 
 #### Ground-truth resolution
 
-The Synchronizer has no permission to pull artifacts for this environment, so it never
-fetches the contract and the Message Processor never receives anything to apply. Nothing
+The Synchronizer has no registered identity for this organization, so it never fetches
+artifacts for it and the Message Processor never receives a contract to apply. Nothing
 is wrong with the proxy, the revision, or the runtime.
 
-The documented requirement is that `setSyncAuthorization` is called with an identity
-holding the Apigee Synchronizer Manager role. When it is skipped, nothing syncs and there
-is no obvious error at any layer. That silence is what makes this hard to see from the
-outside, and it is why a ticket that looks like a routing problem is really an
-authorization one.
+The documented requirement is that `setSyncAuthorization` is called once per hybrid
+organization, against `organizations/{org}`, listing the service account that holds the
+Apigee Synchronizer Manager role. A second organization on the same cluster needs its
+own call; the registration made for the first organization does not carry over. That
+silence is what makes this hard to see from the outside, and it is why a ticket that
+looks like a routing problem is really an authorization one.
 
 #### Correct remediation
 
-Call `setSyncAuthorization` for the organization with the Synchronizer manager service
-account, after granting that account the Apigee Synchronizer Manager role. Confirm the
-grant before calling the API, since the API will accept an identity that lacks the role.
+Call `setSyncAuthorization` for the new organization with the Synchronizer manager
+service account, after confirming that account holds the Apigee Synchronizer Manager
+role. Confirm the grant before calling the API, since the API will accept an identity
+that lacks the role.
 
-This is an IAM change in Google Cloud. It is reversible and it affects the whole
-organization, so confirm the intended service account with whoever owns it.
+This is an IAM change in Google Cloud. It is reversible, and it is scoped to the one
+organization being added, so confirm which service account the platform team intends to
+use.
 
 #### Verification
 
 Confirm the deployment reaches a served state, then send a request. The reliable check is
-the contract version line appearing in the runtime pod log, not the Management API
-response, because on hybrid the API cannot tell you whether the runtime applied anything.
+the `Switched to newer version N from version M` line appearing in the runtime pod log
+for that organization, not the Management API response, because on hybrid the API cannot
+tell you whether the runtime applied anything.
 
-Also confirm the pre-existing environments still serve, since the change is
-organization-wide.
+Also confirm the original organization still serves, since the same service account is
+now registered against two organizations.
 
 #### Common incorrect answers
 
@@ -814,20 +833,22 @@ Replacing the runtime pods. A restart does not grant the Synchronizer permission
 | Dimension | 0 | 2 | 4 |
 | --- | --- | --- | --- |
 | Product and version | Applies X reasoning | Suspects hybrid | Treats deployment as four separate steps |
-| Technical correctness | Redeploys | Looks at runtime | Identifies missing `setSyncAuthorization` and the role |
-| Diagnostic method | Checks DNS | Reads pod logs | Reads pod logs for the contract version line and checks IAM |
-| Quality of next step | Redeploy | Restarts pods | Grants the role then calls the API |
-| Verification | None | Sends a request | Uses the pod log marker and checks other environments |
+| Technical correctness | Redeploys | Looks at runtime | Identifies that sync authorization is per organization |
+| Diagnostic method | Checks DNS | Reads pod logs | Reads pod logs for the contract version line and reads sync authorization |
+| Quality of next step | Redeploy | Restarts pods | Registers the identity against that organization |
+| Verification | None | Sends a request | Uses the pod log marker and checks the other organization |
 
 #### Critical failures: recommending a redeploy as the fix; treating a successful Management
-API call as proof the runtime applied the change.
+API call as proof the runtime applied the change; claiming `setSyncAuthorization` is
+configured per environment.
 
 #### References
 
 - What is Apigee hybrid:
   <https://cloud.google.com/apigee/docs/hybrid/latest/what-is-hybrid>
-- Compare Apigee products:
-  <https://cloud.google.com/apigee/docs/api-platform/get-started/compare-apigee-products>
+- Synchronizer service account access, including the per-organization
+  `setSyncAuthorization` and `getSyncAuthorization` calls:
+  <https://cloud.google.com/apigee/docs/hybrid/latest/synchronizer-access>
 
 ---
 
@@ -967,9 +988,10 @@ the remediation is written.
 
 #### Diagnostic evidence
 
-Counting requests per client per minute shows the quota is enforced accurately. Clients
-that retry within the same window succeed, because the counter resets on the window
-boundary rather than on the retry.
+Counting requests per client per minute shows the quota is enforced accurately. A retry
+issued inside the same window is rejected as well, because the documented behavior is that
+requests are rejected until the counter resets. Only retries that land after the window
+boundary succeed.
 
 #### Ground-truth resolution
 
@@ -978,8 +1000,8 @@ produces is exactly the documented consequence.
 
 The real issue is policy choice. The documented recommendation is to use SpikeArrest for
 spike protection and Quota for longer-window allowances, and not to use Quota to shield
-against spikes. Retries landing after a counter reset is normal window behavior, not a
-flaw.
+against spikes. A retry that lands after the counter resets succeeding, and one that lands
+inside the window being rejected, is the documented behavior rather than a flaw.
 
 The fault code is the evidence for which policy is firing. `QuotaViolation` is the Quota
 policy's error and `SpikeArrestViolation` is SpikeArrest's, and this proxy has no
@@ -1113,14 +1135,20 @@ first does not.
 
 #### Diagnostic evidence
 
-A trace of the failing proxy shows `OAuthV2/VerifyAccessToken` succeeded at the
-validate step and the failure occurs at a later `SetOAuthV2Info` step.
+A trace of the failing proxy has no `VerifyAccessToken` step at all. The first token policy
+on that path is `GetOAuthV2Info`, and the failure occurs there. The working proxy's trace
+shows `VerifyAccessToken` running before the info policies, and failing.
 
 #### Ground-truth resolution
 
 The token is expired, which is a single condition. The status differs because the two
 proxies use different policies to handle it: `VerifyAccessToken` surfaces 401, while
 `GetOAuthV2Info` and `SetOAuthV2Info` surface 500 for an expired token.
+
+An expired token cannot pass `VerifyAccessToken`, so a trace showing that step succeeding
+would contradict the ground truth rather than explain the difference. What the trace
+establishes is which policies are on each path, and that is what makes the status
+difference legible.
 
 The client's experience is consistent, not contradictory, once you know the status codes
 are policy-specific.
@@ -1323,7 +1351,10 @@ which is the opposite of what the evidence supports.
 - Origin: synthetic
 - Versions: checked 2026-10-11
 - Evaluation objectives: distinguish the callout's own timeout from the request target's
-  timeout; both present as a 500 with different fixes
+  timeout, and from each other recognize which is which. They do not look the same on the
+  wire: a callout `<Timeout>` expiry fails the policy with HTTP 500, while a target read or
+  write timeout surfaces as HTTP 504. Getting that mapping backwards sends the agent to the
+  wrong element
 - Skills expected: apigee-support-core
 
 #### Initial support ticket
@@ -1354,6 +1385,11 @@ The callout's own timeout is the one firing. The documented behaviour is that wh
 ServiceCallout hits its timeout, an HTTP 500 is returned, the policy fails, and the proxy goes
 into an error state. The upstream's p95 being healthy did not rule out a timeout, because
 timeouts are tail-sensitive and p95 hides the tail entirely.
+
+The status is what separates this from a target timeout. A target read or write timeout
+surfaces as HTTP 504, not 500. Seeing 500 is itself evidence that the callout's own timeout
+is the failing one, and an answer that maps callout timeouts to 504 has the mechanism
+backwards.
 
 Raising the enrichment service's timeout, as they did, was addressing a different timeout
 that was not the failing one.
@@ -1387,13 +1423,14 @@ Looking at the enrichment service's dashboard averages rather than its tail.
 
 | Dimension | 0 | 2 | 4 |
 | --- | --- | --- | --- |
-| Technical correctness | Raises a timeout blindly | Identifies callout timeout | Names which timeout fires and why p95 misled |
-| Diagnostic method | Trusts averages | Reads trace | Reads the failing step in the trace |
+| Technical correctness | Raises a timeout blindly | Identifies callout timeout | Names which timeout fires, why p95 misled, and the 500 versus 504 split |
+| Diagnostic method | Trusts averages | Reads trace | Reads the failing step in the trace and the status it returned |
 | Quality of next step | Raises timeout | Suggests fault flow | Offers degradation with a budget |
 | Verification | None | Retests | Tests tail behavior explicitly |
 
 #### Critical failures: recommending a timeout increase with no fault handling; reasoning
-from p95 to rule out a tail problem.
+from p95 to rule out a tail problem; mapping a callout timeout to HTTP 504 or a target
+timeout to 500.
 
 #### References
 
@@ -1421,48 +1458,65 @@ from p95 to rule out a tail problem.
 
 #### Initial support ticket
 
-> We get a JavaScript policy failure roughly once an hour. It says `ScriptExecutionFailed`
-> but the script is trivial and works most of the time. What is it failing on?
+> We get a JavaScript policy failure roughly once an hour. Every time it says
+> `ScriptExecutionFailed` and the fault string is always the same. Two different policies
+> are involved and both look fine. What is it failing on?
 
 #### Initial evidence
 
-A JavaScript policy doing a small amount of work. Roughly one failure per hour, always at
-peak. The fault string is not included in what the team pasted.
+Two JavaScript policies doing small amounts of work: one parses a JSON body, the other
+reads a query parameter list. Roughly one failure per hour, always at peak. The team
+pasted the error code but not the fault string.
 
 #### Expected investigation
 
 The documented cause of `steps.javascript.ScriptExecutionFailed` is that the policy can
 throw many different types of errors, and the fault string is where the detail lives. The
-agent should ask for the fault string, not just the code, and note that this is the one
-case where reading the prose is useful as a diagnostic aid even though matching on it is
-fragile.
+agent should ask for the fault string in full, not just the code, and note that this is
+the one case where reading the prose is useful as a diagnostic aid even though matching on
+it is fragile.
 
 #### Diagnostic evidence
 
 The full fault string reads:
 
 ```
-TypeError: Cannot read property 'length' of undefined
+Execution of ParseJSONResponse failed with error: Javascript runtime error: "TypeError: Cannot read property "length" from undefined. (ParseJSONResponse.js:7)"
 ```
 
-The script reads `request.queryparam.items`, which is absent on requests with no items
-query parameter.
+The error description on its own does not say which of the two policies failed. It is the
+policy name and the source line inside the same fault string that discriminate: this one
+is `ParseJSONResponse` at line 7, not the query-parameter policy. On the requests that
+fail, the client sends a body that is an empty array, and the script reads
+`response.content[0].length`.
 
 #### Ground-truth resolution
 
-The script dereferences a query parameter that is not always present. Requests without it
-fail; requests with it succeed. The correlation with peak traffic is because peak traffic
-includes proportionally more requests from clients that omit the parameter.
+Two unrelated conditions produce the same error code and the same error description. A
+malformed body reaches `ParseJSONResponse`, and a request with no `items` query parameter
+reaches the other policy. Neither is a timeout, and neither is a bug in Apigee.
 
-`ScriptExecutionFailed` is a family of errors rather than one error, which is why the code
-alone did not identify the problem. The documented note is to check the fault string for
-details.
+The discriminator is not the code and not even the description, both of which are shared.
+It is the policy name and source line carried in the fault string. An agent that stops at
+`ScriptExecutionFailed` cannot tell the two apart, and will keep fixing whichever policy
+it happened to open first.
+
+The correlation with peak traffic is because peak traffic includes proportionally more of
+the client traffic that omits the parameter and sends the empty array.
 
 #### Correct remediation
 
-Guard the access:
+Guard both accesses, keyed on the fault string's policy name:
 
 ```javascript
+// ParseJSONResponse.js
+var parsed = context.getVariable("response.content");
+var body = parsed ? JSON.parse(parsed) : [];
+var first = body.length > 0 ? body[0] : null;
+```
+
+```javascript
+// the query-parameter policy
 var raw = context.getVariable("request.queryparam.items");
 var items = raw ? String(raw).split(",") : [];
 ```
@@ -1472,14 +1526,19 @@ the fault code.
 
 #### Verification
 
-Send requests with and without the parameter. Confirm both succeed and that the behavior
-with the parameter is unchanged.
+Send requests with and without the parameter, and with an empty array, a populated array
+and no body. Confirm all succeed and that behavior for the well-formed cases is unchanged.
+Confirm from the trace that the two conditions are now distinguishable by policy name.
 
 #### Common incorrect answers
 
 Raising the JavaScript timeout, which does not apply to a null dereference.
 
-Treating `ScriptExecutionFailed` as one specific bug and rewriting the script blind.
+Treating `ScriptExecutionFailed` as one specific bug and rewriting a single script blind.
+The code is shared by two conditions in two policies.
+
+Fixing only the policy whose name the team mentioned. The fault string names the one that
+actually failed, and it may not be that one.
 
 Ignoring the fault string because matching on prose is discouraged. It is discouraged for
 error handling and useful for diagnosis, and conflating the two is its own error.
@@ -1488,17 +1547,22 @@ error handling and useful for diagnosis, and conflating the two is its own error
 
 | Dimension | 0 | 2 | 4 |
 | --- | --- | --- | --- |
-| Technical correctness | Says code is insufficient | Asks for fault string | Identifies the null dereference |
-| Diagnostic method | Rewrites script | Requests fault string | Requests fault string and finds the cause |
+| Technical correctness | Says code is insufficient | Asks for fault string | Identifies both conditions and names the shared description |
+| Diagnostic method | Rewrites script | Requests fault string | Uses the policy name and line in the fault string to discriminate |
 | Evidence and citation | None | Generic | Cites the JavaScript error reference |
-| Handling of uncertainty | Asserts a cause | Hedges | Names what the code cannot show alone |
+| Handling of uncertainty | Asserts a cause | Hedges | Says what the code and the description each cannot distinguish |
 
-#### Critical failures: recommending error handling that matches on `faultstring`.
+#### Critical failures: recommending error handling that matches on `faultstring`; concluding
+one cause from the error description alone without reading the policy name in the fault
+string.
 
 #### References
 
 - JavaScript policy error reference:
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/javascript-policy>
+- JavaScript runtime errors, including the full fault string format and the
+  `Cannot read property "length" from undefined` example:
+  <https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/runtime/javascript-runtime-errors>
 - Handling faults:
   <https://cloud.google.com/apigee/docs/api-platform/fundamentals/fault-handling>
 
@@ -1543,7 +1607,8 @@ Revocation at 09:15, first failure at 09:18. The window matches the documented c
 
 Revocation works. OAuth tokens are cached for three minutes, so a revoked token can still
 succeed until its cache entry expires. The observed three-minute window is exactly the
-documented behavior.
+documented behavior: the OAuthV2 reference states that a revoked token may still succeed
+for up to three minutes until its cache limit expires.
 
 There is a real operational consequence, which the agent should raise rather than dismiss:
 if an account must be locked out immediately, revocation alone is not sufficient, and the
@@ -1551,16 +1616,26 @@ security team needs to know that.
 
 #### Correct remediation
 
-For immediate lockout, revoke at the identity provider as well if one is in the path, so
-the credential is rejected upstream rather than relying on the cache expiring.
+The documented lever for a shorter window is `<CacheExpiryInSeconds>` on the OAuthV2
+policy, which lowers the access token cache TTL and is described specifically for the
+case where you revoke tokens and want to reduce the window during which Apigee treats
+revoked tokens as valid. Its supported range is 1 to 180 seconds. Lower it, redeploy the
+proxy, and note that the reduction applies from the next cache expiry onward, so it does
+not shorten the window for a token already cached under the old TTL.
 
-Document the three-minute window so the security team knows what response time Apigee
+If the security team needs the credential rejected before that, revoking at the identity
+provider as well is the only path to immediate rejection, and whether one exists depends
+on their flow. The agent should ask rather than assume.
+
+Document the resulting window so the security team knows what response time Apigee
 offers and does not offer.
 
 #### Verification
 
 Revoke a test token, record the time, and poll until it fails. Repeat to confirm the
-window is consistently three minutes rather than occasionally longer.
+window matches the configured `<CacheExpiryInSeconds>` rather than occasionally running
+longer. Then confirm tokens issued under the old TTL no longer survive longer than the
+new value.
 
 #### Common incorrect answers
 
@@ -1572,17 +1647,22 @@ flows and unacceptable for a credential compromise, and the answer depends on wh
 Suggesting clearing the runtime cache manually. There is no documented supported way to
 force-flush token caches across runtimes.
 
+Offering only identity provider revocation and never mentioning that Apigee's own cache
+TTL is configurable. It is, it is the lever the documentation points at for this exact
+situation, and an answer that omits it cannot be verified by the steps below.
+
 #### Evaluation rubric
 
 | Dimension | 0 | 2 | 4 |
 | --- | --- | --- | --- |
-| Technical correctness | Calls it a defect | Identifies caching | Names the three-minute window and its consequence |
+| Technical correctness | Calls it a defect | Identifies caching | Names the window, its bound, and the configurable TTL |
 | Handling of competing causes | Escalates | Hedges | Explains and addresses the security need separately |
-| Quality of next step | Cache flush | Document window | Offers upstream revocation for immediate lockout |
-| Verification | None | Waits | Measures the window repeatedly |
+| Quality of next step | Cache flush | Document window | Lowers `<CacheExpiryInSeconds>` and asks whether an upstream IdP is in path |
+| Verification | None | Waits | Measures the window repeatedly and confirms it matches the configured TTL |
 
 #### Critical failures: advising a security team to accept the window for a credential
-compromise without raising the alternative.
+compromise without raising the alternative; asserting the three-minute window is fixed
+and cannot be shortened.
 
 #### References
 
@@ -1977,9 +2057,15 @@ environments that use Workload Identity Federation together with an HTTP forward
 conditions are required. The register scopes the issue to EKS. The fix is to move the operator
 and MART images to `1.16.0-hotfix.1`.
 
-The trap is the conjunction. An agent that checks only "are you using WIF?" or only "do you have a
-forward proxy?" will correctly observe one is absent and wrongly close the case. The same applies
-to the platform check: an agent that verifies GKE and stops there will also wrongly close it.
+The trap is the conjunction read backwards. Because both conditions are required, checking
+one and finding it absent rules the issue out. An agent that verifies "not GKE" and stops
+there has correctly excluded this issue and should go looking elsewhere. The same applies
+to WIF and to the forward proxy: any one of them being absent is enough to exclude it, and
+an agent that treats a single negative check as insufficient has inverted the logic.
+
+The diagnostic work is therefore in establishing all three scope facts — platform,
+WIF, and forward proxy — and reporting a negative result as a genuine exclusion rather
+than as a partial match.
 
 #### Correct remediation
 
@@ -2014,8 +2100,9 @@ Telling the customer their data is lost, or that they must re-import. Both are w
 Re-importing org entities. They are in Cassandra; the import is not the problem and a re-import
 risks real damage.
 
-Checking only Workload Identity Federation, or only the forward proxy. Either alone rules the issue
-out incorrectly.
+Checking only Workload Identity Federation, or only the forward proxy, and concluding the
+issue is still in play because one condition is missing. Both conditions are required, so a
+missing one excludes it.
 
 #### Evaluation rubric
 
@@ -2024,10 +2111,10 @@ out incorrectly.
 | Product and version | Gives Apigee X advice | Identifies hybrid | Names the 1.16.0 MART defect and its fixed version |
 | Technical correctness | Says data lost | Suspects MART | Names the credential casting regression |
 | Diagnostic method | Re-imports | Checks MART | Checks MART version, both gating features, and the platform |
-| Handling of uncertainty | Asserts | Hedges | States the conjunction and platform scope explicitly |
+| Handling of uncertainty | Asserts | Hedges | States that both gating features are required and that one absent excludes it |
 
-#### Critical failures: telling a customer their data is lost; ruling the issue out by checking
-only one of the two gating features.
+#### Critical failures: telling a customer their data is lost; keeping the issue in play on
+the strength of a single gating feature check that came back negative.
 
 #### References
 
@@ -2160,8 +2247,8 @@ runtime restart, which does not address scheduling.
 - Primary topic: timeouts and LoadBalancer targets
 - Secondary topics: deployment state, hybrid runtime pods, latency
 - Product: hybrid
-- Origin: reported real-world cases (official known issues 471125841, fixed in hybrid
-  1.16.x, and 246774745, both FIXED)
+- Origin: documented (official known issue 471125841, affecting hybrid 1.14.x and 1.15.x,
+  FIXED in hybrid 1.16.x)
 - Versions: checked 2026-10-11
 - Evaluation objectives: two competing wrong answers dominate here, "the deployment failed" and "the
   backend ignores the timeout". Both are wrong. The agent must notice that the condition depends on
@@ -2196,13 +2283,16 @@ Processor that has not applied the new contract value.
 
 The deployment succeeded and the revision is deployed. The documented defect, 471125841, is that an
 updated `io.timeout.millis` value "might not be consistently honored" when "multiple servers are
-used under `<LoadBalancer>` in the TargetEndpoint". It affects hybrid 1.14.x and 1.15.x. The old
-value survives on some Message Processors, which is why only some requests behave as deployed.
-The structural signal the symptom does not reveal is the presence of the `<LoadBalancer>`.
+used under `<LoadBalancer>` in the TargetEndpoint". It affects hybrid 1.14.x and 1.15.x, which is
+the version the customer reports. The old value survives on some Message Processors, which is why
+only some requests behave as deployed. The structural signal the symptom does not reveal is the
+presence of the `<LoadBalancer>`.
 
-A second documented defect, 246774745, compounds it: when a proxy "sets two or more
+There is a separate documented defect, 246774745, where a proxy that "sets two or more
 `io.timeout.millis` values in two or more flows using the same target host, only one
-`io.timeout.millis` value is honored".
+`io.timeout.millis` value is honored". The register scopes that one to Apigee, not hybrid, so it
+does not apply to this installation. Reading it in is a plausible mistake, because it sounds like
+a fit, and checking the product against the register's own Affects column is what rules it out.
 
 #### Correct remediation
 
@@ -2212,13 +2302,11 @@ On an affected version the documented workaround is to restart the `apigee-runti
 so the change propagates, rather than all at once, to keep serving traffic. This is disruptive and
 needs authorization.
 
-Separately, if several flows set different timeouts against the same target host, consolidate them,
-because the per-flow values will collapse to one regardless.
-
 #### Verification
 
-Confirm requests no longer time out at the old value. Then exercise every flow that sets a timeout
-for that target host, because the collapse to a single value will only show up there.
+Confirm requests no longer time out at the old value, and confirm across more than one Message
+Processor, since the defect is that some of them kept the old value and a single successful request
+does not rule it out.
 
 #### Common incorrect answers
 
@@ -2236,16 +2324,18 @@ rules it out and changes the answer.
 | Dimension | 0 | 2 | 4 |
 | --- | --- | --- | --- |
 | Technical correctness | Redeploys | Suspects propagation | Identifies the LoadBalancer-conditioned timeout defect |
-| Diagnostic method | Restarts everything | Reads deployment state | Checks TargetEndpoint for LoadBalancer and per-flow timeouts |
-| Evidence use | Blames the backend | Measures the target | Measures the target and checks the version against the register |
-| Quality of next step | Redeploy | Rolling restart | Upgrade where possible, else rolling restart, plus consolidating conflicting timeouts |
+| Diagnostic method | Restarts everything | Reads deployment state | Checks the TargetEndpoint for LoadBalancer and the version against the register |
+| Evidence use | Blames the backend | Measures the target | Measures the target, checks the version, and excludes non-hybrid defects |
+| Quality of next step | Redeploy | Rolling restart | Upgrade where possible, else rolling restart one pod at a time |
 
 #### Critical failures: recommending a redeploy as the fix; blaming the backend for timeouts at a
-value the proxy is no longer configured to use.
+value the proxy is no longer configured to use; applying a defect the register scopes to Apigee to a
+hybrid installation.
 
 #### References
 
-- Known issues register (entries 471125841 and 246774745):
+- Known issues register (entry 471125841, which also lists 246774745 as a separate
+  entry scoped to Apigee):
   <https://cloud.google.com/apigee/docs/release/known-issues>
 - API proxy configuration reference:
   <https://cloud.google.com/apigee/docs/api-platform/reference/api-proxy-configuration-reference>
@@ -2451,8 +2541,14 @@ cert-manager, otherwise a rotation may already be triggered.
 
 Confirm `rotationPolicy: Never` on `apigee-ca` with
 `kubectl get certificate apigee-ca -n cert-manager -o yaml`. Then confirm the runtime components
-are healthy. Separately, verify Cassandra backup and restore across the clusters, because
-Cassandra backup and restore cannot work with mixed hybrid versions.
+are healthy and that certificate connections are succeeding. Check the same value on both
+clusters, since the defect distinguishes upgraded clusters from fresh installs rather than
+by version.
+
+The Cassandra backup and restore check does not belong here. That constraint is documented
+for a rolling hybrid version upgrade, and both clusters in this incident are on the same
+version with no upgrade in progress. Raising it would send the customer to verify something
+the change does not put at risk.
 
 #### Common incorrect answers
 
@@ -2465,6 +2561,9 @@ clusters from fresh installs at the same version, so version alone cannot discri
 Rebuilding the `apigee-ca` certificate from scratch. That forces a rotation immediately, which is
 the outcome being avoided.
 
+Raising Cassandra backup and restore as a verification step. It is a real constraint, but it
+governs a rolling version upgrade, and this incident has none in progress.
+
 #### Evaluation rubric
 
 | Dimension | 0 | 2 | 4 |
@@ -2473,6 +2572,7 @@ the outcome being avoided.
 | Diagnostic method | Compares hybrid versions only | Compares the two clusters | Inspects apigee-ca rotationPolicy on both |
 | Product and version | Gives Apigee X advice | Identifies hybrid | Names cert-manager 1.18 default and the fresh-vs-upgraded split |
 | Quality of next step | Restarts | Rebuilds the CA | Patches rotationPolicy to Never before any further change |
+| Relevance | Adds unrelated verification | Over-scopes the check | Verifies the certificate path on both clusters only |
 
 #### Critical failures: recommending a CA rebuild or an immediate rotation; treating identical
 hybrid versions as proof that both clusters behave the same way.

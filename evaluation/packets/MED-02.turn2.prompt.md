@@ -15,6 +15,7 @@ Rules for this exercise:
 The customer has replied with more information.
 
 ## Diagnostic Evidence
-Checking deployment state shows the `test` environment deployment reported as `READY`, while
-the `prod` deployment has not reached that state and its per-pod deployment status is not
-`deployed`. The colleague and the customer both use the `prod` environment hostname.
+Checking deployment state shows the `test` environment deployment reported as `READY`,
+while the `prod` deployment has not reached that state and its per-pod deployment status
+is not `deployed`. The colleague and the customer both use the `prod` environment
+hostname.

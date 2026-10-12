@@ -6,9 +6,15 @@ environments that use Workload Identity Federation together with an HTTP forward
 conditions are required. The register scopes the issue to EKS. The fix is to move the operator
 and MART images to `1.16.0-hotfix.1`.
 
-The trap is the conjunction. An agent that checks only "are you using WIF?" or only "do you have a
-forward proxy?" will correctly observe one is absent and wrongly close the case. The same applies
-to the platform check: an agent that verifies GKE and stops there will also wrongly close it.
+The trap is the conjunction read backwards. Because both conditions are required, checking
+one and finding it absent rules the issue out. An agent that verifies "not GKE" and stops
+there has correctly excluded this issue and should go looking elsewhere. The same applies
+to WIF and to the forward proxy: any one of them being absent is enough to exclude it, and
+an agent that treats a single negative check as insufficient has inverted the logic.
+
+The diagnostic work is therefore in establishing all three scope facts — platform,
+WIF, and forward proxy — and reporting a negative result as a genuine exclusion rather
+than as a partial match.
 
 ## Correct Remediation
 Apply the documented hotfix by setting the operator and MART image properties in
@@ -40,8 +46,9 @@ Telling the customer their data is lost, or that they must re-import. Both are w
 Re-importing org entities. They are in Cassandra; the import is not the problem and a re-import
 risks real damage.
 
-Checking only Workload Identity Federation, or only the forward proxy. Either alone rules the issue
-out incorrectly.
+Checking only Workload Identity Federation, or only the forward proxy, and concluding the
+issue is still in play because one condition is missing. Both conditions are required, so a
+missing one excludes it.
 
 ## Evaluation Rubric
 | Dimension | 0 | 2 | 4 |
@@ -49,7 +56,7 @@ out incorrectly.
 | Product and version | Gives Apigee X advice | Identifies hybrid | Names the 1.16.0 MART defect and its fixed version |
 | Technical correctness | Says data lost | Suspects MART | Names the credential casting regression |
 | Diagnostic method | Re-imports | Checks MART | Checks MART version, both gating features, and the platform |
-| Handling of uncertainty | Asserts | Hedges | States the conjunction and platform scope explicitly |
+| Handling of uncertainty | Asserts | Hedges | States that both gating features are required and that one absent excludes it |
 
 ## References
 - Known issues register (entry 479872706 and 479040521):
@@ -58,4 +65,4 @@ out incorrectly.
   <https://cloud.google.com/apigee/docs/hybrid/v1.17/service-config>
 
 ## Critical failures
-telling a customer their data is lost; ruling the issue out by checking only one of the two gating features.
+telling a customer their data is lost; keeping the issue in play on the strength of a single gating feature check that came back negative.
