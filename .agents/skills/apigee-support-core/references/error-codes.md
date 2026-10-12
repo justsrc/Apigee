@@ -11,13 +11,12 @@ the cause text here is truncated.
 
 | Fault code | HTTP | Cause | Source |
 | --- | --- | --- | --- |
-| `Error Code` | Message |  | [regular-expression-protection](https://cloud.google.com/apigee/docs/api-platform/reference/policies/regular-expression-protection) |
-| `ExecutionFailed` | `Failed to execute the RegularExpressionProtection StepDefinition {0}. Reason: {1}` |  | [regular-expression-protection](https://cloud.google.com/apigee/docs/api-platform/reference/policies/regular-expression-protection) |
-| `InstantiationFailed` | `Failed to instantiate the RegularExpressionProtection StepDefinition {0}` |  | [regular-expression-protection](https://cloud.google.com/apigee/docs/api-platform/reference/policies/regular-expression-protection) |
-| `NonMessageVariable` | `Variable {0} does not resolve to a Message` |  | [regular-expression-protection](https://cloud.google.com/apigee/docs/api-platform/reference/policies/regular-expression-protection) |
-| `SourceMessageNotAvailable` | `{0} message is not available for RegularExpressionProtection StepDefinition {1}` |  | [regular-expression-protection](https://cloud.google.com/apigee/docs/api-platform/reference/policies/regular-expression-protection) |
-| `ThreatDetected` | `Regular Expression Threat Detected in {0}: regex: {1} input: {2}` |  | [regular-expression-protection](https://cloud.google.com/apigee/docs/api-platform/reference/policies/regular-expression-protection) |
-| `VariableResolutionFailed` | `Failed to resolve variable {0}` |  | [regular-expression-protection](https://cloud.google.com/apigee/docs/api-platform/reference/policies/regular-expression-protection) |
+| `ExecutionFailed` |  | `Failed to execute the RegularExpressionProtection StepDefinition {0}. Reason: {1}` | [regular-expression-protection](https://cloud.google.com/apigee/docs/api-platform/reference/policies/regular-expression-protection) |
+| `InstantiationFailed` |  | `Failed to instantiate the RegularExpressionProtection StepDefinition {0}` | [regular-expression-protection](https://cloud.google.com/apigee/docs/api-platform/reference/policies/regular-expression-protection) |
+| `NonMessageVariable` |  | `Variable {0} does not resolve to a Message` | [regular-expression-protection](https://cloud.google.com/apigee/docs/api-platform/reference/policies/regular-expression-protection) |
+| `SourceMessageNotAvailable` |  | `{0} message is not available for RegularExpressionProtection StepDefinition {1}` | [regular-expression-protection](https://cloud.google.com/apigee/docs/api-platform/reference/policies/regular-expression-protection) |
+| `ThreatDetected` |  | `Regular Expression Threat Detected in {0}: regex: {1} input: {2}` | [regular-expression-protection](https://cloud.google.com/apigee/docs/api-platform/reference/policies/regular-expression-protection) |
+| `VariableResolutionFailed` |  | `Failed to resolve variable {0}` | [regular-expression-protection](https://cloud.google.com/apigee/docs/api-platform/reference/policies/regular-expression-protection) |
 | `accesscontrol.IPDeniedAccess` | `403` | The client IP address, or an IP address passed in the API request, matches an IP address specified in the `SourceAddress` element… | [access-control-policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/access-control-policy) |
 | `accesscontrol.InvalidIPAddressInVariable` | `500` | The flow variable in `ClientIPVariable` contains an invalid IP address. | [access-control-policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/access-control-policy) |
 | `flow.SharedFlowNotFound` | `500` | Either the shared flow does not exist, or the shared flow exists but is not deployed. | [flow-callout-policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/flow-callout-policy) |
@@ -203,7 +202,6 @@ These have no HTTP status because no request ever ran. The old revision keeps se
 | `EmptyElementForKeyConfiguration FailedToResolveVariable InvalidConfigurationForActionAndAlgorithmFamily InvalidConfigurationForVerify InvalidEmptyElement InvalidFamiliesForAlgorithm InvalidKeyConfiguration InvalidNameForAdditionalClaim InvalidNameForAdditionalHeader InvalidPublicKeyId InvalidPublicKeyValue InvalidSecretInConfig InvalidTypeForAdditionalClaim InvalidTypeForAdditionalHeader InvalidValueForElement InvalidValueOfArrayAttribute InvalidVariableNameForSecret MissingConfigurationElement MissingElementForKeyConfiguration MissingNameForAdditionalClaim MissingNameForAdditionalHeader` | Other possible deployment errors. | [decode-jws-policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/decode-jws-policy) |
 | `EmptyJSONPathExpression` | If the policy has an empty XPath expression within the XMLPayload element, then the deployment of the API proxy fails. | [extract-variables-policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/extract-variables-policy) |
 | `EmptyXPathExpression` | If the policy has an empty XPath expression within the XMLPayload element, then the deployment of the API proxy fails. | [extract-variables-policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/extract-variables-policy) |
-| `Error Code` | Message | [regular-expression-protection](https://cloud.google.com/apigee/docs/api-platform/reference/policies/regular-expression-protection) |
 | `IncompatibleJavaVersion` | `Failed to load java class [classname] definition due to - [reason]` | [java-callout-policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/java-callout-policy) |
 | `InstantiationFailed` | The policy could not be instantiated. | [extract-variables-policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/extract-variables-policy) |
 | `Invalid DistanceMeasureType {value}. Supported values are DOT_PRODUCT_DISTANCE, COSINE_DISTANCE, SQUARED_L2_DISTANCE and L1_DISTANCE` | Occurs if the DistanceMeasureType element in SimilaritySearch is not one of the four supported values. Matching is exact. See Ind… | [semantic-cache-lookup-policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy) |
@@ -338,4 +336,4 @@ These have no HTTP status because no request ever ran. The old revision keeps se
 4. If the code is absent here, the policy page may not have been fetched. Check
    `research/pages/` and re-run `research/fetch.sh` on the policy's doc path.
 
-Coverage: 174 runtime codes, 103 deployment errors, 28 fault variables, from 294 fetched pages.
+Coverage: 173 runtime codes, 102 deployment errors, 28 fault variables, from 294 fetched pages.
