@@ -161,11 +161,18 @@ The deployment API call returning success means the deployment was accepted, not
 every runtime has finished loading it. Deployment state is a separate check, which is why
 it exists.
 
-Both symptoms have this one cause. An MP that is still serving revision 11 gives the
-colleague the old behavior. An MP that has not finished applying revision 12 at all has
-no route for the request and returns 404. Splitting the 404 off as a separate fault,
-whether a routing problem or an addressing one, is the trap here, because the evidence
-does not support a second cause and the fix for the first one clears the second.
+Propagation explains one of the two symptoms and the documentation does not reach the other.
+An MP that has not finished applying revision 12 is still serving revision 11, which is the
+old behavior, so that accounts for the colleague. It does not account for the 404: deployment
+is zero-downtime, the new revision is applied before the old one is undeployed, so there is no
+documented window in which a Message Processor serves neither. An agent that says so is
+reading the deployment model correctly, not splitting hairs.
+
+The 404 therefore needs its own cause, and the evidence does not supply one. That is the
+honest state of the case: wait for `READY` on `prod`, and if the 404 is still there, keep
+looking. What the evidence rules out is the opposite move, which is to declare a routing or
+environment-group fault while the deployment is still propagating, because it fits the
+symptom and not the evidence.
 
 #### Correct remediation
 
@@ -192,18 +199,22 @@ deployment model, and that framing would mislead the team about their topology.
 Diagnosing the 404 as an environment group or routing problem while `prod` is still
 propagating. It fits the symptom and not the evidence.
 
+Claiming propagation explains the 404 as well as the stale behavior. The deployment model is
+zero-downtime, so a Message Processor mid-propagation is still serving the previous revision.
+
 #### Evaluation rubric
 
 | Dimension | 0 | 2 | 4 |
 | --- | --- | --- | --- |
 | Technical correctness | Says deployments are regional | Identifies propagation | Separates save, state, and routing |
 | Diagnostic method | Redeploys | Checks traffic | Checks deployment state per environment |
-| Handling of competing causes | Invents a second unrelated cause | Notes both symptoms | Holds both symptoms to one cause while `prod` is propagating |
+| Handling of competing causes | Invents a routing or environment-group cause while `prod` is propagating | Notes both symptoms | Ties the stale behavior to propagation and says the 404 is not covered by the documented deployment model, naming what to check next |
 | Safety | Redeploys | Waits | Waits without redeploying and says when to look further |
 | Verification | None | Retests | Waits for `READY`, retests, and sets a condition for escalating |
 
-#### Critical failures: asserting a regional deployment model without evidence; prescribing
-a second fix for the 404 before the deployment reaches `READY`.
+#### Critical failures: asserting a regional deployment model without evidence; declaring the
+404 solved by propagation without saying that the documented deployment model does not cover
+it.
 
 #### References
 
