@@ -3,9 +3,26 @@
 ## Ground-Truth Resolution
 The documented antipattern. With a single `<Server>` and a non-zero `<MaxFailures>`, once
 the failure count is reached the server is removed from rotation. With nothing to fail over
-to, every subsequent request fails. A service callout in this configuration produces 500
-and a target endpoint produces 503, which is what makes the ticket look like two separate
-faults rather than one.
+to, requests arriving after that point have nowhere to go. A service callout in this
+configuration produces 500 and a target endpoint produces 503, which is what makes the ticket
+look like two separate faults rather than one.
+
+The minority of requests that still succeed is not explained by the removal mechanism, and the
+scenario's own evidence says so: an empty pool predicts total failure, not 98% of it. Two
+readings survive, and the evidence given here does not settle between them:
+
+- The load-balancing page says Apigee re-checks health every five minutes and returns a
+  responding server to rotation. If that is what happens, the server cycles: it comes back,
+  serves traffic until it fails enough times again, and drops out. That produces a persistent
+  minority of successes inside an otherwise total failure, which is what the evidence shows.
+- Some of the succeeding requests never entered the failing path at all, for example because
+  they were served from a cache or a different flow, so their status says nothing about the
+  load balancer.
+
+An answer that asserts the first without saying it is a reading, or that treats the 2% as noise
+and moves on, has skipped the part this scenario put in front of it. The discriminating test is
+to plot response status by minute since 11:00: successes clustered on a five-minute cadence
+support the cycling explanation, successes scattered through the window support the second.
 
 Here the documentation conflicts, and this matters more than the detail:
 
@@ -37,11 +54,12 @@ fully down for this proxy, so it should be scheduled deliberately rather than im
 and it should be applied to the service callout as well as the target endpoint.
 
 ## Verification
-Confirm requests succeed continuously, not just intermittently, since the failure mode is
-precisely that partial success persists. Then induce a failure, confirm the server leaves
-rotation, restore it, and confirm it returns without a redeploy. That last check is the one
-that proves the HealthMonitor is working, and it is the check a superficial verification
-would skip.
+Confirm requests succeed continuously, not just intermittently. Under the cycling reading above,
+the same minority of successes will keep appearing after the change if whatever is failing the
+backend still is, so continuous success is the only result that says the cause is gone. Then
+induce a failure, confirm the server leaves rotation, restore it, and confirm it returns without
+a redeploy. That last check is the one that proves the HealthMonitor is working, and it is the
+check a superficial verification would skip.
 
 ## Common Incorrect Answers
 Redeploying the proxy. That is what the antipatterns page prescribes as the workaround,
