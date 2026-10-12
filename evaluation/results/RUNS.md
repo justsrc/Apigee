@@ -108,6 +108,10 @@ that the skill works.
 
 ## Runs not yet performed
 
-Run 2, with the two-turn release, the weighted rubric, the corrected `error-codes.md`, and
-the new `policy-mechanics.md` reference, has not been run. Any statement that the skill
-scores above any particular figure would be invented until it is.
+No run of the full 103-scenario set has been performed, with or without a baseline arm.
+Run 2 covered four scenarios with one arm and one grader who was also the candidate, which
+is enough to find defects in the suite and not enough to say anything about the skill.
+
+Any statement that the skill scores above a particular figure, or that it scores better with
+the skills than without them, would be invented until an A/B run with the protocol in
+`evaluation/model-eval-protocol.md` is carried out.
