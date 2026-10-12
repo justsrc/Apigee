@@ -31,8 +31,16 @@ in the bundle before deploying.
 <HMAC name="VerifySignature">
   <Algorithm>SHA256</Algorithm>
   <SecretKey encoding="base64" ref="private.webhook.secret"/>
+  <VerificationValue ref="request.header.x-hub-signature-256"/>
 </HMAC>
 ```
+
+`<VerificationValue>` is listed here separately on purpose. Adding `<SecretKey>` alone makes
+the policy compute a digest and do nothing with it. The HMAC reference states the policy
+"can optionally verify the computed signature against an expected value. The optional
+`VerificationValue` element (if present) directs the policy to check the computed value
+against a known or given value." Without it, every webhub signature passes, and the failure
+is silent.
 
 Do not commit the secret itself. The reference documents `steps.hmac.InvalidSecretInConfig`
 for a text value explicitly provided for `SecretKey`, and `steps.hmac.InvalidVariableName`
@@ -48,6 +56,11 @@ Deploy to test, send a correctly signed webhook and confirm it verifies. Then se
 incorrectly signed one and confirm it is rejected. Both checks together prove the policy
 is verifying rather than merely present, which is the failure mode an absent
 `<VerificationValue>` would leave in place.
+
+The second check is only meaningful once `<VerificationValue>` is present. If the
+remediation stops at `<SecretKey>`, an incorrectly signed webhook is accepted exactly like a
+correctly signed one and the check cannot be performed, so a verification that requires
+rejection while omitting `<VerificationValue>` is not a verification.
 
 ## Common Incorrect Answers
 Rotating the secret. The error is about a missing element, not a value, and the secret is

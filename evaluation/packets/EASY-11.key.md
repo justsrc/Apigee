@@ -1,8 +1,14 @@
 # EASY-11 answer key, do not show to the agent
 
 ## Ground-Truth Resolution
-`InvalidQuotaTimeUnit` fires when the `<TimeUnit>` value is unsupported. The supported
-values are `minute`, `hour`, `day`, `week` and `month`. `minutes` is not among them.
+`InvalidQuotaTimeUnit` fires when the `<TimeUnit>` value is unsupported. The `<TimeUnit>`
+element reference is the normative list and reads: select from `minute`, `hour`, `day`,
+`week`, `month`, or `year`. `minutes` is not among them.
+
+The deployment-error table on the same page gives a shorter list that omits `year`. Both are
+official, and the element reference is the one that governs what the element accepts, so
+quote it rather than the table. Naming the full list including `year` is correct and should
+not be marked down.
 
 The revision was rejected, so the currently deployed revision continues to serve.
 
@@ -31,7 +37,7 @@ reset semantics depending on quota type, so the `hour` unit is clearer.
 ## Evaluation Rubric
 | Dimension | 0 | 2 | 4 |
 | --- | --- | --- | --- |
-| Technical correctness | Guesses accepted values | Identifies singular/plural | Names the full documented list |
+| Technical correctness | Guesses accepted values | Identifies singular/plural | Names the full list from the `<TimeUnit>` element reference, including `year` |
 | Evidence and citation | None | Generic | Cites the Quota deployment error reference |
 | Quality of next step | "Use minute" | Gives a value | Gives a value and asks about intent |
 | Verification | None | Retests | Retests and checks reset semantics |

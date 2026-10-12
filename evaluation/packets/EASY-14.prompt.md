@@ -26,4 +26,8 @@ Rules for this exercise:
 </SSLInfo>
 ```
 
-The backend advertises TLS 1.0 as its highest supported version.
+No `<Protocols>` element is present, so the Apigee side permits every protocol the JVM
+supports. The backend advertises TLS 1.0 as its highest supported version.
+
+If asked what the Apigee side offers, the operator confirms `<Protocols>` is absent from the
+target endpoint configuration and that the runtime has not been restricted by configuration.

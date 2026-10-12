@@ -23,5 +23,8 @@ InvalidQuotaInterval: The quota interval is not a valid integer.
 ```
 
 If asked whether `<Interval>` was changed recently, the user says it was set to `0.5`
-about six weeks ago and the previous revision saved fine with the same value, which
-implies an earlier revision was created when the policy differed.
+about six weeks ago. Whether a revision with that value was ever saved successfully is not
+known and the customer is not sure: the deployed revision is three weeks older than the
+edit, and nobody can recall whether the edit was ever deployed. If it was, then something
+other than the documented rule was in effect at the time, and that is worth establishing
+before drawing a conclusion.

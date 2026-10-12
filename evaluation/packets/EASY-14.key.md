@@ -4,6 +4,19 @@
 The backend only offers TLS 1.0, which Apigee does not support. The handshake fails and
 the proxy returns 502.
 
+Be careful which documented sentence you reach for. The Configuration TLS page says Apigee
+does not support TLS 1.0 or 1.1 and then describes a specific trigger: "If you use these
+protocols in your target endpoint configuration." That trigger is on the Apigee side, and the
+configuration here sets only `<Enabled>true</Enabled>` with no `<Protocols>`, so it is not
+met. Citing the restriction as if it applied here is citing a conditional without its
+condition. The failure arises from the other end of the handshake: the backend offers
+nothing Apigee can agree on.
+
+The code is `messaging.adaptors.http.flow.SslHandshakeFailed` either way, so the code is not
+what discriminates between the two readings. The `<Protocols>` check is. The remediation
+differs too: an Apigee-side misconfiguration is fixed in the target endpoint, a
+backend-side limitation means the backend must be upgraded or Apigee pointed elsewhere.
+
 Connectivity is fine, which is why a port check passes and confuses people.
 
 `IgnoreValidationErrors` does not help here. It affects certificate validation, not

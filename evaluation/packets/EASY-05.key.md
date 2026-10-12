@@ -1,18 +1,31 @@
 # EASY-05 answer key, do not show to the agent
 
 ## Ground-Truth Resolution
-`loadCredential` is not part of the documented JavaScript object model. It is a helper
-that reaches for something the sandbox refuses, and Apigee throws
-`steps.javascript.ScriptSecurityError` when a security error occurs during execution. It
-is the runtime refusing a restricted call, not a defect in the policy.
+Start from what the evidence actually shows: the response carries
+`steps.javascript.ScriptSecurityError`. The JavaScript policy page documents that code as
+"A security error occurred when the `JavaScript` executed. See the fault string for
+details", and nothing more. The code alone does not name the blocked call, and the page
+sends you to the fault string for that.
 
-The documented fix column for this code sends you to the fault string for details, so the
-fault string, not the code alone, is what names the blocked call. An agent that stops at
-the code will guess at the cause; one that asks for the fault string will not.
+So the first real step is to ask for the fault string, not to theorise about the code. An
+agent that stops at the error code and asserts a cause is guessing; the documentation
+explicitly declines to carry enough information to identify the call.
 
-Nothing changed in the script because nothing needed to. The behavior is the documented
-sandbox behavior, and the script was relying on a call that should not have been
-available.
+What the script does tell you is that `loadCredential` is not in the documented JavaScript
+object model. That is a defect in the script regardless of which code Apigee raises: the
+script references an identifier that does not exist. Note the trap here. An undeclared
+identifier is normally a `ReferenceError`, and the page maps `ReferenceError` to
+`steps.javascript.ScriptExecutionFailed`, not to `ScriptSecurityError`. So do not reason
+backwards from "ReferenceError must be involved" to "it is therefore a security error", and
+do not rename the code in the response. The evidence says `ScriptSecurityError`; take it at
+face value and get the fault string, which is the only thing that will tell you what was
+actually refused.
+
+"Nothing changed in the script" is what makes this worth asking about rather than assuming a
+runtime regression. The customer believes a runtime update changed the behaviour. The
+documented answer is that the page does not support that conclusion either way: it records
+what the fault means, not what changed between releases. Say that, and say what would
+settle it.
 
 ## Correct Remediation
 Replace the restricted call with a documented object model equivalent, or with a Java

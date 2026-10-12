@@ -70,8 +70,11 @@ InvalidQuotaInterval: The quota interval is not a valid integer.
 ```
 
 If asked whether `<Interval>` was changed recently, the user says it was set to `0.5`
-about six weeks ago and the previous revision saved fine with the same value, which
-implies an earlier revision was created when the policy differed.
+about six weeks ago. Whether a revision with that value was ever saved successfully is not
+known and the customer is not sure: the deployed revision is three weeks older than the
+edit, and nobody can recall whether the edit was ever deployed. If it was, then something
+other than the documented rule was in effect at the time, and that is worth establishing
+before drawing a conclusion.
 
 #### Ground-truth resolution
 
@@ -79,8 +82,20 @@ implies an earlier revision was created when the policy differed.
 not an integer, so the revision is rejected at upload. This is a deployment error, which
 means it has no HTTP status and never reaches the runtime.
 
-The reason it worked before is that the previously deployed revision predates the change
-to the bundle. The revision that was live was built from an older bundle.
+The reason the current revision is rejected is the value, not a recent change to anything.
+That is the whole answer here, and it does not depend on the deployment history.
+
+Do not build a story out of the history you were given. The scenario offers two facts that
+do not fit together: a `0.5` interval that cannot have been saved under the documented rule,
+and a customer who believes an earlier revision was saved with it. An agent should give the
+cause the documentation supports and flag the inconsistency rather than inventing a
+mechanism to reconcile it. Claiming an undetected platform change, a prior
+`IgnoreValidationErrors` setting, or any other story to make both facts true is a
+fabrication, and it is worth more marks to say the history cannot be reconciled from the
+evidence supplied than to produce a tidy explanation.
+
+An agent that treats this as a runtime fault because the ticket says the proxy "cannot be
+deployed any more" has missed the distinction the rest of the scenario is about.
 
 #### Correct remediation
 
@@ -515,8 +530,9 @@ recommending credential rotation.
 - Product: Apigee or hybrid
 - Origin: documented
 - Versions: checked 2026-10-11
-- Evaluation objectives: distinguish ScriptSecurityError from ScriptExecutionFailed; the
-  former is the sandbox, not a bug in the code
+- Evaluation objectives: recognise that the documented fix column for this code sends you to
+  the fault string; do not invent a mechanism from the code alone, and do not relabel the
+  code the evidence actually shows
 - Skills expected: apigee-support-core
 
 #### Initial support ticket
@@ -566,18 +582,31 @@ blocked.
 
 #### Ground-truth resolution
 
-`loadCredential` is not part of the documented JavaScript object model. It is a helper
-that reaches for something the sandbox refuses, and Apigee throws
-`steps.javascript.ScriptSecurityError` when a security error occurs during execution. It
-is the runtime refusing a restricted call, not a defect in the policy.
+Start from what the evidence actually shows: the response carries
+`steps.javascript.ScriptSecurityError`. The JavaScript policy page documents that code as
+"A security error occurred when the `JavaScript` executed. See the fault string for
+details", and nothing more. The code alone does not name the blocked call, and the page
+sends you to the fault string for that.
 
-The documented fix column for this code sends you to the fault string for details, so the
-fault string, not the code alone, is what names the blocked call. An agent that stops at
-the code will guess at the cause; one that asks for the fault string will not.
+So the first real step is to ask for the fault string, not to theorise about the code. An
+agent that stops at the error code and asserts a cause is guessing; the documentation
+explicitly declines to carry enough information to identify the call.
 
-Nothing changed in the script because nothing needed to. The behavior is the documented
-sandbox behavior, and the script was relying on a call that should not have been
-available.
+What the script does tell you is that `loadCredential` is not in the documented JavaScript
+object model. That is a defect in the script regardless of which code Apigee raises: the
+script references an identifier that does not exist. Note the trap here. An undeclared
+identifier is normally a `ReferenceError`, and the page maps `ReferenceError` to
+`steps.javascript.ScriptExecutionFailed`, not to `ScriptSecurityError`. So do not reason
+backwards from "ReferenceError must be involved" to "it is therefore a security error", and
+do not rename the code in the response. The evidence says `ScriptSecurityError`; take it at
+face value and get the fault string, which is the only thing that will tell you what was
+actually refused.
+
+"Nothing changed in the script" is what makes this worth asking about rather than assuming a
+runtime regression. The customer believes a runtime update changed the behaviour. The
+documented answer is that the page does not support that conclusion either way: it records
+what the fault means, not what changed between releases. Say that, and say what would
+settle it.
 
 #### Correct remediation
 
@@ -1266,8 +1295,16 @@ in the bundle before deploying.
 <HMAC name="VerifySignature">
   <Algorithm>SHA256</Algorithm>
   <SecretKey encoding="base64" ref="private.webhook.secret"/>
+  <VerificationValue ref="request.header.x-hub-signature-256"/>
 </HMAC>
 ```
+
+`<VerificationValue>` is listed here separately on purpose. Adding `<SecretKey>` alone makes
+the policy compute a digest and do nothing with it. The HMAC reference states the policy
+"can optionally verify the computed signature against an expected value. The optional
+`VerificationValue` element (if present) directs the policy to check the computed value
+against a known or given value." Without it, every webhub signature passes, and the failure
+is silent.
 
 Do not commit the secret itself. The reference documents `steps.hmac.InvalidSecretInConfig`
 for a text value explicitly provided for `SecretKey`, and `steps.hmac.InvalidVariableName`
@@ -1284,6 +1321,11 @@ Deploy to test, send a correctly signed webhook and confirm it verifies. Then se
 incorrectly signed one and confirm it is rejected. Both checks together prove the policy
 is verifying rather than merely present, which is the failure mode an absent
 `<VerificationValue>` would leave in place.
+
+The second check is only meaningful once `<VerificationValue>` is present. If the
+remediation stops at `<SecretKey>`, an incorrectly signed webhook is accepted exactly like a
+correctly signed one and the check cannot be performed, so a verification that requires
+rejection while omitting `<VerificationValue>` is not a verification.
 
 #### Common incorrect answers
 
@@ -1354,9 +1396,12 @@ HTTP 400 on save, error name `InvalidQuotaTimeUnit`. The policy:
 
 #### Expected investigation
 
-Read the Quota policy deployment error reference. It lists the supported time units as
-`minute`, `hour`, `day`, `week` and `month`, singular. The developer's guess is right about
-the cause.
+Read the Quota policy deployment error reference, then the `<TimeUnit>` element reference,
+which is the normative list: `minute`, `hour`, `day`, `week`, `month` or `year`. The
+deployment-error summary is shorter than that and does not mention `year`, so a reader who
+stops at the summary will omit a valid value. Taking the longer list from the element
+reference is more accurate, not less. The developer is right about the cause: `minutes` is
+not a valid value, and the unit is singular.
 
 A good answer also flags that `1 minutes` is doubly wrong, since the interval of 1 with
 `minute` would mean one minute rather than one day, which is probably not the intent.
@@ -1367,8 +1412,14 @@ On request, the developer confirms the intent was a daily limit.
 
 #### Ground-truth resolution
 
-`InvalidQuotaTimeUnit` fires when the `<TimeUnit>` value is unsupported. The supported
-values are `minute`, `hour`, `day`, `week` and `month`. `minutes` is not among them.
+`InvalidQuotaTimeUnit` fires when the `<TimeUnit>` value is unsupported. The `<TimeUnit>`
+element reference is the normative list and reads: select from `minute`, `hour`, `day`,
+`week`, `month`, or `year`. `minutes` is not among them.
+
+The deployment-error table on the same page gives a shorter list that omits `year`. Both are
+official, and the element reference is the one that governs what the element accepts, so
+quote it rather than the table. Naming the full list including `year` is correct and should
+not be marked down.
 
 The revision was rejected, so the currently deployed revision continues to serve.
 
@@ -1401,7 +1452,7 @@ reset semantics depending on quota type, so the `hour` unit is clearer.
 
 | Dimension | 0 | 2 | 4 |
 | --- | --- | --- | --- |
-| Technical correctness | Guesses accepted values | Identifies singular/plural | Names the full documented list |
+| Technical correctness | Guesses accepted values | Identifies singular/plural | Names the full list from the `<TimeUnit>` element reference, including `year` |
 | Evidence and citation | None | Generic | Cites the Quota deployment error reference |
 | Quality of next step | "Use minute" | Gives a value | Gives a value and asks about intent |
 | Verification | None | Retests | Retests and checks reset semantics |
@@ -1682,12 +1733,29 @@ version. It is not in the policy error index, because no policy raises it.
 </SSLInfo>
 ```
 
-The backend advertises TLS 1.0 as its highest supported version.
+No `<Protocols>` element is present, so the Apigee side permits every protocol the JVM
+supports. The backend advertises TLS 1.0 as its highest supported version.
+
+If asked what the Apigee side offers, the operator confirms `<Protocols>` is absent from the
+target endpoint configuration and that the runtime has not been restricted by configuration.
 
 #### Expected investigation
 
 A reachable port that still fails at handshake points at the TLS negotiation, not
-connectivity. The documented restriction is that TLS 1.0 and 1.1 are not supported, and
+connectivity.
+
+Read the Configuration TLS page carefully rather than stopping at the first sentence. Its
+trigger is conditional on Apigee's own configuration: "If you use these protocols in your
+target endpoint configuration, the Apigee target endpoint throws the error
+`messaging.adaptors.http.flow.SslHandshakeFailed`." The evidence here has an `<SSLInfo>`
+carrying only `<Enabled>true</Enabled>` with no `<Protocols>` element, which means every JVM
+protocol is permitted on the Apigee side. So the documented Apigee-side restriction has not
+been triggered, and the reason the handshake fails is that the backend offers TLS 1.0 as its
+highest version and Apigee has nothing higher to agree on.
+
+Both readings lead to `SslHandshakeFailed`, so the code alone does not discriminate. The
+distinguishing step is checking who is offering what, and the scenario supplies exactly
+enough to do it.
 configuring them on a target makes the target endpoint throw
 `messaging.adaptors.http.flow.SslHandshakeFailed`.
 
@@ -1705,6 +1773,19 @@ shows `FailedHandshakeWithTargetEndpoint` with the underlying
 
 The backend only offers TLS 1.0, which Apigee does not support. The handshake fails and
 the proxy returns 502.
+
+Be careful which documented sentence you reach for. The Configuration TLS page says Apigee
+does not support TLS 1.0 or 1.1 and then describes a specific trigger: "If you use these
+protocols in your target endpoint configuration." That trigger is on the Apigee side, and the
+configuration here sets only `<Enabled>true</Enabled>` with no `<Protocols>`, so it is not
+met. Citing the restriction as if it applied here is citing a conditional without its
+condition. The failure arises from the other end of the handshake: the backend offers
+nothing Apigee can agree on.
+
+The code is `messaging.adaptors.http.flow.SslHandshakeFailed` either way, so the code is not
+what discriminates between the two readings. The `<Protocols>` check is. The remediation
+differs too: an Apigee-side misconfiguration is fixed in the target endpoint, a
+backend-side limitation means the backend must be upgraded or Apigee pointed elsewhere.
 
 Connectivity is fine, which is why a port check passes and confuses people.
 
@@ -1816,12 +1897,27 @@ expectation mismatch, not a fault.
 
 #### Correct remediation
 
-Decide where the limit should live. Either accept per-proxy counting and document it, or
-apply the limit at a single shared point such as a parent shared flow, or move all
-traffic behind one proxy.
+Decide where the limit should live, and be careful which of the two options you propose.
 
-Do not raise the per-proxy number to 30,000 as a fix, because that couples the limit to the
-current proxy count and silently breaks when a proxy is added.
+**Moving all traffic behind one proxy** gives a single limit that actually aggregates. That
+works, because a quota counter belongs to a proxy.
+
+**A parent shared flow does not.** A shared flow executes once per proxy that invokes it,
+each with its own counter, so it multiplies the limit rather than consolidating it. The
+Quota policy page is explicit: "Quotas apply to individual API proxies and are not
+distributed among API proxies. For example, if you have three API proxies in an API product,
+a single quota is not shared across all three even if all three use the same quota policy
+configuration." A shared flow does not change that scope, so suggesting one as an aggregate
+limit meets the same objection as raising the per-proxy number. There is no configuration
+trick that makes a Quota policy distribute across proxies; a rate-limit service or an
+external store is what aggregates, and that is a different design conversation.
+
+So the honest answer is either aggregate by putting the traffic somewhere that is genuinely
+one counter, or accept per-proxy counting and document that the effective ceiling is the
+per-proxy number.
+
+Do not raise the per-proxy number to 30,000 as a shortcut fix, because that couples the
+limit to the current proxy count and silently changes the ceiling whenever a proxy is added.
 
 #### Verification
 
@@ -1838,18 +1934,24 @@ Concluding the quota policy is defective. It enforces exactly as documented.
 
 Adding a spike arrest policy. That addresses bursts, not monthly totals.
 
+Consolidating the limit with a shared flow. A shared flow runs once per proxy that invokes
+it, each with its own counter, so it multiplies the limit rather than consolidating it. This
+one is worth calling out specifically because it sounds like the aggregate answer and is
+not: the document's own scope rule, that a quota is not shared across proxies even when all
+three use the same policy configuration, applies unchanged.
+
 #### Evaluation rubric
 
 | Dimension | 0 | 2 | 4 |
 | --- | --- | --- | --- |
 | Technical correctness | Says quota is broken | Identifies multiple proxies | Explains the documented per-proxy scope rule |
 | Diagnostic method | Changes config first | Counts proxies | Finds the scope rule in documentation |
-| Safety | Raises limits | Suggests one option | Offers designs and rejects the naive limit increase |
+| Safety | Raises limits | Suggests one option | Offers designs, rejects the naive limit increase, and explains why a shared flow does not aggregate |
 | Verification | None | Checks analytics | Checks counters and aggregate behavior |
 | Clarity | Asserts a defect | Correct | Leads with "the quota is working" |
 
 **Critical failures:** recommending raising the per-proxy limit as the fix; asserting the
-policy is defective.
+policy is defective; proposing a shared flow as an aggregate limit while presenting it as one.
 
 #### References
 
