@@ -2142,10 +2142,32 @@ mart:
     tag: "1.16.0-hotfix.1"
 ```
 
+Editing the file changes nothing on its own. Install the new operator release with a server-side
+dry run first, then without it once the dry run passes:
+
+```
+helm upgrade operator apigee-operator/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  --atomic \
+  -f overrides.yaml \
+  --dry-run=server
+```
+
+```
+helm upgrade operator apigee-operator/ \
+  --install \
+  --namespace APIGEE_NAMESPACE \
+  --atomic \
+  -f overrides.yaml
+```
+
 Then check the neighbouring 1.16.0 defect, fixed in the same hotfix: on AKS and EKS with
 Federated Workload Identity, the Kubernetes ServiceAccount `apigee-operator-guardrails-sa` is not
 created, because the chart template's initial `if` condition omits
-`.Values.gcp.federatedWorkloadIdentity.enabled`.
+`.Values.gcp.federatedWorkloadIdentity.enabled`. The same property, read as `false` on this
+cluster, is what excludes the MART defect, so read it rather than inferring the feature state
+from the MART behaviour.
 
 #### Verification
 
@@ -2168,8 +2190,8 @@ missing one excludes it.
 | Dimension | 0 | 2 | 4 |
 | --- | --- | --- | --- |
 | Product and version | Gives Apigee X advice | Identifies hybrid | Names the 1.16.0 MART defect and its fixed version |
-| Technical correctness | Says data lost | Suspects MART | Names the credential casting regression |
-| Diagnostic method | Re-imports | Checks MART | Checks MART version, both gating features, and the platform |
+| Technical correctness | Says data lost | Suspects MART | Attributes the failure to MART on hybrid 1.16.0 with WIF and a forward proxy both set |
+| Diagnostic method | Re-imports | Checks MART | Reads `gcp.federatedWorkloadIdentity.enabled`, checks the forward proxy, and confirms the MART image is not `1.16.0-hotfix.1` |
 | Handling of uncertainty | Asserts | Hedges | States that both gating features are required and that one absent excludes it |
 
 #### Critical failures: telling a customer their data is lost; keeping the issue in play on
