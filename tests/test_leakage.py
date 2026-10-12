@@ -66,6 +66,81 @@ def sentences(text: str) -> list[str]:
     return out
 
 
+def _sections(sid: str) -> dict[str, str]:
+    """Map section name to section text for one scenario.
+
+    This used to be `blocks = {s: b for s, b in _blocks(sid)}`, which looks right and is
+    not: `make_packets.blocks()` yields (scenario_id, whole_block) pairs, so the dict was
+    keyed by scenario ID and `blocks.get("ground-truth resolution")` was always the empty
+    string. `sentences("")` returns nothing, so the loop never ran and the ground-truth and
+    incorrect-answer comparisons below compared nothing against anything. The test printed
+    "no ground truth leaks into any prompt packet" having checked no ground truth at all.
+
+    The canary test caught real leakage end to end, so the headline result was not wrong.
+    But the per-file check, which is the thing that would catch a leak in MED-13's
+    particular ground truth, has been inert since it was written.
+    """
+    out: dict[str, str] = {}
+    for _bsid, block in _blocks(sid):
+        headings = mp.headings_of(block)
+        for want in ("ground-truth resolution", "common incorrect answers",
+                     "initial support ticket", "diagnostic evidence"):
+            body = mp.section(block, want, headings)
+            if body:
+                out[want] = body
+    return out
+
+
+def _workspace_test() -> tuple[bool, str]:
+    """Build the tree an evaluating model is allowed to see, and look for answers in it.
+
+    Everything above this function inspects one file at a time and asks whether its text is
+    clean. That cannot answer the question a reader actually has, which is whether a model
+    running in this repository could find the answer. The answer keys live in
+    evaluation/packets/, the full scenario text including every ground truth lives in
+    scenarios/, and scenarios/index.md maps each ID to its title.
+
+    That last one is the interesting path. make_packets.py strips the scenario title from
+    the prompt on purpose, because titles like "Root cause cannot be established" state the
+    grading criterion. It then writes the scenario ID into the prompt as `# Support case
+    MED-13`, and index.md turns that ID back into the title in a single lookup. Restoring a
+    deliberately dropped title is the same leak the dropping was for.
+
+    So build the workspace and assert the answers are not in it.
+    """
+    try:
+        import tempfile
+
+        import make_eval_workspace as mew
+    except ImportError:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        try:
+            import make_eval_workspace as mew
+        except ImportError:
+            return True, "SKIPPED (tests/make_eval_workspace.py not importable)"
+
+    ids = mew.all_scenario_ids()
+    sample = ids[:: max(1, len(ids) // 12)][:12] or ids[:1]
+    with tempfile.TemporaryDirectory(prefix="apigee-leakws-") as d:
+        out = Path(d) / "ws"
+        rc = mew.build(out, sample, False, True)
+        if rc == 2:                      # could not build; already reported
+            return False, "could not build the workspace"
+        leaks = mew.find_leaks(out)
+        if leaks:
+            return False, f"LEAK, workspace contains: {', '.join(leaks[:3])}"
+
+        # Belt and braces. The name patterns are the fast check; confirm directly that the
+        # things that actually hold answers are absent.
+        for sub in ("evaluation", "scenarios", "research"):
+            if (out / sub).exists():
+                return False, f"LEAK, workspace contains a {sub}/ directory"
+        if list(out.rglob("*.key.md")):
+            return False, "LEAK, workspace contains an answer key"
+
+    return True, f"OK, {len(sample)} scenarios built with no answer material reachable"
+
+
 def main() -> int:
     failures: list[str] = []
     checked = 0
@@ -86,15 +161,18 @@ def main() -> int:
                 failures.append(f"{path.name}: contains held-back section heading "
                                 f"'{sec}'")
 
-        blocks = {s: b for s, b in _blocks(sid)}
+        blocks = _sections(sid)
         gt = blocks.get("ground-truth resolution", "")
-        for s in sentences(gt)[:12]:
+        # No [:12] cap. The first version checked only the first twelve sentences, so the
+        # tail of a long ground-truth section was never compared against anything. Nine
+        # scenarios have more than twelve sentences.
+        for s in sentences(gt):
             if s and s in norm(text):
                 failures.append(f"{path.name}: contains ground-truth text: {s[:70]}...")
                 break
 
         cia = blocks.get("common incorrect answers", "")
-        for s in sentences(cia)[:12]:
+        for s in sentences(cia):
             if s and s in norm(text):
                 failures.append(f"{path.name}: contains incorrect-answer text: {s[:70]}...")
                 break
@@ -116,8 +194,26 @@ def main() -> int:
                                     f"heading: {m.group(0)[:70]}")
                     break
 
+            # The heading test above has a blind spot: a title pasted into the ticket as a
+            # sentence produces no heading at all. That is the shape a real leak takes, since
+            # the generator drops the title but nothing stops a future edit from inlining it
+            # in a block quote. The one legitimate case is a title that IS the customer's own
+            # text, which by definition appears in the scenario's Initial support ticket.
+            # Anything else appearing in the body is a leak.
+            ticket = norm(blocks.get("initial support ticket", ""))
+            bare = norm(re.sub(r"^[A-Z]+-\d+\.?\s*", "", title)).strip("\"'“”` ")
+            if bare and bare[:60] in norm(text) and bare[:60] not in ticket:
+                failures.append(f"{path.name}: title text appears in the packet body but "
+                                f"not in the customer's ticket: {bare[:60]}...")
+
     # Deliberate leak: inject a canary into held-back material and prove it does not escape.
     leaked_ok = _canary_test()
+
+    # The packet text being clean is necessary and not sufficient. The answer keys, the
+    # scenario files and the ID-to-title index all sit under the repository root, one Read
+    # away from a model whose working directory is that root. Build the tree the agent is
+    # actually allowed to see and assert the answer material is not in it.
+    ws_ok, ws_detail = _workspace_test()
 
     print(f"checked {checked} prompt packets across {checked // 2} scenarios")
     for f in failures:
@@ -129,6 +225,10 @@ def main() -> int:
     print(f"deliberate canary leak test: {'held back correctly' if leaked_ok else 'LEAKED'}")
     if not leaked_ok:
         failures.append("canary phrase leaked into a prompt packet")
+    print()
+    print(f"agent workspace isolation: {ws_detail}")
+    if not ws_ok:
+        failures.append("the agent workspace contains answer material")
 
     if failures:
         print(f"\nRESULT: FAIL, {len(failures)} leakage finding(s)")

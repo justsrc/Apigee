@@ -3380,17 +3380,13 @@ The ticket's premise is wrong in a specific way worth naming: the admin's role i
 same admin working in other organizations is not evidence that her role differs, it is evidence
 that the data differs.
 
-The hard part is what follows. There is no configuration change that raises the limit. The
-documented mitigations are all destructive:
-
-> If it is the custom role name, App, API product or other entities which is the primary factor
-> causing the RDN to be long, migrate to using an alternate entity with a shorter name.
-
-> If it is the organization name or environment name that is the primary contributor to long RDN,
-> you will have to migrate to a different organization or environment with a shorter name.
-
-> Keep repeating the steps above until your LDAP has no RDNs longer than 241 bytes. Once you
-> reach this state, proceed with the private cloud version upgrade as usual.
+The hard part is what follows. There is no configuration change that raises the limit. Every
+documented mitigation trades one problem for a worse one. Shortening a custom role name, app
+or API product is the documented first resort; if the organization or environment name is
+the dominant contributor instead, the customer has to migrate to a differently named one.
+And the documentation's own loop condition is that this repeats until no RDN exceeds 241
+bytes, at which point the upgrade proceeds as usual, which is the one part of the procedure
+that is not destructive.
 
 None of those is an undo. Renaming an API product or a custom role changes the identity of every
 developer credential and every role assignment that references it.
