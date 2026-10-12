@@ -25,8 +25,13 @@ expect `429` at the caller is a separate, open question raised by the note on th
 page, and it does not move the diagnosis.
 
 ## Correct Remediation
-Keep the Quota policy for the long-window allowance and add a SpikeArrest policy for
-burst protection. SpikeArrest has no `rateLimit` element and no `timeWindow` element. Its
+Move the allowance to a longer window and put the bursts in SpikeArrest. The comparison
+chart puts Quota at "longer time intervals like days, weeks, or months" and SpikeArrest at
+"seconds or minutes", so the existing one-minute Quota sits in SpikeArrest's column and
+cannot stay as the sustained allowance. Change that Quota's interval to the window the
+commercial terms actually imply, and add SpikeArrest to shed the bursts.
+
+SpikeArrest has no `rateLimit` element and no `timeWindow` element. Its
 documented children are `<DisplayName>`, `<Identifier>`, `<MessageWeight>`, `<Rate>` and
 `<UseEffectiveCount>`, and the whole rate is set by one required child:
 
@@ -69,8 +74,9 @@ not address the window behavior.
 Telling them to disable retries. Retries are the client's rational response to a rate
 limit.
 
-Adding another Quota policy with a longer interval. Two Quota policies do not compose into
-burst protection.
+Adding a second Quota policy alongside the one-minute one and leaving that one in place.
+Two Quota policies do not compose into burst protection, and the fix is to change the
+existing interval rather than to stack another policy on top of it.
 
 Naming `rateLimit` or `timeWindow` as SpikeArrest elements. Neither exists. The rate is the
 body of `<Rate>` and must carry a `ps` or `pm` suffix, such as `<Rate>30ps</Rate>`.
@@ -83,7 +89,7 @@ Quota visible, not evidence that a different policy is firing.
 ## Evaluation Rubric
 | Dimension | 0 | 2 | 4 |
 | --- | --- | --- | --- |
-| Technical correctness | Says quota miscounts | Identifies burst behavior | Explains enforcement is correct and policy choice is wrong |
+| Technical correctness | Says the quota is miscounting, or calls the observed fault a spike rejection | Identifies burst behavior | Explains enforcement is correct and policy choice is wrong |
 | Diagnostic method | Raises limits | Suggests SpikeArrest | Verifies counts before concluding |
 | Safety | Changes prod limits | Adds SpikeArrest | Tests in test env first |
 | Policy configuration | Invents elements or quotes a default `<Rate>` | Names SpikeArrest without a concrete element | Uses `<Rate>` with a `ps`/`pm` value and sets `<UseEffectiveCount>` deliberately |
