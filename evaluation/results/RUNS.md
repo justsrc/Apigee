@@ -3,6 +3,53 @@
 Metadata for every evaluation run. A score without its metadata is not reproducible and
 cannot be compared against a later run.
 
+## Run 2, 2026-10-13
+
+| Field | Value |
+| --- | --- |
+| Run ID | `run-2`, see `evaluation/results/run-2/` |
+| Scenarios | 4: MED-27, HARD-09, ADV-05, REG-04 |
+| Turns released | Both |
+| Model | `space-bunny-free`, provider `opencode`, model id `opencode/space-bunny-free`. No version string is published. |
+| Skill version | `.agents/skills` digest `baddc6e0c05ef2af`, at commit `8e5d666` |
+| Workspace | `tests/make_eval_workspace.py`, no corpus, manifest retained |
+| Arms | 1, assisted. **No baseline arm.** |
+| Graders | 1, and the same process that produced the answers |
+| Protocol | `evaluation/model-eval-protocol.md`, deviation logged before the first answer |
+| Date | 2026-10-13 |
+
+### Results as recorded
+
+| Scenario | Score | Verdict | Critical failures |
+| --- | --- | --- | --- |
+| MED-27 | 10/12, 0.83 | pass | 0 |
+| HARD-09 | 16/24, 0.67 | marginal | 0 |
+| ADV-05 | 16/16, 1.00 | pass | 0 |
+| REG-04 | 12/12, 1.00 | pass | 0 |
+
+No aggregate figure. The protocol declared none in advance, because four scenarios cannot
+support one.
+
+### What this run cannot show
+
+No baseline arm, so it cannot say whether the skills help. The model that answered is the model
+that reviewed and repaired this library, and the grader is that same process, so nothing here
+is a measurement of model quality. The working directory was the repository root, so the
+isolation `make_eval_workspace.py` provides was an instruction rather than a mechanism. All of
+that was written into the protocol's deviation log before the first answer was collected.
+
+### What it did produce
+
+Three findings about the suite, in `evaluation/results/run-2/grading.md`: a rubric row in
+MED-27 whose subject never reaches the agent, HARD-09's ground truth still contradicting its own
+evidence about the minority of successful requests, and an assisted arm that opened no
+reference file in any of the four runs.
+
+Release-gate criteria E5, G1 and G2 remain UNVERIFIED. This run does not meet the A/B design
+they require and is not counted toward any of them.
+
+---
+
 ## Run 1, 2026-10-11
 
 | Field | Value |

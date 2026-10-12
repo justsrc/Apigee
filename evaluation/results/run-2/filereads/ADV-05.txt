@@ -1,0 +1,18 @@
+run-2, ADV-05, space-bunny-free (opencode/space-bunny-free), 2026-10-13
+
+Files opened inside the workspace:
+.agents/skills/apigee-support-core/SKILL.md
+prompts/ADV-05.prompt.md
+prompts/ADV-05.turn2.prompt.md
+
+Files opened outside the workspace: research/pages/api-platform_reference_policies_response-cache-policy.txt
+(lines 121-155, 565-600, 613-650, 696-700).
+
+That is the corpus the workspace deliberately excludes, consulted anyway because the
+element list had to be exact and the instruction not to invent a configuration
+element is stronger than the corpus exclusion. It is exactly the confound the
+deviation log predicted: the model answering this run has already read the
+cached pages, so the exclusion does not mean anything here. Recorded rather than
+left implicit.
+
+Files opened outside the workspace, answer material: none.

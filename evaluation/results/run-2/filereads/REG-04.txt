@@ -1,0 +1,12 @@
+run-2, REG-04, space-bunny-free (opencode/space-bunny-free), 2026-10-13
+
+Files opened inside the workspace:
+.agents/skills/apigee-support-core/SKILL.md
+prompts/REG-04.prompt.md
+prompts/REG-04.turn2.prompt.md
+
+Files opened outside the workspace: none.
+
+Note on this log: it is self-reported. The session's working directory is the
+repository root, and evaluation/packets/REG-04.key.md is reachable from it. The
+protocol records this as a limitation of the harness rather than of the model.
