@@ -125,20 +125,39 @@ time; the honest manifest entry is what matters.
 
 ---
 
-### D-022 MEDIUM — Two cached URLs cited by scenarios have no local copy
+### D-022 MEDIUM — Twelve cached URLs cited by scenarios had no local copy
 
-**Affected** 10 URLs in `scenarios/hard.md`
+**Affected** 12 URLs, eleven of them Edge for Private Cloud pages cited from `scenarios/hard.md`, plus `antipatterns/intro`
 
-**What failed.** Ten cited URLs, all Edge for Private Cloud operational pages plus
-`antipatterns/intro`, have no page in `research/pages/`. A reviewer working only from the
-local corpus cannot check what those pages say, which is how HARD-16's invented "eight
-central types" survived review.
+**What failed.** Twelve cited URLs had no page in `research/pages/`: eleven Edge for Private
+Cloud operational pages and `antipatterns/intro`, which is a cloud.google.com page scoped to
+Apigee and hybrid rather than OPDK. A reviewer working only from the local corpus could not
+check what those pages said, which is how HARD-16's invented "eight central types" survived
+review.
 
-**Correction.** The reviewer fetched them live. A cache is a convenience, not the source of
-truth; `check_urls.py` verifies the live document regardless of whether a copy is cached.
+This entry originally said ten. `evaluation/audit-hard-reg.md:528` is where the ten came from,
+and the list it carried was wrong three ways: its tenth item, `view-page`, is not a URL and
+appears nowhere else in the repository; its ninth, `antipatterns/intro`, is not an OPDK page;
+and three genuinely uncached OPDK pages were missing from the list altogether, because raw
+copies of them survive under `research/scratch-pages/` and looked fetched. `bb5d859` re-derived
+the list and cached all eleven OPDK pages.
 
-**Status: OPEN, accepted.** Recording which URLs are uncached would be useful but does not
-change any verdict, and the URL checker already resolves all of them.
+**Status: PARTIALLY FIXED.** As of `bb5d859` the eleven OPDK pages are cached and all eleven
+answered HTTP 200 under the pinned v4.53.01 release. Five cited documentation URLs still have
+no local copy:
+
+| URL | Cited from |
+| --- | --- |
+| `api-platform/antipatterns/intro` | `hard.md` |
+| `api-platform/antipatterns/reusing-quota` | `medium.md` |
+| `api-platform/get-started/compare-apigee-products` | `hard.md`, `medium.md`, `regression.md` |
+| `api-platform/troubleshoot/playbooks/ingressgateway/api-calls-fail-timeout-errors` | `medium.md` |
+| `docs.apigee.com/api-platform/develop/comparing-quota-spike-arrest-and-concurrent-rate-limit-policies` | `medium.md` |
+
+The last one is an `docs.apigee.com` URL whose slug carries the Edge release, so the pinned
+release copy is not interchangeable with it (D-025). The rest are cloud.google.com pages the
+fetch recipe did not reach. `check_urls.py` resolves all five live, so nothing shipped is
+wrong because of this.
 
 ---
 
@@ -457,25 +476,25 @@ reported unconfirmed on a URL that returns 200.
 
 ---
 
-## D-012 MEDIUM — 108 of 168 citations permanently redirect to a new host
+## D-012 MEDIUM — 112 of 172 citations permanently redirect to a new host
 
 **Affected** all cited documentation URLs
 
 **What failed.** Every `cloud.google.com` URL now issues a permanent redirect to
 `docs.cloud.google.com`. The citations resolve, so the previous checker reported none as
-broken, but 64% of the corpus cites a hostname Google has retired. Separately,
+broken, but 65% of the corpus cites a hostname Google has retired. Separately,
 `https://apigee.com/about/support/portal/` redirects to the product home page rather than to
 a support portal, which is a citation that no longer points at what it claims.
 
 The rewritten checker is what made this visible: it records the chain rather than following
 it silently, and reports `REDIRECTED_AND_VERIFIED` separately from `VERIFIED`.
 
-**Correction.** Recorded rather than rewritten. Bulk-editing 108 inline URLs risks breaking
+**Correction.** Recorded rather than rewritten. Bulk-editing 112 inline URLs risks breaking
 scenario text that quotes a URL inside prose or code, and the support-portal citation is a
 genuine dead reference that should be replaced deliberately rather than by substitution.
 
 **Status: OPEN, accepted with reason.** Nothing shipped is technically wrong because of this.
-Tracked so a 64%-redirected citation set is not mistaken for a clean one.
+Tracked so a 65%-redirected citation set is not mistaken for a clean one.
 
 ---
 
@@ -487,7 +506,7 @@ Tracked so a 64%-redirected citation set is not mistaken for a clean one.
 | D-014 | `decode-jws-policy` documents 20 error names in one table cell | Faithful to the source. The names are now split into individual rows and flagged as listed together upstream. |
 | D-016 | Ground-truth correctness cannot be checked by script | By design. It needs review by someone who knows Apigee, which is what `evaluation/audit-*.md` records. |
 | D-017 | No model evaluation of the scenarios has been run | No model-execution budget in this environment. Structural validation and technical review are reported separately and are never presented as model evaluation. |
-| D-024 | 108 of 168 citations permanently redirect `cloud.google.com` to `docs.cloud.google.com` | Resolving is verified and the chain is recorded. Rewriting 108 inline URLs risks breaking scenario text that quotes them, and it is not a correctness defect while the redirects hold. |
+| D-024 | 112 of 172 citations permanently redirect `cloud.google.com` to `docs.cloud.google.com` | Resolving is verified and the chain is recorded. Rewriting 112 inline URLs risks breaking scenario text that quotes them, and it is not a correctness defect while the redirects hold. |
 | D-025 | `docs.apigee.com` Edge slugs carry the release, so a page verified at one release 404s at another | Real and unavoidable. Recorded in `notes-known-404.txt`; the OPDK skills pin a release. |
 | D-026 | The known-issues register contains no OPDK entries | By design: it scopes itself to "Apigee and Apigee hybrid". Recorded in `evaluation/source-notes-opdk-knownissues.md` rather than worked around. |
 | D-027 | Two current official pages contradict each other on load-balanced target rotation | Unresolvable from the sources. Both statements are recorded verbatim in `evaluation/source-conflicts-loadbalancing.md`; neither is chosen. |
