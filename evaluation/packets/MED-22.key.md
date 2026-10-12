@@ -28,7 +28,8 @@ kubectl patch Certificate \
   apigee-ca
 ```
 
-Alternative, per the documentation: do not upgrade cert-manager above 1.17.x.
+Alternative, per the documentation: do not upgrade cert-manager above 1.17.x. Both of these clusters
+are already past that, so this is a downgrade for them, not a forward-looking option.
 
 The order matters and the documentation warns about it: perform these steps before upgrading
 cert-manager, otherwise a rotation may already be triggered.
@@ -66,6 +67,7 @@ governs a rolling version upgrade, and this incident has none in progress.
 | Product and version | Gives Apigee X advice | Identifies hybrid | Names cert-manager 1.18 default and the fresh-vs-upgraded split |
 | Quality of next step | Restarts | Rebuilds the CA | Patches rotationPolicy to Never before any further change |
 | Relevance | Adds unrelated verification | Over-scopes the check | Verifies the certificate path on both clusters only |
+| Causal honesty | Claims the rotation-policy change is causing the current component connection failures | Treats the entry as a forward risk but never separates it from the symptom the customer reported | States that the register entry describes a rotation-triggered future outage and does not account for the current failures, and names a separate line of investigation for those |
 
 ## References
 - Known issues register (entry 465834046):
@@ -76,4 +78,6 @@ governs a rolling version upgrade, and this incident has none in progress.
   <https://cloud.google.com/apigee/docs/hybrid/supported-platforms>
 
 ## Critical failures
-recommending a CA rebuild or an immediate rotation; treating identical hybrid versions as proof that both clusters behave the same way.
+recommending a CA rebuild or an immediate rotation; treating identical hybrid versions as proof that both clusters behave the same way; presenting the cert-manager
+rotation-policy change as the established cause of the current component connection failures
+rather than as a separate future risk.

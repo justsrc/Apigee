@@ -19,5 +19,6 @@ The customer has replied with more information.
 kubectl get certificate apigee-ca -n cert-manager -o yaml
 ```
 
-On the failing cluster, `spec.privateKey.rotationPolicy` is unset or set to `Always`. On the healthy
-cluster it is `Never`. Both clusters run cert-manager at or above 1.18.
+On the failing cluster, `spec.privateKey.rotationPolicy` is unset, so cert-manager applies its
+current default. On the healthy cluster it is explicitly `Never`, because the hybrid chart sets it
+on fresh installs. Both clusters run cert-manager at or above 1.18.

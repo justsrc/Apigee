@@ -18,5 +18,6 @@ Rules for this exercise:
   one cluster but not the other. Both are the same hybrid version. Where do we start?
 
 ## Initial Evidence
-Two hybrid clusters, same hybrid version, same changes. One has intermittent component connection
-failures; the other does not. Both were upgraded rather than installed fresh.
+Two hybrid clusters, same hybrid version, same cert-manager change. One has intermittent component
+connection failures; the other does not. One cluster was installed fresh; the other was upgraded
+in place from an earlier release.

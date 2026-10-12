@@ -2496,9 +2496,11 @@ the two authorities is simply wrong.
 - Origin: reported real-world case (official known issue 465834046, FIXED for fresh installs in
   hybrid 1.14.3, 1.15.1 and 1.16.0; upgraded clusters are not covered)
 - Versions: checked 2026-10-11
-- Evaluation objectives: nothing in the symptom points at cert-manager, and the defect is scoped to
-  upgraded clusters only, so two clusters on the same hybrid version behave differently. The agent
-  must think about a future outage caused by a completed, successful change.
+- Evaluation objectives: the symptom points at the runtime components rather than at
+  cert-manager, and the defect is scoped to upgraded clusters only, so two clusters on the
+  same hybrid version behave differently. The agent must think about a future outage caused
+  by a completed, successful change, and must not present that entry as the diagnosis of the
+  fault the customer actually reported.
 - Skills expected: apigee-support-core, apigee-opdk-troubleshooter, references/security.md
 
 #### Initial support ticket
@@ -2509,8 +2511,9 @@ the two authorities is simply wrong.
 
 #### Initial evidence
 
-Two hybrid clusters, same hybrid version, same changes. One has intermittent component connection
-failures; the other does not. Both were upgraded rather than installed fresh.
+Two hybrid clusters, same hybrid version, same cert-manager change. One has intermittent component
+connection failures; the other does not. One cluster was installed fresh; the other was upgraded
+in place from an earlier release.
 
 #### Expected investigation
 
@@ -2524,8 +2527,9 @@ cert-manager" but "what is the rotation policy on the `apigee-ca` certificate".
 kubectl get certificate apigee-ca -n cert-manager -o yaml
 ```
 
-On the failing cluster, `spec.privateKey.rotationPolicy` is unset or set to `Always`. On the healthy
-cluster it is `Never`. Both clusters run cert-manager at or above 1.18.
+On the failing cluster, `spec.privateKey.rotationPolicy` is unset, so cert-manager applies its
+current default. On the healthy cluster it is explicitly `Never`, because the hybrid chart sets it
+on fresh installs. Both clusters run cert-manager at or above 1.18.
 
 #### Ground-truth resolution
 
@@ -2557,7 +2561,8 @@ kubectl patch Certificate \
   apigee-ca
 ```
 
-Alternative, per the documentation: do not upgrade cert-manager above 1.17.x.
+Alternative, per the documentation: do not upgrade cert-manager above 1.17.x. Both of these clusters
+are already past that, so this is a downgrade for them, not a forward-looking option.
 
 The order matters and the documentation warns about it: perform these steps before upgrading
 cert-manager, otherwise a rotation may already be triggered.
@@ -2598,9 +2603,12 @@ governs a rolling version upgrade, and this incident has none in progress.
 | Product and version | Gives Apigee X advice | Identifies hybrid | Names cert-manager 1.18 default and the fresh-vs-upgraded split |
 | Quality of next step | Restarts | Rebuilds the CA | Patches rotationPolicy to Never before any further change |
 | Relevance | Adds unrelated verification | Over-scopes the check | Verifies the certificate path on both clusters only |
+| Causal honesty | Claims the rotation-policy change is causing the current component connection failures | Treats the entry as a forward risk but never separates it from the symptom the customer reported | States that the register entry describes a rotation-triggered future outage and does not account for the current failures, and names a separate line of investigation for those |
 
 #### Critical failures: recommending a CA rebuild or an immediate rotation; treating identical
-hybrid versions as proof that both clusters behave the same way.
+hybrid versions as proof that both clusters behave the same way; presenting the cert-manager
+rotation-policy change as the established cause of the current component connection failures
+rather than as a separate future risk.
 
 #### References
 
