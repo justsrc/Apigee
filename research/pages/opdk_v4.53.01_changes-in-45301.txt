@@ -1,0 +1,676 @@
+## Overview of changes
+
+Edge for Private Cloud 4.53.01 introduces multiple changes that enhance the security posture of the platform and incorporates updated versions of required software and libraries. These changes affect the following policy types:
+
+- [OAS (OpenAPI specification) validation policy](#oas-validation-policy)
+- Policies that support [JSONPath](#jsonpath) queries
+- [Java callout policies](#java-callout-changes) that rely on deprecated libraries.
+- [OpenLDAP](#openldap-changes)
+- [Cryptography Provider changes](#cryptography-provider-changes)
+
+You can also use the [change detection tool](#change-detection-tool) to identify changes to the proxies, shared flows, or other artifacts in your cluster that may cause disruption as a result of this upgrade.
+
+**Warning:** While these changes are unlikely to affect all your use cases, certain configurations may experience disruption to API proxy traffic during and after the upgrade to Edge for Private Cloud 4.53.01. A thorough review of this topic is recommended prior to initiating the upgrade.
+
+**Note:** We recommend using the tools described in this topic to identify and mitigate any possible impact to your cluster before upgrading to version 4.53.01 or later.
+
+## Detailed description of changes
+
+This section describes the changes introduced in version 4.53.01 that can disrupt your workflows during or after the upgrade. Methods to identify potential problem areas and methodologies of mitigation or workarounds are also covered.
+
+### OAS (OpenAPI specification) validation policy
+
+#### Context
+
+The [OAS validation policy](/api-platform/reference/policies/oas-validation-policy) validates incoming requests or responses against the rules defined in OpenAPI 3.0 specification (JSON or YAML). Edge for Private Cloud 4.53.01 delivers enhancements to the OAS (OpenAPI specification) policy, focusing on stricter and more accurate validation of API response bodies.
+
+#### Changes
+
+Edge for Private Cloud 4.53.01 introduces two important changes in how the OAS policy validates API responses, ensuring closer alignment with your OpenAPI specification:
+
+- **Scenario 1:**
+  - **Previous behavior:** If your OpenAPI specification required a response body but the actual response from target or upstream policy did not include one , the policy would not flag this as a validation error.
+  - **Current behavior:** The policy will now correctly return a validation error (example: `defines a response schema but no response body found`) in this scenario, indicating a mismatch between the expected and actual response.
+- **Scenario 2:**
+  - **Previous behavior:** If your OpenAPI specification explicitly stated that no response body was expected, but the actual response from target or upstream policy included a body, the policy would not result in a failure.
+  - **Current behavior:** The policy will now result in a failure (example: `No response body is expected but one was found`) in this scenario, ensuring that responses adhere strictly to the specified schema.
+
+#### Mitigation
+
+Identify any proxies or shared flows that may be impacted by the upgrade using the [change detection tool](#change-detection-tool) or through manual review. Look for any proxies where either of the following conditions are present:
+
+- The OAS Validation policy is configured with a `Source` tag set to `response`.
+- The OAS Validation policy is validating a response from any *other* policy that generates a response.
+
+If using the tool, it will generate output in below format:
+
+| Organization | Environment | Artifact Name | Artifact Type | Revision | Policy Name | Policy Type | Type of Impact | Impact Specific Field | Impact Certainty | Documentation |
+|----|----|----|----|----|----|----|----|----|----|----|
+| org2 | dev | proxy2 | proxy | 4 | oas-validateresponse | OASValidation | oas_content_type_handling | Source=calloutresponse | Medium | [OAS Validation Policy](#oas-validation-policy) |
+| org1 | prod | proxy3 | sharedflow | 1 | oas-spec-validation | OASValidation | oas_content_type_handling | Source=response | Medium | [OAS Validation Policy](#oas-validation-policy) |
+
+For a detailed explanation of the columns in the output table, see the [Understand the tool output](#understand-tool-output) section.
+
+**Note:** The tool will always flag the OAS Validation policies even after corrections have been made.
+
+Once a proxy or shared flow is identified, make sure that the response and your OAS specification are in alignment regarding the presence or absence of a response body. You can use standard Apigee trace to review your traffic patterns. If the target is returning a response intermittently, then use other policies to validate the response before the response is passed to the OAS Validation policy.
+
+- If your OAS specification file defines a response body, the response from target or upstream policy must always provide one.
+- If your OAS specification file does not define a response body, the target or upstream policy must not send one.
+
+Update the OAS validation policy or your target behavior as necessary before you attempt the upgrade to Private Cloud 4.53.01. You should validate such identified workflows in your non-production environments first to minimize risk of disruptions during production cluster upgrade.
+
+### JSON path
+
+#### Context
+
+The Edge for Private Cloud 4.53.01 has introduced changes to how JSON path expressions are used in various policies. JSONPath expressions can be used in policies like [ExtractVariable policy](/api-platform/reference/policies/extract-variables-policy), [RegularExpressionProtection policy](/api-platform/reference/policies/regular-expression-protection), [Data masking](/api-platform/security/data-masking) to parse JSON content or store values in variables. JSONPath expressions can also be used in general [message templating](/api-platform/reference/message-template-intro) to replace variables with values dynamically during proxy execution. The new JSONPath expressions and formats follow the latest JSON expression standards.
+
+**Warning:** If Edge message processor is upgraded to version 4.53.01 without sufficiently addressing the JSON expressions as described below, your proxies may either not function as intended or fail to deploy on the message processor.
+
+**Warning:** The actions described for each type of change is not backwards compatible - taking the action prematurely and deploying proxies with changes associated with newer JSONPath expressions in an Edge for Private Cloud cluster older than 4.53.01 will result in failures. Please read the [mitigation section](/private-cloud/v4.53.01/changes-privatecloud-45301#jsonpath-mitigation) thoroughly.
+
+**Note:** Not every JSONPath expression is prone to failure. The topic below explains various JSON Path expressions that are likely to fail in the newer version. You should thoroughly test various use cases of JSONPath in your non-production environments before attempting a production upgrade.
+
+#### Changes
+
+It is important to review existing API proxies/shared flows for policies that utilize JSONPath expressions. This includes, but is not limited to, Extract Variables policy, Regular Expression Protection policy or any policy with Message Template using JSONPath.
+
+Below json input is used for explaining the changes:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+{
+  "store": {
+    "book": [
+      {"category": "reference", "author": "Nigel Rees", "price": 8.95},
+      {"category": "fiction", "author": "Evelyn Waugh", "price": 12.99},
+      {"category": "fiction", "author": "Herman Melville", "price": 8.99}
+    ],
+    "bicycle": {
+      "color": "red",
+      "book": [
+        {"author": "Abc"}
+      ]
+    }
+  }
+}
+```
+
+1.  <span id="jsonpath-wildcard-behavior">**[JSONPath wildcard `[*]` behavior change for object values](#jsonpath-wildcard-behavior)**</span>
+
+    The behavior of the `[*]` wildcard has been altered when used to access all immediate values of a JSON object. Previously, `$.object[*]` would return the immediate values wrapped within a single JSON object. With the updated libraries, the output is now an array containing these values.
+
+    For example, `$.store[*]`:
+
+    **Previous behavior:**
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    {
+      "bicycle": {
+        "color": "red",
+        "book": [{"author": "Abc"}]
+      },
+      "book": [
+        {"price": 8.95, "category": "reference", "author": "Nigel Rees"},
+        {"price": 12.99, "category": "fiction", "author": "Evelyn Waugh"},
+        {"price": 8.99, "category": "fiction", "author": "Herman Melville"}
+      ]
+    }
+    ```
+
+    **Current behavior:**
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    [
+      [
+        {"category": "reference", "author": "Nigel Rees", "price": 8.95},
+        {"category": "fiction", "author": "Evelyn Waugh", "price": 12.99},
+        {"category": "fiction", "author": "Herman Melville", "price": 8.99}
+      ],
+      {
+        "color": "red",
+        "book": [{"author": "Abc"}]
+      }
+    ]
+    ```
+
+    **Action:**
+
+    Change the JSONPath expression to simply target the parent object (example: `$.store`) to directly target the items which were retrieved previously.
+
+2.  <span id="jsonpath-trailing-dot">**[JSONPath trailing dot `(.)` in paths causes error](#jsonpath-trailing-dot)**</span>
+
+    There is stricter validation for JSONPath expressions. Previously, paths ending with an invalid trailing dot (example: `$.path.to.element.`) would be silently ignored, and the query still returns a result if the preceding valid path segment matched. With the new version, such malformed paths are now correctly identified as invalid and will result in an error.
+
+    For example, `$.store.book.`
+
+    **Previous behavior:**
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    [
+      {"price":8.95,"category":"reference","author":"Nigel Rees"},
+      {"price":12.99,"category":"fiction","author":"Evelyn Waugh"},
+      {"price":8.99,"category":"fiction","author":"Herman Melville"}
+    ]
+    ```
+
+    **Current behavior:**
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    ERROR: com.jayway.jsonpath.InvalidPathException - Path must not end with a '.' or '..'
+    ```
+
+    Any existing policies that use JSONPath expressions with an unintentional trailing dot will now fail with an `InvalidPathException`.
+
+    **Action:**
+
+    Remove the trailing dot from any JSONPath expression that ends with one. For example, change `$.store.book.` to `$.store.book`.
+
+3.  <span id="jsonpath-recursive-descent">**[JSONPath recursive descent `(..)` output structure change](#jsonpath-recursive-descent)**</span>
+
+    There are changes to how results are returned when using the `(..)` (recursive descent) operator to locate all occurrences of a named element. Previously, all found elements were flattened into a single list. The updated libraries now return a list of lists, preserving the original grouping structure where elements were found, rather than a single flat list.
+
+    For example, `$..book`
+
+    **Previous behavior:**
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    [
+      {"price":8.95,"category":"reference","author":"Nigel Rees"},
+      {"price":12.99,"category":"fiction","author":"Evelyn Waugh"},
+      {"price":8.99,"category":"fiction","author":"Herman Melville"},
+      {"author":"Abc"}
+    ]
+    ```
+
+    **Current behavior:**
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    [
+      [
+        {"category":"reference","author":"Nigel Rees","price":8.95},
+        {"category":"fiction","author":"Evelyn Waugh","price":12.99},
+        {"category":"fiction","author":"Herman Melville","price":8.99}
+      ],
+      [
+        {"author":"Abc"}
+      ]
+    ]
+    ```
+
+    **Action:**
+
+    Update your downstream processing logic to account for the new nested array structure. You will likely need to iterate through the outer JSONArray and then iterate through each inner JSONArray to access the individual elements.
+
+4.  <span id="jsonpath-index-after-multi-item-selection">**[JSONPath indexing after multi-item selection or filter returns empty array](#jsonpath-index-after-multi-item-selection)**</span>
+
+    There is a change in behavior when an index (example: `[0]`) is applied immediately after a multi-item selector (like `[*]`) or a filter (`[?(condition)]`). Previously, such expressions would attempt to select the item at the specified index from the combined results. With the new version, these expressions will now return an empty array (`[]`).
+
+    For example, `$.store.book[*][0]`
+
+    **Previous behavior:**
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    {"category": "reference", "price": 8.95, "author": "Nigel Rees"}
+    ```
+
+    **Current behavior:**
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    []
+    ```
+
+    **Action:**
+
+    If there is a need to filter and then get a specific item from the filtered set, process the filtered array returned by the JSONPath for example, `$..book[?(@.category == 'fiction')]` and then take `[0]` from the previous result.
+
+5.  <span id="jsonpath-negative-array-slicing">**[JSONPath negative array slicing output change](#jsonpath-negative-array-slicing)**</span>
+
+    The new version has modified the behavior of negative array slicing (example: `[-2:], [-1:]`). Previously, when applying a negative slice to an array (indicating elements from the end of the array), the old version would incorrectly return only a single item from that slice. The new version now correctly returns a list (array) containing all elements that fall within the specified negative range.
+
+    For example `$.store.book[-2:]`
+
+    **Previous behavior:**
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    {"price":12.99,"category":"fiction","author":"Evelyn Waugh"}
+    ```
+
+    **Current behavior:**
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    [
+      {"category":"fiction","author":"Evelyn Waugh","price":12.99},
+      {"category":"fiction","author":"Herman Melville","price":8.99}
+    ]
+    ```
+
+    **Action:**
+
+    The downstream processing logic must now be updated to iterate through the returned JSON array to get the desired output.
+
+6.  <span id="jsonpath-stricter-preceding-dot">**[JSONPath stricter preceding dot](#jsonpath-stricter-preceding-dot)**</span>
+
+    There is stricter enforcement of syntax for elements accessed directly from the root. When the elements are accessed directly from the root without a preceding dot (example: `$propertyelement`), such syntax is now considered as an error and will prevent proxy deployment.
+
+    For example `$store`,
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+
+    {
+      "bicycle": {
+        "color": "red",
+        "book": [{"author": "Abc"}]
+      },
+      "book": [
+        {"price": 8.95, "category": "reference", "author": "Nigel Rees"},
+        {"price": 12.99, "category": "fiction", "author": "Evelyn Waugh"},
+        {"price": 8.99, "category": "fiction", "author": "Herman Melville"}
+      ]
+    }
+    ```
+
+    **Current behavior:**
+
+    `Proxy will fail to deploy.`
+
+    **Action:**
+
+    Change your JSONPath to include the dot: `$.propertyName` (example: `$.store`). This will correctly target and retrieve the value.
+
+7.  <span id="jsonpath-dynamic-jsonpath">**[Dynamic JSONPath expressions](#jsonpath-dynamic-jsonpath)**</span>
+
+    Pay close attention to policies where the JSONPath expression itself is provided by a variable (example: `{myJsonPathVariable}` or `{dynamicPath}`). The value of these variables must also be checked against the potential behavioral changes outlined above.
+
+#### Mitigation
+
+Identify any proxies or shared flows that may be impacted by the upgrade by using the [change detection tool](#change-detection-tool) or manually reviewing your API proxies to look for the patterns described. If you use the tool, the output will identify the impacted proxy or shared flow, the relevant policy, and any problematic JSON paths, as shown in the example output below:
+
+| Organization | Environment | Artifact Name | Artifact Type | Revision | Policy Name | Policy Type | Type of Impact | Impact Specific Field | Impact Certainty | Documentation |
+|----|----|----|----|----|----|----|----|----|----|----|
+| org1 | dev | proxy1 | proxy | 4 | EV-ExtractRequestParams | ExtractVariables | JSONPath Wildcard \[\*\] Behavior Change for Object Values | \$.store\[\*\] | High | [JSONPath Wildcard \[\*\] Behavior Change for Object Values](#jsonpath-wildcard-behavior) |
+| org2 | prod | proxy2 | sharedflow | 1 | EV-ExtractResponseParams | ExtractVariables | JSONPath Trailing Dot (.) in Paths Now Causes Error | \$.store.book. | High | [JSONPath trailing dot (.) in paths causes error](#jsonpath-trailing-dot) |
+| org3 | dev | proxy3 | proxy | 3 | SC-FetchUserProfile | ServiceCallout | JSONPath Recursive Descent (..) Output Structure Change | \$..book | High | [JSONPath recursive descent (..) output structure change](#jsonpath-recursive-descent) |
+| org4 | prod | proxy4 | sharedflow | 2 | RF-InvalidAuthToken | RaiseFault | JSONPath Indexing After Multi-Item Selection or Filter Now Returns Empty Array | \$.store.book\[\*\]\[0\] | High | [JSONPath indexing after multi-item selection or filter returns empty array](#jsonpath-index-after-multi-item-selection) |
+| org5 | test | proxy5 | proxy | 6 | SC-FetchProfileDetails | ServiceCallout | JSONPath Negative Array Slicing Output Change | \$.store.book\[-2:\] | High | [JSONPath negative array slicing output change](#jsonpath-negative-array-slicing) |
+| org6 | prod | proxy6 | proxy | 2 | ML-LogRequestDetails | MessageLogging | JSONPath Stricter Preceding Dot | \$store | High | [JSONPath stricter preceding dot](#jsonpath-stricter-preceding-dot) |
+| org7 | test | proxy7 | proxy | 5 | RF-InvalidTokenDetails | RaiseFault | Dynamic JSONPath Expressions | myJsonPathVariable | Medium | [Dynamic JSONPath expressions](#jsonpath-dynamic-jsonpath) |
+
+For a detailed explanation of the columns in the above output table, see [Understand the tool output](#understand-tool-output) section.
+
+To mitigate, a comprehensive strategy is necessary. This process involves deciding on the appropriate update path and applying the necessary fix for detected JSONPath expressions.
+
+**Warning:** It is strongly recommended to vet and test these strategies in your lower non-production environments before proceeding on production systems.
+
+Choose the Upgrade Path Method that works best for you:
+
+- **Zero Downtime Migration**
+
+  This strategy involves procuring one or more new environments so that you can wire separate message processor nodes to it. Such message processor nodes can be set to install 4.53.01 and have proxies with modern JSONPath expressions. These can be used during upgrade and can be decommissioned after upgrade is complete. This strategy is seamless but involves temporarily procuring additional message-processor nodes to support a smooth upgrade. Details below:
+
+  - Create a [new environment](/private-cloud/v4.53.01/creating-organization-environment-and-virtual-host#createanenvironment) and [add new message-processor nodes](/private-cloud/v4.53.01/adding-router-or-message-processor-node#addbotharouterandamessageprocessor) of version 4.53.01 to this new environment.
+  - Upload the proxy bundle for affected proxies to the new environment and [apply necessary fixes explained in the remediation section](/private-cloud/v4.53.01/changes-privatecloud-45301#jsonpath-changes) & deploy the updated proxy bundle to the new environment.
+  - Redirect the traffic to the new environment and un-deploy the affected proxies from the old environment.
+  - Upgrade original message processor nodes to 4.53.01. Deploy proxies that have fixes for JSONPath in the original environment.
+  - Switch traffic back to the old environment, which now has message processors on 4.53.01 and proxy that is modernized for new jsonpath expressions.
+  - Delete and decommission the new environment and associated nodes.
+
+- **Downtime and upgrade**
+
+  This strategy involves procuring downtime for API Proxies using faulty JSON Path expressions. It does not necessitate procuring additional message processor nodes but causes disruption to API traffic for impacted proxies.
+
+  - Identify the affected proxies with affected policies and generate a new revision for all affected proxies.
+  - Apply necessary fixes by [Implementing the fixes explained in the remediation section](/private-cloud/v4.53.01/changes-privatecloud-45301#jsonpath-changes) in a new revision of the proxy. Don’t deploy this yet.
+  - Procure downtime for the proxy/proxies with impact.
+  - Upgrade all message processors to Edge for private cloud version 4.53.01. Note that the existing proxies may fail on the newly upgraded message processors.
+  - Once all message processors are upgraded to Edge for private cloud version 4.53.01 , deploy the newly created proxy revision with fixed JSONPath expression.
+  - Resume traffic on such proxies.
+
+- **Redesign Proxy before upgrade**
+
+  You can redesign the proxy itself before upgrading to Edge for Private Cloud 4.53.01. Instead of relying on specific JSON path expressions, you can get the same result by using a different method.
+
+  For example, if you are using an Extract Variable Policy with a JSON path, you could replace the policy with a Javascript policy that extracts similar data before upgrading to the newer version. After the upgrade is complete, you can change your proxy back to using JSON Paths with newer formats.
+
+### JavaCallout changes
+
+#### Context
+
+Edge for private cloud 4.53.00 and earlier used to contain a directory called **deprecated** (`$APIGEE_ROOT/edge-message-processor/lib/deprecated`) that contained a bunch of JAR libraries. These libraries were available for use in Java code in [JavaCallout policy](/api-platform/reference/policies/java-callout-policy) and could have been used by your custom Java code directly or indirectly.
+
+#### Changes
+
+The **deprecated** directory is now removed in Edge for private cloud version 4.53.01. In case your java code is relying on such libraries, proxies using such java callouts will fail when message processors are upgraded to version 4.53.01. In order to avoid such failures, follow the below mitigating steps before upgrading the message-processors to version 4.53.01.
+
+#### Mitigation
+
+1.  Review your Java Callout policies and associated jars using the [change detection tool](#change-detection-tool) or manually. Check to see if any of the policies reference libraries present in the “deprecated” directory of your current message processors.
+
+    **Note**: Make sure to review any libraries referenced by the policy that may be present in jars uploaded as organization- or environment-level [resources](/api-platform/develop/resource-files).
+
+    If you are using the tool provided by Apigee for the above detections, the tool will generate a report as shown in the following table . Specifically, it targets policies that reference JARs found in the `$APIGEE_ROOT/edge-message-processor/lib/deprecated` directory of older Edge for Private Cloud versions.
+
+    The tool will generate reports in the below format:
+
+    | Organization | Environment | Artifact Name | Artifact Type | Revision | Policy Name | Policy Type | Type of Impact | Impact Specific Field | Impact Certainty | Documentation |
+    |----|----|----|----|----|----|----|----|----|----|----|
+    | org1 | None | None | org-level-jar | None | None | java-callout | deprecated library detected for `simple-javacallout-o1-jar-1.jar` | \['Detected use of class `org.apache.commons.io.FileUtils` from `commons-io-2.5.jar`, 'Detected use of class `org.apache.commons.io.input.XmlStreamReaderException` from `commons-io-2.5.jar`'\] | High | [JavaCallout changes](#java-callout-changes) |
+    | org3 | env3 | None | env-level-jar | None | None | java-callout | deprecated library detected for `fat-javacallout-e3-jar-1.jar` | \['Detected use of class `org.apache.http.impl.auth.NTLMSchemeFactory` from `httpclient-4.5.2.jar`'\] | High | [JavaCallout changes](#java-callout-changes) |
+    | org1 | env1 | p1 | proxy-level-jar | 1 | None | java-callout | deprecated library detected for `simple-javacallout-p1-jar-1.jar` | \['Detected use of class `org.apache.commons.lang3.builder.ToStringBuilder` from `commons-lang3-3.4.jar`', 'Detected use of class `org.apache.commons.lang3.Validate` from `commons-lang3-3.4.jar`'\] | High | [JavaCallout changes](#java-callout-changes) |
+
+    For a detailed explanation of the columns in the above output table, see the [Understand the tool output](#understand-tool-output) section.
+
+2.  Once you have identified such deprecated libraries , you can follow one of the below methods for mitigating the issue.
+    - **Resource placement** (Recommended if you have a small number of jars / libraries from deprecated directory that are being referenced by the Java-Callout jars)
+      - Upload the identified deprecated jars as a [resource](/api-platform/develop/resource-files) at the desired level: API proxy revision, environment or organization.
+      - Proceed with Apigee software upgrade as usual.
+    - **Manual Placement** (Recommended if you have a large number of jars / libraries that are being referenced by the Java-Callout jars)
+      - On each message processor node, create a new directory named **external-lib** at the path `$APIGEE_ROOT/data/edge-message-processor/`.
+      - Copy the identified JARs into this **external-lib** directory from deprecated directory: `cp $APIGEE_ROOT/edge-message-processor/lib/deprecated/some.jar` `$APIGEE_ROOT/data/edge-message-processor/external-lib/some.jar`
+      - Ensure the directory and underlying jars are readable by Apigee user: `chown -R apigee:apigee` `$APIGEE_ROOT/data/edge-message-processor/external-lib`
+      - Proceed with Apigee software upgrade as usual.
+
+### OpenLDAP change
+
+#### Context
+
+OpenLDAP can be used in Edge Private Cloud for both authentication and authorization. In Edge for Private Cloud 4.53.01, OpenLDAP software shipped by Apigee was upgraded from version 2.4 to 2.6.
+
+#### Changes
+
+In OpenLDAP 2.6, relative distinguished name (RDN) is limited to approximately 241 bytes/characters. This limitation is a hard cap enforced and cannot be modified.
+
+**Impact**
+
+- Replication or import failures occur for entries with excessively large RDNs.
+- Attempting to create an entities like organizations,environments, custom roles, permissions etc. may results in the error message: `"message": "[LDAP: error code 80 - Other]"`.
+- Any DN longer than 241 bytes in Apigee’s LDAP is impacted. Such DN’s will prevent successful upgrade of Apigee OpenLDAP software and you will have to follow mitigation strategies for such items before you can proceed with the upgrade.
+
+Generally, in Apigee’s LDAP, long DNs are related to permissions since they are created by concatenating multiple entities. Such permission entries are especially prone to upgrade issues.
+
+For example,
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+dn: cn=@@@environments@@@*@@@applications@@@*@@@revisions@@@*@@@debugsessions,ou=resources,cn=businessuser,ou=userroles,o=orgname,ou=organizations,dc=apigee,dc=com
+```
+
+Typically, you would have organization, environment and role names of lengths such that RDNs in LDAP end up being smaller than 241 bytes.
+
+#### Mitigation
+
+**Before upgrade to 4.53.01:**
+
+The following steps will help to verify the presence of long RDNs in your existing LDAP 2.4 cluster.
+
+**\#1 - Extract LDAP data**
+
+Use ldapsearch command to find the distinguished name (dn) and redirect the output to a file:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+ldapsearch -o ldif-wrap=no -b "dc=apigee,dc=com" -D "cn=manager,dc=apigee,dc=com" -H ldap://:10389 -LLL -x -w LDAP_PASSWORD dn > /tmp/DN.ldif
+```
+
+Make sure the DN.ldif file above has LDAP entries.
+
+**\#2 - Identify long RDNs**
+
+The [change detection tool](#change-detection-tool) uses a generated LDIF file to identify LDAP RDNs exceeding 241 bytes/characters.
+
+The tool will generate reports in the following format:
+
+| Organization | Environment | Artifact Name | Artifact Type | Revision | Policy Name | Policy Type | Type of Impact | Impact Specific Field | Impact Certainty | Documentation |
+|----|----|----|----|----|----|----|----|----|----|----|
+| None | None | cn=`really-long-name`,ou=userroles,o=edge-platform,ou=organizations,dc=apigee,dc=com | ldif file | None | None | None | Ldap RDN exceeds 241 chars | cn=`really-long-name` | High | [OpenLDAP change](#openldap-changes) |
+
+For a detailed explanation of the columns in the above output table, see the [Understand the tool output section](#understand-tool-output).
+
+If the above command produces no output, then no RDNs in the existing LDAP setup exceed 241 bytes/characters. You are safe to proceed with the upgrade as usual.
+
+If the above command generates an output, it indicates the presence of RDNs exceeding 241 bytes/characters. For such items, follow mitigation steps as described in [step#3](/private-cloud/v4.53.01/changes-privatecloud-45301#mitigate-long-rdns) prior to proceeding with the Edge for Private Cloud 4.53.01 upgrade.
+
+**\#3 - Handle long RDNs**
+
+If output is received from step#2, it indicates the presence of RDNs exceeding 241 bytes/characters and follow the below mitigation steps:
+
+Review the LDAP entries that exceed 241 bytes.
+
+- If it is the custom role name, App, API product or other entities which is the primary factor causing the RDN to be long, migrate to using an alternate entity with a shorter name.
+- If it is the organization name or environment name that is the primary contributor to long RDN, you will have to migrate to a different organization or environment with a shorter name.
+
+Keep repeating the steps above until your LDAP has no RDNs longer than 241 bytes. Once you reach this state, proceed with the private cloud version upgrade as usual.
+
+### Cryptography Provider changes
+
+#### Context
+
+This change is a carry-over from Edge for Private Cloud 4.53.00. In Edge for Private Cloud 4.53.00, the internal cryptography provider was updated from Bouncy Castle (BC) to Bouncy Castle FIPS (BCFIPS) to enable FIPS support.
+
+#### Changes
+
+If [JavaCallout policies](/api-platform/reference/policies/java-callout-policy) rely on using the original BC provider, especially when using security functionality that has been hardened in the BCFIPS provider (example, using a common key pair for both encryption and signing), such JavaCallout policies will need to be modernized. JavaCallout policies attempting to load the Bouncy Castle cryptography provider using the name BC may fail because the default provider has changed. Such policies using the BC provider can subsequently break. Any custom implementations relying on the old BC provider will no longer be accessible and will need to be reviewed and re-implemented.
+
+#### Mitigation
+
+The recommended workaround is to use the BCFIPS provider. Custom JavaCallout implementations that relied on the old provider will need to be reviewed and re-implemented using the Bouncy Castle FIPS provider, which can be accessed using the string "BCFIPS".
+
+## Change detection tool
+
+A change detection tool has been built to identify Apigee proxies, policies, shared flows that may be impacted during and after the transition to Edge for Private Cloud 4.53.01. This tool generates a report detailing deployed proxies, shared flows, and OpenLDAP affected by the changes and provides direction to specific guides and strategies relevant to those identified proxies or shared flows.
+
+### Prerequisites
+
+1.  An RHEL-based machine is required to run this tool.
+2.  JRE 8 must be installed and correctly configured on the host virtual machine to allow the tool's scripts to run.
+3.  The tool requires the correct endpoint (URL) of the Management Server and valid administrative credentials for authentication and data retrieval.
+4.  The tool requires access to a designated working directory (e.g.`/tmp`) for extracting bundles, generating logs, and storing output. Ensure this directory has sufficient disk space and appropriate read/write permissions.
+5.  The tool requires the LDIF file using the `ldapsearch` command in the [OpenLDAP change - Extract LDAP data](#extract-ldap-data) section to detect the long RDNs more than 241 characters / bytes.
+
+### Running the tool
+
+After all prerequisites listed above are met, download the tool while supplying it the username and password from Apigee that you use to access the Apigee repository. Once downloaded, extract the downloaded archive.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+curl -u uName:pWord https://software.apigee.com/apigee/change-detector/change-detector-for-4.53.01_1.0.1.zip -o /tmp/change-detector-for-4.53.01_1.0.1.zip
+```
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+unzip /tmp/change-detector-for-4.53.01_1.0.1.zip
+```
+
+Once the download is complete, you can run the following command to see all the available options for the tool:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+./change-detector --help
+```
+
+To run the tool, use the following command and replace the placeholders with your information:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+export APIGEE_PASSWORD=[your_password]
+./change-detector --username [your_username] --mgmt-url [MGMT url]
+```
+
+To detect the large RDN LDAP entries, run the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+./change-detector --username [your_username] --mgmt-url [MGMT url] --ldif-file [LDIF_file]
+```
+
+The tool generates output either in json or csv format that can be directly consumed or imported into a human-readable tool, such as Google Sheets.
+
+### Understand the tool output
+
+#### Organization
+
+It points to the name of the organization where the artifact is located. For OpenLDAP change, this will be `None`.
+
+#### Environment
+
+The specific environment (e.g., dev, test, prod) within the organization. For OpenLDAP change, this will be `None`.
+
+For Java Callout changes, if Artifact Type=`env-level-jar`, this field will be `None`.
+
+#### Artifact name
+
+This field tells about the name of proxy/shared flow. For OpenLDAP change, this field shows the LDAP entity of the RDN.
+
+For Java Callout changes, if Artifact Type=`env-level-jar` or `org-level-jar`, this field will be `None`.
+
+#### Artifact type
+
+- For OAS and JSON changes, this column specifies the type of artifact, proxy or shared flow.
+- For the Java Callout change, this column provides details about the place or level at which the affected jar is uploaded. Resources (JARs) can be [stored at one of three levels](/api-platform/develop/resource-files#stored): `org-level`, `env-level`, `proxy-level`.
+- For the OpenLDAP change, this field indicates the LDIF file used in the tool.
+
+Revision
+
+It points to the deployed revision of the affected proxy/shared flow. For OpenLDAP change, it will be `None`.
+
+Policy name
+
+The name of the specific policy that has been identified as a potential issue. For OpenLDAP change, it will be `None`.
+
+Policy type
+
+It points to the type of the policy. For OpenLDAP change, it will be `None`.
+
+Type of impact
+
+This field describes the specific type of change detected in a proxy/shared flow.
+
+For Java Callout change, detections of changes related to java-callouts, the tool points to the affected java-callout which has references to the JARs present in `$APIGEE_ROOT/edge-message-processor/lib/deprecated` directory of older versions of Edge for Private Cloud in the following way in this particular column.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+deprecated library detected for NAME_OF_THE_AFFECTED_JAVA_CALLOUT_JAR
+```
+
+For OpenLDAP change, this field shows if any LDAP entity’s RDN exceeded more than 241 bytes or characters.
+
+Impact specific field
+
+For OAS change, this field is the name of the variable used in **Source** tag of the policy.
+
+For JSON change, this field shows the exact JSONPath expression or element that has been flagged as a potential issue.
+
+For Java Callout change, this field has the details of the exact classes and the name of the corresponding JAR (present in `$APIGEE_ROOT/edge-message-processor/lib/deprecated` directory of older Private Cloud versions ) used/referenced by the affected JavaCallout jar which will lead to failures upon upgrading to version 4.53.01 if not mitigated.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+ ['Detected use of class CLASS_NAME_1 from JAR_NAME_1',
+    Detected use of class CLASS_NAME_2 from JAR_NAME_2', 
+  .. , .. , ]
+```
+
+For OpenLDAP change, this field shows the LDAP entity’s RDN which are all exceeded more than 241 bytes or characters.
+
+Impact certainity
+
+- This field tells about the amount of certainty with which tool has detected a particular item. Values for this column can be either **High** or **Medium** (more values may be added later).
+
+  A **High** value means the tool has determined that there is a very high probability that the item will cause the application to break after upgrading to version 4.53.01. A **Medium** value indicates that the tool is unclear about the detection and more strategies would be needed to make a determination (For example, capture trace to observe resolved variables during proxy execution).
+
+- Detections related to JavaCallout and OpenLDAP changes will always have **High** value for impact certainty columns.
+
+Documentation
+
+This column provides a hyperlink to Apigee's documentation (relevant sections of this article) that explains the issue and its mitigation steps.

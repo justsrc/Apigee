@@ -1,0 +1,116 @@
+Perform the following during a PostgreSQL database failover:
+
+1.  Stop `apigee-postgresql` on the current master if it is still running:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-postgresql stop
+    ```
+
+2.  Go to standby node and invoke the following command to make it the master:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-postgresql promote-standby-to-master IPorDNSofOldMaster
+    ```
+
+If old master is restored at some time in the future, make it a standby node:
+
+1.  On the current master, edit the config file to set:
+
+    <div>
+
+    </div>
+
+    ```
+    PG_MASTER=IPorDNSofNewMaster
+    PG_STANDBY=IPorDNSofOldMaster
+    ```
+
+    **Note:** Apigee strongly recommends that you use IP addresses rather than host names for the `PG_MASTER` and `PG_STANDBY` properties in your silent configuration file. In addition, you should be consistent on both nodes.
+
+    If you use host names rather than IP addresses, you must be sure sure that the host names properly resolve using DNS.
+
+2.  Enable replication on the new master:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-postgresql setup-replication-on-master -f configFIle
+    ```
+
+3.  On the old master, edit the config file to set:
+
+    <div>
+
+    </div>
+
+    ```
+    PG_MASTER=IPorDNSofNewMaster
+    PG_STANDBY=IPorDNSofOldMaster
+    ```
+
+4.  Stop `apigee-postgresql` on the old master:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-postgresql stop
+    ```
+
+5.  On the old master, clean out any old Postgres data:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    rm -rf /opt/apigee/data/apigee-postgresql/
+    ```
+
+    **Note**: If necessary, you can backup this data before deleting it.
+
+6.  Configure the old master as a standby:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-postgresql setup-replication-on-standby -f configFile
+    ```
+
+7.  On completion of replication, verify the replication status by issuing the following scripts on both servers. The system should display identical results on both servers to ensure a successful replication:
+    1.  On the master node, run:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+        /opt/apigee/apigee-service/bin/apigee-service apigee-postgresql postgres-check-master
+        ```
+
+        Verify that it says it is the master.
+
+    2.  On the standby node:
+
+        <div>
+
+        </div>
+
+        ``` devsite-terminal
+        /opt/apigee/apigee-service/bin/apigee-service apigee-postgresql postgres-check-standby
+        ```
+
+        Verify that it says it is the standby.

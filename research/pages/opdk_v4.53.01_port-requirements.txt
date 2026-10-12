@@ -1,0 +1,185 @@
+The need to manage the firewall goes beyond just the virtual hosts; both VM and physical host firewalls must allow traffic for the ports required by the components to communicate with each other.
+
+## Port diagrams
+
+The following images show the port requirements for both a single data center and multiple data center configuration:
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### Single Data Center
+
+The following image shows the port requirements for each Edge component in a single data center configuration:
+
+<img src="/static/private-cloud/images/arch-ports-main.png" style="width:100.0%" alt="Port requirements for each Edge component in a single data center configuration" />
+
+**Notes on this diagram:**
+
+- The ports prefixed by "M" are ports used to manage the component and must be open on the component for access by the Management Server.
+- The Edge UI requires access to the Router, on the ports exposed by API proxies, to support the **Send** button in the trace tool.
+- Access to JMX ports can be configured to require a username/password. See [How to Monitor](/private-cloud/v4.53.01/how-monitor) for more information.
+- You can optionally configure TLS/SSL access for certain connections, which can use different ports. See [TLS/SSL](/api-platform/system-administration/ssl) for more.
+- You can configure the Management Server and Edge UI to send emails through an external SMTP server. If you do, you must ensure that the Management Server and UI can access the necessary port on the SMTP server (not shown). For non-TLS SMTP, the port number is typically 25. For TLS-enabled SMTP, it is often 465, but check with your SMTP provider.
+
+</div>
+
+<div class="section">
+
+### Multiple Data Centers
+
+If you install the [12-node clustered configuration with two data centers](/private-cloud/v4.53.01/installation-topologies#12hostclusteredinstallation), ensure that the nodes in the two data centers can communicate over the ports shown below:
+
+<img src="/static/private-cloud/images/12-node-port-requirements.png" style="width:100.0%" alt="Port requirements for each node in a 12-node clustered configuration" />
+
+**Note that:**
+
+- All Management Servers must be able to access all Cassandra nodes in all other data centers.
+- All Message Processors in all data centers must all be able to access each other over port 4528.
+- The Management Server must be able to access all Message Processors over port 8082.
+- All Management Servers and all Qpid nodes must be able to access Postgres in all other data centers.
+- **For security reasons**, other than the ports shown above and any others required by your own network requirements, no other ports should be open between data centers.
+
+</div>
+
+</div>
+
+By default, the communications among components is not encrypted. You can add encryption by installing Apigee mTLS. For more information, see [Introduction to Apigee mTLS](/private-cloud/latest/mtls-intro).
+
+## Port details
+
+The table below describes the ports that need to be opened in firewalls, by Edge component:
+
+<div id="filter1">
+
+Filter by port \# 22 80 443 1099 1100 1101 1102 1103 2181 2888 3888 4526 4527 4528 4529 4530 5432 5636 5672 7000 7199 8080 8081 8082 8083 8084 8443 9000 9042 9099 9160 10389 15999 59001 59002
+
+</div>
+
+<div id="table-div-id">
+
+| Component | Port | Description |
+| --- | --- | --- |
+| Standard HTTP ports | 80, 443 | HTTP plus any other ports you use for virtual hosts |
+| Apigee SSO | 9099 | Connections from external IDPs, the Management Server, and browsers for authentication. |
+| Cassandra | 7000, 9042 | Apache Cassandra ports for communication between Cassandra nodes and for access by other Edge components. |
+| 7199 | JMX port. Must be open for access by the Management Server. |  |
+| LDAP | 10389 | SymasLDAP |
+| Management Server | 1099 | JMX port |
+| 4526 | Port for distributed cache and management calls. This port is configurable. |  |
+| 5636 | Port for monetization commit notifications. |  |
+| 8080 | Port for Edge management API calls. These components require access to port 8080 on the Management Server: Router, Message Processor, UI, Postgres, Apigee SSO (if enabled), and Qpid. |  |
+| Management UI | 9000 | Port for browser access to management UI |
+| Message Processor | 1101 | JMX port |
+| 4528 | For distributed cache and management calls between Message Processors, and for communication from the Router and Management Server. A Message Processor must open port 4528 as its management port. If you have multiple Message Processors, they must all be able to access each other over port 4528 (indicated by the loop arrow in the diagram above for port 4528 on the Message Processor). If you have multiple data centers, the port must be accessible from all Message Processors in all data centers. |  |
+| 8082 | Default management port for Message Processor and must be open on the component for access by the Management Server. If you configure TLS/SSL between the Router and Message Processor, used by the Router to make health checks on the Message Processor. Port 8082 on the Message Processor only has to be open for access by the Router when you configure TLS/SSL between the Router and Message Processor. If you do not configure TLS/SSL between the Router and Message Processor, the default configuration, port 8082 still must be open on the Message Processor to manage the component, but the Router does not require access to it. |  |
+| 8443 | When TLS is enabled between the Router and Message Processor, you must open port 8443 on the Message Processor for access by the Router. |  |
+| 8998 | Message Processor port for communications from Router |  |
+| Postgres | 22 | If configuring two Postgres nodes to use master-standby replication, you must open port 22 on each node for SSH access. |
+| 1103 | JMX port |  |
+| 4530 | For distributed cache and management calls |  |
+| 5432 | Used for communication from Qpid/Management Server to Postgres |  |
+| 8084 | Default management port on Postgres server; must be open on the component for access by the Management Server. |  |
+| Qpid | 1102 | JMX port |
+| 4529 | For distributed cache and management calls |  |
+| 5672 | Single data center : Used for sending analytics from Router and Message Processor to Qpid. Multiple data centers : Used for communications between Qpid nodes in different data centers. Also used for communication between the Qpid server and broker components on the same node. In topologies with multiple Qpid nodes, the server must be able to connect to all brokers on port 5672. |  |
+| 8083 | Default management port on Qpid server and must be open on the component for access by the Management Server. |  |
+| 8090 | Default port for Qpid's Broker; must be open to access the Broker's management console or management APIs for monitoring purposes. |  |
+| Router | 4527 | For distributed cache and management calls. A Router must open port 4527 as its management port. If you have multiple Routers, they must all be able to access each other over port 4527 (indicated by the loop arrow in the diagram above for port 4527 on the Router). While it is not required, you can open port 4527 on the Router for access by any Message Processor . Otherwise, you might see error messages in the Message Processor log files. |
+| 8081 | Default management port for Router and must be open on the component for access by the Management Server. |  |
+| 15999 | Health check port. A load balancer uses this port to determine if the Router is available. To get the status of a Router, the load balancer makes a request to port 15999 on the Router: curl -v http://routerIP:15999/v1/servers/self/reachable If the Router is reachable, the request returns HTTP 200. |  |
+| 59001 | Port used for testing the Edge installation by the apigee-validate utility. This utility requires access to port 59001 on the Router. See Test the install for more on port 59001. |  |
+| SmartDocs | 59002 | The port on the Edge router where SmartDocs page requests are sent. |
+| ZooKeeper | 2181 | Used by other components like Management Server, Router, Message Processor and so on |
+| 2888, 3888 | Used internally by ZooKeeper for ZooKeeper cluster (known as ZooKeeper ensemble) communication |  |
+
+</div>
+
+The next table shows the same ports, listed numerically, with the source and destination components:
+
+<div id="filter2">
+
+Filter by port \# 1099 1100 1101 1102 1103 2181 2888 3888 4526 4527 4528 4529 4530 5432 5636 5672 7000 7199 8080 8081 8082 8083 8084 8443 9000 9042 9099 9160 10389 15999 59001 59002
+
+</div>
+
+<div id="table-div-id">
+
+| Port Number | Purpose | Source Component | Destination Component |
+| --- | --- | --- | --- |
+| virtual_host_port | HTTP plus any other ports you use for virtual host API call traffic. Ports 80 and 443 are most commonly used; the Message Router can terminate TLS/SSL connections. | External client (or load balancer) | Listener on Message Router |
+| 1099 through 1103 | JMX Management | JMX Client | Management Server (1099) Message Processor (1101) Qpid Server (1102) Postgres Server (1103) |
+| 2181 | Zookeeper client communication | Management Server Router Message Processor Qpid Server Postgres Server | Zookeeper |
+| 2888 and 3888 | Zookeeper internode management | Zookeeper | Zookeeper |
+| 4526 | RPC Management port | Management Server | Management Server |
+| 4527 | RPC Management port for distributed cache and management calls, and for communications between Routers | Management Server Router | Router |
+| 4528 | For distributed cache calls between Message Processors, and for communication from the Router | Management Server Router Message Processor | Message Processor |
+| 4529 | RPC Management port for distributed cache and management calls | Management Server | Qpid Server |
+| 4530 | RPC Management port for distributed cache and management calls | Management Server | Postgres Server |
+| 5432 | Postgres client | Qpid Server | Postgres |
+| 5636 | Monetization | External JMS component | Management Server |
+| 5672 | Single data center : Used for sending analytics from Router and Message Processor to Qpid. Multiple data centers : Used for communications between Qpid nodes in different data centers. Also used for communication between the Qpid server and broker components on the same node. In topologies with multiple Qpid nodes, the server must be able to connect to all brokers on port 5672. | Qpid Server | Qpid Server |
+| 7000 | Cassandra inter-node communications | Cassandra | Other Cassandra node |
+| 7199 | JMX management. Must be open for access on the Cassandra node by the Management Server. | JMX client | Cassandra |
+| 8080 | Management API port | Management API clients | Management Server |
+| 8081 through 8084 | Component API ports, used for issuing API requests directly to individual components. Each component opens a different port; the exact port used depends on the configuration but must be open on the component for access by the Management Server | Management API clients | Router (8081) Message Processor (8082) Qpid Server (8083) Postgres Server (8084) |
+| 8090 | Default management port for Qpid's Broker to manage and monitor queues. | Browser or API client | Qpid Broker (apigee-qpidd) |
+| 8443 | Communication between Router and Message Processor when TLS is enabled | Router | Message Processor |
+| 8998 | Communication between Router and Message Processor | Router | Message Processor |
+| 9000 | Default Edge management UI port | Browser | Management UI Server |
+| 9042 | CQL native transport | Router Message Processor Management Server | Cassandra |
+| 9099 | External IDP authentication | IDP, browser, and Management Server | Apigee SSO |
+| 10389 | LDAP port | Management Server | SymasLDAP |
+| 15999 | Health check port. A load balancer uses this port to determine if the Router is available. | Load balancer | Router |
+| 59001 | Port used by the apigee-validate utility to test the Edge installation | apigee-validate | Router |
+| 59002 | The router port where SmartDocs page requests are sent | SmartDocs | Router |
+
+</div>
+
+A Message Processor keeps a dedicated connection pool open to Cassandra, which is configured to never timeout. When a firewall is between a Message Processor and Cassandra server, the firewall can time out the connection. However, the Message Processor is not designed to re-establish connections to Cassandra.
+
+To prevent this situation, Apigee recommends that the Cassandra server, Message Processor, and Routers be in the same subnet so that a firewall is not involved in the deployment of these components.
+
+If a firewall is between the Router and Message Processors, and has an idle TCP timeout set, our recommendations is to do the following:
+
+1.  Set `net.ipv4.tcp_keepalive_time = 1800` in sysctl settings on Linux OS, where 1800 should be lower than the firewall idle tcp timeout. This setting should keep the connection in an established state so that the firewall does not disconnect the connection.
+
+2.  On all Message Processors, edit `/opt/apigee/customer/application/message-processor.properties` to add the following property. If the file does not exist, create it.
+
+    <div>
+
+    </div>
+
+    ```
+    conf_system_cassandra.maxconnecttimeinmillis=-1
+    ```
+
+3.  Restart the Message Processor:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service edge-message-processor restart
+    ```
+
+4.  On all Routers, edit `/opt/apigee/customer/application/router.properties` to add the following property. If the file does not exist, create it.
+
+    <div>
+
+    </div>
+
+    ```
+    conf_system_cassandra.maxconnecttimeinmillis=-1
+    ```
+
+5.  Restart the Router:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service edge-router restart
+    ```

@@ -388,7 +388,7 @@ These have no HTTP status because no request ever ran. The old revision keeps se
 5. If the code is absent here, the policy page may not have been fetched. Check
    `research/pages/` and re-run `research/fetch.sh` on the policy's doc path.
 
-Coverage: 195 runtime codes, 116 deployment errors, 33 fault variables, from 294 fetched pages.
+Coverage: 195 runtime codes, 116 deployment errors, 33 fault variables, from 305 fetched pages.
 
 3 runtime code(s) are documented with conflicting HTTP statuses across
 policy pages. They are listed below in full so the conflict stays visible rather

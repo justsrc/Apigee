@@ -1,0 +1,772 @@
+# Provide encrypted password here if you have setup JMX password encryption
+export CASS_JMX_PASSWORD=PASSWORD
+export CASS_JMX_SSL=Y
+```
+
+Create a file in Apigee user’s home directory (`/opt/apigee`).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+$HOME/.cassandra/nodetool-ssl.properties
+```
+
+Edit the file and add the following lines:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+-Djavax.net.ssl.trustStore=<path-to-truststore.node1>
+-Djavax.net.ssl.trustStorePassword=<truststore-password>
+-Dcom.sun.management.jmxremote.registry.ssl=true
+-Djavax.net.ssl.trustStoreType=PKCS12
+```
+
+Make sure the trustore file is readable by Apigee user.
+
+Run the following `apigee-service` command. If it runs without error, your configurations are correct.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+apigee-service apigee-cassandra ring
+```
+
+#### Option 2 (SSL arguments stored in environment variables)
+
+Set the following environment variables:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+export CASS_JMX_USERNAME=ADMIN
+# Provide encrypted password here if you have setup JMX password encryption
+export CASS_JMX_PASSWORD=PASSWORD
+export CASS_JMX_SSL=Y
+# Ensure the truststore file is accessible by Apigee user.
+export CASS_JMX_TRUSTSTORE=<path-to-trustore.node1>
+export CASS_JMX_TRUSTSTORE_PASSWORD=<truststore-password>
+# If you are using a non standard truststore type, export truststore type as well
+# Possible values are JKS, PKCS12, BCFKS
+export CASS_JMX_TRUSTSTORE_TYPE=PKCS12
+```
+
+Run the following `apigee-service` command. If it runs without error, your configurations are correct.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+apigee-service apigee-cassandra ring
+```
+
+#### Option 3 (SSL arguments passed directly to `apigee-service`)
+
+Run any `apigee-service` command like the one below. You don't need to configure any environment variables.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+CASS_JMX_USERNAME=ADMIN CASS_JMX_PASSWORD=PASSWORD CASS_JMX_SSL=Y CASS_JMX_TRUSTSTORE=<path-to-trustore.node1> CASS_JMX_TRUSTSTORE_PASSWORD=<trustore-password> CASS_JMX_TRUSTSTORE_TYPE=PKCS12 /opt/apigee/apigee-service/bin/apigee-service apigee-cassandra ring
+```
+
+Set up nodetool. Nodetool requires JMX parameters to be passed to it. There are two ways you can configure nodetool to run with SSL-enabled JMX, as described in the configuration options below:
+
+- [Configuration Option 1](#config-option1)
+- [Configuration Option 2](#config-option2)
+
+The options differ in the way SSL related configurations are passed to nodetool. In both cases, the user running nodetool should have READ permissions on the truststore file. Choose an appropriate option based on usability and your security practices.
+
+To learn more about nodetool parameters, see the [DataStax documentation](https://docs.datastax.com/en/archived/cassandra/2.1/cassandra/security/secureNodetoolSSL.html).
+
+#### Configuration Option 1
+
+Create a file in the home directory of the user running nodetool.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+$HOME/.cassandra/nodetool-ssl.properties
+```
+
+Add the following lines to the file:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+-Djavax.net.ssl.trustStore=<path-to-truststore.node1>
+-Djavax.net.ssl.trustStorePassword=<truststore-password>
+-Dcom.sun.management.jmxremote.registry.ssl=true
+-Djavax.net.ssl.trustStoreType=PKCS12
+```
+
+The truststore path specified above should be accessible by any user running nodetool.
+
+Run `nodetool` with the `--ssl` option.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+/opt/apigee/apigee-cassandra/bin/nodetool --ssl -u <jmx-user-name> -pw <jmx-user-password> -h localhost ring
+```
+
+#### Configuration option 2
+
+Run `nodetool` as a single command with the extra parameters listed below.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+/opt/apigee/apigee-cassandra/bin/nodetool -Djavax.net.ssl.trustStore=<path-to-truststore.node1> -Djavax.net.ssl.trustStorePassword=<truststore-password> -Dcom.sun.management.jmxremote.registry.ssl=true -Djavax.net.ssl.trustStoreType=PKCS12 -Dssl.enable=true -u <jmx-user-name> -pw <jmx-user-password> -h localhost ring
+```
+
+### Revert SSL configurations
+
+If you need to revert the SSL configurations described in the procedure above, do the following steps:
+
+Stop `apigee-cassandra`by entering
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+apigee-service apigee-cassandra stop
+```
+
+Remove the line `conf_cassandra-env_com.sun.management.jmxremote.ssl=true` from the file `/opt/apigee/customer/application/cassandra.properties`.
+
+Comment out the following lines in `/opt/apigee/apigee-cassandra/source/conf/cassandra-env.sh`
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+# JVM_OPTS="$JVM_OPTS -Djavax.net.ssl.keyStore=/opt/apigee/data/apigee-cassandra/keystore.node0"
+# JVM_OPTS="$JVM_OPTS -Djavax.net.ssl.keyStorePassword=keypass"
+# JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.registry.ssl=true”
+```
+
+Start `apigee-cassandra` by entering
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+apigee-service apigee-cassandra start
+```
+
+Remove the environment variable `CASS_JMX_SSL` if it was set.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+unset CASS_JMX_SSL
+```
+
+Check that `apigee-service` based commands like `ring`, `stop`, `backup`, and so on, are working.
+
+Stop using the `--ssl` switch with nodetool
+
+### Disable JMX authentication for Cassandra
+
+**To disable JMX authentication for Cassandra:**
+
+1.  Edit `/opt/apigee/customer/application/cassandra.properties`.
+
+2.  Remove the following line in the file:
+
+    <div>
+
+    </div>
+
+    ```
+    conf_cassandra-env_com.sun.management.jmxremote.authenticate=true
+    ```
+
+3.  Run configure on Cassandra:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-cassandra configure
+    ```
+
+4.  Restart Cassandra:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-cassandra restart
+    ```
+
+5.  Repeat this process on all other Cassandra nodes.
+
+### Use JConsole: Monitor task statistics
+
+Use JConsole and the following service URL to monitor the JMX attributes (MBeans) offered via JMX:
+
+<div>
+
+</div>
+
+```
+service:jmx:rmi:///jndi/rmi://IP_address:7199/jmxrmi
+```
+
+Where `IP_address` is the IP of the Cassandra server.
+
+### Cassandra JMX statistics
+
+| JMX MBeans | JMX Attributes |
+| --- | --- |
+| ColumnFamilies/apprepo/environments ColumnFamilies/apprepo/organizations ColumnFamilies/apprepo/apiproxy_revisions ColumnFamilies/apprepo/apiproxies ColumnFamilies/audit/audits ColumnFamilies/audit/audits_ref | PendingTasks |
+| MemtableColumnsCount |  |
+| MemtableDataSize |  |
+| ReadCount |  |
+| RecentReadLatencyMicros |  |
+| TotalReadLatencyMicros |  |
+| WriteCount |  |
+| RecentWriteLatencyMicros |  |
+| TotalWriteLatencyMicros |  |
+| TotalDiskSpaceUsed |  |
+| LiveDiskSpaceUsed |  |
+| LiveSSTableCount |  |
+| BloomFilterFalsePositives |  |
+| RecentBloomFilterFalseRatio |  |
+| BloomFilterFalseRatio |  |
+
+### Use nodetool to manage cluster nodes
+
+The nodetool utility is a command line interface for Cassandra that manages cluster nodes. The utility can be found at `/opt/apigee/apigee-cassandra/bin`.
+
+The following calls can be made on all Cassandra cluster nodes:
+
+1.  **General ring info** (also possible for single Cassandra node): Look for the "Up" and "Normal" for all nodes.
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    nodetool [-u username -pw password] -h localhost ring
+    ```
+
+    You only need to pass your username and password if you [enabled JMX authentication for Cassandra](/private-cloud/v4.53.01/how-monitor#cassauthenable).
+
+    The output of the above command looks as shown below:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    Datacenter: dc-1
+    ==========
+    Address            Rack     Status State   Load    Owns    Token
+    192.168.124.201    ra1      Up     Normal  1.67 MB 33,33%  0
+    192.168.124.202    ra1      Up     Normal  1.68 MB 33,33%  5671...5242
+    192.168.124.203    ra1      Up     Normal  1.67 MB 33,33%  1134...0484
+    ```
+
+2.  **General info about nodes** (call per node)
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    nodetool [-u username -pw password]  -h localhost info
+    ```
+
+    The output of the above command looks like the following:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    ID                     : e2e42793-4242-4e82-bcf0-oicu812
+    Gossip active          : true
+    Thrift active          : true
+    Native Transport active: true
+    Load                   : 273.71 KB
+    Generation No          : 1234567890
+    Uptime (seconds)       : 687194
+    Heap Memory (MB)       : 314.62 / 3680.00
+    Off Heap Memory (MB)   : 0.14
+    Data Center            : dc-1
+    Rack                   : ra-1
+    Exceptions             : 0
+    Key Cache              : entries 150, size 13.52 KB, capacity 100 MB, 1520781 hits, 1520923 requests, 1.000 recent hit rate, 14400 save period in seconds
+    Row Cache              : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds
+    Counter Cache          : entries 0, size 0 bytes, capacity 50 MB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+    Token                  : 0
+    ```
+
+3.  **Status of the thrift server** (serving client API)
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    nodetool [-u username -pw password] -h localhost statusthrift
+    ```
+
+    The output of the above command looks like the following:  
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    running
+    ```
+
+4.  **Status of data streaming operations**: Observe traffic for cassandra nodes:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    nodetool [-u username -pw password] -h localhost netstats
+    ```
+
+    The output of the above command looks like the following:  
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    Mode: NORMAL
+    Not sending any streams.
+    Read Repair Statistics:
+    Attempted: 151612
+    Mismatch (Blocking): 0
+    Mismatch (Background): 0
+    Pool Name                    Active   Pending      Completed   Dropped
+    Commands                        n/a         0              0         0
+    Responses                       n/a         0              0       n/a
+    ```
+
+For more information on using the nodetool, see <a href="https://cassandra.apache.org/doc/4.0/cassandra/tools/nodetool/nodetool.html" class="external">About the nodetool utility</a>.
+
+### Cassandra resource
+
+Refer to the following URL: <a href="https://cassandra.apache.org/doc/4.0/cassandra/operating/metrics.html" class="external">Cassandra monitoring</a>.
+
+## Monitoring Apache Qpid Broker-J
+
+You can monitor Qpid Broker-J from the Qpid management console. This section explains how to access the console and use it to perform basic monitoring functions. For more detailed information on using the management console, see <a href="https://qpid.apache.org/releases/qpid-broker-j-8.0.6/book/Java-Broker-Management-Channel-Web-Console.html" class="external">Web Management Console</a> in the Apache Qpid documentation.
+
+**Note:** We recommend you avoid making changes to the broker through the Qpid management console. If you intend to make broker configuration changes, we recommend you manage such changes using Edge properties files (referred to as *code with config*, or CwC) rather than using the console. If you do make broker changes using the management console, we recommend you test your changes on non-production environments before applying them to production. See also [How to configure Edge](/private-cloud/v4.52.01/how-configure-edge).
+
+### Access the management console
+
+The default management console port is 8090. To access the console on this default port, point your web browser to:
+
+<div>
+
+</div>
+
+```
+http://QPID_NODE_IP:8090
+```
+
+**Note:** If port 8090 is not open to access from your browser, you must extend or forward the port to a node with web browser support.
+
+To log in to the console, use the default credentials set by Apigee or the ones set in the Edge configuration file. For details, see [Edge configuration file reference](/private-cloud/v4.52.01/edge-configuration-file-reference).
+
+### Monitor queues and messages
+
+In the left-navigation panel, navigate to **Java-Broker \> virtualhosts \> queues**. Select a queue to view its details in the main part of the UI. In the details view, you can see Queue Attributes and Statistics, including information on messages delivered, enqueued, message rates, and so on.
+
+### View and download log files
+
+In the left-navigation panel, navigate to **Java-Broker \> brokerloggers \> logfile**. In the main UI details view, you can view log file details and download log files.
+
+### Using the Qpid management API
+
+You can use the Apache Qpid Broker-J REST API to automate management tasks and monitor the broker. For details, see the <a href="https://qpid.apache.org/releases/qpid-broker-j-8.0.6/book/Java-Broker-Management-Channel-REST-API.html" class="external">Apache Qpid Broker REST API documentation</a>.
+
+You can also use command line tools to monitor the broker. For example:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "QPID_NODE_IP":"8090"/api/latest/broker -u "USERNAME":"PASSWORD"
+```
+
+### Enable monitoring with SSL for Qpid
+
+To provide additional security for monitoring and management, enable SSL on Qpid’s Management Portal and Qpid's Management APIs. Follow the guidelines below to provide a key and certificate.
+
+Qpid provides an option for a File Keystore, which is enabled in Apigee. This type accepts the standard JKS keystore format understood by Java and Java tools such as **keytool**. It can also accept a PKCS12 keystore, which can be generated using tools like **OpenSSL**.
+
+#### Keystore preparation
+
+For generating keystores, see <a href="https://docs.oracle.com/javase/8/docs/technotes/tools/unix/keytool.html" class="external">Java Keytool Documentation.</a>
+
+For generating PKCS12 keystores, see <a href="https://www.openssl.org/docs/" class="external">OpenSSL Documentation.</a>
+
+**Note:** If you are using Edge for Private Cloud on a FIPS-enabled operating system, you should use a PKCS12 keystore to configure TLS on the Qpid Management Portal. PKCS12 keystores can be created using **OpenSSL** commands.
+
+When you use a PKCS12 keystore, you need to add an additional configuration (in addition to the other standard configurations documented in this article):
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+conf_qpidd_qpid.keystore.keyStoreType=PKCS12
+```
+
+#### After verifying requirements
+
+1.  Place the keystore file in `/opt/apigee/customer/application/apigee-qpidd`.
+
+2.  Ensure the keystore file is readable only by the Apigee user:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    chown apigee:apigee /opt/apigee/customer/application/apigee-qpidd/qpidd.keystore
+      chmod 400 /opt/apigee/customer/application/apigee-qpidd/qpidd.keystore
+    ```
+
+#### Enable SSL in Qpid
+
+Perform the steps below on one Qpid node at a time:
+
+Open the file `/opt/apigee/customer/application/qpidd.properties` and add the following lines:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+
+conf_qpidd_qpid_management.https.enabled=true
+conf_qpidd_qpid.keystore.storeUrl=/opt/apigee/customer/application/apigee-qpidd/qpidd.keystore
+conf_qpidd_qpid.keystore.password=keystore-password
+conf_qpidd_qpid.keystore.certificateAlias=certificate-alias
+## If you are using a PKCS12 keystore, specify the keystore type
+conf_qpidd_qpid.keystore.keyStoreType=PKCS12
+```
+
+1.  Change the owner of the file to apigee:apigee:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    chown apigee:apigee /opt/apigee/customer/application/qpidd.properties
+    ```
+
+2.  Configure Qpidd:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-qpidd configure
+    ```
+
+3.  Restart Qpidd:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-qpidd restart
+    ```
+
+4.  Check the status with wait_for_ready:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-qpidd wait_for_ready
+    ```
+
+**Note:** Repeat these steps on each QPID node one at a time to ensure proper configuration and synchronization.
+
+#### Revert SSL configuration
+
+Remove or comment out the properties from the file `/opt/apigee/customer/application/qpidd.properties`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+conf_qpidd_qpid_management.https.enabled=true
+conf_qpidd_qpid.keystore.storeUrl=/opt/apigee/customer/application/apigee-qpidd/keystore
+```
+
+1.  Configure Qpidd:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-qpidd configure
+    ```
+
+2.  Restart Qpidd:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-qpidd restart
+    ```
+
+3.  Check the status with wait_for_ready:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    apigee-service apigee-qpidd wait_for_ready
+    ```
+
+## Apache ZooKeeper
+
+### Check ZooKeeper status
+
+1.  Ensure the ZooKeeper process is running. ZooKeeper writes a PID file to `opt/apigee/var/run/apigee-zookeeper/apigee-zookeeper.pid`.
+
+2.  Test ZooKeeper ports to ensure that you can establish a TCP connection to ports 2181 and 3888 on every ZooKeeper server.
+
+3.  Ensure that you can read values from the ZooKeeper database. Connect using a ZooKeeper client library (or `/opt/apigee/apigee-zookeeper/bin/zkCli.sh`) and read a value from the database.
+
+4.  Check the status:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-zookeeper status
+    ```
+
+### Use ZooKeeper four-letter words
+
+ZooKeeper can be monitored via a small set of commands (four-letter words) that are sent to the port 2181 using netcat (nc) or telnet.
+
+For more info on ZooKeeper commands, see: <a href="https://zookeeper.apache.org/doc/r3.1.2/zookeeperAdmin.html#sc_zkCommands" class="external">Apache ZooKeeper command reference</a>.
+
+For example:
+
+- `srvr`: Lists full details for the server.
+- `stat`: Lists brief details for the server and connected clients.
+
+The following commands can be issued to the ZooKeeper port:
+
+1.  Run the four-letter command ruok to test if server is running in a non-error state. A successful response returns "imok".
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    echo ruok | nc host 2181
+    ```
+
+    Returns:
+
+    <div>
+
+    </div>
+
+    ```
+    imok
+    ```
+
+2.  Run the four-letter command, `stat`, to list server performance and connected clients statistics:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    echo stat | nc host 2181
+    ```
+
+    Returns:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    Zookeeper version: 3.4.5-1392090, built on 09/30/2012 17:52 GMT
+    Clients:
+    /0:0:0:0:0:0:0:1:33467[0](queued=0,recved=1,sent=0)
+    /192.168.124.201:42388[1](queued=0,recved=8433,sent=8433)
+    /192.168.124.202:42185[1](queued=0,recved=1339,sent=1347)
+    /192.168.124.204:39296[1](queued=0,recved=7688,sent=7692)
+    Latency min/avg/max: 0/0/128
+    Received: 26144
+    Sent: 26160
+    Connections: 4
+    Outstanding: 0
+    Zxid: 0x2000002c2
+    Mode: follower
+    Node count: 283
+    ```
+
+    **Note**: It is sometimes important to see whether a ZooKeeper is in Mode: leader, follower or observer.
+
+3.  If netcat (nc) is not available, you can use the python as an alternative. Create a file named `zookeeper.py` that contains the following:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    import time, socket,
+    sys c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    c.connect((sys.argv[1], 2181))
+    c.send(sys.argv[2])
+    time.sleep(0.1)
+    print c.recv(512)
+    ```
+
+    Now run the following python lines:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    python zookeeper.py 192.168.124.201 ruok
+    python zookeeper.py 192.168.124.201 stat
+    ```
+
+## LDAP level test
+
+You can monitor SymasLDAP to see whether the specific requests are served properly. In other words, check for a specific search that returns the right result.
+
+1.  Use `ldapsearch` (`yum install symasldap-clients`) to query the entry of the system admin. This entry is used to authenticate all API calls.
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/symas/bin/ldapsearch -b "uid=admin,ou=users,ou=global,dc=apigee,dc=com" -x -W -D "cn=manager,dc=apigee,dc=com" -H ldap://localhost:10389 -LLL
+    ```
+
+    You are then prompted for the LDAP admin password:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    Enter LDAP Password:
+    ```
+
+    After entering the password, you see a response in the form:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    dn:
+    uid=admin,ou=users,ou=global,dc=apigee,dc=com
+    objectClass: organizationalPerson
+    objectClass: person
+    objectClass: inetOrgPerson
+    objectClass: top
+    uid: admin
+    cn: admin
+    sn: admin
+    userPassword:: e1NTSEF9bS9xbS9RbVNXSFFtUWVsU1F0c3BGL3BQMkhObFp2eDFKUytmZVE9PQ=
+     =
+    mail: opdk@google.com
+    ```
+
+2.  Check whether Management Server is still connected to LDAP with the following command:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    curl -u userEMail:password http://localhost:8080/v1/users/ADMIN
+    ```
+
+    Returns:
+
+    <div>
+
+    </div>
+
+    ``` devsite-click-to-copy
+    {
+      "emailId" : ADMIN,
+      "firstName" : "admin",
+      "lastName" : "admin"
+    }
+    ```
+
+You can also monitor the SymasLDAP caches, which help in reducing the number of disk accesses and hence improve the performance of the system. Monitoring and then tuning the cache size in the SymasLDAP server can heavily impact the performance of the directory server. You can view the log files (`opt/apigee/var/log`) to obtain information about cache.

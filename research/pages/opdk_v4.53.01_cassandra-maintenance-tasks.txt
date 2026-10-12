@@ -1,0 +1,112 @@
+This section describes periodic maintenance tasks for Cassandra.
+
+## Anti-entropy maintenance
+
+The Apache Cassandra ring nodes require periodic maintenance to ensure consistency across all nodes. To perform this maintenance, use the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+apigee-service apigee-cassandra apigee_repair -pr
+```
+
+Apigee recommends the following when running this command:
+
+- Run on every Cassandra node (across all regions or data centers).
+
+- Run on one node at a time, to ensure consistency across all nodes in the ring. Running repair jobs on multiple nodes at the same time can impair the health of Cassandra.
+
+  To check if a repair job on a node has completed successfully, look in the nodes's `system.log` file for an entry with the latest repair session's UUID and the phrase "session completed successfully." Here is a sample log entry:
+
+  <div>
+
+  </div>
+
+  ```
+
+  INFO [AntiEntropySessions:1] 2015-03-01 10:02:56,245 RepairSession.java (line 282) [repair #2e7009b0-c03d-11e4-9012-99a64119c9d8] session completed successfully"
+  Ref: https://support.datastax.com/hc/en-us/articles/204226329-How-to-check-if-a-scheduled-nodetool-repair-ran-successfully
+  ```
+
+- Run during periods of relatively low workload (the tool imposes a significant load on the system).
+
+- Run at least every seven days in order to eliminate problems related to Cassandra's "forgotten deletes".
+
+- Run on different nodes on different days, or schedule it so that there are several hours between running it on each node.
+
+- Use the `-pr` option (partitioner range) to specify the primary partitioner range of the node only.
+
+If you [enabled JMX authentication for Cassandra](/private-cloud/v4.53.01/how-monitor#cassauthenable), you must include the username and password when you invoke `nodetool`. For example:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+apigee-service apigee-cassandra apigee_repair -u username -pw password -pr
+```
+
+You can also run the following command to check the supported options of `apigee_repair:`
+
+<div>
+
+</div>
+
+``` devsite-terminal
+apigee-service apigee-cassandra apigee_repair -h
+```
+
+**Note:** `apigee_repair` is a wrapper around Cassandra's nodetool repair, which performs additional checks before performing Cassandra's repair.
+
+For more information, see the following resources:
+
+- <a href="https://docs.datastax.com/en/archived/cassandra/3.0/cassandra/dml/dmlAboutDeletes.html" class="external">Forgotten deletes</a>
+- <a href="https://docs.datastax.com/en/archived/cassandra/3.0/cassandra/dml/dmlDataConsistencyTOC.html" class="external">Data consistency</a>
+- <a href="https://docs.datastax.com/en/archived/cassandra/3.0/cassandra/tools/toolsRepair.html" class="external">nodetool repair</a>
+
+**NOTE:** Apigee does not recommend adding, moving or removing Cassandra nodes without contacting [Apigee Edge Support](/api-platform/troubleshoot/support). The Apigee system tracks Cassandra nodes using their IP address, and performing ring maintenance without performing corresponding updates on the Apigee environment metadata will cause undesirable results.
+
+## Log file maintenance
+
+Cassandra logs are stored in the `/opt/apigee/var/log/apigee-cassandra` directory on each node. By default, a maximum of 50 log files, each with a maximum size of 20 MB, can be created; once this limit is reached older logs are deleted when newer logs are created.
+
+If you should find that Cassandra log files are taking up excessive space, you can modify the amount of space allocated for log files by editing the log4j settings.
+
+1.  Edit `/opt/apigee/customer/application/cassandra.properties` to set the following properties. If that file does not exist, create it:
+
+    <div>
+
+    </div>
+
+    ```
+    conf_logback_maxfilesize=20MB
+    # max file size
+    conf_logback_maxbackupindex=50 # max open files
+    ```
+
+2.  Restart Cassandra by using the following command:
+
+    <div>
+
+    </div>
+
+    ``` devsite-terminal
+    /opt/apigee/apigee-service/bin/apigee-service apigee-cassandra restart
+    ```
+
+## Disk space maintenance
+
+You should monitor Cassandra disk utilization regularly to ensure at least 50 percent of each disk is free. If disk utilization climbs above 50 percent, we recommend that you add more disk space to reduce the percentage that is in use.
+
+Cassandra automatically performs the following operations to reduce its own disk utilization:
+
+- Authentication token deletion when tokens expire. However, it may take a couple of weeks to free up the disk space the tokens were using, depending on your configuration. If automatic deletion is not adequate to maintain sufficient disk space, contact support to learn about manually deleting tokens to recover space.
+  **Note:** Manual deletion will delete *all* tokens, after which all clients will need to re-authenticate.
+
+- Note on data compaction: Starting with Edge for Private Cloud 4.51.00, new installations of Apigee Cassandra will create keyspaces with the [Leveled Compaction Strategy](https://cassandra.apache.org/doc/latest/operating/compaction/lcs.html#lcs).
+
+  Installations of older versions of Edge for Private Cloud that have been upgraded to Private Cloud 4.51.00 will continue to retain the prior compaction strategy. If the existing compaction strategy is SizeTieredCompactionStrategy, we recommend changing to LeveledCompactionStrategy, which provides better disk utilization.
+
+**Note:** When Cassandra performs data compactions, it can take a considerable amount of CPU cycles and memory. But resource utilization should return to normal once compactions are complete. You can run the `'Nodetool compactionstats'` command on each node to check if compaction is running. The output of `compactionstats` informs you if there are pending compactions to be executed and the estimated time for completion.

@@ -1,0 +1,141 @@
+## Stop/start order
+
+The order of stopping and starting the subsystems is important. Start and stop scripts are provided that take care of that for you for Edge components running on the same node.
+
+### Stop order
+
+If you install Edge on multiple nodes, then you should stop Edge components on those nodes in the following *stop order*:
+
+1.  Management Server (`edge-management-server`)
+2.  Message Processor (`edge-message-processor`)
+3.  Postgres Server (`edge-postgres-server`)
+4.  Qpid Server (`edge-qpid-server`)
+5.  Router (`edge-router`)
+6.  Edge UI: `edge-ui` (classic) or `edge-management-ui`(new)
+7.  Cassandra (`apigee-cassandra`)
+8.  SymasLDAP (`apigee-openldap`)
+9.  Apigee SSO (`apigee-sso`)
+10. PostgreSQL database (`apigee-postgresql`)
+11. Qpidd (`apigee-qpidd`)
+12. ZooKeeper (`apigee-zookeeper`)
+
+### Start order
+
+If you install Edge on multiple nodes, then you should start Edge components on those nodes in the following *start order*:
+
+1.  Cassandra (`apigee-cassandra`)
+2.  SymasLDAP (`apigee-openldap`)
+3.  PostgreSQL database (`apigee-postgresql`)
+4.  Qpidd (`apigee-qpidd`)
+5.  Edge SSO (`apigee-sso`)
+6.  ZooKeeper (`apigee-zookeeper`)
+7.  Management Server (`edge-management-server`)
+8.  Message Processor (`edge-message-processor`)
+9.  Postgres Server (`edge-postgres-server`)
+10. Qpid Server (`edge-qpid-server`)
+11. Router (`edge-router`)
+12. Edge UI: `edge-ui` (classic) or `edge-management-ui`(new)
+
+## Start/stop/check all components
+
+The following scripts detect the Apigee components configured to run on the system on which the script is executed, and will start or stop only those components in the correct order for that node.
+
+- To stop all Apigee components:
+
+  <div>
+
+  </div>
+
+  ``` devsite-terminal
+  /opt/apigee/apigee-service/bin/apigee-all stop
+  ```
+
+- To start all Apigee components:
+
+  <div>
+
+  </div>
+
+  ``` devsite-terminal
+  /opt/apigee/apigee-service/bin/apigee-all start
+  ```
+
+- To restart all Apigee components:
+
+  <div>
+
+  </div>
+
+  ``` devsite-terminal
+  /opt/apigee/apigee-service/bin/apigee-all restart
+  ```
+
+- To check which components are running:
+
+  <div>
+
+  </div>
+
+  ``` devsite-terminal
+  /opt/apigee/apigee-service/bin/apigee-all status
+  ```
+
+## Start/stop/restart individual components
+
+You can use the `apigee-service` tool to start/stop/restart or check the status of an individual Apigee component on any specific server.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service component_name [start|stop|restart|status]
+```
+
+Where `component_name` identifies the component. Possible values of `component_name` include (in alphabetical order):
+
+- `apigee-cassandra` (Cassandra)
+- `apigee-openldap` (OpenLDAP)
+- `apigee-postgresql` (PostgreSQL database)
+- `apigee-qpidd` (Qpidd)
+- `apigee-sso` (Edge SSO)
+- `apigee-zookeeper` (ZooKeeper)
+- `edge-management-server` (Management Server)
+- `edge-management-ui` (new Edge UI)
+- `edge-message-processor` (Message Processor)
+- `edge-postgres-server` (Postgres Server)
+- `edge-qpid-server` (Qpid Server)
+- `edge-router` (Edge Router)
+- `edge-ui` (Classic UI)
+
+For example, to start, stop, or restart the Management Server, run the following commands:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service edge-management-server start
+/opt/apigee/apigee-service/bin/apigee-service edge-management-server stop
+/opt/apigee/apigee-service/bin/apigee-service edge-management-server restart
+```
+
+You can also check the status of an individual Apigee component by using the following command:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service component_name status
+```
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+/opt/apigee/apigee-service/bin/apigee-service edge-management-server status
+```
