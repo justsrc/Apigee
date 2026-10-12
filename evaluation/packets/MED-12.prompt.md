@@ -14,7 +14,7 @@ Rules for this exercise:
 
 ## Initial Support Ticket
 > Our enrichment callout started timing out for about 1% of requests. The enrichment
-> service is fast. We raised its timeout and it did not help.
+> service is fast. We raised the timeout on the enrichment service and it did not help.
 
 ## Initial Evidence
 A ServiceCallout policy with a configured timeout. Roughly 1% of requests return 500. The

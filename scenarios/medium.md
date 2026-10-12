@@ -1394,7 +1394,7 @@ which is the opposite of what the evidence supports.
 #### Initial support ticket
 
 > Our enrichment callout started timing out for about 1% of requests. The enrichment
-> service is fast. We raised its timeout and it did not help.
+> service is fast. We raised the timeout on the enrichment service and it did not help.
 
 #### Initial evidence
 
@@ -1420,10 +1420,13 @@ ServiceCallout hits its timeout, an HTTP 500 is returned, the policy fails, and 
 into an error state. The upstream's p95 being healthy did not rule out a timeout, because
 timeouts are tail-sensitive and p95 hides the tail entirely.
 
-The status is what separates this from a target timeout. A target read or write timeout
-surfaces as HTTP 504, not 500. Seeing 500 is itself evidence that the callout's own timeout
-is the failing one, and an answer that maps callout timeouts to 504 has the mechanism
-backwards.
+The status narrows the search to the callout, it does not prove which element inside the
+callout failed. A callout timeout returns HTTP 500, but so does
+`steps.servicecallout.ExecutionFailed` when the target itself returns an error status, and
+that error carries the same 500. The trace is what separates the two: the step failed at its
+configured `<Timeout>`, not on a response the target returned. A target read or write timeout
+is a different shape again, surfacing as HTTP 504, and an answer that maps callout timeouts to
+504 has the mechanism backwards.
 
 Raising the enrichment service's timeout, as they did, was addressing a different timeout
 that was not the failing one.
@@ -1453,11 +1456,14 @@ conditions where latency is already the problem.
 
 Looking at the enrichment service's dashboard averages rather than its tail.
 
+Concluding from the 500 alone that the callout `<Timeout>` fired. The same status covers a
+target that returned an error, so the trace is the evidence, not the status code.
+
 #### Evaluation rubric
 
 | Dimension | 0 | 2 | 4 |
 | --- | --- | --- | --- |
-| Technical correctness | Raises a timeout blindly | Identifies callout timeout | Names which timeout fires, why p95 misled, and the 500 versus 504 split |
+| Technical correctness | Raises a timeout blindly | Identifies callout timeout | Names which timeout fires from the trace, why p95 misled, that 500 narrows to the callout without proving the timeout, and 504 for the target case |
 | Diagnostic method | Trusts averages | Reads trace | Reads the failing step in the trace and the status it returned |
 | Quality of next step | Raises timeout | Suggests fault flow | Offers degradation with a budget |
 | Verification | None | Retests | Tests tail behavior explicitly |
