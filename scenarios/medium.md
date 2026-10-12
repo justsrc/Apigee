@@ -2306,8 +2306,8 @@ runtime restart, which does not address scheduling.
 - Primary topic: timeouts and LoadBalancer targets
 - Secondary topics: deployment state, hybrid runtime pods, latency
 - Product: hybrid
-- Origin: documented (official known issue 471125841, affecting hybrid 1.14.x and 1.15.x,
-  FIXED in hybrid 1.16.x)
+- Origin: reported real-world case (official known issue 471125841, affecting hybrid 1.14.x
+  and 1.15.x, FIXED in hybrid 1.16.x)
 - Versions: checked 2026-10-11
 - Evaluation objectives: two competing wrong answers dominate here, "the deployment failed" and "the
   backend ignores the timeout". Both are wrong. The agent must notice that the condition depends on
@@ -2322,15 +2322,19 @@ runtime restart, which does not address scheduling.
 
 #### Initial evidence
 
-The TargetEndpoint uses a `<LoadBalancer>` with more than one target server. Deployment succeeded.
-Behaviour is inconsistent across requests. The upstream service itself is healthy and responds
-within 4 seconds.
+The deployment reported success. Behaviour is inconsistent across requests. The upstream
+service itself is healthy and responds within 4 seconds. No proxy configuration is included.
 
 #### Expected investigation
 
 The agent should separate the three states that "the deploy succeeded" collapses: the revision was
 saved, the runtime accepted the contract, and each Message Processor applied the new value. In
 hybrid this is directly observable in the pod log via the contract version lines.
+
+The ticket carries no proxy configuration, so the turn-1 answer is bounded by that. The right
+move is to name what would settle it and ask for the TargetEndpoint, then read the register
+entry against the reported version once the configuration is in hand. Naming the specific
+documented defect before seeing the TargetEndpoint is a guess, not a diagnosis.
 
 #### Diagnostic evidence
 

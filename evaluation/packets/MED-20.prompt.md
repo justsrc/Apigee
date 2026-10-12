@@ -18,6 +18,5 @@ Rules for this exercise:
 > The deployment reported success. We are on hybrid 1.15.5.
 
 ## Initial Evidence
-The TargetEndpoint uses a `<LoadBalancer>` with more than one target server. Deployment succeeded.
-Behaviour is inconsistent across requests. The upstream service itself is healthy and responds
-within 4 seconds.
+The deployment reported success. Behaviour is inconsistent across requests. The upstream
+service itself is healthy and responds within 4 seconds. No proxy configuration is included.
