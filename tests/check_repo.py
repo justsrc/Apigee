@@ -633,6 +633,36 @@ def check_generated_references(root: Path, r: Results) -> None:
         r.ok("generated reference files carry no raw HTML or escaped angle brackets")
 
 
+def check_reference_discovery(root: Path, r: Results) -> None:
+    """Every reference file must be named in its skill's SKILL.md.
+
+    A reference file nobody is told about is never loaded, so its content may as well
+    not exist. The core skill carried policy-mechanics.md while its reference table
+    listed five other files and omitted that one, which no script noticed until now.
+    """
+    skills_dir = root / SKILLS_DIR
+    if not skills_dir.is_dir():
+        return
+
+    orphans: list[str] = []
+    total = 0
+    for d in sorted(p for p in skills_dir.iterdir() if p.is_dir()):
+        refs = d / "references"
+        skill_md = d / "SKILL.md"
+        if not refs.is_dir() or not skill_md.is_file():
+            continue
+        body = read(skill_md)
+        for f in sorted(refs.glob("*.md")):
+            total += 1
+            if f.name not in body:
+                orphans.append(f"{d.name}/references/{f.name}")
+
+    for o in orphans:
+        r.fail(f"reference file is not named in its SKILL.md: {o}")
+    if total and not orphans:
+        r.ok(f"all {total} reference files are named in their SKILL.md")
+
+
 def check_unslop_scope(r: Results) -> None:
     """unslop is a writing skill, not a diagnosis skill. Record that explicitly.
 
@@ -671,6 +701,7 @@ def main() -> int:
     check_packets(root, r)
     check_critical_failure_completeness(root, r)
     check_generated_references(root, r)
+    check_reference_discovery(root, r)
     check_unslop_scope(r)
 
     def dump(title: str, items: list[str]) -> None:
