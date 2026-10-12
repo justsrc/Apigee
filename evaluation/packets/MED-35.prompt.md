@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-35: 502 Bad Gateway at exactly two minutes, with the backend reporting success four minutes later
+# Support case MED-35
 
 ## Initial Support Ticket
 > We have an Apigee proxy in front of a Node.js 12 / Express backend. If a request takes

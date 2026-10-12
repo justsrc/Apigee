@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-15: A Java callout fails only on some requests
+# Support case MED-15
 
 The customer has replied with more information.
 

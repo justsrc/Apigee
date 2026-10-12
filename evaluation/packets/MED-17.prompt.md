@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-17: The deploy tool says "Deployment failed" and the Management API says the deployment worked
+# Support case MED-17
 
 ## Initial Support Ticket
 > Our CI deploys shared flows and proxies with the Apigee deploy Maven plugin. Intermittently the

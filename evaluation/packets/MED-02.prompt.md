@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-02: Works for some users, 404s for others, same deployment
+# Support case MED-02
 
 ## Initial Support Ticket
 > We deployed revision 12 about ten minutes ago. Our own tests pass. A colleague in

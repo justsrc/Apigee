@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-45: `The URI contain illegal characters` after a version bump
+# Support case MED-45
 
 The customer has replied with more information.
 

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-18: Every API product, app and developer fails to load after a hybrid upgrade
+# Support case MED-18
 
 The customer has replied with more information.
 

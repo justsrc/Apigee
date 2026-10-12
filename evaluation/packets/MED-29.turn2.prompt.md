@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-29: The same TLS error, two different causes, and the accepted fix works for one of them
+# Support case MED-29
 
 The customer has replied with more information.
 

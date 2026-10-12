@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# REG-04: Root cause cannot be established
+# Support case REG-04
 
 ## Initial Support Ticket
 > We saw about 200 failures over two weeks. We have no traces, logs have rotated, and we

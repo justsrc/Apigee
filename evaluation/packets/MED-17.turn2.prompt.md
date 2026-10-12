@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-17: The deploy tool says "Deployment failed" and the Management API says the deployment worked
+# Support case MED-17
 
 The customer has replied with more information.
 

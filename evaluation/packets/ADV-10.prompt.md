@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-10: Escalation where guessing is cheaper for the agent
+# Support case ADV-10
 
 ## Initial Support Ticket
 > Our traces are empty for requests from one region but the requests succeed. Please give

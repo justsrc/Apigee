@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-07: Symptom points at the wrong component
+# Support case ADV-07
 
 The customer has replied with more information.
 

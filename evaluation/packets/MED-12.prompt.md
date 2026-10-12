@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-12: Service callout times out and takes the request with it
+# Support case MED-12
 
 ## Initial Support Ticket
 > Our enrichment callout started timing out for about 1% of requests. The enrichment

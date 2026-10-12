@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-05: Realistic premise, nonexistent policy element
+# Support case ADV-05
 
 ## Initial Support Ticket
 > Our ResponseCache policy has `<invalidateOnHeaderChange>true</invalidateOnHeaderChange>`

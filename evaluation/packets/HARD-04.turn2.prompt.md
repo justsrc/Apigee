@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-04: Latency is up and everyone has a theory
+# Support case HARD-04
 
 The customer has replied with more information.
 

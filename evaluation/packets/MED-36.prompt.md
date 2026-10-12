@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-36: A JavaScript policy times out intermittently, and raising the limit is the wrong fix
+# Support case MED-36
 
 ## Initial Support Ticket
 > We have two proxies. Proxy B has a JavaScript policy that calls proxy A over HTTP and

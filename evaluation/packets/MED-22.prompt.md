@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-22: A routine cert-manager upgrade plants a future outage
+# Support case MED-22
 
 ## Initial Support Ticket
 > We upgraded cert-manager on our hybrid clusters last week as part of routine maintenance. No

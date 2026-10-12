@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-26: A deployment fails with a Java callout error, and the build tool corrupted the artifact
+# Support case MED-26
 
 ## Initial Support Ticket
 > Our Maven deploy fails. The UI says the revision is deployed but traffic cannot flow. Support
@@ -22,4 +22,4 @@ Rules for this exercise:
 Three messages for one deployment. The UI shows `Error in deployment for environment dev. The
 revision is deployed, but traffic cannot flow`. Maven reports `Deployment failed: Bundle did not
 activate within the expected time. Please check deployment status manually before trying again`.
-The deployments API, queried directly, reports `steps.javacallout.JavaCalloutInstantiationFailed`.
+The deployments API, queried directly, reports `JavaCalloutInstantiationFailed`.

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-07: Deployment succeeds on hybrid but the runtime never applies it
+# Support case MED-07
 
 ## Initial Support Ticket
 > We created a new environment in our hybrid install and deployed our proxy to it. The

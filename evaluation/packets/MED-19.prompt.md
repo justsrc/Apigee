@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-19: Runtime logs stopped after a successful upgrade
+# Support case MED-19
 
 ## Initial Support Ticket
 > We upgraded hybrid to 1.16.8 yesterday and we now have no Apigee runtime logs at all. Cloud

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-01: Deployed successfully, every request returns 404
+# Support case MED-01
 
 The customer has replied with more information.
 

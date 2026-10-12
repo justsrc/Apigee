@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-05: Key value map updates are not visible everywhere
+# Support case MED-05
 
 The customer has replied with more information.
 

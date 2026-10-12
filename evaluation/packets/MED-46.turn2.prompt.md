@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-46: The 502 that means your certificate is bad
+# Support case MED-46
 
 The customer has replied with more information.
 

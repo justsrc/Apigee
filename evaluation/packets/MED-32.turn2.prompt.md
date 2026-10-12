@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-32: Six requests admitted where three per minute is configured
+# Support case MED-32
 
 The customer has replied with more information.
 

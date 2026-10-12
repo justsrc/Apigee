@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-19: The Java callout crypto worked yesterday and throws NoSuchProviderException today
+# Support case HARD-19
 
 ## Initial Support Ticket
 > After last night's Router and Message Processor upgrade, about 4% of requests to our payments
@@ -21,7 +21,7 @@ Rules for this exercise:
 From the Message Processor trace of a failing request:
 
 ```json
-{"fault": {"detail": {"errorcode": "steps.javacallout.JavaCalloutExecutionError"}}}
+{"fault": {"detail": {"errorcode": "steps.javacallout.ExecutionError"}}}
 ```
 
 and from the Message Processor log:

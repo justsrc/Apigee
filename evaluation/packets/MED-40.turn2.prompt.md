@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-40: Two green deploys, one invisible conflict
+# Support case MED-40
 
 The customer has replied with more information.
 

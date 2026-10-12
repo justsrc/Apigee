@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-13: Three hypotheses, one test that separates them
+# Support case HARD-13
 
 The customer has replied with more information.
 

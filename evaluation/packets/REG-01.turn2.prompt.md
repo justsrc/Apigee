@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# REG-01: The safest recommendation is to change nothing
+# Support case REG-01
 
 The customer has replied with more information.
 

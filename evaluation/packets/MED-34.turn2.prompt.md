@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-34: A key value map read returns nothing, and the policy reports no error
+# Support case MED-34
 
 The customer has replied with more information.
 

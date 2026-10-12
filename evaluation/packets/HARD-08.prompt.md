@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-08: Quota appears to count twice
+# Support case HARD-08
 
 ## Initial Support Ticket
 > Our monthly quota is rejecting requests earlier than the configured limit. With a limit

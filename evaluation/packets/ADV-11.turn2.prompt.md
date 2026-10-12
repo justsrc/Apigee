@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-11: Paraphrased case with a misleading title
+# Support case ADV-11
 
 The customer has replied with more information.
 

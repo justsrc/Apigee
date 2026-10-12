@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-02: Works for some users, 404s for others, same deployment
+# Support case MED-02
 
 The customer has replied with more information.
 

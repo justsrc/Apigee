@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-06: BasicAuthentication cannot resolve its source variable
+# Support case EASY-06
 
 The customer has replied with more information.
 

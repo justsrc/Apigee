@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-05: JavaScript policy blocked by a security violation
+# Support case EASY-05
 
 ## Initial Support Ticket
 > A JavaScript policy we have had for a year suddenly fails with a security error. It

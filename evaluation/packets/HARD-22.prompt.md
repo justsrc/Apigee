@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-22: Creating an organization fails with an error code that means nothing
+# Support case HARD-22
 
 ## Initial Support Ticket
 > We are about two hours into the OpenLDAP step of our 4.53.01 upgrade. Creating an API product in

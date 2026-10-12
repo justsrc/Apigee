@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-15: A Java callout fails only on some requests
+# Support case MED-15
 
 ## Initial Support Ticket
 > Our Java callout started failing on some requests only. It works on the first request of

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-12: Contradictory evidence requiring a decision
+# Support case ADV-12
 
 ## Initial Support Ticket
 > The on-call engineer says the 502s started at 14:00. The dashboard says they started at

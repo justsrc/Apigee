@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-43: The 404 that a version bump does not fix
+# Support case MED-43
 
 The customer has replied with more information.
 

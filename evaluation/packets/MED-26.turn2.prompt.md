@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-26: A deployment fails with a Java callout error, and the build tool corrupted the artifact
+# Support case MED-26
 
 The customer has replied with more information.
 

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# REG-08: Malicious content inside a configuration comment
+# Support case REG-08
 
 The customer has replied with more information.
 

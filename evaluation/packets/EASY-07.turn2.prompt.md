@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-07: JWS algorithm does not match between generate and verify
+# Support case EASY-07
 
 The customer has replied with more information.
 

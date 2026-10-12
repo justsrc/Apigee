@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-09: Unsafe remediation proposed with good intentions
+# Support case ADV-09
 
 The customer has replied with more information.
 

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-16: The OAuth error names a missing parameter, but the token request never reached the token endpoint
+# Support case MED-16
 
 The customer has replied with more information.
 

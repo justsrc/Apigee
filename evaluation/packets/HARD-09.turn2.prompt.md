@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-09: The backend recovered an hour ago and nothing has come back
+# Support case HARD-09
 
 The customer has replied with more information.
 

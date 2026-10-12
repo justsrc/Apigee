@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-40: Two green deploys, one invisible conflict
+# Support case MED-40
 
 ## Initial Support Ticket
 > We deployed `/v1/orders` to `prod` last month and it works. This week we deployed `/v1/orders`

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-01: The ticket does not say which product it is
+# Support case HARD-01
 
 The customer has replied with more information.
 

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-08: InvalidMessageWeight does not tell you which policy failed
+# Support case EASY-08
 
 The customer has replied with more information.
 

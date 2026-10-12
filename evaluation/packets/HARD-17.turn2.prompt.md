@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-17: The password is right, the error says it is wrong
+# Support case HARD-17
 
 The customer has replied with more information.
 

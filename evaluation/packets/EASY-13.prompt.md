@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-13: JWKS verification fails because the token has no key id
+# Support case EASY-13
 
 ## Initial Support Ticket
 > Our identity provider rotated keys last week. Most of our traffic is fine but some

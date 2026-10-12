@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-03: Product confusion with a confident wrong answer
+# Support case ADV-03
 
 The customer has replied with more information.
 

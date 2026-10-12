@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-12: Nothing changed, but the numbers moved
+# Support case HARD-12
 
 ## Initial Support Ticket
 > Error rate on the checkout API went from 0.1% to 4% this morning. No deploys for three

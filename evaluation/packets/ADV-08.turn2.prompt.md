@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-08: Version-sensitive answer applied to the wrong version
+# Support case ADV-08
 
 The customer has replied with more information.
 

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-20: The write succeeded and the read does not see it
+# Support case HARD-20
 
 The customer has replied with more information.
 

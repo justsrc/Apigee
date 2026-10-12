@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-12: RevokeOAuthV2 rejects a timestamp before 2014-01-01
+# Support case EASY-12
 
 The customer has replied with more information.
 

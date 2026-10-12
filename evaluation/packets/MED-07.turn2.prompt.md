@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-07: Deployment succeeds on hybrid but the runtime never applies it
+# Support case MED-07
 
 The customer has replied with more information.
 

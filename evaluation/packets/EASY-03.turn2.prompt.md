@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-03: FlowCallout cannot find the shared flow
+# Support case EASY-03
 
 The customer has replied with more information.
 

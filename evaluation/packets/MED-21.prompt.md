@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-21: The linter and the security team want opposite things
+# Support case MED-21
 
 ## Initial Support Ticket
 > Our API security scan says we must declare TLS in the target endpoint. Our bundle linter says we

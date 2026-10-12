@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-32: Six requests admitted where three per minute is configured
+# Support case MED-32
 
 ## Initial Support Ticket
 > We have an Apigee X organisation with six message processors. A SpikeArrest policy on our

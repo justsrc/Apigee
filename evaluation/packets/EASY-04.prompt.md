@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-04: AccessControl blocks a corporate IP range
+# Support case EASY-04
 
 ## Initial Support Ticket
 > Since this morning our office gets a 403 from the orders API. Nothing changed in the

@@ -38,22 +38,16 @@ sometimes misses, which bounds it at the scale of inter-zone replication lag, bu
 is supplied.
 
 ## Correct Remediation
-Session affinity is the documented mitigation, and the Knowledge Hub post says so. Bind the client
-to a zone:
+Session affinity is the documented mitigation, and the Knowledge Hub post says so. Do this in the
+load balancer in front of the Routers, not in a proxy policy: a proxy's `<LoadBalancer><Server>`
+element names a TargetServer, which is a backend the proxy itself calls, so listing Message
+Processor hostnames there would configure Apigee to call the Message Processors as if they were
+an API backend. What belongs in front of the Routers is ordinary load-balancer session
+affinity, keyed so that a client's writes and subsequent reads land on Message Processors in the
+same zone.
 
-```xml
-<LoadBalancer>
-  <Algorithm>RoundRobin</Algorithm>
-  <Server name="mp-az1-1" />
-  <Server name="mp-az1-2" />
-  <Server name="mp-az2-1" />
-  <Server name="mp-az2-2" />
-</LoadBalancer>
-```
-
-with affinity configured on the load balancer in front of the Routers, so that a client's writes
-and subsequent reads are handled by Message Processors in the same zone. Documented as the
-ordinary expectation: "Typically connection reuse and session affinity will limit this risk."
+Documented as the ordinary expectation: "Typically connection reuse and session affinity will limit
+this risk."
 
 Be clear with the customer about what affinity costs. It removes the second zone from the failure
 domain for any single client, which is a real availability trade against a consistency trade. The

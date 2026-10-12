@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# REG-07: Escalation without pretending to have solved it
+# Support case REG-07
 
 ## Initial Support Ticket
 > We suspect a platform defect. Please open a case with Google on our behalf.

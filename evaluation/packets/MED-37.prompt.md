@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-37: One quota policy referenced from three flows exhausts faster than expected
+# Support case MED-37
 
 ## Initial Support Ticket
 > We have one proxy with three flows, A, B and C. All three reference a single Quota policy

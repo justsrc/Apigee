@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-43: The 404 that a version bump does not fix
+# Support case MED-43
 
 ## Initial Support Ticket
 > We upgraded hybrid to 1.14.3 last week to pick up the wildcard base path fix. `/a/v1/b` works.

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-03: FlowCallout cannot find the shared flow
+# Support case EASY-03
 
 ## Initial Support Ticket
 > After we refactored the token validation into a shared flow, every request fails with a

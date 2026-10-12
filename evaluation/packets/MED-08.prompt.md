@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-08: Mutual TLS broke after a certificate authority renewal
+# Support case MED-08
 
 ## Initial Support Ticket
 > Our CA renewed our client certificates last week. Since then mutual TLS fails in both

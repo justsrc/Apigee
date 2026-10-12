@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-04: Outdated community answer given as authoritative
+# Support case ADV-04
 
 ## Initial Support Ticket
 > A colleague found a forum post from 2019 saying we should set `Enforce=false` in the

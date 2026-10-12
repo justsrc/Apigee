@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-10: Token works against one API and fails against another
+# Support case MED-10
 
 ## Initial Support Ticket
 > Our mobile app gets a clean 401 on one API and a confusing 500 on another, using the

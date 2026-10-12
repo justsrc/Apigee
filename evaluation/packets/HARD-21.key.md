@@ -91,8 +91,14 @@ Rolling back the Apigee 4.53.01 upgrade. Nothing about this failure is caused by
 it is caused by the NGINX change that was made afterwards. The `fault` body appearing on 1.20
 nodes is what makes it look like an Apigee regression.
 
-Treating the Apigee fault code `messaging.adaptors.http.flow.BadRequest` as the cause. It is the
-symptom on the nodes that have not changed their behaviour.
+Accepting the operator's `messaging.adaptors.http.flow.BadRequest` as a real Apigee fault
+code. No such code appears in the Apigee fault-code reference; the real codes in that
+`flow.*` family are `ApplicationNotFound`, `DecompressionFailureAtRequest`,
+`DecompressionFailureAtResponse`, `ErrorResponseCode`, `GatewayTimeout`, `LengthRequired`,
+`NoActiveTargets`, `ServiceUnavailable`, `SslHandshakeFailed` and `UnexpectedEOFAtTarget`.
+Repeating the transcribed string without flagging it repeats the reporter's error, and
+inventing a plausible replacement code would be a second one. It is the symptom on the nodes
+whose behaviour has not changed, and it does not need a code to be identified.
 
 Adding a ResponseCache or a fault-handling policy to "fix" the 400. The request never reaches the
 Message Processor on the 1.26 nodes. No policy can help.

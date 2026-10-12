@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-11: A timeout that is not the timeout
+# Support case HARD-11
 
 The customer has replied with more information.
 

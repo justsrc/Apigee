@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-21: Half the routers are rejecting a request the other half accepts
+# Support case HARD-21
 
 ## Initial Support Ticket
 > We finished the 4.53.01 upgrade last week across all six nodes and everything has been fine
@@ -30,8 +30,12 @@ The response body differs between nodes, and this is the only detail in the tick
   fault body:
 
 ```json
-{"fault": {"detail": {"errorcode": "messaging.adaptors.http.flow.BadRequest"}}}
+{"fault": {"detail": {"errorcode": "<an HTTP-layer protocol.http.* code>"}}}
 ```
+
+The operator transcribed the code as `messaging.adaptors.http.flow.BadRequest`. No code by
+that name appears in the Apigee fault-code reference, so it is reproduced here as given and
+should be treated as unverified until the raw body is checked.
 
 Six Routers, all on Edge for Private Cloud 4.53.01:
 

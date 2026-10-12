@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-38: OAuth rejects a valid-looking token because no API product matched
+# Support case MED-38
 
 ## Initial Support Ticket
 > We are integrating a new client against our Apigee proxy and every call fails with:

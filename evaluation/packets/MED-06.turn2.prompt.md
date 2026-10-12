@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-06: Latency jumped and nobody knows which layer moved
+# Support case MED-06
 
 The customer has replied with more information.
 

@@ -203,7 +203,19 @@ def main() -> int:
             clean_title = re.sub(r"^[A-Z]+-\d+\.?\s*", "", title)
 
             visible = TURN1 if turn == 1 else TURN2
-            prompt = [PREAMBLE, f"# {sid}: {clean_title}", ""]
+            # The scenario title is deliberately NOT put in the prompt.
+            #
+            # Regression titles are statements of the correct disposition: "The safest
+            # recommendation is to change nothing", "Root cause cannot be established",
+            # "The right answer is a question". Handing those to the agent hands it the
+            # grading criterion, so the suite that exists to catch a skill drifting
+            # inaccuracy measures nothing. The same applies to any title phrased as a
+            # conclusion rather than a symptom.
+            #
+            # A real support request arrives as a ticket, not as a headline that states
+            # the answer, so dropping the title makes the packets more realistic as well
+            # as harder to cheat. The title stays in the answer key for the grader.
+            prompt = [PREAMBLE, f"# Support case {sid}", ""]
             if turn == 2:
                 prompt.append("The customer has replied with more information.")
                 prompt.append("")

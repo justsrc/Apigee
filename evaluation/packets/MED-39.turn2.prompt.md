@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-39: Every client call times out, and the Kubernetes object at fault is in another namespace
+# Support case MED-39
 
 The customer has replied with more information.
 

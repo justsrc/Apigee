@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-11: Everything works in test and fails in production
+# Support case MED-11
 
 The customer has replied with more information.
 

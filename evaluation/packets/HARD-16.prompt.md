@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-16: The Management Server will not start, and it started fine three weeks ago
+# Support case HARD-16
 
 ## Initial Support Ticket
 > Our Management Server will not stay up. It starts, runs for a couple of minutes, then dies.

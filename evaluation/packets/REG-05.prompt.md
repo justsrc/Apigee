@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# REG-05: A corrected skill must not reintroduce a stale source
+# Support case REG-05
 
 ## Initial Support Ticket
 > Which features did Apigee remove compared to Apigee Edge? Point me at the comparison

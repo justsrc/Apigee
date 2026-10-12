@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-09: The backend recovered an hour ago and nothing has come back
+# Support case HARD-09
 
 ## Initial Support Ticket
 > Our pricing API has been returning errors continuously since about 11:00. The backend

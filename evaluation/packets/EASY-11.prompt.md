@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-11: Unsupported TimeUnit blocks the revision
+# Support case EASY-11
 
 ## Initial Support Ticket
 > Deployment rejected again after our config change. The error says the quota time unit

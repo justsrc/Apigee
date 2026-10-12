@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-27: The deployment tool says it succeeded, and the revision is in ERROR
+# Support case MED-27
 
 ## Initial Support Ticket
 > Our shared flow deploys. The command prints the deploy response and returns success. The revision

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-22: Creating an organization fails with an error code that means nothing
+# Support case HARD-22
 
 The customer has replied with more information.
 

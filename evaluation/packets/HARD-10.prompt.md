@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-10: The symptom stopped and the cause is still unknown
+# Support case HARD-10
 
 ## Initial Support Ticket
 > The 500s have not recurred since yesterday afternoon. We think restarting the Message

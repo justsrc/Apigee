@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-15: It looks like a product defect
+# Support case HARD-15
 
 The customer has replied with more information.
 

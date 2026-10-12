@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-19: The Java callout crypto worked yesterday and throws NoSuchProviderException today
+# Support case HARD-19
 
 The customer has replied with more information.
 

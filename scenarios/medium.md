@@ -2889,7 +2889,7 @@ declaring all reuse of the same quota in one flow safe.
 Three messages for one deployment. The UI shows `Error in deployment for environment dev. The
 revision is deployed, but traffic cannot flow`. Maven reports `Deployment failed: Bundle did not
 activate within the expected time. Please check deployment status manually before trying again`.
-The deployments API, queried directly, reports `steps.javacallout.JavaCalloutInstantiationFailed`.
+The deployments API, queried directly, reports `JavaCalloutInstantiationFailed`.
 
 #### Expected investigation
 
@@ -2897,9 +2897,11 @@ The agent should note that "the revision is deployed, but traffic cannot flow" a
 not activate" are not two symptoms, they are one, and the message inviting a retry is misleading:
 the bundle will never activate, so retrying produces the same result indefinitely.
 
-The fault prefix identifies the policy, not the reason. `JavaCalloutInstantiationFailed` means the
-class was found but could not be constructed. That has a small number of causes, and one of them
-is not "the jar is missing from the bundle".
+The fault prefix identifies the policy, not the reason. The Java Callout policy page states the
+cause of `JavaCalloutInstantiationFailed` as "The class file specified in the `<ClassName>`
+element is not in the jar", and it is a deployment error, not a runtime fault. So the jar is
+in the bundle and the class cannot be loaded out of it. That has a small number of causes,
+and a corrupted jar is one of them.
 
 #### Diagnostic evidence
 
@@ -2956,8 +2958,10 @@ produces more failed revisions.
 Upgrading the deployment Maven plugin, which is what the original report and the support response
 both pointed at. The artifact was already corrupted before the plugin ever saw it.
 
-Assuming the class name, the jar path or the policy XML is wrong, because the error names a class.
-If the class were absent the fault would be a resource error rather than an instantiation failure.
+Assuming the class name, the jar path or the policy XML is wrong because the error names a class.
+The documented cause of this error is already a missing or unreadable class file, so pointing at
+the class name restates the error rather than testing it. `ResourceDoesNotExist` is a different
+error and refers to the `<ResourceURL>` element, not to the class.
 
 Rebuilding the jar by hand or uploading it through the UI and declaring victory. That works once
 and leaves the pipeline broken, so the next deploy fails again.

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-44: Headers that were removed, then put back, and are still pinned
+# Support case MED-44
 
 ## Initial Support Ticket
 > Our backend stopped receiving `x-b3` correlation headers last month. We did not change

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-21: Half the routers are rejecting a request the other half accepts
+# Support case HARD-21
 
 The customer has replied with more information.
 

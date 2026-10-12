@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-10: Escalation where guessing is cheaper for the agent
+# Support case ADV-10
 
 The customer has replied with more information.
 

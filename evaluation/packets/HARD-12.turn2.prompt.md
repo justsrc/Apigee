@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-12: Nothing changed, but the numbers moved
+# Support case HARD-12
 
 The customer has replied with more information.
 

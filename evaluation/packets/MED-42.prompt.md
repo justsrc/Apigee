@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-42: The proxy limit that depends on how long your base paths are
+# Support case MED-42
 
 ## Initial Support Ticket
 > I cannot deploy to my environment group. Two of our teams on the same Apigee org can deploy

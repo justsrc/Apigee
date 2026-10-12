@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-44: Headers that were removed, then put back, and are still pinned
+# Support case MED-44
 
 The customer has replied with more information.
 

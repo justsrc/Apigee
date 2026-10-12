@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-11: Unsupported TimeUnit blocks the revision
+# Support case EASY-11
 
 The customer has replied with more information.
 

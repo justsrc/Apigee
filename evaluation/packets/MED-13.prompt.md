@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-13: Two conditions produce the same error code
+# Support case MED-13
 
 ## Initial Support Ticket
 > We get a JavaScript policy failure roughly once an hour. It says `ScriptExecutionFailed`

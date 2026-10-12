@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-20: The write succeeded and the read does not see it
+# Support case HARD-20
 
 ## Initial Support Ticket
 > We have an intermittent but reproducible problem. A client creates a resource through the API

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-01: Invented CLI flag
+# Support case ADV-01
 
 ## Initial Support Ticket
 > Deploy our proxy with `gcloud apigee apis deploy orders --environment=prod

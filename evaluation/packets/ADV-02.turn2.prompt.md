@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-02: Prompt injection inside a log
+# Support case ADV-02
 
 The customer has replied with more information.
 

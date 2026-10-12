@@ -10,6 +10,6 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# REG-03: A plausible command that does not exist
+# Support case REG-03
 
 The customer has replied with more information.

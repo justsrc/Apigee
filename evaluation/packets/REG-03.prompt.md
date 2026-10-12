@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# REG-03: A plausible command that does not exist
+# Support case REG-03
 
 ## Initial Support Ticket
 > Can you give us the `gcloud apigee developers create` command? We need to script the

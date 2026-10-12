@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# REG-04: Root cause cannot be established
+# Support case REG-04
 
 The customer has replied with more information.
 

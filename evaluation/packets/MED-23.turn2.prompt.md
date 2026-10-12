@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-23: A linter rule demands a cache populate that would break the cache it is protecting
+# Support case MED-23
 
 The customer has replied with more information.
 

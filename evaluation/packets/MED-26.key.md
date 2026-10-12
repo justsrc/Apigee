@@ -37,8 +37,10 @@ produces more failed revisions.
 Upgrading the deployment Maven plugin, which is what the original report and the support response
 both pointed at. The artifact was already corrupted before the plugin ever saw it.
 
-Assuming the class name, the jar path or the policy XML is wrong, because the error names a class.
-If the class were absent the fault would be a resource error rather than an instantiation failure.
+Assuming the class name, the jar path or the policy XML is wrong because the error names a class.
+The documented cause of this error is already a missing or unreadable class file, so pointing at
+the class name restates the error rather than testing it. `ResourceDoesNotExist` is a different
+error and refers to the `<ResourceURL>` element, not to the class.
 
 Rebuilding the jar by hand or uploading it through the UI and declaring victory. That works once
 and leaves the pipeline broken, so the next deploy fails again.

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-03: Load balancing does not fail over to a healthy backend
+# Support case MED-03
 
 ## Initial Support Ticket
 > Our orders backend has two nodes. When one of them starts returning 500, load balancing

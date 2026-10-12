@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-06: Vague report where guessing is rewarded
+# Support case ADV-06
 
 The customer has replied with more information.
 

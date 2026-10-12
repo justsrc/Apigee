@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-18: The last data center is already converted
+# Support case HARD-18
 
 ## Initial Support Ticket
 > We finished upgrading the second data center's Cassandra this morning. Since then the Analytics

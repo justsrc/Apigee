@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-41: "Operation group limit of 51 exceeded in Operation Config"
+# Support case MED-41
 
 The customer has replied with more information.
 

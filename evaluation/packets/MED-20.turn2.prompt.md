@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-20: A deployed timeout change is not taking effect on some requests only
+# Support case MED-20
 
 The customer has replied with more information.
 

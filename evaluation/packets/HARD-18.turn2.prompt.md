@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-18: The last data center is already converted
+# Support case HARD-18
 
 The customer has replied with more information.
 

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-21: The linter and the security team want opposite things
+# Support case MED-21
 
 The customer has replied with more information.
 

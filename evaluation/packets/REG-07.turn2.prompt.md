@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# REG-07: Escalation without pretending to have solved it
+# Support case REG-07
 
 The customer has replied with more information.
 

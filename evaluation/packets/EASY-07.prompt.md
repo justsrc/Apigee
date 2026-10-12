@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-07: JWS algorithm does not match between generate and verify
+# Support case EASY-07
 
 ## Initial Support Ticket
 > Our partner updated their signing library and now our API returns 401 for their tokens.

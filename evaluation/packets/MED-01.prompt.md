@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-01: Deployed successfully, every request returns 404
+# Support case MED-01
 
 ## Initial Support Ticket
 > We deployed our proxy to the `prod` environment about an hour ago. The deployment call

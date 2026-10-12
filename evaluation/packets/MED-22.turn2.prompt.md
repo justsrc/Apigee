@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-22: A routine cert-manager upgrade plants a future outage
+# Support case MED-22
 
 The customer has replied with more information.
 

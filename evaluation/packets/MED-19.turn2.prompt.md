@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-19: Runtime logs stopped after a successful upgrade
+# Support case MED-19
 
 The customer has replied with more information.
 

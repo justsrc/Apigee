@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-14: Partial restore leaves inconsistent state
+# Support case HARD-14
 
 ## Initial Support Ticket
 > We restored OpenLDAP from last night's backup. Now some environments exist and others do

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-02: Missing Interval produces a runtime 500, not a deploy failure
+# Support case EASY-02
 
 The customer has replied with more information.
 

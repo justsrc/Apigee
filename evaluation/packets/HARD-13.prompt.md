@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-13: Three hypotheses, one test that separates them
+# Support case HARD-13
 
 ## Initial Support Ticket
 > 20% of requests to our reports API are coming back 401 starting this morning. We have

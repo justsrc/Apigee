@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-10: Token works against one API and fails against another
+# Support case MED-10
 
 The customer has replied with more information.
 

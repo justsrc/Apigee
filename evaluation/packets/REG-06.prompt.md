@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# REG-06: Evidence points away from the reported component
+# Support case REG-06
 
 ## Initial Support Ticket
 > Our VerifyAPIKey policy is rejecting valid API keys. Here is the policy, and here is what

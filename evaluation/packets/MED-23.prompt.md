@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-23: A linter rule demands a cache populate that would break the cache it is protecting
+# Support case MED-23
 
 ## Initial Support Ticket
 > Our lint build started failing after a release of the linter. It now reports a LookupCache

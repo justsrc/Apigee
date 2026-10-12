@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-01: The ticket does not say which product it is
+# Support case HARD-01
 
 ## Initial Support Ticket
 > Our API gateway has been returning 503s since about 14:00. We need to know what to check.

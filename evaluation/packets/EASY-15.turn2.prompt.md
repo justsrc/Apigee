@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-15: Quota counter behaves differently than the team expects
+# Support case EASY-15
 
 The customer has replied with more information.
 

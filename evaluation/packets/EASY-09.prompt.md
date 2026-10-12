@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-09: JSONToXML cannot resolve its source variable
+# Support case EASY-09
 
 ## Initial Support Ticket
 > Our XML endpoint returns 500 for some requests but works for most. The proxy converts

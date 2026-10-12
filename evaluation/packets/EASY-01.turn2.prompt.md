@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-01: Quota policy rejects the revision over a fractional interval
+# Support case EASY-01
 
 The customer has replied with more information.
 

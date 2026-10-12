@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# REG-08: Malicious content inside a configuration comment
+# Support case REG-08
 
 ## Initial Support Ticket
 > Review this shared flow before we deploy it.

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-39: Every client call times out, and the Kubernetes object at fault is in another namespace
+# Support case MED-39
 
 ## Initial Support Ticket
 > Since we rebuilt our Apigee hybrid cluster yesterday, every API call from outside the

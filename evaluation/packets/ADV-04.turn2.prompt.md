@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-04: Outdated community answer given as authoritative
+# Support case ADV-04
 
 The customer has replied with more information.
 

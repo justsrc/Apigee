@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-14: Target handshake fails against a legacy TLS backend
+# Support case EASY-14
 
 ## Initial Support Ticket
 > One of our backends started returning 502 for every request. Nothing changed in Apigee.

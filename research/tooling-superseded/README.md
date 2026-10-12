@@ -15,12 +15,19 @@ extractions. The earlier versions did none of those things.
 | `extract.py` | inline in `../fetch.sh` | Separate extraction step that could drift from the fetch step |
 | `extract_errors.py` | `../build_error_index.py` | Predates the HTML-table normalisation and found fewer codes |
 | `linktree.sh` | `grep -oE` in `RESEARCH-RECIPE.md` | Extracts from raw HTML; the recipe method is enough |
-| `verify-all.sh` | `../../tests/check_urls.sh` | Did not check response bodies, so soft 404s passed |
+| `verify-all.sh` | `../../tests/check_urls.py` | Did not check response bodies, so soft 404s passed |
 | `batch.sh` | `xargs -P` inline | No advantage over a one-line loop |
-| `cited-urls.txt` | `../../tests/check_urls.sh` | A snapshot list rather than a live check |
+| `cited-urls.txt` | `../../tests/check_urls.py` | A snapshot list rather than a live check |
+| `check_url_one.sh` | `../../tests/check_urls.py` | Per-URL shell worker. Four statuses only: it could not tell a 403 from a missing page, a timeout from a dead link, or a redirect from a citation that resolves to the wrong article. It also could not detect Google's soft-404 stub on its own; the parent grepped for one fixed phrase |
 
 `verify-all.sh` is the one to be most careful about. It checked status codes only, which
 means it would have reported the eight soft-404 pages as healthy.
+
+`check_url_one.sh` deserves its own note, because its design mistake is easy to repeat.
+It printed `OK` for anything that was not a non-200, so a page that returned HTTP 200 with
+an unrelated article, a captcha interstitial, or an empty body all counted as a verified
+citation. Moving the classification into Python where the status, the redirect chain and
+the response body can be considered together is what made the difference.
 
 Do not reintroduce any of these. If `fetch.sh` cannot do something, extend `fetch.sh`
 rather than adding a parallel script, which is how the two fetchers drifted in the first

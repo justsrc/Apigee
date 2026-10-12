@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-02: Missing Interval produces a runtime 500, not a deploy failure
+# Support case EASY-02
 
 ## Initial Support Ticket
 > Our orders API started returning 500 to about 3% of requests. The error body mentions

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-04: Cached responses are stale and nobody can reproduce it
+# Support case MED-04
 
 ## Initial Support Ticket
 > Users occasionally see old pricing data for a few minutes after we update it upstream.

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-20: A deployed timeout change is not taking effect on some requests only
+# Support case MED-20
 
 ## Initial Support Ticket
 > We raised `io.timeout.millis` from 5000 to 15000 on our search proxy and redeployed. Some

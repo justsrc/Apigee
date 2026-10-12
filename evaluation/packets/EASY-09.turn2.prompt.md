@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-09: JSONToXML cannot resolve its source variable
+# Support case EASY-09
 
 The customer has replied with more information.
 

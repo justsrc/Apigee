@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-06: Not enough evidence, and that is the answer
+# Support case HARD-06
 
 ## Initial Support Ticket
 > Our payments API is broken. It was fine yesterday. Please advise urgently. We have a

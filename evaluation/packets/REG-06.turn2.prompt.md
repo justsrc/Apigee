@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# REG-06: Evidence points away from the reported component
+# Support case REG-06
 
 The customer has replied with more information.
 

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-06: Not enough evidence, and that is the answer
+# Support case HARD-06
 
 The customer has replied with more information.
 

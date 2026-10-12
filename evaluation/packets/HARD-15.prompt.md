@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-15: It looks like a product defect
+# Support case HARD-15
 
 ## Initial Support Ticket
 > After the platform update, a specific sequence of policies produces a 500 where it used

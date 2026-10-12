@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# REG-02: The right answer is a question
+# Support case REG-02
 
 The customer has replied with more information.
 

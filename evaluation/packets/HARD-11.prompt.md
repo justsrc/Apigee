@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-11: A timeout that is not the timeout
+# Support case HARD-11
 
 ## Initial Support Ticket
 > We get 504s from the proxy. We raised the target timeout to 30 seconds and they

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-14: A revoked token still works for a few minutes
+# Support case MED-14
 
 The customer has replied with more information.
 

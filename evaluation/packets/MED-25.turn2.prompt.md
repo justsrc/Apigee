@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-25: The linter says a quota is used twice, and the quota is used once per request
+# Support case MED-25
 
 The customer has replied with more information.
 

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-07: Symptom points at the wrong component
+# Support case ADV-07
 
 ## Initial Support Ticket
 > Our JavaScript policy is throwing errors on some requests, we think it is a bug in our

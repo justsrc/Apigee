@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-28: Provisioning over mutual TLS succeeds, then the tool fails its own verification
+# Support case MED-28
 
 ## Initial Support Ticket
 > We provision a private cloud tenant with mutual TLS. The proxies and key value maps are created

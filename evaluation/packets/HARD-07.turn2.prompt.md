@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-07: Certificate rotation, and the question that decides the path
+# Support case HARD-07
 
 The customer has replied with more information.
 

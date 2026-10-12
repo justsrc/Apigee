@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-10: HMAC policy missing a required element
+# Support case EASY-10
 
 ## Initial Support Ticket
 > The deployment of our webhook receiver proxy is being rejected with an HMAC error. The

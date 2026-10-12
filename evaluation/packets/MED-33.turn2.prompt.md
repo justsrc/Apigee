@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-33: Rate of 5 per minute, but the third call in ten seconds is rejected
+# Support case MED-33
 
 The customer has replied with more information.
 

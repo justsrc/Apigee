@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-14: Target handshake fails against a legacy TLS backend
+# Support case EASY-14
 
 The customer has replied with more information.
 

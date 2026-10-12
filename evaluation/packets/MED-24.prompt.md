@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-24: A linter release breaks every working rate limit policy in the estate
+# Support case MED-24
 
 ## Initial Support Ticket
 > Nothing changed in our proxies. The linter started failing every single SpikeArrest policy in

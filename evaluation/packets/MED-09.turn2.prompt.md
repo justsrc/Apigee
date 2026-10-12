@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-09: Bursts are rejected by a Quota policy that is enforcing correctly
+# Support case MED-09
 
 The customer has replied with more information.
 

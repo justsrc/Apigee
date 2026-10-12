@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-04: Latency is up and everyone has a theory
+# Support case HARD-04
 
 ## Initial Support Ticket
 > p95 went from 200ms to 2s about a week ago. The backend team says they did not change

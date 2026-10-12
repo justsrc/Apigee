@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-37: One quota policy referenced from three flows exhausts faster than expected
+# Support case MED-37
 
 The customer has replied with more information.
 

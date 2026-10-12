@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-30: The token endpoint is correct and the client is sending a malformed header
+# Support case MED-30
 
 ## Initial Support Ticket
 > Calls to our backend are being rejected as unauthorised. We only see it through our developer

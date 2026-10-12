@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# EASY-01: Quota policy rejects the revision over a fractional interval
+# Support case EASY-01
 
 ## Initial Support Ticket
 > We cannot deploy our proxy any more. It worked last week. The API call to save the

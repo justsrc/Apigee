@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-03: mTLS fails in one direction only, after a keystore change
+# Support case HARD-03
 
 The customer has replied with more information.
 

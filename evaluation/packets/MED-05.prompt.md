@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-05: Key value map updates are not visible everywhere
+# Support case MED-05
 
 ## Initial Support Ticket
 > We rotate an API endpoint URL in a key-value map about once a week. After the update,

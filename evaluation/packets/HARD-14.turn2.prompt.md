@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-14: Partial restore leaves inconsistent state
+# Support case HARD-14
 
 The customer has replied with more information.
 

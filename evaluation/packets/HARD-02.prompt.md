@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# HARD-02: The config and the logs disagree
+# Support case HARD-02
 
 ## Initial Support Ticket
 > We removed the rate limiting from our API last month and the change was deployed

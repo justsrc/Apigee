@@ -2558,7 +2558,7 @@ confirmed cause without running it.
 From the Message Processor trace of a failing request:
 
 ```json
-{"fault": {"detail": {"errorcode": "steps.javacallout.JavaCalloutExecutionError"}}}
+{"fault": {"detail": {"errorcode": "steps.javacallout.ExecutionError"}}}
 ```
 
 and from the Message Processor log:
@@ -2913,22 +2913,16 @@ is supplied.
 
 #### Correct remediation
 
-Session affinity is the documented mitigation, and the Knowledge Hub post says so. Bind the client
-to a zone:
+Session affinity is the documented mitigation, and the Knowledge Hub post says so. Do this in the
+load balancer in front of the Routers, not in a proxy policy: a proxy's `<LoadBalancer><Server>`
+element names a TargetServer, which is a backend the proxy itself calls, so listing Message
+Processor hostnames there would configure Apigee to call the Message Processors as if they were
+an API backend. What belongs in front of the Routers is ordinary load-balancer session
+affinity, keyed so that a client's writes and subsequent reads land on Message Processors in the
+same zone.
 
-```xml
-<LoadBalancer>
-  <Algorithm>RoundRobin</Algorithm>
-  <Server name="mp-az1-1" />
-  <Server name="mp-az1-2" />
-  <Server name="mp-az2-1" />
-  <Server name="mp-az2-2" />
-</LoadBalancer>
-```
-
-with affinity configured on the load balancer in front of the Routers, so that a client's writes
-and subsequent reads are handled by Message Processors in the same zone. Documented as the
-ordinary expectation: "Typically connection reuse and session affinity will limit this risk."
+Documented as the ordinary expectation: "Typically connection reuse and session affinity will limit
+this risk."
 
 Be clear with the customer about what affinity costs. It removes the second zone from the failure
 domain for any single client, which is a real availability trade against a consistency trade. The
@@ -3043,8 +3037,12 @@ The response body differs between nodes, and this is the only detail in the tick
   fault body:
 
 ```json
-{"fault": {"detail": {"errorcode": "messaging.adaptors.http.flow.BadRequest"}}}
+{"fault": {"detail": {"errorcode": "<an HTTP-layer protocol.http.* code>"}}}
 ```
+
+The operator transcribed the code as `messaging.adaptors.http.flow.BadRequest`. No code by
+that name appears in the Apigee fault-code reference, so it is reproduced here as given and
+should be treated as unverified until the raw body is checked.
 
 Six Routers, all on Edge for Private Cloud 4.53.01:
 
@@ -3201,8 +3199,14 @@ Rolling back the Apigee 4.53.01 upgrade. Nothing about this failure is caused by
 it is caused by the NGINX change that was made afterwards. The `fault` body appearing on 1.20
 nodes is what makes it look like an Apigee regression.
 
-Treating the Apigee fault code `messaging.adaptors.http.flow.BadRequest` as the cause. It is the
-symptom on the nodes that have not changed their behaviour.
+Accepting the operator's `messaging.adaptors.http.flow.BadRequest` as a real Apigee fault
+code. No such code appears in the Apigee fault-code reference; the real codes in that
+`flow.*` family are `ApplicationNotFound`, `DecompressionFailureAtRequest`,
+`DecompressionFailureAtResponse`, `ErrorResponseCode`, `GatewayTimeout`, `LengthRequired`,
+`NoActiveTargets`, `ServiceUnavailable`, `SslHandshakeFailed` and `UnexpectedEOFAtTarget`.
+Repeating the transcribed string without flagging it repeats the reporter's error, and
+inventing a plausible replacement code would be a second one. It is the symptom on the nodes
+whose behaviour has not changed, and it does not need a code to be identified.
 
 Adding a ResponseCache or a fault-handling policy to "fix" the 400. The request never reaches the
 Message Processor on the 1.26 nodes. No policy can help.

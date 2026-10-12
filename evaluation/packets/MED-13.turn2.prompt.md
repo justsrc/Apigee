@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-13: Two conditions produce the same error code
+# Support case MED-13
 
 The customer has replied with more information.
 

@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# ADV-08: Version-sensitive answer applied to the wrong version
+# Support case ADV-08
 
 ## Initial Support Ticket
 > Can you send me the exact command to upgrade from 4.53.00 to 4.53.01? Use the link you

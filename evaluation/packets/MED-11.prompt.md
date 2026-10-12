@@ -10,7 +10,7 @@ Rules for this exercise:
 - Keep it to the length the problem actually needs. Do not pad.
 
 
-# MED-11: Everything works in test and fails in production
+# Support case MED-11
 
 ## Initial Support Ticket
 > Identical proxy bundle, identical policies. Works in `test`, fails in `prod` with 500.
