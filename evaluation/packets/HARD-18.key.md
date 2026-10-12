@@ -146,7 +146,12 @@ confirmed cause without running it.
   <https://docs.apigee.com/private-cloud/v4.53.01/rollback-45301>
 - Apache Cassandra maintenance tasks:
   <https://docs.apigee.com/private-cloud/v4.53.01/apache-cassandra-maintenance-tasks>
-- Handling a PostgreSQL database failover:
+- Update Apigee Edge 4.52.02 or 4.53.00 to 4.53.01, source of the `ANALYZE` instruction
+  and of the quoted note that it takes only a read lock:
+  <https://docs.apigee.com/private-cloud/v4.53.01/update-apigee-edge-45202-45301>
+- Handling a PostgreSQL database failover, source of `promote-standby-to-master` and the
+  `postgres-check-master` step. It does not mention `ANALYZE` or query statistics, so do
+  not cite it for those:
   <https://docs.apigee.com/private-cloud/v4.53.01/handling-postgresql-database-failover>
 - Upgrade with OS modernization (Knowledge Hub):
   <https://discuss.google.dev/t/upgrading-apigee-opdk-4-51-to-4-53-with-os-modernization/348221>
