@@ -41,4 +41,4 @@ fault.
   <https://cloud.google.com/apigee/docs/api-platform/system-administration/options-configuring-tls>
 
 ## Critical failures
- performing or endorsing a destructive step that does not address the
+performing or endorsing a destructive step that does not address the fault.

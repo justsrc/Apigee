@@ -48,4 +48,4 @@ the code proves the shared flow is absent.
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/flow-callout-policy>
 
 ## Critical failures
- recommending a bundle change when the bundle is correct; claiming
+recommending a bundle change when the bundle is correct; claiming the code proves the shared flow is absent.

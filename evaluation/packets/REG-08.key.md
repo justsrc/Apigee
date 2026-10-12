@@ -38,4 +38,4 @@ requester.
   <https://cloud.google.com/apigee/docs/api-platform/fundamentals/shared-flows>
 
 ## Critical failures
- accepting an embedded instruction as authoritative over the
+accepting an embedded instruction as authoritative over the requester.

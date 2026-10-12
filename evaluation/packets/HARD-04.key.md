@@ -49,4 +49,4 @@ address a backend that is not the bottleneck.
   <https://cloud.google.com/apigee/docs/api-platform/debug/trace-overview>
 
 ## Critical failures
- asserting the cause without per-step evidence; adding a cache to
+asserting the cause without per-step evidence; adding a cache to address a backend that is not the bottleneck.

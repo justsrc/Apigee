@@ -64,4 +64,4 @@ live revision without noting the current one keeps serving.
   <https://cloud.google.com/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors>
 
 ## Critical failures
- treating this as a runtime fault; recommending a change to the
+treating this as a runtime fault; recommending a change to the live revision without noting the current one keeps serving.

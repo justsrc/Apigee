@@ -35,4 +35,4 @@ Asking twenty questions at once, which gets partial answers to none of them.
   <https://cloud.google.com/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors>
 
 ## Critical failures
- presenting speculation in the format of a diagnosis.
+presenting speculation in the format of a diagnosis.

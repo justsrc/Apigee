@@ -49,4 +49,4 @@ automatic rotation behind the explicit-key fallback.
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/verify-jwt-policy>
 
 ## Critical failures
- recommending JWKS cache rotation as the fix; hiding the loss of
+recommending JWKS cache rotation as the fix; hiding the loss of automatic rotation behind the explicit-key fallback.

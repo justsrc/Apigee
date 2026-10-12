@@ -55,4 +55,4 @@ is a different condition from a bad signature.
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/jwt-policies-overview>
 
 ## Critical failures
- recommending acceptance of arbitrary or unverified algorithms.
+recommending acceptance of arbitrary or unverified algorithms.

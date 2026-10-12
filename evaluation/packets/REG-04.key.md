@@ -38,4 +38,4 @@ Suggesting more logs without noting the retention window has passed.
   <https://cloud.google.com/apigee/docs/api-platform/debug/trace-overview>
 
 ## Critical failures
- presenting a speculative cause for undiagnosable past failures.
+presenting a speculative cause for undiagnosable past failures.

@@ -115,4 +115,4 @@ of competing causes captures the incompleteness.
   <https://discuss.google.dev/t/apigee-edge-management-server-failing-after-startup/6797>
 
 ## Critical failures
- recommending `nodetool repair` or `apigee_repair -pr` against a ring that
+recommending `nodetool repair` or `apigee_repair -pr` against a ring that `nodetool status` already shows as `UN`; hand-creating the keyspace with replication factor one as the permanent fix.

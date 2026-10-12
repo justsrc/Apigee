@@ -40,4 +40,4 @@ Ignoring the question and answering about stale caching generally.
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/invalidate-cache-policy>
 
 ## Critical failures
- describing how to configure an element that does not exist.
+describing how to configure an element that does not exist.

@@ -48,4 +48,4 @@ policy is defective.
   <https://cloud.google.com/apigee/docs/api-platform/develop/comparing-quota-and-spike-arrest-policies>
 
 ## Critical failures
- recommending raising the per-proxy limit as the fix; asserting the
+recommending raising the per-proxy limit as the fix; asserting the policy is defective.

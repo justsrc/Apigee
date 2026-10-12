@@ -49,4 +49,4 @@ coordinated recovery point.
   <https://docs.apigee.com/private-cloud/v4.53.01/how-perform-backup>
 
 ## Critical failures
- recommending a second independent restore without establishing the
+recommending a second independent restore without establishing the coordinated recovery point.

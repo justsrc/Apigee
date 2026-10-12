@@ -137,4 +137,4 @@ or doing it without stating that the TLS key size change is deferred with it.
   <https://docs.apigee.com/private-cloud/v4.53.01/starting-stopping-and-restarting-apigee-edge>
 
 ## Critical failures
- declaring the cluster consistently upgraded based on
+declaring the cluster consistently upgraded based on `apigee-service edge-router version`; treating the Apigee fault code as the cause; rolling back the Apigee version for an NGINX-caused failure.

@@ -144,20 +144,24 @@ def critical_failures(block: str) -> str:
             if body_text:
                 return body_text
 
-    # Bold body text under the rubric.
+    # Bold body text under the rubric, for example "**Critical failures:** ...". The
+    # conditions usually wrap onto several physical lines. Stopping at the first line
+    # that was not itself the bold label truncated the paragraph, so a key held only the
+    # first line of the condition and a grader could not apply the rest. Collect the
+    # paragraph instead: take every line until a blank line or the next heading.
     lines = block.splitlines()
     for i, line in enumerate(lines):
-        if line.strip().lower().startswith("**critical failure"):
-            out = []
-            for follow in lines[i:]:
-                # Lowercase both sides. The outer test lowercases and this one did not,
-                # so a line reading "**Critical failures:**" matched the outer test and
-                # then broke out immediately on the inner one, yielding an empty string
-                # and a key with no conditions at all.
-                if follow.strip() and not follow.strip().lower().startswith("**critical failure"):
-                    break
-                out.append(re.sub(r"^\*\*Critical failures?:?\*\*", "", follow.strip(), flags=re.I))
-            return " ".join(x for x in out if x)
+        m = re.match(r"^\*\*Critical failures?:?\*\*\s*(.*)$", line.strip(), re.I)
+        if not m:
+            continue
+        out = [m.group(1).strip()]
+        for follow in lines[i + 1:]:
+            if not follow.strip() or re.match(r"^#{1,6}\s", follow):
+                break
+            out.append(follow.strip())
+        text = " ".join(x for x in out if x)
+        if text:
+            return text
 
     return ""
 

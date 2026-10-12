@@ -37,4 +37,4 @@ Saying the information is no longer published, which is wrong; it moved.
   <https://docs.apigee.com/migration-to-x/compare-apigee-edge-to-apigee-x>
 
 ## Critical failures
- citing a page for content it no longer contains.
+citing a page for content it no longer contains.

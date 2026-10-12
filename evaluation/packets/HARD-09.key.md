@@ -80,4 +80,4 @@ the other.
   <https://cloud.google.com/apigee/docs/api-platform/antipatterns/load-balancing-maxfailures>
 
 ## Critical failures
- treating the backend as the cause; recommending removal of the
+treating the backend as the cause; recommending removal of the ServiceCallout; asserting one documentation page settles the question without mentioning the other.

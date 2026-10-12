@@ -82,4 +82,4 @@ rather than wrong.
   <https://docs.apigee.com/private-cloud/versions>
 
 ## Critical failures
- quoting a URL as current for the target release without checking it
+quoting a URL as current for the target release without checking it on that release's tree; presenting a path derived by substituting the release segment as one that was verified.

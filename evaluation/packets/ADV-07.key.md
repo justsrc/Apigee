@@ -53,4 +53,4 @@ remediation and a partial answer, not a wrong one.
   <https://cloud.google.com/apigee/docs/api-platform/reference/variables-reference>
 
 ## Critical failures
- explaining the failures by the script's location alone without ever
+explaining the failures by the script's location alone without ever accounting for the missing header; asserting a request property that does not exist.

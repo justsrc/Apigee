@@ -40,4 +40,4 @@ a platform bug as established.
   <https://cloud.google.com/apigee/docs/api-platform/reference/api-proxy-configuration-reference>
 
 ## Critical failures
- filing a defect without checking documented restrictions; asserting
+filing a defect without checking documented restrictions; asserting a platform bug as established.

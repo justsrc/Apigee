@@ -72,4 +72,4 @@ store.
   <https://cloud.google.com/apigee/docs/api-monitoring/fault-codes>
 
 ## Critical failures
- recommending `IgnoreValidationErrors` to make TLS succeed;
+recommending `IgnoreValidationErrors` to make TLS succeed; repointing the reference without checking that the alias name still exists in the new store.

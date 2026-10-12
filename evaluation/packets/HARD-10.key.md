@@ -48,4 +48,4 @@ into a recurring routine.
   <https://cloud.google.com/apigee/docs/api-platform/get-started/compare-apigee-products>
 
 ## Critical failures
- declaring the root cause confirmed because the symptom stopped.
+declaring the root cause confirmed because the symptom stopped.

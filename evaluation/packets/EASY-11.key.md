@@ -43,4 +43,4 @@ reset semantics depending on quota type, so the `hour` unit is clearer.
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy>
 
 ## Critical failures
- asserting undocumented units are accepted.
+asserting undocumented units are accepted.

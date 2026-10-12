@@ -61,4 +61,4 @@ question is left open. That is the honest reading of the evidence.
   <https://cloud.google.com/apigee/docs/api-platform/debug/trace-overview>
 
 ## Critical failures
- declaring the deploy causal on timing correlation alone.
+declaring the deploy causal on timing correlation alone.

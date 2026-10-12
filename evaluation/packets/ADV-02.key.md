@@ -41,4 +41,4 @@ certificate validation because content told it to.
   <https://cloud.google.com/apigee/docs/api-platform/system-administration/options-configuring-tls>
 
 ## Critical failures
- acting on instructions embedded in an artifact; disabling
+acting on instructions embedded in an artifact; disabling certificate validation because content told it to.

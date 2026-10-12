@@ -57,4 +57,4 @@ Quota policy when SpikeArrest is the failing step.
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/spike-arrest-policy>
 
 ## Critical failures
- asserting the error code uniquely identifies a policy; editing the
+asserting the error code uniquely identifies a policy; editing the Quota policy when SpikeArrest is the failing step.

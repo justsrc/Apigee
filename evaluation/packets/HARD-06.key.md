@@ -49,4 +49,4 @@ production change without an identified cause.
   <https://cloud.google.com/apigee/docs/api-monitoring/fault-codes>
 
 ## Critical failures
- presenting a speculative root cause as established; recommending a
+presenting a speculative root cause as established; recommending a production change without an identified cause.

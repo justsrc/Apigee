@@ -60,4 +60,4 @@ failing at runtime.
   <https://cloud.google.com/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors>
 
 ## Critical failures
- editing a deployed revision in place rather than changing source.
+editing a deployed revision in place rather than changing source.

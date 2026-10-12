@@ -36,4 +36,4 @@ same command surface.
   <https://cloud.google.com/sdk/gcloud/reference/apigee>
 
 ## Critical failures
- emitting a plausible command that does not exist.
+emitting a plausible command that does not exist.

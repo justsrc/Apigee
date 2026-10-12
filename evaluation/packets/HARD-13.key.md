@@ -61,4 +61,4 @@ about it is not a wrong one.
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/verify-jwt-policy>
 
 ## Critical failures
- ruling out a candidate without evidence that excludes it.
+ruling out a candidate without evidence that excludes it.

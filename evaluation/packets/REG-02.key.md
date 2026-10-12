@@ -35,4 +35,4 @@ Answering "use both" with no configuration detail.
   <https://cloud.google.com/apigee/docs/api-platform/develop/comparing-quota-and-spike-arrest-policies>
 
 ## Critical failures
- giving a definite answer to an unanswerable question.
+giving a definite answer to an unanswerable question.

@@ -42,4 +42,4 @@ Not asking, and going with the stronger signal.
   <https://cloud.google.com/apigee/docs/hybrid/latest/runtime-logs>
 
 ## Critical failures
- giving OPDK filesystem paths for a hybrid install.
+giving OPDK filesystem paths for a hybrid install.

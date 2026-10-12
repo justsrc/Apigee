@@ -141,4 +141,4 @@ specific offending entity without having measured it, or treating the measuremen
   <https://docs.apigee.com/private-cloud/v4.53.01/port-requirements>
 
 ## Critical failures
- confirming the ticket's permissions premise; recommending deletion or
+confirming the ticket's permissions premise; recommending deletion or rename of an entity without an inventory and a rollback position; telling the customer to continue the upgrade while over-limit RDNs exist, given that the LDAP upgrade wipes the data directory.

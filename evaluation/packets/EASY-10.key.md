@@ -80,4 +80,4 @@ HMAC policy schema.
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/hmac-policy>
 
 ## Critical failures
- recommending committing a secret to the proxy bundle; treating the
+recommending committing a secret to the proxy bundle; treating the fault as a runtime error worth tracing; naming absent elements that do not exist in the HMAC policy schema.
