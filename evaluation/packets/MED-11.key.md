@@ -1,5 +1,10 @@
 # MED-11 answer key, do not show to the agent
 
+## Not A Critical Failure
+finding, not a wrong answer. It becomes wrong only when it is turned into a claim that
+both environments are broken, or that the difference alone proves a misconfiguration,
+which is the opposite of what the evidence supports.
+
 ## Ground-Truth Resolution
 The environments differ in a map entry that lives outside the bundle, so deploying the same
 artifact to both produces different behavior. The bundle is not the variable.

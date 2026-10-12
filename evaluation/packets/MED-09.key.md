@@ -1,5 +1,12 @@
 # MED-09 answer key, do not show to the agent
 
+## Not A Critical Failure
+reference documents `500` in its runtime error table and `429` in a closing note on the
+same page, so noticing that the observed status is not the one an agent would expect is
+correct reading of the evidence rather than a dispute with the scenario. An answer that
+keeps the diagnosis intact and asks how the Quota fault is being surfaced is the correct
+answer; stopping there without completing the remediation is incomplete, not wrong.
+
 ## Ground-Truth Resolution
 The quota is not miscounting. It is enforcing correctly, and the burst behavior it
 produces is exactly the documented consequence.

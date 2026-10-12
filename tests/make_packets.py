@@ -47,6 +47,13 @@ TURN2 = ["diagnostic evidence"]
 KEY = ["ground-truth resolution", "correct remediation", "verification",
        "common incorrect answers", "evaluation rubric", "references"]
 
+# Sections that state a graded boundary and so belong in the key even though they are not
+# remediation steps. Two scenarios carry a "Not a critical failure" ruling that explicitly
+# clears an answer the grader would otherwise fail, and neither reached the answer key,
+# because KEY never named the heading. A grader working from the key could not see the
+# scenario's own decision not to fail something.
+KEY_EXTRA = ["not a critical failure"]
+
 PREAMBLE = """You are an Apigee technical support engineer. A customer has contacted support.
 Answer as you would to them, in Markdown.
 
@@ -229,7 +236,9 @@ def main() -> int:
             (OUT / f"{sid}{suffix}.prompt.md").write_text("\n".join(prompt), encoding="utf-8")
 
             answer = [f"# {sid} answer key, do not show to the agent", ""]
-            for sec in KEY:
+            # KEY_EXTRA comes first: it qualifies how the critical failures below are read,
+            # so a grader should see the exception before the list it excepts.
+            for sec in KEY_EXTRA + KEY:
                 content = section(block, sec, hs)
                 if content:
                     # medium.md separates its scenarios with a `---` rule, so the final
