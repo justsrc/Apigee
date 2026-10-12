@@ -12,7 +12,7 @@ scenarios:
 reading, no web search. This measures what it would have said on its own.
 
 **Run B, assisted.** The same model answers the same scenarios having loaded
-`apigee-support-core` and its four reference files.
+`apigee-support-core` and its six reference files.
 
 Same model, same scenarios, same prompt. The only difference is the skill. Anything else
 that differs confuses the result.

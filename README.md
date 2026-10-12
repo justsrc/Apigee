@@ -11,7 +11,7 @@ broken. These skills exist to make those failures harder.
 
 ## What is here
 
-Three skills and two scenario suites, all under `.agents/skills/` and `scenarios/`.
+Three skills and five scenario suites, all under `.agents/skills/` and `scenarios/`.
 
 | Skill | What it does |
 | --- | --- |
@@ -124,7 +124,7 @@ like this one would be a gate that is not looking hard enough.
 The project's history records several checkers that reported success while checking nothing.
 `fault_probe.py` found eight more in the previous version of `check_repo.py`, including a
 corrupted fault-code index passing cleanly. All eight are fixed and the probe now runs
-25/25. `evaluation/defect-register.md` has the full list with reproduction steps and the
+32/32. `evaluation/defect-register.md` has the full list with reproduction steps and the
 test that now covers each one.
 
 ## Adding a scenario
