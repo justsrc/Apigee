@@ -57,12 +57,17 @@ def entries(path: Path) -> list[tuple[str, str]]:
     return out
 
 
-def main() -> int:
+def build() -> str:
+    """Render the index and return it as text, without writing anything.
+
+    tests/check_repo.py calls this to compare the committed index against a fresh render.
+    Comparing a generated file to itself proves nothing; comparing it to an independent
+    regeneration is what catches a hand edit or an index left over from an older run.
+    """
     rows = []
     for fname, kind in FILES:
         p = SCEN / fname
         if not p.is_file():
-            print(f"missing {p}", file=sys.stderr)
             continue
         for sid, title in entries(p):
             rows.append((kind, sid, title))
@@ -106,8 +111,13 @@ def main() -> int:
     A("Score with `evaluation/rubric.md`, and with the scenario's own rubric table where")
     A("the two differ.")
     A("")
+    return "\n".join(lines)
 
-    OUT.write_text("\n".join(lines), encoding="utf-8")
+
+def main() -> int:
+    body = build()
+    total = len(re.findall(r"^\| `[A-Z]+-\d+` \|", body, re.M))
+    OUT.write_text(body, encoding="utf-8")
     print(f"wrote {OUT}, {total} scenarios")
     return 0
 

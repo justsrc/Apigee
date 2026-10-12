@@ -80,6 +80,31 @@ URL_RE = re.compile(r"https?://[^\s\)\]\"'>]+")
 
 
 # ---------------------------------------------------------------------------
+# Discovery: what scenarios actually exist
+# ---------------------------------------------------------------------------
+
+
+SCENARIO_ID_RE = re.compile(r"\b(EASY|MED|HARD|ADV|REG)-(\d{2,3})\b")
+
+
+def scenario_ids(root: Path) -> set[str]:
+    """Every scenario ID defined in scenarios/*.md, excluding the generated index.
+
+    Used as the source of truth for completeness checks. A hard-coded count is not
+    usable here: it changes whenever a scenario is added, and a check that asserts a
+    literal either rots or gets edited until it passes. Comparing against the IDs
+    themselves holds however the library grows.
+    """
+    ids: set[str] = set()
+    for p in sorted((root / SCENARIOS_DIR).glob("*.md")):
+        if p.name == "index.md":
+            continue
+        for prefix, num in SCENARIO_ID_RE.findall(read(p)):
+            ids.add(f"{prefix}-{num}")
+    return ids
+
+
+# ---------------------------------------------------------------------------
 # Result plumbing
 # ---------------------------------------------------------------------------
 
@@ -341,17 +366,22 @@ def check_scenarios(root: Path, r: Results) -> None:
         else:
             r.fail(f"{difficulty}: only {count} scenarios, minimum is {MIN_PER_DIFFICULTY}")
 
-    # Adversarial and regression suites are additional; warn rather than fail.
+    # Adversarial and regression suites are additional but load-bearing: the regression
+    # suite is the documented smoke test after a skill change, so a missing file is a
+    # missing test rather than a missing extra. Both were previously warned about, which
+    # let `rm scenarios/regression.md` exit 0. Their IDs are still checked for uniqueness
+    # and prefix, but they do not carry the full graded section list.
     for extra in ("adversarial.md", "regression.md"):
         p = scenarios_dir / extra
-        if p.is_file():
-            n = len(find_scenario_blocks(read(p)))
-            if n:
-                r.ok(f"{extra}: {n} scenarios")
-            else:
-                r.fail(f"{extra}: no scenarios found")
+        if not p.is_file():
+            r.fail(f"missing scenario file: {extra}. The regression suite is the "
+                   f"documented post-change smoke test and cannot be optional.")
+            continue
+        n = len(find_scenario_blocks(read(p)))
+        if n:
+            r.ok(f"{extra}: {n} scenarios")
         else:
-            r.warn(f"{extra} not present, stress-test suite is incomplete")
+            r.fail(f"{extra}: no scenarios found")
 
 
 def check_local_links(root: Path, r: Results) -> None:
@@ -383,11 +413,19 @@ def check_research(root: Path, r: Results) -> None:
     if n_pages:
         r.ok(f"research/pages holds {n_pages} fetched documents")
     else:
-        r.warn("research/pages is empty, no documents were fetched")
+        # An empty corpus was only a warning. It is the input to every generated index in
+        # this project, so an empty one means the indices are stale and unprovable, and
+        # the run would still report PASS on the indices built from them. Verified by
+        # deleting the cache, which used to exit 0.
+        r.fail("research/pages holds no documents. Every generated index here is derived "
+               "from it, so an empty cache invalidates all of them and any check on those "
+               "indexes becomes vacuous. Restore the corpus or re-run research/fetch.sh.")
 
     index = research / "official-documentation-index.md"
     if not index.is_file():
         r.fail("missing research/official-documentation-index.md")
+    elif n_pages == 0:
+        r.fail("official documentation index exists but the corpus it indexes is empty")
     else:
         r.ok("official documentation index exists")
 
@@ -458,12 +496,40 @@ def check_packets(root: Path, r: Results) -> None:
     """
     packets = root / "evaluation" / "packets"
     if not packets.is_dir():
-        r.warn("evaluation/packets not generated; run tests/make_packets.py --all --turn 1 and --turn 2")
+        # Warned about before. That is a false pass: a run with no packets cannot happen,
+        # so its absence means the evaluation inputs were never built, not that nothing
+        # was required. Verified by deleting the directory, which used to exit 0.
+        r.fail("evaluation/packets does not exist; the evaluation inputs were never built. "
+               "Run: python3 tests/make_packets.py --all --turn 1 && "
+               "python3 tests/make_packets.py --all --turn 2")
         return
 
     turn1 = sorted(p for p in packets.glob("*.prompt.md") if ".turn2" not in p.name)
     turn2 = sorted(packets.glob("*.turn2.prompt.md"))
     keys = sorted(packets.glob("*.key.md"))
+
+    # Per-scenario completeness. Counting the files was not enough. The set is built as
+    # three per scenario, so deleting exactly one of them leaves a count that still looks
+    # healthy, and the run would silently proceed with one scenario unreleasable or
+    # ungradable. Assert against the scenario IDs, which are the source of truth, rather
+    # than against a count that changes legitimately as scenarios are added.
+    expected_ids = scenario_ids(root)
+    have_t1 = {p.name.split(".")[0] for p in turn1}
+    have_t2 = {p.name.split(".")[0] for p in turn2}
+    have_k = {p.name.split(".")[0] for p in keys}
+    for label, have in (("turn-1 prompt", have_t1), ("turn-2 prompt", have_t2),
+                        ("answer key", have_k)):
+        missing = sorted(expected_ids - have)
+        extra = sorted(have - expected_ids)
+        if missing:
+            shown = ", ".join(missing[:8]) + ("..." if len(missing) > 8 else "")
+            r.fail(f"{len(missing)} scenario(s) have no {label}: {shown}")
+        if extra:
+            shown = ", ".join(extra[:8]) + ("..." if len(extra) > 8 else "")
+            r.fail(f"{len(extra)} {label}(s) exist for no scenario in scenarios/: {shown}")
+    if not (expected_ids - have_t1 or expected_ids - have_t2 or expected_ids - have_k):
+        r.ok(f"all {len(expected_ids)} scenarios have a turn-1 prompt, a turn-2 prompt "
+             f"and an answer key")
 
     # Staleness. A reviewer caught answer keys that still asserted a ground truth the
     # scenario had been rewritten away from, which would have graded every response
@@ -633,6 +699,78 @@ def check_generated_references(root: Path, r: Results) -> None:
         r.ok("generated reference files carry no raw HTML or escaped angle brackets")
 
 
+def check_generated_freshness(root: Path, r: Results) -> None:
+    """A generated file must match what its generator produces from the current sources.
+
+    The raw-markup check above only proves the output is well formed. It cannot tell a
+    freshly generated file from one that was hand-edited, truncated, or left behind by an
+    older generator, because all three are equally valid Markdown. Deleting every
+    SpikeArrest runtime code from the fault-code index, the defect this project was built
+    after, exited 0.
+
+    Regenerating into a temporary file and diffing is the only check that distinguishes
+    the two. It runs the real generator against the real corpus, so it also fails when a
+    generator breaks, which is the case worth catching.
+    """
+    sys.path.insert(0, str(root / "research"))
+    try:
+        import build_error_index  # type: ignore
+        import build_scenario_index  # type: ignore
+    except Exception as e:  # pragma: no cover - import failure is itself a finding
+        r.fail(f"cannot import the generators to verify freshness: {e}")
+        return
+    finally:
+        try:
+            sys.path.remove(str(root / "research"))
+        except ValueError:
+            pass
+
+    produced = build_error_index.build()
+
+    ref = (root / ".agents/skills/apigee-support-core/references/error-codes.md")
+    if not ref.is_file():
+        r.fail("missing references/error-codes.md, the generated fault-code index")
+        return
+    committed = read(ref)
+    if committed.strip() != produced.strip():
+        missing = _missing_fault_codes(produced, committed)
+        extra_note = ""
+        if missing:
+            extra_note = (" Codes present in the source pages but absent from the "
+                          f"committed index: {', '.join(missing[:6])}"
+                          + ("..." if len(missing) > 6 else "") + ".")
+        r.fail("references/error-codes.md is not what research/build_error_index.py "
+               "produces from the current corpus. It is generated: fix the generator or "
+               "the source pages, then regenerate, do not edit the output." + extra_note)
+    else:
+        r.ok("fault-code index matches a fresh run of build_error_index.py")
+
+    if not _scenario_index_current(root, build_scenario_index):
+        r.fail("scenarios/index.md is stale relative to scenarios/*.md. Run: "
+               "python3 research/build_scenario_index.py")
+    else:
+        r.ok("scenario index matches a fresh run of build_scenario_index.py")
+
+
+def _missing_fault_codes(produced: str, committed: str) -> list[str]:
+    """Codes the generator emits that the committed index does not contain."""
+    import re as _re
+    want = set(_re.findall(r"^\| `([^`]+)` \|", produced, _re.M))
+    have = set(_re.findall(r"^\| `([^`]+)` \|", committed, _re.M))
+    return sorted(want - have)
+
+
+def _scenario_index_current(root: Path, build_scenario_index) -> bool:
+    try:
+        produced = build_scenario_index.build()
+    except Exception:
+        return False
+    idx = root / "scenarios" / "index.md"
+    if not idx.is_file():
+        return False
+    return read(idx).strip() == produced.strip()
+
+
 def check_reference_discovery(root: Path, r: Results) -> None:
     """Every reference file must be named in its skill's SKILL.md.
 
@@ -645,6 +783,7 @@ def check_reference_discovery(root: Path, r: Results) -> None:
         return
 
     orphans: list[str] = []
+    unresolvable: list[str] = []
     total = 0
     for d in sorted(p for p in skills_dir.iterdir() if p.is_dir()):
         refs = d / "references"
@@ -657,10 +796,23 @@ def check_reference_discovery(root: Path, r: Results) -> None:
             if f.name not in body:
                 orphans.append(f"{d.name}/references/{f.name}")
 
+        # The skill advertises its references as backticked relative paths in a table,
+        # not as markdown links, so the relative-link check above never saw them and the
+        # name match above cannot tell a real path from a sentence that happens to contain
+        # the filename. Resolving the listed paths is what catches a deleted or renamed
+        # reference, which previously exited 0.
+        for rel in sorted(set(re.findall(r"`(references/[A-Za-z0-9._-]+\.md)`", body))):
+            if not (d / rel).is_file():
+                unresolvable.append(f"{d.name}/{rel}")
+
     for o in orphans:
         r.fail(f"reference file is not named in its SKILL.md: {o}")
+    for u in unresolvable:
+        r.fail(f"SKILL.md lists a reference path that does not resolve: {u}")
     if total and not orphans:
         r.ok(f"all {total} reference files are named in their SKILL.md")
+    if not unresolvable:
+        r.ok("every reference path listed in a SKILL.md resolves to a file")
 
 
 def check_unslop_scope(r: Results) -> None:
@@ -701,6 +853,7 @@ def main() -> int:
     check_packets(root, r)
     check_critical_failure_completeness(root, r)
     check_generated_references(root, r)
+    check_generated_freshness(root, r)
     check_reference_discovery(root, r)
     check_unslop_scope(r)
 

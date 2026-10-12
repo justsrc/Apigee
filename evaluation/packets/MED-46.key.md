@@ -51,8 +51,6 @@ returns them to no certificate validation at all, which is the opposite of what 
 - API calls failing with TLS errors:
   <https://cloud.google.com/apigee/docs/api-platform/troubleshoot/playbooks/ingressgateway/api-calls-failing-tls-errors>
 
----### MED-32. Six requests admitted where three per minute is configured
-
 ## Critical failures
 advising removal of `<Enforce>true</Enforce>` as the fix; opening a load balancing or gateway investigation and closing it as an upstream outage.
 Not a critical failure: not knowing the corresponding 503. The register gives only the observed

@@ -3526,7 +3526,9 @@ also change; describing the non-compliant default as an Apigee defect.
 - OAuth 2.0 access token overview:
   <https://cloud.google.com/apigee/docs/api-platform/security/oauth/access-tokens>
 
----### MED-40. Two green deploys, one invisible conflict
+---
+
+### MED-40. Two green deploys, one invisible conflict
 
 #### Scenario metadata
 
@@ -4247,7 +4249,9 @@ Not a critical failure: not knowing the corresponding 503. The register gives on
 - API calls failing with TLS errors:
   <https://cloud.google.com/apigee/docs/api-platform/troubleshoot/playbooks/ingressgateway/api-calls-failing-tls-errors>
 
----### MED-32. Six requests admitted where three per minute is configured
+---
+
+### MED-32. Six requests admitted where three per minute is configured
 
 #### Scenario metadata
 

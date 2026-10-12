@@ -212,11 +212,13 @@ def title_of(text: str) -> str:
     return re.sub(r"<[^>]+>", "", m.group(1)).replace("*", "").strip()
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--stdout", action="store_true")
-    args = ap.parse_args()
+def build() -> str:
+    """Render the fault-code index and return it as text, without writing anything.
 
+    tests/check_repo.py calls this to compare the committed index against a fresh render.
+    That comparison is the only thing that can tell a current generated file from a
+    hand-edited or stale one, because both are equally valid Markdown.
+    """
     policies = sorted(PAGES.glob("*.txt"))
     runtime: list[tuple[str, str, str, str]] = []   # code, status, cause, url
     deployment: list[tuple[str, str, str]] = []    # name, cause, url
@@ -430,16 +432,30 @@ def main() -> int:
             A(f"- {title}")
         A("")
 
-    body = "\n".join(lines)
+    return "\n".join(lines)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--stdout", action="store_true")
+    args = ap.parse_args()
+
+    body = build()
     if args.stdout:
         print(body)
         return 0
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(body, encoding="utf-8")
+    counts = _coverage_line(body)
     print(f"wrote {OUT}")
-    print(f"  {len(runtime)} runtime codes, {len(deployment)} deployment errors, {len(fault_vars)} fault variables")
+    print(f"  {counts}")
     return 0
+
+
+def _coverage_line(body: str) -> str:
+    m = re.search(r"^Coverage: (.+)$", body, re.M)
+    return m.group(1) if m else "counts unknown"
 
 
 if __name__ == "__main__":

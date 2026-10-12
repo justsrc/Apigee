@@ -74,8 +74,6 @@ Treating only the token type as the difference. The other three changes ship wit
 - OAuth 2.0 access token overview:
   <https://cloud.google.com/apigee/docs/api-platform/security/oauth/access-tokens>
 
----### MED-40. Two green deploys, one invisible conflict
-
 ## Critical failures
 editing the developer portal or SDKs instead of the token endpoint; enabling compliance without warning that the error response shape and the lifetime value types
 also change; describing the non-compliant default as an Apigee defect.
