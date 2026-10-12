@@ -114,10 +114,24 @@ def rows_of_loose(block: str) -> list[list[str]]:
 
 def clean(cell: str) -> str:
     cell = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", cell)   # links -> text
-    # Keep element names. Cause text frequently reads "specified in the <Allow> element",
-    # and blanking the tag leaves a sentence with a hole in it.
-    cell = re.sub(r"</?([A-Za-z][A-Za-z0-9_.-]*)>", r"\1", cell)
+    # pandoc escapes angle brackets in some cells as "\<URL\>". Unescape them so the
+    # cause text reads cleanly instead of carrying stray backslashes.
+    cell = cell.replace("\\<", "<").replace("\\>", ">")
+    # google wraps some table cells in markup such as
+    # <span sheets-...>steps.javacallout.ExecutionError</span>. A tag that has
+    # attributes, or a closing tag, is a wrapper rather than an Apigee element
+    # reference, so drop it whole. Leaving the closing tag to the element-name rule
+    # below produced the fault code "steps.javacallout.ExecutionErrorspan" and kept a
+    # raw <span> in the generated index.
+    cell = re.sub(r"<[A-Za-z][A-Za-z0-9_.-]*\s[^>]*>", "", cell)   # tag with attributes
+    cell = re.sub(r"</[A-Za-z][A-Za-z0-9_.-]*\s*>", "", cell)      # closing tag
+    # Keep a bare element name. Cause text frequently reads "specified in the <Allow>
+    # element", and blanking the tag leaves a sentence with a hole in it.
+    cell = re.sub(r"<([A-Za-z][A-Za-z0-9_.-]*)>", r"\1", cell)
     cell = re.sub(r"\*\*", "", cell)
+    # The same wrapper splits a code span into "` `value`". Merge the broken opener so
+    # the value renders as one span instead of one holding a leading space.
+    cell = re.sub(r"`\s+`", "`", cell)
     cell = cell.replace("``", "`")
     return re.sub(r"\s+", " ", cell).strip()
 

@@ -607,6 +607,32 @@ def check_critical_failure_completeness(root: Path, r: Results) -> None:
         r.ok(f"all {checked} bold critical-failure conditions reach their answer keys in full")
 
 
+def check_generated_references(root: Path, r: Results) -> None:
+    """Generated reference files must not carry raw HTML or escaped angle brackets.
+
+    google wraps some table cells in markup, and the extractor used to pass the wrapper
+    through. That produced a fault code of "steps.javacallout.ExecutionErrorspan" and
+    left a raw <span> in the index. The generator now strips wrappers and unescapes
+    "\\<URL\\>"; this catches a regression.
+    """
+    refs = root / ".agents" / "skills" / "apigee-support-core" / "references"
+    files = sorted(refs.glob("*.md")) if refs.is_dir() else []
+    if not files:
+        return
+
+    bad = []
+    for p in files:
+        text = read(p)
+        for marker in ("<span", "<div", "<table", "sheets-userformat", "<\\"):
+            if marker in text:
+                bad.append(f"{p.name} contains {marker!r}")
+
+    for hit in bad:
+        r.fail(f"generated reference has raw markup: {hit}")
+    if not bad:
+        r.ok("generated reference files carry no raw HTML or escaped angle brackets")
+
+
 def check_unslop_scope(r: Results) -> None:
     """unslop is a writing skill, not a diagnosis skill. Record that explicitly.
 
@@ -644,6 +670,7 @@ def main() -> int:
     check_code_blocks(root, r)
     check_packets(root, r)
     check_critical_failure_completeness(root, r)
+    check_generated_references(root, r)
     check_unslop_scope(r)
 
     def dump(title: str, items: list[str]) -> None:
