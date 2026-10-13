@@ -2,19 +2,50 @@
 
 Recoverable note so no work lives only in conversation context.
 
-## Status as of 2026-10-13, end of this pass
+## Status as of 2026-10-13, later in the day
+
+Re-verified against the repository, not against the previous pass's summary. Three items the
+earlier note listed as still open are in fact fixed; the note is corrected below and the
+original wording is kept in git history.
+
+- **MED-09's Quota-versus-SpikeArrest characterisation is fixed.** `cb057df` replaced "Keep the
+  Quota policy for the long-window allowance" (the Quota in evidence was one minute) with "Move
+  the allowance to a longer window and put the bursts in SpikeArrest", and states the comparison
+  chart's own wording. Verified at `scenarios/medium.md` "Correct Remediation".
+- **MED-20 no longer hands over the discriminator at turn 1.** The `<LoadBalancer>` line sits
+  under `#### Diagnostic evidence`, which is turn-2 material. `make_packets.py` emits only the
+  initial ticket, initial evidence and diagnostic evidence, so the turn-1 packet carries no
+  load-balancer mention. Verified against the generated packet, not the source.
+- **MED-27's non-reproduction row has its subject.** "Two maintainers tried to reproduce this"
+  is in the turn-2 prompt at line 28, so the row is no longer unscoreable.
+- **HARD-09's reconciliation checks out.** `load-balancing-across-backend-servers.txt:350` says
+  Apigee checks health every five minutes and returns the server to rotation, which is the
+  sentence the key relies on. The key presents it as one of two readings rather than asserting
+  it, which is the right shape.
+- **EASY-14's fault code disclosure is accurate.** `messaging.adaptors.http.flow.SslHandshakeFailed`
+  is at `mon_fault-codes.txt:77` and `options-configuring-tls.txt:8`, and is correctly absent
+  from the policy error index because no policy raises it.
+
+`AM-VerifyToken` was resolved by `8966ded` (now `JWT`). It is listed as live in
+`evaluation/outstanding-errors.md`, which is stale on that point.
+
+## Status as of 2026-10-13, end of the earlier pass
 
 Phases 1, 2, 3 and 4 are done. Twenty commits landed on top of the thirteen listed below.
-Final gate: **PROVISIONAL**, 28 PASS, 0 FAIL, 0 BLOCKED, 3 UNVERIFIED across 31 criteria on the
-full run with the URL audit; 27 PASS, 1 BLOCKED offline. E5, G1 and G2 stay UNVERIFIED because
-no model has been run under the A/B design, and that is the correct result.
+Gate at that point: **PROVISIONAL**, 28 PASS, 0 FAIL, 0 BLOCKED, 3 UNVERIFIED across 31 criteria
+on the full run with the URL audit; 27 PASS, 1 BLOCKED offline. E5, G1 and G2 stay UNVERIFIED
+because no model has been run under the A/B design, and that is the correct result.
+
+The criterion count was 31 at that point. `de540e5` added F6 as a 32nd, which is why the counts
+here and in `evaluation/RELEASE-REPORT.md` section 0 read 29 PASS across 32 today.
 
 Run 2 exists: four scenarios, both turns, one arm, scored and retained in
 `evaluation/results/run-2/`. It is a path exercise, declared as such in
 `evaluation/model-eval-protocol.md` before a single answer was collected, with its deviation
 logged before the run. It does not meet the A/B design and moves nothing on the gate.
 
-Still open for a future pass, none of it blocking:
+Still open for a future pass, none of it blocking. Three of the five were re-checked and are
+now closed, as recorded in the section above:
 
 - **MED-27's rubric row** was unscoreable and now has its subject in the diagnostic evidence.
   Re-check whether the turn-2 packet still discriminates; nothing has been re-run since.

@@ -9,14 +9,23 @@ Date: 2026-10-12. Baseline: git tag `baseline-v0.1` at `ce3d96d`.
 
 ## 0. Current status
 
-Written 2026-10-13. Read this before section 1, which describes the project as it stood at
-`832bbca`.
+Written 2026-10-13, corrected 2026-10-13 after re-running the gate. Read this before section 1,
+which describes the project as it stood at `832bbca`.
 
-`python3 tests/release_gate.py` returns **PROVISIONAL**: 28 PASS, 0 FAIL, 0 BLOCKED,
-3 UNVERIFIED across 31 criteria, on the full run including the live URL audit. The same run
-offline, with `--skip-urls`, is 27 PASS, 1 BLOCKED, 3 UNVERIFIED and reports NOT QUALIFIED,
-because the URL criterion is recorded as BLOCKED rather than passed when the network run is
-skipped.
+The earlier version of this section said "31 criteria" and "27 PASS offline". Both were the
+pre-`de540e5` count. That commit added F6 as a 32nd criterion and moved the offline run from
+27 to 28 PASS. Nothing else about the verdict changed.
+
+Current figures, re-run on 2026-10-13 against `898d9d4`:
+
+`python3 tests/release_gate.py` returns **PROVISIONAL**: 29 PASS, 0 FAIL, 0 BLOCKED,
+3 UNVERIFIED across 32 criteria, on the full run including the live URL audit. The same run
+offline, with `--skip-urls`, is 28 PASS, 0 FAIL, 1 BLOCKED, 3 UNVERIFIED and reports NOT
+QUALIFIED, because the URL criterion is recorded as BLOCKED rather than passed when the network
+run is skipped.
+
+The 32 criterion IDs are A1-A5, B1-B4, C1-C5, D1-D4, E1-E5, F1-F6, G1-G3. F6
+("Evaluation isolation is enforced, not instructed") is the one `de540e5` added.
 
 **PROVISIONAL is the honest result and is not a step toward a green build.** E5, G1 and G2
 ask for a model to have actually answered the scenarios. No model has been run against this
@@ -34,14 +43,15 @@ which returns PASS for every possible value of the thing it checks, and C4 mappe
 | | At 832bbca | Now |
 | --- | --- | --- |
 | Verdict | NOT QUALIFIED | PROVISIONAL |
-| Criteria | 30 | 31 |
-| PASS / FAIL / BLOCKED / UNVERIFIED | 26 / 0 / 1 / 3 | 28 / 0 / 0 / 3 |
+| Criteria | 30 | 32 |
+| PASS / FAIL / BLOCKED / UNVERIFIED (full run) | 26 / 0 / 1 / 3 | 29 / 0 / 0 / 3 |
+| PASS / FAIL / BLOCKED / UNVERIFIED (offline) | 26 / 0 / 1 / 3 | 28 / 0 / 1 / 3 |
 | Scenarios with a recorded technical review | 53 of 103 | 103 of 103 |
 | Cited URLs | 168 unique, 842 occurrences | 172 unique, 885 occurrences |
 | Citations that permanently redirect | 108 | 112 |
 | Cached pages with a verified URL | 289 of 294 | 300 of 305 |
 | Manifest rows recorded at fetch time | 109 | 120 |
-| Fault-injection probes | 25 | 32 |
+| Fault-injection probes | 25 | 34 |
 | Origin classification | 34 real-world, 32 documented, 37 synthetic | 34 real-world, 31 documented, 38 synthetic |
 
 The fault-code index now reports 195 runtime codes, 116 deployment errors and 33 fault
