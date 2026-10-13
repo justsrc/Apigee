@@ -7,13 +7,19 @@
 >
 > Still live as of 2026-10-13:
 >
-> - **Unsourced trace step names.** `AM-VerifyToken` is still used as if it came from a real
->   trace (`scenarios/hard.md`). The other invented name this entry cites, `AM-Count-Tokens`,
->   no longer appears anywhere in the repository.
 > - **EASY-14's fault code is still not in the policy error index.**
 >   `messaging.adaptors.http.flow.SslHandshakeFailed` is not raised by a policy page. The
 >   scenario now says so in a caveat of its own, so the gap is disclosed rather than silent,
->   but the code is still absent from `references/error-codes.md`.
+>   but the code is still absent from `references/error-codes.md`. Re-checked 2026-10-13: the
+>   caveat's two citations are both real, `mon_fault-codes.txt:77` and
+>   `options-configuring-tls.txt:8`, and the code is correctly absent from the index because no
+>   policy raises it.
+>
+> No longer live, re-checked 2026-10-13:
+>
+> - **`AM-VerifyToken` is resolved.** `8966ded` replaced it with `JWT` in `scenarios/hard.md`
+>   and added the note that trace step names are whatever the team named each policy. Zero
+>   occurrences remain in `hard.md`. This bullet previously listed it as still live.
 >
 > No longer live: the two-turn release (`make_packets.py` implements turn 2), the rubric's
 > missing weights and pass mark (`evaluation/rubric.md` now defines both),

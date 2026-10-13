@@ -18,10 +18,15 @@ Severity, as defined for this project:
 | Status | Count |
 | --- | --- |
 | Open, blocking release | 0 |
-| Fixed and covered by a test | 18 |
-| Fixed, coverage recorded, no dedicated probe yet | 6 |
+| Fixed and covered by a test | 21 |
+| Fixed, coverage recorded, no dedicated probe yet | 7 |
 | Open, accepted with documented reason | 8 |
 | Open, awaiting external evidence | 2 |
+
+Three entries changed on 2026-10-13. D-035 adds the seventh fixed-without-a-dedicated-probe
+entry. D-036 adds two probes for the packet generator. The isolation-route classifier is what
+moves fixed-and-covered from 19 to 21 alongside them: `tests/test_isolation_classify.py` is a
+test file of its own and `release_gate.py` F6 fails if it regresses.
 
 ## Later additions
 
@@ -632,7 +637,14 @@ title-leak findings are superseded rather than outstanding.
 
 ### D-032 MEDIUM — An invented trace-step name was presented as an Apigee product term
 
-- **Affected** `scenarios/hard.md` HARD-04 and HARD-13; `scenarios/adversarial.md` ADV-05
+- **Affected** `scenarios/hard.md` HARD-04 and HARD-13; `scenarios/adversarial.md` ADV-07
+
+Corrected 2026-10-13: this entry recorded ADV-05, which was wrong. `AM-Enrich` appeared at
+`scenarios/adversarial.md:529` in the pre-fix tree, inside the block that opens at
+`509: ### ADV-07. Symptom points at the wrong component` (ADV-05 runs 351-435 and never
+contained it). `git show 3d6c521:scenarios/adversarial.md` confirms the line, and
+`8966ded` changed it. The scenario ID was the only error; the defect, the diagnosis and the
+fix are as recorded below.
 
 **What failed.** `AM-VerifyToken` appeared in HARD-04's diagnostic evidence and
 verification steps and in HARD-13's diagnostic evidence, described as the VerifyJWT step in
@@ -659,6 +671,109 @@ added, matching `easy.md:994-995`. `AM-Enrich` in `adversarial.md` had the same 
 JavaScript policy and is now `JS-Enrich`.
 
 **Status: FIXED.**
+
+### D-036 HIGH — The packet generator silently dropped a "not a critical failure" ruling
+
+- **Affected** `tests/make_packets.py`, `evaluation/packets/MED-09.key.md`,
+  `evaluation/packets/MED-11.key.md`
+
+Found 2026-10-13 by the same blinded review as D-035, and the more mechanical of the two.
+
+**What failed.** Two separate losses, both invisible in every existing check.
+
+1. MED-09 carries two `#### Not a critical failure:` rulings. `section()` returns the first
+   matching heading, so the second never reached the key. The second is the one `cb057df`
+   added to stop the grader failing a documented-correct caveat, so the generator was
+   reinstating exactly the defect that commit fixed, and the key still looked complete.
+2. A `#### Not a critical failure: <subject>` heading carries its subject in the heading line.
+   The generator stripped the heading to `## Not A Critical Failure` and kept only the body, so
+   MED-11's key opened with "finding, not a wrong answer. It becomes wrong only when ..." with
+   no antecedent. A grader cannot apply a ruling that does not name what it exempts.
+
+**Why it matters.** These are load-bearing. A critical failure fails the scenario whatever the
+score, so the ruling that exempts an answer from one is the difference between a documented-
+correct answer passing and failing. Neither loss was covered: the existing critical-failure
+completeness check only reads the bold `**Critical failures:**` form, and nothing looked at the
+`Not a critical failure` headings at all.
+
+**Fix.** `make_packets.py` gained `sections()`, which returns every match with the heading's
+own subject carried in, and `KEY_EXTRA` now goes through it. `check_repo.py` gained
+`check_not_a_critical_failure_completeness`, which reads the source block and requires each
+ruling's opening to appear in the key.
+
+**Status: FIXED and covered.** Two probes: `answer-key-not-a-critical-failure-loses-subject`
+and `answer-key-second-ruling-dropped`. The second probe initially reported a **false pass**
+against the first version of the new check, which validated only the first ruling and would
+have left the dropped-ruling case undetected. The check was corrected to inspect every ruling
+and both probes now fire. That false pass is recorded here because a check written to catch a
+class of silent loss, which itself silently lost one of them, is the part worth keeping.
+
+### D-035 HIGH — A critical failure rested on a claim the corpus does not support
+
+- **Affected** `scenarios/easy.md` EASY-15
+
+Found 2026-10-13 by a blinded review of the 12 scenarios whose model-visible prompts are
+byte-identical between `3d6c521` and `898d9d4`. Recorded because it is the one case in that
+review where the current key was worse than the historical one.
+
+**What failed.** The remediation added a critical failure for "proposing a shared flow as an
+aggregate limit while presenting it as one", and justified it by asserting that "a shared flow
+executes once per proxy that invokes it, each with its own counter". Nothing in the 305-page
+corpus supports that. `quota-policy.txt` never mentions shared flows; `shared-flows.txt`
+describes deployment and reuse and does not state how a policy inside a shared flow is
+instantiated per calling proxy. The key cites the Quota page and the Quota/SpikeArrest
+comparison page, and neither is the source of the instantiation claim.
+
+The documented part is real and still there: `quota-policy.txt:14` says quotas apply to
+individual API proxies and are not distributed among them, and `:138` scopes counters to the
+API proxy containing the policy. What the sources do not settle is what a Quota policy in a
+parent shared flow does to that scope.
+
+**Why it matters.** A critical failure fails the scenario whatever the score. This one failed
+every answer that proposed a shared flow, on the strength of a mechanism the documentation in
+reach does not state, and the review could not find a page that would settle it. It is the
+same shape as D-028: a scenario penalising the answer the documentation supports, except that
+here the penalty was added rather than removed, and by the same class of reasoning.
+
+**Fix.** The critical failure is gone. The key now states the documented scope rule, says
+plainly that the shared-flow case is unsettled by the documentation in reach, and grades only
+the documented part. Proposing a parent shared flow while flagging the gap is explicitly **not**
+a critical failure. Presenting it as a documented guarantee still scores 0 on technical
+correctness, so the work the scenario sets is unchanged; what is removed is the unfounded
+penalty.
+
+The remediation, ground truth and prompts were not otherwise touched, and the turn-1 and turn-2
+prompts are byte-identical to the pre-fix packets, so the task's difficulty is unchanged.
+
+**Status: FIXED.** No dedicated probe; the defect is in prose and the corpus search that
+demonstrates it is the evidence.
+
+### D-037 MEDIUM — MED-18's remediation contradicted the scenario's own evidence
+
+- **Affected** `scenarios/medium.md` MED-18
+
+Found 2026-10-13 by the same blinded review as D-035 and D-036, and recorded because it is
+the second case of a current key being worse than the historical one it replaced.
+
+**What failed.** The remediation `970e75a` added reads, in the hotfix paragraph: "The same
+property, read as `false` on this cluster, is what excludes the MART defect". The scenario's
+turn-2 diagnostic evidence says the opposite: MART is on `1.16.0` **and** "the installation
+has both Workload Identity Federation enabled and an HTTP forward proxy configured". WIF is
+therefore present, the property would read `true`, and the sentence asserts an exclusion the
+evidence contradicts.
+
+Checked directly, the key's "Ground-Truth Resolution" states both conditions are required and
+that either being absent is enough to exclude the issue, while the remediation paragraph says
+this cluster is excluded. A grader cannot score an answer consistently against both.
+
+**Fix.** The paragraph now says what the evidence supports: MART being affected means WIF and
+the forward proxy are both present here, so the guardrails ServiceAccount absence is a real
+thing to check for on this installation rather than something already ruled out, and
+`gcp.federatedWorkloadIdentity.enabled` is worth reading directly because the two defects gate
+on overlapping but different facts.
+
+**Status: FIXED.** No dedicated probe. MED-18's changed sections are held back rather than
+prompt-visible, and the corpus read is the evidence.
 
 ### D-033 HIGH — The recorded baseline commit was downstream of the remediation it was meant to precede
 
