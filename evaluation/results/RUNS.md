@@ -154,3 +154,31 @@ returns something else.
 It measures the present system on the present suite. It cannot show the skill caused the
 result, because the always-loaded `SKILL.md` files were reported byte-identical across the
 selected baseline, so no valid comparison exists.
+
+## Run 4 pilot, declared 2026-10-13, state recorded 2026-10-14
+
+| Field | Value |
+| --- | --- |
+| Run ID | `run-4`, see `evaluation/results/run-4/` |
+| Purpose | Smallest defensible success-rate estimate on a declared sample |
+| Scenarios | 12: 3 easy, 3 medium, 3 hard, 2 adversarial, 1 regression + REG-08, fixed by rule |
+| Model | `opencode/space-bunny-free`, a different provider from the exhausted OpenRouter tier |
+| Rubric | Route 1, frozen, unchanged |
+| Protocol | `evaluation/results/run-4/PILOT-PROTOCOL.md`, written before collection |
+| Isolation | Structurally isolated (12 deterministic checks). Live breach INCONCLUSIVE. |
+| Subagents | Excluded. NO-GO, established by direct probe, not by inference. |
+
+### Status
+
+**Zero answers collected.** No pass rate exists.
+
+The OpenRouter free window is closed until 2026-10-14 05:30 IST. The `opencode/*` route works
+but is burst rate-limited, and reports the limit as a misleading `provider.auth` message that
+reads as an entitlement refusal.
+
+### Correction to the record
+
+`evaluation/WORKING-STATE.md` previously stated that `opencode/*` free models return 403 from
+the CLI and that headless execution worked for `openrouter/*` entries only. That is wrong and
+it was load-bearing, because it placed a working route outside consideration. Corrected at
+commit `0596f15`; the original text is preserved under the correction.
