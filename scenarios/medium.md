@@ -1359,10 +1359,12 @@ configurations, neither of which is in the bundle.
 #### Critical failures: recommending repeated manual map edits as the durable fix; blaming
 the `30` value in `test` for the production failure.
 
-#### Not a critical failure: stating that the two environments differ. That is the
-finding, not a wrong answer. It becomes wrong only when it is turned into a claim that
-both environments are broken, or that the difference alone proves a misconfiguration,
-which is the opposite of what the evidence supports.
+#### Not a critical failure
+
+Not a critical failure: stating that the two environments differ. That is the finding, not a
+wrong answer. It becomes wrong only when it is turned into a claim that both environments are
+broken, or that the difference alone proves a misconfiguration, which is the opposite of what
+the evidence supports.
 
 #### References
 
@@ -2186,9 +2188,14 @@ helm upgrade operator apigee-operator/ \
 Then check the neighbouring 1.16.0 defect, fixed in the same hotfix: on AKS and EKS with
 Federated Workload Identity, the Kubernetes ServiceAccount `apigee-operator-guardrails-sa` is not
 created, because the chart template's initial `if` condition omits
-`.Values.gcp.federatedWorkloadIdentity.enabled`. The same property, read as `false` on this
-cluster, is what excludes the MART defect, so read it rather than inferring the feature state
-from the MART behaviour.
+`.Values.gcp.federatedWorkloadIdentity.enabled`.
+
+That property is worth reading directly rather than inferring from MART behaviour, because the
+two defects gate on overlapping but different facts. On this cluster MART *is* affected, which
+means WIF and the forward proxy are both present here, so the guardrails ServiceAccount
+absence is a real thing to check for on this installation rather than something already ruled
+out. Read `gcp.federatedWorkloadIdentity.enabled` to confirm it; the MART symptom is not a
+substitute for reading it.
 
 #### Verification
 

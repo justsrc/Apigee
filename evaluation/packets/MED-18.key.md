@@ -54,9 +54,14 @@ helm upgrade operator apigee-operator/ \
 Then check the neighbouring 1.16.0 defect, fixed in the same hotfix: on AKS and EKS with
 Federated Workload Identity, the Kubernetes ServiceAccount `apigee-operator-guardrails-sa` is not
 created, because the chart template's initial `if` condition omits
-`.Values.gcp.federatedWorkloadIdentity.enabled`. The same property, read as `false` on this
-cluster, is what excludes the MART defect, so read it rather than inferring the feature state
-from the MART behaviour.
+`.Values.gcp.federatedWorkloadIdentity.enabled`.
+
+That property is worth reading directly rather than inferring from MART behaviour, because the
+two defects gate on overlapping but different facts. On this cluster MART *is* affected, which
+means WIF and the forward proxy are both present here, so the guardrails ServiceAccount
+absence is a real thing to check for on this installation rather than something already ruled
+out. Read `gcp.federatedWorkloadIdentity.enabled` to confirm it; the MART symptom is not a
+substitute for reading it.
 
 ## Verification
 Confirm API Products, apps and developers load. Then confirm proxy deployment still works, because
