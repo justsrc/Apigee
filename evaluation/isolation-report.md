@@ -256,3 +256,40 @@ claiming that evaluation was isolated.
 
 The honest summary is unchanged by any of this. The boundary is implemented and structurally
 verified. It has not been demonstrated to hold against a model trying to cross it.
+
+## Addendum, 2026-10-13 night: the provider routes, re-established from observation
+
+The execution-path table above was written from the earlier session and is wrong in one
+important respect. Everything below was observed directly today, not inferred.
+
+**`opencode/*` works from the CLI.** The earlier entry said those models return 403 with
+"free tier can only be used from within OpenCode". That is not an entitlement wall. The same
+command returned `PONG` repeatedly, from the repository root and from an unrelated temporary
+directory. `opencode/*` is a different provider from `openrouter/*`, so it is capacity the
+exhausted OpenRouter daily quota does not consume.
+
+**The real limit is burst rate limiting, misreported.** A rate-limited call returns
+`provider.auth` with that same "free tier" message. Two requests fired back to back behave
+differently from two spaced 90 seconds apart. An unchanged configuration flips between
+success and this error across repeated probes, so the message carries no information about
+entitlement. `tests/test_answering_isolation.py` pins this: that error must classify
+INDETERMINATE and never become a BLOCKED route.
+
+**A permission config can surface as the same misleading error.** An `opencode.jsonc` naming
+actions the server does not recognise produced byte-identical output to the rate-limit case,
+and a config that had just passed failed a minute later with no change to its contents. The
+signal is therefore not a usable diagnostic for either cause, and config validity has to be
+established separately.
+
+**No live breach result yet.** Three attempts to breach the boundary against the working
+route all returned that provider error, so they are INDETERMINATE and nothing was
+demonstrated. The boundary remains structurally verified and undemonstrated against a live
+model, exactly as before. The difference now is that a route exists to demonstrate it with
+once the burst limit allows.
+
+**Subagents remain NO-GO.** The earlier probe is unchanged and was not retested today
+because it does not depend on any provider: a subagent was asked to read the skill, an answer
+key, a scenario file and a cached documentation page, and **all four reads succeeded with
+zero denials, the key returned in full**. Child sessions do not apply the parent's loaded
+project configuration. Prompt text is a detection control, not prevention, and no quota
+argument changes that.

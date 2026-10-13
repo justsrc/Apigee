@@ -217,6 +217,29 @@ no graded surface on it.
 
 ## Model execution, established
 
+**Corrected 2026-10-13 later.** The claim below that `opencode/*` returns 403 from the CLI
+is wrong. It works. Probed repeatedly on 2026-10-13:
+
+    opencode run --auto --model opencode/space-bunny-free --format json "Reply with exactly: PONG"
+
+returned `PONG` on many separate occasions, from the repository root and from an unrelated
+temporary directory. `opencode/*` is a different provider from `openrouter/*`, so it is
+capacity the exhausted OpenRouter daily quota does not touch.
+
+The real constraint is not an auth wall. It is **burst rate limiting**, and the provider
+reports it badly: a rate-limited call returns
+
+    provider.auth: OpenCode's free tier can only be used from within OpenCode.
+
+which reads as an entitlement refusal and is not one. Two requests fired in quick succession
+behave differently from two spaced 90 seconds apart, and repeated probes of an unchanged
+configuration flip between success and this error. Anyone treating the message as proof that
+the route is unavailable will conclude the run is impossible while a working route sits in
+front of them. Treat `provider.auth` with that message as INDETERMINATE, never as evidence.
+
+The original text is preserved below.
+
+---
 Headless CLI works for `openrouter/<model>:free` entries only. `opencode/*` free-tier
 models return 403 from the CLI ("free tier can only be used from within OpenCode"), and
 paid OpenRouter models return 402 because OpenCode requests `max_tokens: 128000` while the
