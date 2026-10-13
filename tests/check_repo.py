@@ -673,6 +673,85 @@ def check_critical_failure_completeness(root: Path, r: Results) -> None:
         r.ok(f"all {checked} bold critical-failure conditions reach their answer keys in full")
 
 
+def source_not_a_critical_failures(block: str) -> list[str]:
+    """Every 'Not a critical failure' ruling in a scenario block, subjects kept.
+
+    Scenarios write it as a `#### Not a critical failure: <subject>` heading, sometimes
+    with the subject carried in the heading itself and the reasoning on the lines below.
+    The packet generator keeps the heading and takes the body, so a heading whose
+    subject never made it into the body produces a key section that begins mid-sentence
+    with no antecedent. That is what MED-11's key did: `make_packets.py` stripped the
+    heading to `## Not A Critical Failure` and kept "finding, not a wrong answer. It
+    becomes wrong only when...", which a grader cannot apply because nothing names the
+    finding it exempts.
+
+    Returns a list rather than one string because MED-09 carries two rulings and the
+    generator used to emit only the first. Returning the first here would have left the
+    second unchecked, which is the false pass probe `answer-key-second-ruling-dropped`
+    demonstrates.
+    """
+    lines = block.splitlines()
+    out = []
+    for i, line in enumerate(lines):
+        m = re.match(r"^#{2,6}\s*Not a critical failure\b[:\s]*(.*)$", line.strip(), re.I)
+        if not m:
+            continue
+        inline = m.group(1).strip()
+        body = [x.strip() for x in lines[i + 1:]
+                if x.strip() and not re.match(r"^#{1,6}\s", x)]
+        text = " ".join(x for x in [inline] + body if x)
+        if text:
+            out.append(text)
+    return out
+
+
+def check_not_a_critical_failure_completeness(root: Path, r: Results) -> None:
+    """A 'Not a critical failure' ruling must reach its key with its subject attached.
+
+    A critical failure fails the scenario whatever the score, so the ruling that exempts an
+    answer from one is load-bearing. If the section reaches the key without naming what it
+    exempts, the ruling cannot be applied at all, and the exemption is silently lost.
+    """
+    packets = root / "evaluation" / "packets"
+    if not packets.is_dir():
+        return
+
+    broken, checked = [], 0
+    for path in sorted((root / SCENARIOS_DIR).glob("*.md")):
+        if path.name == "index.md":
+            continue
+        for sid, block in find_scenario_blocks(read(path)):
+            rulings = source_not_a_critical_failures(block)
+            if not rulings:
+                continue
+            key = packets / f"{sid}.key.md"
+            if not key.is_file():
+                continue
+            checked += len(rulings)
+            key_words = _normalized_words(read(key))
+            if "not a critical failure" not in key_words:
+                broken.append(f"{sid} ({len(rulings)} ruling(s) absent from the key)")
+                continue
+            for n, ruling in enumerate(rulings, 1):
+                # The subject is the opening of the ruling. Requiring it to be present is
+                # what catches a body extracted without its heading, and checking every
+                # ruling is what catches one of two being dropped.
+                head = " ".join(_normalized_words(ruling).split()[:6])
+                if head and head not in key_words:
+                    which = f"ruling {n} of {len(rulings)}" if len(rulings) > 1 else "ruling"
+                    broken.append(f"{sid} ({which} lost its subject)")
+
+    if broken:
+        r.fail(f"{len(broken)} 'Not a critical failure' ruling(s) unusable in the key: "
+               f"{'; '.join(broken[:6])}{'...' if len(broken) > 6 else ''}. A ruling that "
+               f"does not name what it exempts cannot be applied by a grader. Re-run: "
+               f"python3 tests/make_packets.py --all --turn 1 && "
+               f"python3 tests/make_packets.py --all --turn 2")
+    elif checked:
+        r.ok(f"all {checked} 'Not a critical failure' rulings reach their keys with their "
+             f"subject")
+
+
 def check_generated_references(root: Path, r: Results) -> None:
     """Generated reference files must not carry raw HTML or escaped angle brackets.
 
@@ -990,6 +1069,7 @@ def main() -> int:
     check_code_blocks(root, r)
     check_packets(root, r)
     check_critical_failure_completeness(root, r)
+    check_not_a_critical_failure_completeness(root, r)
     check_generated_references(root, r)
     check_generated_freshness(root, r)
     check_reference_discovery(root, r)

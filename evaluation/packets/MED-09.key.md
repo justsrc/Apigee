@@ -1,11 +1,21 @@
 # MED-09 answer key, do not show to the agent
 
 ## Not A Critical Failure
+raising the `500` versus `429` question. The Quota policy
 reference documents `500` in its runtime error table and `429` in a closing note on the
 same page, so noticing that the observed status is not the one an agent would expect is
 correct reading of the evidence rather than a dispute with the scenario. An answer that
 keeps the diagnosis intact and asks how the Quota fault is being surfaced is the correct
 answer; stopping there without completing the remediation is incomplete, not wrong.
+
+## Not A Critical Failure
+noting that `<Distributed>` and `<Synchronous>` both default
+to `false`, and that the Quota policy page says you might exceed the quota on that
+configuration. The evidence does not disclose either element, so an agent that raises the
+counter-distribution caveat has read the reference correctly and must not be scored below 4
+on Technical correctness for it. The caveat does not rescue "the quota is miscounting",
+because the diagnostic evidence says counting per client per minute is accurate; treat the
+two as separable claims, as the scenario's own analysis of the status code does.
 
 ## Ground-Truth Resolution
 The quota is not miscounting. It is enforcing correctly, and the burst behavior it

@@ -95,6 +95,15 @@ def blocks(path: Path) -> list[tuple[str, str]]:
 
 
 def section(block: str, wanted: str, headings: list) -> str | None:
+    """First section whose heading matches `wanted`.
+
+    First match only. That is right for the held-back material, where one section per
+    heading is enough. It is NOT enough for `Not a critical failure`: MED-09 carries two
+    rulings and this returned only the first, so the second never reached the key. That
+    second ruling was written by `cb057df` specifically to stop the grader failing a
+    documented-correct caveat, so dropping it reinstated the defect that commit fixed.
+    `sections()` handles the repeat case.
+    """
     target = norm(wanted)
     body = block.splitlines()
     for idx, (_lvl, text, ln) in enumerate(headings):
@@ -104,6 +113,31 @@ def section(block: str, wanted: str, headings: list) -> str | None:
             stop = headings[idx + 1][2] if idx + 1 < len(headings) else len(body)
             return "\n".join(body[ln + 1:stop]).strip()
     return None
+
+
+def sections(block: str, wanted: str, headings: list) -> list[str]:
+    """Every section whose heading matches `wanted`, keeping the heading's own subject.
+
+    A `#### Not a critical failure: <subject>` heading states the ruling in the heading
+    line itself. Returning only the body yields a key section that begins mid-sentence
+    with no antecedent, which a grader cannot apply: MED-11's key opened with "finding, not
+    a wrong answer. It becomes wrong only when..." and never said which finding. Each match
+    comes back as `<heading text minus the marker>` followed by the body, and repeats are
+    kept rather than collapsed.
+    """
+    target = norm(wanted)
+    body = block.splitlines()
+    out = []
+    for idx, (_lvl, text, ln) in enumerate(headings):
+        if idx == 0:
+            continue
+        if norm(text) == target or target in norm(text):
+            stop = headings[idx + 1][2] if idx + 1 < len(headings) else len(body)
+            inline = re.sub(r"^#{1,6}\s*", "", text).strip()
+            inline = re.sub(r"^Not a critical failure\b[:\s]*", "", inline, flags=re.I).strip()
+            rest = "\n".join(body[ln + 1:stop]).strip()
+            out.append(f"{inline}\n{rest}".strip() if inline else rest)
+    return out
 
 
 def headings_of(block: str) -> list:
@@ -238,9 +272,17 @@ def main() -> int:
             answer = [f"# {sid} answer key, do not show to the agent", ""]
             # KEY_EXTRA comes first: it qualifies how the critical failures below are read,
             # so a grader should see the exception before the list it excepts.
+            #
+            # KEY_EXTRA uses sections() rather than section() because a scenario may carry
+            # more than one ruling, and MED-09 does. Taking only the first silently dropped
+            # the second, which was the ruling cb057df added.
             for sec in KEY_EXTRA + KEY:
-                content = section(block, sec, hs)
-                if content:
+                if sec in KEY_EXTRA:
+                    pieces = sections(block, sec, hs)
+                else:
+                    one = section(block, sec, hs)
+                    pieces = [one] if one else []
+                for content in pieces:
                     # medium.md separates its scenarios with a `---` rule, so the final
                     # section's content ends with one. Appending after it put the critical
                     # failures outside the body of the key.

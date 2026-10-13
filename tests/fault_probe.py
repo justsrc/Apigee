@@ -196,6 +196,49 @@ def _p_key_truncated_cf(sb: Sandbox) -> None:
         raise AssertionError("truncation was a no-op; the CF text has one clause only")
 
 
+@probe("answer-key-not-a-critical-failure-loses-subject", "FAIL",
+       "strip the subject from a 'Not a critical failure' ruling in the key, leaving a "
+       "sentence a grader cannot apply to anything")
+def _p_key_ncf_no_subject(sb: Sandbox) -> None:
+    # MED-11's key once opened its ruling with "finding, not a wrong answer. It becomes
+    # wrong only when...", because the generator took the body and dropped the heading the
+    # subject lived in. The completeness check looks for the head of the ruling, so cutting
+    # the subject is what makes it fire.
+    key = sb.path("evaluation/packets/MED-11.key.md")
+    kt = key.read_text()
+    marker = "## Not A Critical Failure\n"
+    if marker not in kt:
+        raise AssertionError("MED-11 key has no 'Not A Critical Failure' section")
+    head, _, rest = kt.partition(marker)
+    body = rest.split("\n## ", 1)[0]
+    stripped = re.sub(r"^(Not a critical failure: )?[^.]*\.\s*", "", body.strip(), count=1)
+    if stripped == body.strip():
+        raise AssertionError("the strip was a no-op; the ruling text did not match")
+    key.write_text(head + marker + stripped + "\n## " + rest.split("\n## ", 1)[1])
+    key.touch()
+
+
+@probe("answer-key-second-ruling-dropped", "FAIL",
+       "delete the second of a scenario's two 'Not a critical failure' rulings, which the "
+       "generator used to discard silently")
+def _p_key_second_ruling(sb: Sandbox) -> None:
+    # MED-09 carries two rulings and the generator's section() returned only the first. The
+    # second was the one cb057df added to stop the grader failing a documented-correct
+    # caveat, so its loss reinstated that defect invisibly: the key looked complete.
+    key = sb.path("evaluation/packets/MED-09.key.md")
+    kt = key.read_text()
+    marker = "## Not A Critical Failure\n"
+    if kt.count(marker) < 2:
+        raise AssertionError("MED-09 key should carry two rulings")
+    first_end = kt.index(marker) + len(marker)
+    second = kt.index(marker, first_end)
+    following = kt.find("\n## ", second + len(marker))
+    if following == -1:
+        raise AssertionError("unexpected key shape; no section follows the second ruling")
+    key.write_text(kt[:second] + kt[following + 1:])
+    key.touch()
+
+
 @probe("packet-turn2-deleted", "FAIL",
        "delete one turn-2 packet so a multi-turn run would be unusable")
 def _p_missing_turn2(sb: Sandbox) -> None:
