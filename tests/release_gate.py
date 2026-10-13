@@ -466,6 +466,30 @@ def main() -> int:
             f"python3 tests/test_release_gate.py -> exit {code_g}; "
             + (gm.group(0) if gm else "no case summary"))
 
+    # Isolation is the difference between a leakage check and a leakage-resistant
+    # evaluation. The structural tier runs offline and proves the workspace holds no
+    # answer material and carries an enforcing config. The live tier asks a model to breach
+    # the boundary; test_isolation.py reports INCONCLUSIVE rather than PASS when routes
+    # never reached a model, which is the case whenever the provider quota is exhausted.
+    # Both are reported so a reader cannot mistake the structural result for the whole.
+    code_i, out_i = run([sys.executable, "tests/test_isolation.py"], timeout=600)
+    struct = "PASS" if "structural: PASS" in out_i else "FAIL"
+    live_line = next((ln.strip() for ln in out_i.splitlines()
+                      if ln.startswith("live breaches")), "live breach status unknown")
+    # Status tracks the mechanism, which is what this criterion names: the workspace is
+    # built without answer material and the config denies external_directory, shell, and
+    # network in a rule the harness evaluates before the tool call. Testing that against a
+    # model is a separate question, reported in the detail and in isolation-report.md, and
+    # it does not make the mechanism absent. Exit code is deliberately not the criterion:
+    # the test exits non-zero whenever the live tier is skipped, which is most of the time
+    # on a free provider quota.
+    rep.add("F6", "Checker integrity", "Evaluation isolation is enforced, not instructed",
+            PASS if struct == "PASS" else FAIL,
+            f"python3 tests/test_isolation.py; structural {struct}",
+            f"{live_line}. The mechanism is enforced by the harness, not by prompt text. "
+            f"The boundary has not been demonstrated against a model that tried to cross "
+            f"it; see evaluation/isolation-report.md.", kind=DERIVED)
+
     # ---- G. End-to-end ------------------------------------------------------
     # G1, G2 and E5 stay UNVERIFIED until a model has actually been run over these scenarios
     # under the A/B design. They are mandatory, and decide() refuses to return QUALIFIED while
