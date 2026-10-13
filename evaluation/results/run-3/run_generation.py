@@ -101,9 +101,13 @@ def sha(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
-def parse_events(raw: str) -> tuple[str, str | None, str | None]:
-    """Return (assistant text, error type, error message) from opencode's JSON stream."""
-    text, etype, emsg = [], None, None
+def parse_events(raw: str) -> tuple[str, str | None, str | None, str | None]:
+    """Return (assistant text, error type, error message, session id).
+
+    The session id comes from the event stream. It is what makes turn 2 continue the
+    turn-1 conversation instead of starting over.
+    """
+    text, etype, emsg, sid = [], None, None, None
     for line in raw.splitlines():
         line = line.strip()
         if not line:
@@ -112,6 +116,8 @@ def parse_events(raw: str) -> tuple[str, str | None, str | None]:
             d = json.loads(line)
         except json.JSONDecodeError:
             continue
+        if d.get("sessionID") and not sid:
+            sid = str(d["sessionID"])
         part = d.get("part") or {}
         if d.get("type") == "text" and part.get("type") == "text":
             text.append(part.get("text", ""))
@@ -120,7 +126,7 @@ def parse_events(raw: str) -> tuple[str, str | None, str | None]:
             etype = str(err.get("type") or "error")
             emsg = str(err.get("message") or "")
             text.append(emsg)
-    return "\n".join(t for t in text if t.strip()), etype, emsg
+    return "\n".join(t for t in text if t.strip()), etype, emsg, sid
 
 
 def build_ws(ids: list[str]) -> Path:
@@ -144,6 +150,8 @@ def one_turn(m: dict, sid: str, turn: int, model: str, timeout: int) -> str:
     if not (ws / "MANIFEST.json").exists():
         build_ws([sid])
 
+    # Carried across the two turns of one scenario so turn 2 continues the conversation.
+    session_id = (rec.get("turns", {}).get("turn1") or {}).get("session_id")
     attempt = 0
     while attempt <= 1:  # one retry, never on a quota error
         if win.get("quota_exhausted"):
@@ -165,14 +173,23 @@ def one_turn(m: dict, sid: str, turn: int, model: str, timeout: int) -> str:
         ts = now_ist().isoformat()
         started = time.time()
         try:
+            # Turn 2 must continue the SAME session as turn 1. Without --session,
+            # `opencode run` starts a fresh conversation each time, so the scenario's own
+            # two-turn design collapses: the turn-2 packet says "the customer has replied"
+            # to a ticket the model has never seen, and it would score the evidence cold.
+            cmd = ["opencode", "run", "--auto", "--model", model, "--format", "json"]
+            if turn == 2 and session_id:
+                cmd += ["--session", session_id]
+            cmd.append(prompt)
             proc = subprocess.run(
-                ["opencode", "run", "--auto", "--model", model, "--format", "json", prompt],
-                cwd=ws, capture_output=True, text=True, timeout=timeout)
+                cmd, cwd=ws, capture_output=True, text=True, timeout=timeout)
             out, err, rc = proc.stdout, proc.stderr, proc.returncode
         except subprocess.TimeoutExpired:
             out, err, rc = "", "TIMEOUT", -1
 
-        text, etype, emsg = parse_events(out)
+        text, etype, emsg, got_sid = parse_events(out)
+        if got_sid and not session_id:
+            session_id = got_sid
         RAW.mkdir(parents=True, exist_ok=True)
         (RAW / f"{sid}.turn{turn}.attempt{attempt}.jsonl").write_text(out, encoding="utf-8")
         if err:
@@ -213,7 +230,8 @@ def one_turn(m: dict, sid: str, turn: int, model: str, timeout: int) -> str:
         entry["status"] = "OK"
         win["requests"][-1]["status"] = "OK"
         rec["turns"][f"turn{turn}"] = {
-            "at": ts, "model": model, "prompt_sha256": entry["prompt_sha256"],
+            "at": ts, "model": model, "session_id": got_sid or session_id,
+            "prompt_sha256": entry["prompt_sha256"],
             "response_sha256": hashlib.sha256(text.encode()).hexdigest(),
             "chars": len(text), "raw": f"raw/{sid}.turn{turn}.attempt{attempt}.jsonl",
             "attempts": attempt}
