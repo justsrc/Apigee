@@ -70,6 +70,37 @@ CORPUS = ROOT / "research/pages"
 FORBIDDEN = ("key.md", "scenarios/", "evaluation/", "audit", "defect-register",
              "review", "grading", "packets/", "notes-", "rubric")
 
+# The permission rules that make the isolation real rather than advisory.
+#
+# Run 2's deviation log recorded that its working directory was the repository root and
+# the answer key was reachable from it, with isolation "an instruction rather than a
+# mechanism". These rules are the mechanism. OpenCode evaluates them in the harness before
+# a tool call executes, and a configured deny is not overridable: `--auto` only
+# auto-approves permissions that are not explicitly denied, and saved approvals "never
+# override a configured deny".
+#
+# The load-bearing rule is `external_directory`. A path outside the workspace Location needs
+# external-directory approval before its own read approval is even considered, so denying
+# it blocks every read outside this directory regardless of how the path was written:
+# absolute, relative with `..`, through a symlink, or via a shared mount.
+#
+# Verified against a live model on 2026-10-13: `nemotron-3-ultra-550b-a55b` attempted to
+# read an out-of-workspace canary and received `Permission denied: external_directory`.
+PERMISSIONS = [
+    # No process spawning. Shell is the obvious route out: cat, curl, git and python can
+    # all reach anything on the host filesystem.
+    {"action": "shell", "resource": "*", "effect": "deny"},
+    # The boundary itself.
+    {"action": "external_directory", "resource": "*", "effect": "deny"},
+    # Read-only inside the workspace.
+    {"action": "edit", "resource": "*", "effect": "deny"},
+    # No network, so no fetching an answer from the documentation the answers cite.
+    {"action": "webfetch", "resource": "*", "effect": "deny"},
+    {"action": "websearch", "resource": "*", "effect": "deny"},
+    # No nested agents, which would not inherit these rules predictably.
+    {"action": "subagent", "resource": "*", "effect": "deny"},
+]
+
 BANNER = """# Evaluation workspace
 
 This directory was built by `tests/make_eval_workspace.py`. It is the only tree an
@@ -162,9 +193,17 @@ def build(out: Path, ids: list[str], with_corpus: bool, force: bool) -> int:
 
     (out / "WORKSPACE.md").write_text(BANNER, encoding="utf-8")
 
+    # The config is what enforces the boundary. Written into the workspace so it is part of
+    # the artifact whose hash goes in the manifest.
+    cfg = {"$schema": "https://opencode.ai/config.json", "permissions": PERMISSIONS}
+    (out / "opencode.jsonc").write_text(
+        json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
+
     manifest = {
         "built_from_commit": head_commit(),
         "skill_dir_sha256": dir_digest(out / ".agents/skills"),
+        "permission_config_sha256": sha256(out / "opencode.jsonc"),
+        "permissions": PERMISSIONS,
         "scenarios": ids,
         "prompts": [{"file": p.name, "sha256": sha256(p)} for p in sorted(copied)],
         "corpus_included": with_corpus,

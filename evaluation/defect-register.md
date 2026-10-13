@@ -629,3 +629,80 @@ phrased as a conclusion cannot reach the agent. Titles survive only in the answe
 the grader. The probes `title-leak-reintroduced` and the comment at `make_packets.py:206`
 cover this; `audit-hard-reg.md` and `audit-medium-B.md` predate the change and their
 title-leak findings are superseded rather than outstanding.
+
+### D-032 MEDIUM — An invented trace-step name was presented as an Apigee product term
+
+- **Affected** `scenarios/hard.md` HARD-04 and HARD-13; `scenarios/adversarial.md` ADV-05
+
+**What failed.** `AM-VerifyToken` appeared in HARD-04's diagnostic evidence and
+verification steps and in HARD-13's diagnostic evidence, described as the VerifyJWT step in
+an API Monitoring trace. It is not an Apigee trace step name. Zero hits across all 345 files
+of `research/pages/` and `research/issues/`.
+
+The prefix makes it worse than a merely fictional name. Every `AM-` token in the
+documentation belongs to an AssignMessage policy: `assign-message-policy.txt:332`,
+`fault-handling.txt:714`, `verify-api-key-policy.txt:572`, and the fault-rule examples in
+`javascript-policy.txt:459`, `oauthv2-policy.txt:1460`, `populate-cache-policy.txt:402` and
+others. A real customer bundle in `research/issues/devrel-267.txt:180-189` follows the same
+per-type convention, giving JavaScript policies a `JS-` prefix. Attaching `AM-` to a
+VerifyJWT policy asserts a meaning the prefix does not carry.
+
+`hard.md` was also the only scenario file with no note that trace step names are whatever
+the team named each policy. `easy.md:994-995` and `medium.md:697` both carry one, and
+`evaluation/fix-medium.md:142-144` records the decision to generalise this exact pattern
+rather than invent a name.
+
+**Fix.** `AM-VerifyToken` to `JWT`, a real policy name from
+`api-platform_reference_policies_verify-jwt-policy.txt:315`, chosen because it does not pin
+the algorithm the way `JWT-Verify-RS256` would at HARD-04. The customer-defined-step note
+added, matching `easy.md:994-995`. `AM-Enrich` in `adversarial.md` had the same defect on a
+JavaScript policy and is now `JS-Enrich`.
+
+**Status: FIXED.**
+
+### D-033 HIGH — The recorded baseline commit was downstream of the remediation it was meant to precede
+
+- **Affected** the proposed paired A/B evaluation; no file defect
+
+**What failed.** The handoff named `ecf2ffe` as the pre-remediation state. `ecf2ffe` is the
+child of `f9d7de8`, which is itself a remediation commit that edits
+`references/error-codes.md` and `references/hybrid.md`. The "35 commits since `ecf2ffe`"
+count therefore absorbed `f9d7de8` into the baseline arm.
+
+Had this gone unnoticed, both arms would have carried the first remediation commit and the
+comparison would have returned a guaranteed null. A null that looks like a measurement and
+is an artefact of the baseline choice is the worst available outcome, because it is
+indistinguishable from a real finding at reading time.
+
+**Correct baseline** is `5b40edd96007eda996d5787b540b1ae51e32394f`, the parent of `f9d7de8`.
+The remediation span is 37 commits, not 35.
+
+**Why it matters beyond this experiment.** Any comparison that reconstructs its baseline
+from a stated commit hash without checking the ancestry will make the same mistake. The check
+is `git rev-parse <claimed-baseline>^` and reading that commit's subject.
+
+**Status: FIXED.** Recorded in `evaluation/ab-protocol-and-power.md`.
+
+### D-034 HIGH — Evaluation isolation was an instruction, and the packet check did not test it
+
+- **Affected** `tests/test_leakage.py`, `evaluation/test-protocol.md`
+
+**What failed.** Run 2's own deviation log states that its working directory was the
+repository root, that `evaluation/packets/<ID>.key.md` was reachable from it, and that
+isolation was "an instruction rather than a mechanism". The protocol said "never shown to
+the agent", which described the generator rather than the filesystem.
+
+`tests/test_leakage.py` verified that prompt *files* contain no held-back text. It could not
+and did not verify that an evaluating process could not *reach* an answer key. Three paths
+existed: the keys sit under the same root as the skill; `make_packets.py` writes the
+scenario ID into every prompt as `# Support case <ID>`; and `scenarios/index.md` maps that
+ID to a title, restoring the one thing the generator deliberately drops.
+
+**Fix.** `tests/make_eval_workspace.py` builds a tree containing the skill and the prompts
+and writes an `opencode.jsonc` whose `external_directory: deny` rule blocks every read
+outside it. The rule is enforced by the harness before a tool call executes and is not
+overridable by `--auto`. `tests/test_isolation.py` attempts eight breach routes against a
+live model with canaries planted outside the boundary, and reports INCOMPLETE rather than
+PASS when no model was asked to breach anything.
+
+**Status: FIXED**, with the live-test results recorded in `evaluation/isolation-report.md`.
