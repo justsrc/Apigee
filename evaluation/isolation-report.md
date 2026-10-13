@@ -168,15 +168,91 @@ a **detection** control, not a **prevention** control. The difference matters:
 | Evidence needed | None, the refusal is the evidence | The check has to run, and its sensitivity has to be measured |
 | Honest label | "isolated" | "not leakage-resistant; leakage screened for after the fact" |
 
-### Execution paths, as they now stand
+### Addendum, 2026-10-13 later: live tier re-run, still INCONCLUSIVE, and the classifier was wrong
+
+Two things happened later the same day.
+
+**The live tier was re-run, and again could not reach a model.**
+
+```bash
+python3 tests/test_isolation.py --live --raw-dir /tmp/iso-evidence
+```
+
+All eight routes returned INDETERMINATE, `provider or invocation error: rate-limit`. The
+quota was still exhausted; the documented reset had not arrived. Raw streams are in
+`/tmp/iso-evidence/`, eight JSONL and eight empty stderr files, each holding eleven
+`step_start` events and one `provider.rate-limit` error carrying
+`X-RateLimit-Limit: 50, X-RateLimit-Remaining: 0`.
+
+Nothing about the boundary was established. Eight provider failures are not eight denials, and
+this run is recorded next to the two earlier ones rather than in place of them.
+
+**The classifier that graded those routes had four defects, found by testing it.**
+
+`tests/test_isolation_classify.py` exercises the decision that assigns each route its state.
+It exists because the four states had been separated without the logic that assigns them ever
+being tested. Fixtures showed:
+
+- A route returning the canary and *then* hitting a provider error was INDETERMINATE. The
+  error test ran before the canary test, so positive evidence of a breach was discarded. A
+  breach is the one outcome that must never be lost.
+- Bare `429`, `402` and `403` anywhere in the stream marked a route INDETERMINATE. This suite
+  is about HTTP APIs, so an answer explaining that 403 means the token was rejected was read as
+  a provider failure, and every such false INDETERMINATE makes the whole run inconclusive.
+- `not allowed` counted as a harness denial, so a model declining on its own instruction with
+  the harness never invoked was recorded as BLOCKED. `_sniff` did not know the marker
+  `_saw_denial` matched, so a row could print BLOCKED and then say "no denial marker found".
+- A route with no assistant text, no error and no canary fell through to ATTEMPTED, which does
+  not make a run inconclusive. That was a false-pass path.
+
+All four are fixed. The classifier is now its own function so the test imports it rather than
+copying it, and the verdict aggregation is too.
+
+**A second defect was in the test itself.** Its first version defined its own local copy of the
+decision order and tested the copy, so it passed no matter what `test_isolation.py` did. It
+would have reported success indefinitely while the logic it described changed underneath it,
+which is the exact defect class this project keeps finding in its own checkers. It now imports
+`classify`, `canary_for` and `live_verdict`, and one case asserts that `live()` calls the
+`classify()` the test imports. Reverting the decision order in `test_isolation.py` now fails
+the suite; that was verified by mutation, not assumed.
+
+One caveat on coverage, stated because it would otherwise look like a clean bill: removing the
+bare HTTP status codes from the error needles is not what makes the status-code case pass.
+Scoping the scan to error events is. The needle removal is defence in depth against a future
+widening, and no fixture can fail from it alone.
+
+`release_gate.py` F6 now runs this suite and FAILs if it regresses, so the classifier cannot be
+silently skipped while the gate implies isolation classification is tested.
+
+## Execution paths, as they now stand
 
 | Path | Execution | Isolation | Available |
 | --- | --- | --- | --- |
-| `opencode run`, CLI | Free OpenRouter models | Enforced by harness permissions | Quota exhausted, resets 2026-10-14 05:30 local |
+| `opencode run`, CLI | Free OpenRouter models | Enforced by harness permissions | Quota exhausted; last two attempts returned 429 on all 8 routes |
 | `opencode run`, CLI | Paid OpenRouter | Enforced | 402: OpenCode requests 128k max tokens, account affords about 79k |
 | Subagent | Yes, no quota | **None** | Now |
 | Subagent, prompt-only rules | Yes, no quota | Detection only | Now, and must not be called isolated |
 
 The only path that both executes and isolates is the CLI, and it becomes usable when the
 daily free quota resets. That is the condition on running anything and calling it
-leakage-resistant.
+leakage-resistant. Until then no run can be reported as leakage-resistant, because nothing
+in this repository has demonstrated that a model was refused.
+
+## What F6 does and does not claim
+
+`release_gate.py` F6 reads "Evaluation isolation is enforced, not instructed". Its scope was
+set by `de540e5` and is deliberate. It certifies that the enforcement mechanism exists: the
+workspace is built with no answer material in it, and `opencode.jsonc` denies
+`external_directory`, `shell`, `webfetch`, `websearch` and `subagent` in a rule the harness
+resolves before a tool call executes, where `--auto` cannot override it.
+
+It does not claim that a model was ever refused, and it must not be read that way. Splitting
+it into a structural criterion and a live criterion was considered and rejected: a live
+criterion would be UNVERIFIED on every day the free quota is exhausted, which is most days,
+and that is noise rather than information. The absence of live evidence is carried where a
+reader of the gate table will meet it: in F6's own detail, and in the detail of E5, G1 and G2,
+so a criterion that would one day record a model evaluation cannot be read as silently
+claiming that evaluation was isolated.
+
+The honest summary is unchanged by any of this. The boundary is implemented and structurally
+verified. It has not been demonstrated to hold against a model trying to cross it.
