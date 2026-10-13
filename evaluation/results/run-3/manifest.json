@@ -1,0 +1,654 @@
+{
+  "run": "run-3",
+  "protocol": "evaluation/results/run-3/PROTOCOL.md",
+  "created": "2026-10-13T23:33:42.151546+05:30",
+  "model": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+  "budget": {
+    "max_attempts_per_window": 45,
+    "windows": {
+      "2026-10-13 05:30->05:29 IST": {
+        "attempts": 1,
+        "quota_exhausted": true,
+        "requests": [
+          {
+            "at": "2026-10-13T23:26:35+05:30",
+            "kind": "preflight",
+            "status": "QUOTA_EXHAUSTED",
+            "error_type": "provider.rate-limit",
+            "note": "HTTP 429, X-RateLimit-Remaining 0, reset 2026-10-14T05:30+05:30"
+          }
+        ]
+      }
+    }
+  },
+  "scenarios": {
+    "ADV-01": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "ADV-02": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "ADV-03": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "ADV-04": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "ADV-05": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "ADV-06": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "ADV-07": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "ADV-08": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "ADV-09": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "ADV-10": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "ADV-11": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "ADV-12": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "ADV-13": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "EASY-01": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "EASY-02": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "EASY-03": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "EASY-04": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "EASY-05": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "EASY-06": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "EASY-07": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "EASY-08": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "EASY-09": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "EASY-10": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "EASY-11": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "EASY-12": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "EASY-13": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "EASY-14": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "EASY-15": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-01": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-02": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-03": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-04": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-05": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-06": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-07": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-08": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-09": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-10": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-11": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-12": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-13": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-14": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-15": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-16": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-17": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-18": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-19": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-20": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-21": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "HARD-22": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-01": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-02": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-03": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-04": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-05": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-06": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-07": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-08": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-09": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-10": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-11": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-12": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-13": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-14": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-15": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-16": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-17": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-18": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-19": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-20": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-21": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-22": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-23": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-24": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-25": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-26": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-27": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-28": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-29": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-30": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-32": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-33": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-34": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-35": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-36": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-37": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-38": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-39": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-40": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-41": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-42": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-43": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-44": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-45": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "MED-46": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "REG-01": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "REG-02": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "REG-03": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "REG-04": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "REG-05": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "REG-06": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "REG-07": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    },
+    "REG-08": {
+      "status": "NOT_STARTED",
+      "turns": {},
+      "attempts": 0,
+      "error": null
+    }
+  },
+  "blockers": [
+    {
+      "kind": "provider_quota_exhausted",
+      "detected": "2026-10-13T23:26:35+05:30",
+      "evidence": "HTTP 429, X-RateLimit-Limit 50, X-RateLimit-Remaining 0",
+      "reset_at": "2026-10-14T05:30:00+05:30",
+      "consequence": "no scenario generated; no performance metric exists",
+      "unmet_prerequisite": "live isolation tier unverified (8 INDETERMINATE routes on 2026-10-13)"
+    }
+  ]
+}
