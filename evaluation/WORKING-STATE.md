@@ -151,3 +151,44 @@ a model has actually been run. That is the correct outcome, not a problem to eng
   first. No em dashes. No "Co-Authored-By" trailers.
 - Never make a criterion PASS to turn the gate green. The gate returning PROVISIONAL is the
   honest result.
+
+## Phase 2b — paired A/B: not run, and why
+
+The requested experiment was a 206-invocation paired comparison. It was not run.
+`evaluation/ab-protocol-and-power.md` holds the full record.
+
+The baseline was wrong. `ecf2ffe` is the **child** of `f9d7de8`, which is itself a
+remediation commit that edits two skill files, so the "35 commits since ecf2ffe" count
+absorbed it into the baseline arm. Correct baseline: `5b40edd`, parent of `f9d7de8`,
+making the span 37. Logged as D-033.
+
+The treatment is too small to measure. Against `5b40edd` the skill differs by 52 lines in
+2 of 9 files. All three `SKILL.md` files are byte-identical, so the always-loaded
+instruction surface differs by zero bytes. 47 of 52 lines are in `error-codes.md`, a
+generated file. The only hand-written change in the skill is 3 lines in `hybrid.md`
+restating a rule that was already correct. Two of 104 scenarios touch the delta and one has
+no graded surface on it.
+
+## Isolation: mechanism built and structurally verified, not yet demonstrated
+
+- `tests/make_eval_workspace.py` now writes an enforcing `opencode.jsonc`
+  (`external_directory`, `shell`, `edit`, `webfetch`, `websearch`, `subagent` all denied).
+  The rule is resolved by the harness before the tool call and is not overridable by
+  `--auto`.
+- `tests/test_isolation.py` runs 8 breach routes with canaries. It distinguishes
+  BREACHED, BLOCKED, ATTEMPTED and INDETERMINATE, retains raw provider streams, and
+  reports INCONCLUSIVE rather than PASS when a route never reached a model.
+- **Current result: structural PASS, live INCONCLUSIVE.** The free provider quota
+  (50/day) ran out mid-run on 2026-10-13 and resets 2026-10-14 05:30 local.
+- One manual probe before the harness existed was refused with `external_directory`.
+  Recorded as a single data point, not a test result.
+- No isolation claim is made. Full write-up in `evaluation/isolation-report.md`.
+
+## Model execution, established
+
+Headless CLI works for `openrouter/<model>:free` entries only. `opencode/*` free-tier
+models return 403 from the CLI ("free tier can only be used from within OpenCode"), and
+paid OpenRouter models return 402 because OpenCode requests `max_tokens: 128000` while the
+account affords about 79k; `limit.output`, `options.maxTokens` and `body.max_tokens` were
+all ignored. `sandbox-exec` does not enforce `deny file-read*` on macOS 27 (verified twice).
+Docker has no daemon; podman has no VM.
