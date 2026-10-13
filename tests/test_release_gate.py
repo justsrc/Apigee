@@ -34,7 +34,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from release_gate import (  # noqa: E402
     BLOCKED, DECLARED, EXECUTED, FAIL, NOT_QUALIFIED, PASS, PROVISIONAL, QUALIFIED,
-    UNVERIFIED, Criterion, audit_manifest, decide,
+    UNVERIFIED, Criterion, audit_manifest, decide, f6_status,
 )
 
 CASES: list[dict] = []
@@ -423,6 +423,55 @@ def _scenario_tables():
                 bad.append(f"{f.name}: row with a missing 0 or 4 anchor: {cells[0][:40]}")
     assert not bad, "\n".join(bad[:8])
     assert checked >= 200, f"only {checked} rubric rows found; the sweep did not run"
+
+
+@case("f6-passes-on-structural-plus-classifier")
+def _f6_ok():
+    v, _, _ = decide([crit("F6", f6_status("PASS", "PASS"))])
+    assert v == QUALIFIED, v
+
+
+@case("f6-fails-if-structural-fails")
+def _f6_struct():
+    assert f6_status("FAIL", "PASS") == FAIL, f6_status("FAIL", "PASS")
+
+
+@case("f6-fails-if-classifier-fails")
+def _f6_clf():
+    assert f6_status("PASS", "FAIL") == FAIL, f6_status("PASS", "FAIL")
+
+
+@case("f6-does-not-require-live-model-evidence")
+def _f6_live():
+    # The live tier is INCONCLUSIVE whenever a free provider quota runs out. That is not a
+    # failure of the mechanism, so a live tier that never reached a model must not FAIL F6.
+    # The criterion is about the mechanism; the unseen live result is disclosed in the
+    # evidence detail and in evaluation/isolation-report.md instead.
+    assert f6_status("PASS", "PASS") == PASS
+
+
+@case("f6-evidence-never-claims-live-isolation-was-demonstrated")
+def _f6_words():
+    # F6's own wording is the claim a reader sees on the gate table. It must not suggest an
+    # adversarial model was refused. These read the module source, so they only bite if the
+    # wording is reintroduced; a copy of the string here would not.
+    import inspect
+    import release_gate as rg
+    src = inspect.getsource(rg.main)
+    for phrase in ("live isolation passes", "isolation demonstrated", "boundary held",
+                   "no breach occurred", "blocked all eight"):
+        assert phrase not in src.lower(), f"F6 wording overclaims: {phrase}"
+
+
+@case("model-criteria-carry-the-live-isolation-limitation")
+def _g_words():
+    # E5, G1 and G2 tell a reader whether isolation was actually tested. If they pass
+    # without that note, a run with no live-isolation evidence could be read as isolated.
+    import inspect
+    import release_gate as rg
+    src = inspect.getsource(rg.main)
+    assert "live isolation has not been demonstrated" in src.lower(), \
+        "G1/G2 detail must carry the live-isolation limitation"
 
 
 def main() -> int:

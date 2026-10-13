@@ -84,8 +84,16 @@ python3 tests/check_repo.py          # structure, IDs, sections, frontmatter, li
 ./tests/check_urls.sh                # classify every cited URL (network required)
 python3 tests/fault_probe.py         # prove the checkers detect broken projects
 python3 tests/test_leakage.py        # prove no answer key reaches a prompt
+python3 tests/test_isolation_classify.py   # prove breach-route grading cannot mislabel a result
+python3 tests/test_isolation.py      # prove the workspace is built without answer material
 ./tests/release_gate.py              # run everything and emit a machine-readable verdict
 ```
+
+`test_isolation_classify.py` is in that list on purpose. The rule that decides a breach route
+was BREACHED, BLOCKED, ATTEMPTED or INDETERMINATE used to be tested by a file that defined a
+local copy of the decision and tested the copy, so it passed while the real logic changed.
+It now imports the classifier from `test_isolation.py` and asserts that it does.
+`release_gate.py` runs it inside F6, so F6 FAILs if it regresses.
 
 `check_repo.py` checks what a script can honestly check: files exist, scenario IDs are
 unique, each graded file has at least 15 scenarios, every scenario has its required

@@ -178,6 +178,22 @@ def audit_eval_runs(path: Path) -> list[dict]:
     return runs
 
 
+def f6_status(struct: str, clf: str) -> str:
+    """F6 passes only when the structural tier AND the classifier test both pass.
+
+    Kept as a function so tests/test_release_gate.py can pin the rule. F6 is named
+    "enforced, not instructed": it certifies that a runtime enforcement mechanism is
+    configured, and that the logic which decides a route was BREACHED is itself tested.
+    A classifier nobody runs would let a boundary failure be reported as BLOCKED.
+
+    It deliberately does not require live-model evidence. The live tier is INCONCLUSIVE
+    whenever the provider quota is exhausted, and that absence is not a failure of the
+    mechanism. Making it one would report NOT QUALIFIED every time a free quota ran out,
+    which is noise rather than information.
+    """
+    return PASS if struct == "PASS" and clf == "PASS" else FAIL
+
+
 def run(cmd: list[str], timeout: int = 1800) -> tuple[int, str]:
     try:
         p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=ROOT)
@@ -483,32 +499,52 @@ def main() -> int:
     # it does not make the mechanism absent. Exit code is deliberately not the criterion:
     # the test exits non-zero whenever the live tier is skipped, which is most of the time
     # on a free provider quota.
+    #
+    # The classifier test runs here too, and it is not optional. F6 claims enforcement is
+    # sound, and the thing that decides a route was BREACHED is the classifier; a classifier
+    # nobody tests would let a boundary failure be reported as BLOCKED or ATTEMPTED.
+    # F6 FAILs if either the structural tier or the classifier test fails.
+    code_c, out_c = run([sys.executable, "tests/test_isolation_classify.py"], timeout=300)
+    cm = re.search(r"(\d+) cases, (\d+) passed, (\d+) failed", out_c)
+    clf = "PASS" if code_c == 0 else "FAIL"
+
     rep.add("F6", "Checker integrity", "Evaluation isolation is enforced, not instructed",
-            PASS if struct == "PASS" else FAIL,
-            f"python3 tests/test_isolation.py; structural {struct}",
+            f6_status(struct, clf),
+            f"python3 tests/test_isolation.py; structural {struct}; "
+            f"python3 tests/test_isolation_classify.py; classification {clf}",
             f"{live_line}. The mechanism is enforced by the harness, not by prompt text. "
-            f"The boundary has not been demonstrated against a model that tried to cross "
-            f"it; see evaluation/isolation-report.md.", kind=DERIVED)
+            f"Adversarial model access has NOT been demonstrated to fail: the last live run "
+            f"returned 8 INDETERMINATE routes because the provider quota was exhausted, "
+            f"which is not a denial. See evaluation/isolation-report.md.", kind=DERIVED)
 
     # ---- G. End-to-end ------------------------------------------------------
     # G1, G2 and E5 stay UNVERIFIED until a model has actually been run over these scenarios
     # under the A/B design. They are mandatory, and decide() refuses to return QUALIFIED while
     # they are outstanding. Their detail now names the runs that exist rather than asserting
     # that no budget was available, which stopped being true when run 2 was recorded.
+    #
+    # Every one of these three carries the live-isolation limitation in its detail. F6 passing
+    # says the mechanism is configured and the classifier is tested; it does not say a model
+    # was ever refused. A run whose isolation was never demonstrably tested cannot be
+    # reported as leakage-resistant, so the limitation travels with the criterion rather than
+    # living only in isolation-report.md where a reader of this table will not go.
     covered = ", ".join(r["name"] for r in runs) or "none"
+    iso = ("Live isolation has not been demonstrated against a model; see F6 and "
+           "evaluation/isolation-report.md. ")
     rep.add("G1", "End-to-end behavior", "Representative easy/medium/hard cases evaluated",
             UNVERIFIED,
             f"Requires a model evaluation meeting evaluation/test-protocol.md. Runs recorded: "
             f"{covered}. No recorded run evaluates a representative sample of all three "
             f"suites with a baseline arm.",
-            "This is not reported as a pass anywhere in the project")
+            iso + "This is not reported as a pass anywhere in the project")
 
     rep.add("G2", "End-to-end behavior", "Adversarial and regression suites evaluated",
             UNVERIFIED,
             f"Requires a model evaluation meeting evaluation/test-protocol.md. Runs recorded: "
             f"{covered}. No recorded run evaluates adversarial and regression suites to a "
             f"standard that supports a claim about them.",
-            "A smoke test covering one scenario from each suite is not an evaluation of them")
+            iso + "A smoke test covering one scenario from each suite is not an evaluation "
+                  "of them")
 
     rep.add("G3", "End-to-end behavior", "Known regressions tested",
             PASS,
