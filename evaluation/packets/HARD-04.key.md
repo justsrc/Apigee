@@ -20,7 +20,7 @@ If VerifyJWT is configured with an inline key rather than JWKS, investigate the 
 verification cost itself before changing anything.
 
 ## Verification
-Confirm the `AM-VerifyToken` step time in traces returns to baseline under the same load,
+Confirm the `JWT` step time in traces returns to baseline under the same load,
 and confirm p95 and p99 both. Confirm the JWKS is not fetched per request.
 
 ## Common Incorrect Answers

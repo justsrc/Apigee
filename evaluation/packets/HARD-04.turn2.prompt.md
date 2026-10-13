@@ -15,9 +15,12 @@ Rules for this exercise:
 The customer has replied with more information.
 
 ## Diagnostic Evidence
-Per-step timings show the `AM-VerifyToken` step, a VerifyJWT policy, taking 1.7s. The
+Per-step timings show the `JWT` step, a VerifyJWT policy, taking 1.7s. The
 target responds in about 200ms externally. The JavaScript and Quota steps are
 milliseconds.
+
+Step names here are abbreviated to policy types, since real step names are whatever the
+team named each policy.
 
 Separately, the identity provider's JWKS endpoint is slow to respond on first fetch after
 its cache expires.

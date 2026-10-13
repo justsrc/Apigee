@@ -424,9 +424,12 @@ localize the time, plus an external measurement of the target.
 
 #### Diagnostic evidence
 
-Per-step timings show the `AM-VerifyToken` step, a VerifyJWT policy, taking 1.7s. The
+Per-step timings show the `JWT` step, a VerifyJWT policy, taking 1.7s. The
 target responds in about 200ms externally. The JavaScript and Quota steps are
 milliseconds.
+
+Step names here are abbreviated to policy types, since real step names are whatever the
+team named each policy.
 
 Separately, the identity provider's JWKS endpoint is slow to respond on first fetch after
 its cache expires.
@@ -454,7 +457,7 @@ verification cost itself before changing anything.
 
 #### Verification
 
-Confirm the `AM-VerifyToken` step time in traces returns to baseline under the same load,
+Confirm the `JWT` step time in traces returns to baseline under the same load,
 and confirm p95 and p99 both. Confirm the JWKS is not fetched per request.
 
 #### Common incorrect answers
@@ -1547,7 +1550,7 @@ the reported status already discriminates, and say so rather than leaving it imp
 
 #### Diagnostic evidence
 
-A trace for a failing request shows the failure at `AM-VerifyToken`, carrying:
+A trace for a failing request shows the failure at `JWT`, carrying:
 
 ```json
 {"fault": {"detail": {"errorcode": "steps.jwt.TokenExpired"}}}

@@ -17,7 +17,7 @@ Rules for this exercise:
 > code. Please review our script.
 
 ## Initial Evidence
-Faults at the `AM-Enrich` JavaScript step. The script reads the tenant header through the
+Faults at the `JS-Enrich` JavaScript step. The script reads the tenant header through the
 flow variable accessor:
 
 ```javascript

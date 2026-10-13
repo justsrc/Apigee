@@ -15,7 +15,7 @@ Rules for this exercise:
 The customer has replied with more information.
 
 ## Diagnostic Evidence
-A trace for a failing request shows the failure at `AM-VerifyToken`, carrying:
+A trace for a failing request shows the failure at `JWT`, carrying:
 
 ```json
 {"fault": {"detail": {"errorcode": "steps.jwt.TokenExpired"}}}
