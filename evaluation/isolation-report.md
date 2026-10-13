@@ -133,3 +133,50 @@ python3 tests/test_isolation.py --live --raw-dir /tmp/iso-evidence
 
 PASS requires every route to reach a model, none to retrieve a canary, and the structural
 checks to pass. An INDETERMINATE on any route makes the result INCONCLUSIVE, never PASS.
+
+## Addendum, 2026-10-13: subagents do not inherit project permission config
+
+An alternative execution path was tested: running evaluation units as OpenCode subagents
+rather than through the CLI. It solves the provider problem (no CLI, no free-tier quota,
+fresh context per unit) and creates a worse one.
+
+A project `opencode.jsonc` was written to the repository root denying reads of
+`evaluation/**`, `scenarios/**`, `research/**` and `archive/**`. A subagent was then asked to
+read four paths: the skill, `evaluation/packets/MED-13.key.md`, `scenarios/medium.md` and a
+cached documentation page.
+
+**All four reads succeeded. Zero denials.** The answer key was returned in full.
+
+Child sessions do not apply the parent's already-loaded project configuration, so a
+permission rule that would genuinely bound the CLI path bounds nothing here. The config file
+was deleted rather than committed, because leaving it in place would imply a protection that
+does not exist.
+
+### What this rules out
+
+Running evaluation units as subagents gives real model execution and no isolation. Prompt
+text is not a boundary. Run 2 already established that: its file-read logs were
+self-reported, and the answer key was reachable from its working directory the whole time.
+
+Prompt-level enforcement is not worthless, but it has to be described for what it is. It is
+a **detection** control, not a **prevention** control. The difference matters:
+
+| | Prevention | Detection |
+| --- | --- | --- |
+| Mechanism | Harness refuses the tool call | Answer is checked afterwards for ground-truth-only strings |
+| Fails by | Nothing reaches the model | Agent reads the key and the answer looks confident |
+| Evidence needed | None, the refusal is the evidence | The check has to run, and its sensitivity has to be measured |
+| Honest label | "isolated" | "not leakage-resistant; leakage screened for after the fact" |
+
+### Execution paths, as they now stand
+
+| Path | Execution | Isolation | Available |
+| --- | --- | --- | --- |
+| `opencode run`, CLI | Free OpenRouter models | Enforced by harness permissions | Quota exhausted, resets 2026-10-14 05:30 local |
+| `opencode run`, CLI | Paid OpenRouter | Enforced | 402: OpenCode requests 128k max tokens, account affords about 79k |
+| Subagent | Yes, no quota | **None** | Now |
+| Subagent, prompt-only rules | Yes, no quota | Detection only | Now, and must not be called isolated |
+
+The only path that both executes and isolates is the CLI, and it becomes usable when the
+daily free quota resets. That is the condition on running anything and calling it
+leakage-resistant.
