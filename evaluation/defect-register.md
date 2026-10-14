@@ -18,10 +18,11 @@ Severity, as defined for this project:
 | Status | Count |
 | --- | --- |
 | Open, blocking release | 0 |
-| Fixed and covered by a test | 26 |
+| Fixed and covered by a test | 31 |
 | Fixed, coverage recorded, no dedicated probe yet | 7 |
-| Open, accepted with documented reason | 8 |
+| Open, accepted with documented reason | 9 |
 | Open, awaiting external evidence | 2 |
+| Open, reproduced and not yet fixed | 6 |
 
 Three entries changed on 2026-10-13. D-035 adds the seventh fixed-without-a-dedicated-probe
 entry. D-036 adds two probes for the packet generator. The isolation-route classifier is what
@@ -40,6 +41,14 @@ the most consequential defect this pass found after D-038: the component that wr
 never read the manifest, so a scenario recorded as never run could be written out as a pass.
 Neither was reachable from a real run, because run 3 collected nothing, and both are recorded
 as latent rather than as damage to a recorded result. Fixed-and-covered moves from 24 to 26.
+
+A third review pass added eleven more, D-043 through D-053, and moved fixed-and-covered from
+26 to 31. Five of them are fixed: D-043, D-044, D-046, D-047 and, partially, D-045. Six are
+reproduced and open, and the summary gains a row for them because "open" previously meant
+either a finding somebody had decided to live with or a finding nobody had looked at, and a
+reader needs to be able to tell those apart at a glance. D-053 is a disagreement between two
+documents about a sample size, recorded rather than fixed because the sample was declared in
+advance and editing it after the fact is the thing the freeze exists to prevent.
 
 ## Later additions
 
@@ -1163,6 +1172,11 @@ Two labels are used throughout and they mean different things.
   here rather than independently re-run by me. The reasoning is checkable against the code
   and the cited line numbers; the run is not one I performed.
 
+Six of the entries below have been fixed since they were written, and each says so at its
+own heading rather than being moved. D-046 and D-047 were found in the review pass and fixed
+on this branch after the evidence was reproduced here, so they carry the stronger label. The
+rest are open.
+
 Nothing in this section is a claim about model quality or about whether the skills help. All
 of it is about machinery. Run 3 collected nothing, so no recorded score depends on any of it.
 
@@ -1268,24 +1282,47 @@ entire isolation half of the leakage test disappear while the script still repor
 This is the same shape as D-044 in a different file, and the same failure the gate was written
 to catch.
 
-**Status: OPEN**, in progress on a separate branch.
+**Fix.** The workspace check answers with one of three verdicts rather than a bool, because a
+bool cannot say the third thing and every way the check could not run used to say the first.
+`OK`, `LEAK` and `UNRUNNABLE` are now distinct, and an unrunnable check is reported separately
+from a finding, because a leak is a result and a non-run is not. Both exit nonzero. Two further
+ways the check could not run were found while changing it: a build returning 2 was being
+reported as a leak, which it is not, and an empty scenario sample would build an empty
+workspace, find nothing in it, and call that clean.
+
+**Remediation** `c63ebdb`. **Test results.** `test_leakage.py` PASS with exit 0 on a clean
+tree, `INCOMPLETE` and exit 1 with the builder deleted. **Status: FIXED.**
 
 ### D-047 MEDIUM — "Every reference path resolves" passes when no path was found
 
 - **Affected** `tests/check_repo.py::check_reference_discovery`
-- **Evidence** from the review pass
+- **Remediation** `57d0627`
+- **Regression test** probe `reference-paths-no-longer-listed`
+- **Evidence** reproduced here
 
 **What failed.** The orphan check is guarded by `if total and not orphans`, but the
 unresolvable check is guarded only by `if not unresolvable`. The list is empty both when
 every listed path resolves and when the regex that collects paths matched nothing at all.
 
 **Reproduction.** Strip the backticks from every reference path in every `SKILL.md` and delete
-`.agents/skills/apigee-support-core/references/hybrid.md`. The check still reports "every
-reference path listed in a SKILL.md resolves to a file" and `check_repo --strict` returns
-PASS. The deleted file is precisely what the `reference-path-unresolvable` probe protects; the
-probe passes today only because the repository happens to use backticks.
+`.agents/skills/apigee-support-core/references/hybrid.md`. Before the fix the check still
+reported "every reference path listed in a SKILL.md resolves to a file" and `check_repo
+--strict` returned PASS. The deleted file is precisely what the `reference-path-unresolvable`
+probe protects; the probe passed today only because the repository happens to use backticks.
 
-**Status: OPEN**, in progress on a separate branch.
+The orphan check does not catch it either, which is the part worth recording. `hybrid.md`'s
+name is still in the `SKILL.md` body, so nothing looks orphaned. Both checks go quiet at once
+for one edit, which is why this needed a probe rather than a reading of the code.
+
+**Fix.** The count of paths the regex actually found now gates the ok the way `total` gates
+the one above it, and a repository with no reference files at all still stays silent. The ok
+line gained its count, so a reader can tell a check that ran from one that did not.
+
+**Regression test.** Probe `reference-paths-no-longer-listed` asserts both preconditions, so
+it cannot go inert the way the origin probes did. It touches no scenario, so it needs no
+packet re-sync. **Test results.** Reports a false pass against the previous check, passes
+against this one. `check_repo.py --strict` PASS, 37 probes with 0 false passes.
+**Status: FIXED and covered.**
 
 ### D-048 MEDIUM — A workspace with no prompts still reports `structural: PASS`
 
