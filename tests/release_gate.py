@@ -241,12 +241,24 @@ def main() -> int:
 
     # A5 used to assert the baseline tag exists in prose. Asserting that a tag is present is
     # the easiest kind of claim to get wrong and the easiest to check, so check it.
+    #
+    # The exit code is checked, not just the output. `run` answers a missing binary with
+    # (-2, "ERROR FileNotFoundError: ..."), and that string is non-empty, so reading the
+    # output alone made `bool(tags)` true in an environment with no git at all. The gate
+    # then reported "git tag baseline-v0.1 present" and printed the same line it prints
+    # when git worked, so nothing in the report distinguished the two. A criterion that
+    # cannot reach the thing it asserts has to say so rather than pass on an error string.
     baseline_doc = ROOT / "evaluation/baseline.md"
-    tags = run(["git", "tag", "-l", "baseline-v0.1"], timeout=60)[1].strip()
-    a5_ok = bool(tags) and baseline_doc.is_file()
+    tag_rc, tag_out = run(["git", "tag", "-l", "baseline-v0.1"], timeout=60)
+    if tag_rc != 0:
+        a5_status, a5_tags = BLOCKED, f"could not be listed, `git tag -l` exited {tag_rc}"
+    else:
+        tags = tag_out.strip()
+        a5_status = PASS if tags and baseline_doc.is_file() else FAIL
+        a5_tags = "present" if tags else "absent"
     rep.add("A5", "Repository integrity", "Baseline recorded before modification",
-            PASS if a5_ok else FAIL,
-            f"git tag baseline-v0.1 {'present' if tags else 'absent'}; "
+            a5_status,
+            f"git tag baseline-v0.1 {a5_tags}; "
             f"evaluation/baseline.md {'present' if baseline_doc.is_file() else 'absent'}",
             "the pre-audit state is reachable without walking the history")
 
@@ -441,6 +453,12 @@ def main() -> int:
     e5_detail = "; ".join(
         f"{r['name']} lacks " + ", ".join(r["missing"]) for r in runs if r["missing"]
     ) or "every recorded run meets the design; this criterion should be revisited by hand"
+    # The status stays a literal UNVERIFIED even when a qualifying run exists, and
+    # tests/test_release_gate.py enforces that. It is deliberate: the run record can say a
+    # run matches the A/B design, but whether a real model actually answered is not
+    # something a script can settle, so the criterion stays a claim for a human. The
+    # evidence string above already reports qualifying runs in full, so the reader is
+    # told either way.
     rep.add("E5", "Evaluation integrity", "Model evaluation executed", UNVERIFIED,
             e5_evidence, e5_detail)
 
