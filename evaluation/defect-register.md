@@ -18,7 +18,7 @@ Severity, as defined for this project:
 | Status | Count |
 | --- | --- |
 | Open, blocking release | 0 |
-| Fixed and covered by a test | 24 |
+| Fixed and covered by a test | 26 |
 | Fixed, coverage recorded, no dedicated probe yet | 7 |
 | Open, accepted with documented reason | 8 |
 | Open, awaiting external evidence | 2 |
@@ -34,6 +34,12 @@ earlier passes left behind. D-038 and D-039 are both about the fault-probe suite
 green without evidence: D-038 made every FAIL-expecting probe vacuous, and D-039 records two
 probes that had never mutated anything. D-040 is the one remaining path that could still write
 a failure into an answer file. Fixed-and-covered moves from 21 to 24.
+
+Two more were added on 2026-10-14, D-041 and D-042, both in the run-3 grading script. D-041 is
+the most consequential defect this pass found after D-038: the component that writes a score
+never read the manifest, so a scenario recorded as never run could be written out as a pass.
+Neither was reachable from a real run, because run 3 collected nothing, and both are recorded
+as latent rather than as damage to a recorded result. Fixed-and-covered moves from 24 to 26.
 
 ## Later additions
 
@@ -1033,3 +1039,109 @@ described. It is not evidence that a live model or a live provider cannot produc
 shape these suites do not model, and none of it bears on whether the skills help. The gate
 still reads NOT QUALIFIED, and the three criteria that would change that, E5, G1 and G2, are
 unverified for the same reason they were before this pass.
+
+### D-041 HIGH — `grade_run.py` scored scenarios the manifest said were never run
+
+- **Affected** `evaluation/results/run-3/grade_run.py`
+- **Remediation** `acb326e`
+- **Regression test** `tests/test_grading_integrity.py`
+
+**What failed.** `--run` took the grader's JSON at face value. It read the answer key, scored
+the supplied anchors and wrote the result. It never opened `manifest.json`. Only `--list`
+filtered on `AWAITING_GRADE`, and `--list` is the command that costs nothing and writes
+nothing.
+
+Driven against run 3's own state, where all 103 scenarios are `NOT_STARTED` and no answer
+file exists, a scores file naming MED-13 produced:
+
+```json
+{"scenario": "MED-13", "normalized_score": 1.0, "verdict": "PASS"}
+```
+
+Nothing had been generated. The number was arithmetic on the caller's own input, and the only
+thing that made it look like a result was that it was written into the same directory as real
+grades, where `_summary.json` reported `mean_normalized_score: 1.0` and `critical_failure_free: 1`.
+
+**Why it matters.** This is the other end of the sentence in `75f1997`, which stopped the
+generation harness from writing a provider error into an answer file on the grounds that a
+false success "produces a score for a turn the model never answered". The generation path was
+hardened; the component that writes the score was not. The outcome that commit set out to
+prevent stayed reachable from the grading side, with no generation at all, and it would have
+been reachable by a stale or mis-transcribed scores file rather than by a provider fault.
+
+PROTOCOL.md is explicit and was not followed: "manifest.json is authoritative for collection
+state."
+
+**Cause.** Verified. The loop iterates `supplied.items()` and never references the manifest,
+the run's status fields, or the answer files.
+
+**Reproduction.** Drive the real file against a manifest in which a scenario is `NOT_STARTED`:
+
+```bash
+echo '{"MED-13": {"anchors": {"a": 4}, "critical": false}}' > /tmp/s.json
+python3 evaluation/results/run-3/grade_run.py --run --scores /tmp/s.json
+cat evaluation/results/run-3/grades/primary/MED-13.json   # PASS, 1.0, before the fix
+```
+
+The under-count guard does not help here. It fires when the grader supplies fewer anchors than
+the table has rows, so a careless score is caught and a well-formed score for the wrong
+scenario is not.
+
+**Fix.** `why_ungradeable()` gates every scenario. A scenario may be graded only when the
+manifest marks it `AWAITING_GRADE` and both turn answer files exist. A refusal names the
+scenario and the reason, writes no grade file, appears in the summary under `refused`, and
+makes the process exit nonzero so the rest of the summary cannot be read as complete. Other
+scenarios in the same scores file are still graded, because a stale entry should not cost the
+run everything.
+
+**Regression test.** `tests/test_grading_integrity.py`, eight cases driving the real file in a
+subprocess against a scratch manifest and the real answer keys. Six fail against the previous
+grader. The two that pass are the ordinary path and the critical-failure override, which are
+there to show the new gate does not reject a scenario that genuinely ran.
+
+**Status: FIXED and covered.**
+
+### D-042 MEDIUM — A grading input error was recorded as a model failure
+
+- **Affected** `evaluation/results/run-3/grade_run.py`
+- **Remediation** `acb326e`
+- **Regression test** `tests/test_grading_integrity.py`
+
+**What failed.** Three lines coerced a score that could not be computed into a FAIL, whenever
+the grader had supplied any anchors at all:
+
+```text
+verdict FAIL, normalized_score None, unscorable_reason None
+```
+
+Reproduced with one anchor of `7` where the rubric scale is 0 to 4. The file's own docstring
+says it "refuses to guess a verdict it cannot derive", and PROTOCOL.md says "An invalid
+grading reference is never counted as a model failure." Both were contradicted by the same
+three lines.
+
+**Why it matters.** The count that matters most in this project is the count of model
+failures. A grader typo, a stale anchor carried from an earlier key, or a rubric row that
+disappeared between two turns all land in `by_verdict["FAIL"]`, indistinguishable from a
+model answering wrongly. Nothing recorded that it was an input error, so the grade file could
+not be re-examined later, which is the one thing `test-protocol.md` insists a result must
+allow.
+
+**Cause.** Verified. `normalized()` returns `None` for an out-of-range anchor, an empty anchor
+set, or a key with no rubric table, and the caller treated all three as a model failure.
+
+**Fix.** The verdict stays `UNSCORABLE` and `unscorable_reason` is computed rather than left
+null, naming the offending input: the out-of-range anchors and their values, the empty anchor
+set, or the missing rubric table. A grader who declares a scenario unscorable themselves is
+still taken at their word.
+
+**Regression test.** The case
+"an anchor outside the 0-to-4 scale is unscorable, not a model failure", which asserts the
+verdict, the null score, a non-empty reason naming the value 7, and `by_verdict["FAIL"] == 0`.
+
+**Status: FIXED and covered.**
+
+**Note on the relationship between these two.** D-041 and D-042 are three lines apart in the
+same function and were found together, but they are separate defects with separate causes and
+separate tests, and only D-041 required a new gate. A grader's own data being wrong and a
+scenario never having run are different problems, and a fix for either one does not address
+the other.
