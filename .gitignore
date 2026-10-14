@@ -4,3 +4,10 @@ __pycache__/
 
 # macOS Finder metadata.
 .DS_Store
+
+# Type-checker and linter caches. Recent mypy and ruff each write a .gitignore containing
+# "*" inside their own cache directory, so these are usually already hidden. The rule is
+# here for the versions that do not, and for the window before that file exists. Neither
+# tool is declared project tooling, so this is defensive rather than required.
+.mypy_cache/
+.ruff_cache/
