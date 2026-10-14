@@ -18,11 +18,11 @@ Severity, as defined for this project:
 | Status | Count |
 | --- | --- |
 | Open, blocking release | 0 |
-| Fixed and covered by a test | 29 |
+| Fixed and covered by a test | 31 |
 | Fixed, coverage recorded, no dedicated probe yet | 9 |
 | Open, accepted with documented reason | 9 |
 | Open, awaiting external evidence | 2 |
-| Open, reproduced and not yet fixed | 5 |
+| Open, reproduced and not yet fixed | 2 |
 
 Three entries changed on 2026-10-13. D-035 adds the seventh fixed-without-a-dedicated-probe
 entry. D-036 adds two probes for the packet generator. The isolation-route classifier is what
@@ -42,13 +42,13 @@ never read the manifest, so a scenario recorded as never run could be written ou
 Neither was reachable from a real run, because run 3 collected nothing, and both are recorded
 as latent rather than as damage to a recorded result. Fixed-and-covered moves from 24 to 26.
 
-A third review pass added eleven more, D-043 through D-053. Six are fixed: D-043 and D-047
-carry a probe each, D-051 carries a 28-case suite, and D-044 and D-046 are fixed with the
-behaviour itself as the evidence rather than a dedicated test. Fixed-and-covered goes from 26
-to 29 and the coverage-recorded row from 7 to 9. Five are reproduced and open, D-045 in part,
-and D-053 is a disagreement between two documents about a sample size, recorded rather than
-fixed because the sample was declared in advance and editing it after the fact is the thing
-the freeze exists to prevent.
+A third review pass added eleven more, D-043 through D-053. Nine are now fixed: D-043, D-047
+and D-051 carry a probe or a suite each, D-049 and D-050 are fixed with 13 new cases between
+them, and D-044 and D-046 are fixed with the behaviour itself as the evidence rather than a
+dedicated test. Fixed-and-covered goes from 26 to 31 and the coverage-recorded row from 7 to 9.
+Two are reproduced and open, D-045 in part and D-052, and D-053 is a disagreement between two
+documents about a sample size, recorded rather than fixed because the sample was declared in
+advance and editing it after the fact is the thing the freeze exists to prevent.
 
 The summary gains a row for findings that are reproduced and not yet fixed. "Open" previously
 meant either something somebody had decided to live with or something nobody had looked at, and
@@ -1372,29 +1372,79 @@ of the world is the trigger. Running `--batch` before the reset would strand tho
 for the whole run, and only a hand-edit of `manifest.json` would revive them, which no
 document describes.
 
-**Status: OPEN**, in progress on a separate branch.
+**Remediation** `6f13dba`, with D-050 and the turn-2 half of D-052 in the same commit because
+the three are interlocked in the same two functions and splitting them would leave
+intermediate states that do not run.
+
+**Fix.** `BLOCKED_BY_INFRASTRUCTURE` stays one status, and a new `block_kind` field says which
+situation it was. `BLOCK_WINDOW` covers a 429, the attempt cap and an already-closed window,
+all of which the protocol itself scopes to the window, so the next window re-queues them.
+`BLOCK_TERMINAL` covers an unusable workspace, an exhausted retry and a turn 2 with no session
+id, none of which a later window can change. The turn owed is read off `rec["turns"]` rather
+than off a remembered status, so a scenario the quota blocked during turn 2 comes back for
+turn 2 and does not spend a second request re-collecting turn 1. `pending_turn()` is the single
+predicate, so `--list` and a resuming run cannot disagree about what will happen.
+
+**Why it is not re-offered forever.** Structurally, not by counter. Every window block also
+closes the window, `main` refuses to start a batch in a closed window, and `one_turn`
+re-checks before spending. A scenario is therefore offered at most once per window, and a
+window costs at most `MAX_ATTEMPTS` either way. Terminal blocks have no timer at all.
+
+**Test results.** 8 of the 23 cases in `tests/test_generation_outcomes.py` fail against the
+previous harness. **Status: FIXED and covered.**
 
 ### D-050 HIGH — A stale workspace is reused with nothing checking what is inside it
 
 - **Affected** `evaluation/results/run-3/run_generation.py`
-- **Evidence** from the review pass
+- **Remediation** `6f13dba`
+- **Regression test** `tests/test_generation_workspace.py`
+- **Evidence** reproduced here
 
-**What failed.** `scenario_ws()` rebuilds only when the workspace's own `MANIFEST.json` is
-absent, then checks that `missing_packets` is empty and that the scenario id is present. It
-never compares `skill_dir_sha256` or `permission_config_sha256`, both of which the builder
+**What failed.** `scenario_ws()` rebuilt only when the workspace's own `MANIFEST.json` was
+absent, then checked that `missing_packets` was empty and that the scenario id was present. It
+never compared `skill_dir_sha256` or `permission_config_sha256`, both of which the builder
 writes for exactly this purpose.
 
-**Reproduction.** Build a workspace with the real builder, empty its `opencode.jsonc`,
-replace a skill file, corrupt both digests in the workspace's own manifest, then run a turn.
-The turn records `TURN1_COMPLETE` with every isolation deny stripped, no request refused, and
-no warning. The module docstring's claim that the workspace carries an enforcing
-`opencode.jsonc` holds only for a workspace the current builder produced, and nothing
-re-establishes it on resume.
+**Reproduction.** Build a workspace with the real builder, empty its `opencode.jsonc`, replace a
+skill file, and recompute both digests in the workspace's own manifest to match the tampered
+material. The turn records `TURN1_COMPLETE` with every isolation deny stripped, no request
+refused, no warning. Two forgeries were run, because each defeats a different single check:
+corrupted digests defeat comparing the workspace against itself, and recomputed digests defeat
+comparing it against its own recorded provenance.
 
-Compounding it, `ws_path()` hashes only the scenario ids and `WS_ROOT` defaults under `/tmp`,
-so every checkout, branch and commit resolves a given scenario to the same directory.
+**Why it matters.** The module docstring's claim that the workspace carries an enforcing
+`opencode.jsonc` held only for a workspace the current builder produced, and nothing
+re-established it on resume. A run whose isolation is silently absent still produces scores,
+and nothing downstream would say those scores came from a tree the model could read answer
+keys out of.
 
-**Status: OPEN**, in progress on a separate branch.
+Compounding it, `ws_path()` hashes only the scenario ids and `WS_ROOT` defaulted under `/tmp`,
+so two checkouts of this repository resolved a scenario to the same directory.
+
+**Fix.** `verify_material()` runs on every use and fails closed, with four gates: the isolation
+material is present, the recorded digests match what the workspace holds, the recorded skills
+digest matches the current source tree, and `opencode.jsonc`'s permissions are compared rule by
+rule against the `PERMISSIONS` imported from the builder itself. The last one needs no stored
+digest to trust, so it catches an emptied config even when the digest was regenerated to match.
+It blocks rather than rebuilds, because a scenario whose turn 1 was collected inside that
+workspace would answer turn 2 against different material, and PROTOCOL says mixing versions
+inside one result is worse than an incomplete run.
+
+The default workspace root moves under a per-checkout suffix for the reason above.
+**Operational note:** a workspace left at the old fixed path by a previous run is orphaned and
+will not be reused.
+
+**Test results.** 5 of the 15 cases in `tests/test_generation_workspace.py` fail against the
+previous harness. A sixth guards against over-correction, asserting that an untampered
+workspace is accepted on a resumed turn and not silently rewritten. **Status: FIXED and
+covered.**
+
+**Residual risk, accepted deliberately.** A mid-run edit to `.agents/skills/` now blocks every
+scenario rather than silently collecting against mixed material. That is the direction the
+protocol asks for, but it is a total failure rather than a partial one, and three separate
+gates can each halt a whole run. Each names its remedy in the recorded error. The harness
+deliberately does not rebuild its way out, because `scenario_ws` cannot see what the manifest
+has already collected for that scenario.
 
 ### D-051 HIGH — The freeze verified deletions, additions, and almost nothing else
 
@@ -1452,7 +1502,8 @@ invokes this script, so both runs will hit the unanchored failure until the free
 - **Evidence** from the review pass
 
 Two smaller integrity gaps, recorded together because they are both about a recorded result
-not being checkable after the fact.
+not being checkable after the fact. Both are open; the run-3 half of `6f13dba` edited
+`run_generation.py` but neither of these is what that commit fixed, and both are cheap.
 
 - `run_generation.py` records `response_sha256` per turn. `grade_run.py` never reads it, and
   the grade file records `key_sha256` but not the response hash. Replacing an answer file after
@@ -1464,7 +1515,9 @@ not being checkable after the fact.
   directory a report would read still holds the old PASS. The summary and the exit code are
   correct; the artifact on disk is not.
 
-**Status: OPEN.**
+**Status: OPEN.** The second is the more pressing of the two. A refusal that leaves the thing
+it refused sitting in the directory is a refusal a reader of that directory will not see, and
+`grade_run.py` now refuses scenarios as a matter of routine.
 
 ### D-053 LOW — Recorded and accepted, with the disagreement written down
 
