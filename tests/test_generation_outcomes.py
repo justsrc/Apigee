@@ -17,6 +17,9 @@ turn the model never answered.
 The invariant these cases pin down:
 
   * A provider error is never answer text, however the event stream is shaped.
+  * A nonzero exit is never an answer, even when the stream carries text. A provider
+    that dies partway through leaves the text it did emit behind, so "the stream was
+    not empty" is not evidence that the turn finished.
   * One predicate decides whether an attempt produced an answer, and both the retry
     branch and the give-up branch use it, so nothing that failed can fall through to OK.
   * Every request that was spent is recorded with the status it actually got.
@@ -56,6 +59,10 @@ HARNESS = ROOT / "evaluation" / "results" / "run-3" / "run_generation.py"
 ALPHA = "MED-13"
 BETA = "HARD-22"
 ANSWER = "a real answer"
+# A stream that stops mid-sentence. A provider that dies partway through still leaves
+# the text it managed to emit in the event stream, so a non-empty stream is not evidence
+# of a complete answer.
+TRUNCATED = "The Quota policy rejects the revision at upload, because the interval"
 
 
 # ---------------------------------------------------------------------------
@@ -435,6 +442,52 @@ def _():
         st = h.mod.one_turn(m, ALPHA, 1, "fake/model", 30)
         assert st == "BLOCKED_BY_INFRASTRUCTURE", st
         assert len(h.calls) == 1, "a quota error was retried"
+        assert statuses(m) == [(ALPHA, 1, "QUOTA_EXHAUSTED")], statuses(m)
+        assert_no_answer(h, m, ALPHA)
+
+
+@case("a nonzero exit carrying text is not an answer")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        h.script(Step(turn_stream(TRUNCATED), rc=1, err="provider stream aborted"),
+                 Step(turn_stream(TRUNCATED), rc=1, err="provider stream aborted"))
+        st = h.mod.one_turn(m, ALPHA, 1, "fake/model", 30)
+        assert st == "BLOCKED_BY_INFRASTRUCTURE", st
+        assert_no_answer(h, m, ALPHA)
+        assert statuses(m) == [(ALPHA, 1, "RETRY_ONCE"),
+                               (ALPHA, 2, "NO_ANSWER")], statuses(m)
+
+
+@case("a nonzero exit is reported as a nonzero exit, not as an empty response")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        # No stderr and no error event: the only thing that says the call failed is the
+        # exit code. Recording "empty response" here would be a false description of a
+        # turn that returned text.
+        h.script(Step(turn_stream(TRUNCATED), rc=2), Step(turn_stream(TRUNCATED), rc=2))
+        assert h.mod.one_turn(m, ALPHA, 1, "fake/model", 30) == "BLOCKED_BY_INFRASTRUCTURE"
+        assert_no_answer(h, m, ALPHA)
+        err = m["scenarios"][ALPHA]["error"] or ""
+        assert "2" in err, f"the exit code is not in the recorded reason: {err!r}"
+        assert "empty response" not in err, err
+
+
+@case("a 429 exit is still a quota error, not a generic failure")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        # 429 is a nonzero exit and now satisfies the failure predicate, so the quota
+        # branch above it has to keep taking precedence or the budget window would be
+        # retried against a provider that has already said it is done.
+        h.script(Step(turn_stream(TRUNCATED), rc=429), Step(turn_stream(ANSWER)))
+        st = h.mod.one_turn(m, ALPHA, 1, "fake/model", 30)
+        assert st == "BLOCKED_BY_INFRASTRUCTURE", st
+        assert len(h.calls) == 1, "a 429 exit was retried"
         assert statuses(m) == [(ALPHA, 1, "QUOTA_EXHAUSTED")], statuses(m)
         assert_no_answer(h, m, ALPHA)
 

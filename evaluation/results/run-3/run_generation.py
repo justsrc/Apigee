@@ -319,7 +319,15 @@ def one_turn(m: dict, sid: str, turn: int, model: str, timeout: int) -> str:
         # `not text`. An error event carrying text satisfied the second test and not the
         # first, so on the retry it satisfied neither and fell through to OK, writing the
         # provider's error message as the answer. Sharing the predicate closes that path.
-        failed = bool(etype) or rc == -1 or not text.strip()
+        #
+        # The exit code is tested as `rc != 0`, not as `rc == -1`. -1 is this harness's
+        # own sentinel for a TimeoutExpired, and testing for it alone accepted every
+        # other nonzero exit as an answer. That is the same defect by another route: a
+        # provider that dies partway through still leaves the text it managed to emit in
+        # the event stream, so a stream that is not empty says nothing about whether the
+        # turn finished. A truncated answer written to raw/<sid>.turn1.md is graded
+        # exactly like a whole one.
+        failed = bool(etype) or rc != 0 or not text.strip()
 
         if failed and attempt == 1:
             entry["status"] = "RETRY_ONCE"
@@ -329,7 +337,14 @@ def one_turn(m: dict, sid: str, turn: int, model: str, timeout: int) -> str:
 
         if failed:
             entry["status"] = "NO_ANSWER"
-            entry["error"] = emsg or etype or (err.strip()[:200] if err else "empty response")
+            why = emsg or etype or (err.strip()[:200] if err else "")
+            if rc != 0 and not (emsg or etype):
+                # The exit code is the only thing that went wrong, so name it. Falling
+                # through to "empty response" described a turn that returned text as one
+                # that returned none, which is the kind of wrong reason that costs an
+                # afternoon.
+                why = f"opencode run exited {rc}" + (f": {why}" if why else "")
+            entry["error"] = why or "empty response"
             win["requests"][-1]["status"] = "NO_ANSWER"
             rec["status"] = "BLOCKED_BY_INFRASTRUCTURE"
             rec["error"] = entry["error"]
