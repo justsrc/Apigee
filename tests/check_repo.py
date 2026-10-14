@@ -534,34 +534,18 @@ def check_packets(root: Path, r: Results) -> None:
     # Staleness. A reviewer caught answer keys that still asserted a ground truth the
     # scenario had been rewritten away from, which would have graded every response
     # against the wrong answer. Editing a scenario without regenerating its packets is
-    # silent, so compare mtimes and refuse to call the packets current.
-    # Map every scenario ID to the mtime of the FILE that contains it. Keying by
-    # filename stem looks right and is not: the file is hard.md and the IDs inside it
-    # are HARD-01..HARD-15, so a stem-keyed lookup silently matches nothing and the
-    # guard passes vacuously. Verified by deliberately touching a file.
-    id_re = re.compile(r"\b(EASY|MED|HARD|ADV|REG)-(\d{2,3})\b")
-    id_mtimes: dict[str, float] = {}
-    for p in sorted((root / SCENARIOS_DIR).glob("*.md")):
-        if p.name == "index.md":
-            continue
-        for sid in id_re.findall(read(p)):
-            key = f"{sid[0]}-{sid[1]}"
-            id_mtimes[key] = max(id_mtimes.get(key, 0.0), p.stat().st_mtime)
-
-    stale = []
-    for packet in turn1 + turn2 + keys:
-        sid = packet.name.split(".")[0]
-        src = id_mtimes.get(sid)
-        if src is not None and packet.stat().st_mtime < src:
-            stale.append(sid)
-    if stale:
-        uniq = sorted(set(stale))
-        r.fail(f"{len(uniq)} packet(s) are older than their scenario and hold a stale "
-               f"answer key: {', '.join(uniq[:8])}{'...' if len(uniq) > 8 else ''}. "
-               f"Re-run: python3 tests/make_packets.py --all --turn 1 && "
-               f"python3 tests/make_packets.py --all --turn 2")
-    elif turn1 or turn2:
-        r.ok("packets are newer than every scenario they derive from")
+    # silent, so refuse to call the packets current until they say what the generator
+    # would say now.
+    #
+    # This compares rendered text, not timestamps. The guard used to compare mtimes,
+    # and mtime is not recorded in a commit: `git clone` and `git worktree add` write
+    # every file at checkout time, in whatever order the index hands them over. On a
+    # pristine checkout that made all 103 packets look older than their scenario, so
+    # check_repo --strict failed, fault_probe's valid-repo-baseline probe reported a
+    # false pass, and release_gate lost A1, F1, F2 and F3 on a repository that was
+    # byte-for-byte correct. Text is what the check was always about, and unlike mtime
+    # it survives being cloned.
+    check_packets_current(root, r, turn1 + turn2 + keys)
 
     if turn1 and turn2:
         r.ok(f"evaluation packets: {len(turn1)} turn-1, {len(turn2)} turn-2, {len(keys)} keys")
@@ -829,6 +813,46 @@ def check_generated_freshness(root: Path, r: Results) -> None:
                "python3 research/build_scenario_index.py")
     else:
         r.ok("scenario index matches a fresh run of build_scenario_index.py")
+
+
+def check_packets_current(root: Path, r: Results, packets: list[Path]) -> None:
+    """Every committed packet must say what tests/make_packets.py would write today.
+
+    Regenerates in memory and diffs, the way check_generated_freshness already does for
+    the fault-code index and the scenario index. The generator is imported rather than
+    run, so the check reads the working tree and writes nothing, which matters because
+    it also runs against throwaway copies under tests/fault_probe.py.
+    """
+    if not packets:
+        return
+    sys.path.insert(0, str(root / "tests"))
+    try:
+        import make_packets  # type: ignore
+    except Exception as e:  # pragma: no cover - import failure is itself a finding
+        r.fail(f"cannot import tests/make_packets.py to verify packet freshness: {e}")
+        return
+    finally:
+        try:
+            sys.path.remove(str(root / "tests"))
+        except ValueError:
+            pass
+
+    try:
+        rendered = make_packets.packet_texts(root / SCENARIOS_DIR)
+    except Exception as e:  # pragma: no cover - a generator crash is itself a finding
+        r.fail(f"tests/make_packets.py could not render the current scenarios: {e}")
+        return
+
+    stale = sorted(p.name for p in packets
+                   if rendered.get(p.name, "").rstrip() != read(p).rstrip())
+    if stale:
+        shown = ", ".join(stale[:6]) + ("..." if len(stale) > 6 else "")
+        r.fail(f"{len(stale)} packet(s) are not what tests/make_packets.py produces from "
+               f"the current scenarios, so they hold a stale answer key: {shown}. "
+               f"Re-run: python3 tests/make_packets.py --all --turn 1 && "
+               f"python3 tests/make_packets.py --all --turn 2")
+    else:
+        r.ok(f"all {len(packets)} packets match a fresh run of tests/make_packets.py")
 
 
 def _missing_fault_codes(produced: str, committed: str) -> list[str]:

@@ -259,16 +259,33 @@ def _p_leak(sb: Sandbox) -> None:
 
 
 @probe("stale-packet-answer-key", "FAIL",
-       "edit a scenario without regenerating its packet")
+       "rewrite a scenario's ground truth without regenerating its packet")
 def _p_stale(sb: Sandbox) -> None:
-    p = sb.path("scenarios/easy.md")
-    p.write_text(p.read_text() + "\n<!-- probe edit -->\n")
+    sb.edit("scenarios/easy.md",
+            "`InvalidQuotaInterval` fires when the `<Interval>` element is not an integer.",
+            "`InvalidQuotaInterval` fires when the quota is exhausted.", 1)
+    # The packets are made strictly NEWER than the scenario, so a checker that trusts
+    # timestamps passes this probe without reading a single byte of either file. That is
+    # not a contrivance: running the generator, committing, then restoring an old
+    # mtime-free state all leave packets newer than the scenario that no longer matches
+    # them. The previous version of this probe did the opposite, aged the packets, and
+    # so only ever tested the timestamp comparison.
     import os
-    future = sb.root.stat().st_mtime + 0
-    # Make the scenario strictly newer than its packets.
-    now = p.stat().st_mtime
-    for k in sb.path("evaluation/packets").glob("EASY-01.*"):
-        os.utime(k, (now - 100, now - 100))
+    scen = sb.path("scenarios/easy.md").stat().st_mtime
+    for k in sb.path("evaluation/packets").glob("*.md"):
+        os.utime(k, (scen + 10_000, scen + 10_000))
+
+
+@probe("packets-touched-after-checkout", "PASS",
+       "every packet is older than its scenario and no content changed, which is what a "
+       "fresh clone produces; timestamps are not recorded in a commit, so a checker that "
+       "reads them reports 103 stale answer keys on a correct tree")
+def _p_checkout_mtimes(sb: Sandbox) -> None:
+    import os
+    for k in sb.path("evaluation/packets").glob("*.md"):
+        os.utime(k, (0, 0))
+    for s in sb.path("scenarios").glob("*.md"):
+        os.utime(s, (1_000_000, 1_000_000))
 
 
 @probe("skill-frontmatter-removed", "FAIL", "delete a SKILL.md frontmatter block")

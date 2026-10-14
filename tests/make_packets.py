@@ -31,13 +31,19 @@ ROOT = Path(__file__).resolve().parent.parent
 SCEN = ROOT / "scenarios"
 OUT = ROOT / "evaluation" / "packets"
 
-FILES = {
-    "easy": SCEN / "easy.md",
-    "medium": SCEN / "medium.md",
-    "hard": SCEN / "hard.md",
-    "adversarial": SCEN / "adversarial.md",
-    "regression": SCEN / "regression.md",
-}
+
+def scenario_files(scen: Path) -> dict[str, Path]:
+    """The five scenario files, for whichever directory is being read."""
+    return {
+        "easy": scen / "easy.md",
+        "medium": scen / "medium.md",
+        "hard": scen / "hard.md",
+        "adversarial": scen / "adversarial.md",
+        "regression": scen / "regression.md",
+    }
+
+
+FILES = scenario_files(SCEN)
 
 ID_RE = re.compile(r"\b(EASY|MED|HARD|ADV|REG)-(\d{2,3})\b")
 
@@ -207,67 +213,51 @@ def critical_failures(block: str) -> str:
     return ""
 
 
-def main() -> int:
-    argv = sys.argv[1:]
-    turn = 1
-    if "--turn" in argv:
-        i = argv.index("--turn")
-        try:
-            turn = int(argv[i + 1])
-        except (IndexError, ValueError):
-            print("--turn needs a value, 1 or 2", file=sys.stderr)
-            return 1
-        del argv[i:i + 2]
+def packet_texts(scen: Path, wanted: set[str] | None = None) -> dict[str, str]:
+    """Render every packet to text, keyed by the file name it is written under.
 
-    if not argv:
-        print(__doc__)
-        return 1
+    Split out of main() so that a checker can ask what this generator would produce
+    without writing anything. Writing is main()'s job; deciding what is correct is not,
+    and a freshness check that has to write in order to compare cannot safely run
+    against a working tree it is only meant to inspect.
 
-    wanted = set(argv)
-    if "--all" in wanted:
-        wanted = {sid for path in FILES.values() for sid, _ in blocks(path)}
-        wanted.discard("--all")
-
-    if not wanted or wanted == {"--help"} or "-h" in wanted:
-        print(__doc__)
-        return 1
-    OUT.mkdir(parents=True, exist_ok=True)
-
-    found = 0
-    for path in FILES.values():
+    Read-only. `wanted` limits the render to those scenario ids, None means all of them.
+    Both turns and the answer key are produced, because the key does not depend on the
+    turn and the caller decides which of the three to keep.
+    """
+    files = scenario_files(scen)
+    out: dict[str, str] = {}
+    for path in files.values():
         for sid, block in blocks(path):
-            if sid not in wanted:
+            if wanted is not None and sid not in wanted:
                 continue
-            found += 1
             hs = headings_of(block)
-            title = hs[0][1] if hs else sid
-            clean_title = re.sub(r"^[A-Z]+-\d+\.?\s*", "", title)
 
-            visible = TURN1 if turn == 1 else TURN2
-            # The scenario title is deliberately NOT put in the prompt.
-            #
-            # Regression titles are statements of the correct disposition: "The safest
-            # recommendation is to change nothing", "Root cause cannot be established",
-            # "The right answer is a question". Handing those to the agent hands it the
-            # grading criterion, so the suite that exists to catch a skill drifting
-            # inaccuracy measures nothing. The same applies to any title phrased as a
-            # conclusion rather than a symptom.
-            #
-            # A real support request arrives as a ticket, not as a headline that states
-            # the answer, so dropping the title makes the packets more realistic as well
-            # as harder to cheat. The title stays in the answer key for the grader.
-            prompt = [PREAMBLE, f"# Support case {sid}", ""]
-            if turn == 2:
-                prompt.append("The customer has replied with more information.")
-                prompt.append("")
-            for sec in visible:
-                content = section(block, sec, hs)
-                if content:
-                    prompt.append(f"## {sec.title()}")
-                    prompt.append(content)
+            for turn, visible in ((1, TURN1), (2, TURN2)):
+                # The scenario title is deliberately NOT put in the prompt.
+                #
+                # Regression titles are statements of the correct disposition: "The safest
+                # recommendation is to change nothing", "Root cause cannot be established",
+                # "The right answer is a question". Handing those to the agent hands it the
+                # grading criterion, so the suite that exists to catch a skill drifting
+                # inaccuracy measures nothing. The same applies to any title phrased as a
+                # conclusion rather than a symptom.
+                #
+                # A real support request arrives as a ticket, not as a headline that states
+                # the answer, so dropping the title makes the packets more realistic as well
+                # as harder to cheat. The title stays in the answer key for the grader.
+                prompt = [PREAMBLE, f"# Support case {sid}", ""]
+                if turn == 2:
+                    prompt.append("The customer has replied with more information.")
                     prompt.append("")
-            suffix = "" if turn == 1 else ".turn2"
-            (OUT / f"{sid}{suffix}.prompt.md").write_text("\n".join(prompt), encoding="utf-8")
+                for sec in visible:
+                    content = section(block, sec, hs)
+                    if content:
+                        prompt.append(f"## {sec.title()}")
+                        prompt.append(content)
+                        prompt.append("")
+                suffix = "" if turn == 1 else ".turn2"
+                out[f"{sid}{suffix}.prompt.md"] = "\n".join(prompt)
 
             answer = [f"# {sid} answer key, do not show to the agent", ""]
             # KEY_EXTRA comes first: it qualifies how the critical failures below are read,
@@ -303,12 +293,57 @@ def main() -> int:
                 answer.append("## Critical failures")
                 answer.append(cf)
                 answer.append("")
-            (OUT / f"{sid}.key.md").write_text("\n".join(answer), encoding="utf-8")
+            out[f"{sid}.key.md"] = "\n".join(answer)
 
-    if found == 0:
+    return out
+
+
+def main() -> int:
+    argv = sys.argv[1:]
+    turn = 1
+    if "--turn" in argv:
+        i = argv.index("--turn")
+        try:
+            turn = int(argv[i + 1])
+        except (IndexError, ValueError):
+            print("--turn needs a value, 1 or 2", file=sys.stderr)
+            return 1
+        del argv[i:i + 2]
+
+    if not argv:
+        print(__doc__)
+        return 1
+
+    wanted = set(argv)
+    if "--all" in wanted:
+        wanted = {sid for path in FILES.values() for sid, _ in blocks(path)}
+        wanted.discard("--all")
+
+    if not wanted or wanted == {"--help"} or "-h" in wanted:
+        print(__doc__)
+        return 1
+    OUT.mkdir(parents=True, exist_ok=True)
+
+    rendered = packet_texts(SCEN, wanted)
+    # A turn writes its own prompt and the key, and never the other turn's prompt. The
+    # two invocations together produce all three files, which is how the documented
+    # `--all --turn 1` then `--all --turn 2` pair has always behaved. Matching on
+    # ".prompt.md" is not enough to separate them, because the turn-2 name ends in that
+    # too, so the two are told apart by the marker itself.
+    written = 0
+    for name, text in sorted(rendered.items()):
+        is_turn2 = ".turn2." in name
+        if not name.endswith(".key.md") and is_turn2 != (turn == 2):
+            continue
+        (OUT / name).write_text(text, encoding="utf-8")
+        written += 1
+
+    if written == 0:
         print("no matching scenario ids", file=sys.stderr)
         return 1
-    print(f"wrote {found} turn-{turn} packets to {OUT}")
+    # A count of scenarios, which is what this used to report, no longer matches what
+    # was written: a turn also writes the answer key.
+    print(f"wrote {written} files for turn {turn} to {OUT}")
     return 0
 
 
