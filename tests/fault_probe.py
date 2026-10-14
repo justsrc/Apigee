@@ -422,8 +422,7 @@ def _p_origin_inflated(sb: Sandbox) -> None:
        "delete the Origin field entirely, leaving provenance unclassifiable")
 def _p_origin_missing(sb: Sandbox) -> None:
     p = sb.path("scenarios/easy.md")
-    p.write_text(re.sub(r"^- Origin: [^\n]+\n", "", p.read_text(), count=1),
-                 )
+    p.write_text(re.sub(r"^- Origin: [^\n]+\n", "", p.read_text(), count=1, flags=re.M))
 
 
 @probe("origin-unclassifiable-value", "FAIL",
@@ -431,7 +430,7 @@ def _p_origin_missing(sb: Sandbox) -> None:
 def _p_origin_vague(sb: Sandbox) -> None:
     p = sb.path("scenarios/easy.md")
     p.write_text(re.sub(r"^- Origin: [^\n]+", "- Origin: based on something we saw once",
-                        p.read_text(), count=1))
+                        p.read_text(), count=1, flags=re.M))
 
 
 @probe("reference-path-unresolvable", "FAIL",
