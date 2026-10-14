@@ -1,5 +1,103 @@
 # Changelog
 
+## 2026-10-14, evaluation harness audited against a clean checkout
+
+Five defects, all of one kind: something recorded a result that nothing had produced. Four
+are in the checks, one is in the run-3 grading script. Full detail in
+`evaluation/defect-register.md` as D-038 through D-042.
+
+They were found by checking the harness out fresh and running it, not by reading it. Every
+one of them was invisible from inside the working tree the earlier passes used, because that
+tree's own file timestamps happened to be in the order the checkers wanted. A reviewer
+working in place would not have found any of them.
+
+### The fault-probe suite was reporting nothing
+
+`check_repo.py` decided an answer key was stale by comparing the packet's mtime against the
+scenario's. An mtime is not part of a commit, and `git clone` writes every file at checkout
+time, so on a pristine checkout all 103 packets looked stale. That is D-038, and the
+consequence was worse than the noise.
+
+`fault_probe.py` opens with a control probe whose whole job is to confirm the unmodified
+repository passes. It failed. Every other probe runs its mutation inside a copy of that same
+repository, so with the baseline already failing, all 33 probes expecting a FAIL saw a nonzero
+exit whether or not their mutation had been detected. The suite meant to catch checkers
+passing broken repositories was reporting nothing in a fresh clone, and `release_gate.py`,
+which reads the probe result, lost A1, F1, F2 and F3 with it.
+
+This was a false FAIL, not a false PASS, and the distinction decides how much the project's
+other evidence is worth. A suite that always says PASS is actively misleading. One that
+always says FAIL is merely broken, and a reader can see it is broken.
+
+The check now renders every packet and diffs it against what is committed, the way the
+fault-code index and the scenario index were already checked. All 309 committed packets are
+byte-identical under the new path. It is also stricter: with a ground truth rewritten and
+every packet touched ten thousand seconds into the future, the old check reported 0 stale
+and the new one names the key.
+
+### Two probes had never tested anything
+
+`origin-field-removed` and `origin-unclassifiable-value` anchored their regex with `^` and
+passed no `re.MULTILINE`, so it matched only at the start of the file. The field they meant
+to change is a bullet on line 26. `re.sub` found nothing and wrote the file back unchanged.
+
+They read green for the whole life of the suite because the mtime bug was failing the
+unmodified sandbox. That is worth dwelling on: a probe that changes nothing looks exactly
+like a probe that found something, provided something else is broken. `check_origin_integrity`
+turns out to be correct, and nothing shipped is wrong, but the project had no evidence behind
+two of the probes covering the check D-018 exists to enforce.
+
+`fault_probe.py` now digests the sandbox before and after each probe's own mutation. A probe
+expecting a FAIL that changed no file is reported as NO MUTATION and fails the suite whatever
+the checker said. Content is digested rather than timestamps, because a no-op `write_text`
+moves an mtime while leaving the bytes alone.
+
+### A nonzero provider exit was a completed answer
+
+`75f1997` fixed an error event being written as the answer and recorded two paths it left
+open. This is the first. The failure predicate tested `rc == -1`, which is the harness's own
+timeout sentinel, so every other nonzero exit fell through to the OK branch. A provider that
+dies partway through still leaves the text it emitted, so a non-empty stream is not evidence
+of a complete answer. The predicate reads `rc != 0` now, and the quota branch still runs
+first so a 429 is still never retried.
+
+### The scoring script never read the manifest
+
+`grade_run.py --run` took the grader's JSON at face value. It scored whatever it was given
+and wrote the result, and only `--list` filtered on `AWAITING_GRADE`. Against run 3's own
+state, where all 103 scenarios are NOT_STARTED and no answer file exists, MED-13 came out as
+`{"normalized_score": 1.0, "verdict": "PASS"}`.
+
+This is the other end of the sentence in `75f1997`, which hardened generation on the grounds
+that a false success produces a score for a turn the model never answered. The grading side
+was not hardened, and the outcome stayed reachable with no generation at all.
+
+Three lines away, an uncomputable score was coerced to FAIL whenever any anchors were
+supplied, so a grader's typo of 7 on a 0-to-4 scale became a model failure in the counts.
+PROTOCOL.md says the opposite in one line. Both are fixed, with `tests/test_grading_integrity.py`
+driving the real file: six of its eight cases fail against the previous grader, and the two
+that pass are there to show the new gate does not reject a scenario that genuinely ran.
+
+### What did not change
+
+The release gate still reads NOT QUALIFIED, and that is the correct result rather than a
+regression. C4 is BLOCKED because no URL audit was run, and E5, G1 and G2 stay UNVERIFIED
+because no run meets the A/B design. Recovering four criteria did not qualify the project and
+is not presented as though it had.
+
+Run 3 collected nothing, so no recorded score moves because of any of this. All five are
+latent defects in the machinery rather than damage to a result, and the register records them
+that way. Nothing here is evidence about whether the skills help. A passing probe suite says
+the harness classifies the inputs it was given as described, and says nothing about whether a
+live model or provider can produce a shape these suites do not model.
+
+### Still open
+
+The second path `75f1997` named is untouched: a policy carrying `continueOnError="true"`
+that swallows a failure contributes no fault to the manifest while its text still reaches the
+answer file. It is a defect in the fault inventory rather than in the outcome
+classification, it is not what produced the run-3 artifact, and it is not fixed here.
+
 ## 2026-10-12, medium.md reviewed and repaired
 
 `evaluation/audit-medium-A.md` records a technical review of MED-01 through MED-22, closing
