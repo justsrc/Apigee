@@ -18,11 +18,11 @@ Severity, as defined for this project:
 | Status | Count |
 | --- | --- |
 | Open, blocking release | 0 |
-| Fixed and covered by a test | 31 |
-| Fixed, coverage recorded, no dedicated probe yet | 7 |
+| Fixed and covered by a test | 29 |
+| Fixed, coverage recorded, no dedicated probe yet | 9 |
 | Open, accepted with documented reason | 9 |
 | Open, awaiting external evidence | 2 |
-| Open, reproduced and not yet fixed | 6 |
+| Open, reproduced and not yet fixed | 5 |
 
 Three entries changed on 2026-10-13. D-035 adds the seventh fixed-without-a-dedicated-probe
 entry. D-036 adds two probes for the packet generator. The isolation-route classifier is what
@@ -42,13 +42,17 @@ never read the manifest, so a scenario recorded as never run could be written ou
 Neither was reachable from a real run, because run 3 collected nothing, and both are recorded
 as latent rather than as damage to a recorded result. Fixed-and-covered moves from 24 to 26.
 
-A third review pass added eleven more, D-043 through D-053, and moved fixed-and-covered from
-26 to 31. Five of them are fixed: D-043, D-044, D-046, D-047 and, partially, D-045. Six are
-reproduced and open, and the summary gains a row for them because "open" previously meant
-either a finding somebody had decided to live with or a finding nobody had looked at, and a
-reader needs to be able to tell those apart at a glance. D-053 is a disagreement between two
-documents about a sample size, recorded rather than fixed because the sample was declared in
-advance and editing it after the fact is the thing the freeze exists to prevent.
+A third review pass added eleven more, D-043 through D-053. Six are fixed: D-043 and D-047
+carry a probe each, D-051 carries a 28-case suite, and D-044 and D-046 are fixed with the
+behaviour itself as the evidence rather than a dedicated test. Fixed-and-covered goes from 26
+to 29 and the coverage-recorded row from 7 to 9. Five are reproduced and open, D-045 in part,
+and D-053 is a disagreement between two documents about a sample size, recorded rather than
+fixed because the sample was declared in advance and editing it after the fact is the thing
+the freeze exists to prevent.
+
+The summary gains a row for findings that are reproduced and not yet fixed. "Open" previously
+meant either something somebody had decided to live with or something nobody had looked at, and
+the table could not tell them apart.
 
 ## Later additions
 
@@ -1173,9 +1177,10 @@ Two labels are used throughout and they mean different things.
   and the cited line numbers; the run is not one I performed.
 
 Six of the entries below have been fixed since they were written, and each says so at its
-own heading rather than being moved. D-046 and D-047 were found in the review pass and fixed
-on this branch after the evidence was reproduced here, so they carry the stronger label. The
-rest are open.
+own heading rather than being moved. D-046, D-047 and D-051 were found in the review pass and
+fixed on this branch after the evidence was reproduced here, so they carry the stronger label.
+D-043 and D-044 were reproduced here before being fixed. The rest are open, and D-051 is fixed
+but carries a human step that is deliberately not done, which its entry spells out.
 
 Nothing in this section is a claim about model quality or about whether the skills help. All
 of it is about machinery. Run 3 collected nothing, so no recorded score depends on any of it.
@@ -1391,10 +1396,10 @@ so every checkout, branch and commit resolves a given scenario to the same direc
 
 **Status: OPEN**, in progress on a separate branch.
 
-### D-051 HIGH — The freeze verifies deletions, additions, and almost nothing else
+### D-051 HIGH — The freeze verified deletions, additions, and almost nothing else
 
 - **Affected** `evaluation/results/run-3/freeze_artifacts.py`
-- **Evidence** from the review pass
+- **Evidence** reproduced here
 
 **What failed.** Three separate problems, all demonstrated.
 
@@ -1414,7 +1419,32 @@ so every checkout, branch and commit resolves a given scenario to the same direc
 packet is both invisible to it and fatal to the harness, which reads the packet outside any
 error handling and dies with a bare traceback.
 
-**Status: OPEN**, in progress on a separate branch.
+**Remediation** `4d60cb2`. **Regression test** `tests/test_freeze_artifacts.py`, 28 cases of
+which 24 fail against the previous script. The 4 that pass both ways are two controls, the
+deliberate exclusion of `manifest.json`, and a case the old script caught for a different
+reason.
+
+**Decisions taken, and one left open.** A missing declared artifact is recorded as the
+sentinel `MISSING` rather than dropped, so a freeze taken on an incomplete tree says so and
+can never verify clean. An *addition* is treated as drift, not as a weaker signal: the
+population is pinned at 103 and yield is reported as PASS over 103, so a 104th scenario moves
+the denominator silently. `manifest.json` is deliberately **excluded**, because the harness
+rewrites it on every batch and PROTOCOL.md makes it authoritative for collection state rather
+than for rules; freezing it would fail every batch and teach the run to ignore a verifier that
+is always red. `git_head` is reported on every verify and gated only behind an opt-in
+`--strict-head`, because a commit comparison is weaker than the content hashes where it
+matters (a working-tree edit moves bytes, not HEAD) and noisier for no gain.
+
+**What is still open, deliberately.** The real tree is now unanchored and reports eight moved
+artifacts at exit 2. That is the honest state: the freeze predates the harness work on this
+branch, including its own first three fixes, and `artifact-hashes.json` has no sections for
+the four files that decide a verdict. Re-writing it re-blesses whatever is on disk at the
+moment it is written, so it is a human decision, taken at an agreed commit, with the harness
+edits either accepted or reverted on purpose. It is not done on this branch. `PROTOCOL.md`
+also needs a line about the sidecar and `--strict-head`, and `evaluation/results/run-4/`
+invokes this script, so both runs will hit the unanchored failure until the freeze is reset.
+
+**Status: FIXED and covered**, with the re-freeze recorded above as a separate human step.
 
 ### D-052 MEDIUM — A recorded result that would not survive being re-examined
 
