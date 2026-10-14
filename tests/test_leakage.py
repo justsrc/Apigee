@@ -19,6 +19,11 @@ It also runs a deliberate leak: it copies a recognisable ground-truth phrase int
 field and confirms the generated packet does not contain it. A leakage test that never
 actually leaks proves nothing.
 
+The last thing it checks is the tree an evaluating model is allowed to see, which is the
+only check that can find answer material one Read away. That check can fail to run, and when
+it does the script reports INCOMPLETE and exits nonzero rather than PASS, because a check
+that did not run has established nothing about the tree.
+
 Usage:
     python3 tests/test_leakage.py
 """
@@ -49,6 +54,14 @@ HELD_BACK = [
 ]
 
 MARKER = "ZZLEAKCANARYZZ-4f2a9c-do-not-release-this-sentence"
+
+# Verdicts for the workspace half of the test. The third state exists because that half used
+# to answer with a bool and returned True when tests/make_eval_workspace.py could not be
+# imported. True is success, so deleting that one file turned the check off silently: the
+# script printed RESULT: PASS, exited 0, and release_gate.py recorded E2 as PASS having
+# verified nothing about agent-workspace isolation. Three states, so an unrunnable check can
+# be told apart from a passing one.
+WS_OK, WS_LEAK, WS_UNRUNNABLE = "OK", "LEAK", "UNRUNNABLE"
 
 
 def norm(text: str) -> str:
@@ -91,7 +104,7 @@ def _sections(sid: str) -> dict[str, str]:
     return out
 
 
-def _workspace_test() -> tuple[bool, str]:
+def _workspace_test() -> tuple[str, str]:
     """Build the tree an evaluating model is allowed to see, and look for answers in it.
 
     Everything above this function inspects one file at a time and asks whether its text is
@@ -107,6 +120,10 @@ def _workspace_test() -> tuple[bool, str]:
     deliberately dropped title is the same leak the dropping was for.
 
     So build the workspace and assert the answers are not in it.
+
+    Returns (verdict, detail), the verdict being one of WS_OK, WS_LEAK or WS_UNRUNNABLE. The
+    verdict used to be a bool, which cannot express the third of those, so every way this
+    check could fail to run returned success.
     """
     try:
         import tempfile
@@ -117,32 +134,40 @@ def _workspace_test() -> tuple[bool, str]:
         try:
             import make_eval_workspace as mew
         except ImportError:
-            return True, "SKIPPED (tests/make_eval_workspace.py not importable)"
+            return WS_UNRUNNABLE, ("UNRUNNABLE (tests/make_eval_workspace.py not "
+                                    "importable, so the workspace was never built and "
+                                    "nothing in it was checked)")
 
     ids = mew.all_scenario_ids()
     sample = ids[:: max(1, len(ids) // 12)][:12] or ids[:1]
+    if not sample:
+        # The empty build is clean by construction and would have read as a pass. A
+        # workspace holding nothing is not evidence that a workspace holds no answers.
+        return WS_UNRUNNABLE, ("UNRUNNABLE (no scenario IDs, so the workspace would have "
+                                "been built empty and had nothing to hide)")
     with tempfile.TemporaryDirectory(prefix="apigee-leakws-") as d:
         out = Path(d) / "ws"
         rc = mew.build(out, sample, False, True)
         if rc == 2:                      # could not build; already reported
-            return False, "could not build the workspace"
+            return WS_UNRUNNABLE, "UNRUNNABLE (the workspace could not be built)"
         leaks = mew.find_leaks(out)
         if leaks:
-            return False, f"LEAK, workspace contains: {', '.join(leaks[:3])}"
+            return WS_LEAK, f"LEAK, workspace contains: {', '.join(leaks[:3])}"
 
         # Belt and braces. The name patterns are the fast check; confirm directly that the
         # things that actually hold answers are absent.
         for sub in ("evaluation", "scenarios", "research"):
             if (out / sub).exists():
-                return False, f"LEAK, workspace contains a {sub}/ directory"
+                return WS_LEAK, f"LEAK, workspace contains a {sub}/ directory"
         if list(out.rglob("*.key.md")):
-            return False, "LEAK, workspace contains an answer key"
+            return WS_LEAK, "LEAK, workspace contains an answer key"
 
-    return True, f"OK, {len(sample)} scenarios built with no answer material reachable"
+    return WS_OK, f"OK, {len(sample)} scenarios built with no answer material reachable"
 
 
 def main() -> int:
     failures: list[str] = []
+    incomplete: list[str] = []
     checked = 0
 
     packets = ROOT / "evaluation" / "packets"
@@ -213,7 +238,7 @@ def main() -> int:
     # scenario files and the ID-to-title index all sit under the repository root, one Read
     # away from a model whose working directory is that root. Build the tree the agent is
     # actually allowed to see and assert the answer material is not in it.
-    ws_ok, ws_detail = _workspace_test()
+    ws_state, ws_detail = _workspace_test()
 
     print(f"checked {checked} prompt packets across {checked // 2} scenarios")
     for f in failures:
@@ -227,11 +252,20 @@ def main() -> int:
         failures.append("canary phrase leaked into a prompt packet")
     print()
     print(f"agent workspace isolation: {ws_detail}")
-    if not ws_ok:
+    if ws_state == WS_LEAK:
         failures.append("the agent workspace contains answer material")
+    elif ws_state == WS_UNRUNNABLE:
+        # Kept apart from failures: a leak is a finding and a non-run is not, and the
+        # verdict line below says which one happened. Neither is a pass.
+        incomplete.append(f"agent workspace isolation did not run: {ws_detail}")
 
+    if incomplete:
+        print(f"\nRESULT: INCOMPLETE, {len(incomplete)} check(s) could not run: "
+              f"{'; '.join(incomplete)}")
+        print("A check that did not run is not a check that passed.")
     if failures:
         print(f"\nRESULT: FAIL, {len(failures)} leakage finding(s)")
+    if incomplete or failures:
         return 1
     print("\nRESULT: PASS, no ground truth leaks into any prompt packet")
     return 0
