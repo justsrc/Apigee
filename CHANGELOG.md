@@ -1,5 +1,51 @@
 # Changelog
 
+## 2026-10-15, second review pass recorded, and four gaps closed
+
+### Added
+
+Changelog coverage for the second and third review pass, which fixed seven defects across
+nine commits with no entry of its own. D-043 through D-051 in
+`evaluation/defect-register.md`: the fault-code check no longer passes on the word
+"Rejected" anywhere in a block, the release gate no longer reports a tag it could not list,
+`test_leakage.py` reports the isolation half as INCOMPLETE rather than returning success
+when it cannot run, a SKILL.md that advertises a reference path no longer passes because the
+path resolves to nothing, a run can resume past its own quota error, a stale workspace is
+refused unless its digests match the source tree, and the run-3 freeze now checks additions
+and deletions rather than one direction.
+
+Three of those remain open and are recorded as open: D-045, D-048 and D-052. D-053 is
+recorded and accepted, with the disagreement written down.
+
+### Fixed
+
+**`research/official-documentation-index.md` was stale and nothing noticed.** It described
+305 cached pages while 335 sat in `research/pages/`. `build_doc_index.py` was rewritten in
+the typing and lint pass and its output was not regenerated, the same failure
+`error-codes.md` had in the merge that followed. No check compared the two, because the
+documentation index was the only generated file with no freshness check. It has one now,
+and `build_doc_index.py` grew a `build()` to answer it offline, matching the other two
+generators. Reverting the index, or altering one byte size in it, each produce exactly one
+failure naming the file.
+
+**The register's own summary of the review pass was wrong.** It named D-045 as fixed while
+D-045's heading reads OPEN, said nothing after D-044 was fixed when five entries carry a
+FIXED status, and counted six fixed entries when there are seven. Four citations pointed at
+code that has since moved: a probe count of 36 against 37, a sampling expression replaced by
+the typing pass, a symbol the typing pass deleted, and a file path under `run-3/` that is
+under `run-4/`.
+
+**Two instructions in tracked documentation sent the reader to one machine.** The register's
+reproduction block and `research/RESEARCH-RECIPE.md` both began with an absolute path under
+a contributor's home directory. Both now use a relative path, matching what
+`research/official-documentation-index.md` already printed. The remaining `/Users/` hits in
+the repository are verbatim third-party issue text and are left alone.
+
+**Repository-local ignore rules for `.mypy_cache/` and `.ruff_cache/`.** Both tools write a
+self-ignoring `.gitignore` into their own cache directory, so this only matters for the
+versions that do not, and for the window before that file exists. Neither tool is declared
+project tooling, so the rules are defensive.
+
 ## 2026-10-14, evaluation harness audited against a clean checkout
 
 Five defects, all of one kind: something recorded a result that nothing had produced. Four
