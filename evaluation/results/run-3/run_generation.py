@@ -35,6 +35,21 @@ not:
     BLOCKED_BY_INFRASTRUCTURE with a `workspace unusable:` error. It is never recorded as
     a completed turn, and never surfaces as a bare traceback from a missing `cwd`.
   * An unknown scenario id is rejected before a workspace is chosen.
+
+Outcome invariants, for the same reason. A provider error must never be able to reach
+`raw/<sid>.turn<N>.md`, because `grade_run.py` selects every scenario the manifest marks
+`AWAITING_GRADE` and a grader reads those files:
+
+  * A provider error's message is never answer text. `parse_events` returns it separately
+    and does not append it to the assistant text, so an error event cannot satisfy the
+    "did the model answer" test however the stream is shaped.
+  * One predicate decides whether an attempt produced an answer, and the retry branch and
+    the give-up branch both use it. Whatever earns a retry is therefore caught if the
+    retry also fails, instead of falling through to OK.
+  * Every request that was spent is recorded with the status it actually got, including
+    the one that earns the retry.
+  * Only the OK branch writes an answer artifact. An exhausted retry records
+    BLOCKED_BY_INFRASTRUCTURE and leaves no `raw/<sid>.turn<N>.md` behind.
 """
 from __future__ import annotations
 
@@ -121,6 +136,12 @@ def parse_events(raw: str) -> tuple[str, str | None, str | None, str | None]:
 
     The session id comes from the event stream. It is what makes turn 2 continue the
     turn-1 conversation instead of starting over.
+
+    A provider error's message is returned as `emsg` and is never appended to `text`.
+    Appending it made an error event look like a delivered answer, which is how a 401
+    body once reached `raw/*.turn1.md` as though the model had written it. The message
+    stays available for the quota scan and for the recorded error; the answer text stays
+    text the model actually produced.
     """
     text, etype, emsg, sid = [], None, None, None
     for line in raw.splitlines():
@@ -140,7 +161,6 @@ def parse_events(raw: str) -> tuple[str, str | None, str | None, str | None]:
             err = d.get("error") or {}
             etype = str(err.get("type") or "error")
             emsg = str(err.get("message") or "")
-            text.append(emsg)
     return "\n".join(t for t in text if t.strip()), etype, emsg, sid
 
 
@@ -294,14 +314,22 @@ def one_turn(m: dict, sid: str, turn: int, model: str, timeout: int) -> str:
             save(m)
             return rec["status"]
 
-        if (etype or rc == -1 or not text.strip()) and attempt == 1:
+        # One predicate, used by both branches below. They used to test different things:
+        # the retry branch `etype or rc == -1 or not text`, the give-up branch only
+        # `not text`. An error event carrying text satisfied the second test and not the
+        # first, so on the retry it satisfied neither and fell through to OK, writing the
+        # provider's error message as the answer. Sharing the predicate closes that path.
+        failed = bool(etype) or rc == -1 or not text.strip()
+
+        if failed and attempt == 1:
             entry["status"] = "RETRY_ONCE"
+            win["requests"][-1]["status"] = "RETRY_ONCE"
             save(m)
             continue
 
-        if not text.strip():
+        if failed:
             entry["status"] = "NO_ANSWER"
-            entry["error"] = etype or (err.strip()[:200] if err else "empty response")
+            entry["error"] = emsg or etype or (err.strip()[:200] if err else "empty response")
             win["requests"][-1]["status"] = "NO_ANSWER"
             rec["status"] = "BLOCKED_BY_INFRASTRUCTURE"
             rec["error"] = entry["error"]
