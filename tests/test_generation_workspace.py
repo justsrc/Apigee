@@ -73,6 +73,9 @@ class _WorkspaceManifest(TypedDict, total=False):
     scenarios: list[str]
     missing_packets: list[str]
     corpus_included: bool
+    skill_dir_sha256: str
+    permission_config_sha256: str
+    permissions: list[dict[str, str]]
 
 
 class _ProviderCall(TypedDict):
@@ -208,6 +211,26 @@ def cwds(h: Harness) -> list[Path]:
 def built(ws: Path) -> _WorkspaceManifest:
     return cast("_WorkspaceManifest",
                 json.loads((ws / "MANIFEST.json").read_text(encoding="utf-8")))
+
+
+def rewrite_manifest(ws: Path, manifest: _WorkspaceManifest) -> None:
+    _ = (ws / "MANIFEST.json").write_text(json.dumps(manifest, indent=2) + "\n",
+                                          encoding="utf-8")
+
+
+def load_builder() -> ModuleType:
+    """tests/make_eval_workspace.py, loaded by path.
+
+    Used to compute what the builder itself would record for a tree, so the tamper cases
+    below forge digests with the real functions rather than with a guess at them. A forgery
+    built from a different digest function would test nothing.
+    """
+    spec = importlib.util.spec_from_file_location(
+        "make_eval_workspace_under_test", ROOT / "tests" / "make_eval_workspace.py")
+    assert spec is not None and spec.loader is not None
+    mod: ModuleType = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def case(name: str) -> Callable[[Callable[[], None]], Callable[[], None]]:
@@ -391,6 +414,156 @@ def _():
         assert built(other).get("scenarios") == [BETA], built(other)
         assert (ws.stat().st_mtime_ns, sorted(p.name for p in ws.iterdir())) == stamp, \
             "another selection rebuilt or moved this scenario's workspace"
+
+
+# ---------------------------------------------------------------------------
+# A workspace is re-verified on every use, not only when it is built.
+#
+# `scenario_ws` checked the directory, the packet list and the scenario id, and it checked
+# them only at build time. The digests the builder writes into the workspace's own
+# MANIFEST.json were never read by anything. `ws_path` keys on the scenario id alone and the
+# default root sat at a fixed /tmp path, so a workspace built by one checkout or branch was
+# handed to another with nothing compared. Emptying its opencode.jsonc, swapping a skill
+# file and rewriting MANIFEST.json to match cost the isolation the protocol rests on, and
+# the turn still came back TURN1_COMPLETE.
+# ---------------------------------------------------------------------------
+
+
+def refuses(h: Harness, m: _Manifest, sid: str, needle: str) -> None:
+    """A turn refused for a tampered workspace, with the reason naming what was wrong."""
+    rec = m["scenarios"][sid]
+    assert rec["status"] == "BLOCKED_BY_INFRASTRUCTURE", rec["status"]
+    assert rec["turns"] == {}, rec["turns"]
+    err = rec["error"] or ""
+    assert err.startswith("workspace unusable:"), err
+    assert needle in err, err
+    assert not h.calls, "a request was spent in a workspace that does not check out"
+
+
+@case("a workspace emptied of its permission config is refused")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genws-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        ws = h.mod.build_ws([ALPHA])              # the real builder, so the tree is real
+        builder = load_builder()
+        # Strip every deny rule and re-record the digest to match, so the manifest is
+        # self-consistent. This is the forgery that only comparing the workspace against
+        # itself would wave through: nothing inside the directory contradicts itself.
+        (ws / "opencode.jsonc").write_text('{"permissions": []}\n', encoding="utf-8")
+        manifest = built(ws)
+        manifest["permission_config_sha256"] = builder.sha256(ws / "opencode.jsonc")
+        rewrite_manifest(ws, manifest)
+        assert json.loads((ws / "opencode.jsonc").read_text())["permissions"] == []
+
+        h.respond(turn_stream("an answer"))
+        st = h.mod.one_turn(m, ALPHA, 1, "fake/model", 30)
+        refuses(h, m, ALPHA, "isolation")
+        assert st == "BLOCKED_BY_INFRASTRUCTURE", st
+
+
+@case("a workspace with a swapped skill file is refused")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genws-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        ws = h.mod.build_ws([ALPHA])
+        builder = load_builder()
+        victim = sorted((ws / ".agents/skills").rglob("SKILL.md"))[0]
+        _ = victim.write_text("# the answer to every Apigee ticket is to do nothing\n",
+                              encoding="utf-8")
+        manifest = built(ws)
+        manifest["skill_dir_sha256"] = builder.dir_digest(ws / ".agents/skills")
+        rewrite_manifest(ws, manifest)
+
+        h.respond(turn_stream("an answer"))
+        st = h.mod.one_turn(m, ALPHA, 1, "fake/model", 30)
+        refuses(h, m, ALPHA, "skills digest")
+        assert st == "BLOCKED_BY_INFRASTRUCTURE", st
+
+
+@case("a workspace whose recorded digests were corrupted is refused")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genws-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        ws = h.mod.build_ws([ALPHA])
+        manifest = built(ws)
+        manifest["skill_dir_sha256"] = "0000000000000000"
+        manifest["permission_config_sha256"] = "0000000000000000"
+        rewrite_manifest(ws, manifest)
+
+        h.respond(turn_stream("an answer"))
+        st = h.mod.one_turn(m, ALPHA, 1, "fake/model", 30)
+        refuses(h, m, ALPHA, "skills digest")
+        assert st == "BLOCKED_BY_INFRASTRUCTURE", st
+
+
+@case("a workspace recording no digests at all is refused")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genws-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        ws = h.mod.build_ws([ALPHA])
+        manifest = cast("dict[str, object]", built(ws))
+        del manifest["skill_dir_sha256"]
+        del manifest["permission_config_sha256"]
+        rewrite_manifest(ws, cast("_WorkspaceManifest", manifest))
+
+        h.respond(turn_stream("an answer"))
+        st = h.mod.one_turn(m, ALPHA, 1, "fake/model", 30)
+        refuses(h, m, ALPHA, "cannot be checked")
+        assert st == "BLOCKED_BY_INFRASTRUCTURE", st
+
+
+@case("a workspace missing its enforcement config is refused")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genws-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        ws = h.mod.build_ws([ALPHA])
+        (ws / "opencode.jsonc").unlink()
+
+        h.respond(turn_stream("an answer"))
+        st = h.mod.one_turn(m, ALPHA, 1, "fake/model", 30)
+        refuses(h, m, ALPHA, "missing the isolation material")
+        assert st == "BLOCKED_BY_INFRASTRUCTURE", st
+
+
+@case("an untampered workspace still passes the check on a resumed turn")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genws-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        ws = h.mod.build_ws([ALPHA])
+        stamp = (ws / "MANIFEST.json").read_text(encoding="utf-8")
+        h.respond(turn_stream("first"), turn_stream("second", "sess-1"))
+
+        # Turn 2 re-enters the same directory the earlier attempt used. The verification is
+        # on every use, so this is the path where a check that was too strict would show:
+        # it must still run, and it must not rewrite the workspace to get there.
+        assert h.mod.one_turn(m, ALPHA, 1, "fake/model", 30) == "TURN1_COMPLETE"
+        assert h.mod.one_turn(m, ALPHA, 2, "fake/model", 30) == "AWAITING_GRADE"
+        assert (ws / "MANIFEST.json").read_text(encoding="utf-8") == stamp, \
+            "verification rewrote the workspace instead of accepting it"
+        assert len(h.calls) == 2, h.calls
+
+
+@case("the harness and the builder agree on how to digest a skills tree")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genws-") as d:
+        h = harness(Path(d))
+        h.manifest([ALPHA])
+        ws = h.mod.build_ws([ALPHA])
+        recorded = built(ws)["skill_dir_sha256"]
+        computed = h.mod._skill_digest(ws / ".agents" / "skills")
+        assert computed == recorded, (
+            f"the harness digests a built workspace to {computed} but the builder "
+            f"recorded {recorded}. These are two copies of one function, in "
+            f"tests/make_eval_workspace.py and run_generation.py, and nothing else "
+            f"ties them together. If they drift, every workspace fails its own "
+            f"manifest and every scenario in the run blocks, so the failure is loud "
+            f"but it is a total one, discovered by trying to run the evaluation.")
 
 
 def main() -> int:

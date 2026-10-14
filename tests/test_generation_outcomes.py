@@ -25,13 +25,20 @@ The invariant these cases pin down:
   * Every request that was spent is recorded with the status it actually got.
   * Only the OK branch writes an answer artifact. An exhausted retry writes none and
     records BLOCKED_BY_INFRASTRUCTURE.
+  * A scenario that stopped for a reason the next quota window clears comes back in the
+    next window, and one that stopped for a reason it does not clear does not. Both were
+    terminal once, because `todo` selected `NOT_STARTED` and nothing else, so a 429 or an
+    interrupted run retired the scenario for the rest of the evaluation.
+  * Turn 2 is not run cold. PROTOCOL.md requires it in the same conversation as turn 1,
+    and the flag that carries the conversation was omitted when turn 1's stream carried
+    no session id, which graded a follow-up answered without the original ticket.
 
 `tests/test_generation_workspace.py` covers where the model runs. This file covers what
-comes back. The two are deliberately separate suites that each stand alone: importing the
-other's private names to share plumbing would make either file's failure depend on the
-other's internals, and the shared surface here is small. The one thing deliberately not
-stubbed is `tests/make_eval_workspace.py`, which runs for real through `subprocess` in
-both files.
+comes back, and whether the run can carry on afterwards. The two are deliberately separate
+suites that each stand alone: importing the other's private names to share plumbing would
+make either file's failure depend on the other's internals, and the shared surface here is
+small. The one thing deliberately not stubbed is `tests/make_eval_workspace.py`, which runs
+for real through `subprocess` in both files.
 
 Usage:
     python3 tests/test_generation_outcomes.py
@@ -42,12 +49,16 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import contextlib
 import importlib.util
+import io
 import json
 import subprocess
+import sys
 import tempfile
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from pathlib import Path
 from types import ModuleType
 from typing import Protocol, TypedDict, cast
@@ -130,11 +141,26 @@ def turn_stream(text: str, session: str = "sess-1") -> str:
                        "part": {"type": "text", "text": text}}) + "\n"
 
 
+def sessionless_stream(text: str) -> str:
+    """A well-formed turn stream that carries no `sessionID` at all.
+
+    Nothing in the harness produced this, and it is not a provider error: it is the shape
+    that let turn 2 run cold. Modelled here because the guard against it has to exist for
+    the stream the harness did not get an id from, whatever the reason was.
+    """
+    return json.dumps({"type": "text", "part": {"type": "text", "text": text}}) + "\n"
+
+
 def error_stream(message: str, etype: str = "ProviderError",
                  session: str = "sess-err") -> str:
     """An `opencode run --format json` stream carrying only a provider error."""
     return json.dumps({"type": "error", "sessionID": session,
                        "error": {"type": etype, "message": message}}) + "\n"
+
+
+def quota_stream() -> str:
+    """A provider quota error, the one failure the protocol says closes the window."""
+    return error_stream("free-models-per-day exhausted", etype="RateLimitError")
 
 
 class _SubprocessShim:
@@ -178,6 +204,8 @@ class _Harness(Protocol):
     MANIFEST: Path
     WS_ROOT: Path
     MAX_ATTEMPTS: int
+    BLOCK_WINDOW: str
+    BLOCK_TERMINAL: str
     subprocess: _SubprocessShim
 
     def save(self, m: Mapping[str, object]) -> None: ...
@@ -185,6 +213,8 @@ class _Harness(Protocol):
     def one_turn(self, m: Mapping[str, object], sid: str, turn: int, model: str,
                  timeout: int) -> str: ...
     def parse_events(self, raw: str) -> tuple[str, str | None, str | None, str | None]: ...
+    def main(self) -> int: ...
+    def now_ist(self) -> datetime: ...
 
 
 class _ProviderCall(TypedDict):
@@ -218,10 +248,50 @@ class Harness:
         self.mod.WS_ROOT = tmp / "ws"
         self.calls: list[_ProviderCall] = []
         self.plan: list[Step] = []
+        self.out: str = ""
+        self.err: str = ""
         self.mod.subprocess = _SubprocessShim(self)
 
     def script(self, *steps: Step) -> None:
         self.plan = list(steps)
+
+    def run_main(self, *argv: str) -> int:
+        """Drive the harness's own main() with a controlled argv, capturing its output.
+
+        A second invocation in the same window is the whole of R1: selection used to read
+        the manifest afresh through main(), and what it then selected was the question.
+        """
+        out, err = io.StringIO(), io.StringIO()
+        saved = sys.argv
+        sys.argv = ["run_generation.py", *argv]
+        try:
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                rc = self.mod.main()
+        finally:
+            sys.argv = saved
+        self.out, self.err = out.getvalue(), err.getvalue()
+        return int(rc)
+
+    def next_window(self) -> None:
+        """Move this harness's clock on one day: what a quota reset looks like from inside.
+
+        `window()` keys its counter on the date, so a later day is a fresh counter with
+        `quota_exhausted` back to False. Nothing else in the manifest moves, which is the
+        point: a scenario the previous window blocked has to come back on its own, without
+        anybody editing the file by hand.
+        """
+        real = self.mod.now_ist
+        self.mod.now_ist = lambda: real() + timedelta(days=1)
+
+    def reload(self) -> _Manifest:
+        """The manifest as it is on disk.
+
+        `main` reads the file itself, so every invocation gets its own dict and a handle
+        taken before a `run_main` is stale afterwards. Every case below reloads rather than
+        reading the object it passed in, which is what a resuming session sees.
+        """
+        return cast("_Manifest",
+                    json.loads(self.mod.MANIFEST.read_text(encoding="utf-8")))
 
     def manifest(self, ids: list[str]) -> _Manifest:
         m: _Manifest = {
@@ -505,6 +575,230 @@ def _():
         assert answer_file(h, BETA, 1).read_text(encoding="utf-8") == "beta answer"
         assert statuses(m) == [(ALPHA, 1, "RETRY_ONCE"), (ALPHA, 2, "NO_ANSWER"),
                                (BETA, 1, "OK")], statuses(m)
+
+
+# ---------------------------------------------------------------------------
+# Resumption. `todo` selected `NOT_STARTED` and nothing else, so every state a run can
+# stop in was also a state it could not come back from. A quota window reset and an
+# interrupted process are the two a resuming session meets first.
+# ---------------------------------------------------------------------------
+
+
+def blocked_kind(h: Harness, m: _Manifest, sid: str) -> str | None:
+    """The recorded block kind, or None if the scenario is not blocked at all.
+
+    `block_kind` is what separates "the next window retries this" from "this needs a
+    decision", so the cases below assert on it directly rather than on the error string.
+    """
+    rec = cast("dict[str, object]", m["scenarios"][sid])
+    kind = rec.get("block_kind")
+    return cast("str | None", kind)
+
+
+def harness_kind(h: Harness, which: str) -> str:
+    """`run_generation.py`'s BLOCK_WINDOW or BLOCK_TERMINAL, read by name.
+
+    Through an assertion, so a case pinning the kind fails on the value it recorded rather
+    than on an AttributeError for a constant that did not exist yet. The name is looked up
+    rather than hardcoded here so that renaming the constant fails these cases too.
+    """
+    value = getattr(h.mod, which, None)
+    assert value, f"run_generation.py defines no {which}"
+    return cast(str, value)
+
+
+@case("a scenario blocked by a quota error is collected in the next window")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        h.script(Step(quota_stream()),
+                 Step(turn_stream("turn one answer")), Step(turn_stream("turn two answer")))
+        assert h.run_main("--only", ALPHA) == 0, h.err
+        m = h.reload()
+        rec = m["scenarios"][ALPHA]
+        assert rec["status"] == "BLOCKED_BY_INFRASTRUCTURE", rec["status"]
+        assert statuses(m) == [(ALPHA, 1, "QUOTA_EXHAUSTED")], statuses(m)
+        kind = blocked_kind(h, m, ALPHA)
+        spent = len(h.calls)
+
+        # The quota window resets. Nothing was edited by hand: the manifest still holds the
+        # blocked status it was left with, and the scenario has to come back on its own.
+        h.next_window()
+        assert h.run_main("--only", ALPHA) == 0, h.err
+        m = h.reload()
+        rec = m["scenarios"][ALPHA]
+        assert rec["status"] == "AWAITING_GRADE", (rec["status"], h.out)
+        assert kind == harness_kind(h, "BLOCK_WINDOW"), kind
+        assert len(h.calls) - spent == 2, f"expected both turns, spent {len(h.calls) - spent}"
+        # The block is cleared on the way through. Left behind, it would make --list
+        # report a collected scenario as one still waiting on a window.
+        assert blocked_kind(h, m, ALPHA) is None, blocked_kind(h, m, ALPHA)
+        assert rec["error"] is None, rec["error"]
+        assert answer_file(h, ALPHA, 1).read_text(encoding="utf-8") == "turn one answer"
+        assert answer_file(h, ALPHA, 2).read_text(encoding="utf-8") == "turn two answer"
+
+
+@case("a scenario blocked during turn 2 comes back for turn 2, not for turn 1 again")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        h.script(Step(turn_stream("turn one answer", "sess-9")), Step(quota_stream()),
+                 Step(turn_stream("turn two answer", "sess-9")))
+        assert h.run_main("--only", ALPHA) == 0, h.err
+        m = h.reload()
+        rec = m["scenarios"][ALPHA]
+        assert rec["status"] == "BLOCKED_BY_INFRASTRUCTURE", rec["status"]
+        assert sorted(rec["turns"]) == ["turn1"], rec["turns"]
+        spent = len(h.calls)
+
+        h.next_window()
+        assert h.run_main("--only", ALPHA) == 0, h.err
+        m = h.reload()
+        rec = m["scenarios"][ALPHA]
+        assert rec["status"] == "AWAITING_GRADE", (rec["status"], h.out)
+        # One request, not two. Turn 1 was collected; re-running it would spend a second
+        # request on an answer the grader will read.
+        assert len(h.calls) - spent == 1, f"spent {len(h.calls) - spent} requests"
+        assert requests(m)[-1]["turn"] == 2, requests(m)[-1]
+        argv = h.calls[-1]["argv"]
+        assert argv[argv.index("--session") + 1] == "sess-9", argv
+
+
+@case("a scenario left at TURN1_COMPLETE by an interrupted run gets its turn 2")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA, BETA])
+        # Turn 1 lands and the process dies before turn 2, which is what a killed session
+        # or a closed laptop leaves behind. TURN1_COMPLETE is a state with work in it, and
+        # a resumed session is expected to work through the batch, not one scenario of it.
+        h.script(Step(turn_stream("turn one answer", "sess-3")))
+        assert h.mod.one_turn(m, ALPHA, 1, "fake/model", 30) == "TURN1_COMPLETE"
+        assert h.mod.one_turn(m, BETA, 1, "fake/model", 30) == "TURN1_COMPLETE"
+        assert m["scenarios"][ALPHA]["status"] == "TURN1_COMPLETE"
+
+        assert h.run_main("--only", ALPHA, "--only", BETA) == 0, h.err
+        assert "nothing pending" not in h.out, h.out
+        m = h.reload()
+        for sid in (ALPHA, BETA):
+            rec = m["scenarios"][sid]
+            assert rec["status"] == "AWAITING_GRADE", (sid, rec["status"], h.out)
+            assert sorted(rec["turns"]) == ["turn1", "turn2"], (sid, rec["turns"])
+        assert len(h.calls) == 4, f"a resumed run stopped after one scenario: {h.calls}"
+        assert answer_file(h, ALPHA, 2).read_text(encoding="utf-8") == "turn one answer"
+
+
+@case("a window-blocked scenario is not offered again inside the window that blocked it")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA, BETA])
+        h.script(Step(quota_stream()), Step(turn_stream("beta answer")))
+        assert h.run_main("--only", ALPHA, "--only", BETA) == 0, h.err
+        assert h.calls and h.calls[-1]["argv"][0] == "opencode"
+        spent = len(h.calls)
+        m = h.reload()
+
+        # Same window. The quota is still gone, so there is nothing to spend, and BETA must
+        # not be marked blocked for a window it never ran in.
+        assert h.run_main("--only", ALPHA, "--only", BETA) == 0, h.err
+        assert len(h.calls) == spent, "a closed window spent requests anyway"
+        m = h.reload()
+        assert m["scenarios"][ALPHA]["status"] == "BLOCKED_BY_INFRASTRUCTURE"
+        assert m["scenarios"][BETA]["status"] == "NOT_STARTED", m["scenarios"][BETA]
+        assert m["scenarios"][BETA]["error"] is None, m["scenarios"][BETA]
+
+
+@case("a scenario blocked for a reason the next window cannot clear is not retried")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        # A provider failure, not the quota: the window is untouched, so the next window
+        # has nothing to clear. Retrying it would spend the budget proving again that the
+        # same turn fails.
+        h.script(Step(error_stream("upstream busy")), Step(error_stream("upstream busy")),
+                 Step(turn_stream("an answer that must not be collected")))
+        assert h.run_main("--only", ALPHA) == 0, h.err
+        m = h.reload()
+        assert m["scenarios"][ALPHA]["status"] == "BLOCKED_BY_INFRASTRUCTURE"
+        kind = blocked_kind(h, m, ALPHA)
+        spent = len(h.calls)
+
+        h.next_window()
+        assert h.run_main("--only", ALPHA) == 0, h.err
+        assert len(h.calls) == spent, "a terminal block was retried in the next window"
+        assert "nothing pending" in h.out, h.out
+        assert kind == harness_kind(h, "BLOCK_TERMINAL"), kind
+        assert not answer_file(h, ALPHA, 1).exists(), "the retry wrote an answer"
+
+
+@case("--list agrees with what a resuming run would actually collect")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA, BETA])
+        h.script(Step(turn_stream("an answer")))
+        assert h.run_main("--only", ALPHA) == 0, h.err
+        m["scenarios"][BETA]["status"] = "GRADED"
+        h.mod.save(m)
+
+        assert h.run_main("--only", ALPHA, "--only", BETA, "--list") == 0, h.err
+        # One pending: BETA. Counting "not AWAITING_GRADE" reported the graded one too, so
+        # --list and the batch it announces could not be reconciled.
+        assert "pending in selection: 1" in h.out, h.out
+
+
+# ---------------------------------------------------------------------------
+# Turn 2 must run in turn 1's conversation. Without it the follow-up is answered cold and
+# graded as though the scenario's two turns had shared context.
+# ---------------------------------------------------------------------------
+
+
+@case("turn 2 with no session id from turn 1 is refused and spends nothing")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        h.script(Step(sessionless_stream("turn one answer")))
+        assert h.mod.one_turn(m, ALPHA, 1, "fake/model", 30) == "TURN1_COMPLETE"
+        rec = m["scenarios"][ALPHA]
+        assert rec["turns"]["turn1"]["session_id"] is None, rec["turns"]["turn1"]
+        spent = len(h.calls)
+
+        h.script(Step(turn_stream("turn two answer", "sess-cold")))
+        st = h.mod.one_turn(m, ALPHA, 2, "fake/model", 30)
+        assert st == "BLOCKED_BY_INFRASTRUCTURE", st
+        assert len(h.calls) == spent, "a cold turn 2 was spent"
+        rec = m["scenarios"][ALPHA]
+        assert rec["status"] != "AWAITING_GRADE", rec["status"]
+        assert not answer_file(h, ALPHA, 2).exists(), "a cold turn 2 wrote an answer"
+        assert "turn2" not in rec["turns"], rec["turns"]
+        assert "session id" in (rec["error"] or ""), rec["error"]
+        # Turn 1's collected answer is untouched. A cold turn 2 is not a reason to throw
+        # away a request that was already spent.
+        assert answer_file(h, ALPHA, 1).read_text(encoding="utf-8") == "turn one answer"
+
+
+@case("a cold turn 2 is terminal, because turn 1 has to be rerun to fix it")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        h.script(Step(sessionless_stream("turn one answer")))
+        assert h.mod.one_turn(m, ALPHA, 1, "fake/model", 30) == "TURN1_COMPLETE"
+        assert h.mod.one_turn(m, ALPHA, 2, "fake/model", 30) == "BLOCKED_BY_INFRASTRUCTURE"
+        spent = len(h.calls)
+
+        # The next window does not turn up the session id turn 1 failed to yield, so
+        # re-queueing this scenario would spend a request to arrive at the same place.
+        h.next_window()
+        assert h.run_main("--only", ALPHA) == 0, h.err
+        assert len(h.calls) == spent, "a scenario with no session id was retried"
+        assert blocked_kind(h, m, ALPHA) == harness_kind(h, "BLOCK_TERMINAL"), \
+            blocked_kind(h, m, ALPHA)
 
 
 def main() -> int:
