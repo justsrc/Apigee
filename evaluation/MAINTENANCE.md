@@ -147,6 +147,13 @@ so a stale or hand-edited generated file fails the check with the missing codes 
 generated file looks wrong, fix the generator or the source page and regenerate. Editing the
 output makes the freshness check fail, which is the intended outcome.
 
+The packets are checked the same way, by content rather than by timestamp. `check_repo.py`
+calls `make_packets.packet_texts()`, which renders every packet without writing anything, and
+diffs the result against `evaluation/packets/`. Do not reintroduce a timestamp comparison here.
+An mtime is not part of a commit, so on a fresh clone every scenario looks newer than its own
+packets and the whole repository reads as broken. That is D-038, and it cost four release-gate
+criteria and the entire fault-probe suite in one checkout.
+
 ## Recording a defect
 
 Add an entry to `evaluation/defect-register.md` with: ID, severity, affected files, the
@@ -160,11 +167,34 @@ Then add that regression test:
   checker noticed. If a probe reports a false pass, that is a live defect in the checker.
 - **A URL-classification defect** goes in the `FIXTURES` list in `tests/check_urls.py`. These
   run offline and need no network.
+- **An orchestration defect** goes in `tests/test_generation_outcomes.py` or
+  `tests/test_generation_workspace.py`. These drive the real harness and fake only the
+  provider call.
 - **A content or ground-truth defect** cannot be checked mechanically. It is recorded in
   `evaluation/audit-*.md` with the source page and line that contradicts it.
 
 A defect is closed when a test fails without the fix and passes with it. Changing the file is
 not the evidence.
+
+### Writing a probe that proves something
+
+`fault_probe.py` reports `NO MUTATION` for any probe that expects a failure and leaves the
+repository byte-identical, so a probe whose mutation quietly stopped matching cannot sit there
+reporting green. That guard is there because two probes once read green for the whole life of
+the suite while changing nothing, and the reason nobody noticed is that the sandbox was failing
+for an unrelated reason at the time. See D-039.
+
+Three things catch a probe that matches nothing:
+
+- Anchor with `^` only if you also pass `flags=re.MULTILINE`. Without the flag, `^` means the
+  start of the file and a pattern aimed at line 26 matches nothing. `sb.edit()` raises when
+  the pattern is absent and is the safer call for anything but a whole-file rewrite.
+- Prefer `sb.edit()`, which asserts the old text is present, over `re.sub`, which returns the
+  input unchanged and says nothing.
+- Read `NO MUTATION` as a failure of the probe, not as a curiosity. It means the verdict came
+  from an unmodified repository, which is not evidence about the thing being probed.
+
+The guard proves a probe changed a file. It cannot prove the probe changed the right one.
 
 ## Resolving a documentation conflict
 
