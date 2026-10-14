@@ -148,36 +148,17 @@ def http_status(url: str) -> str:
         return "000"
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    _ = ap.add_argument("--verify", action="store_true", help="re-check every indexed URL now")
-    _ = ap.add_argument("--check-known", action="store_true", help="re-check the recorded 404 list")
-    args = ap.parse_args()
-    check_known: bool = bool(getattr(args, "check_known", False))
-    verify: bool = bool(getattr(args, "verify", False))
+# The status line the index carries when no run re-checked the URLs. Kept as a constant
+# because tests/check_repo.py renders the index offline and compares it to the committed
+# file, so the default is what a freshness check must reproduce exactly.
+DEFAULT_STATUS = "status not re-verified in this run (each page returned 200 when fetched)"
 
-    if check_known and NOTES.is_file():
-        known = [ln.strip() for ln in NOTES.read_text().splitlines()
-                 if ln.strip() and not ln.startswith("#")]
-        print(f"re-checking {len(known)} recorded 404 URLs")
-        revived: list[tuple[str, str]] = []
-        with cf.ThreadPoolExecutor(max_workers=12) as ex:
-            for url, code in zip(known, ex.map(http_status, known)):
-                if code != "404":
-                    revived.append((url, code))
-        if revived:
-            print("no longer 404:")
-            for url, code in revived:
-                print(f"  {code}  {url}")
-        else:
-            print("all still 404")
-        return 0
 
+def corpus_rows() -> list[PageRow]:
+    """Every cached page as a row. Offline: reads the corpus, touches no network."""
     pages = sorted(PAGES.glob("*.txt"))
     if not pages:
-        print(f"no pages in {PAGES}, run research/fetch.sh first")
-        return 1
-
+        raise RuntimeError(f"no pages in {PAGES}, run research/fetch.sh first")
     manifest = load_manifest()
     rows: list[PageRow] = []
     for p in pages:
@@ -190,21 +171,19 @@ def main() -> int:
             "bytes": p.stat().st_size,
             "area": area_for(url.replace(DOC_ROOT, "").replace(OPDK_ROOT, "")),
         })
+    return rows
 
-    status_line = "status not re-verified in this run (each page returned 200 when fetched)"
-    if verify:
-        print(f"verifying {len(rows)} URLs")
-        with cf.ThreadPoolExecutor(max_workers=12) as ex:
-            codes: list[str] = list(ex.map(http_status, [r["url"] for r in rows]))
-        for r, c in zip(rows, codes):
-            r["status"] = c
-        bad: list[PageRow] = [r for r in rows if r.get("status") != "200"]
-        status_line = (f"re-verified this run, {len(rows) - len(bad)} of {len(rows)} returned 200")
-        if bad:
-            status_line += f", {len(bad)} did not"
-            print("not reachable now:")
-            for r in bad[:20]:
-                print(f"  {r.get('status', '000')}  {r['url']}")
+
+def build(status_line: str = DEFAULT_STATUS) -> str:
+    """Render the index and return it. Reads the corpus, writes nothing.
+
+    Split out of main() for the same reason build_error_index.build() and
+    build_scenario_index.build() are: tests/check_repo.py has to be able to ask what this
+    generator produces from the current pages without creating a file it would then have
+    to diff against the committed one. That check is the only thing standing between a
+    rewritten generator and an index that silently keeps describing the old corpus.
+    """
+    rows = corpus_rows()
 
     grouped: defaultdict[str, list[PageRow]] = defaultdict(list)
     for r in rows:
@@ -254,11 +233,65 @@ def main() -> int:
             A(f"| {r['title']} | [{r['path']}]({r['url']}) | {r['bytes']} | {note_for(str(r['url']))} |")
         A("")
 
-    _ = OUT.write_text("\n".join(L), encoding="utf-8")
+    return "\n".join(L)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    _ = ap.add_argument("--verify", action="store_true", help="re-check every indexed URL now")
+    _ = ap.add_argument("--check-known", action="store_true", help="re-check the recorded 404 list")
+    args = ap.parse_args()
+    check_known: bool = bool(getattr(args, "check_known", False))
+    verify: bool = bool(getattr(args, "verify", False))
+
+    if check_known and NOTES.is_file():
+        known = [ln.strip() for ln in NOTES.read_text().splitlines()
+                 if ln.strip() and not ln.startswith("#")]
+        print(f"re-checking {len(known)} recorded 404 URLs")
+        revived: list[tuple[str, str]] = []
+        with cf.ThreadPoolExecutor(max_workers=12) as ex:
+            for url, code in zip(known, ex.map(http_status, known)):
+                if code != "404":
+                    revived.append((url, code))
+        if revived:
+            print("no longer 404:")
+            for url, code in revived:
+                print(f"  {code}  {url}")
+        else:
+            print("all still 404")
+        return 0
+
+    if not sorted(PAGES.glob("*.txt")):
+        print(f"no pages in {PAGES}, run research/fetch.sh first")
+        return 1
+
+    rows = corpus_rows()
+
+    status_line = DEFAULT_STATUS
+    if verify:
+        print(f"verifying {len(rows)} URLs")
+        with cf.ThreadPoolExecutor(max_workers=12) as ex:
+            codes: list[str] = list(ex.map(http_status, [r["url"] for r in rows]))
+        for r, c in zip(rows, codes):
+            r["status"] = c
+        bad: list[PageRow] = [r for r in rows if r.get("status") != "200"]
+        status_line = (f"re-verified this run, {len(rows) - len(bad)} of {len(rows)} returned 200")
+        if bad:
+            status_line += f", {len(bad)} did not"
+            print("not reachable now:")
+            for r in bad[:20]:
+                print(f"  {r.get('status', '000')}  {r['url']}")
+
+    _ = OUT.write_text(build(status_line), encoding="utf-8")
     print(f"wrote {OUT}")
-    for area in ordered:
-        if grouped.get(area):
-            print(f"  {area}: {len(grouped[area])}")
+    grouped: defaultdict[str, list[PageRow]] = defaultdict(list)
+    for r in rows:
+        grouped[str(r["area"])].append(r)
+    for label, _ in AREAS:
+        if grouped.get(label):
+            print(f"  {label}: {len(grouped[label])}")
+    if grouped.get(OTHER):
+        print(f"  {OTHER}: {len(grouped[OTHER])}")
     return 0
 
 

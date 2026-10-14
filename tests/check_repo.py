@@ -793,6 +793,8 @@ def check_generated_freshness(root: Path, r: Results) -> None:
             _IndexBuilder, cast(object, importlib.import_module("build_error_index")))
         build_scenario_index = cast(
             _IndexBuilder, cast(object, importlib.import_module("build_scenario_index")))
+        build_doc_index = cast(
+            _IndexBuilder, cast(object, importlib.import_module("build_doc_index")))
     except Exception as e:  # pragma: no cover - import failure is itself a finding
         r.fail(f"cannot import the generators to verify freshness: {e}")
         return
@@ -827,6 +829,28 @@ def check_generated_freshness(root: Path, r: Results) -> None:
                + "python3 research/build_scenario_index.py")
     else:
         r.ok("scenario index matches a fresh run of build_scenario_index.py")
+
+    # The documentation index was the one generated file with no freshness check, so
+    # build_doc_index.py was rewritten in 96cc5c4 and its output kept describing a corpus
+    # thirty pages smaller than the one on disk. Nothing failed. This renders it offline,
+    # the same way the two above are rendered.
+    doc_index = root / "research/official-documentation-index.md"
+    if not doc_index.is_file():
+        r.fail("missing research/official-documentation-index.md, the generated "
+               "documentation index")
+        return
+    try:
+        produced_doc_index = build_doc_index.build()
+    except Exception as e:  # pragma: no cover - a generator crash is itself a finding
+        r.fail(f"research/build_doc_index.py could not render the current corpus: {e}")
+        return
+    if read(doc_index).strip() != produced_doc_index.strip():
+        r.fail("research/official-documentation-index.md is not what "
+               "research/build_doc_index.py produces from research/pages/. It is generated: "
+               "fix the generator or the pages, then regenerate, do not edit the output. "
+               "Re-run: python3 research/build_doc_index.py")
+    else:
+        r.ok("documentation index matches a fresh run of build_doc_index.py")
 
 
 def check_packets_current(root: Path, r: Results, packets: list[Path]) -> None:
