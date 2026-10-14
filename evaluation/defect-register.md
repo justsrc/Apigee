@@ -1535,3 +1535,52 @@ regression + REG-08", which is 13 under a 12 label. The denominator for a strict
 fixed by that list. Not fixed: the sample is declared in advance, so editing it after the fact
 would be exactly the thing the freeze exists to prevent. Recorded so a reader does not have to
 rediscover which number is authoritative.
+
+### D-054 MEDIUM — The freeze manifest has never been anchored on any branch
+
+`freeze_artifacts.py` writes two files: `artifact-hashes.json`, and `artifact-hashes.json.sha256`,
+a sha256sum-format digest of the first held in a second file. The module docstring says the
+point of the split is that the manifest cannot vouch for itself, and that "the file has to be
+committed next to the manifest for either to mean anything."
+
+The sidecar has never been committed. Not here, not at `f040dfc`, not at `9fec8d5`, not at
+`60fc922`, not on `main`. Every `--verify` therefore opens with
+
+```
+UNANCHORED MANIFEST, nothing below is anchored to anything:
+  .../artifact-hashes.json.sha256 is missing, so artifact-hashes.json is not bound to
+  anything outside itself
+```
+
+and ends `against a manifest nothing anchors`. The recorded hashes are still checked and the
+moved count is still reported, so this is not a silent pass. What it removes is the ability to
+tell an edited manifest from an untouched one: rewriting `artifact-hashes.json` to describe
+whatever is on disk produces the same exit code as leaving it alone.
+
+**Reproduction.** Six refs, each in a detached worktree, one command:
+
+```
+for ref in 6f13dba f040dfc 0587bc8 9fec8d5 96cc5c4 60fc922; do
+  git checkout --detach "$ref"
+  python3 evaluation/results/run-3/freeze_artifacts.py --verify
+done
+```
+
+`f040dfc` and `6f13dba` report 8 moved at exit 2, `9fec8d5` reports 8, `60fc922` reports 11.
+Running `f040dfc` twice gives the same 8, so the count is not noise. That 8 is what D-051's
+"What is still open" paragraph claims, so the claim holds. `0587bc8` and `96cc5c4` predate the
+`--verify` flag taking a default, so they exit 2 on an argparse error and are not evidence of
+anything.
+
+**Status: OPEN, blocked on the D-051 re-freeze.** The sidecar cannot be created honestly
+before the re-freeze, because writing it now would bind the current manifest, which D-051
+records as stale and scheduled for replacement. `freeze_artifacts.py --write` emits both files
+together and is the fix, but it also re-blesses whatever is on disk at the moment it runs,
+which D-051 reserves as a human decision at an agreed commit. Doing it here would answer a
+question this repository has already decided is not a script's to answer.
+
+The narrower fix, committing only the digest of the manifest as it stands, was rejected for
+the same reason: it asserts that this manifest is the anchored one, which is the contested
+claim. **Next action:** a maintainer decides whether the current harness edits are accepted,
+then runs `python3 evaluation/results/run-3/freeze_artifacts.py --write` and commits both
+files, recording the reason. Nothing else is waiting on it except D-051's human step.
