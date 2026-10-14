@@ -241,7 +241,7 @@ same held for `steps.oauth.v2.invalid_request-authorization_code_invalid`.
 **Reproduction.**
 
 ```text
-cd /Users/justinjacob/Projects/Work/Apigee
+cd /path/to/this/repository
 grep 'invalid_access_token' research/pages/api-platform_reference_policies_get-oauth-v2-info-policy.txt
 # `steps.oauth.v2.invalid_access_token` | `500` | ...
 grep 'invalid_access_token' .agents/skills/apigee-support-core/references/error-codes.md
@@ -1165,8 +1165,8 @@ the other.
 ## Open findings from the 2026-10-14 review pass, recorded not fixed
 
 A second and third review pass ran over the checkers and over the run-3 freeze and
-resumption machinery. The three defects already fixed from that work are D-043, D-044 and
-D-045 below. Everything after them is recorded here as OPEN, with the evidence each rests
+resumption machinery. The two defects already fixed from that work are D-043 and D-044
+below. Everything after them is recorded here as OPEN, with the evidence each rests
 on, and none of it is fixed on this branch.
 
 Two labels are used throughout and they mean different things.
@@ -1177,11 +1177,14 @@ Two labels are used throughout and they mean different things.
   here rather than independently re-run by me. The reasoning is checkable against the code
   and the cited line numbers; the run is not one I performed.
 
-Six of the entries below have been fixed since they were written, and each says so at its
-own heading rather than being moved. D-046, D-047 and D-051 were found in the review pass and
-fixed on this branch after the evidence was reproduced here, so they carry the stronger label.
-D-043 and D-044 were reproduced here before being fixed. The rest are open, and D-051 is fixed
-but carries a human step that is deliberately not done, which its entry spells out.
+Seven of the entries below have been fixed since they were written, and each says so at
+its own heading rather than being moved: D-043, D-044, D-046, D-047, D-049, D-050 and
+D-051. D-046, D-047 and D-051 were found in the review pass and fixed on this branch after
+the evidence was reproduced here, so they carry the stronger label. D-043 and D-044 were
+reproduced here before being fixed, as were D-049 and D-050. The rest are open: D-045,
+D-048 and D-052, plus D-053 which is recorded and accepted rather than open or fixed.
+D-051 is fixed but carries a human step that is deliberately not done, which its entry
+spells out.
 
 Nothing in this section is a claim about model quality or about whether the skills help. All
 of it is about machinery. Run 3 collected nothing, so no recorded score depends on any of it.
@@ -1217,7 +1220,7 @@ Before the fix, HARD-22 was reported clean and HARD-21 was caught. After, both a
 than a word anywhere in the block, and the number of exempt scenarios is reported in the
 check's own pass line so a future one has to be explained.
 
-**Test results.** 36 probes, 36 behaved as expected, 0 false passes. The new probe reports a
+**Test results.** 37 probes, 37 behaved as expected, 0 false passes. The new probe reports a
 false pass against the previous check once packets are re-synced, which they have to be: see
 D-046.
 
@@ -1265,7 +1268,9 @@ operator to run `make_packets.py`, and following the project's own advice restor
 build over the defect.
 
 `failed_lines`, the list of failure lines that would distinguish "caught by the check I
-targeted" from "caught by something else", is computed at `fault_probe.py:527` and never used.
+targeted" from "caught by something else", was computed at `fault_probe.py:527` and never
+used. The typing pass removed the binding, so the name is no longer in the file; the
+mechanism is still unwired, which is why this entry stays open.
 
 **Partially addressed.** `Sandbox.sync_packets()` was added and is used by the new probe in
 D-043, which is why that probe is sound. The other scenario-editing probes still do not call
@@ -1345,7 +1350,8 @@ reports `0 packets (2 missing)` and returns 1, and the isolation run still repor
 `structural: PASS`. F6 therefore passes on a workspace containing no prompts at all.
 
 Two things make this worse than a cosmetic exit-code mismatch. The coverage is 12 of 103
-scenarios, chosen by `ids[::8][:12]`, which happened not to include a scenario with a missing
+scenarios, chosen by the even sample `ids[:: max(1, len(ids) // 12)][:12]`, which happened
+not to include a scenario with a missing
 packet. And the same blindness is in `test_leakage.py:127`.
 
 **Status: OPEN.**
@@ -1522,7 +1528,7 @@ it refused sitting in the directory is a refusal a reader of that directory will
 
 ### D-053 LOW — Recorded and accepted, with the disagreement written down
 
-`evaluation/results/run-3/PILOT-PROTOCOL.md` lists 3 easy, 3 medium, 3 hard, 2 adversarial
+`evaluation/results/run-4/PILOT-PROTOCOL.md` lists 3 easy, 3 medium, 3 hard, 2 adversarial
 and 2 regression in its sample table, which is 13, while the prose says 12 and the budget says
 "12 scenarios x 2 turns = 24 requests maximum". `evaluation/results/RUNS.md` hedges to "1
 regression + REG-08", which is 13 under a 12 label. The denominator for a strict pass rate is
