@@ -22,6 +22,7 @@ the system temp directory, or against a synthetic fixture it builds itself.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import shutil
@@ -70,6 +71,23 @@ class Sandbox:
         shutil.copytree(REPO, self.root, ignore=shutil.ignore_patterns(
             ".git", "__pycache__", "*.pyc"))
 
+    def fingerprint(self) -> str:
+        """A digest of every file's path and content.
+
+        Used to tell a probe that broke something from a probe that did not. Timestamps
+        cannot do this job: a probe whose regex matches nothing still calls write_text,
+        so the file's mtime moves while its bytes do not.
+        """
+        h = hashlib.sha256()
+        for p in sorted(self.root.rglob("*")):
+            if not p.is_file():
+                continue
+            h.update(str(p.relative_to(self.root)).encode())
+            h.update(b"\0")
+            h.update(p.read_bytes())
+            h.update(b"\0")
+        return h.hexdigest()
+
     def path(self, rel: str) -> Path:
         return self.root / rel
 
@@ -97,13 +115,32 @@ class Outcome:
         self.code: int | None = None
         self.caught = False
         self.note = ""
+        # Did the probe change any file? A probe that changes nothing has not tested
+        # anything, whatever the checker went on to say. This is tracked rather than
+        # assumed because `origin-field-removed` and `origin-unclassifiable-value` both
+        # reported green for as long as the suite had existed: their regexes matched
+        # nothing, they wrote the file back unchanged, and the unmodified sandbox was
+        # failing for an unrelated reason, so every probe expecting a FAIL saw one.
+        self.mutated: bool | None = None
+
+    @property
+    def inert(self) -> bool:
+        """A FAIL-expecting probe that did not change the repository."""
+        return self.expect == "FAIL" and self.mutated is False
 
     @property
     def ok(self) -> bool:
+        if self.inert:
+            return False
         return self.caught == (self.expect == "FAIL")
 
     def render(self) -> str:
         mark = "ok  " if self.ok else "MISS"
+        if self.inert:
+            return (f"{mark} {self.name}\n       expected {self.expect}, checker "
+                    f"{'caught it' if self.caught else 'DID NOT CATCH IT'}"
+                    f"  [probe changed nothing, so the verdict came from an unmodified "
+                    f"repository]")
         return (f"{mark} {self.name}\n       expected {self.expect}, checker "
                 f"{'caught it' if self.caught else 'DID NOT CATCH IT'}"
                 + (f"  [{self.note}]" if self.note else ""))
@@ -481,7 +518,9 @@ def main() -> int:
         sb = Sandbox()
         o = Outcome(name, expect, detail)
         try:
+            before = sb.fingerprint()
             fn(sb)
+            o.mutated = sb.fingerprint() != before
             code, out = run_checker(sb.root)
             o.code = code
             o.caught = code != 0
@@ -498,6 +537,7 @@ def main() -> int:
     if args.json:
         print(json.dumps([
             {"name": o.name, "expect": o.expect, "caught": o.caught,
+             "mutated": o.mutated, "inert": o.inert,
              "exit": o.code, "detail": o.detail, "note": o.note}
             for o in results
         ], indent=2))
@@ -505,12 +545,16 @@ def main() -> int:
         for o in results:
             print(o.render())
         missed = [o for o in results if o.ok is False]
+        inert = [o for o in results if o.inert]
         skipped = [o for o in results if o.caught is None]
         print()
         print(f"{len(results)} probes, {len(results) - len(missed) - len(skipped)} "
               f"behaved as expected, {len(missed)} false passes, {len(skipped)} skipped")
         for o in missed:
             print(f"  FALSE PASS: {o.name} ({o.detail})")
+        for o in inert:
+            print(f"  NO MUTATION: {o.name} changed no file, so it proved nothing "
+                  f"({'the checker failed anyway' if o.caught else 'the checker passed'})")
         for o in skipped:
             print(f"  SKIPPED:    {o.name} ({o.note})")
     return 1 if any(o.ok is False for o in results) else 0
