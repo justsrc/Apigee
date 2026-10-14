@@ -888,11 +888,14 @@ def check_reference_discovery(root: Path, r: Results) -> None:
     orphans: list[str] = []
     unresolvable: list[str] = []
     total = 0
+    listed = 0
+    advertising = 0
     for d in sorted(p for p in skills_dir.iterdir() if p.is_dir()):
         refs = d / "references"
         skill_md = d / "SKILL.md"
         if not refs.is_dir() or not skill_md.is_file():
             continue
+        advertising += 1
         body = read(skill_md)
         for f in sorted(refs.glob("*.md")):
             total += 1
@@ -904,7 +907,9 @@ def check_reference_discovery(root: Path, r: Results) -> None:
         # name match above cannot tell a real path from a sentence that happens to contain
         # the filename. Resolving the listed paths is what catches a deleted or renamed
         # reference, which previously exited 0.
-        for rel in sorted(set(re.findall(r"`(references/[A-Za-z0-9._-]+\.md)`", body))):
+        paths = sorted(set(re.findall(r"`(references/[A-Za-z0-9._-]+\.md)`", body)))
+        listed += len(paths)
+        for rel in paths:
             if not (d / rel).is_file():
                 unresolvable.append(f"{d.name}/{rel}")
 
@@ -914,8 +919,22 @@ def check_reference_discovery(root: Path, r: Results) -> None:
         r.fail(f"SKILL.md lists a reference path that does not resolve: {u}")
     if total and not orphans:
         r.ok(f"all {total} reference files are named in their SKILL.md")
-    if not unresolvable:
-        r.ok("every reference path listed in a SKILL.md resolves to a file")
+    # `unresolvable` is empty both when every listed path resolved and when the regex above
+    # matched nothing at all, and this line used to claim the first while meaning either.
+    # Strip the backticks from the reference table, delete references/hybrid.md, and the
+    # deleted file still had its name in the body, so the orphan check passed, the path check
+    # found nothing to resolve, and the run printed a clean ok for a skill pointing at a file
+    # that is not there. That is the deletion the reference probes above exist to catch,
+    # reached by a route they do not cover, so the number of paths actually found has to gate
+    # this ok the way `total` gates the one above it. A skill with a references/ directory
+    # that advertises no path in it has the same problem as a broken link: nothing will load
+    # the content. Silence is only right when there is no skill that could have listed one.
+    if advertising and not listed:
+        r.fail("no SKILL.md lists a backticked `references/....md` path, so the listed-path "
+               f"resolution above checked nothing across {advertising} skill(s) with a "
+               f"references/ directory")
+    elif listed and not unresolvable:
+        r.ok(f"all {listed} reference paths listed in a SKILL.md resolve to a file")
 
 
 def _has_rejected_codes_appendix(block: str) -> bool:
