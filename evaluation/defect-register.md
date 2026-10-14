@@ -18,7 +18,7 @@ Severity, as defined for this project:
 | Status | Count |
 | --- | --- |
 | Open, blocking release | 0 |
-| Fixed and covered by a test | 21 |
+| Fixed and covered by a test | 24 |
 | Fixed, coverage recorded, no dedicated probe yet | 7 |
 | Open, accepted with documented reason | 8 |
 | Open, awaiting external evidence | 2 |
@@ -27,6 +27,13 @@ Three entries changed on 2026-10-13. D-035 adds the seventh fixed-without-a-dedi
 entry. D-036 adds two probes for the packet generator. The isolation-route classifier is what
 moves fixed-and-covered from 19 to 21 alongside them: `tests/test_isolation_classify.py` is a
 test file of its own and `release_gate.py` F6 fails if it regresses.
+
+Three entries were added on 2026-10-14, D-038 through D-040, all found by running the
+evaluation harness against a clean checkout rather than against the working tree the
+earlier passes left behind. D-038 and D-039 are both about the fault-probe suite reporting
+green without evidence: D-038 made every FAIL-expecting probe vacuous, and D-039 records two
+probes that had never mutated anything. D-040 is the one remaining path that could still write
+a failure into an answer file. Fixed-and-covered moves from 21 to 24.
 
 ## Later additions
 
@@ -821,3 +828,208 @@ live model with canaries planted outside the boundary, and reports INCOMPLETE ra
 PASS when no model was asked to breach anything.
 
 **Status: FIXED**, with the live-test results recorded in `evaluation/isolation-report.md`.
+
+---
+
+## Audit of the evaluation harness, 2026-10-14
+
+Found by checking the harness out fresh and running it, rather than by reading it. The three
+entries below were all invisible from inside the working tree the earlier passes used,
+because the working tree's own file timestamps happened to be in the order the checkers
+wanted.
+
+### D-038 HIGH — Packet freshness was decided by file timestamps, which a commit does not record
+
+- **Affected** `tests/check_repo.py` (`check_packets`), `tests/make_packets.py`
+- **Remediation** `0587bc8`
+
+**What failed.** `check_repo.py` decided an answer key was stale by asking whether the
+packet's mtime was older than the mtime of the scenario file containing that scenario id. An
+mtime is not part of a commit. `git clone` and `git worktree add` write every file at checkout
+time, in whatever order the index hands them over, and on a pristine checkout every one of the
+103 scenarios came out with an mtime slightly newer than its packets. The reported result was:
+
+```text
+FAIL (1)
+  - 103 packet(s) are older than their scenario and hold a stale answer key: ADV-01, ADV-02, ...
+RESULT: FAIL
+```
+
+**Why it matters well beyond the noise.** `tests/fault_probe.py` has a control probe,
+`valid-repo-baseline`, whose entire job is to confirm that the unmodified repository passes.
+It failed. Every other probe runs its mutation inside a copy of that same repository, so with
+the baseline already failing, all 33 probes that expect a FAIL saw a nonzero exit whether or
+not their mutation had been detected. The suite that exists to catch a checker passing a
+broken repository was reporting nothing in a fresh clone. `release_gate.py` reads the probe
+result and inherits it, and lost four criteria: A1, F1, F2 and F3.
+
+It is worth being precise about what this is not. It is not a false PASS. The gate returned
+NOT QUALIFIED throughout, and the four criteria failed loudly. The harm is the opposite one:
+a project whose checkers are sound looks broken, and a suite whose passing means nothing looks
+green.
+
+**Cause.** Verified, not inferred. mtime is a property of the working tree, not of the commit
+history, and nothing in `git` reconstructs the order in which two files were last written.
+
+**Reproduction.** On any fresh clone, with no edits at all:
+
+```bash
+git clone <this repo> fresh && cd fresh
+python3 tests/check_repo.py --strict | tail -3   # RESULT: FAIL, 103 stale packets
+python3 tests/fault_probe.py | tail -3            # FALSE PASS: valid-repo-baseline
+```
+
+That the cause is timestamps and not real staleness is shown by changing nothing else. In one
+copy of the repository, setting every packet's mtime to a shared instant without touching a
+single byte of content, `check_repo.py --strict` went from FAIL to PASS and
+`release_gate.py --skip-urls` went from `BLOCKED 1, FAIL 4, PASS 24, UNVERIFIED 3` to
+`BLOCKED 1, PASS 28, UNVERIFIED 3`.
+
+The check was also wrong in the other direction, which the earlier passes had not noticed
+because they did not look. The old predicate missed a genuinely stale key whenever the packet
+was newer than its scenario, which is the normal state after regenerating and committing. With
+EASY-01's ground truth rewritten and every packet touched ten thousand seconds ahead, the old
+predicate reported 0 stale.
+
+**Fix.** `make_packets.py` gained `packet_texts()`, which renders every packet to text without
+writing anything, and `main()` writes what it is handed. `check_repo.py` gained
+`check_packets_current()`, which renders and diffs, the way `check_generated_freshness`
+already did for the fault-code index and the scenario index. The comparison is now strictly
+stronger: it catches the stale key the old check missed, and no longer fires on a correct tree.
+
+**Regression test.** Probe `packets-touched-after-checkout`, which sets every packet's mtime
+to the epoch and every scenario's to a later instant with no content changed, and expects a
+PASS. Probe `stale-packet-answer-key` was rewritten: it previously aged the packets in order
+to force the timestamp comparison, so it only ever tested timestamps, and it now rewrites a
+ground truth and leaves the packets newer.
+
+**Test results.** `check_repo.py --strict` PASS, `fault_probe.py` 35 of 35 with 0 false passes,
+`test_leakage.py` PASS, `test_generation_workspace.py` 8 of 8,
+`test_generation_outcomes.py` 15 of 15, `test_isolation_classify.py` 23 of 23,
+`test_release_gate.py` 32 of 32. All 309 committed packets are byte-identical under the new
+render, verified by regenerating into a copy and diffing, so the change alters no output.
+
+**Status: FIXED and covered.** The gate verdict is unchanged at NOT QUALIFIED. C4 stays BLOCKED
+because `--skip-urls` was used, and E5, G1 and G2 stay UNVERIFIED because no run meets the A/B
+design. Recovering four criteria did not qualify the project and was not used to suggest it had.
+
+### D-039 MEDIUM — Two fault probes matched nothing and had never tested anything
+
+- **Affected** `tests/fault_probe.py` probes `origin-field-removed` and
+  `origin-unclassifiable-value`
+- **Remediation** `3c46b4c`
+
+**What failed.** Both probes anchored their regex with `^` and passed no `re.MULTILINE` flag,
+so the pattern matched only at the start of the file. The field they meant to change is a
+bullet on line 26 of `scenarios/easy.md`:
+
+```python
+>>> len(re.findall(r"^- Origin: [^\n]+", text, re.M))   # 15
+>>> len(re.findall(r"^- Origin: [^\n]+", text))          #  0
+```
+
+`re.sub` found nothing, `write_text` wrote the file back byte-identical, and the probe ran the
+checker against an unmodified repository. The checker then reported
+"origin classification is unambiguous across 103 scenarios" and the probe, which expected a
+FAIL, was scored as having caught the defect it never introduced.
+
+**Why it matters.** `check_origin_integrity` is the check D-018 exists to enforce, that
+counting constructed suites as incident reports did not inflate the library's apparent
+provenance by twenty-one scenarios. Its two most direct probes had no evidence behind them.
+The checker turns out to be correct, and applying the mutations by hand names the defect
+correctly ("origin classification: EASY-01: no Origin field"), so nothing shipped is wrong.
+What was wrong is the project's confidence in its own coverage of that checker.
+
+**Cause.** Verified. The missing flag, and nothing else: the same file's other `^`-anchored
+`re.sub` already passed `flags=re.M`, and those two were the only ones that did not.
+
+**Reproduction.** Drop `flags=re.M` from either probe and run the suite. Both are reported as
+false passes.
+
+**Fix.** Both probes pass `flags=re.M`. Every `^`-anchored `re.sub` in the file was checked
+for the same mistake; these were the only two.
+
+**Status: FIXED and covered**, but the coverage claim here is weaker than the other two
+entries and is why D-039 was closed with a second commit. Fixing the probes leaves the suite
+unable to notice a probe that stops working, which is the defect itself. `4069ef2` adds the
+missing guard: each probe digests the sandbox before and after its own mutation, and a probe
+expecting a FAIL that changed no file is reported as NO MUTATION and fails the suite whatever
+the checker said. Content is digested rather than timestamps because a no-op `write_text`
+moves an mtime while leaving the bytes alone, which is exactly the case being caught. With
+the missing flag reintroduced, the suite now names both probes twice, once as a false pass and
+once as no mutation.
+
+**Remaining uncertainty.** The guard proves each probe changed a file. It does not prove the
+change was the intended one. A probe that corrupted some other file would satisfy it. Nothing
+short of reading each probe settles that, and the suite has 35 of them.
+
+### D-040 HIGH — A nonzero exit from the provider was recorded as a completed answer
+
+- **Affected** `evaluation/results/run-3/run_generation.py` (`one_turn`)
+- **Remediation** `db5ee6e`
+
+**What failed.** The harness's failure predicate read `rc == -1`. That value is the harness's
+own sentinel for a `subprocess.TimeoutExpired`, not a real exit status, so every other nonzero
+exit passed the test and fell through to the OK branch. `75f1997` fixed the sibling defect
+where an error event's message was appended to the answer text, and recorded this path
+deliberately untouched.
+
+A provider that dies partway through still leaves the text it managed to emit in the event
+stream, so a stream that is not empty is not evidence that the turn finished. Driven through
+the real `one_turn` and the real workspace builder with a provider exiting 1 and
+"provider stream aborted" on stderr, the harness recorded `TURN1_COMPLETE`, booked the request
+`OK`, and wrote this to `raw/<sid>.turn1.md`:
+
+```text
+The Quota policy rejects the revision at upload, because the interval
+```
+
+**Why it matters.** `grade_run.py` selects every scenario the manifest marks
+`AWAITING_GRADE`, and a grader reads `raw/<sid>.turn<N>.md`. A truncated sentence presented as
+a finished answer is scored against the rubric exactly like a whole one, and a critical-failure
+condition that a complete answer would have tripped can be missed on a partial one. This is the
+same false-success shape `75f1997` was written to close, reached by a different route.
+
+**Cause.** Verified. The predicate enumerated one sentinel value rather than testing for
+success.
+
+**Reproduction.** Through the project's own harness plumbing, replacing only the provider call:
+
+```python
+h.script(Step(turn_stream(TRUNCATED), rc=1, err="provider stream aborted"))
+h.mod.one_turn(m, ALPHA, 1, "fake/model", 30)   # TURN1_COMPLETE before the fix
+```
+
+**Fix.** The predicate reads `rc != 0`, which subsumes the timeout sentinel and every other
+failure exit. The quota branch still runs first, so a 429 is still classified as a quota error
+and is still not retried, rather than burning the one retry against a provider that has already
+refused; a case pins that ordering, because the fix would otherwise have turned a 429 into a
+generic failure and retried it. The recorded reason now names the exit code when the exit code
+is the only thing that went wrong. Previously a turn that returned text, exited 2 and wrote
+nothing to stderr was recorded as "empty response", which is the opposite of what happened.
+
+**Regression test.** Three cases in `tests/test_generation_outcomes.py`. Two fail against the
+previous harness: a nonzero exit carrying text is not an answer, and a nonzero exit is reported
+as a nonzero exit rather than as an empty response. The third, a 429 exit still being a quota
+error, passed before the fix and guards the ordering the fix could have broken.
+
+**Test results.** `test_generation_outcomes.py` 15 of 15. `test_generation_workspace.py` 8 of
+8, `test_release_gate.py` 32 of 32, `test_isolation_classify.py` 23 of 23 and `check_repo.py
+--strict` PASS, so widening the predicate changed nothing else in the harness.
+
+**Status: FIXED and covered.**
+
+**Remaining uncertainty.** Run 3 never reached a turn. All 103 scenarios in its manifest are
+NOT_STARTED, so nothing in `evaluation/results/run-3/` was produced by the harness this commit
+changed, and no recorded score is affected either way. The second path `75f1997` left open is
+untouched: a policy carrying `continueOnError="true"` that swallows a failure contributes no
+fault to the manifest while its text still reaches the answer file. It is a defect in the fault
+inventory rather than in the outcome classification, it is not what produced the run-3
+artifact, and it is not fixed here.
+
+**What these three entries are not.** All three are deterministic orchestration findings. A
+passing probe suite is evidence that the harness classifies the inputs it was given as
+described. It is not evidence that a live model or a live provider cannot produce a stream
+shape these suites do not model, and none of it bears on whether the skills help. The gate
+still reads NOT QUALIFIED, and the three criteria that would change that, E5, G1 and G2, are
+unverified for the same reason they were before this pass.
