@@ -522,8 +522,7 @@ def main() -> int:
     # sound, and the thing that decides a route was BREACHED is the classifier; a classifier
     # nobody tests would let a boundary failure be reported as BLOCKED or ATTEMPTED.
     # F6 FAILs if either the structural tier or the classifier test fails.
-    code_c, out_c = run([sys.executable, "tests/test_isolation_classify.py"], timeout=300)
-    cm = re.search(r"(\d+) cases, (\d+) passed, (\d+) failed", out_c)
+    code_c, _out_c = run([sys.executable, "tests/test_isolation_classify.py"], timeout=300)
     clf = "PASS" if code_c == 0 else "FAIL"
 
     rep.add("F6", "Checker integrity", "Evaluation isolation is enforced, not instructed",
