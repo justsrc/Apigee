@@ -35,6 +35,15 @@ code that has since moved: a probe count of 36 against 37, a sampling expression
 the typing pass, a symbol the typing pass deleted, and a file path under `run-3/` that is
 under `run-4/`.
 
+**The fault-code index cited a URL that returns 404.** `check_urls.sh` failed on this branch,
+one URL of 173, cited by 31 rows of `references/error-codes.md`:
+`https://cloud.google.com/apigee/docs/oauthv2`. The cause was `build_error_index.py` building
+citations by replacing underscores in a cached filename with slashes, which is not the inverse
+of how `fetch.sh` names files. 88 of the 335 cached pages have a filename that does not spell
+the page's path. The generator now reads `research/pages/MANIFEST.tsv`, which records where each
+page was actually fetched from, the same source `build_doc_index.py` already used. 31 rows
+changed and `check_urls.sh` now verifies all 172 URLs.
+
 **Two instructions in tracked documentation sent the reader to one machine.** The register's
 reproduction block and `research/RESEARCH-RECIPE.md` both began with an absolute path under
 a contributor's home directory. Both now use a relative path, matching what
