@@ -4,6 +4,10 @@
 Grading here is a scaffold, not an oracle. This file computes what the documented rubric
 computes, from numbers a grader supplies, and refuses to guess a verdict it cannot derive.
 
+It also refuses to grade a scenario the manifest says was never answered, and refuses to turn
+a grading input error into a model failure. Both rules come from PROTOCOL.md, and both were
+absent until 2026-10-14; see D-041 and D-042 in evaluation/defect-register.md.
+
 Why the split exists. `evaluation/results/run-2/` graded its own answers in the same
 conversation that produced them, which the run's own deviation log called out. Run 3 keeps
 generation and grading in separate contexts. The primary grader's scores are written to
@@ -88,11 +92,49 @@ def verdict(score: float | None, critical: bool) -> str:
     return "FAIL"
 
 
+def unscorable_reason(anchors: dict, rows: int) -> str:
+    """Why a score could not be computed, naming the input that is wrong."""
+    if not anchors:
+        return "the grader supplied no anchors"
+    if rows <= 0:
+        return f"the answer key has no rubric table, so {len(anchors)} anchors have no " \
+               f"denominator to be scored against"
+    bad = sorted(f"{k}={v}" for k, v in anchors.items() if v not in (0, 1, 2, 3, 4))
+    return f"anchor value outside the 0-to-4 scale ({', '.join(bad)}); this is a grading " \
+           f"input error and is not a model failure"
+
+
 def load_manifest() -> dict:
     if not MANIFEST.exists():
         print("no manifest; nothing has been generated yet", file=sys.stderr)
         raise SystemExit(2)
     return json.loads(MANIFEST.read_text(encoding="utf-8"))
+
+
+def why_ungradeable(sid: str, m: dict) -> str | None:
+    """Why this scenario may not be graded, or None if it may.
+
+    PROTOCOL.md says "manifest.json is authoritative for collection state" and that a grade
+    is only meaningful against a response that exists. `--run` used to enforce neither. It
+    took the grader's JSON at face value, so a scores file naming a scenario that was never
+    run produced a scored, passing result: driven against run 3's own manifest, where all
+    103 scenarios are NOT_STARTED and no answer file exists, MED-13 was written out as
+    PASS with a normalized score of 1.0.
+
+    The docstring here and the commit that fixed the sibling generation defect both claimed
+    this file selects the scenarios the manifest marks AWAITING_GRADE. Only --list did.
+    """
+    rec = m.get("scenarios", {}).get(sid)
+    if rec is None:
+        return "no such scenario in this run's manifest"
+    status = rec.get("status")
+    if status != "AWAITING_GRADE":
+        return f"manifest says {status}, not AWAITING_GRADE"
+    missing = [f"raw/{sid}.turn{n}.md" for n in (1, 2)
+               if not (RUN / "raw" / f"{sid}.turn{n}.md").is_file()]
+    if missing:
+        return "no answer file for " + " or ".join(missing)
+    return None
 
 
 def main() -> int:
@@ -125,8 +167,19 @@ def main() -> int:
     out_dir = RUN / "grades" / a.grader
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    m = load_manifest()
+    refused: list[dict] = []
+    for sid, rec in supplied.items():
+        why = why_ungradeable(sid, m)
+        if why is None:
+            continue
+        refused.append({"scenario": sid, "reason": why})
+        print(f"  {sid}: refused, {why}", file=sys.stderr)
+
     written = []
     for sid, rec in supplied.items():
+        if any(r["scenario"] == sid for r in refused):
+            continue
         key = (PK / f"{sid}.key.md")
         if not key.is_file():
             print(f"  {sid}: no key, skipped", file=sys.stderr)
@@ -152,8 +205,16 @@ def main() -> int:
             continue
         score = normalized(anchors, rows)
         v = verdict(score, crit)
-        if v == "UNSCORABLE" and not rec.get("unscorable_reason"):
-            v = "FAIL" if anchors else "UNSCORABLE"
+        reason = rec.get("unscorable_reason")
+        if v == "UNSCORABLE" and not reason:
+            # PROTOCOL.md: "An invalid grading reference is never counted as a model
+            # failure." This used to coerce to FAIL whenever anchors were present and the
+            # score could not be computed, so a grader's typo became a model failure in
+            # the counts: one anchor of 7 on a 0-to-4 scale produced verdict FAIL with a
+            # null score and no reason recorded. State what is wrong with the input
+            # instead of guessing a verdict from it.
+            reason = unscorable_reason(anchors, rows)
+            v = "UNSCORABLE"
         entry = {
             "scenario": sid, "suite": suite_of(sid),
             "rubric_route": "Route 1 (scenario table)",
@@ -162,7 +223,7 @@ def main() -> int:
             "critical_failure_evidence": rec.get("critical_evidence"),
             "normalized_score": None if score is None else round(score, 4),
             "verdict": v,
-            "unscorable_reason": rec.get("unscorable_reason"),
+            "unscorable_reason": reason,
             "note": rec.get("note"),
             "grader": a.grader,
             "key_sha256": hashlib.sha256(key.read_bytes()).hexdigest(),
@@ -182,6 +243,7 @@ def main() -> int:
             cf += 1
     summary = {
         "grader": a.grader, "graded": n, "by_verdict": by,
+        "refused": refused,
         "critical_failure_free": cf,
         "mean_normalized_score": round(sum(scores) / len(scores), 4) if scores else None,
         "scored": len(scores),
@@ -189,6 +251,12 @@ def main() -> int:
     (out_dir / "_summary.json").write_text(json.dumps(summary, indent=2) + "\n",
                                            encoding="utf-8")
     print(json.dumps(summary, indent=2))
+    if refused:
+        # A refused scenario wrote no grade file, so it cannot be mistaken for a result.
+        # The nonzero exit is what stops the rest of the summary being read as complete.
+        print(f"{len(refused)} scenario(s) refused; see \"refused\" in the summary above",
+              file=sys.stderr)
+        return 1
     return 0
 
 
