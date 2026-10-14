@@ -100,12 +100,25 @@ class Sandbox:
 
         Probes that mutate a scenario call this, so the only failure left standing is
         the one they aimed at.
+
+        A generator that cannot run is reported as a probe that could not run, not as a
+        traceback. `check=True` raises CalledProcessError, which the runner does not
+        catch, so a probe that deleted every scenario and then tried to re-sync would
+        take the whole suite down with it instead of being marked unusable.
         """
         for turn in ("1", "2"):
-            subprocess.run(
+            proc = subprocess.run(
                 [sys.executable, str(self.root / "tests" / "make_packets.py"),
                  "--all", "--turn", turn],
-                cwd=self.root, capture_output=True, text=True, timeout=300, check=True)
+                cwd=self.root, capture_output=True, text=True, timeout=300)
+            if proc.returncode != 0:
+                # The generator prints its whole docstring when given nothing to do, so
+                # the last line carries the reason and the first is noise.
+                tail = (proc.stderr or proc.stdout).strip().splitlines()
+                raise AssertionError(
+                    f"packet re-sync failed on turn {turn} (exit {proc.returncode}), so "
+                    f"this probe cannot isolate its own check: "
+                    f"{tail[-1].strip() if tail else 'no output'}")
 
     def path(self, rel: str) -> Path:
         return self.root / rel
@@ -495,6 +508,26 @@ def _p_bad_ref_path(sb: Sandbox) -> None:
     skill = sb.path(".agents/skills/apigee-support-core/SKILL.md")
     skill.write_text(skill.read_text().replace(
         "`references/products.md`", "`references/products-v9.md`"))
+
+
+@probe("reference-paths-no-longer-listed", "FAIL",
+       "unquote every reference path in every SKILL.md and delete a reference file, so the "
+       "path regex matches nothing: no listed path failed to resolve is not the same claim as "
+       "no path was listed. It touches no scenario, so nothing needs regenerating")
+def _p_refs_unquoted(sb: Sandbox) -> None:
+    quoted = 0
+    for skill in sorted(sb.path(".agents/skills").glob("*/SKILL.md")):
+        text = skill.read_text()
+        quoted += len(re.findall(r"`references/[A-Za-z0-9._-]+\.md`", text))
+        skill.write_text(re.sub(r"`(references/[A-Za-z0-9._-]+\.md)`", r"\1", text))
+    if not quoted:
+        raise AssertionError("fixture precondition failed: no backticked reference path")
+    # The deleted file keeps its name in the SKILL.md body, so the orphan check cannot see it
+    # either. Without the deletion this probe would only prove that a regex stopped matching.
+    gone = sb.path(".agents/skills/apigee-support-core/references/hybrid.md")
+    if not gone.is_file():
+        raise AssertionError("fixture precondition failed: references/hybrid.md is gone")
+    gone.unlink()
 
 
 @probe("scenario-invents-fault-code", "FAIL",
