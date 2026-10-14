@@ -22,7 +22,7 @@ to run the comparison later needs to know what was measured before spending the 
 The handoff named `ecf2ffe` as the pre-remediation state. **That is wrong, and wrong in the
 direction that would have faked a null result.**
 
-```
+```text
 $ git rev-parse ecf2ffe^
 f9d7de8b3556acbd2706577b2fb0ed610a59edd6
 ```

@@ -26,15 +26,27 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import importlib
 import re
 import sys
 from collections import defaultdict
 from pathlib import Path
+from typing import TYPE_CHECKING, Protocol, TypedDict, cast
 
 ROOT = Path(__file__).resolve().parent.parent
+
+if TYPE_CHECKING:
+    # check_repo lives beside this script, not on a package path, so its types are
+    # resolved under `tests` at analysis time while the module is loaded dynamically at
+    # run time (after tests/ is placed on sys.path).
+    from tests import check_repo
+
 sys.path.insert(0, str(ROOT / "tests"))
 
-import check_repo as cr  # noqa: E402
+if TYPE_CHECKING:
+    cr = check_repo
+else:
+    cr = importlib.import_module("check_repo")
 
 ID_RE = re.compile(r"\b(EASY|MED|HARD|ADV|REG)-\d+\b")
 
@@ -48,9 +60,9 @@ def normalise(text: str) -> str:
 
 
 def section(block: str, name: str) -> str:
-    for _sid, b in cr.find_scenario_blocks(block):
+    for _sid, _b in cr.find_scenario_blocks(block):
         pass
-    ok, _size = cr.section_present(block, name)
+    _ok, _size = cr.section_present(block, name)
     hs = cr.parse_headings(block)
     target = cr._norm(name)
     for i, (_lvl, text, ln) in enumerate(hs):
@@ -63,42 +75,55 @@ def section(block: str, name: str) -> str:
     return ""
 
 
-def load() -> dict[str, dict]:
-    out: dict[str, dict] = {}
+class _ScenarioEntry(TypedDict):
+    file: str
+    norm: str
+    urls: set[str]
+    ticket: str
+    topic: str
+
+
+def load() -> dict[str, _ScenarioEntry]:
+    out: dict[str, _ScenarioEntry] = {}
     for p in sorted((ROOT / "scenarios").glob("*.md")):
         if p.name == "index.md":
             continue
         for sid, block in cr.find_scenario_blocks(cr.read(p)):
-            urls = set(cr.URL_RE.findall(block))
+            urls = set(cast(list[str], cr.URL_RE.findall(block)))
             ticket = section(block, "initial support ticket")
+            topic_m = re.search(r"^- Primary topic:\s*(.+)$", block, re.M)
+            topic = cast(str, topic_m.group(1)) if topic_m else "?"
             out[sid] = {
                 "file": p.name,
                 "norm": normalise(block),
                 "urls": urls,
                 "ticket": normalise(ticket),
-                "topic": (re.search(r"^- Primary topic:\s*(.+)$", block, re.M) or [None, "?"])[1]
-                if re.search(r"^- Primary topic:\s*(.+)$", block, re.M) else "?",
+                "topic": topic,
             }
     return out
 
 
+class _Args(Protocol):
+    threshold: float
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--threshold", type=float, default=0.80)
-    args = ap.parse_args()
+    _ = ap.add_argument("--threshold", type=float, default=0.80)
+    args = cast(_Args, cast(object, ap.parse_args()))
 
     data = load()
     ids = sorted(data)
     print(f"{len(ids)} scenarios loaded from scenarios/*.md\n")
 
     # 1. exact duplicates
-    exact = defaultdict(list)
+    exact: defaultdict[str, list[str]] = defaultdict(list)
     for sid in ids:
         exact[data[sid]["norm"]].append(sid)
     exact_dupes = [v for v in exact.values() if len(v) > 1]
 
     # 2. normalised near-duplicates
-    near = []
+    near: list[tuple[float, str, str]] = []
     for i, a in enumerate(ids):
         for b in ids[i + 1:]:
             if data[a]["norm"] == data[b]["norm"]:
@@ -108,14 +133,14 @@ def main() -> int:
                 near.append((r, a, b))
 
     # 3. shared source
-    by_url = defaultdict(list)
+    by_url: defaultdict[str, list[str]] = defaultdict(list)
     for sid in ids:
         for u in data[sid]["urls"]:
             by_url[u].append(sid)
-    shared = {u: v for u, v in by_url.items() if len(v) > 2}
+    shared: dict[str, list[str]] = {u: v for u, v in by_url.items() if len(v) > 2}
 
     # 4. ticket similarity among scenarios that do not share a source
-    ticket_near = []
+    ticket_near: list[tuple[float, str, str]] = []
     for i, a in enumerate(ids):
         for b in ids[i + 1:]:
             if not data[a]["ticket"] or not data[b]["ticket"]:
@@ -146,7 +171,7 @@ def main() -> int:
 
     print()
     print("=" * 72)
-    print(f"3. SHARED SOURCES cited by more than two scenarios (>= 3)")
+    print("3. SHARED SOURCES cited by more than two scenarios (>= 3)")
     print("=" * 72)
     if shared:
         for u, v in sorted(shared.items(), key=lambda kv: -len(kv[1])):

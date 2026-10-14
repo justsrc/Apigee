@@ -20,12 +20,17 @@ failures.
 from __future__ import annotations
 
 import argparse
-import os
+import importlib
 import re
 import sys
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Protocol, cast
+
+# `_norm` is declared public here so find_duplicates.py can share the exact same heading
+# normalisation instead of reimplementing it and drifting from this one.
+__all__ = ["_norm"]
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -99,7 +104,7 @@ def scenario_ids(root: Path) -> set[str]:
     for p in sorted((root / SCENARIOS_DIR).glob("*.md")):
         if p.name == "index.md":
             continue
-        for prefix, num in SCENARIO_ID_RE.findall(read(p)):
+        for prefix, num in cast(list[tuple[str, str]], SCENARIO_ID_RE.findall(read(p))):
             ids.add(f"{prefix}-{num}")
     return ids
 
@@ -297,7 +302,7 @@ def check_skills(root: Path, r: Results) -> list[str]:
             r.fail(f"{skill_md}: body is only {len(body.strip())} chars, too thin to be operational")
 
         # Every relative link in the body must resolve.
-        for link in re.findall(r"\[[^\]]*\]\(([^)]+)\)", body):
+        for link in cast(list[str], re.findall(r"\[[^\]]*\]\(([^)]+)\)", body)):
             if link.startswith(("http://", "https://", "#", "mailto:")):
                 continue
             target = (skill_md.parent / link.split("#")[0]).resolve()
@@ -375,7 +380,7 @@ def check_scenarios(root: Path, r: Results) -> None:
         p = scenarios_dir / extra
         if not p.is_file():
             r.fail(f"missing scenario file: {extra}. The regression suite is the "
-                   f"documented post-change smoke test and cannot be optional.")
+                   + "documented post-change smoke test and cannot be optional.")
             continue
         n = len(find_scenario_blocks(read(p)))
         if n:
@@ -391,7 +396,7 @@ def check_local_links(root: Path, r: Results) -> None:
         p = root / name
         if not p.is_file():
             continue
-        for link in re.findall(r"\[[^\]]*\]\(([^)]+)\)", read(p)):
+        for link in cast(list[str], re.findall(r"\[[^\]]*\]\(([^)]+)\)", read(p))):
             if link.startswith(("http://", "https://", "#", "mailto:")):
                 continue
             if not (root / link.split("#")[0]).exists():
@@ -418,8 +423,8 @@ def check_research(root: Path, r: Results) -> None:
         # the run would still report PASS on the indices built from them. Verified by
         # deleting the cache, which used to exit 0.
         r.fail("research/pages holds no documents. Every generated index here is derived "
-               "from it, so an empty cache invalidates all of them and any check on those "
-               "indexes becomes vacuous. Restore the corpus or re-run research/fetch.sh.")
+               + "from it, so an empty cache invalidates all of them and any check on those "
+               + "indexes becomes vacuous. Restore the corpus or re-run research/fetch.sh.")
 
     index = research / "official-documentation-index.md"
     if not index.is_file():
@@ -458,13 +463,13 @@ def check_code_blocks(root: Path, r: Results) -> None:
             # <Source request.header.name>, which is not well-formed XML by design.
             wrapped = f"<root>{body}</root>"
             try:
-                ET.fromstring(re.sub(r"<([A-Z][\w.]*)\s+([\w.$-]+)\s*\n", r'<\1 name="\2"/>\n', wrapped))
+                _ = ET.fromstring(re.sub(r"<([A-Z][\w.]*)\s+([\w.$-]+)\s*\n", r'<\1 name="\2"/>\n', wrapped))
             except ET.ParseError:
                 # Retry with every bare attribute value quoted, which is the usual cause.
                 try:
                     fixed = re.sub(r"(<[A-Z][\w.]*)\s+([\w.$-]+)\s*(/?>)",
                                    r'\1 name="\2"\3', wrapped)
-                    ET.fromstring(fixed)
+                    _ = ET.fromstring(fixed)
                 except ET.ParseError as e:
                     xml_bad += 1
                     r.fail(f"{path.name}: XML block does not parse: {e}")
@@ -483,7 +488,7 @@ def check_code_blocks(root: Path, r: Results) -> None:
 
     if xml_total or json_total:
         r.ok(f"code blocks parse: {xml_total} XML, {json_total} JSON, "
-             f"{xml_bad + json_bad} bad")
+             + f"{xml_bad + json_bad} bad")
 
 
 def check_packets(root: Path, r: Results) -> None:
@@ -500,8 +505,8 @@ def check_packets(root: Path, r: Results) -> None:
         # so its absence means the evaluation inputs were never built, not that nothing
         # was required. Verified by deleting the directory, which used to exit 0.
         r.fail("evaluation/packets does not exist; the evaluation inputs were never built. "
-               "Run: python3 tests/make_packets.py --all --turn 1 && "
-               "python3 tests/make_packets.py --all --turn 2")
+               + "Run: python3 tests/make_packets.py --all --turn 1 && "
+               + "python3 tests/make_packets.py --all --turn 2")
         return
 
     turn1 = sorted(p for p in packets.glob("*.prompt.md") if ".turn2" not in p.name)
@@ -529,7 +534,7 @@ def check_packets(root: Path, r: Results) -> None:
             r.fail(f"{len(extra)} {label}(s) exist for no scenario in scenarios/: {shown}")
     if not (expected_ids - have_t1 or expected_ids - have_t2 or expected_ids - have_k):
         r.ok(f"all {len(expected_ids)} scenarios have a turn-1 prompt, a turn-2 prompt "
-             f"and an answer key")
+             + "and an answer key")
 
     # Staleness. A reviewer caught answer keys that still asserted a ground truth the
     # scenario had been rewritten away from, which would have graded every response
@@ -544,11 +549,11 @@ def check_packets(root: Path, r: Results) -> None:
     for p in sorted((root / SCENARIOS_DIR).glob("*.md")):
         if p.name == "index.md":
             continue
-        for sid in id_re.findall(read(p)):
+        for sid in cast(list[tuple[str, str]], id_re.findall(read(p))):
             key = f"{sid[0]}-{sid[1]}"
             id_mtimes[key] = max(id_mtimes.get(key, 0.0), p.stat().st_mtime)
 
-    stale = []
+    stale: list[str] = []
     for packet in turn1 + turn2 + keys:
         sid = packet.name.split(".")[0]
         src = id_mtimes.get(sid)
@@ -557,9 +562,9 @@ def check_packets(root: Path, r: Results) -> None:
     if stale:
         uniq = sorted(set(stale))
         r.fail(f"{len(uniq)} packet(s) are older than their scenario and hold a stale "
-               f"answer key: {', '.join(uniq[:8])}{'...' if len(uniq) > 8 else ''}. "
-               f"Re-run: python3 tests/make_packets.py --all --turn 1 && "
-               f"python3 tests/make_packets.py --all --turn 2")
+               + f"answer key: {', '.join(uniq[:8])}{'...' if len(uniq) > 8 else ''}. "
+               + "Re-run: python3 tests/make_packets.py --all --turn 1 && "
+               + "python3 tests/make_packets.py --all --turn 2")
     elif turn1 or turn2:
         r.ok("packets are newer than every scenario they derive from")
 
@@ -570,7 +575,7 @@ def check_packets(root: Path, r: Results) -> None:
         r.fail(f"evaluation packets incomplete: {missing} prompts missing, so the run would be unusable")
 
     # Leakage: no prompt may contain a key heading.
-    leaked = []
+    leaked: list[str] = []
     for p in turn1 + turn2:
         text = read(p)
         for marker in ("Ground-Truth Resolution", "Correct Remediation",
@@ -587,7 +592,7 @@ def check_packets(root: Path, r: Results) -> None:
     # cannot apply them, and rubric.md requires honouring them. All 22 MED keys were
     # silently missing theirs because the extractor only looked under one heading, so a
     # MED response tripping a condition could still be scored as a pass.
-    missing_cf = []
+    missing_cf: list[str] = []
     for k in keys:
         text = read(k)
         ok = False
@@ -598,8 +603,8 @@ def check_packets(root: Path, r: Results) -> None:
             missing_cf.append(k.name.split(".")[0])
     if missing_cf:
         r.fail(f"{len(missing_cf)} answer key(s) carry no critical-failure conditions "
-               f"(heading absent or empty): "
-               f"{', '.join(missing_cf[:8])}{'...' if len(missing_cf) > 8 else ''}")
+               + "(heading absent or empty): "
+               + f"{', '.join(missing_cf[:8])}{'...' if len(missing_cf) > 8 else ''}")
     elif keys:
         r.ok(f"all {len(keys)} answer keys carry critical-failure conditions")
 
@@ -644,7 +649,7 @@ def check_critical_failure_completeness(root: Path, r: Results) -> None:
     if not packets.is_dir():
         return
 
-    truncated = []
+    truncated: list[str] = []
     checked = 0
     for path in sorted((root / SCENARIOS_DIR).glob("*.md")):
         if path.name == "index.md":
@@ -666,9 +671,9 @@ def check_critical_failure_completeness(root: Path, r: Results) -> None:
 
     if truncated:
         r.fail(f"{len(truncated)} answer key(s) carry a truncated critical-failure "
-               f"condition: {', '.join(truncated[:8])}{'...' if len(truncated) > 8 else ''}. "
-               f"Re-run: python3 tests/make_packets.py --all --turn 1 && "
-               f"python3 tests/make_packets.py --all --turn 2")
+               + f"condition: {', '.join(truncated[:8])}{'...' if len(truncated) > 8 else ''}. "
+               + "Re-run: python3 tests/make_packets.py --all --turn 1 && "
+               + "python3 tests/make_packets.py --all --turn 2")
     elif checked:
         r.ok(f"all {checked} bold critical-failure conditions reach their answer keys in full")
 
@@ -691,7 +696,7 @@ def source_not_a_critical_failures(block: str) -> list[str]:
     demonstrates.
     """
     lines = block.splitlines()
-    out = []
+    out: list[str] = []
     for i, line in enumerate(lines):
         m = re.match(r"^#{2,6}\s*Not a critical failure\b[:\s]*(.*)$", line.strip(), re.I)
         if not m:
@@ -716,7 +721,8 @@ def check_not_a_critical_failure_completeness(root: Path, r: Results) -> None:
     if not packets.is_dir():
         return
 
-    broken, checked = [], 0
+    broken: list[str] = []
+    checked = 0
     for path in sorted((root / SCENARIOS_DIR).glob("*.md")):
         if path.name == "index.md":
             continue
@@ -743,13 +749,13 @@ def check_not_a_critical_failure_completeness(root: Path, r: Results) -> None:
 
     if broken:
         r.fail(f"{len(broken)} 'Not a critical failure' ruling(s) unusable in the key: "
-               f"{'; '.join(broken[:6])}{'...' if len(broken) > 6 else ''}. A ruling that "
-               f"does not name what it exempts cannot be applied by a grader. Re-run: "
-               f"python3 tests/make_packets.py --all --turn 1 && "
-               f"python3 tests/make_packets.py --all --turn 2")
+               + f"{'; '.join(broken[:6])}{'...' if len(broken) > 6 else ''}. A ruling that "
+               + "does not name what it exempts cannot be applied by a grader. Re-run: "
+               + "python3 tests/make_packets.py --all --turn 1 && "
+               + "python3 tests/make_packets.py --all --turn 2")
     elif checked:
         r.ok(f"all {checked} 'Not a critical failure' rulings reach their keys with their "
-             f"subject")
+             + "subject")
 
 
 def check_generated_references(root: Path, r: Results) -> None:
@@ -765,7 +771,7 @@ def check_generated_references(root: Path, r: Results) -> None:
     if not files:
         return
 
-    bad = []
+    bad: list[str] = []
     for p in files:
         text = read(p)
         for marker in ("<span", "<div", "<table", "sheets-userformat", "<\\"):
@@ -776,6 +782,12 @@ def check_generated_references(root: Path, r: Results) -> None:
         r.fail(f"generated reference has raw markup: {hit}")
     if not bad:
         r.ok("generated reference files carry no raw HTML or escaped angle brackets")
+
+
+class _IndexBuilder(Protocol):
+    """The interface the research/ generator modules expose: one build() returning text."""
+
+    def build(self) -> str: ...
 
 
 def check_generated_freshness(root: Path, r: Results) -> None:
@@ -793,8 +805,10 @@ def check_generated_freshness(root: Path, r: Results) -> None:
     """
     sys.path.insert(0, str(root / "research"))
     try:
-        import build_error_index  # type: ignore
-        import build_scenario_index  # type: ignore
+        build_error_index = cast(
+            _IndexBuilder, cast(object, importlib.import_module("build_error_index")))
+        build_scenario_index = cast(
+            _IndexBuilder, cast(object, importlib.import_module("build_scenario_index")))
     except Exception as e:  # pragma: no cover - import failure is itself a finding
         r.fail(f"cannot import the generators to verify freshness: {e}")
         return
@@ -816,17 +830,17 @@ def check_generated_freshness(root: Path, r: Results) -> None:
         extra_note = ""
         if missing:
             extra_note = (" Codes present in the source pages but absent from the "
-                          f"committed index: {', '.join(missing[:6])}"
+                          + f"committed index: {', '.join(missing[:6])}"
                           + ("..." if len(missing) > 6 else "") + ".")
         r.fail("references/error-codes.md is not what research/build_error_index.py "
-               "produces from the current corpus. It is generated: fix the generator or "
-               "the source pages, then regenerate, do not edit the output." + extra_note)
+               + "produces from the current corpus. It is generated: fix the generator or "
+               + "the source pages, then regenerate, do not edit the output." + extra_note)
     else:
         r.ok("fault-code index matches a fresh run of build_error_index.py")
 
     if not _scenario_index_current(root, build_scenario_index):
         r.fail("scenarios/index.md is stale relative to scenarios/*.md. Run: "
-               "python3 research/build_scenario_index.py")
+               + "python3 research/build_scenario_index.py")
     else:
         r.ok("scenario index matches a fresh run of build_scenario_index.py")
 
@@ -839,7 +853,7 @@ def _missing_fault_codes(produced: str, committed: str) -> list[str]:
     return sorted(want - have)
 
 
-def _scenario_index_current(root: Path, build_scenario_index) -> bool:
+def _scenario_index_current(root: Path, build_scenario_index: _IndexBuilder) -> bool:
     try:
         produced = build_scenario_index.build()
     except Exception:
@@ -880,7 +894,7 @@ def check_reference_discovery(root: Path, r: Results) -> None:
         # name match above cannot tell a real path from a sentence that happens to contain
         # the filename. Resolving the listed paths is what catches a deleted or renamed
         # reference, which previously exited 0.
-        for rel in sorted(set(re.findall(r"`(references/[A-Za-z0-9._-]+\.md)`", body))):
+        for rel in sorted(set(cast(list[str], re.findall(r"`(references/[A-Za-z0-9._-]+\.md)`", body)))):
             if not (d / rel).is_file():
                 unresolvable.append(f"{d.name}/{rel}")
 
@@ -935,8 +949,8 @@ def check_scenario_codes(root: Path, r: Results) -> None:
     # prefix is excluded outright.
     not_codes = re.compile(
         r"^(?:io|connect|keepalive|overrides|cassandra|logger|spec|iam|apigee|ratelimit|"
-        r"target|request|response|context|system|private|app|my|api|docs|entry|report)\."
-        r"|\.(?:md|yaml|sh|properties|txt)$", re.I)
+        + r"target|request|response|context|system|private|app|my|api|docs|entry|report)\."
+        + r"|\.(?:md|yaml|sh|properties|txt)$", re.I)
 
     unknown: list[str] = []
     checked = 0
@@ -964,19 +978,19 @@ def check_scenario_codes(root: Path, r: Results) -> None:
                 line_no = block[:m.start()].count("\n")
                 window = "\n".join(block.splitlines()[max(0, line_no - 6):line_no + 6])
                 if re.search(r"(unverified|not in the (?:Apigee )?fault|does not exist|"
-                             r"no code by that name|no such code|absent from)", window, re.I):
+                             + r"no code by that name|no such code|absent from)", window, re.I):
                     continue
                 unknown.append(f"{sid}: {tok}")
 
     if unknown:
         r.fail(f"{len(unknown)} fault-code-shaped token(s) in scenario bodies do not appear "
-               f"anywhere in research/pages/ or the generated index: "
-               f"{', '.join(sorted(set(unknown))[:8])}"
-               f"{'...' if len(set(unknown)) > 8 else ''}. An invented code is worse than "
-               f"no code, because an agent is graded against it.")
+               + "anywhere in research/pages/ or the generated index: "
+               + f"{', '.join(sorted(set(unknown))[:8])}"
+               + f"{'...' if len(set(unknown)) > 8 else ''}. An invented code is worse than "
+               + "no code, because an agent is graded against it.")
     else:
         r.ok(f"all {checked} fault-code-shaped tokens in scenario bodies exist in the "
-             f"cached source corpus")
+             + "cached source corpus")
 
 
 def check_origin_integrity(root: Path, r: Results) -> None:
@@ -1014,7 +1028,7 @@ def check_origin_integrity(root: Path, r: Results) -> None:
                 kind = "synthetic"
             else:
                 unclassified.append(f"{sid}: origin '{m.group(1).strip()[:40]}' is not one "
-                                    f"of real-world, documented or synthetic")
+                                    + "of real-world, documented or synthetic")
                 continue
             counts[kind] += 1
             if constructed and kind == "real-world":
@@ -1024,7 +1038,7 @@ def check_origin_integrity(root: Path, r: Results) -> None:
         r.fail(f"origin classification: {u}")
     for m in misplaced:
         r.fail(f"origin classification: {m}. The adversarial and regression suites are "
-               f"constructed evaluations, not incident reports.")
+               + "constructed evaluations, not incident reports.")
     if not unclassified and not misplaced:
         total = sum(counts.values())
         parts = ", ".join(f"{counts[k]} {k}" for k in ("real-world", "documented", "synthetic")
@@ -1040,7 +1054,7 @@ def check_unslop_scope(r: Results) -> None:
     """
     r.review(
         "unslop governs prose only. Verify it never overrides exact error strings, "
-        "config syntax, or product names in any support answer."
+        + "config syntax, or product names in any support answer."
     )
 
 
@@ -1049,11 +1063,16 @@ def check_unslop_scope(r: Results) -> None:
 # ---------------------------------------------------------------------------
 
 
+class _Args(Protocol):
+    root: str
+    strict: bool
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--root", default=".", help="repository root")
-    ap.add_argument("--strict", action="store_true", help="treat warnings as failures")
-    args = ap.parse_args()
+    _ = ap.add_argument("--root", default=".", help="repository root")
+    _ = ap.add_argument("--strict", action="store_true", help="treat warnings as failures")
+    args = cast(_Args, cast(object, ap.parse_args()))
 
     root = Path(args.root).resolve()
     if not root.is_dir():
@@ -1062,7 +1081,7 @@ def main() -> int:
 
     r = Results()
     check_root_files(root, r)
-    check_skills(root, r)
+    _ = check_skills(root, r)
     check_scenarios(root, r)
     check_local_links(root, r)
     check_research(root, r)
@@ -1100,9 +1119,9 @@ def main() -> int:
         print(f"  - {item}")
     print(
         "  - whether each scenario's ground truth is technically correct\n"
-        "  - whether each cited URL supports the claim it is attached to\n"
-        "  - whether difficulty classifications match the diagnostic work required\n"
-        "  - whether any scenario can be solved from its title alone"
+        + "  - whether each cited URL supports the claim it is attached to\n"
+        + "  - whether difficulty classifications match the diagnostic work required\n"
+        + "  - whether any scenario can be solved from its title alone"
     )
 
     if r.failed:

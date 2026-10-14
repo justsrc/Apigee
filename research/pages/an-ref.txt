@@ -1,0 +1,714 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This topic is a reference for analytics metrics, dimensions, and filters. For more context on using these, see [API Analytics overview](/apigee/docs/api-platform/analytics/analytics-services-overview).
+
+This topic shows the names for metrics and dimensions as they appear in the UI and as you need to use them in API calls.
+
+- You'll see the UI names when you [create and manage custom reports](/apigee/docs/api-platform/analytics/create-custom-reports).
+- Use the API-specific names when [getting metrics](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.stats/get), [creating a report](/apigee/docs/reference/apis/apigee/rest/v1/organizations.reports/create) definition, or [updating a report](/apigee/docs/reference/apis/apigee/rest/v1/organizations.reports/update) definition.
+
+## Metrics
+
+Following are the API metrics you can retrieve in custom reports and Apigee API calls.
+
+| Metric | Name to use in the Apigee API | Functions | Description |
+| --- | --- | --- | --- |
+| Average transactions per second | tps | None | Average number of transactions, meaning API proxy requests, per second. Note that if you have a relatively low number of transactions over the time period, the average number of transactions per second could appear to be zero in UI custom reports if the number is smaller than two decimal places. API syntax: tps |
+| Cache hit | cache_hit | sum | Number of successful API requests that use the ResponseCache instead of the response from the target service. API syntax: sum(cache_hit) |
+| L1 Cache elements count | ax_cache_l1_count | avg, min, max | Number of elements in L1 (in-memory) cache per transaction over a given time period. For example, if you choose max for the period of a day, and within that day the highest number of elements in cache is 12 for a specific transaction, then the count will be 12. For avg , if there are three transactions in the time period you're querying, and their cache counts are 5, 6, and 7, the average is 6. L1 cache is in-memory cache as opposed to L2 database cache, as described in Cache internals . API syntax: avg(ax_cache_l1_count) |
+| Policy errors | policy_error | sum | Total number of policy errors over the specified time period. Policy errors usually occur by design. For example, the VerifyApiKey policy throws an error when an invalid API key is passed in the request, and a SpikeArrest policy throws an error if the number of API calls exceeds the limit defined in the policy. So this metric is useful for finding potential trouble spots in your APIs. For example, policy_error metrics, grouped by the developer_app dimension, might help you discover that an API key or OAuth token has expired for a given app; or you might find that a specific API proxy is throwing a lot of SpikeArrest policy errors, leading you to discover that the proxy's spike arrest limit doesn't account for an increase in holiday traffic. A policy error is logged in analytics only if the error results in API proxy failure. For example, if a policy's continueOnError attribute is set to true , the API proxy continues processing a request even if the policy fails. In that case, a policy error is not logged in analytics. The Policy Name on Error ( ax_execution_fault_policy_name ) dimension is useful for grouping policy errors by policy name. A target failure (such as a 404 or 503 ) does not count as a policy failure. Those count as API proxy failures ( is_error ). API syntax: sum(policy_error) |
+| Proxy errors | is_error | sum | Total number of times API proxies failed over the specified time period. Proxy failure can occur when a policy fails or when there's a runtime failure, such as a 404 or 503 from the target service. The Proxy ( apiproxy ) dimension is useful for grouping API proxy failures by proxy. API syntax: sum(is_error) |
+| Request processing latency | request_processing_latency | avg, min, max | Amount of time (average, minimum, or maximum), in milliseconds , that it takes Apigee to process incoming requests. The time starts when the request reaches Apigee and ends when Apigee forwards the request to the target service. Using different dimensions, you can examine request processing latencies by API proxy, developer app, region, and so on. API syntax: max(request_processing_latency) |
+| Request size | request_size | sum, avg, min, max | Size of the request payload received by Apigee, in bytes . API syntax: avg(request_size) |
+| Response cache executed | ax_cache_executed | sum | Total number of times a ResponseCache policy was executed over the given time period. Since the ResponseCache policy is attached in two places in an API proxy (once in the request and once in the response), it usually executes twice in an API call. A cache GET and a cache PUT each count as one execution. However, response cache execution is 0 if the <SkipCacheLookup> element in the policy evaluates to true (in the request), and 0 if the <SkipCachePopulation> element in the policy evaluates to true (in the response). In the Debug tool , you can click the ResponseCache icon in an executed API call and view the responsecache.executed flow variable to see whether or not there was a cache execution (a value of 1). API syntax: sum(ax_cache_executed) |
+| Response processing latency | response_processing_latency | avg, min, max | Amount of time (average, minimum, or maximum), in milliseconds , that it takes Apigee to process API responses. The time starts when the API proxy receives the target service response and ends when Apigee forwards the response to the original caller. Using different dimensions, you can examine response processing latencies by API proxy, region, and so on. API syntax: min(response_processing_latency) |
+| Response size | response_size | sum, avg, min, max | Size of the response payload returned to the client, in bytes . API syntax: max(response_size) |
+| Target errors | target_error | sum | Total number of error responses from the target service. These are target service errors not caused by Apigee. API syntax: sum(target_error) |
+| Target response time | target_response_time | sum, avg, min, max | Amount of time (sum, average, minimum, or maximum), in milliseconds , for the target server to respond to a call. This metric tells you how target servers are performing. The time starts when Apigee forwards a request to the target service and ends when Apigee receives the response. Note that if an API call returns a response from cache (using the ResponseCache policy, for example), the call will never reach the target service, and no target response time metrics are logged. API syntax: avg(target_response_time) |
+| Total response time | total_response_time | sum, avg, min, max | Amount of time (sum, average, minimum, or maximum), in milliseconds , from when Apigee receives a request from a client to when Apigee sends the response back to the client. The time includes network overhead (such as the time it takes load balancers and routers to do their work), request processing latency, response processing latency, and target response time (if the response is served from the target service instead of cache). Using different dimensions, you can examine processing latencies by API proxy, developer app, region, and so on. API syntax: avg(total_response_time) |
+| Traffic | message_count | sum | Total number of API calls processed by Apigee in the specified time period. Use dimensions to group traffic counts in ways that are most meaningful to you. API syntax: sum(message_count) |
+| Monetization |  |  |  |
+| Fees | fees | sum, avg, min, max | Fee amount. API syntax: sum(fees) |
+| Developer share of revenue | x_apigee_mintng_dev_share | sum, avg, min, max | App developer's or AppGroup's share in a transaction's revenue. Apigee calculates the share only if you have enabled revenue sharing in your rate plan. The share is calculated using the following formula: x_apigee_mintng_dev_share = revShareGrossPrice * (share percentage) The value of the share percentage is fetched from your rate plan. API syntax: sum(x_apigee_mintng_dev_share) |
+| Monetization price | x_apigee_mintng_price | sum, avg, min, max | Total revenue of a transaction. The revenue of a transaction is set to the value of the revShareGrossPrice monetization variable captured in your DataCapture policy. API syntax: sum(x_apigee_mintng_price) |
+| Api price multiplier | x_apigee_mintng_price_multiplier | sum, avg, min, max | The factor (multiplier) by which the per-transaction cost is multiplied. The per-transaction cost is specified in the rate plan's Consumption-based fees pricing. API syntax: avg(x_apigee_mintng_price_multiplier) |
+| Monetization rates | x_apigee_mintng_rate | sum, avg, min, max | Rate charged for a transaction. The rate charged for a transaction is calculated using the following formula: x_apigee_mintng_rate = (consumption-based pricing rate) * perUnitPriceMultiplier value The value of the consumption-based pricing rate is fetched from your rate plan and the perUnitPriceMultiplier value is multiplied only if the variable is captured by the DataCapture policy. API syntax: sum(x_apigee_mintng_rate) |
+
+## Dimensions
+
+Dimensions let you view metrics in meaningful groupings. For example, seeing total traffic counts becomes much more powerful when you view them for each developer app or API proxy.
+
+Following are the dimensions Apigee provides out of the box.
+
+Dimension
+
+Name to use in the Apigee API
+
+Description
+
+Access Token
+
+`access_token`
+
+App end user's OAuth access token.
+
+API Product
+
+`api_product`
+
+- Name of the API product containing the API proxies being called. In order to get this dimension, developer apps making the calls must be associated with one or more API products that contain the API proxies, and the proxies being called must check for an API key or OAuth token sent with the API call. The key or token is associated with an API product. For more information, see [How do I generate complete analytics data?](/apigee/docs/api-platform/analytics/analytics-services-overview#how-do-i-generate-complete-analytics-data).
+
+  If the above criteria aren't met, you'll see the value `(not set)`. See also [What does an analytics entity value "(not set)" mean?](/apigee/docs/api-platform/analytics/why-am-i-seeing-analytics-entity-named-not-set).
+
+- In the context of the fees metric, this is the API product corresponding to the rate plan for which setup fee or recurring fee apply. The value is empty for prepaid top-up.
+
+AppGroup App Name
+
+`app_group_app`
+
+Name of the app being called when it is part of an AppGroup. See [Using AppGroups to organize app ownership](/apigee/docs/api-platform/publish/organizing-client-app-ownership#using-appgroups-to-organize-app-ownership) for information on AppGroups.
+
+AppGroup Name
+
+`app_group_name`
+
+Name of the AppGroup containing the apps being called, if applicable. See [Using AppGroups to organize app ownership](/apigee/docs/api-platform/publish/organizing-client-app-ownership#using-appgroups-to-organize-app-ownership) for information on AppGroups.
+
+Cache Key
+
+`ax_cache_key`
+
+Key containing the `ResponseCache` value that was accessed. For more information on how the key is constructed for response cache, see [ResponseCache policy](/apigee/docs/api-platform/reference/policies/response-cache-policy).
+
+In the [Debug tool](/apigee/docs/api-platform/debug/trace-overview), when you select a `ResponseCache` policy that reads from or writes to the cache, you can see this value in the `responsecache.cachekey` [flow variable](/apigee/docs/api-platform/reference/variables-reference).
+
+Cache Name
+
+`ax_cache_name`
+
+Name of the cache containing the keys/values used by the `ResponseCache` policy, prefixed with *orgName\_\_envName\_\_*. For example, if the org is `myorgf`, the environment is `test`, and the cache name is `myCache` the `ax_cache_name` is `foo__test__myCache`.
+
+In the [Debug tool](/apigee/docs/api-platform/debug/trace-overview), when you select a `ResponseCache` policy, you can see this value in the `responsecache.cachename` [flow variable](/apigee/docs/api-platform/reference/variables-reference).
+
+Cache Source
+
+`ax_cache_source`
+
+Cache level (L1 in-memory or L2 database) from which the `ResponseCache` was retrieved. This dimension also shows `CACHE_MISS` when the response was delivered from the target instead of cache (and response cache was refreshed with the target response); or when a cache key in the request is invalid. Cache keys are limited to 2 KB in size.
+
+In the [Debug tool](/apigee/docs/api-platform/debug/trace-overview), when you select the `ResponseCache` policy, you can see this value in the `responsecache.cachesource` [flow variable](/apigee/docs/api-platform/reference/variables-reference).
+
+For more information on cache levels, see [Cache internals](/apigee/docs/api-platform/cache/cache-internals).
+
+Client ID
+
+`client_id`
+
+Consumer key (API key) of the developer app making the API calls, whether passed in the request as API keys or included in OAuth tokens.
+
+In order to get this dimension, proxies receiving calls must be configured to check for a valid API key or OAuth token. Developer apps get API keys, which can be used to generate OAuth tokens, when the apps are registered in Apigee. For more information, see [How do I generate complete analytics data?](/apigee/docs/api-platform/analytics/analytics-services-overview#how-do-i-generate-complete-analytics-data).
+
+If the above criteria aren't met, you'll see the value `(not set)`. See also [What does an analytics entity value "(not set)" mean?](/apigee/docs/api-platform/analytics/why-am-i-seeing-analytics-entity-named-not-set).
+
+Developer App
+
+`developer_app`
+
+Apigee-registered developer app making API calls.
+
+In order to get this dimension, apps must be associated with one or more API products that contain the API proxies being called, and the proxies must check for an API key or OAuth token sent with the API call. The key or token identifies the developer app. For more information, see [How do I generate complete analytics data?](/apigee/docs/api-platform/analytics/analytics-services-overview#how-do-i-generate-complete-analytics-data).
+
+If the above criteria aren't met, you'll see the value `(not set)`. See also [What does an analytics entity value "(not set)" mean?](/apigee/docs/api-platform/analytics/why-am-i-seeing-analytics-entity-named-not-set).
+
+Developer Email
+
+`developer_email`
+
+- Email of the Apigee-registered app developers or AppGroups whose app made the API calls.
+
+  In order to get this dimension, app developers or AppGroups must have apps associated with one or more API products that contain the API proxies being called, and the proxies must check for an API key or OAuth token sent with the API call. The key or token identifies the developer app. For more information, see [How do I generate complete analytics data?](/apigee/docs/api-platform/analytics/analytics-services-overview#how-do-i-generate-complete-analytics-data).
+
+  If the above criteria aren't met, you'll see the value `(not set)`. See also [What does an analytics entity value "(not set)" mean?](/apigee/docs/api-platform/analytics/why-am-i-seeing-analytics-entity-named-not-set).
+
+- In the context of the fees metric, this is the app developer or AppGroup who is charged with setup fee, recurring fees, or prepaid top-up.
+
+Developer ID
+
+`developer`
+
+Unique Apigee-generated developer ID in the form *`org_name`*`@@@`*`unique_id`*. For AppGroups, the `unique_id` is the AppGroup name.
+
+In order to get this dimension, app developers and AppGroups must have apps associated with one or more API products containing the API proxies being called, and the proxies must check for an API key or OAuth token sent with the API calls. The key or token identifies the app developer or AppGroup. For more information, see [How do I generate complete analytics data?](/apigee/docs/api-platform/analytics/analytics-services-overview#how-do-i-generate-complete-analytics-data).
+
+If the above criteria aren't met, you'll see the value `(not set)`. See also [What does an analytics entity value "(not set)" mean?](/apigee/docs/api-platform/analytics/why-am-i-seeing-analytics-entity-named-not-set).
+
+Environment
+
+`environment`
+
+Apigee environment in which the API proxies are deployed. For example, `test` or `prod`.
+
+Fault Code on Error
+
+`ax_edge_execution_fault_code`
+
+The [fault code](/apigee/docs/api-monitoring/fault-codes) of the error. For example: `messaging.adaptors.http.flow.GatewayTimeout`
+
+Flow Name on Error
+
+`ax_execution_fault`  
+`  _flow_name`
+
+Named [flow](/apigee/docs/api-platform/fundamentals/what-are-flows) in an API proxy that raised an error. For example, `PreFlow`, `PostFlow`, or the name of a conditional flow you created.
+
+Note that the full name to use in the Apigee API is `ax_execution_fault_flow_name`, without a line break.
+
+Where no errors occurred, you'll see the value `(not set)`.
+
+Flow Resource
+
+`flow_resource`
+
+Apigee use only. See <a href="https://discuss.google.dev/t/how-to-use-resource-flow-dimension-in-analytics/13765" class="external">How to use "Resource Flow" Dimension in Analytics</a> if you're curious.
+
+Flow State on Error
+
+`ax_execution_fault`  
+`  _flow_state`
+
+Name of the API proxy flow states that raised errors, such as `PROXY_REQ_FLOW` or `TARGET_RESP_FLOW`.
+
+Note that the full name to use in the Apigee API is `ax_execution_fault_flow_state`, without a line break.
+
+Gateway Flow ID
+
+`gateway_flow_id`
+
+As API calls move through Apigee, each call gets its own gateway flow ID. Example: rrt329ea-12575-114653952-1. Gateway Flow ID is useful for distinguishing metrics in high-TPS situations where other dimensions such as organization, environment, and timestamp are identical across calls.
+
+Organization
+
+`organization`
+
+Apigee organization in which the API proxies are deployed.
+
+Policy Name on Error
+
+`ax_execution_fault`  
+`  _policy_name`
+
+Name of the policy that threw an error and caused the API call to fail.
+
+Note that the full name to use in the Apigee API is `ax_execution_fault_policy_name`, without a line break.
+
+If a policy throws an error but the policy root attribute `continueOnError` is set to `true`, the API proxy flow continues without failure, and the policy failure isn't counted in this dimension.
+
+Proxy
+
+`apiproxy`
+
+Machine name (not the display name) of an API proxy.
+
+Proxy Base Path
+
+`proxy_basepath`
+
+BasePath configured on the API proxy ProxyEndpoint. Base path does not include the domain and port portion of the API proxy URL. For example, if an API proxy's base URL is `https://apigeedocs-test.apigee.net/releasenotes/`, the base path is `/releasenotes`.
+
+The value is also stored in the `proxy.basepath` [flow variable](/apigee/docs/api-platform/reference/variables-reference).
+
+Proxy Deployment Type
+
+`proxy_deployment_type`
+
+The [API proxy type](/apigee/docs/api-platform/fundamentals/understanding-apis-and-api-proxies#proxy-types) for deployed proxies. Specifying a proxy type limits results to that proxy type. Potential values are `STANDARD`, `EXTENSIBLE`, or unset.
+
+Proxy Path Suffix
+
+`proxy_pathsuffix`
+
+Resource path added to the API proxy base path. For example, if an API proxy's base URL is `https://apigeedocs-test.apigee.net/hello/`, and a call is made to `https://apigeedocs-test.apigee.net/hello/json`, the `pathsuffix` is **`/json`**.
+
+If no `pathsuffix` is used, the value is empty.
+
+The value is also stored in the `proxy.pathsuffix` [flow variable](/apigee/docs/api-platform/reference/variables-reference).
+
+Proxy revision
+
+`apiproxy_revision`
+
+Revision number of the API proxy that handled API calls. This doesn't necessarily mean the latest revision of an API proxy. If an API proxy has 10 revisions, the 8th revision may currently be deployed. Also, an API may have multiple revisions deployed as long as the revisions have different Base Paths, as described in [Deploying proxies](/apigee/docs/api-platform/deploy/ui-deploy-overview).
+
+Resolved Client IP
+
+`ax_resolved_client_ip`
+
+Originating client IP address. This is either derived using the default client IP address resolution (which only uses the `X-Forwarded-For` header) or the algorithm configured in [configured client IP resolution (which can resolve the IP address from any header)](/apigee/docs/api-platform/system-administration/client-ip-resolution#when-to-set-the-client-ip-resolution-with-an-environment).
+
+Note that when using routing products such as Akamai to capture the true IP addresses of clients, the client IP is passed to Apigee in the HTTP header `True-Client-IP`, which is then used to set the `ax_true_client_ip` dimension.
+
+With the default behavior, the value of the `ax_resolved_client_ip` dimension is calculated from the values in the `x_forwarded_for_ip` dimension in the following manner:
+
+1.  Set `ax_resolved_client_ip` to the first non-local IP address in `x_forwarded_for_ip`.
+2.  If `x_forwarded_for_ip` contains only local IP addresses, then set `ax_resolved_client_ip` to the last local IP address in `x_forwarded_for_ip`.
+3.  If `x_forwarded_for_ip` is null, set `ax_resolved_client_ip` to `(not set)`.
+
+Response Status Code
+
+`response_status_code`
+
+HTTP response status code forwarded from Apigee to the client, such as `200`, `404`, `503`, and so on. In Apigee, the response status code from the target can be overwritten with policies such as [AssignMessage policy](/apigee/docs/api-platform/reference/policies/assign-message-policy) and [RaiseFault policy](/apigee/docs/api-platform/reference/policies/raise-fault-policy), which is why this dimension can differ from [Target Response Code (target_response_code)](#target_response_code).
+
+Virtual Host
+
+`virtual_host`
+
+The name of the virtual host the API call was made to. For more information, see [About environments and environment groups](/apigee/docs/api-platform/fundamentals/environments-overview).
+
+**Inbound/Client**
+
+Client IP Address
+
+`client_ip`
+
+IP address of the system that hits the router, such as the original client (proxy_client_ip) or a load balancer. When there are multiple IPs in the `X-Forwarded-For` header, this is the last IP listed.
+
+Device Category
+
+`ax_ua_device_category`
+
+Type of device from which the API call was made, such as `Tablet` or `Smartphone`.
+
+OS Family
+
+`ax_ua_os_family`
+
+Operating system family of the device making the call, such as `Android` or `iOS`.
+
+OS Version
+
+`ax_ua_os_version`
+
+Operating system version of the device making the call.
+
+It's useful to use this as a second drill-down dimension with OS Family (ax_ua_os_family) to see the versions of the operating systems.
+
+Proxy Client IP
+
+`proxy_client_ip`
+
+IP address of the calling client, stored in the `proxy.client.ip` [flow variable](/apigee/docs/api-platform/reference/variables-reference). This is often the `X-Forwarded-For` address of the inbound call, which is the IP address Apigee received from the last external TCP handshake. This could be the calling client or a load balancer. When there are multiple IPs in the `X-Forwarded-For` header, this is the last IP listed.
+
+Referred Client IP
+
+`ax_true_client_ip`
+
+When using routing products such as Akamai to capture the true IP addresses of clients, the client IPs are passed to Apigee in the HTTP header `True-Client-IP`. This dimension captures those true client IPs from that header.
+
+Request Path
+
+`request_path`
+
+Resource path (not including the domain) to the target service, excluding query parameters.
+
+For example, the Apigee sample target `http://mocktarget.apigee.net` includes several resources, including `/user`, which returns a greeting. Regardless of how your API proxy calls `http://mocktarget.apigee.net/user`, the request_path is **`/user`**.
+
+Request URI
+
+`request_uri`
+
+Resource path (not including the domain) to the target service, including query parameters.
+
+For example, the Apigee sample target `http://mocktarget.apigee.net` includes several resources, including `/user?user={name}` resource and query parameter to return a custom greeting to the name provided. Regardless of how your API proxy calls `http://mocktarget.apigee.net/user?user=Dude`, the request_uri is **`/user?user=Dude`**.
+
+Request Verb
+
+`request_verb`
+
+HTTP request verb in the API requests, such as GET, POST, PUT, DELETE.
+
+User Agent
+
+`useragent`
+
+Name of the user agent, or software agent, used to make the API call. Examples:
+
+- A Pixel XL making a call through Chrome: `Mozilla/5.0 (Linux; Android 7.1.2; Pixel XL Build/NHG47N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.92 Mobile Safari/537.36`
+- An iPad making a call through Chrome: `Mozilla/5.0 (iPad; CPU OS 10_2 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/54.0.2840.91 Mobile/14C92 Safari/602.1`
+- cURL from a terminal: `curl/7.51.0`
+
+User Agent Family
+
+`ax_ua_agent_family`
+
+Family of the useragent, such as `Chrome Mobile` or `curl`.
+
+User Agent Type
+
+`ax_ua_agent_type`
+
+The useragent type, such as `Browser`, `Mobile Browser`, `Library`, and so on.
+
+User Agent Version
+
+`ax_ua_agent_version`
+
+Version of the useragent.
+
+It's useful to use this as a second drill-down dimension with User Agent Family (ax_ua_agent_family) to get the version of the agent family.
+
+**Outbound/Target**
+
+Target
+
+`target`
+
+Target endpoint that handled the request. For example, `default`.
+
+Target Base Path
+
+`target_basepath`
+
+Resource path (not including the domain) to the target service, excluding query parameters, that is defined in the proxy's `<TargetEndpoint>`.
+
+For example, say an API proxy calls the following target:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<TargetEndpoint name="default">
+...
+<HTTPTargetConnection>
+  <URL>http://mocktarget.apigee.net/user?user=Dude</URL>
+</HTTPTargetConnection>
+```
+
+In this example, the target_basepath is **`/user`**.
+
+If the target were this:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<TargetEndpoint name="default">
+...
+<HTTPTargetConnection>
+  <URL>http://mocktarget.apigee.net</URL>
+</HTTPTargetConnection>
+```
+
+the target_basepath would be null.
+
+In the [Debug tool](/apigee/docs/api-platform/debug/trace), when you select the AX icon at the end of the flow diagram, the `target.basepath` [flow variable](/apigee/docs/api-platform/reference/variables-reference) maps to the target_basepath dimension.
+
+gRPC Service Name
+
+`x_apigee_grpc_service_name`
+
+Applicable only when the target service is gRPC. The gRPC service name. For information on gRPC proxies, see [Creating gRPC API proxies](/apigee/docs/api-platform/fundamentals/build-simple-api-proxy#creating-grpc-api-proxies).
+
+gRPC Status
+
+`x_apigee_grpc_status`
+
+Applicable only when the target service is gRPC. The gRPC request status. For information on gRPC proxies, see [Creating gRPC API proxies](/apigee/docs/api-platform/fundamentals/build-simple-api-proxy#creating-grpc-api-proxies).
+
+Target Host
+
+`target_host`
+
+Host of the target service. For example, if an API proxy calls `http://mocktarget.apigee.net/help`, the target_host is **`mocktarget.apigee.net`**.
+
+Target IP Address
+
+`target_ip`
+
+IP address of the target service returning the response to the API proxy.
+
+Target Response Code
+
+`target_response_code`
+
+HTTP response status code returned by the target service to the API proxy, such as `200`, `404`, `503`, and so on.
+
+A value of `null` means the request never reached the target service. This occurs when the response is served by the `ResponseCache` policy or when there's a failure in request processing.
+
+This is different from the [Response Status Code (response_status_code)](#response-status-code) dimension.
+
+gRPC RPC Name
+
+`x_apigee_grpc_rpc_name`
+
+Applicable only when the target service is gRPC. The RPC name. For information on gRPC proxies, see [Creating gRPC API proxies](/apigee/docs/api-platform/fundamentals/build-simple-api-proxy#creating-grpc-api-proxies).
+
+Target URL
+
+`target_url`
+
+Full URL of the target service defined in an API proxy's TargetEndpoint.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+<TargetEndpoint name="default">
+...
+<HTTPTargetConnection>
+  <URL>http://mocktarget.apigee.net/user?user=Dude</URL>
+</HTTPTargetConnection>
+```
+
+In this example, the target_url is **`http://mocktarget.apigee.net/user?user=Dude`**.
+
+Note that the URL can also be overridden during API proxy processing with the `target.url` [flow variable](/apigee/docs/api-platform/reference/variables-reference).
+
+In [proxy chaining](/apigee/docs/api-platform/fundamentals/connecting-proxies-other-proxies), the target_url in the calling proxy is null.
+
+X-Forwarded-For IP
+
+`x_forwarded_for_ip`
+
+The list of IP addresses in the `X-Forwarded-For` header.
+
+To determine the original client IP Address, accessed through the `ax_resolved_client_ip` dimension, Apigee uses the values in the `x_forwarded_for_ip` dimension.
+
+X-Forwarded-For Proto
+
+`x_forwarded_proto`
+
+Protocol that the client used to connect to the router. Valid values include `http` or `https`.
+
+**Time**
+
+Day of week
+
+`ax_day_of_week`
+
+Three-letter day of the week abbreviation on which the API calls were made. For example, Mon, Tue, Wed.
+
+Month
+
+`ax_month_of_year`
+
+The numeric month in which the API calls were made. For example, `03` for March.
+
+Time of Day
+
+`ax_hour_of_day`
+
+Based on a 24-hour clock, the 2-digit hour in which API calls were made. For example, API calls made in the hour between 10pm and 11pm, the ax_hour_of_day would be 22.
+
+The time value is in UTC.
+
+Time Zone
+
+`ax_geo_timezone`
+
+Common names of the time zones the API calls were made from, such as `America/New_York` and `Europe/Dublin`.
+
+Week of Month
+
+`ax_week_of_month`
+
+Numeric week of the month. For example, for API calls made in the 3rd week of a month, the `ax_week_of_month` is 3.
+
+**Location**
+
+City
+
+`ax_geo_city`
+
+City from which the API calls were made.
+
+Continent
+
+`ax_geo_continent`
+
+Two-letter code of the continent from which the API calls were made. For example, `NA` for North America.
+
+Country
+
+`ax_geo_country`
+
+Two-letter code of the country from which the API calls were made. For example, `US` for United States.
+
+Geographical Region
+
+`ax_geo_region`
+
+Hyphenated code for the geographic region, such as `STATE-COUNTRY`. For example, `WA-US` for Washington-United States.
+
+Region
+
+`ax_dn_region`
+
+Name of the Apigee data center where API proxies are deployed, such as `us-east-1`.
+
+**Monetization**
+
+AppGroup Name
+
+`app_group_name`
+
+Name of the AppGroup the fees apply to, if applicable. For app developers, this field is blank.
+
+In the context of the fees metric, this is the AppGroup corresponding to the API product and rate plan for which the fee apply.
+
+Fee Type
+
+`fees_type`
+
+Type of fee: setup fee, recurring fee, prepaid topup, or refund. This value is populated only if you have selected the `Fees` metric.
+
+Fee Time Created
+
+`created`
+
+Unix timestamp when the fees schedule was added for the app developer and API product. This value is populated only if you have selected the `Fees` metric.
+
+Revenue Currency
+
+`x_apigee_mintng_currency`
+
+Currency of the transaction revenue is set to the value of the `currency` monetization variable captured in your DataCapture policy. This currency is associated with the currency of `revShareGrossPrice`.
+
+In the context of the fees metric, this is the currency of fee.
+
+Rate Plan ID
+
+`x_apigee_mintng_rate_plan_id`
+
+The monetization rate plan for the app developer or AppGroup.
+
+Transaction Success
+
+`x_apigee_mintng_tx_success`
+
+Monetization status of the transaction is set to the value of the `transactionSuccess` monetization variable captured in your DataCapture policy.
+
+Period Start
+
+`period_start`
+
+Start of the period for which recurring fees are charged. For example, for a monthly fee this is the first day of the month. This value is populated only if you have selected the `Fees` metric.
+
+Period End
+
+`period_end`
+
+End of the period for which recurring fees are charged. For example, for a monthly fee this is the last day of the month. This value is populated only if you have selected the `Fees` metric.
+
+## Filters
+
+Filters let you limit results to metrics with specific characteristics. Following are some sample filters. Use metric and dimension API-style names when defining filters.
+
+**Note:** You must put filter text between single quotes, for example, `'books'`. Do *not* use double quotes.
+
+Returns metrics for API proxies with the name books or music:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+filter=(apiproxy in 'books','music')
+```
+
+Returns metrics for API proxies with names that start with `m`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+filter=(apiproxy like 'm%')
+```
+
+Returns metrics for API proxies with names that do not start with `m`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+filter=(apiproxy not like 'm%')
+```
+
+Returns metrics for API calls with response status codes between `400` and `599`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+filter=(response_status_code ge 400 and response_status_code le 599)
+```
+
+Returns metrics for API calls with response status code of `200` and a target response code of `404`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+filter=(response_status_code eq 200 and target_response_code eq 404)
+```
+
+Returns metrics for API calls with a response status code of `500`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+filter=(response_status_code eq 500)
+```
+
+Returns metrics for API calls that didn't result in errors:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+filter=(is_error eq 0)
+```
+
+Returns metrics for API calls that didn't result in `null` responses:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+filter=(response_status_code isnot null)
+```
+
+Following are operators you can use to build report filters.
+
+| Operator | Description |
+|----|----|
+| `in` | Include in list |
+| `notin` | Exclude from list |
+| `is` | Use `response_status_code is null` to filter for responses whose status code is `null`. |
+| `isnot` | Use `response_status_code isnot null` to filter for responses whose status code is not `null`. |
+| `eq` | Equals, `==` |
+| `ne` | Not equal to, `!=` |
+| `gt` | Greater than, `>` |
+| `lt` | Less than, `<` |
+| `ge` | Greater than or equal to, `>=` |
+| `le` | Less than or equal to, `<=` |
+| `like` | Returns true if the string pattern matches the supplied pattern. |
+| `not like` | Returns false if the string pattern matches the supplied pattern. |
+| `similar to` | Returns true or false depending on whether its pattern matches the given string. It is similar to `like` except that it interprets the pattern using the SQL standard's definition of a regular expression. |
+| `not similar to` | Returns false or true depending on whether its pattern matches the given string. It is similar to `not like`, except that it interprets the pattern using the SQL standard's definition of a regular expression. |
+| `and` | Lets you use `AND` logic to include more than one filter expression. The filter includes data that meets all the conditions. |
+| `or` | Lets you use `OR` logic to evaluate different possible filter expressions. The filter includes data that meets at least one of the conditions. |

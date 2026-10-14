@@ -1,0 +1,86 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+## What does this dashboard tell me?
+
+The Proxy Performance dashboard helps you see API proxy traffic patterns and processing times. Use is to visualize how much traffic your APIs generate and how long it takes for API calls to be processed, from the time they are received by Apigee until they are returned to the client app.
+
+**Note:** **Data delay interval**  
+After API calls are made to proxies, it may take up to **10 minutes** for the data to appear in dashboards, custom reports, and management API calls.
+
+## The API Proxy Performance dashboard
+
+To access the Proxy Performance dashboard:
+
+1.  In the Google Cloud console, go to the **Apigee <span aria-label="and then">\></span> Analytics <span aria-label="and then">\></span> API metrics <span aria-label="and then">\></span> API Proxy Performance** page.
+
+    <a href="https://console.cloud.google.com/apigee/analytics/proxy-performance" class="button button-primary" target="console" data-track-name="consoleLink" data-track-type="tutorial" data-track-metadata-position="body">Go to API Proxy Performance</a>
+
+2.  Select an **Environment or Hostname** and one or **All** proxies in the **Proxy** list. Selecting **All** shows charts for all proxies including aggregated data for proxies. Selecting a single proxy shows charts with data for that proxy only.
+
+3.  If desired, change the default time range. For example, you can view data for the last day or the last 14 days.
+
+The **API Proxy Performance** view is shown. Aggregate metrics for each chart, such as the average transactions per second (**Average TPS**) and maximum transactions per second (**Peak TPS**) are shown to the right of the chart
+
+![](/static/apigee/docs/api-platform/images/proxy-performance-peaktps.png)
+
+## What does this dashboard measure?
+
+This dashboard includes these charts:
+
+- [Average transactions per second (TPS)](#averagetraffic)
+- [Peak transactions per second (TPS)](#peaktraffic)
+- [Traffic](#traffic)
+- [Average Response Time](#averageresponsetime)
+- [Traffic by Proxy](#trafficbyproxy)
+- [Average Response Time by Proxy](#averagebyproxy)
+
+**Note:** This `client.received.start.timestamp` time value is used to calculate traffic metrics for API proxies in the analytics dashboards. For more information, see the [client](/apigee/docs/api-platform/reference/variables-reference#client) flow variable reference.
+
+### Average transactions per second (TPS)
+
+| Metric | Description |
+|----|----|
+| **Average TPS** | The average number of API requests and resulting responses per second. |
+
+### Peak transactions per second (TPS)
+
+| Metric | Description |
+|----|----|
+| **Peak TPS** | The maximum number of API requests and resulting responses per second (which is aggregated by minute or hour or day, depending on the time range selected). |
+
+### Traffic
+
+| Metric | Description |
+|----|----|
+| **Total Traffic** | The total number of API requests received by Apigee for an API environment in an organization. |
+| **Traffic Success** | The total number of requests that resulted in a successful response. Error responses do not count. |
+| **Traffic Errors** | The total number of all API requests that are unsuccessful, that is, the request does not deliver a response as desired by the end user. The count includes both Proxy and Target errors. |
+
+### Average Response Time
+
+See also this interesting article on the Apigee Community site: [When can the Average Total Response Time be less than the Average Target Response Time?](https://discuss.google.dev/t/when-can-the-average-total-response-time-be-less-than-the-average-target-response-time/17793)
+
+| Metric | Description |
+| --- | --- |
+| Average Response Time | The average of the Total Response Time measured for all API calls made to an Apigee organization environment. The Total Response Time is the amount of time it takes for an API call to Apigee to return (in milliseconds). Or, put another way, total response time is the time measured from when an entire API call is received on Apigee to the time Apigee begins sending a response back to the client app. This chart measures the average for all proxies. For individual proxies, see the Average Response Time by Proxy chart below. |
+| Average Proxy Response Time | This value is calculated as the average of the Total Response Time minus the Target Response Time for all API calls made to an Apigee organization environment. It's basically a measure of how much time the API calls spend flowing through Apigee itself (in milliseconds). |
+| Average Target Response Time | The average number of milliseconds that it takes from the point the last byte of a request is sent from Apigee to a backend target to the time Apigee receives the last byte of the response. It's basically measuring how much time the API call spends on the target system. |
+
+Average proxy response time is calculated as the difference between the averages of total response time and target response time. The expectation is that total response time is always greater than the target response time. However, there are also calls which are handled by the proxy itself - preflight requests, cached responses, Oauth tokens etc which do not reach the backend system. These "faster" calls by the proxy reduce the average Total Response time without reducing the Target response time. Hence the average total response time may not always be greater than the average target response time which could result in negative values being seen for proxy response time. When you look at larger TPS without zooming in the time scale too much, these exceptions will not hold much weight and hence give you more accurate and actionable data.
+
+You obtain the most meaningful average response data when a large number of requests are collected over a long period of time, rather than from just a few requests collected over a short period of time. If you only observe a small number of requests that come in over a short time period, there's a chance that even one call that does not go to the target will result in a negative average proxy response time. When evaluating average response times, it's best to view longer time frames that have high traffic.
+
+### Traffic by Proxy
+
+| Metric | Description |
+|----|----|
+| **\<*Proxy name*\>** | For the specified API proxy, the number of recorded API requests and responses. |
+
+### <span id="averagebyproxy"></span>Average Response Time by Proxy
+
+| Metric | Description |
+| --- | --- |
+| < Proxy name > | For the specified API proxy, the average of the Total Response Time measured for all API calls made to an Apigee environment. The Total Response Time is the amount of time it takes for an API call to Apigee to return (in milliseconds). Hover over the graph to see the total amount of time spent on the proxy side and the target side, as well as the average. |

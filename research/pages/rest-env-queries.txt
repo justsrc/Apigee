@@ -1,0 +1,26 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.queries" class="section">
+
+- [Resource](#RESOURCE_REPRESENTATION)
+- [Methods](#METHODS_SUMMARY)
+
+<div id="RESOURCE_REPRESENTATION" class="section">
+
+## Resource
+
+There is no persistent data associated with this resource.
+
+</div>
+
+<div id="METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | Submit a query to be processed in the background. |
+| get | Get query status If the query is still in progress, the state is set to "running" After the query has completed successfully, state is set to "completed" |
+| getResult | After the query is completed, use this API to retrieve the results. |
+| getResulturl | After the query is completed, use this API to retrieve the results. |
+| list | Return a list of Asynchronous Queries |
+
+</div>
+
+</div>

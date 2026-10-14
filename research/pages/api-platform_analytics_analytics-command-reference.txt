@@ -1,0 +1,1406 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+This document provides examples of using the Apigee metrics API based on specific criteria. This is not a comprehensive reference.
+
+For more information, see:
+
+- [Metrics API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.stats/get)
+- [Analytics metrics, dimensions, and filters reference](/apigee/docs/api-platform/analytics/analytics-reference)
+- [Getting started using the Apigee API](/apigee/docs/api-platform/get-started/api-get-started)
+
+**Note**: If you are a Pay-as-you-go customer, you must enable the Apigee API Analytics add-on in your eligible environments to use this API. If the Apigee API Analytics add-on is not enabled, you will see an error that you are unable to access this API. For more information, see [Manage the Apigee API Analytics add-on](/apigee/docs/api-platform/reference/manage-analytics-add-on).
+
+In the following examples:
+
+- `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in the examples, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of the environment variables used, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+- [`apiproxy`](/apigee/docs/api-platform/analytics/analytics-reference#apiproxy) is the internal name (not the display name) of the API proxy.
+- [`developer`](/apigee/docs/api-platform/analytics/analytics-reference#developer) is the unique Apigee-generated developer ID of the form `org_name@@@unique_id`.
+- [`developer_app`](/apigee/docs/api-platform/analytics/analytics-reference#developer_app) is the Apigee-registered developer app making API calls.
+- [`api_product`](/apigee/docs/api-platform/analytics/analytics-reference#api_product) is the name of the API product containing the API proxies being called. .
+
+## API analytics commands
+
+### Request counts by API proxy
+
+Requests by API proxy
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=sum(message_count)&timeRange=9/24/2019+00:00~10/25/2019+00:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response time by API proxy
+
+Avg. Total Response Time by API proxy
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=avg(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Total Response Time by API proxy
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=max(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Total Response Time by API proxy
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=min(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Avg. Target Response Time by API proxy
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=avg(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Target Response Time by API proxy
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=max(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Target Response Time by API proxy
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=min(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Errors by API proxy
+
+Errors by API
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=sum(is_error)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Request/response size by API
+
+Max Request Size by API
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=max(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Min Request Size by API
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=min(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Avg Request Size by API
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=avg(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Max Response Size by API
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=max(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Min Response Size by API
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=min(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Avg Response Size by API
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=avg(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+### Request/response latency by API
+
+Avg. Response Processing Latency by API
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=avg(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Max Response Processing Latency by API
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=max(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Min Response Processing Latency by API
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=min(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Avg. Request Processing Latency by API
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=avg(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Max Request Processing Latency by API
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=max(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Min Request Processing Latency by API
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?select=min(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+## Developer analytics commands
+
+### App/User/Request counts by developer
+
+App count by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=app_count&timeRange=9/24/2014%2000:00~10/25/2014%2000:00&timeUnit=day \
+```
+
+End User count by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/<$ORG/environments/$ENV/stats/developer?select=user_count&timeRange=9/24/2014%2000:00~10/25/2014%2000:00&timeUnit=day \
+```
+
+Requests by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=sum(message_count)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+### Response time by developer
+
+Avg. Total Response Time by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=avg(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Max Total Response Time by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=max(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Min Total Response Time by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=min(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Avg. Target Response Time by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=avg(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Max Target Response Time by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=max(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Min Target Response Time by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=min(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+### Errors by developer
+
+Errors by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=sum(is_error)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+### Request/response size by developer
+
+Max Request Size by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=max(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Min Request Size by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=min(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Avg Request Size by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=avg(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Max Response Size by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=max(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Min Response Size by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=min(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Avg Response Size by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=avg(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+### Request/response latency by developer
+
+Avg. Response Processing Latency by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=avg(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Max Response Processing Latency by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=max(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Min Response Processing Latency by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=min(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Avg. Request Processing Latency by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=avg(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Min Request Processing Latency by Developers
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer?select=min(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+## App analytics commands
+
+### User/Request counts by app
+
+User count by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=user_count&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Requests by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=sum(message_count)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+### Response time by app
+
+Avg. Total Response Time by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=avg(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Max Total Response Time by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=max(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Min Total Response Time by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=min(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Avg. Target Response Time by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=avg(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Max Target Response Time by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=max(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+Min Target Response Time by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=min(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+```
+
+### Errors by app
+
+Errors by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=sum(is_error)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Request/response size by app
+
+Max Request Size by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=max(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Request Size by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=min(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Avg Request Size by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=avg(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Response Size by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=max(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Response Size by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=min(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Avg Response Size by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=avg(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Request/response latency by app
+
+Avg. Response Processing Latency by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=avg(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Response Processing Latency by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=max(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Response Processing Latency by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=min(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Avg. Request Processing Latency by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=avg(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Request Processing Latency by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=max(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Request Processing Latency by Apps
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?select=min(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+## API product analytics commands
+
+### App/Developer/Request counts by API product
+
+App count by API Products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=app_count&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Developer count by API Products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=developer_count&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Requests by Products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=sum(message_count)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response time by API product
+
+Avg. Total Response Time API products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=avg(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Total Response Time API products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=max(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Total Response Time API products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=min(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Avg. Target Response Time API products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=avg(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Target Response Time API products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=max(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Target Response Time API products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=min(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Errors by API product
+
+Errors by API Products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=sum(is_error)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Request/response size by API product
+
+Max Request Size by API Products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=max(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Request Size by API Products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=min(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Avg Request Size by API Products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=avg(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Response Size by API Products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=max(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+MIn Response Size by API Products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=min(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Avg Response Size by API Products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=avg(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Request/response latency by API product
+
+Avg. Response Processing Latency by API products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=avg(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Response Processing Latency by API products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=max(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Response Processing Latency by API products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=min(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Avg. Request Processing Latency by API products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=avg(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Request Processing Latency by API products
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/api_product?select=min(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+## API resource analytics commands
+
+### Request counts by API resource
+
+Requests by API Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=sum(message_count)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response time by API resource
+
+Avg. Total Response Time by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=avg(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Total Response Time by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=max(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Total Response Time by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=min(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Avg. Target Response Time by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=avg(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Target Response Time by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=max(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Target Response Time by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=min(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Errors by API resource
+
+Errors by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=sum(is_error)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Request/response size by API resource
+
+Max Request Size by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=max(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Request Size by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=min(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Avg Request Size by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=avg(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Response Size by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=max(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Response Size by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=min(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Avg Response Size by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=avg(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Request/response latency by API resource
+
+Avg. Response Processing Latency by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=avg(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Response Processing Latency by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=max(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Response Processing Latency by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=min(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Avg. Request Processing Latency by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=avg(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Request Processing Latency by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=max(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Request Processing Latency by API-Resource
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/request_path?select=min(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+## API program-wide analytics commands
+
+### Request counts
+
+Requests over Time
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats?select=sum(message_count)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Response time
+
+Average Total Response Time
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=avg(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Total Response Time
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=max(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Total Response Time
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=min(total_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Average Target Response Time
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=avg(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Target Response Time
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=max(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Target Response Time
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=min(target_response_time)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Errors
+
+Errors over Time
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=sum(is_error)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Request/response size
+
+Max Request Size over Time
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=min(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Request Size over Time
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=min(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Avg Request Size over Time
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=avg(request_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Response Size over Time
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=min(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Response Size over Time
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=min(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Avg Response Size over Time
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=avg(response_size)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Request/response latency
+
+Avg. Response Processing Latency
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=avg(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Response Processing Latency
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=max(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Response Processing Latency
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=min(response_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Average Request Processing Latency
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=avg(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Max Request Processing Latency
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=max(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Min Request Processing Latency
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=min(request_processing_latency)&timeRange=9/24/2018%2000:00~10/25/2018%2000:00&timeUnit=day \
+  -H "Authorization: Bearer $TOKEN"
+```

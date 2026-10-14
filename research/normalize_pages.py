@@ -23,9 +23,11 @@ import argparse
 import re
 import sys
 from pathlib import Path
+from typing import cast
 
 try:
     from bs4 import BeautifulSoup
+    from bs4.element import Tag
 except ImportError:
     print("beautifulsoup4 is required: pip install beautifulsoup4", file=sys.stderr)
     raise SystemExit(2)
@@ -33,7 +35,7 @@ except ImportError:
 PAGES = Path(__file__).parent / "pages"
 
 
-def cell_text(node) -> str:
+def cell_text(node: Tag) -> str:
     text = node.get_text(" ", strip=True)
     text = re.sub(r"\s+", " ", text)
     # Pipes would break the Markdown row, so escape rather than drop.
@@ -42,7 +44,7 @@ def cell_text(node) -> str:
 
 def html_table_to_md(table_html: str) -> str | None:
     soup = BeautifulSoup(table_html, "html.parser")
-    rows = []
+    rows: list[list[str]] = []
     for tr in soup.find_all("tr"):
         cells = tr.find_all(["th", "td"])
         if not cells:
@@ -73,7 +75,7 @@ def html_table_to_md(table_html: str) -> str | None:
 def convert(text: str) -> tuple[str, int]:
     count = 0
 
-    def repl(m: re.Match) -> str:
+    def repl(m: re.Match[str]) -> str:
         nonlocal count
         md = html_table_to_md(m.group(0))
         if md is None:
@@ -91,16 +93,19 @@ def convert(text: str) -> tuple[str, int]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dry", action="store_true")
-    ap.add_argument("--quiet", action="store_true",
-                    help="normalise specific files passed as arguments, report nothing")
-    ap.add_argument("files", nargs="*", help="specific page files to normalise")
+    _ = ap.add_argument("--dry", action="store_true")
+    _ = ap.add_argument("--quiet", action="store_true",
+                        help="normalise specific files passed as arguments, report nothing")
+    _ = ap.add_argument("files", nargs="*", help="specific page files to normalise")
     args = ap.parse_args()
+    files = cast(list[str], args.files)
+    quiet = cast(bool, args.quiet)
+    dry = cast(bool, args.dry)
 
-    if args.files:
-        changed = []
+    if files:
+        changed_files: list[str] = []
         total_tables = 0
-        for name in args.files:
+        for name in files:
             path = Path(name)
             if not path.is_file():
                 continue
@@ -110,13 +115,13 @@ def main() -> int:
             new, n = convert(text)
             if n and new != text:
                 total_tables += n
-                path.write_text(new, encoding="utf-8")
-                changed.append(path.name)
-        if not args.quiet:
-            print(f"normalised {total_tables} tables in {len(changed)} file(s)")
+                _ = path.write_text(new, encoding="utf-8")
+                changed_files.append(path.name)
+        if not quiet:
+            print(f"normalised {total_tables} tables in {len(changed_files)} file(s)")
         return 0
 
-    changed = []
+    changed: list[tuple[str, int]] = []
     total_tables = 0
 
     for p in sorted(PAGES.glob("*.txt")):
@@ -127,17 +132,17 @@ def main() -> int:
         if n and new != text:
             total_tables += n
             changed.append((p.name, n))
-            if not args.dry:
-                p.write_text(new, encoding="utf-8")
+            if not dry:
+                _ = p.write_text(new, encoding="utf-8")
 
     print(f"converted {total_tables} HTML tables across {len(changed)} pages")
-    if args.dry:
+    if dry:
         print("(dry run, nothing written)")
     else:
         print("files updated")
 
     # Report what is still HTML, so a remaining gap is visible rather than assumed.
-    residual = []
+    residual: list[tuple[str, int]] = []
     for p in sorted(PAGES.glob("*.txt")):
         text = p.read_text(encoding="utf-8", errors="replace")
         n = len(re.findall(r"<table\b", text, re.IGNORECASE))

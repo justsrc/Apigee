@@ -29,6 +29,7 @@ import argparse
 import json
 import re
 from pathlib import Path
+from typing import cast
 
 SCEN = Path(__file__).resolve().parent.parent / "scenarios"
 
@@ -38,26 +39,29 @@ BLOCK_RE = re.compile(r"```json\n(\{.*?\})\n```", re.DOTALL)
 
 def convert(block: str) -> tuple[str, list[str]]:
     try:
-        obj = json.loads(block)
+        loaded = cast("object", json.loads(block))
     except json.JSONDecodeError:
         return f"```json\n{block}\n```", []
-    if not isinstance(obj, dict) or "fault" in obj:
+    if not isinstance(loaded, dict) or "fault" in loaded:
         # Already in the documented nested shape. Return the block unchanged, still
         # fenced, so the caller's comparison is against a like-for-like value.
         return f"```json\n{block}\n```", []
-    if "errorcode" not in obj:
+    if "errorcode" not in loaded:
         return f"```json\n{block}\n```", []
 
+    obj = cast("dict[str, str]", loaded)
     code = obj["errorcode"]
     faultstring = obj.get("faultstring")
     faultname = obj.get("faultname")
     status = obj.get("status")
 
-    new: dict = {"fault": {"detail": {"errorcode": code}}}
+    detail: dict[str, object] = {"errorcode": code}
+    fault: dict[str, object] = {"detail": detail}
+    new: dict[str, object] = {"fault": fault}
     if faultstring:
-        new["fault"]["faultstring"] = faultstring
+        fault["faultstring"] = faultstring
 
-    notes = []
+    notes: list[str] = []
     if status:
         notes.append(f"HTTP {status}")
     if faultname and faultname != code.split(".")[-1]:
@@ -76,8 +80,9 @@ def convert(block: str) -> tuple[str, list[str]]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dry", action="store_true")
+    _ = ap.add_argument("--dry", action="store_true")
     args = ap.parse_args()
+    dry = cast(bool, args.dry)
 
     total = 0
     for path in sorted(SCEN.glob("*.md")):
@@ -86,7 +91,7 @@ def main() -> int:
             continue
         count = 0
 
-        def repl(m: re.Match) -> str:
+        def repl(m: re.Match[str]) -> str:
             nonlocal count
             new_block, _notes = convert(m.group(1))
             # convert() is handed the inner JSON but returns a full fenced block, so
@@ -100,14 +105,14 @@ def main() -> int:
             return new_block
 
         updated = BLOCK_RE.sub(repl, text)
-        if count and not args.dry:
-            path.write_text(updated, encoding="utf-8")
+        if count and not dry:
+            _ = path.write_text(updated, encoding="utf-8")
         total += count
         if count:
-            verb = "would fix" if args.dry else "fixed"
+            verb = "would fix" if dry else "fixed"
             print(f"  {path.name}: {verb} {count} payload(s)")
 
-    print(f"{'would fix' if args.dry else 'fixed'} {total} payloads total")
+    print(f"{'would fix' if dry else 'fixed'} {total} payloads total")
     if not total:
         print("nothing to do; no flat error payloads remain")
     return 0

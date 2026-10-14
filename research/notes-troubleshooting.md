@@ -18,12 +18,12 @@ This affects three of the four pages the task brief asked for by name.
 
 | Title | URL | HTTP | bytes |
 | --- | --- | --- | --- |
-| Handling faults | https://cloud.google.com/apigee/docs/api-platform/fundamentals/fault-handling | 200 | 63471 |
-| What you need to know about policy errors | https://cloud.google.com/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors | 200 | 8728 |
-| What are flows | https://cloud.google.com/apigee/docs/api-platform/fundamentals/what-are-flows | 200 | 13581 |
-| Flow variables and conditions | https://cloud.google.com/apigee/docs/api-platform/fundamentals/flow-variables-and-conditions | 200 | 41594 |
-| Policy error reference | https://cloud.google.com/apigee/docs/api-platform/reference/policies/error-code-reference | 200 | 2312 |
-| Policy reference overview | https://cloud.google.com/apigee/docs/api-platform/reference/policies/reference-overview-policy | 200 | 3453 |
+| Handling faults | <https://cloud.google.com/apigee/docs/api-platform/fundamentals/fault-handling> | 200 | 63471 |
+| What you need to know about policy errors | <https://cloud.google.com/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors> | 200 | 8728 |
+| What are flows | <https://cloud.google.com/apigee/docs/api-platform/fundamentals/what-are-flows> | 200 | 13581 |
+| Flow variables and conditions | <https://cloud.google.com/apigee/docs/api-platform/fundamentals/flow-variables-and-conditions> | 200 | 41594 |
+| Policy error reference | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/error-code-reference> | 200 | 2312 |
+| Policy reference overview | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/reference-overview-policy> | 200 | 3453 |
 
 ### Policy runtime error playbooks (`api-platform/troubleshoot/policies/runtime/*`)
 
@@ -94,13 +94,13 @@ infrastructure playbook index, a different thing.
 
 | Title | URL | HTTP | bytes |
 | --- | --- | --- | --- |
-| Debug tool overview | https://cloud.google.com/apigee/docs/api-platform/debug/trace-overview | 200 | 5753 |
-| Trace tool | https://cloud.google.com/apigee/docs/api-platform/debug/trace | 200 | 25079 |
-| Offline trace | https://cloud.google.com/apigee/docs/api-platform/debug/offline-trace | 200 | 3609 |
-| Health check | https://cloud.google.com/apigee/docs/api-platform/debug/health-check | 200 | 11611 |
-| Audit logging | https://cloud.google.com/apigee/docs/api-observation/audit-logging | 200 | 13878 |
-| **API Monitoring fault codes** | https://cloud.google.com/apigee/docs/api-monitoring/fault-codes | 200 | 19954 |
-| Investigate (API Monitoring) | https://cloud.google.com/apigee/docs/api-monitoring/investigate | 200 | 6471 |
+| Debug tool overview | <https://cloud.google.com/apigee/docs/api-platform/debug/trace-overview> | 200 | 5753 |
+| Trace tool | <https://cloud.google.com/apigee/docs/api-platform/debug/trace> | 200 | 25079 |
+| Offline trace | <https://cloud.google.com/apigee/docs/api-platform/debug/offline-trace> | 200 | 3609 |
+| Health check | <https://cloud.google.com/apigee/docs/api-platform/debug/health-check> | 200 | 11611 |
+| Audit logging | <https://cloud.google.com/apigee/docs/api-observation/audit-logging> | 200 | 13878 |
+| **API Monitoring fault codes** | <https://cloud.google.com/apigee/docs/api-monitoring/fault-codes> | 200 | 19954 |
+| Investigate (API Monitoring) | <https://cloud.google.com/apigee/docs/api-monitoring/investigate> | 200 | 6471 |
 
 ### Reference pages
 
@@ -462,7 +462,7 @@ conditions page's own examples, e.g. `<Condition>request.path MatchesPath "/stat
 Collected from the `"errorcode"` fields in the fetched runtime playbooks. These are the codes
 the playbooks actually diagnose:
 
-```
+```text
 policies.ratelimit.FailedToResolveQuotaIntervalReference
 policies.ratelimit.FailedToResolveQuotaIntervalTimeUnitReference
 policies.ratelimit.FailedToResolveSpikeArrestRate
@@ -570,7 +570,7 @@ The troubleshooting playbooks then split the *symptom*:
   containing a JSON `{"fault": {...}}` object.
 - Deployment playbook sections are headed `### Error message` followed by plain text of the form:
 
-```
+```text
 Error Saving Revision [revision_number]
 Invalid spike arrest rate [invalid_rate].
 ```
@@ -619,7 +619,9 @@ deploy-time error surface.
 — `.../reference/policies/verify-api-key-policy`
 
 **RaiseFault.** The degenerate case that proves the split:
+
 > ### Deployment errors
+>
 > None.
 
 Its only runtime error is `steps.raisefault.RaiseFault` = `500`.
@@ -698,6 +700,7 @@ Confirmed namespaces: `ratelimit` (Quota, SpikeArrest), `oauthV2` (VerifyAPIKey)
     <Condition>fault.name = "FailedToResolveAPIKey"</Condition>
 </FaultRule>
 ```
+
 — `.../fundamentals/fault-handling`
 
 The Step-level condition uses the `.failed` flag; the outer rule condition uses `fault.name`.

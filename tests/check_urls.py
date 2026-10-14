@@ -54,7 +54,8 @@ import time
 from collections import Counter
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
-from urllib.parse import urlsplit, urlunsplit, unquote
+from typing import Protocol, TypedDict, cast
+from urllib.parse import urlsplit, unquote
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -122,7 +123,8 @@ def strip_fences(text: str) -> str:
     A citation lives in prose. A URL inside a code sample is part of a string literal, and
     extracting it produced a citation with a trailing apostrophe that broke the fetch.
     """
-    out, fenced = [], False
+    out: list[str] = []
+    fenced = False
     for line in text.splitlines():
         if re.match(r"^\s*(```|~~~)", line):
             fenced = not fenced
@@ -135,7 +137,7 @@ def strip_fences(text: str) -> str:
 URL_RE = re.compile(r"https?://[^\s\)\]\"'`>]+")
 
 
-def discover(targets: list[str]) -> tuple[list[str], Counter]:
+def discover(targets: list[str]) -> tuple[list[str], Counter[str]]:
     """Return (sorted unique URLs, per-URL occurrence counts)."""
     chunks: list[str] = []
     for t in targets:
@@ -150,9 +152,9 @@ def discover(targets: list[str]) -> tuple[list[str], Counter]:
             print(f"WARNING target does not exist, nothing read from it: {t}",
                   file=sys.stderr)
 
-    counts: Counter = Counter()
+    counts: Counter[str] = Counter()
     for chunk in chunks:
-        for raw in URL_RE.findall(chunk):
+        for raw in cast(list[str], URL_RE.findall(chunk)):
             url = raw.rstrip("'\".,;")
             if PLACEHOLDER_RE.search(url):
                 continue
@@ -279,7 +281,7 @@ def classify(url: str, code: int | None, body: str, chain: list[str]) -> Result:
     if code in (401, 403):
         res.status = "ACCESS_RESTRICTED"
         res.detail = f"HTTP {code}: the origin refused the fetch, which is not evidence "\
-                     f"the document is missing"
+                     + "the document is missing"
         return res
 
     if code >= 500:
@@ -335,6 +337,14 @@ def classify(url: str, code: int | None, body: str, chain: list[str]) -> Result:
 # ---------------------------------------------------------------------------
 
 
+class _StackExchangeItem(TypedDict, total=False):
+    title: str
+
+
+class _StackExchangeResponse(TypedDict, total=False):
+    items: list[_StackExchangeItem]
+
+
 def verify_stackexchange(url: str, code: int) -> Result:
     res = Result(url=url, status="ACCESS_RESTRICTED", http=code)
     m = re.search(r"/questions/(\d+)", url)
@@ -346,9 +356,9 @@ def verify_stackexchange(url: str, code: int) -> Result:
         proc = subprocess.run(
             ["curl", "-sL", "--max-time", "20",
              f"https://api.stackexchange.com/2.3/questions/{qid}"
-             "?site=stackoverflow&filter=default"],
+             + "?site=stackoverflow&filter=default"],
             capture_output=True, text=True, timeout=30)
-        payload = json.loads(proc.stdout or "{}")
+        payload = cast(_StackExchangeResponse, json.loads(proc.stdout or "{}"))
         items = payload.get("items") or []
         if items:
             res.status = "VERIFIED"
@@ -418,14 +428,23 @@ def with_retries(urls: list[str], workers: int, retries: int) -> list[Result]:
 # ---------------------------------------------------------------------------
 
 
-FIXTURES: list[dict] = [
+class _Fixture(TypedDict):
+    name: str
+    url: str
+    code: int | None
+    chain: list[str]
+    body: str
+    expect: str
+
+
+FIXTURES: list[_Fixture] = [
     {
         "name": "genuine-documentation-page",
         "url": "https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy",
         "code": 200,
         "chain": [],
         "body": "<html><head><title>Quota policy | Apigee docs</title></head><body>"
-                "<h1>Quota policy</h1><p>quota-policy</p></body></html>",
+                + "<h1>Quota policy</h1><p>quota-policy</p></body></html>",
         "expect": "VERIFIED",
     },
     {
@@ -434,7 +453,7 @@ FIXTURES: list[dict] = [
         "code": 200,
         "chain": [],
         "body": "<html><head><title>Apigee docs</title></head><body>"
-                "<div>The equivalent page does not exist in Apigee.</div></body></html>",
+                + "<div>The equivalent page does not exist in Apigee.</div></body></html>",
         "expect": "SOFT_404",
     },
     {
@@ -499,7 +518,7 @@ FIXTURES: list[dict] = [
         "code": 200,
         "chain": [],
         "body": "<html><head><title>SpikeArrest policy</title></head>"
-                "<body>This page explains rate limiting with SpikeArrest.</body></html>",
+                + "<body>This page explains rate limiting with SpikeArrest.</body></html>",
         "expect": "CONTENT_MISMATCH",
     },
     {
@@ -530,8 +549,8 @@ FIXTURES: list[dict] = [
         "code": 200,
         "chain": [],
         "body": "<html><head><title>Quota policy</title></head><body>quota-policy"
-                "<script>var f={DevPro__enable_devsite_captcha:false};</script>"
-                "</body></html>",
+                + "<script>var f={DevPro__enable_devsite_captcha:false};</script>"
+                + "</body></html>",
         "expect": "VERIFIED",
     },
     {
@@ -540,7 +559,7 @@ FIXTURES: list[dict] = [
         "code": 200,
         "chain": [],
         "body": "<html><body>Our systems have detected unusual traffic from your "
-                "computer network. Please try your request again later.</body></html>",
+                + "computer network. Please try your request again later.</body></html>",
         "expect": "RATE_LIMITED",
     },
     {
@@ -564,7 +583,7 @@ def run_fixtures() -> int:
         ok = got == fx["expect"]
         bad += 0 if ok else 1
         print(f"  {'ok  ' if ok else 'FAIL'} {fx['name']:<38} "
-              f"expected {fx['expect']:<26} got {got}")
+              + f"expected {fx['expect']:<26} got {got}")
     print()
     print(f"{len(FIXTURES) - bad}/{len(FIXTURES)} fixtures classified correctly")
     return 1 if bad else 0
@@ -573,15 +592,23 @@ def run_fixtures() -> int:
 # ---------------------------------------------------------------------------
 
 
+class _Args(Protocol):
+    paths: list[str]
+    fixtures: bool
+    json: bool
+    workers: int
+    retries: int
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("paths", nargs="*", help="files or directories to read")
-    ap.add_argument("--fixtures", action="store_true",
-                    help="run the offline classifier fixtures and exit")
-    ap.add_argument("--json", action="store_true")
-    ap.add_argument("--workers", type=int, default=8)
-    ap.add_argument("--retries", type=int, default=RETRIES)
-    args = ap.parse_args()
+    _ = ap.add_argument("paths", nargs="*", help="files or directories to read")
+    _ = ap.add_argument("--fixtures", action="store_true",
+                        help="run the offline classifier fixtures and exit")
+    _ = ap.add_argument("--json", action="store_true")
+    _ = ap.add_argument("--workers", type=int, default=8)
+    _ = ap.add_argument("--retries", type=int, default=RETRIES)
+    args = cast(_Args, cast(object, ap.parse_args()))
 
     if args.fixtures:
         return run_fixtures()
@@ -593,12 +620,12 @@ def main() -> int:
         # A URL audit that found nothing to check has verified nothing. Exiting 0 here is
         # how the first version of this checker reported a pass having checked zero URLs.
         print("ERROR: no URLs found in the given targets. A URL audit with no inputs is "
-              "not a passing audit.")
+              + "not a passing audit.")
         print(f"targets read: {', '.join(targets)}")
         return 2
 
     print(f"auditing {len(urls)} unique URLs from {sum(counts.values())} citation "
-          f"occurrences in: {', '.join(targets)}")
+          + f"occurrences in: {', '.join(targets)}")
 
     results = with_retries(urls, args.workers, args.retries)
     for r in results:
@@ -638,14 +665,14 @@ def main() -> int:
 
     if failing:
         print(f"\nRESULT: FAIL, {len(failing)} of {len(urls)} URLs are broken, are a "
-              f"soft 404, or could not be confirmed")
+              + "soft 404, or could not be confirmed")
         return 1
     if env:
         print(f"\nRESULT: PASS with {len(env)} URL(s) unverifiable from this environment. "
-              f"Those are not confirmed citations.")
+              + "Those are not confirmed citations.")
         return 0
     print(f"\nRESULT: PASS, all {len(urls)} unique URLs verified "
-          f"({sum(counts.values())} citation occurrences)")
+          + f"({sum(counts.values())} citation occurrences)")
     return 0
 
 

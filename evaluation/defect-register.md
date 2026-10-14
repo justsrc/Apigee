@@ -193,7 +193,7 @@ while the check enforces the prefix.
 
 ---
 
-## Open items accepted with reason
+## Open items accepted with reason (D-001–D-012)
 
 ---
 
@@ -214,7 +214,7 @@ same held for `steps.oauth.v2.invalid_request-authorization_code_invalid`.
 
 **Reproduction.**
 
-```
+```text
 cd /Users/justinjacob/Projects/Work/Apigee
 grep 'invalid_access_token' research/pages/api-platform_reference_policies_get-oauth-v2-info-policy.txt
 # `steps.oauth.v2.invalid_access_token` | `500` | ...
@@ -245,7 +245,7 @@ rather than being resolved by sort order.
 
 **What failed.** Both headings were jammed onto a horizontal rule:
 
-```
+```text
 ---### MED-32. Six requests admitted where three per minute is configured
 ```
 
@@ -255,7 +255,7 @@ packets, and appeared in no index. They are not headings in rendered Markdown ei
 
 **Reproduction.** Count scenarios the way the tooling does versus the way a reader does:
 
-```
+```text
 grep -c '^### ' scenarios/medium.md            # 45 headings
 grep -c '^---###' scenarios/medium.md          # 2 more, invisible to every tool
 ```
@@ -512,7 +512,7 @@ Tracked so a 65%-redirected citation set is not mistaken for a clean one.
 
 ---
 
-## Open items accepted with reason
+## Open items accepted with reason (D-013 and later)
 
 | ID | Item | Why accepted |
 | --- | --- | --- |
@@ -524,6 +524,7 @@ Tracked so a 65%-redirected citation set is not mistaken for a clean one.
 | D-025 | `docs.apigee.com` Edge slugs carry the release, so a page verified at one release 404s at another | Real and unavoidable. Recorded in `notes-known-404.txt`; the OPDK skills pin a release. |
 | D-026 | The known-issues register contains no OPDK entries | By design: it scopes itself to "Apigee and Apigee hybrid". Recorded in `evaluation/source-notes-opdk-knownissues.md` rather than worked around. |
 | D-027 | Two current official pages contradict each other on load-balanced target rotation | Unresolvable from the sources. Both statements are recorded verbatim in `evaluation/source-conflicts-loadbalancing.md`; neither is chosen. |
+
 ---
 
 ## Audit of medium.md, MED-01 through MED-22

@@ -27,12 +27,12 @@ import argparse
 import hashlib
 import json
 import os
-import re
 import subprocess
 import sys
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import NotRequired, TypedDict, cast
 
 ROOT = Path(__file__).resolve().parents[3]
 RUN = ROOT / "evaluation" / "results" / "run-3"
@@ -50,6 +50,91 @@ STATUSES = ["NOT_STARTED", "TURN1_COMPLETE", "TURN2_COMPLETE", "AWAITING_GRADE",
             "GRADED", "UNSCORABLE", "BLOCKED_BY_INFRASTRUCTURE"]
 
 
+class Turn(TypedDict):
+    at: str
+    model: str
+    session_id: str | None
+    prompt_sha256: str
+    response_sha256: str
+    chars: int
+    raw: str
+    attempts: int
+
+
+class Request(TypedDict):
+    sid: str
+    turn: int
+    attempt: int
+    at: str
+    status: str | None
+    error_type: str | None
+
+
+class BudgetWindow(TypedDict):
+    attempts: int
+    quota_exhausted: bool
+    requests: list[Request]
+
+
+class Budget(TypedDict):
+    max_attempts_per_window: int
+    windows: dict[str, BudgetWindow]
+
+
+class Scenario(TypedDict):
+    status: str
+    turns: dict[str, Turn]
+    attempts: int
+    error: str | None
+
+
+class Manifest(TypedDict):
+    run: str
+    protocol: str
+    created: str
+    model: str | None
+    budget: Budget
+    scenarios: dict[str, Scenario]
+
+
+class ResponseEntry(TypedDict):
+    turn: int
+    attempt: int
+    at: str
+    exit: int
+    seconds: float
+    error_type: str | None
+    prompt_sha256: str
+    bytes_out: int
+    status: NotRequired[str]
+    error: NotRequired[str]
+
+
+class EventPart(TypedDict, total=False):
+    type: str
+    text: str
+
+
+class EventError(TypedDict, total=False):
+    type: str
+    message: str
+
+
+class Event(TypedDict, total=False):
+    sessionID: str
+    type: str
+    part: EventPart
+    error: EventError
+
+
+class Args(argparse.Namespace):
+    list: bool = False
+    model: str = "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free"
+    batch: int = 5
+    timeout: int = 600
+    only: list[str] = []
+
+
 def scenarios() -> list[str]:
     """Every scenario ID, in suite order, from the generated turn-one packets."""
     return sorted(p.name[:-len(".prompt.md")]
@@ -65,10 +150,10 @@ def window_key(d: datetime) -> str:
     return d.strftime("%Y-%m-%d 05:30->05:29 IST")
 
 
-def load() -> dict:
+def load() -> Manifest:
     if MANIFEST.exists():
-        return json.loads(MANIFEST.read_text(encoding="utf-8"))
-    m = {
+        return cast("Manifest", json.loads(MANIFEST.read_text(encoding="utf-8")))
+    m: Manifest = {
         "run": "run-3",
         "protocol": "evaluation/results/run-3/PROTOCOL.md",
         "created": now_ist().isoformat(),
@@ -84,14 +169,14 @@ def load() -> dict:
     return m
 
 
-def save(m: dict) -> None:
+def save(m: Manifest) -> None:
     RUN.mkdir(parents=True, exist_ok=True)
     tmp = MANIFEST.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(m, indent=2) + "\n", encoding="utf-8")
-    tmp.replace(MANIFEST)
+    _ = tmp.write_text(json.dumps(m, indent=2) + "\n", encoding="utf-8")
+    _ = tmp.replace(MANIFEST)
 
 
-def window(m: dict) -> dict:
+def window(m: Manifest) -> BudgetWindow:
     k = window_key(now_ist())
     return m["budget"]["windows"].setdefault(
         k, {"attempts": 0, "quota_exhausted": False, "requests": []})
@@ -107,22 +192,25 @@ def parse_events(raw: str) -> tuple[str, str | None, str | None, str | None]:
     The session id comes from the event stream. It is what makes turn 2 continue the
     turn-1 conversation instead of starting over.
     """
-    text, etype, emsg, sid = [], None, None, None
+    text: list[str] = []
+    etype: str | None = None
+    emsg: str | None = None
+    sid: str | None = None
     for line in raw.splitlines():
         line = line.strip()
         if not line:
             continue
         try:
-            d = json.loads(line)
+            d = cast("Event", json.loads(line))
         except json.JSONDecodeError:
             continue
         if d.get("sessionID") and not sid:
-            sid = str(d["sessionID"])
-        part = d.get("part") or {}
+            sid = str(d.get("sessionID"))
+        part: EventPart = d.get("part") or {}
         if d.get("type") == "text" and part.get("type") == "text":
             text.append(part.get("text", ""))
         if d.get("type") == "error":
-            err = d.get("error") or {}
+            err: EventError = d.get("error") or {}
             etype = str(err.get("type") or "error")
             emsg = str(err.get("message") or "")
             text.append(emsg)
@@ -131,13 +219,13 @@ def parse_events(raw: str) -> tuple[str, str | None, str | None, str | None]:
 
 def build_ws(ids: list[str]) -> Path:
     out = WS_ROOT / ("ws-" + hashlib.sha256("|".join(ids).encode()).hexdigest()[:10])
-    subprocess.run([sys.executable, "tests/make_eval_workspace.py", "--out", str(out),
-                    "--force"] + sum([["--scenario", i] for i in ids], []),
-                   cwd=ROOT, check=True)
+    scenario_args = [x for i in ids for x in ("--scenario", i)]
+    _ = subprocess.run([sys.executable, "tests/make_eval_workspace.py", "--out", str(out),
+                        "--force", *scenario_args], cwd=ROOT, check=True)
     return out
 
 
-def one_turn(m: dict, sid: str, turn: int, model: str, timeout: int) -> str:
+def one_turn(m: Manifest, sid: str, turn: int, model: str, timeout: int) -> str:
     """Run one turn. Returns the new scenario status."""
     rec = m["scenarios"][sid]
     win = window(m)
@@ -148,10 +236,11 @@ def one_turn(m: dict, sid: str, turn: int, model: str, timeout: int) -> str:
     ws = WS_ROOT / ("ws-" + hashlib.sha256(
         json.dumps(sorted(m["scenarios"])).encode()).hexdigest()[:10])
     if not (ws / "MANIFEST.json").exists():
-        build_ws([sid])
+        _ = build_ws([sid])
 
     # Carried across the two turns of one scenario so turn 2 continues the conversation.
-    session_id = (rec.get("turns", {}).get("turn1") or {}).get("session_id")
+    turn1 = rec["turns"].get("turn1")
+    session_id: str | None = turn1["session_id"] if turn1 else None
     attempt = 0
     while attempt <= 1:  # one retry, never on a quota error
         if win.get("quota_exhausted"):
@@ -191,14 +280,16 @@ def one_turn(m: dict, sid: str, turn: int, model: str, timeout: int) -> str:
         if got_sid and not session_id:
             session_id = got_sid
         RAW.mkdir(parents=True, exist_ok=True)
-        (RAW / f"{sid}.turn{turn}.attempt{attempt}.jsonl").write_text(out, encoding="utf-8")
+        _ = (RAW / f"{sid}.turn{turn}.attempt{attempt}.jsonl").write_text(
+            out, encoding="utf-8")
         if err:
-            (RAW / f"{sid}.turn{turn}.attempt{attempt}.stderr").write_text(err, encoding="utf-8")
+            _ = (RAW / f"{sid}.turn{turn}.attempt{attempt}.stderr").write_text(
+                err, encoding="utf-8")
 
-        entry = {"turn": turn, "attempt": attempt, "at": ts,
-                 "exit": rc, "seconds": round(time.time() - started, 1),
-                 "error_type": etype, "prompt_sha256": sha(packet),
-                 "bytes_out": len(text)}
+        entry: ResponseEntry = {"turn": turn, "attempt": attempt, "at": ts,
+                                "exit": rc, "seconds": round(time.time() - started, 1),
+                                "error_type": etype, "prompt_sha256": sha(packet),
+                                "bytes_out": len(text)}
         win["requests"].append({"sid": sid, "turn": turn, "attempt": attempt,
                                 "at": ts, "status": None, "error_type": etype})
 
@@ -219,11 +310,12 @@ def one_turn(m: dict, sid: str, turn: int, model: str, timeout: int) -> str:
             continue
 
         if not text.strip():
+            no_answer = etype or (err.strip()[:200] if err else "empty response")
             entry["status"] = "NO_ANSWER"
-            entry["error"] = etype or (err.strip()[:200] if err else "empty response")
+            entry["error"] = no_answer
             win["requests"][-1]["status"] = "NO_ANSWER"
             rec["status"] = "BLOCKED_BY_INFRASTRUCTURE"
-            rec["error"] = entry["error"]
+            rec["error"] = no_answer
             save(m)
             return rec["status"]
 
@@ -235,7 +327,7 @@ def one_turn(m: dict, sid: str, turn: int, model: str, timeout: int) -> str:
             "response_sha256": hashlib.sha256(text.encode()).hexdigest(),
             "chars": len(text), "raw": f"raw/{sid}.turn{turn}.attempt{attempt}.jsonl",
             "attempts": attempt}
-        (RAW / f"{sid}.turn{turn}.md").write_text(text, encoding="utf-8")
+        _ = (RAW / f"{sid}.turn{turn}.md").write_text(text, encoding="utf-8")
         rec["status"] = "TURN1_COMPLETE" if turn == 1 else "TURN2_COMPLETE"
         if turn == 2:
             rec["status"] = "AWAITING_GRADE"
@@ -249,12 +341,14 @@ def one_turn(m: dict, sid: str, turn: int, model: str, timeout: int) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--list", action="store_true", help="print progress, spend nothing")
-    ap.add_argument("--model", default="openrouter/nvidia/nemotron-3-ultra-550b-a55b:free")
-    ap.add_argument("--batch", type=int, default=5)
-    ap.add_argument("--timeout", type=int, default=600)
-    ap.add_argument("--only", action="append", default=[])
-    a = ap.parse_args()
+    _ = ap.add_argument("--list", action="store_true",
+                        help="print progress, spend nothing")
+    _ = ap.add_argument("--model",
+                        default="openrouter/nvidia/nemotron-3-ultra-550b-a55b:free")
+    _ = ap.add_argument("--batch", type=int, default=5)
+    _ = ap.add_argument("--timeout", type=int, default=600)
+    _ = ap.add_argument("--only", action="append", default=[])
+    a = ap.parse_args(namespace=Args())
 
     m = load()
     m["model"] = a.model
@@ -268,7 +362,7 @@ def main() -> int:
             print(f"  {k:<28} {v}")
         for wk, w in m["budget"]["windows"].items():
             print(f"  window {wk}: {w['attempts']} attempts, "
-                  f"quota_exhausted={w['quota_exhausted']}")
+                  + f"quota_exhausted={w['quota_exhausted']}")
         pend = [s for s in ids if m["scenarios"][s]["status"] != "AWAITING_GRADE"]
         print(f"  pending in selection: {len(pend)}")
         return 0
@@ -296,7 +390,7 @@ def main() -> int:
     save(m)
     w = window(m)
     print(f"\nwindow {window_key(now_ist())}: {w['attempts']} attempts used "
-          f"(cap {MAX_ATTEMPTS}), quota_exhausted={w['quota_exhausted']}")
+          + f"(cap {MAX_ATTEMPTS}), quota_exhausted={w['quota_exhausted']}")
     from collections import Counter
     c = Counter(r["status"] for r in m["scenarios"].values())
     print("status: " + ", ".join(f"{k}={v}" for k, v in sorted(c.items())))

@@ -19,7 +19,8 @@ dropping them") after the scenarios were written, so all cited line numbers are 
 
 ---
 
-### MED-23 A linter rule demands a cache populate that would break the cache it is protecting
+## MED-23 A linter rule demands a cache populate that would break the cache it is protecting
+
 - Verdict: DEFECT
 - Defect: Two problems.
   (a) Unsupported attribution to the maintainers. The scenario's "Common incorrect answers"
@@ -39,6 +40,7 @@ dropping them") after the scenarios were written, so all cited line numbers are 
   environment." Nothing else.
 
 The substantive technical content is correct and well sourced:
+
 - Default scope `Exclusive` — `api-platform_reference_policies_lookup-cache-policy.txt` line 232:
   `| **Default:** | "Exclusive" |`; line 249 gives the prefix form.
 - Prefix composition as quoted — line 236: "a cache key would take the following form when scope
@@ -50,7 +52,8 @@ The substantive technical content is correct and well sourced:
   deployed in the environment."
 - Unset variable on miss — line 253: "(if no value is retrieved, the variable will not be set)".
 
-### MED-24 A linter release breaks every working rate limit policy in the estate
+## MED-24 A linter release breaks every working rate limit policy in the estate
+
 - Verdict: OK
 - Defect: n/a
 - Severity: n/a
@@ -64,7 +67,8 @@ The substantive technical content is correct and well sourced:
   v2.77.1 release, and reporter confirmation 23 minutes after filing
   (CREATED 00:01:28Z, CLOSED 00:24:23Z).
 
-### MED-25 The linter says a quota is used twice, and the quota is used once per request
+## MED-25 The linter says a quota is used twice, and the quota is used once per request
+
 - Verdict: DEFECT
 - Defect: Stale index citation. The scenario and the fault-code ledger both say
   `policies.ratelimit.QuotaViolation` is "verified at `error-codes.md` line 42". It is on line
@@ -74,13 +78,15 @@ The substantive technical content is correct and well sourced:
   `| \`policies.ratelimit.QuotaViolation\` | 500 | The quota limit was exceeded. | [quota-policy](...) |`
 
 Everything substantive is correct and matches the real thread:
+
 - research/issues/apigee_apigeelint-168.txt: maintainer ssvaidyanathan 2023-03-11 — "Released
   v2.36.0 with a fix for this... It looks for the policy and checks if its across flows or across
   ProxyEndpoint or TargetEndpoint. If its within the same flow, it checks if the Condition tag is
   same." Two reporter confirmations 2023-03-14. Matches the scenario's three-way description
   (different flows / different endpoints / different `<Condition>`).
 
-### MED-26 A deployment fails with a Java callout error, and the build tool corrupted the artifact
+## MED-26 A deployment fails with a Java callout error, and the build tool corrupted the artifact
+
 - Verdict: DEFECT
 - Defect: **The scenario contradicts the page it cites, twice, on the meaning of the fault code.**
   (a) "Expected investigation": *"`JavaCalloutInstantiationFailed` means the class was found but
@@ -98,10 +104,10 @@ Everything substantive is correct and matches the real thread:
   error name** with an "N/A" HTTP status, not a `steps.`-prefixed fault code.
 - Severity: critical
 - Evidence: research/pages/api-platform_reference_policies_java-callout-policy.txt line 231:
-  `| \`JavaCalloutInstantiationFailed\` | \`Failed to instantiate the JavaCallout Class
-  [classname]\` | N/A | The class file specified in the \`<ClassName>\` element is not in the jar. |`
-  and line 230: `| \`ResourceDoesNotExist\` | ... | N/A | The file specified in the
-  \`<ResourceURL>\` element does not exist. |`. Line 222 shows the only `steps.javacallout.*` code
+  ``| `JavaCalloutInstantiationFailed` | `Failed to instantiate the JavaCallout Class
+  [classname]` | N/A | The class file specified in the `<ClassName>` element is not in the jar. |``
+  and line 230: ``| `ResourceDoesNotExist` | ... | N/A | The file specified in the
+  `<ResourceURL>` element does not exist. |``. Line 222 shows the only `steps.javacallout.*` code
   is `steps.javacallout.ExecutionError` (500); line 259 shows the example response errorcode is
   `javacallout.ExecutionError`.
 
@@ -113,7 +119,8 @@ successfully." Note the scenario's remediation ("Scope resource filtering to the
 actually contain text templates") also glosses over that modern `maven-resources-plugin` treats
 `.jar` as non-filtered by default; the original poster's case may differ from rad264's.
 
-### MED-27 The deployment tool says it succeeded, and the revision is in ERROR
+## MED-27 The deployment tool says it succeeded, and the revision is in ERROR
+
 - Verdict: OK
 - Defect: n/a
 - Severity: n/a
@@ -128,7 +135,8 @@ actually contain text templates") also glosses over that modern `maven-resources
   the issue I'm dealing with." Fix confirmed on `v1.124.0-beta`; maintainer: "We will release the
   version in a few days as we consolidate other fixes". Duplicate #273 carries label `duplicate`.
 
-### MED-28 Provisioning over mutual TLS succeeds, then the tool fails its own verification
+## MED-28 Provisioning over mutual TLS succeeds, then the tool fails its own verification
+
 - Verdict: DEFECT
 - Defect: The second reference does not support the claim it is attached to. It is captioned
   "Provisioning a tenant with Edge for Private Cloud" but points at the hybrid **upgrade** page
@@ -148,7 +156,8 @@ researcher's own independent source read in research/notes-rw-github.md lines 14
 verifyErrors }` means hybrid prints warnings and exits 0). The scenario's own text correctly
 states the evidence level ("no maintainer has replied, and the thread has zero comments").
 
-### MED-29 The same TLS error, two different causes, and the accepted fix works for one of them
+## MED-29 The same TLS error, two different causes, and the accepted fix works for one of them
+
 - Verdict: DEFECT
 - Defect: Three problems; the first is the serious one.
   (a) **The ground truth invents a root cause and a working remedy that the evidence cannot
@@ -181,7 +190,8 @@ Correctly sourced parts: issue #33 is `STATE: open`; the reporter did ask whethe
 applied ("The solution to .../issues/6 doesn't fix the problem."); the `cafile`/PEM request and
 the eventual fix are in #6.
 
-### MED-30 The token endpoint is correct and the client is sending a malformed header
+## MED-30 The token endpoint is correct and the client is sending a malformed header
+
 - Verdict: OK
 - Defect: n/a
 - Severity: n/a
@@ -194,13 +204,15 @@ the eventual fix are in #6.
   research/issues/apigee_apigee-api-catalog-drupal-46.txt shows behaviour reported 2019-10-01,
   documentation linked 2019-11-06, and "doc bug b/141752334 is now fixed" on 2020-12-08.
 
-### MED-31 *(not present)*
+## MED-31 *(not present)*
+
 - Verdict: n/a — no such block in the file.
 - Defect: n/a
 - Severity: n/a
 - Evidence: `grep -n "^### MED-" scenarios/medium.md` returns no MED-31.
 
-### MED-32 Six requests admitted where three per minute is configured
+## MED-32 Six requests admitted where three per minute is configured
+
 - Verdict: DEFECT
 - Defect: Source misattribution. "Diagnostic evidence" states: *"The current spike-arrest policy
   reference states that per-minute rates are 'smoothed into intervals of seconds', that the
@@ -233,7 +245,8 @@ page line 21; and `docs.apigee.com/...comparing-quota-spike-arrest-and-concurren
 really does resolve to Edge documentation (`research/so/legacy_comparing.html` title:
 "Comparing Quota and SpikeArrest policies | Apigee Edge | Apigee Docs").
 
-### MED-33 Rate of 5 per minute, but the third call in ten seconds is rejected
+## MED-33 Rate of 5 per minute, but the third call in ten seconds is rejected
+
 - Verdict: DEFECT
 - Defect: Stale index citation only. `policies.ratelimit.SpikeArrestViolation` is cited as
   "`error-codes.md` line 43" (twice, in Initial evidence and in the ledger); it is on line **47**.
@@ -248,7 +261,8 @@ quoted from the comparing page, which this scenario also references, so the attr
 acceptable here; the 10pm/weight-2 → five-messages example is line 395; the `failed` warning is
 line 641; SpikeArrest-before-Quota is comparing page line 21.
 
-### MED-34 A key value map read returns nothing, and the policy reports no error
+## MED-34 A key value map read returns nothing, and the policy reports no error
+
 - Verdict: DEFECT
 - Defect: **The ground truth contradicts the diagnostic evidence the scenario itself supplies.**
   "Diagnostic evidence" states: *"The trace shows `apigee.countryCode` resolving to a value, for
@@ -276,7 +290,8 @@ Other content verified: `index` is 1-based (line 453) and zero/negative is a dep
 its accepted answer (`<Parameter ref="k1">` vs `<Parameter>k1</Parameter>`) are real and match
 research/so/a_27850597.json.
 
-### MED-35 502 Bad Gateway at exactly two minutes, with the backend reporting success four minutes later
+## MED-35 502 Bad Gateway at exactly two minutes, with the backend reporting success four minutes later
+
 - Verdict: DEFECT
 - Defect: Misstatement of the source it depends on. "Expected investigation": *"Then work the
   documented causes for this exact fault code, and be willing to find they do not fit. The
@@ -294,6 +309,7 @@ research/so/a_27850597.json.
   balancing and IP preservation").
 
 Secondary, low:
+
 - Product label says "Apigee (and Apigee hybrid)" but the NLB cause is scoped `(Apigee X only)`
   (playbook line 3855). The scenario applies that cause without flagging the restriction.
 - "The current defaults are `connect.timeout.millis` 3000 ms and `io.timeout.millis` 55000 ms,
@@ -313,7 +329,8 @@ with a variable" (line 252); `messaging.adaptors.http.flow.UnexpectedEOFAtTarget
 correctly here, and this is an issue with NLB architecture. No changes can be made at Apigee"; the
 honesty about the undocumented 120-second wall is a genuine strength.
 
-### MED-36 A JavaScript policy times out intermittently, and raising the limit is the wrong fix
+## MED-36 A JavaScript policy times out intermittently, and raising the limit is the wrong fix
+
 - Verdict: DEFECT
 - Defect: Stale index citation only. `steps.javascript.ScriptExecutionFailed` is cited as
   "`error-codes.md` line 61"; it is on line **66**. (HTTP 500 is correct.)
@@ -333,7 +350,8 @@ are verbatim from api-platform_antipatterns_proxy-within-proxy.txt lines 3734, 3
 research/so/a_22995892.json confirms the accepted answer is "The `timeLimit` attribute can be
 updated to raise the execution limit."
 
-### MED-37 One quota policy referenced from three flows exhausts faster than expected
+## MED-37 One quota policy referenced from three flows exhausts faster than expected
+
 - Verdict: DEFECT
 - Defect: **Wrong flow-variable name in the diagnostic evidence.** The scenario instructs the
   agent to read `quota.<policy>.used.count` in a debug trace. No such variable exists. The
@@ -348,6 +366,7 @@ updated to raise the execution limit."
   value"). Nothing in the page uses a `quota.` prefix for counter values.
 
 Substance otherwise verified, and unusually well sourced:
+
 - Line 118: "If there is no API product associated with an API proxy, a quota policy maintains a
   single counter, regardless of how many times you reference it in an API proxy. **The name of
   the quota counter is based on the `name` attribute of the policy.**"
@@ -359,7 +378,8 @@ Substance otherwise verified, and unusually well sourced:
   unintentionally cause Quota to run out faster than you expected, is an anti-pattern."
 - Line 14: "Quotas apply to individual API proxies and are not distributed among API proxies."
 
-### MED-38 OAuth rejects a valid-looking token because no API product matched
+## MED-38 OAuth rejects a valid-looking token because no API product matched
+
 - Verdict: DEFECT
 - Defect: (a) Internal contradiction in the ticket. "Initial evidence" instructs the agent:
   *"Note a discrepancy worth surfacing to the agent: **the customer quotes a
@@ -388,7 +408,8 @@ The four-link enumeration is accurate against research/so/a_24035609.json (accep
 score 3 "check that the product ... is listed in the products list"; third answer "manual"
 approval; fourth answer about paths).
 
-### MED-39 Every client call times out, and the Kubernetes object at fault is in another namespace
+## MED-39 Every client call times out, and the Kubernetes object at fault is in another namespace
+
 - Verdict: DEFECT
 - Defect: Origin label. "Origin: **reported real-world case**, sourced from official documentation
   retrieved live this session (`.../playbooks/ingressgateway/api-calls-fail-timeout-errors`),
@@ -405,6 +426,7 @@ approval; fourth answer about paths).
   strings and the pending-Service table the scenario quotes, so the *content* is accurate.)
 
 Substance otherwise verified verbatim:
+
 - "Jobs in erroneous/pending state in istio-system namespace" and "Incorrect IP address range
   assigned to external load balancer" as configured in `istio-operator.yaml` — page lines 3834-3845.
 - `kubectl get services -n istio-system` with `EXTERNAL-IP <pending>` — page lines 3809-3815.
@@ -413,7 +435,8 @@ Substance otherwise verified verbatim:
 Title leakage: "**and the Kubernetes object at fault is in another namespace**" is the ground
 truth.
 
-### MED-40 Two green deploys, one invisible conflict
+## MED-40 Two green deploys, one invisible conflict
+
 - Verdict: DEFECT
 - Defect: The ground truth asserts a platform mechanism the cited register does not contain.
   "Ground-truth resolution" states: *"the platform has recorded an ambiguity it will later resolve
@@ -436,7 +459,8 @@ truth.
 
 The documented core of the diagnosis is correct: the entry exists, is Apigee, and is FIXED.
 
-### MED-41 "Operation group limit of 51 exceeded in Operation Config"
+## MED-41 "Operation group limit of 51 exceeded in Operation Config"
+
 - Verdict: DEFECT
 - Defect: Reference deep link is dead. The scenario cites
   `https://cloud.google.com/apigee/docs/api-platform/publish/create-api-products#behavior-resource-path`.
@@ -456,7 +480,8 @@ exceeded in Operation Config`", status OPEN at line 1276. Both workarounds quote
 include the new one, but credentials and client-side request details have been proven to not need
 changing."
 
-### MED-42 The proxy limit that depends on how long your base paths are
+## MED-42 The proxy limit that depends on how long your base paths are
+
 - Verdict: OK
 - Defect: n/a
 - Severity: n/a
@@ -472,7 +497,8 @@ changing."
 Minor, not scored: title leakage — "**that depends on how long your base paths are**" hands over
 the 15-character second factor that the scenario's rubric treats as the key diagnostic step.
 
-### MED-43 The 404 that a version bump does not fix
+## MED-43 The 404 that a version bump does not fix
+
 - Verdict: OK
 - Defect: n/a
 - Severity: n/a
@@ -488,7 +514,8 @@ Minor, not scored: "Skills expected: apigee-support-core, apigee-opdk-upgrader" 
 upgrader skill covers Edge for Private Cloud upgrades, but this scenario is Apigee (SaaS) and
 hybrid, so the second skill does not apply.
 
-### MED-44 Headers that were removed, then put back, and are still pinned
+## MED-44 Headers that were removed, then put back, and are still pinned
+
 - Verdict: OK
 - Defect: n/a
 - Severity: n/a
@@ -504,7 +531,8 @@ Minor, not scored: title leakage — "**Headers that were removed, then put back
 pinned**" states the non-monotonic behaviour and the per-org pin, which are precisely the two
 conclusions the rubric asks the agent to reach.
 
-### MED-45 `The URI contain illegal characters` after a version bump
+## MED-45 `The URI contain illegal characters` after a version bump
+
 - Verdict: OK
 - Defect: n/a
 - Severity: n/a
@@ -516,7 +544,8 @@ conclusions the rubric asks the agent to reach.
   the trailing "s" matches the register character for character, and the upstream issue link is
   the register's own.
 
-### MED-46 The 502 that means your certificate is bad
+## MED-46 The 502 that means your certificate is bad
+
 - Verdict: DEFECT
 - Defect: Reference does not support the remediation. The ground truth is documented correctly, but
   "Correct remediation" — *"Fix the target's certificate chain, or add the issuing authority to the

@@ -99,6 +99,7 @@ not make its stated cause real.
 The third class is the one that worries me most, because it is invisible to every
 mechanical check: a scenario whose ground truth is wrong in a way that makes a correct
 answer score as a critical failure. A passing harness cannot see it. Only review can.
+
 ## Round 3, final blind pass
 
 Part 2 (`final-review-hard-adv-reg.md`, 35 scenarios): **2 material errors, 94.3% clean**,

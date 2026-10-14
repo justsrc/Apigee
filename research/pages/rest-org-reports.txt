@@ -1,0 +1,217 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.reports" class="section">
+
+- [Resource: CustomReport](#CustomReport)
+  - [JSON representation](#CustomReport.SCHEMA_REPRESENTATION)
+- [Metric](#Metric)
+  - [JSON representation](#Metric.SCHEMA_REPRESENTATION)
+- [ReportProperty](#ReportProperty)
+  - [JSON representation](#ReportProperty.SCHEMA_REPRESENTATION)
+- [Methods](#METHODS_SUMMARY)
+
+<div id="CustomReport" class="section">
+
+## Resource: CustomReport
+
+<div id="CustomReport.description" class="section">
+
+</div>
+
+<div id="CustomReport.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;name&quot;: string,
+  &quot;displayName&quot;: string,
+  &quot;metrics&quot;: [
+    {
+      object (Metric)
+    }
+  ],
+  &quot;dimensions&quot;: [
+    string
+  ],
+  &quot;filter&quot;: string,
+  &quot;createdAt&quot;: string,
+  &quot;lastModifiedAt&quot;: string,
+  &quot;properties&quot;: [
+    {
+      object (ReportProperty)
+    }
+  ],
+  &quot;chartType&quot;: string,
+  &quot;timeUnit&quot;: string,
+  &quot;sortByCols&quot;: [
+    string
+  ],
+  &quot;sortOrder&quot;: string,
+  &quot;fromTime&quot;: string,
+  &quot;toTime&quot;: string,
+  &quot;offset&quot;: string,
+  &quot;limit&quot;: string,
+  &quot;topk&quot;: string,
+  &quot;organization&quot;: string,
+  &quot;environment&quot;: string,
+  &quot;lastViewedAt&quot;: string,
+  &quot;tags&quot;: [
+    string
+  ],
+  &quot;comments&quot;: [
+    string
+  ]
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="CustomReport.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| name | string Required. Unique identifier for the report T his is a legacy field used to encode custom report unique id |
+| displayName | string This is the display name for the report |
+| metrics[] | object ( Metric ) Required. This contains the list of metrics |
+| dimensions[] | string This contains the list of dimensions for the report |
+| filter | string This field contains the filter expression |
+| createdAt | string ( int64 format) Output only. Unix time when the app was created json key: createdAt |
+| lastModifiedAt | string ( int64 format) Output only. Modified time of this entity as milliseconds since epoch. json key: lastModifiedAt |
+| properties[] | object ( ReportProperty ) This field contains report properties such as ui metadata etc. |
+| chartType | string This field contains the chart type for the report |
+| timeUnit | string This field contains the time unit of aggregation for the report |
+| sortByCols[] | string Legacy field: not used much. Contains the list of sort by columns |
+| sortOrder | string Legacy field: not used much. Contains the sort order for the sort columns |
+| fromTime | string Legacy field: not used. Contains the from time for the report |
+| toTime | string Legacy field: not used. Contains the end time for the report |
+| offset | string Legacy field: not used. This field contains the offset for the data |
+| limit | string Legacy field: not used This field contains the limit for the result retrieved |
+| topk | string Legacy field: not used. This field contains the top k parameter value for restricting the result |
+| organization | string Output only. Organization name |
+| environment | string Output only. Environment name |
+| lastViewedAt | string ( int64 format) Output only. Last viewed time of this entity as milliseconds since epoch |
+| tags[] | string Legacy field: not used. This field contains a list of tags associated with custom report |
+| comments[] | string Legacy field: not used. This field contains a list of comments associated with custom report |
+
+</div>
+
+</div>
+
+<div id="Metric" class="section">
+
+## Metric
+
+<div id="Metric.description" class="section">
+
+This encapsulates a metric property of the form sum(message_count) where name is message_count and function is sum
+
+</div>
+
+<div id="Metric.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;name&quot;: string,
+  &quot;function&quot;: string
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="Metric.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| name | string name of the metric |
+| function | string aggregate function |
+
+</div>
+
+</div>
+
+<div id="ReportProperty" class="section">
+
+## ReportProperty
+
+<div id="ReportProperty.description" class="section">
+
+</div>
+
+<div id="ReportProperty.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;property&quot;: string,
+  &quot;value&quot;: [
+    {
+      object (Attribute)
+    }
+  ]
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="ReportProperty.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| property | string name of the property |
+| value[] | object ( Attribute ) property values |
+
+</div>
+
+</div>
+
+<div id="METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| create | Creates a Custom Report for an Organization. |
+| delete | Deletes an existing custom report definition |
+| get | Retrieve a custom report definition. |
+| list | Return a list of Custom Reports |
+| update | Update an existing custom report definition |
+
+</div>
+
+</div>

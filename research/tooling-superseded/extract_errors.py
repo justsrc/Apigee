@@ -1,8 +1,10 @@
-import re,sys,os
+import re
+import sys
+import os
 
-def sections(t):
+def sections(t: str) -> list[tuple[str, str]]:
     parts=re.split(r'\n(#{2,4}) ',t)
-    out=[]
+    out: list[tuple[str, str]]=[]
     for i in range(1,len(parts),2):
         body=parts[i+1]
         nl=body.find('\n')
@@ -12,9 +14,9 @@ def sections(t):
 
 ROW=re.compile(r'<tr>\s*<td><code translate="no" dir="ltr">([^<]+)</code></td>\s*<td>(?:<p><strong>)?(?:<code translate="no" dir="ltr">)?([^<]*)')
 
-def main(fn):
+def main(fn: str) -> None:
     t=open(fn).read()
-    sec=None
+    sec: str | None=None
     print("########## "+os.path.basename(fn))
     for h,body in sections(t):
         iserr = ('Error reference' in h) or bool(re.match(r'#{3,4} (Runtime errors|Deployment errors|Fault variables|JWT token-specific)',h))
@@ -23,9 +25,10 @@ def main(fn):
             print("  -- "+h)
         elif sec and re.match(r'#{2,4} ',h):
             sec=None
-        if sec and not ('Error reference' in h):
+        if sec and 'Error reference' not in h:
             for m in ROW.finditer(body):
-                code=m.group(1).strip(); st=m.group(2).strip().rstrip(')(').strip()
+                code=m.group(1).strip()
+                st=m.group(2).strip().rstrip(')(').strip()
                 print("  %-62s %s" % (code,st))
             for m in re.finditer(r'^\|\s*`([^`]+)`\s*\|',body,re.M):
                 print("  [dep] "+m.group(1).strip())

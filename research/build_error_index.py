@@ -25,10 +25,36 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+from collections.abc import Sequence
 from pathlib import Path
+from typing import NamedTuple, NotRequired, TypedDict
 
 PAGES = Path(__file__).parent / "pages"
 OUT = Path(__file__).parent.parent / ".agents/skills/apigee-support-core/references/error-codes.md"
+
+
+class ParsedPage(TypedDict):
+    """The error tables pulled out of one policy page's Error reference section.
+
+    `runtime_has_status` is present only when a Runtime errors table was found and
+    records whether that table carries an HTTP status column.
+    """
+
+    runtime: list[list[str]]
+    deployment: list[list[str]]
+    fault_vars: list[list[str]]
+    runtime_has_status: NotRequired[bool]
+
+
+class MergedRow(NamedTuple):
+    """A code collapsed across every policy page that documents it."""
+
+    code: str
+    status: str
+    cause: str
+    sources: list[str]
+    conflict: bool
+
 
 # Map fetched filenames back to their canonical doc URLs. The fetch script saves as
 # <path with slashes replaced by underscores>.txt, so this is a pure function.
@@ -41,7 +67,7 @@ def url_for(stem: str) -> str | None:
 
 def rows_of(block: str) -> list[list[str]]:
     """Parse a markdown pipe table into cell lists, dropping the header."""
-    out = []
+    out: list[list[str]] = []
     for line in block.splitlines():
         line = line.strip()
         if not line.startswith("|"):
@@ -168,7 +194,7 @@ def truncate(text: str, limit: int = 150) -> str:
     return text[: limit - 1].rstrip() + "…"
 
 
-def parse_policy_page(text: str) -> dict | None:
+def parse_policy_page(text: str) -> ParsedPage | None:
     """Pull runtime and deployment error tables out of one policy page."""
     # The heading is sometimes published with an anchor span in front of the text:
     #   ## <span id="errorcodes"></span>Error reference
@@ -185,7 +211,7 @@ def parse_policy_page(text: str) -> dict | None:
     if nxt:
         rest = rest[: nxt.start()]
 
-    out: dict = {"runtime": [], "deployment": [], "fault_vars": []}
+    out: ParsedPage = {"runtime": [], "deployment": [], "fault_vars": []}
 
     for kind, key in (("Runtime errors", "runtime"), ("Deployment errors", "deployment")):
         km = re.search(rf"^### {kind}\s*$", rest, re.MULTILINE)
@@ -195,10 +221,12 @@ def parse_policy_page(text: str) -> dict | None:
         nxt3 = re.search(r"^#{2,3} ", block, re.MULTILINE)
         if nxt3:
             block = block[: nxt3.start()]
-        out[key] = rows_of(block)
         if key == "runtime":
+            out["runtime"] = rows_of(block)
             header = pipe_header(block)
             out["runtime_has_status"] = header is None or "http" in " ".join(header)
+        else:
+            out["deployment"] = rows_of(block)
 
     fv = re.search(r"^### Fault variables\s*$", rest, re.MULTILINE)
     if fv:
@@ -226,10 +254,10 @@ def build() -> str:
     hand-edited or stale one, because both are equally valid Markdown.
     """
     policies = sorted(PAGES.glob("*.txt"))
-    runtime: list[tuple[str, str, str, str]] = []   # code, status, cause, url
-    deployment: list[tuple[str, str, str]] = []    # name, cause, url
-    fault_vars: list[tuple[str, str, str]] = []    # var, description, url
-    empty: list[str] = []                           # pages with a section but no rows
+    runtime_rows: list[tuple[str, str, str, str]] = []   # code, status, cause, url
+    deployment_rows: list[tuple[str, str, str]] = []    # name, cause, url
+    fault_var_rows: list[tuple[str, str, str]] = []     # var, description, url
+    empty: list[str] = []                               # pages with a section but no rows
 
     for p in policies:
         text = p.read_text(encoding="utf-8", errors="replace")
@@ -261,7 +289,7 @@ def build() -> str:
                 # Table has no HTTP column, so the second cell is the cause.
                 status = ""
                 cause = clean(cells[1]) if len(cells) > 1 else ""
-            runtime.append((code, status, cause, url))
+            runtime_rows.append((code, status, cause, url))
 
         for cells in parsed["deployment"]:
             if not cells:
@@ -280,10 +308,10 @@ def build() -> str:
             parts = name.split()
             if len(parts) > 1 and all(re.fullmatch(r"[A-Za-z][A-Za-z0-9]*", p) for p in parts):
                 for p in parts:
-                    deployment.append((p, cause + " (source page lists this name in a "
-                                          "shared 'other errors' cell)", url))
+                    deployment_rows.append((p, cause + " (source page lists this name in a "
+                                           + "shared 'other errors' cell)", url))
                 continue
-            deployment.append((name, cause, url))
+            deployment_rows.append((name, cause, url))
 
         for cells in parsed["fault_vars"]:
             if len(cells) < 2:
@@ -291,7 +319,7 @@ def build() -> str:
             var = untick(cells[0])
             if not var or var.startswith("*") or "Where" == var:
                 continue
-            fault_vars.append((var, clean(cells[1]), url))
+            fault_var_rows.append((var, clean(cells[1]), url))
 
     # Merge records that share a code instead of dropping the duplicates.
     #
@@ -304,15 +332,16 @@ def build() -> str:
     #
     # Merging keeps every source page, and surfaces the conflict instead of resolving it by
     # accident. Picking one status would be the same silent choice in a different place.
-    def merge(rows, code_i, status_i, cause_i):
+    def merge(rows: Sequence[Sequence[str]], code_i: int, status_i: int | None,
+              cause_i: int) -> list[MergedRow]:
         """Collapse rows that share a code into one record that keeps every source.
 
         Indices are passed explicitly. Inferring them from len(row) was wrong: the runtime
         rows have four fields and the deployment and fault-variable rows have three, so a
         length test silently emptied the Cause column for two thirds of the table.
         """
-        order: list = []
-        by_key: dict = {}
+        order: list[str] = []
+        by_key: dict[str, list[Sequence[str]]] = {}
         for row in rows:
             k = row[code_i]
             if k not in by_key:
@@ -320,7 +349,7 @@ def build() -> str:
                 order.append(k)
             by_key[k].append(row)
 
-        out = []
+        out: list[MergedRow] = []
         for k in order:
             group = by_key[k]
             first = group[0]
@@ -344,12 +373,13 @@ def build() -> str:
                     f"(wording differs on {len(causes)} policy pages, see Sources)"
                 )
             conflict = len(statuses) > 1
-            out.append((first[code_i], ", ".join(statuses), cause_cell, sources, conflict))
+            out.append(MergedRow(first[code_i], ", ".join(statuses), cause_cell,
+                                 sources, conflict))
         return out
 
-    runtime = merge(runtime, code_i=0, status_i=1, cause_i=2)
-    deployment = merge(deployment, code_i=0, status_i=None, cause_i=1)
-    fault_vars = merge(fault_vars, code_i=0, status_i=None, cause_i=1)
+    runtime = merge(runtime_rows, code_i=0, status_i=1, cause_i=2)
+    deployment = merge(deployment_rows, code_i=0, status_i=None, cause_i=1)
+    fault_vars = merge(fault_var_rows, code_i=0, status_i=None, cause_i=1)
 
     lines: list[str] = []
     A = lines.append
@@ -408,12 +438,13 @@ def build() -> str:
     A("4. If a row says CONFLICT, the documentation disagrees about the HTTP status. Do not")
     A("   average the values and do not quietly pick one. Say which page documents which")
     A("   status and tell the reader the documented answers conflict.")
-    A(f"5. If the code is absent here, the policy page may not have been fetched. Check")
-    A(f"   `research/pages/` and re-run `research/fetch.sh` on the policy's doc path.")
+    A("5. If the code is absent here, the policy page may not have been fetched. Check")
+    A("   `research/pages/` and re-run `research/fetch.sh` on the policy's doc path.")
     A("")
     n_conflict = sum(1 for r in runtime if r[4])
+    fetched = len(sorted(PAGES.glob("*.txt")))
     A(f"Coverage: {len(runtime)} runtime codes, {len(deployment)} deployment errors, "
-      f"{len(fault_vars)} fault variables, from {len(pages := sorted(PAGES.glob('*.txt')))} fetched pages.")
+      + f"{len(fault_vars)} fault variables, from {fetched} fetched pages.")
     A("")
     if n_conflict:
         A(f"{n_conflict} runtime code(s) are documented with conflicting HTTP statuses across")
@@ -443,19 +474,20 @@ def build() -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stdout", action="store_true")
+    _ = ap.add_argument("--stdout", action="store_true")
     args = ap.parse_args()
 
     body = build()
-    if args.stdout:
+    stdout: bool = bool(getattr(args, "stdout", False))
+    if stdout:
         # sys.stdout.write, not print. print appends a newline that the written file does
         # not have, so comparing --stdout against the committed file reported a spurious
         # one-line diff and taught a reader that the generator is non-deterministic.
-        sys.stdout.write(body)
+        _ = sys.stdout.write(body)
         return 0
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(body, encoding="utf-8")
+    _ = OUT.write_text(body, encoding="utf-8")
     counts = _coverage_line(body)
     print(f"wrote {OUT}")
     print(f"  {counts}")

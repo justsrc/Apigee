@@ -39,7 +39,7 @@ Replacement scripts written for this task:
 `api-platform/troubleshoot/policies/runtime/responsecache-runtime-errors`
 returns **HTTP 200** and its entire body is:
 
-> ## The equivalent page does not exist in Apigee.
+> ## The equivalent page does not exist in Apigee
 
 So a status check alone is insufficient. Gate citations on extracted content,
 not on status.
@@ -49,57 +49,57 @@ not on status.
 ## 1. VERIFIED PAGES
 
 Title | URL | HTTP | bytes
----|---|---|---
-AssignMessage policy | https://cloud.google.com/apigee/docs/api-platform/reference/policies/assign-message-policy | 200 | 170439
-CORS policy | https://cloud.google.com/apigee/docs/api-platform/reference/policies/cors-policy | 200 | 33613
-ExtractVariables policy | https://cloud.google.com/apigee/docs/api-platform/reference/policies/extract-variables-policy | 200 | 62289
-FlowCallout policy | https://cloud.google.com/apigee/docs/api-platform/reference/policies/flow-callout-policy | 200 | 17939
-InvalidateCache policy | https://cloud.google.com/apigee/docs/api-platform/reference/policies/invalidate-cache-policy | 200 | 19586
-JavaScript policy | https://cloud.google.com/apigee/docs/api-platform/reference/policies/javascript-policy | 200 | 27103
-KeyValueMapOperations policy | https://cloud.google.com/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy | 200 | 45154
-LookupCache policy | https://cloud.google.com/apigee/docs/api-platform/reference/policies/lookup-cache-policy | 200 | 17590
-MessageLogging policy | https://cloud.google.com/apigee/docs/api-platform/reference/policies/message-logging-policy | 200 | 34905
-PopulateCache policy | https://cloud.google.com/apigee/docs/api-platform/reference/policies/populate-cache-policy | 200 | 21699
-Quota policy | https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy | 200 | 84253
-Policy reference overview | https://cloud.google.com/apigee/docs/api-platform/reference/policies/reference-overview-policy | 200 | 13991
-ResponseCache policy | https://cloud.google.com/apigee/docs/api-platform/reference/policies/response-cache-policy | 200 | 34252
-ServiceCallout policy | https://cloud.google.com/apigee/docs/api-platform/reference/policies/service-callout-policy | 200 | 60542
-SpikeArrest policy | https://cloud.google.com/apigee/docs/api-platform/reference/policies/spike-arrest-policy | 200 | 32895
-Working with cache keys | https://cloud.google.com/apigee/docs/api-platform/reference/policies/working-cachekeys | 200 | 10151
-API proxy configuration reference | https://cloud.google.com/apigee/docs/api-platform/reference/api-proxy-configuration-reference | 200 | 69564
-Conditions reference | https://cloud.google.com/apigee/docs/api-platform/reference/conditions-reference | 200 | 13025
-Endpoint properties reference | https://cloud.google.com/apigee/docs/api-platform/reference/endpoint-properties-reference | 200 | 25195
-Flow configuration reference | https://cloud.google.com/apigee/docs/api-platform/reference/flow-configuration-reference | 200 | 52095
-JavaScript object model | https://cloud.google.com/apigee/docs/api-platform/reference/javascript-object-model | 200 | 57837
-Limits | https://cloud.google.com/apigee/docs/api-platform/reference/limits | 200 | 33738
-Variables reference | https://cloud.google.com/apigee/docs/api-platform/reference/variables-reference | 200 | 116542
-Policy error reference | https://cloud.google.com/apigee/docs/api-platform/reference/policies/error-code-reference | 200 | 1759
-RaiseFault policy | https://cloud.google.com/apigee/docs/api-platform/reference/policies/raise-fault-policy | 200 | 23787
-Cache internals | https://cloud.google.com/apigee/docs/api-platform/cache/cache-internals | 200 | 7705
-HTTP response caching | https://cloud.google.com/apigee/docs/api-platform/cache/http-response-caching | 200 | 15790
-Using key value maps | https://cloud.google.com/apigee/docs/api-platform/cache/key-value-maps | 200 | 15119
-Load balancing across backend servers | https://cloud.google.com/apigee/docs/api-platform/deploy/load-balancing-across-backend-servers | 200 | 36319
-Comparing rate-limiting policies | https://cloud.google.com/apigee/docs/api-platform/develop/comparing-quota-and-spike-arrest-policies | 200 | 9523
-Resource files | https://cloud.google.com/apigee/docs/api-platform/develop/resource-files | 200 | 27685
-Environments overview | https://cloud.google.com/apigee/docs/api-platform/fundamentals/environments-overview | 200 | 22674
-Flow hooks | https://cloud.google.com/apigee/docs/api-platform/fundamentals/flow-hooks | 200 | 7107
-Flow variables and conditions | https://cloud.google.com/apigee/docs/api-platform/fundamentals/flow-variables-and-conditions | 200 | 43383
-Shared flows | https://cloud.google.com/apigee/docs/api-platform/fundamentals/shared-flows | 200 | 15428
-What you need to know about policy errors | https://cloud.google.com/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors | 200 | 8942
-Handling faults | https://cloud.google.com/apigee/docs/api-platform/fundamentals/fault-handling | 200 | 63659
-Controlling API proxies with flows | https://cloud.google.com/apigee/docs/api-platform/fundamentals/what-are-flows | 200 | 13788
-Understanding APIs and API proxies | https://cloud.google.com/apigee/docs/api-platform/fundamentals/understanding-apis-and-api-proxies | 200 | 7914
-Deploy error: AssignMessage | https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/deployment/assign-message-deployment-errors | 200 | 7891
-Deploy error: KVM | https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/deployment/key-value-map-deployment-errors | 200 | 10710
-Deploy error: Quota | https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/deployment/quota-deployment-errors | 200 | 23397
-Deploy error: ResponseCache | https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/deployment/responsecache-deployment-errors | 200 | 19295
-Deploy error: SpikeArrest | https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/deployment/spike-arrest-deployment-errors | 200 | (status only)
-Runtime error: AssignMessage | https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/runtime/assign-message-runtime-errors | 200 | 9585
-Runtime error: JavaScript | https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/runtime/javascript-runtime-errors | 200 | 25928
-Runtime error: KVM | https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/runtime/key-value-map-runtime-errors | 200 | 7462
-Runtime error: Quota | https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/runtime/quota-runtime-errors | 200 | 10196
-Runtime error: ServiceCallout | https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/runtime/service-callout-runtime-errors | 200 | 17284
-Runtime error: ResponseCache **(stub page — see tooling finding)** | https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/runtime/responsecache-runtime-errors | 200 | 1371
+--- | --- | --- | ---
+AssignMessage policy | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/assign-message-policy> | 200 | 170439
+CORS policy | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/cors-policy> | 200 | 33613
+ExtractVariables policy | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/extract-variables-policy> | 200 | 62289
+FlowCallout policy | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/flow-callout-policy> | 200 | 17939
+InvalidateCache policy | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/invalidate-cache-policy> | 200 | 19586
+JavaScript policy | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/javascript-policy> | 200 | 27103
+KeyValueMapOperations policy | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy> | 200 | 45154
+LookupCache policy | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/lookup-cache-policy> | 200 | 17590
+MessageLogging policy | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/message-logging-policy> | 200 | 34905
+PopulateCache policy | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/populate-cache-policy> | 200 | 21699
+Quota policy | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy> | 200 | 84253
+Policy reference overview | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/reference-overview-policy> | 200 | 13991
+ResponseCache policy | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/response-cache-policy> | 200 | 34252
+ServiceCallout policy | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/service-callout-policy> | 200 | 60542
+SpikeArrest policy | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/spike-arrest-policy> | 200 | 32895
+Working with cache keys | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/working-cachekeys> | 200 | 10151
+API proxy configuration reference | <https://cloud.google.com/apigee/docs/api-platform/reference/api-proxy-configuration-reference> | 200 | 69564
+Conditions reference | <https://cloud.google.com/apigee/docs/api-platform/reference/conditions-reference> | 200 | 13025
+Endpoint properties reference | <https://cloud.google.com/apigee/docs/api-platform/reference/endpoint-properties-reference> | 200 | 25195
+Flow configuration reference | <https://cloud.google.com/apigee/docs/api-platform/reference/flow-configuration-reference> | 200 | 52095
+JavaScript object model | <https://cloud.google.com/apigee/docs/api-platform/reference/javascript-object-model> | 200 | 57837
+Limits | <https://cloud.google.com/apigee/docs/api-platform/reference/limits> | 200 | 33738
+Variables reference | <https://cloud.google.com/apigee/docs/api-platform/reference/variables-reference> | 200 | 116542
+Policy error reference | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/error-code-reference> | 200 | 1759
+RaiseFault policy | <https://cloud.google.com/apigee/docs/api-platform/reference/policies/raise-fault-policy> | 200 | 23787
+Cache internals | <https://cloud.google.com/apigee/docs/api-platform/cache/cache-internals> | 200 | 7705
+HTTP response caching | <https://cloud.google.com/apigee/docs/api-platform/cache/http-response-caching> | 200 | 15790
+Using key value maps | <https://cloud.google.com/apigee/docs/api-platform/cache/key-value-maps> | 200 | 15119
+Load balancing across backend servers | <https://cloud.google.com/apigee/docs/api-platform/deploy/load-balancing-across-backend-servers> | 200 | 36319
+Comparing rate-limiting policies | <https://cloud.google.com/apigee/docs/api-platform/develop/comparing-quota-and-spike-arrest-policies> | 200 | 9523
+Resource files | <https://cloud.google.com/apigee/docs/api-platform/develop/resource-files> | 200 | 27685
+Environments overview | <https://cloud.google.com/apigee/docs/api-platform/fundamentals/environments-overview> | 200 | 22674
+Flow hooks | <https://cloud.google.com/apigee/docs/api-platform/fundamentals/flow-hooks> | 200 | 7107
+Flow variables and conditions | <https://cloud.google.com/apigee/docs/api-platform/fundamentals/flow-variables-and-conditions> | 200 | 43383
+Shared flows | <https://cloud.google.com/apigee/docs/api-platform/fundamentals/shared-flows> | 200 | 15428
+What you need to know about policy errors | <https://cloud.google.com/apigee/docs/api-platform/fundamentals/what-you-need-know-about-policy-errors> | 200 | 8942
+Handling faults | <https://cloud.google.com/apigee/docs/api-platform/fundamentals/fault-handling> | 200 | 63659
+Controlling API proxies with flows | <https://cloud.google.com/apigee/docs/api-platform/fundamentals/what-are-flows> | 200 | 13788
+Understanding APIs and API proxies | <https://cloud.google.com/apigee/docs/api-platform/fundamentals/understanding-apis-and-api-proxies> | 200 | 7914
+Deploy error: AssignMessage | <https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/deployment/assign-message-deployment-errors> | 200 | 7891
+Deploy error: KVM | <https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/deployment/key-value-map-deployment-errors> | 200 | 10710
+Deploy error: Quota | <https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/deployment/quota-deployment-errors> | 200 | 23397
+Deploy error: ResponseCache | <https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/deployment/responsecache-deployment-errors> | 200 | 19295
+Deploy error: SpikeArrest | <https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/deployment/spike-arrest-deployment-errors> | 200 | (status only)
+Runtime error: AssignMessage | <https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/runtime/assign-message-runtime-errors> | 200 | 9585
+Runtime error: JavaScript | <https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/runtime/javascript-runtime-errors> | 200 | 25928
+Runtime error: KVM | <https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/runtime/key-value-map-runtime-errors> | 200 | 7462
+Runtime error: Quota | <https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/runtime/quota-runtime-errors> | 200 | 10196
+Runtime error: ServiceCallout | <https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/runtime/service-callout-runtime-errors> | 200 | 17284
+Runtime error: ResponseCache **(stub page — see tooling finding)** | <https://cloud.google.com/apigee/docs/api-platform/troubleshoot/policies/runtime/responsecache-runtime-errors> | 200 | 1371
 
 ---
 
@@ -107,9 +107,9 @@ Runtime error: ResponseCache **(stub page — see tooling finding)** | https://c
 
 ### 2.1 Proxy structure, flows, the Condition element
 
-S = https://cloud.google.com/apigee/docs/api-platform/fundamentals/what-are-flows
-C = https://cloud.google.com/apigee/docs/api-platform/reference/api-proxy-configuration-reference
-R = https://cloud.google.com/apigee/docs/api-platform/reference/conditions-reference
+S = <https://cloud.google.com/apigee/docs/api-platform/fundamentals/what-are-flows>
+C = <https://cloud.google.com/apigee/docs/api-platform/reference/api-proxy-configuration-reference>
+R = <https://cloud.google.com/apigee/docs/api-platform/reference/conditions-reference>
 
 - A processing pipeline "consists of a request flow and a response flow. Each
   request flow and response flow is subdivided into a PreFlow, one or more
@@ -117,14 +117,14 @@ R = https://cloud.google.com/apigee/docs/api-platform/reference/conditions-refer
 - PreFlow "Always executes. Executes before any conditional Flows."
   PostFlow "Always executes. Executes after any conditional Flows." (C)
 - Execution order, request pipeline (C):
-  1. Proxy Request PreFlow, 2. Proxy Request Conditional Flows (opt),
-  3. Proxy Request PostFlow, 4. Target Request PreFlow,
-  5. Target Request Conditional Flows (opt), 6. Target Request PostFlow.
+  1\. Proxy Request PreFlow, 2. Proxy Request Conditional Flows (opt),
+  3\. Proxy Request PostFlow, 4. Target Request PreFlow,
+  5\. Target Request Conditional Flows (opt), 6. Target Request PostFlow.
 - Execution order, response pipeline (C):
-  1. Target Response PreFlow, 2. Target Response Conditional Flows (opt),
-  3. Target Response PostFlow, 4. Proxy Response PreFlow,
-  5. Proxy Response Conditional Flows (opt), 6. Proxy Response PostFlow,
-  7. PostClientFlow Response (opt).
+  1\. Target Response PreFlow, 2. Target Response Conditional Flows (opt),
+  3\. Target Response PostFlow, 4. Proxy Response PreFlow,
+  5\. Proxy Response Conditional Flows (opt), 6. Proxy Response PostFlow,
+  7\. PostClientFlow Response (opt).
 - Flow support differs by endpoint (S):
   ProxyEndpoint supports "PreFlow, conditional flows, PostFlow, PostClientFlow";
   TargetEndpoint supports "PreFlow, conditional flows, PostFlow".
@@ -179,8 +179,8 @@ R = https://cloud.google.com/apigee/docs/api-platform/reference/conditions-refer
 ### 2.2 Routing, proxy vs target endpoint, target servers, load balancing
 
 C as above.
-LB = https://cloud.google.com/apigee/docs/api-platform/deploy/load-balancing-across-backend-servers
-EP = https://cloud.google.com/apigee/docs/api-platform/reference/endpoint-properties-reference
+LB = <https://cloud.google.com/apigee/docs/api-platform/deploy/load-balancing-across-backend-servers>
+EP = <https://cloud.google.com/apigee/docs/api-platform/reference/endpoint-properties-reference>
 
 - A target endpoint is "the outbound equivalent of a proxy endpoint"; it acts
   as the client to the backend service. (C)
@@ -258,7 +258,7 @@ EP = https://cloud.google.com/apigee/docs/api-platform/reference/endpoint-proper
 
 ### 2.3 AssignMessage
 
-AM = https://cloud.google.com/apigee/docs/api-platform/reference/policies/assign-message-policy
+AM = <https://cloud.google.com/apigee/docs/api-platform/reference/policies/assign-message-policy>
 
 - Parent element `<AssignMessage>`, attributes `continueOnError`, `enabled`,
   `name`. Child elements: `<Add>`, `<AssignTo>`, `<AssignVariable>`,
@@ -304,13 +304,13 @@ AM = https://cloud.google.com/apigee/docs/api-platform/reference/policies/assign
 
 ### 2.4 Response caching and cache keys
 
-RC = https://cloud.google.com/apigee/docs/api-platform/reference/policies/response-cache-policy
-CK = https://cloud.google.com/apigee/docs/api-platform/reference/policies/working-cachekeys
-CI = https://cloud.google.com/apigee/docs/api-platform/cache/cache-internals
-LC = https://cloud.google.com/apigee/docs/api-platform/reference/policies/lookup-cache-policy
-PC = https://cloud.google.com/apigee/docs/api-platform/reference/policies/populate-cache-policy
-IC = https://cloud.google.com/apigee/docs/api-platform/reference/policies/invalidate-cache-policy
-LIM = https://cloud.google.com/apigee/docs/api-platform/reference/limits
+RC = <https://cloud.google.com/apigee/docs/api-platform/reference/policies/response-cache-policy>
+CK = <https://cloud.google.com/apigee/docs/api-platform/reference/policies/working-cachekeys>
+CI = <https://cloud.google.com/apigee/docs/api-platform/cache/cache-internals>
+LC = <https://cloud.google.com/apigee/docs/api-platform/reference/policies/lookup-cache-policy>
+PC = <https://cloud.google.com/apigee/docs/api-platform/reference/policies/populate-cache-policy>
+IC = <https://cloud.google.com/apigee/docs/api-platform/reference/policies/invalidate-cache-policy>
+LIM = <https://cloud.google.com/apigee/docs/api-platform/reference/limits>
 
 - Full element set: `<ResponseCache>` with `<DisplayName>`, `<Properties>`,
   `<CacheKey>` (containing `<Prefix>` and one or more `<KeyFragment>`),
@@ -413,8 +413,8 @@ LIM = https://cloud.google.com/apigee/docs/api-platform/reference/limits
 
 ### 2.5 Key-value maps
 
-KVM = https://cloud.google.com/apigee/docs/api-platform/cache/key-value-maps
-KVMO = https://cloud.google.com/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy
+KVM = <https://cloud.google.com/apigee/docs/api-platform/cache/key-value-maps>
+KVMO = <https://cloud.google.com/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy>
 LIM as above
 
 - KVM scopes (KVM): **API proxy** ("Only the API proxy can access the KVM"),
@@ -479,8 +479,8 @@ LIM as above
 
 ### 2.6 JavaScript callouts and the JavaScript object model
 
-JS = https://cloud.google.com/apigee/docs/api-platform/reference/policies/javascript-policy
-OM = https://cloud.google.com/apigee/docs/api-platform/reference/javascript-object-model
+JS = <https://cloud.google.com/apigee/docs/api-platform/reference/policies/javascript-policy>
+OM = <https://cloud.google.com/apigee/docs/api-platform/reference/javascript-object-model>
 
 - "Apigee supports JavaScript running on the **Rhino JavaScript engine 1.7.13**."
   "JavaScript source files must have a `.js` extension." (JS)
@@ -540,7 +540,7 @@ OM = https://cloud.google.com/apigee/docs/api-platform/reference/javascript-obje
 
 ### 2.7 Service callouts
 
-SC = https://cloud.google.com/apigee/docs/api-platform/reference/policies/service-callout-policy
+SC = <https://cloud.google.com/apigee/docs/api-platform/reference/policies/service-callout-policy>
 
 - Typical composition: AssignMessage builds the request, ServiceCallout sends
   it and names the response variable, ExtractVariables parses the response. (SC)
@@ -572,7 +572,7 @@ SC = https://cloud.google.com/apigee/docs/api-platform/reference/policies/servic
 
 ### 2.8 ExtractVariables
 
-EV = https://cloud.google.com/apigee/docs/api-platform/reference/policies/extract-variables-policy
+EV = <https://cloud.google.com/apigee/docs/api-platform/reference/policies/extract-variables-policy>
 
 - `<ExtractVariables>` children: `<DisplayName>`, `<Source clearPayload="true|false">request</Source>`,
   `<VariablePrefix>`, `<IgnoreUnresolvedVariables>`, `<URIPath>`/`<Pattern ignoreCase="...">`,
@@ -606,8 +606,8 @@ EV = https://cloud.google.com/apigee/docs/api-platform/reference/policies/extrac
 
 ### 2.9 Synchronous versus asynchronous
 
-Q = https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy
-C = https://cloud.google.com/apigee/docs/api-platform/reference/api-proxy-configuration-reference
+Q = <https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy>
+C = <https://cloud.google.com/apigee/docs/api-platform/reference/api-proxy-configuration-reference>
 
 - Quota `<Synchronous>` default `false`. `true`: counters update at the same
   time the quota is checked. `false`: "it is possible that some API calls
@@ -643,6 +643,7 @@ C = https://cloud.google.com/apigee/docs/api-platform/reference/api-proxy-config
 ## 3. DOCUMENTED GOTCHAS
 
 Flows and conditions
+
 - Only *named* flows can be conditional. PreFlow/PostFlow always run. (conditions-reference)
 - Only the **first** matching conditional flow in a segment runs. Unreachable
   conditional flows are a common cause of "my policy never executes". (what-are-flows)
@@ -659,6 +660,7 @@ Flows and conditions
   with `~`/`~~`/`~/`, RHS null -> N/A. (conditions-reference)
 
 AssignMessage
+
 - **You cannot set `target.url` from a ProxyEndpoint-attached policy.** Apigee
   initialises `target.url` in the TargetEndpoint. Attach the AssignMessage (with
   `<AssignVariable><Name>target.url</Name>`) to the TargetEndpoint. (assign-message-policy)
@@ -679,6 +681,7 @@ AssignMessage
   `<aside>` will render this section empty.
 
 Caching
+
 - **`<CacheLookupTimeoutInSeconds>` default is 30 on ResponseCache but 12 on
   LookupCache.** Same element name, same policy family, different documented
   default. Verify empirically before relying on either. (response-cache-policy vs lookup-cache-policy)
@@ -723,6 +726,7 @@ Caching
   error, not a runtime error. (RC, LC, PC, IC)
 
 KVM
+
 - "when accessing a map or map entry, you must specify the same scope value you
   used when the map was created." (key-value-map-operations-policy)
 - `<Get index="...">` is **1-based**; index 0 or negative is a deployment
@@ -750,6 +754,7 @@ KVM
   enforcement, not currently enforced. (limits)
 
 JavaScript
+
 - `timeLimit` is required and throws when exceeded — the message is
   `Javascript.{policy_name} failed with error: Javascript runtime exceeded
   limit of {N}ms`. (javascript-policy)
@@ -772,6 +777,7 @@ JavaScript
   Unverified whether `Base64` exists undocumented.
 
 ServiceCallout
+
 - `<Timeout>` cannot be set dynamically at runtime — no `ref` support. (service-callout-policy)
 - Default timeout is 55000 ms, and a timeout produces **HTTP 500** plus a fault
   state, not a 504. (service-callout-policy)
@@ -787,6 +793,7 @@ ServiceCallout
   string or a Response. (service-callout-policy)
 
 ExtractVariables
+
 - A non-matching pattern does not create the variable; it silently leaves it
   undefined. Downstream policies then fault. (extract-variables-policy)
 - A policy with none of `URIPath`, `QueryParam`, `Header`, `FormParam`,
@@ -799,6 +806,7 @@ ExtractVariables
   error in the source docs. (extract-variables-policy)
 
 Routing / target servers
+
 - `<MaxFailures>` defaults to **0**, i.e. no failover at all. Most "load
   balancing isn't failing over" reports trace to this default. (load-balancing-across-backend-servers)
 - An HTTP 500 from the target **resets** the failure counter rather than
@@ -818,6 +826,7 @@ Routing / target servers
   `/*/search`." (api-proxy-configuration-reference)
 
 Policy behaviour
+
 - The `async` attribute is documented as **deprecated** on every individual
   policy page, yet still documented as functional on
   api-proxy-configuration-reference. Treat it as deprecated and do not build
@@ -864,9 +873,11 @@ section 1. Runtime faults carry an HTTP status. Deployment errors have none —
 they mean the revision was rejected at upload.
 
 ### AssignMessage
-Source: https://cloud.google.com/apigee/docs/api-platform/reference/policies/assign-message-policy
+
+Source: <https://cloud.google.com/apigee/docs/api-platform/reference/policies/assign-message-policy>
 
 Runtime:
+
 - `steps.assignmessage.SetVariableFailed` / 500 — policy could not set a
   variable; see the fault string for the unresolved variable name.
 - `steps.assignmessage.VariableOfNonMsgType` / 500 — the `source` attribute of
@@ -875,6 +886,7 @@ Runtime:
   for the flow, or cannot be resolved.
 
 Deployment:
+
 - `InvalidIndex` — index in `<Copy>` and/or `<Remove>` is 0 or negative.
 - `InvalidVariableName` — `<Name>` empty or missing inside `<AssignVariable>`.
 - `InvalidPayload` — payload in the policy is invalid.
@@ -882,13 +894,15 @@ Deployment:
 Fault variables: `fault.name="FAULT_NAME"`, `assignmessage.POLICY_NAME.failed`.
 
 ### ResponseCache
-Source: https://cloud.google.com/apigee/docs/api-platform/reference/policies/response-cache-policy
+
+Source: <https://cloud.google.com/apigee/docs/api-platform/reference/policies/response-cache-policy>
 
 Runtime: "This policy does not throw any runtime errors." (Corroborated: the
 corresponding troubleshoot runtime URL returns HTTP 200 but is a stub page
 reading "The equivalent page does not exist in Apigee.")
 
 Deployment:
+
 - `InvalidTimeout` — `<CacheLookupTimeoutInSeconds>` set to a negative number.
 - `InvalidCacheResourceReference` — `<CacheResource>` names a cache that does
   not exist in the deploy environment.
@@ -903,7 +917,8 @@ Deployment:
 Fault variables: N/A (policy-level).
 
 ### LookupCache
-Source: https://cloud.google.com/apigee/docs/api-platform/reference/policies/lookup-cache-policy
+
+Source: <https://cloud.google.com/apigee/docs/api-platform/reference/policies/lookup-cache-policy>
 
 Runtime: none.
 Deployment: `InvalidCacheResourceReference`, `InvalidTimeout`, `CacheNotFound`
@@ -911,20 +926,24 @@ Deployment: `InvalidCacheResourceReference`, `InvalidTimeout`, `CacheNotFound`
 Fault variables: N/A.
 
 ### InvalidateCache
-Source: https://cloud.google.com/apigee/docs/api-platform/reference/policies/invalidate-cache-policy
+
+Source: <https://cloud.google.com/apigee/docs/api-platform/reference/policies/invalidate-cache-policy>
 
 Runtime: none.
 Deployment: `InvalidCacheResourceReference`, `CacheNotFound`.
 Fault variables: N/A.
 
 ### PopulateCache
-Source: https://cloud.google.com/apigee/docs/api-platform/reference/policies/populate-cache-policy
+
+Source: <https://cloud.google.com/apigee/docs/api-platform/reference/policies/populate-cache-policy>
 
 Runtime:
+
 - `policies.populatecache.EntryCannotBeCached` / 500 — the message being cached
   is not an instance of a Serializable class.
 
 Deployment:
+
 - `InvalidCacheResourceReference` — `<CacheResource>` names a nonexistent cache.
 - `CacheNotFound` — the cache specified in `<CacheResource>` does not exist.
 
@@ -933,13 +952,16 @@ Example response faultstring: `[entry] can not be cached. Only serializable
 entries are cached.`
 
 ### KeyValueMapOperations
-Source: https://cloud.google.com/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy
+
+Source: <https://cloud.google.com/apigee/docs/api-platform/reference/policies/key-value-map-operations-policy>
 
 Runtime:
+
 - `steps.keyvaluemapoperations.UnsupportedOperationException` / 500 — the
   `mapIdentifier` attribute is set to an empty string.
 
 Deployment:
+
 - `InvalidIndex` — `index` attribute of `<Get>` is zero or negative (index
   starts at 1).
 - `KeyIsMissing` — `<Key>` missing, or `<Parameter>` missing inside `<Key>`,
@@ -947,9 +969,11 @@ Deployment:
 - `ValueIsMissing` — `<Value>` missing under `<Entry>` under `<InitialEntries>`.
 
 ### Quota
-Source: https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy
+
+Source: <https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy>
 
 Runtime:
+
 - `policies.ratelimit.FailedToResolveQuotaIntervalReference` / 500 — `<Interval>`
   not defined.
 - `policies.ratelimit.FailedToResolveQuotaIntervalTimeUnitReference` / 500 —
@@ -959,6 +983,7 @@ Runtime:
 - `policies.ratelimit.QuotaViolation` / 500 — quota limit exceeded.
 
 Deployment:
+
 - `InvalidQuotaInterval` — `<Interval>` is not an integer.
 - `InvalidQuotaTimeUnit` — unsupported time unit; valid are `minute`, `hour`,
   `day`, `week`, `month`.
@@ -974,29 +999,35 @@ Deployment:
 Fault variables: `fault.name="fault_name"`, `ratelimit.POLICY_NAME.failed`.
 
 ### SpikeArrest
-Source: https://cloud.google.com/apigee/docs/api-platform/reference/policies/spike-arrest-policy
+
+Source: <https://cloud.google.com/apigee/docs/api-platform/reference/policies/spike-arrest-policy>
 
 Runtime:
+
 - `policies.ratelimit.FailedToResolveSpikeArrestRate` / 500 — `<Rate>` reference
   cannot be resolved; rate is mandatory in the form `intpm` or `intps`.
 - `policies.ratelimit.InvalidMessageWeight` / 500 — `<MessageWeight>` non-integer.
 - `policies.ratelimit.SpikeArrestViolation` / **429** — rate limit exceeded.
 
 Deployment:
+
 - `InvalidAllowedRate` — `<Rate>` is not an integer, or lacks a `ps`/`pm` suffix.
 
 Fault variables: `fault.name="fault_name"`, `ratelimit.POLICY_NAME.failed`.
 
 ### JavaScript
-Source: https://cloud.google.com/apigee/docs/api-platform/reference/policies/javascript-policy
+
+Source: <https://cloud.google.com/apigee/docs/api-platform/reference/policies/javascript-policy>
 
 Runtime (all 500):
+
 - `steps.javascript.ScriptExecutionFailed` — many underlying types; documented
   ones are RangeError, ReferenceError, SyntaxError, TypeError, URIError.
 - `steps.javascript.ScriptExecutionFailedLineNumber` — JS error; see fault string.
 - `steps.javascript.ScriptSecurityError` — security error during execution.
 
 Deployment:
+
 - `InvalidResourceUrlFormat` — bad format in `<ResourceURL>` or `<IncludeURL>`.
 - `InvalidResourceUrlReference` — referenced JS file does not exist at API
   proxy, environment, or organization level.
@@ -1010,9 +1041,11 @@ Note: the policy's `timeLimit` overrun produces a runtime failure message
 Nms`) that is not listed in the runtime errors table.
 
 ### ServiceCallout
-Source: https://cloud.google.com/apigee/docs/api-platform/reference/policies/service-callout-policy
+
+Source: <https://cloud.google.com/apigee/docs/api-platform/reference/policies/service-callout-policy>
 
 Runtime:
+
 - `steps.servicecallout.ExecutionFailed` / 500 — malformed input, **or** the
   backend returns an error status (by default 4xx or 5xx).
 - `steps.servicecallout.RequestVariableNotMessageType` / 500 — the `Request`
@@ -1026,6 +1059,7 @@ Runtime:
   (hybrid), IAMCredentials API disabled, or invalid `<GoogleAccessToken>` scopes.
 
 Deployment:
+
 - `URLMissing` — `<URL>` inside `<HTTPTargetConnection>` missing or empty.
 - `ConnectionInfoMissing` — neither `<HTTPTargetConnection>` nor
   `<LocalTargetConnection>` present.
@@ -1035,9 +1069,11 @@ Deployment:
 - `PERMISSION_DENIED` — service account permission problem.
 
 ### ExtractVariables
-Source: https://cloud.google.com/apigee/docs/api-platform/reference/policies/extract-variables-policy
+
+Source: <https://cloud.google.com/apigee/docs/api-platform/reference/policies/extract-variables-policy>
 
 Runtime (all 500):
+
 - `steps.extractvariables.ExecutionFailed` — empty input payload, or invalid /
   malformed JSON or XML.
 - `steps.extractvariables.ImmutableVariable` — the policy tried to set an
@@ -1045,6 +1081,7 @@ Runtime (all 500):
 - `steps.extractvariables.InvalidJSONPath` — invalid JSON path in `<JSONPath>`.
 
 Deployment:
+
 - `NothingToExtract`, `NONEmptyPrefixMappedToEmptyURI`, `DuplicatePrefix`,
   `NoXPathsToEvaluate`, `EmptyXPathExpression`, `NoJSONPathsToEvaluate`,
   `EmptyJSONPathExpression`, `MissingName`, `PatternWithoutVariable`,
@@ -1052,18 +1089,22 @@ Deployment:
   `InstantiationFailed`, `XPathCompilationFailed`, `InvalidPattern`.
 
 ### FlowCallout
-Source: https://cloud.google.com/apigee/docs/api-platform/reference/policies/flow-callout-policy
+
+Source: <https://cloud.google.com/apigee/docs/api-platform/reference/policies/flow-callout-policy>
 
 Runtime:
+
 - `flow.SharedFlowNotFound` / 500 — "Either the shared flow does not exist, or
   the shared flow exists but is **not deployed**."
 
 Deployment: N/A.
 
 ### MessageLogging
-Source: https://cloud.google.com/apigee/docs/api-platform/reference/policies/message-logging-policy
+
+Source: <https://cloud.google.com/apigee/docs/api-platform/reference/policies/message-logging-policy>
 
 Runtime (all 500):
+
 - `steps.messagelogging.StepDefinitionExecutionFailed` — see fault string.
 - `steps.messagelogging.InvalidGoogleCloudLogName` — `<LogName>` does not
   evaluate to `projects/{project}/logs/{logid}`.
@@ -1075,7 +1116,8 @@ Runtime (all 500):
   `Log message size exceeded. Increase the max message size setting`.
 
 ### CORS
-Source: https://cloud.google.com/apigee/docs/api-platform/reference/policies/cors-policy
+
+Source: <https://cloud.google.com/apigee/docs/api-platform/reference/policies/cors-policy>
 Fetched but not fully mined for this section; the page has `## Error codes`
 with Runtime / Deployment / Fault variables subsections.
 
@@ -1113,6 +1155,7 @@ All verified 404 by `curl -w "%{http_code}"` on
   `fundamentals/flow-variables-and-conditions` and `reference/variables-reference`)
 
 **HTTP 200 but no content** (different failure mode, worth its own warning):
+
 - api-platform/troubleshoot/policies/runtime/responsecache-runtime-errors —
   200, 1371 bytes, body reads "## The equivalent page does not exist in Apigee."
 

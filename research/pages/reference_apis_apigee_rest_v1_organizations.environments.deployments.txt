@@ -1,0 +1,468 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.deployments" class="section">
+
+- [Resource: Deployment](#Deployment)
+  - [JSON representation](#Deployment.SCHEMA_REPRESENTATION)
+- [PodStatus](#PodStatus)
+  - [JSON representation](#PodStatus.SCHEMA_REPRESENTATION)
+- [RuntimeState](#RuntimeState)
+- [RoutingConflict](#RoutingConflict)
+  - [JSON representation](#RoutingConflict.SCHEMA_REPRESENTATION)
+- [RoutingDeployment](#RoutingDeployment)
+  - [JSON representation](#RoutingDeployment.SCHEMA_REPRESENTATION)
+- [InstanceDeploymentStatus](#InstanceDeploymentStatus)
+  - [JSON representation](#InstanceDeploymentStatus.SCHEMA_REPRESENTATION)
+- [DeployedRevision](#DeployedRevision)
+  - [JSON representation](#DeployedRevision.SCHEMA_REPRESENTATION)
+- [DeployedRoute](#DeployedRoute)
+  - [JSON representation](#DeployedRoute.SCHEMA_REPRESENTATION)
+- [ProxyDeploymentType](#ProxyDeploymentType)
+- [Methods](#METHODS_SUMMARY)
+
+<div id="Deployment" class="section">
+
+## Resource: Deployment
+
+<div id="Deployment.description" class="section">
+
+Deployment represents a deployment of an API proxy or shared flow.
+
+</div>
+
+<div id="Deployment.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;environment&quot;: string,
+  &quot;apiProxy&quot;: string,
+  &quot;revision&quot;: string,
+  &quot;deployStartTime&quot;: string,
+  &quot;pods&quot;: [
+    {
+      object (PodStatus)
+    }
+  ],
+  &quot;state&quot;: enum (RuntimeState),
+  &quot;errors&quot;: [
+    {
+      object (Status)
+    }
+  ],
+  &quot;routeConflicts&quot;: [
+    {
+      object (RoutingConflict)
+    }
+  ],
+  &quot;instances&quot;: [
+    {
+      object (InstanceDeploymentStatus)
+    }
+  ],
+  &quot;serviceAccount&quot;: string,
+  &quot;proxyDeploymentType&quot;: enum (ProxyDeploymentType)
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="Deployment.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| environment | string Environment. |
+| apiProxy | string API proxy. |
+| revision | string API proxy revision. |
+| deployStartTime | string ( int64 format) Time the API proxy was marked deployed in the control plane in millisconds since epoch. |
+| pods[] | object ( PodStatus ) Status reported by runtime pods. Note : This field is deprecated . Runtime versions 1.3 and above report instance level status rather than pod status. |
+| state | enum ( RuntimeState ) Current state of the deployment. Note : This field is displayed only when viewing deployment status. |
+| errors[] | object ( Status ) Errors reported for this deployment. Populated only when state == ERROR. Note : This field is displayed only when viewing deployment status. |
+| routeConflicts[] | object ( RoutingConflict ) Conflicts in the desired state routing configuration. The presence of conflicts does not cause the state to be ERROR , but it will mean that some of the deployment's base paths are not routed to its environment. If the conflicts change, the state will transition to PROGRESSING until the latest configuration is rolled out to all instances. Note : This field is displayed only when viewing deployment status. |
+| instances[] | object ( InstanceDeploymentStatus ) Status reported by each runtime instance. Note : This field is displayed only when viewing deployment status. |
+| serviceAccount | string The full resource name of Cloud IAM Service Account that this deployment is using, eg, projects/-/serviceAccounts/{email} . |
+| proxyDeploymentType | enum ( ProxyDeploymentType ) Output only. The type of the deployment (standard or extensible) Deployed proxy revision will be marked as extensible in following 2 cases. 1. The deployed proxy revision uses extensible policies. 2. If a environment supports flowhooks and flow hook is configured. |
+
+</div>
+
+</div>
+
+<div id="PodStatus" class="section">
+
+## PodStatus
+
+<div id="PodStatus.description" class="section">
+
+</div>
+
+<div id="PodStatus.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;podName&quot;: string,
+  &quot;appVersion&quot;: string,
+  &quot;podStatus&quot;: string,
+  &quot;podStatusTime&quot;: string,
+  &quot;deploymentStatusTime&quot;: string,
+  &quot;deploymentTime&quot;: string,
+  &quot;deploymentStatus&quot;: string,
+  &quot;statusCode&quot;: string,
+  &quot;statusCodeDetails&quot;: string
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="PodStatus.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| podName | string Name of the pod which is reporting the status. |
+| appVersion | string Version of the application running in the pod. |
+| podStatus | string Overall status of the pod (not this specific deployment). Valid values include: - active : Up to date. - stale : Recently out of date. Pods that have not reported status in a long time are excluded from the output. |
+| podStatusTime | string ( int64 format) Time the pod status was reported in milliseconds since epoch. |
+| deploymentStatusTime | string ( int64 format) Time the deployment status was reported in milliseconds since epoch. |
+| deploymentTime | string ( int64 format) Time the proxy was deployed in milliseconds since epoch. |
+| deploymentStatus | string Status of the deployment. Valid values include: - deployed : Successful. - error : Failed. - pending : Pod has not yet reported on the deployment. |
+| statusCode | string Code associated with the deployment status. |
+| statusCodeDetails | string Human-readable message associated with the status code. |
+
+</div>
+
+</div>
+
+<div id="RuntimeState" class="section">
+
+## RuntimeState
+
+<div id="RuntimeState.description" class="section">
+
+State of the resource in the runtime.
+
+</div>
+
+<div id="RuntimeState.ENUM_VALUES" class="section">
+
+| Enums |  |
+| --- | --- |
+| RUNTIME_STATE_UNSPECIFIED | This value should never be returned. |
+| READY | Runtime has loaded the deployment. |
+| PROGRESSING | Deployment is not fully ready in the runtime. |
+| ERROR | Encountered an error with the deployment that requires intervention. |
+
+</div>
+
+</div>
+
+<div id="RoutingConflict" class="section">
+
+## RoutingConflict
+
+<div id="RoutingConflict.description" class="section">
+
+Describes a routing conflict that may cause a deployment not to receive traffic at some base path.
+
+</div>
+
+<div id="RoutingConflict.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;environmentGroup&quot;: string,
+  &quot;conflictingDeployment&quot;: {
+    object (RoutingDeployment)
+  },
+  &quot;description&quot;: string
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="RoutingConflict.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| environmentGroup | string Name of the environment group in which this conflict exists. |
+| conflictingDeployment | object ( RoutingDeployment ) Existing base path/deployment causing the conflict. |
+| description | string Human-readable description of this conflict. |
+
+</div>
+
+</div>
+
+<div id="RoutingDeployment" class="section">
+
+## RoutingDeployment
+
+<div id="RoutingDeployment.description" class="section">
+
+Tuple representing a base path and the deployment containing it.
+
+</div>
+
+<div id="RoutingDeployment.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;basepath&quot;: string,
+  &quot;environment&quot;: string,
+  &quot;apiProxy&quot;: string,
+  &quot;revision&quot;: string
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="RoutingDeployment.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| basepath | string Base path receiving traffic. |
+| environment | string Name of the environment in which the proxy is deployed. |
+| apiProxy | string Name of the deployed API proxy revision containing the base path. |
+| revision | string Name of the deployed API proxy revision containing the base path. |
+
+</div>
+
+</div>
+
+<div id="InstanceDeploymentStatus" class="section">
+
+## InstanceDeploymentStatus
+
+<div id="InstanceDeploymentStatus.description" class="section">
+
+The status of a deployment as reported by a single instance.
+
+</div>
+
+<div id="InstanceDeploymentStatus.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;instance&quot;: string,
+  &quot;deployedRevisions&quot;: [
+    {
+      object (DeployedRevision)
+    }
+  ],
+  &quot;deployedRoutes&quot;: [
+    {
+      object (DeployedRoute)
+    }
+  ]
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="InstanceDeploymentStatus.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| instance | string ID of the instance reporting the status. |
+| deployedRevisions[] | object ( DeployedRevision ) Revisions currently deployed in MPs. |
+| deployedRoutes[] | object ( DeployedRoute ) Current routes deployed in the ingress routing table. A route which is missing will appear in missingRoutes . |
+
+</div>
+
+</div>
+
+<div id="DeployedRevision" class="section">
+
+## DeployedRevision
+
+<div id="DeployedRevision.description" class="section">
+
+Revisions deployed in the MPs.
+
+</div>
+
+<div id="DeployedRevision.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;revision&quot;: string,
+  &quot;percentage&quot;: integer
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="DeployedRevision.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| revision | string API proxy revision reported as deployed. |
+| percentage | integer Percentage of MP replicas reporting this revision. |
+
+</div>
+
+</div>
+
+<div id="DeployedRoute" class="section">
+
+## DeployedRoute
+
+<div id="DeployedRoute.description" class="section">
+
+Route deployed in the ingress routing table.
+
+</div>
+
+<div id="DeployedRoute.SCHEMA_REPRESENTATION" class="section">
+
+<table class="properties responsive fixed">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
+<thead>
+<tr>
+<th>JSON representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="margin: 0; padding: 0"><div>
+&#10;</div>
+<pre style="border: 0;margin: 0;" translate="no" dir="ltr" data-is-upgraded=""><code>{
+  &quot;basepath&quot;: string,
+  &quot;envgroup&quot;: string,
+  &quot;environment&quot;: string,
+  &quot;percentage&quot;: integer
+}</code></pre></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div id="DeployedRoute.FIELDS" class="section">
+
+| Fields |  |
+| --- | --- |
+| basepath | string Base path in the routing table. |
+| envgroup | string Environment group where this route is installed. |
+| environment | string Destination environment. This will be empty if the route is not yet reported. |
+| percentage | integer Percentage of ingress replicas reporting this route. |
+
+</div>
+
+</div>
+
+<div id="ProxyDeploymentType" class="section">
+
+## ProxyDeploymentType
+
+<div id="ProxyDeploymentType.description" class="section">
+
+ProxyDeploymentType specifies whether deployments contains only STANDARD type of proxies or both
+
+</div>
+
+<div id="ProxyDeploymentType.ENUM_VALUES" class="section">
+
+| Enums |  |
+| --- | --- |
+| PROXY_DEPLOYMENT_TYPE_UNSPECIFIED | Default value till public preview. After public preview this value should not be returned. |
+| STANDARD | Deployment will be of type Standard if only Standard proxies are used |
+| EXTENSIBLE | Proxy will be of type Extensible if deployments uses one or more Extensible proxies |
+
+</div>
+
+</div>
+
+<div id="METHODS_SUMMARY" class="section">
+
+| Methods |  |
+| --- | --- |
+| get | Gets a particular deployment of Api proxy or a shared flow in an environment |
+| getIamPolicy | Gets the IAM policy on a deployment. |
+| list | Lists all deployments of API proxies or shared flows in an environment. |
+| setIamPolicy | Sets the IAM policy on a deployment, if the policy already exists it will be replaced. |
+| testIamPermissions | Tests the permissions of a user on a deployment, and returns a subset of permissions that the user has on the deployment. |
+
+</div>
+
+</div>

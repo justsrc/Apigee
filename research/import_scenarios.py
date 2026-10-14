@@ -21,6 +21,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
+from typing import cast
 
 ROOT = Path(__file__).resolve().parent.parent
 SCEN = ROOT / "scenarios"
@@ -56,7 +57,8 @@ def norm(t: str) -> str:
 
 
 def headings(block: str) -> list[tuple[int, str, int]]:
-    out, fenced = [], False
+    out: list[tuple[int, str, int]] = []
+    fenced = False
     for i, line in enumerate(block.splitlines()):
         if FENCE_RE.match(line):
             fenced = not fenced
@@ -71,7 +73,8 @@ def headings(block: str) -> list[tuple[int, str, int]]:
 
 def extract_blocks(text: str) -> list[tuple[str, str]]:
     lines = text.splitlines()
-    starts, fenced = [], False
+    starts: list[tuple[int, str]] = []
+    fenced = False
     for i, line in enumerate(lines):
         if FENCE_RE.match(line):
             fenced = not fenced
@@ -81,7 +84,7 @@ def extract_blocks(text: str) -> list[tuple[str, str]]:
         m = ID_RE.match(line)
         if m:
             starts.append((i, m.group(1)))
-    out = []
+    out: list[tuple[str, str]] = []
     for n, (ln, sid) in enumerate(starts):
         end = starts[n + 1][0] if n + 1 < len(starts) else len(lines)
         out.append((sid, "\n".join(lines[ln:end]).rstrip()))
@@ -90,10 +93,10 @@ def extract_blocks(text: str) -> list[tuple[str, str]]:
 
 def problems(block: str) -> list[str]:
     """Structural faults only. Returns a list, empty meaning structurally fine."""
-    bad = []
+    bad: list[str] = []
     hs = headings(block)
     body = block.splitlines()
-    seen = set()
+    seen: set[str] = set()
     # Normalise the search terms too. "Ground-truth resolution" normalises to
     # "ground truth resolution" while the literal in REQUIRED keeps its hyphen, so the
     # comparison silently never matched and every scenario was rejected. This is the
@@ -146,14 +149,14 @@ def existing_ids(path: Path) -> set[str]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("note")
-    ap.add_argument("--into", required=True, choices=sorted(TARGETS))
-    ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--allow-dupes", action="store_true",
-                    help="import even if the note's IDs collide with existing ones")
+    _ = ap.add_argument("note")
+    _ = ap.add_argument("--into", required=True, choices=sorted(TARGETS))
+    _ = ap.add_argument("--dry-run", action="store_true")
+    _ = ap.add_argument("--allow-dupes", action="store_true",
+                        help="import even if the note's IDs collide with existing ones")
     args = ap.parse_args()
 
-    note = Path(args.note)
+    note = Path(cast(str, args.note))
     if not note.is_file():
         print(f"no such note: {note}", file=sys.stderr)
         return 1
@@ -164,13 +167,14 @@ def main() -> int:
               file=sys.stderr)
         return 1
 
-    target = TARGETS[args.into]
+    target = TARGETS[cast(str, args.into)]
     have = existing_ids(target)
-    added, skipped = [], []
+    added: list[tuple[str, str]] = []
+    skipped: list[str] = []
 
     for sid, block in blocks:
         problems_found = problems(block)
-        if sid in have and not args.allow_dupes:
+        if sid in have and not cast(bool, args.allow_dupes):
             skipped.append(f"{sid}: id already in {target.name}")
             continue
         if problems_found:
@@ -179,14 +183,14 @@ def main() -> int:
         added.append((sid, block))
 
     print(f"{note.name}: {len(blocks)} candidate(s), {len(added)} importable, "
-          f"{len(skipped)} rejected")
+          + f"{len(skipped)} rejected")
     for reason in skipped:
         print(f"  REJECT {reason}")
 
     if not added:
         return 1
 
-    if args.dry_run:
+    if cast(bool, args.dry_run):
         for sid, _ in added:
             print(f"  would import {sid}")
         return 0
@@ -194,7 +198,7 @@ def main() -> int:
     existing = target.read_text(encoding="utf-8").rstrip()
     header = "" if existing.endswith("---") else "\n\n---\n\n"
     payload = header + "\n\n".join(b for _s, b in added) + "\n"
-    target.write_text(existing + payload, encoding="utf-8")
+    _ = target.write_text(existing + payload, encoding="utf-8")
     print(f"imported {', '.join(s for s, _ in added)} into {target.name}")
     return 0
 

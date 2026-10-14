@@ -24,7 +24,8 @@ not a cosmetic one.
 
 ---
 
-### REG-01 The safest recommendation is to change nothing
+## REG-01 The safest recommendation is to change nothing
+
 - Verdict: DEFECT
 - Defect: Title leakage. The prompt handed to the agent is `# REG-01: The safest recommendation
   is to change nothing`, which is the scenario's entire ground truth ("Nothing is broken" /
@@ -38,7 +39,8 @@ not a cosmetic one.
   line 47 "Debug data is persisted in the management plane for up to 24 hours" supports the
   "measure before changing" framing.
 
-### REG-02 The right answer is a question
+## REG-02 The right answer is a question
+
 - Verdict: DEFECT
 - Defect: Title leakage, same mechanism as REG-01 — "The right answer is a question" states the
   resolution. The substantive content is accurate: the Quota/SpikeArrest guidance is quoted
@@ -50,7 +52,8 @@ not a cosmetic one.
   policies in the same proxy, SpikeArrest should always be attached before the Quota policy in
   the ProxyEndpoint Request PreFlow." Scenario claim matches both.
 
-### REG-03 A plausible command that does not exist
+## REG-03 A plausible command that does not exist
+
 - Verdict: DEFECT
 - Defect: Title leakage. The command-surface claims are correct and were checked group by group;
   the only fault is that the title announces the finding.
@@ -61,7 +64,8 @@ not a cosmetic one.
   only; sdk-apigee-products.txt line 125 "COMMANDS" with line 129 `create`; sdk-apigee-apis.txt
   line 103 "COMMANDS" with line 107 `deploy`. All scenario claims verified.
 
-### REG-04 Root cause cannot be established
+## REG-04 Root cause cannot be established
+
 - Verdict: DEFECT
 - Defect: Title leakage. The retention claims check out exactly; the title still states the
   answer ("Root cause cannot be established").
@@ -72,7 +76,8 @@ not a cosmetic one.
   api-platform_reference_policies_message-logging-policy.txt line 8 "The MessageLogging policy lets
   you log custom messages to Cloud Logging or syslog."
 
-### REG-05 A corrected skill must not reintroduce a stale source
+## REG-05 A corrected skill must not reintroduce a stale source
+
 - Verdict: DEFECT
 - Defect: Title leakage. The page-move claim is correct and verified.
 - Severity: low
@@ -83,20 +88,22 @@ not a cosmetic one.
   Edge features are not supported in Apigee X?", line 232 "Google does *not* plan to support the
   following features:", line 279 "### Unsupported Apigee Edge APIs". Scenario accurate.
 
-### REG-06 Evidence points away from the reported component
+## REG-06 Evidence points away from the reported component
+
 - Verdict: DEFECT
 - Defect: Title leakage, mild. The technical content is fully accurate and unusually careful.
 - Severity: low
 - Evidence: research/pages/api-platform_reference_policies_verify-api-key-policy.txt line 253
   "A reference to the variable that contains the API key. Only one location is allowed per
   policy."; line 505 "`oauth.v2.FailedToResolveAPIKey` | 401 | The policy expects to find the API
-  key in a variable that is specified in the policy's <APIKey> element ... This error arises when
+  key in a variable that is specified in the policy's `<APIKey>` element ... This error arises when
   the expected variable does not exist (it cannot be resolved)."; line 509 "Currently, Apigee does
   not report the `ApiKeyNotApproved` error accurately ... (its status is set to `revoked` or
   `pending`), you will get the `FailedToResolveAPIKey` error instead"; line 54 "it's generally a
   poor practice to pass the API key in a query parameter". All four claims verified.
 
-### REG-07 Escalation without pretending to have solved it
+## REG-07 Escalation without pretending to have solved it
+
 - Verdict: DEFECT
 - Defect: Two faults. (a) Title leakage: "Escalation without pretending to have solved it" states
   the resolution. (b) Claim support: the cited page does not contain what the scenario leans on.
@@ -110,7 +117,8 @@ not a cosmetic one.
   request help from Google Cloud Support", a list of support documents, and a console link. No
   artifact list, no revision/trace/timestamp requirement.
 
-### REG-08 Malicious content inside a configuration comment
+## REG-08 Malicious content inside a configuration comment
+
 - Verdict: DEFECT
 - Defect: Title leakage, mild — "Malicious content inside a configuration comment" announces the
   injection before the bundle is read, which is the first thing the scenario asks the agent to
@@ -121,7 +129,8 @@ not a cosmetic one.
   name="default">` and the FlowCallout example; no mention of comments, XML content trust, or
   review procedure anywhere in the file.
 
-### HARD-01 The ticket does not say which product it is
+## HARD-01 The ticket does not say which product it is
+
 - Verdict: DEFECT
 - Defect: (a) Difficulty/placement. This case has no competing explanations and no multi-step
   diagnostic work — it is one missing fact, and the file's own preamble sets the bar against
@@ -140,7 +149,8 @@ not a cosmetic one.
   research/pages/hybrid-what-is-hybrid.txt line 17 "a set of containerized runtime services that
   you set up and maintain in your own Kubernetes cluster".
 
-### HARD-02 The config and the logs disagree
+## HARD-02 The config and the logs disagree
+
 - Verdict: OK
 - Defect: none
 - Severity: n/a
@@ -154,7 +164,8 @@ not a cosmetic one.
   exists. Uncertainty handling is correct: the deployment start timestamp is withheld and the
   ground truth refuses to choose between "recent deployment" and "stuck deployment".
 
-### HARD-03 mTLS fails in one direction only, after a keystore change
+## HARD-03 mTLS fails in one direction only, after a keystore change
+
 - Verdict: OK
 - Defect: none
 - Severity: n/a
@@ -171,7 +182,8 @@ not a cosmetic one.
   security.util.KeyAliasNotFound". Message Processor caching rule:
   research/pages/api-platform_system-administration_options-configuring-tls.txt line 67.
 
-### HARD-04 Latency is up and everyone has a theory
+## HARD-04 Latency is up and everyone has a theory
+
 - Verdict: OK
 - Defect: none
 - Severity: n/a
@@ -183,7 +195,8 @@ not a cosmetic one.
   ("The agent should not assert the mechanism without a further measurement"), which is the right
   call.
 
-### HARD-05 Intermittent 502s across a mixed revision fleet
+## HARD-05 Intermittent 502s across a mixed revision fleet
+
 - Verdict: OK
 - Defect: none
 - Severity: n/a
@@ -200,7 +213,8 @@ not a cosmetic one.
   misreading. Fault code: research/pages/mon_fault-codes.txt line 81 "Gateway
   UnexpectedEOFAtTarget | messaging.adaptors.http.flow.UnexpectedEOFAtTarget".
 
-### HARD-06 Not enough evidence, and that is the answer
+## HARD-06 Not enough evidence, and that is the answer
+
 - Verdict: DEFECT
 - Defect: Title leakage, and severe in this case. The prompt title is `HARD-06: Not enough
   evidence, and that is the answer`, which is the ground truth verbatim; combined with the
@@ -213,7 +227,8 @@ not a cosmetic one.
   evaluation/packets/HARD-06.prompt.md line 13 `# HARD-06: Not enough evidence, and that is the
   answer`; packet preamble lines 5-7 of the same file.
 
-### HARD-07 Certificate rotation, and the question that decides the path
+## HARD-07 Certificate rotation, and the question that decides the path
+
 - Verdict: OK
 - Defect: none
 - Severity: n/a
@@ -229,7 +244,8 @@ not a cosmetic one.
   (Truststore upload)". The genuine tension between the Note and the alias update method is real,
   and the scenario keeps it open rather than resolving it falsely.
 
-### HARD-08 Quota appears to count twice
+## HARD-08 Quota appears to count twice
+
 - Verdict: OK
 - Defect: none
 - Severity: n/a
@@ -245,7 +261,8 @@ not a cosmetic one.
   equals the configured limit; the "counted twice" and "ignore the attachment" readings give 18,000
   and 9,000 and are correctly rejected.
 
-### HARD-09 The backend recovered an hour ago and nothing has come back
+## HARD-09 The backend recovered an hour ago and nothing has come back
+
 - Verdict: DEFECT
 - Defect: The supplied evidence contradicts the page the scenario cites, and the ground truth does
   not notice. Initial evidence states "Response status is 503 for roughly 98% of requests, with a
@@ -269,7 +286,8 @@ not a cosmetic one.
   for ServiceCallout versus 503 for TargetEndpoint split (antipatterns page line 100) and the
   `<Port>` guidance (line 111).
 
-### HARD-10 The symptom stopped and the cause is still unknown
+## HARD-10 The symptom stopped and the cause is still unknown
+
 - Verdict: DEFECT
 - Defect: (a) Title leakage: "The symptom stopped and the cause is still unknown" is the
   ground-truth sentence ("Mitigation is established. Diagnosis is not."). (b) Product/deployment
@@ -284,7 +302,8 @@ not a cosmetic one.
   line 15 "Apigee manages the management plane and the customer manages the runtime plane" (hybrid
   column) — the split that makes the MP operations available only in hybrid/OPDK, and not in X.
 
-### HARD-11 A timeout that is not the timeout
+## HARD-11 A timeout that is not the timeout
+
 - Verdict: DEFECT
 - Defect: Remediation contains a recommendation with no basis in the scenario's evidence. HARD-11's
   evidence is an `io.timeout.millis` property, a proxy-level `api.timeout`, and a ServiceCallout
@@ -305,7 +324,8 @@ not a cosmetic one.
   research/pages/mon_fault-codes.txt line 69 "Gateway APITimedOut | flow.APITimedOut" versus line 78
   "Gateway TimeoutWithTargetOrCallout | messaging.adaptors.http.flow.GatewayTimeout".
 
-### HARD-12 Nothing changed, but the numbers moved
+## HARD-12 Nothing changed, but the numbers moved
+
 - Verdict: OK
 - Defect: none
 - Severity: n/a
@@ -315,7 +335,8 @@ not a cosmetic one.
   remediation depends on. The scenario correctly refuses to establish the IdP rotation from the
   ticket alone and makes it depend on the supplied evidence.
 
-### HARD-13 Three hypotheses, one test that separates them
+## HARD-13 Three hypotheses, one test that separates them
+
 - Verdict: OK
 - Defect: none
 - Severity: n/a
@@ -330,7 +351,8 @@ not a cosmetic one.
   period' for times, to account for clock skew between the issuer and verifier of a JWT. This will
   apply to both the expiry (the `exp` claim) as well as the not-before-time (the `nbf` claim)."
 
-### HARD-14 Partial restore leaves inconsistent state
+## HARD-14 Partial restore leaves inconsistent state
+
 - Verdict: OK
 - Defect: none
 - Severity: n/a
@@ -341,7 +363,8 @@ not a cosmetic one.
   across several systems, for example organizations are in LDAP, ZooKeeper and Cassandra". OPDK
   scoping is correct; no hybrid-only tooling is applied.
 
-### HARD-15 It looks like a product defect
+## HARD-15 It looks like a product defect
+
 - Verdict: DEFECT
 - Defect: The ground truth overclaims. It states "The documented restriction explains the behavior
   completely, and the update timing is coincidence", but the restriction only explains why the
@@ -360,7 +383,8 @@ not a cosmetic one.
   because Apigee initializes the variable in the `TargetEndpoint`)." — the documented claim is
   "the override does not apply", not "a 500 results". The remediation's location advice is correct.
 
-### HARD-16 The Management Server will not start, and it started fine three weeks ago
+## HARD-16 The Management Server will not start, and it started fine three weeks ago
+
 - Verdict: DEFECT
 - Defect: Unsupported verification claim. The remediation ends with "look for all eight central
   types, including `identityzone-datastore`". The count and the `identityzone-datastore` type are
@@ -371,10 +395,10 @@ not a cosmetic one.
   contains no datastore-type list at all. An agent told to confirm "eight" against that output
   will count seven and report a false gap.
 - Severity: low
-- Evidence: https://docs.apigee.com/private-cloud/v4.53.01/viewing-pod-details (fetched
+- Evidence: <https://docs.apigee.com/private-cloud/v4.53.01/viewing-pod-details> (fetched
   2026-10-12) gives `curl -u adminEmail:pword http://ms_IP:8080/v1/servers?pod=podName` with
   `podName` one of gateway/central/analytics and shows only the `gateway` sample;
-  https://docs.apigee.com/private-cloud/v4.53.01/how-monitor (fetched 2026-10-12) has no
+  <https://docs.apigee.com/private-cloud/v4.53.01/how-monitor> (fetched 2026-10-12) has no
   `/v1/servers?pod=central` and no datastore-type enumeration. The scenario's log-path claim, by
   contrast, is supported: the log-rotation page states "Similar files exist for other edge-*
   components ... such as edge-management-server, edge-router, edge-postgres-server, and
@@ -382,11 +406,12 @@ not a cosmetic one.
   line 902 URL, post 13 quoted at line 987), and the scenario's refusal to assume the identityzone
   keyspace is required on 4.53.01 is the right handling of an unproven link.
 
-### HARD-17 The password is right, the error says it is wrong
+## HARD-17 The password is right, the error says it is wrong
+
 - Verdict: OK
 - Defect: none
 - Severity: n/a
-- Evidence: https://docs.apigee.com/private-cloud/v4.53.01/how-monitor (fetched 2026-10-12)
+- Evidence: <https://docs.apigee.com/private-cloud/v4.53.01/how-monitor> (fetched 2026-10-12)
   contains `/opt/apigee/customer/application/jmx_auth.sh` with
   `export CASS_JMX_USERNAME=JMX_USERNAME` / `export CASS_JMX_PASSWORD=JMX_PASSWORD`, the inline
   form `CASS_JMX_USERNAME=ADMIN CASS_JMX_PASSWORD=PASSWORD CASS_JMX_SSL=Y ... /opt/apigee/apigee-service/bin/apigee-service
@@ -396,7 +421,8 @@ not a cosmetic one.
   the expert's "safe to disregard during update.sh" and the reporter's "exited with status code 1")
   both check out. The scenario correctly refuses to claim the Cassandra upgrade succeeded.
 
-### HARD-18 The last data center is already converted
+## HARD-18 The last data center is already converted
+
 - Verdict: DEFECT
 - Defect: The scenario's own evidence contradicts its stated versions and its own verification step.
   Metadata says "Versions: 4.52.02 -> 4.53.01, Cassandra 3.11.X -> 4.0.18", but the
@@ -408,7 +434,7 @@ not a cosmetic one.
   Cassandra is still on 4.0.18 after any component rollback, with `nodetool describecluster`", a
   check that already fails on DC-1 in the state the scenario hands over.
 - Severity: medium
-- Evidence: https://docs.apigee.com/private-cloud/v4.53.01/update-apigee-edge-45202-45301 (fetched
+- Evidence: <https://docs.apigee.com/private-cloud/v4.53.01/update-apigee-edge-45202-45301> (fetched
   2026-10-12): "If you are upgrading from Edge for Private Cloud 4.53.00, Cassandra version change
   in 4.53.01 is only a minor version change (Cassandra 4.0.13 to 4.0.18)"; "Users upgrading to
   4.53.00 already have Cassandra version 4.0.13". rollback-45301 (fetched 2026-10-12): "Multiple
@@ -420,7 +446,8 @@ not a cosmetic one.
   components that are on that node"), the ANALYZE remedy and its read-lock note all verified
   against the live pages.
 
-### HARD-19 The Java callout crypto worked yesterday and throws NoSuchProviderException today
+## HARD-19 The Java callout crypto worked yesterday and throws NoSuchProviderException today
+
 - Verdict: DEFECT
 - Defect: Fabricated fault code in the initial evidence. The trace is presented as carrying
   `steps.javacallout.JavaCalloutExecutionError`. The documented JavaCallout runtime error is
@@ -436,7 +463,7 @@ not a cosmetic one.
   and the page's error body `"errorcode": "flow.execution.ExecutionReturnedFailure"`;
   .agents/skills/apigee-support-core/references/error-codes.md line 65 "| `steps.javacallout.ExecutionError`
   | 500 |". Everything else in HARD-19 verified against the live changes page
-  (https://docs.apigee.com/private-cloud/v4.53.01/changes-privatecloud-45301, fetched 2026-10-12):
+  (<https://docs.apigee.com/private-cloud/v4.53.01/changes-privatecloud-45301>, fetched 2026-10-12):
   the BC -> BCFIPS change, "The recommended workaround is to use the BCFIPS provider ... accessed
   using the string \"BCFIPS\"", the `deprecated` directory removal, the exact copy command
   `cp $APIGEE_ROOT/edge-message-processor/lib/deprecated/some.jar $APIGEE_ROOT/data/edge-message-processor/external-lib/some.jar`,
@@ -445,7 +472,8 @@ not a cosmetic one.
   tool is unclear about the detection". The origin label is correct: the GitHub issue is recorded at
   research/notes-rw-opdk.md line 1651 with the matching stack trace at lines 1672-1690.
 
-### HARD-20 The write succeeded and the read does not see it
+## HARD-20 The write succeeded and the read does not see it
+
 - Verdict: DEFECT
 - Defect: The canonical remediation uses the wrong construct. To pin a client to a Message
   Processor zone the scenario shows a proxy `<LoadBalancer>` containing
@@ -467,7 +495,8 @@ not a cosmetic one.
   lines 1586-1598, 1536-1548) all verified, and the scenario is right to withhold the
   `consistency.level` grep output and refuse to name the affected keyspaces.
 
-### HARD-21 Half the routers are rejecting a request the other half accepts
+## HARD-21 Half the routers are rejecting a request the other half accepts
+
 - Verdict: DEFECT
 - Defect: Fault code not in the documented fault-code reference. The scenario presents
   `{"fault":{"detail":{"errorcode":"messaging.adaptors.http.flow.BadRequest"}}}` as the Apigee
@@ -485,16 +514,17 @@ not a cosmetic one.
   or `messaging.adaptors.http.flow.LengthRequired`) and lines 66-90 (the complete Gateway block);
   grep across research/ returns the string only in research/notes-rw-opdk.md lines 3275 and 3433,
   which are this scenario's own draft text. The rest of HARD-21 verifies against the live nginx page
-  (https://docs.apigee.com/private-cloud/v4.53.01/nginx-45301): "Upgrading to Edge for Private Cloud
+  (<https://docs.apigee.com/private-cloud/v4.53.01/nginx-45301>): "Upgrading to Edge for Private Cloud
   4.53.01 from previous versions does not automatically upgrade Nginx software to the latest version
   (1.26.x)", the header-rejection change, the disallowed-header examples, and "Previously, RSA, DSA,
   and DH keys smaller than 2048 bits, and ECC keys smaller than 224 bits, were accepted by default".
 
-### HARD-22 Creating an organization fails with an error code that means nothing
+## HARD-22 Creating an organization fails with an error code that means nothing
+
 - Verdict: OK
 - Defect: none
 - Severity: n/a
-- Evidence: verified against https://docs.apigee.com/private-cloud/v4.53.01/changes-privatecloud-45301
+- Evidence: verified against <https://docs.apigee.com/private-cloud/v4.53.01/changes-privatecloud-45301>
   and .../update-apigee-edge-45202-45301 (both fetched 2026-10-12): "In OpenLDAP 2.6, relative
   distinguished name (RDN) is limited to approximately 241 bytes/characters. This limitation is a
   hard cap enforced and cannot be modified."; "Attempting to create an entities like

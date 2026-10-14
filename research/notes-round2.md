@@ -8,12 +8,13 @@ read, not just search snippets. Fetched page bodies are in `research/pages/`, is
 `research/issues/`.
 
 Tools written this session:
+
 - `research/gh-issue.sh OWNER/REPO NUMBER [name]` — dumps issue + all comments to
   `research/issues/<name>.txt`. New; verify with `./gh-issue.sh` before citing.
 
 ---
 
-# PART 1 — REAL-WORLD FAILURE REPORTS
+## PART 1 — REAL-WORLD FAILURE REPORTS
 
 ## 1A. Official known-issues register (evidence level (a))
 
@@ -123,8 +124,8 @@ support cases are below.
   v1.16.0."** Detail: "There is a known issue in 1.16.0 where Hybrid clusters may fail to report
   deployment status of proxies. This is due to a missing permission in the `apigee-manager-role`
   role."
-- Workaround: "Add the permission to the `apigee-operator` helm chart template: … Add the ` - watch`
-  verb to the `deployments` resource, after the ` - update` verb on line 584."
+- Workaround: "Add the permission to the `apigee-operator` helm chart template: … Add the `- watch`
+  verb to the `deployments` resource, after the `- update` verb on line 584."
 - Evidence level: (a) official docs.
 - Why it is a good case: "deployment is stuck" is read as a runtime problem. It is a Kubernetes
   RBAC verb missing from the controller's own role.
@@ -519,6 +520,7 @@ Note on author associations as they appear in the API `author_association` field
   closed 2018-06-04.
 - Title, verbatim: "Deployment fails when a keystore or target server is added in the service callout policy"
 - The triggering configuration, verbatim from the issue body:
+
   ```xml
   <HTTPTargetConnection>
     <URL>https://myURL.com</URL>
@@ -530,10 +532,13 @@ Note on author associations as they appear in the API `author_association` field
     </SSLInfo>
   </HTTPTargetConnection>
   ```
+
 - Error string, verbatim:
-  ```
+
+  ```text
   "{\n  \"code\" : \"beans.OtherValidationError\",\n  \"message\" : \"Unexpected Validation Error null\",\n  \"contexts\" : [ ]\n}"
   ```
+
 - Decisive fact, verbatim from the reporter: "When I create a zip of the same proxy bundle and
   upload it to management UI then it deploys fine."
 - Maintainer `noahdietz` (`author_association: COLLABORATOR`), verbatim: "I've found the root cause.
@@ -617,10 +622,12 @@ Note on author associations as they appear in the API `author_association` field
 - URL: <https://github.com/apigee/apigeecli/issues/473>
 - Repo: `apigee/apigeecli`, owner `apigee`, **owner_type=Organization**. Opened 2024-05-28.
 - Real API error, verbatim:
-  ```
+
+  ```text
   "message": "generic::failed_precondition: revision organizations/djfong-autopush-ngsaas/apis/apiproduct-operations-oauth2/revisions/3 is currently deployed in default-dev",
   "status": "FAILED_PRECONDITION",
   ```
+
   with `"code": 400` and a `DebugInfo` detail repeating the string three times.
 - What the user actually saw on the terminal, verbatim: `Error: Bad Request - malformed request
   syntax` followed by the full `apigeecli apis delete` usage block.
@@ -677,12 +684,14 @@ Note on author associations as they appear in the API `author_association` field
 - Repo: `apigee/apigeetool-node`, owner `apigee`, **owner_type=Organization**. Opened 2014-12-04.
   **Still OPEN as of this session.**
 - Error, verbatim:
-  ```
+
+  ```text
   Error: UNABLE_TO_VERIFY_LEAF_SIGNATURE
       at SecurePair.<anonymous> (tls.js:1380:32)
       ...
   ```
-- `gbrail` (`author_association: NONE`, signed "greg brail | apigee https://apigee.com") proposed
+
+- `gbrail` (`author_association: NONE`, signed "greg brail | apigee <https://apigee.com>") proposed
   two options, verbatim: "We could add a flag that lets you pass in a CA certificate as a PEM file"
   or "we could add a flag to disable certificate validation, like the "-k" flag to "curl.""
 - The reporter rejected the second, verbatim: "I think, that disabling the validation is not a
@@ -691,7 +700,7 @@ Note on author associations as they appear in the API `author_association` field
   resolved in #7 . At least it works for me :)" → that is **(iv) reporter-confirmed** for this
   issue's specific symptom. But the issue is still open, and the last comment shows the insecure
   flag does not cover the neighbouring case: "I tried the `insecure` option and it didn't solve
-  https://github.com/apigee/apigeetool-node/issues/33" — that other issue is titled "Error: unable
+  <https://github.com/apigee/apigeetool-node/issues/33>" — that other issue is titled "Error: unable
   to verify the first certificate", i.e. an incomplete chain, which is a different defect from an
   untrusted root.
 - Evidence level: (c) reporter-confirmed, for the CA-file option only.
@@ -737,7 +746,7 @@ Note on author associations as they appear in the API `author_association` field
 
 ---
 
-# PART 2 — HYBRID OPERATIONS
+## PART 2 — HYBRID OPERATIONS
 
 Seed page verified first, as instructed:
 <https://cloud.google.com/apigee/docs/hybrid/latest/what-is-hybrid> — observed **HTTP 200, 11551
@@ -881,16 +890,20 @@ memorised number. EKS on 1.17 lists `1.30.x`–`1.36.x` on at least one platform
   that are required to deploy and maintain the AD… validates the ApigeeDeployment configuration
   before persisting it in Kubernetes cluster."
 - Command, verbatim:
+
   ```terminal
   kubectl get ad -n APIGEE_NAMESPACE
   ```
+
   Output shape, verbatim:
-  ```
+
+  ```text
   NAME                                              AGE
   apigee-mart-my_org                                4h
   apigee-runtime-my_org-my_env                      4h
   apigee-synchronizer-my_org-my_env                 4h
   ```
+
   The `apigee-runtime-<org>-<env>` and `apigee-synchronizer-<org>-<env>` naming convention is the
   fastest way to confirm which environment a pod serves.
 
@@ -925,9 +938,11 @@ memorised number. EKS on 1.17 lists `1.30.x`–`1.36.x` on at least one platform
   Each runtime pod contains a message processor, which is responsible for processing API proxy
   traffic, executing policies, routing requests, and more."
 - Command, verbatim:
+
   ```terminal
   kubectl logs -f -n APIGEE_NAMESPACE apigee-runtime-apigee-gcp-prod1-test-blue-hd77q
   ```
+
 - **Contract version log lines** (the discriminator for "did my deploy land on this pod?"),
   verbatim:
   - `hybrid-runtime Apigee-Timer-9 INFO RUNTIME-SYNC-SERVICE - RuntimeSyncServiceImpl.updateToVersion() : Switched to newer version 750 from version null` → "The MP changed to a newer version of the configuration contract."
@@ -992,6 +1007,7 @@ status are not. "The metrics say the latency went up" is weaker evidence on hybr
   environment configuration data in the Cassandra database." and "One Synchronizer can support many
   Message Processors deployed in the same pod."
 - Commands, verbatim:
+
   ```terminal
   export GOOGLE_APPLICATION_CREDENTIALS=your_sa_credentials_file.json
   gcloud auth application-default print-access-token
@@ -1001,6 +1017,7 @@ status are not. "The metrics say the latency went up" is weaker evidence on hybr
     "https://apigee.googleapis.com/v1/organizations/YOUR_ORG_NAME:setSyncAuthorization" \
      -d '{"identities":["serviceAccount:SYNCHRONIZER_MANAGER_SERVICE_ACCOUNT_NAME"]}'
   ```
+
 - The role requirement, verbatim: "Be sure that the service account name that you add to this API
   has the **Apigee Synchronizer Manager** role."
 - **This is a classic support trap and the doc is explicit**: if `setSyncAuthorization` was never
@@ -1039,6 +1056,7 @@ See Part 1A for F-01 through F-29. The hybrid-specific cluster, in rough triage 
 ### "Upgrade Apigee hybrid" — <https://cloud.google.com/apigee/docs/hybrid/v1.17/upgrade> (HTTP 200, 78108 bytes)
 
 Prerequisites, verbatim:
+
 - "If your hybrid installation is running a version older than v1.16, you must upgrade to version
   1.16 before upgrading to 1.17." (**No version skipping.** This is the analogue of the Edge for
   Private Cloud `update.sh` rule and should be checked before any upgrade ticket.)
@@ -1060,6 +1078,7 @@ restore a Hybrid 1.17 instance."
 "Management plane changes do not need to be fully suspended during an upgrade."
 
 Other verbatim constraints:
+
 - "**Caution:** Do not create new environments during the upgrade process."
 - CRD install, verbatim: "**Note:** This is the only supported method for installing Apigee CRDs.
   Do not use `kubectl apply` without `-k`, do not omit `--server-side`."
@@ -1087,13 +1106,15 @@ Chart upgrade order and exact commands (all quoted):
 | 8 | `ENV_GROUP_RELEASE_NAME` | `apigee-virtualhost/` | `kubectl -n APIGEE_NAMESPACE get arc` | `apigee-org1-dev-egroup-123abc  running` |
 
 Canonical invocation, verbatim:
-```
+
+```text
 helm upgrade ORG_NAME apigee-org/ \
   --install \
   --namespace APIGEE_NAMESPACE \
   -f OVERRIDES_FILE \
   --dry-run=server
 ```
+
 (then the same without `--dry-run=server`.)
 
 Release-name rule, verbatim and easy to get wrong: "`ENV_RELEASE_NAME` is a name used to keep track
@@ -1234,7 +1255,7 @@ stated mechanism is not sourced. Recommend rewording before MED-07 is used for e
 
 ---
 
-# PART 3 — MISDIAGNOSED CAUSES
+## PART 3 — MISDIAGNOSED CAUSES
 
 The cases where the first plausible explanation is wrong. Ordered by how badly an agent trained on
 the obvious answer would fail.
@@ -1247,6 +1268,7 @@ unaffected; a **fix** to node-selector handling in the `apigee-telemetry` chart 
 `logger.nodeSelector` default start taking effect, so the DaemonSet stopped matching nodes.
 Discriminator: `kubectl get daemonset apigee-logger -n apigee` reports "a desired count of `0`".
 Trajectories that go wrong:
+
 - Escalate as a runtime outage. The API is serving traffic the whole time.
 - Delete and recreate the Logger DaemonSet. The default selector returns.
 - Only check "is `logger.enabled` true" and stop. The bug only affects deployments with
@@ -1398,6 +1420,7 @@ commands, upload/download round-trip) rather than dismissing the claim.
 ## M-17. The refusal cases
 
 Two "obvious explanation is wrong" answers are the wrong kind of wrong and worth naming:
+
 - **apigee-api-catalog-drupal#46 (G-09)**: "SmartDocs and Swagger UI send the wrong Authorization
   scheme, so the bug is downstream." The wrong scheme originates in Apigee's own token response. The
   official remedy is a documentation section, not a fix — so "upgrade to fix it" is wrong too.
@@ -1408,7 +1431,7 @@ Two "obvious explanation is wrong" answers are the wrong kind of wrong and worth
 
 ---
 
-# PART 4 — PROPOSED SCENARIOS (MED-16 to MED-22)
+## PART 4 — PROPOSED SCENARIOS (MED-16 to MED-22)
 
 Format copied from `scenarios/medium.md`. Every fault code below exists in
 `.agents/skills/apigee-support-core/references/error-codes.md` (checked). Every URL was fetched
@@ -1500,7 +1523,8 @@ Rewriting the OAuth policy to generate the error manually. That hides the routin
 | Handling of competing causes | Accepts the literal error | Hedges | Separates client, policy, and routing explicitly |
 | Quality of next step | Changes parameters | Redeploys blindly | Redeploys with the base path matched, then verifies both flows |
 
-#### Critical failures: recommending adding `response_type` or `client_id` to the token request;
+#### Critical failures: recommending adding `response_type` or `client_id` to the token request
+
 asserting the OAuth policy is misconfigured.
 
 #### References
@@ -1602,6 +1626,7 @@ Treating "the tool said failed" as proof the proxy is not deployed. Check the de
 | Quality of next step | Increases delay | Retries | Changes the check interval or polls deployment state |
 
 #### Critical failures: asserting the delay setting is the root cause; opening a platform defect
+
 against Apigee for a tool-generated message.
 
 #### References
@@ -1697,6 +1722,7 @@ out incorrectly.
 | Handling of uncertainty | Asserts | Hedges | States the conjunction condition explicitly |
 
 #### Critical failures: telling a customer their data is lost; ruling the issue out by checking
+
 only one of the two gating features.
 
 #### References
@@ -1808,6 +1834,7 @@ by default on AKS.
 | Quality of next step | Restarts pods | Deletes the DaemonSet | Clears the selector or labels nodes |
 
 #### Critical failures: escalating as a runtime outage; recreating the DaemonSet; recommending a
+
 runtime restart, which does not address scheduling.
 
 #### References
@@ -1902,6 +1929,7 @@ Rolling every runtime pod at once. That turns a partial problem into a full outa
 | Quality of next step | Redeploy | Rolling restart | Rolling restart plus consolidating conflicting timeouts |
 
 #### Critical failures: recommending a redeploy as the fix; blaming the backend for timeouts at a
+
 value the proxy is no longer configured to use.
 
 #### References
@@ -2000,6 +2028,7 @@ a tool that cannot see the target server.
 | Quality of next step | Adds config | Suppresses the rule | Keeps TLS on the target server and cites the fixed version |
 
 #### Critical failures: adding `SSLInfo` to `HTTPTargetConnection` without establishing whether a
+
 `<LoadBalancer>` is in use; telling the customer one of the two authorities is simply wrong.
 
 #### References
@@ -2113,6 +2142,7 @@ the outcome being avoided.
 | Quality of next step | Restarts | Rebuilds the CA | Patches rotationPolicy to Never before any further change |
 
 #### Critical failures: recommending a CA rebuild or an immediate rotation; treating identical
+
 hybrid versions as proof that both clusters behave the same way.
 
 #### References

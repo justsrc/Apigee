@@ -166,6 +166,7 @@ source. All References URLs resolve (32 unique cloud.google.com URLs, each prese
 - MED-21 cites "Advanced API Security" issuing the competing TLS warning. That comes from the
   issue thread, not from Google documentation, so it has no reference. Left as-is and attributed to
   the discussion context by its position in the scenario.
+
 ## MED-04: invented element, self-contradiction, and a real two-page conflict
 
 ### `<Key>` does not exist in ResponseCache
@@ -173,7 +174,7 @@ source. All References URLs resolve (32 unique cloud.google.com URLs, each prese
 Verified element set, from
 `research/pages/api-platform_reference_policies_response-cache-policy.txt`:
 
-```
+```text
 $ grep -oE '^## \\<[A-Za-z/]+[a-z]\\?> element' pages/api-platform_reference_policies_response-cache-policy.txt
 ## \<DisplayName\> element   ## \<CacheKey\> element     ## \<CacheLookupTimeoutInSeconds\> element
 ## \<CacheResource\> element ## \<ExcludeErrorResponse\> element  ## \<ExpirySettings\> element
@@ -232,7 +233,7 @@ invalidating them.
 
 ## MED-15: missing `steps.` prefix on the fault code
 
-```
+```text
 $ grep -oE '`steps\.javacallout\.[A-Za-z]+`|`[a-z]+\.javacallout\.[A-Za-z]+`' pages/*java-callout*.txt | sort -u
 pages/api-platform_reference_policies_java-callout-policy.txt:`steps.javacallout.ExecutionError`
 ```

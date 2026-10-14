@@ -14,50 +14,50 @@ Format: Title | URL | HTTP status | bytes of extracted body
 
 | Title | URL | Status | Bytes |
 | --- | --- | --- | --- |
-| Apigee technical feature overview (was "Compare Apigee products") | https://cloud.google.com/apigee/docs/api-platform/get-started/compare-apigee-products | 200 | 11304 |
-| What is Apigee hybrid? | https://cloud.google.com/apigee/docs/hybrid/what-is-hybrid | 200 | 11551 |
-| Apigee hybrid — upgrade stub (see section 5) | https://cloud.google.com/apigee/docs/hybrid/upgrade | 200 (STUB) | 0 |
-| Upgrading Apigee hybrid | https://cloud.google.com/apigee/docs/hybrid/latest/upgrade | 200 | 78108 |
-| Installing Apigee hybrid: before you begin | https://cloud.google.com/apigee/docs/hybrid/latest/install-before-begin | 200 | 10254 |
-| Installing Apigee hybrid: the big picture | https://cloud.google.com/apigee/docs/hybrid/latest/big-picture | 200 | 11502 |
-| Apigee hybrid: supported platforms and versions | https://cloud.google.com/apigee/docs/hybrid/supported-platforms | 200 | 58518 |
-| Apigee hybrid: ports | https://cloud.google.com/apigee/docs/hybrid/latest/ports | 200 | 19075 |
-| Apigee hybrid: admin overview | https://cloud.google.com/apigee/docs/hybrid/latest/administer-overview | 200 | 10379 |
-| Apigee hybrid: service configuration overview | https://cloud.google.com/apigee/docs/hybrid/latest/service-config | 200 | 17774 |
-| Apigee hybrid: project/org setup overview (precog) | https://cloud.google.com/apigee/docs/hybrid/latest/precog-overview | 200 | 9743 |
-| Apigee hybrid: runtime logs | https://cloud.google.com/apigee/docs/hybrid/latest/runtime-logs | 200 | 11976 |
-| Apigee hybrid: logging | https://cloud.google.com/apigee/docs/hybrid/latest/logging | 200 | 8562 |
-| Apigee hybrid: creating an environment | https://cloud.google.com/apigee/docs/hybrid/latest/environment-create | 200 | 11768 |
-| Apigee hybrid: about environments | https://cloud.google.com/apigee/docs/hybrid/latest/environments-about | 200 | 14278 |
-| Apigee hybrid: metrics collection | https://cloud.google.com/apigee/docs/hybrid/latest/metrics-collection | 200 | (fetched, 200) |
-| Apigee hybrid: data collection overview | https://cloud.google.com/apigee/docs/hybrid/latest/data-collection-overview | 200 | (fetched, 200) |
-| Apigee hybrid: configuration properties reference | https://cloud.google.com/apigee/docs/hybrid/latest/config-prop-ref | 200 | 479971 |
-| Apigee hybrid release notes | https://cloud.google.com/apigee/docs/hybrid/release-notes | 200 | 819438 |
-| About environments and environment groups | https://cloud.google.com/apigee/docs/api-platform/fundamentals/environments-overview | 200 | 22460 |
-| Edge for Private Cloud release notes (post-Sep-2026) | https://cloud.google.com/apigee/docs/edge-private-cloud/release-notes | 200 | 3571 |
-| Apigee Edge for Private Cloud release notes (45301) | https://docs.apigee.com/release/notes/45301-edge-private-cloud-release-notes | 200 | 9971 |
-| Apigee Edge release notes archive (pre-Sep-2026) | https://docs.apigee.com/release/notes/apigee-release-notes | 200 | (status only) |
-| Known issues with Edge / Edge for Private Cloud | https://docs.apigee.com/release/known-issues | 200 | 25961 |
-| **Compare Apigee Edge to Apigee X** (the real feature-difference page) | https://docs.apigee.com/migration-to-x/compare-apigee-edge-to-apigee-x | 200 | 26454 |
-| What is Apigee Edge? | https://docs.apigee.com/api-platform/get-started/what-apigee-edge | 200 | 16042 |
-| Edge for Private Cloud index (unversioned root) | https://docs.apigee.com/private-cloud/ | 200 | 10606 |
-| Edge for Private Cloud overview v4.53.01 | https://docs.apigee.com/private-cloud/v4.53.01/overview | 200 | 9627 |
-| OPDK port requirements v4.53.01 | https://docs.apigee.com/private-cloud/v4.53.01/port-requirements | 200 | 17382 |
-| OPDK installation requirements v4.53.01 | https://docs.apigee.com/private-cloud/v4.53.01/installation-requirements | 200 | 26392 |
-| OPDK installation topologies v4.53.01 | https://docs.apigee.com/private-cloud/v4.53.01/installation-topologies | 200 | 13251 |
-| OPDK upgrade paths v4.53.01 | https://docs.apigee.com/private-cloud/v4.53.01/upgrade-paths | 200 | 581 |
-| OPDK starting/stopping/restarting v4.53.01 | https://docs.apigee.com/private-cloud/v4.53.01/starting-stopping-and-restarting-apigee-edge | 200 | 3797 |
-| OPDK after the install v4.53.01 | https://docs.apigee.com/private-cloud/v4.53.01/after-the-install | 200 | 7971 |
-| OPDK how to configure Edge v4.53.01 | https://docs.apigee.com/private-cloud/v4.53.01/how-configure-edge | 200 | (fetched, 200) |
-| OPDK test the install v4.53.01 | https://docs.apigee.com/private-cloud/v4.53.01/test-install | 200 | 4429 |
-| OPDK Edge configuration file reference v4.53.01 | https://docs.apigee.com/private-cloud/v4.53.01/edge-configuration-file-reference | 200 | (fetched, 200) |
-| Edge org structure | https://docs.apigee.com/api-platform/fundamentals/apigee-edge-organization-structure | 200 | 10135 |
-| Edge deploy via Management API | https://docs.apigee.com/api-platform/deploy/deploy-api-proxies-using-management-api | 200 | 3048 |
-| Edge service requests | https://docs.apigee.com/api-platform/system-administration/service-requests | 200 | 1842 |
-| Apigee REST: organizations.instances.attachments/create | https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.attachments/create | 200 | 2436 |
-| Apigee REST: organizations.instances.attachments/list | https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.attachments/list | 200 | 5296 |
-| Apigee REST: organizations.instances/list | https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances/list | 200 | 5062 |
-| Apigee REST: organizations.envgroups | https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups | 200 | 4811 |
+| Apigee technical feature overview (was "Compare Apigee products") | <https://cloud.google.com/apigee/docs/api-platform/get-started/compare-apigee-products> | 200 | 11304 |
+| What is Apigee hybrid? | <https://cloud.google.com/apigee/docs/hybrid/what-is-hybrid> | 200 | 11551 |
+| Apigee hybrid — upgrade stub (see section 5) | <https://cloud.google.com/apigee/docs/hybrid/upgrade> | 200 (STUB) | 0 |
+| Upgrading Apigee hybrid | <https://cloud.google.com/apigee/docs/hybrid/latest/upgrade> | 200 | 78108 |
+| Installing Apigee hybrid: before you begin | <https://cloud.google.com/apigee/docs/hybrid/latest/install-before-begin> | 200 | 10254 |
+| Installing Apigee hybrid: the big picture | <https://cloud.google.com/apigee/docs/hybrid/latest/big-picture> | 200 | 11502 |
+| Apigee hybrid: supported platforms and versions | <https://cloud.google.com/apigee/docs/hybrid/supported-platforms> | 200 | 58518 |
+| Apigee hybrid: ports | <https://cloud.google.com/apigee/docs/hybrid/latest/ports> | 200 | 19075 |
+| Apigee hybrid: admin overview | <https://cloud.google.com/apigee/docs/hybrid/latest/administer-overview> | 200 | 10379 |
+| Apigee hybrid: service configuration overview | <https://cloud.google.com/apigee/docs/hybrid/latest/service-config> | 200 | 17774 |
+| Apigee hybrid: project/org setup overview (precog) | <https://cloud.google.com/apigee/docs/hybrid/latest/precog-overview> | 200 | 9743 |
+| Apigee hybrid: runtime logs | <https://cloud.google.com/apigee/docs/hybrid/latest/runtime-logs> | 200 | 11976 |
+| Apigee hybrid: logging | <https://cloud.google.com/apigee/docs/hybrid/latest/logging> | 200 | 8562 |
+| Apigee hybrid: creating an environment | <https://cloud.google.com/apigee/docs/hybrid/latest/environment-create> | 200 | 11768 |
+| Apigee hybrid: about environments | <https://cloud.google.com/apigee/docs/hybrid/latest/environments-about> | 200 | 14278 |
+| Apigee hybrid: metrics collection | <https://cloud.google.com/apigee/docs/hybrid/latest/metrics-collection> | 200 | (fetched, 200) |
+| Apigee hybrid: data collection overview | <https://cloud.google.com/apigee/docs/hybrid/latest/data-collection-overview> | 200 | (fetched, 200) |
+| Apigee hybrid: configuration properties reference | <https://cloud.google.com/apigee/docs/hybrid/latest/config-prop-ref> | 200 | 479971 |
+| Apigee hybrid release notes | <https://cloud.google.com/apigee/docs/hybrid/release-notes> | 200 | 819438 |
+| About environments and environment groups | <https://cloud.google.com/apigee/docs/api-platform/fundamentals/environments-overview> | 200 | 22460 |
+| Edge for Private Cloud release notes (post-Sep-2026) | <https://cloud.google.com/apigee/docs/edge-private-cloud/release-notes> | 200 | 3571 |
+| Apigee Edge for Private Cloud release notes (45301) | <https://docs.apigee.com/release/notes/45301-edge-private-cloud-release-notes> | 200 | 9971 |
+| Apigee Edge release notes archive (pre-Sep-2026) | <https://docs.apigee.com/release/notes/apigee-release-notes> | 200 | (status only) |
+| Known issues with Edge / Edge for Private Cloud | <https://docs.apigee.com/release/known-issues> | 200 | 25961 |
+| **Compare Apigee Edge to Apigee X** (the real feature-difference page) | <https://docs.apigee.com/migration-to-x/compare-apigee-edge-to-apigee-x> | 200 | 26454 |
+| What is Apigee Edge? | <https://docs.apigee.com/api-platform/get-started/what-apigee-edge> | 200 | 16042 |
+| Edge for Private Cloud index (unversioned root) | <https://docs.apigee.com/private-cloud/> | 200 | 10606 |
+| Edge for Private Cloud overview v4.53.01 | <https://docs.apigee.com/private-cloud/v4.53.01/overview> | 200 | 9627 |
+| OPDK port requirements v4.53.01 | <https://docs.apigee.com/private-cloud/v4.53.01/port-requirements> | 200 | 17382 |
+| OPDK installation requirements v4.53.01 | <https://docs.apigee.com/private-cloud/v4.53.01/installation-requirements> | 200 | 26392 |
+| OPDK installation topologies v4.53.01 | <https://docs.apigee.com/private-cloud/v4.53.01/installation-topologies> | 200 | 13251 |
+| OPDK upgrade paths v4.53.01 | <https://docs.apigee.com/private-cloud/v4.53.01/upgrade-paths> | 200 | 581 |
+| OPDK starting/stopping/restarting v4.53.01 | <https://docs.apigee.com/private-cloud/v4.53.01/starting-stopping-and-restarting-apigee-edge> | 200 | 3797 |
+| OPDK after the install v4.53.01 | <https://docs.apigee.com/private-cloud/v4.53.01/after-the-install> | 200 | 7971 |
+| OPDK how to configure Edge v4.53.01 | <https://docs.apigee.com/private-cloud/v4.53.01/how-configure-edge> | 200 | (fetched, 200) |
+| OPDK test the install v4.53.01 | <https://docs.apigee.com/private-cloud/v4.53.01/test-install> | 200 | 4429 |
+| OPDK Edge configuration file reference v4.53.01 | <https://docs.apigee.com/private-cloud/v4.53.01/edge-configuration-file-reference> | 200 | (fetched, 200) |
+| Edge org structure | <https://docs.apigee.com/api-platform/fundamentals/apigee-edge-organization-structure> | 200 | 10135 |
+| Edge deploy via Management API | <https://docs.apigee.com/api-platform/deploy/deploy-api-proxies-using-management-api> | 200 | 3048 |
+| Edge service requests | <https://docs.apigee.com/api-platform/system-administration/service-requests> | 200 | 1842 |
+| Apigee REST: organizations.instances.attachments/create | <https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.attachments/create> | 200 | 2436 |
+| Apigee REST: organizations.instances.attachments/list | <https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.attachments/list> | 200 | 5296 |
+| Apigee REST: organizations.instances/list | <https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances/list> | 200 | 5062 |
+| Apigee REST: organizations.envgroups | <https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups> | 200 | 4811 |
 
 ### Version-in-URL pattern verification (observed)
 
@@ -93,7 +93,7 @@ Format: Title | URL | HTTP status | bytes of extracted body
 
 ### 2.2 Features Google does not plan to support in Apigee X (exact list, verbatim)
 
-Source: https://docs.apigee.com/migration-to-x/compare-apigee-edge-to-apigee-x — section "Which Apigee Edge features are not supported in Apigee X?" (documented). The page states "Google does *not* plan to support the following features":
+Source: <https://docs.apigee.com/migration-to-x/compare-apigee-edge-to-apigee-x> — section "Which Apigee Edge features are not supported in Apigee X?" (documented). The page states "Google does *not* plan to support the following features":
 
 1. Apigee Edge Extensions
 2. OpenAPI Specification store
@@ -104,6 +104,7 @@ Source: https://docs.apigee.com/migration-to-x/compare-apigee-edge-to-apigee-x �
 7. The Apigee Edge `proxy_read_timeout` property is not supported in Apigee X.
 
 Also on the same page (documented):
+
 - **StatisticsCollector policy is not supported** (replaced by the new DataCapture policy).
 - **MessageLogging policy does not support file logging.**
 - `reasonPhrase` — Not supported.
@@ -182,7 +183,7 @@ Table titled "Unsupported Apigee Edge APIs (that do not have Apigee X API equiva
 Edge: rate plans attach to API product *bundles* attachable to multiple products; developers *purchase rate plans*; quotas at **API proxy** level; published rate plans can only be expired (no edit/delete); no wizard; `MonetizationLimitsCheck` blocks only **after the first call is processed**; prepaid/postpaid configurable for both developers and rate plans.
 X/hybrid: rate plans attach **one-to-one to API products**; developers purchase API products; quotas at **API product** (business) level; published rate plans can be expired, edited, moved to draft, or deleted; wizard + preview tool; `MonetizationLimitsCheck` blocks **immediately**; prepaid/postpaid only for developers; monetization data captured automatically, overridable with DataCapture.
 
-OPDK-specific (from https://docs.apigee.com/private-cloud/): **Monetization Services cannot be installed on an All-in-One (AiO) configuration**, and **Edge Gateway + Analytics are prerequisites** for Monetization Services. Monetization components are Edge Management Server + Edge Message Processor.
+OPDK-specific (from <https://docs.apigee.com/private-cloud/>): **Monetization Services cannot be installed on an All-in-One (AiO) configuration**, and **Edge Gateway + Analytics are prerequisites** for Monetization Services. Monetization components are Edge Management Server + Edge Message Processor.
 
 ### 2.7 Hybrid architecture — what runs where (documented)
 
@@ -215,7 +216,7 @@ Google Cloud project, billing account, `gcloud` CLI installed; enable required G
 - To reach **4.53.00**: you must first be on **4.52.02**. **Direct upgrades from versions earlier than 4.52.02 are not supported.**
 - Edge UI in 4.53.00+ shows an **EOL warning pop-up** (documented under known issues).
 
-### 2.11 OPDK components and operations (documented, https://docs.apigee.com/private-cloud/)
+### 2.11 OPDK components and operations (documented, <https://docs.apigee.com/private-cloud/>)
 
 - Gateway: Edge Management Server, Apache ZooKeeper, Apache Cassandra, Edge Router, Edge Message Processor, OpenLDAP, Edge UI (new) + Classic UI.
 - Analytics: Qpid (Apache Qpid messaging + `edge-qpid-server`) and Postgres (`edge-postgres-server` + `apigee-postgresql`).
@@ -232,7 +233,7 @@ Management API **8080** on the Management Server, required for Router, MP, UI, P
 ### 2.13 Environment groups and instance attachment — the precise answer
 
 - **Environment groups: Apigee X AND hybrid. NOT Edge for Private Cloud.** (documented)
-  - Applies banner: "This page applies to Apigee and hybrid" on https://cloud.google.com/apigee/docs/api-platform/fundamentals/environments-overview.
+  - Applies banner: "This page applies to Apigee and hybrid" on <https://cloud.google.com/apigee/docs/api-platform/fundamentals/environments-overview>.
   - Hybrid requires one: install step 3 is "Create an environment group"; `precog-add-environment` and `virtualhosts` overrides reference environment group names ("the name of the virtualhosts must be the names of the environment groups").
   - `organizations.envgroups` in the Apigee REST reference carries **no** "not supported for hybrid" note (fetched and grepped).
   - Evidence of absence for Edge: `https://docs.apigee.com/api-platform/fundamentals/environments-overview` → **404**; the full 260-link Edge side nav contains **zero** links matching `envgroup` or `environment-group`; four probed envgroup-style Edge URLs all **404**. Edge documents environments as "either test or prod" (`apigee-edge-organization-structure`). This is consistent with environment groups being absent from Edge, but note the honest limit: absence of documentation is not a positive statement that the API fails. Label: **documented for X+hybrid; strongly supported (documentation-level) for Edge.**
@@ -268,6 +269,7 @@ Every cell is either sourced inline or says **not verified**. "—" means the to
 The skill's existing "tells" list in `apigee-support-core` is sound. What this research adds, each sourced:
 
 **Decisive, ask-for-this-first, single highest-value question:** "Which product and which version/release string?" Concretely:
+
 - Ask for the **Management API base URL they are calling.** It resolves the product in one answer (documented):
   - `apigee.googleapis.com` → Apigee X **or** hybrid (then go to step 2).
   - `api.enterprise.apigee.com` → Apigee Edge (public **or** private — then go to step 3).
@@ -275,18 +277,21 @@ The skill's existing "tells" list in `apigee-support-core` is sound. What this r
 - Ask for the **version/release string** and match it to the right doc tree: hybrid `1.17.1`; OPDK `4.53.01`. A procedure from the wrong release is wrong, not approximately right.
 
 **Step 2 — X vs hybrid** (both use `apigee.googleapis.com`):
+
 - Is there a **Kubernetes cluster** the customer operates? Any mention of `apigee-runtime` pods, a runtime plane, Istio/Anthos Service Mesh ingress, Prometheus per cluster, UDCA, or a **Synchronizer** → hybrid.
 - Do they run `helm upgrade` against `apigee-org` / `apigee-env` charts, or maintain an `overrides.yaml` with `instanceID`/`org`/`envs[]` → hybrid.
 - Do they have a **Google Cloud project holding the management plane** plus a separate data center runtime → hybrid.
 - Is it a single fully Google-managed offering with no runtime of their own → **X**.
 
 **Step 3 — Edge for Private Cloud** (tells, each anchored to a fetched page):
+
 - `apigee-service`, `apigee-all`, `update.sh`, `/opt/apigee` install tree → OPDK (documented: starting-stopping page, how-configure page).
 - ZooKeeper, OpenLDAP, Qpid, Postgres, `apigee-monit` → OPDK (documented: private-cloud index, how-configure component table).
 - "All-in-One" / AiO topology, or a named **data center / POD** arrangement, or "pod=central/gateway/analytics" → OPDK (documented: installation-topologies, test-install).
 - Note **Monetization cannot be installed on AiO** — an AiO install with monetization is a contradiction worth asking about (documented).
 
 **Fast discriminator if they will only paste a URL or an error:**
+
 - `*.apigee.net` proxy hostname is an **Edge public cloud** convention, not X/hybrid.
 - `reasonPhrase`, `created_by`/`modified_by`/`self`, `application/xml`, or int64 timestamps in a response → **Edge**, because X explicitly dropped all of these (documented, edge-vs-x).
 - An error saying trace/deployment status is **delayed or stale** → X or hybrid (async check-in), not Edge.
@@ -297,20 +302,20 @@ The skill's existing "tells" list in `apigee-support-core` is sound. What this r
 
 | URL | Status | Note |
 | --- | --- | --- |
-| https://cloud.google.com/apigee/docs/hybrid/upgrade | **200 but STUB** | Not a 404 — returns 200 with "The equivalent page does not exist in the selected hybrid version." Worse than a 404 for tooling. Use `/hybrid/latest/upgrade`. fetch.sh now reports `200-STUB`. |
-| https://cloud.google.com/apigee/docs/hybrid/upgrade (as supplied) | — | The seed URL given for this task is unversioned and is a stub. Superseded by `/hybrid/latest/upgrade`. |
-| https://docs.apigee.com/private-cloud/port-requirements | 404 | Version segment is mandatory on the OPDK host. |
-| https://docs.apigee.com/private-cloud/v4.54.00/ | 404 | No such release. v4.53.01 is latest. |
-| https://docs.apigee.com/private-cloud/v4.53.00/install-prerequisites | 404 | Page is named `installation-requirements`. |
-| https://docs.apigee.com/private-cloud/v4.53.00/nonexistent-page-xyz | 404 | Control test — confirms real 404s do occur on this host. |
-| https://docs.apigee.com/api-platform/fundamentals/environments-overview | 404 | Environment groups page does not exist for Edge. |
-| https://docs.apigee.com/api-platform/fundamentals/environment-groups | 404 | ditto |
-| https://docs.apigee.com/api-platform/deploy/understanding-environment-groups | 404 | ditto |
-| https://docs.apigee.com/api-platform/reference/environment-groups | 404 | ditto |
-| https://docs.apigee.com/api-platform/get-started/environment-groups | 404 | ditto |
-| https://cloud.google.com/apigee/docs/api-platform/reference/apis/apigee/rest/v1/organizations.instances | 404 | Wrong tree. Correct tree is `/apigee/docs/reference/apis/apigee/rest/v1/...` (no `api-platform`). |
-| https://cloud.google.com/apigee/docs/api-platform/reference/apis/apigee/rest/v1/organizations.instances.attachments | 404 | ditto |
-| https://cloud.google.com/apigee/docs/api-platform/reference/apis/apigee/rest/v1/organizations.instances.attachments/list | 404 | ditto (correct URL returns 200) |
+| <https://cloud.google.com/apigee/docs/hybrid/upgrade> | **200 but STUB** | Not a 404 — returns 200 with "The equivalent page does not exist in the selected hybrid version." Worse than a 404 for tooling. Use `/hybrid/latest/upgrade`. fetch.sh now reports `200-STUB`. |
+| <https://cloud.google.com/apigee/docs/hybrid/upgrade> (as supplied) | — | The seed URL given for this task is unversioned and is a stub. Superseded by `/hybrid/latest/upgrade`. |
+| <https://docs.apigee.com/private-cloud/port-requirements> | 404 | Version segment is mandatory on the OPDK host. |
+| <https://docs.apigee.com/private-cloud/v4.54.00/> | 404 | No such release. v4.53.01 is latest. |
+| <https://docs.apigee.com/private-cloud/v4.53.00/install-prerequisites> | 404 | Page is named `installation-requirements`. |
+| <https://docs.apigee.com/private-cloud/v4.53.00/nonexistent-page-xyz> | 404 | Control test — confirms real 404s do occur on this host. |
+| <https://docs.apigee.com/api-platform/fundamentals/environments-overview> | 404 | Environment groups page does not exist for Edge. |
+| <https://docs.apigee.com/api-platform/fundamentals/environment-groups> | 404 | ditto |
+| <https://docs.apigee.com/api-platform/deploy/understanding-environment-groups> | 404 | ditto |
+| <https://docs.apigee.com/api-platform/reference/environment-groups> | 404 | ditto |
+| <https://docs.apigee.com/api-platform/get-started/environment-groups> | 404 | ditto |
+| <https://cloud.google.com/apigee/docs/api-platform/reference/apis/apigee/rest/v1/organizations.instances> | 404 | Wrong tree. Correct tree is `/apigee/docs/reference/apis/apigee/rest/v1/...` (no `api-platform`). |
+| <https://cloud.google.com/apigee/docs/api-platform/reference/apis/apigee/rest/v1/organizations.instances.attachments> | 404 | ditto |
+| <https://cloud.google.com/apigee/docs/api-platform/reference/apis/apigee/rest/v1/organizations.instances.attachments/list> | 404 | ditto (correct URL returns 200) |
 
 **Transient anomaly, not reproducible (observed):** an early `curl` of `https://docs.apigee.com/private-cloud/v4.53.00/port-requirements` reported a redirect to the version root. Two subsequent checks (`curl -sIL` and `curl -sL`) both returned a clean **200** with no redirect. Treat the 200 as authoritative; the earlier reading was not reproducible.
 

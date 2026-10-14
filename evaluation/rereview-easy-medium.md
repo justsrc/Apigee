@@ -12,6 +12,7 @@ invented XML elements (EASY-10, MED-04). The `context.variable(...)` error class
 ---
 
 ## EASY-01 Quota policy rejects the revision over a fractional interval
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -27,6 +28,7 @@ on with "Confirm `second` is a supported `<TimeUnit>` value before recommending 
 ---
 
 ## EASY-02 Missing Interval produces a runtime 500, not a deploy failure
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -39,6 +41,7 @@ ground truth correctly separates it from the deployment error in EASY-01.
 ---
 
 ## EASY-03 FlowCallout cannot find the shared flow
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -51,6 +54,7 @@ shared flow exists but is not deployed"
 ---
 
 ## EASY-04 AccessControl blocks a corporate IP range
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -64,6 +68,7 @@ table, AccessControl page). The TEST-NET-3 aside is a correct observation, not a
 ---
 
 ## EASY-05 JavaScript policy blocked by a security violation
+
 **Verdict**: MINOR
 
 **Issues**:
@@ -88,6 +93,7 @@ table, AccessControl page). The TEST-NET-3 aside is a correct observation, not a
 ---
 
 ## EASY-06 BasicAuthentication cannot resolve its source variable
+
 **Verdict**: MATERIAL
 
 **Issues**:
@@ -133,6 +139,7 @@ table, AccessControl page). The TEST-NET-3 aside is a correct observation, not a
 ---
 
 ## EASY-07 JWS algorithm does not match between generate and verify
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -145,6 +152,7 @@ scenario correctly distinguishes platform support from the single configured val
 ---
 
 ## EASY-08 InvalidMessageWeight does not tell you which policy failed
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -158,6 +166,7 @@ the right call. The `parseInt`/`isNaN` remediation uses documented object-model 
 ---
 
 ## EASY-09 JSONToXML cannot resolve its source variable
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -172,6 +181,7 @@ variable.
 ---
 
 ## EASY-10 HMAC policy missing a required element
+
 **Verdict**: MATERIAL
 
 **Issues**:
@@ -208,6 +218,7 @@ variable.
 ---
 
 ## EASY-11 Unsupported TimeUnit blocks the revision
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -219,11 +230,13 @@ name, the 400-on-save framing, and the plural-vs-singular point are all correct.
 ---
 
 ## EASY-12 RevokeOAuthV2 rejects a timestamp before 2014-01-01
+
 **Verdict**: CORRECT
 
 **Issues**: none. This is the cleanest rewrite in the file.
 
 Verified against `api-platform_reference_policies_revoke-oauth-v2-policy.txt`:
+
 - `steps.oauth.v2.InvalidEarlyTimestamp`, HTTP 500, "Timestamp cannot be earlier than January 1,
   2014." (L315) — matches the known facts and the scenario exactly.
 - Siblings `InvalidFutureTimestamp` (500, "cannot be in the future") and `InvalidTimestamp` (500,
@@ -239,6 +252,7 @@ Verified against `api-platform_reference_policies_revoke-oauth-v2-policy.txt`:
 ---
 
 ## EASY-13 JWKS verification fails because the token has no key id
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -253,6 +267,7 @@ fault code. The corroborating code `steps.jwt.KeyIdMissing`, HTTP 401, is real
 ---
 
 ## EASY-14 Target handshake fails against a legacy TLS backend
+
 **Verdict**: CORRECT
 
 **Issues**: none. The previous pass's reframing is sound and should be kept.
@@ -271,6 +286,7 @@ narrow, never widen. `<SSLInfo>`/`<Enabled>` are real.
 ---
 
 ## EASY-15 Quota counter behaves differently than the team expects
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -284,6 +300,7 @@ the three-proxy arithmetic.
 ---
 
 ## MED-01 Deployed successfully, every request returns 404
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -300,6 +317,7 @@ under Apigee features only.
 ---
 
 ## MED-02 Works for some users, 404s for others, same deployment
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -315,6 +333,7 @@ as a second, independent problem rather than conflated — good handling.
 ---
 
 ## MED-03 Load balancing does not fail over to a healthy backend
+
 **Verdict**: CORRECT
 
 **Issues**: none. This is the most-improved scenario in the file.
@@ -329,6 +348,7 @@ values — RoundRobin, Weighted, LeastConnections, L235-299), `<Server name="...
 (L610-623). The remediation block is structurally identical to the documented sample.
 
 Two substantive claims both check out:
+
 - MaxFailures default 0, quoted from L342: "This means that Apigee always tries to connect to the
   target for each request and never removes the target server from the rotation."
 - HTTP 500 does not count as a failure, quoted from L314: "even if the response is an HTTP error
@@ -344,6 +364,7 @@ fabrications flagged previously.
 ---
 
 ## MED-04 Cached responses are stale and nobody can reproduce it
+
 **Verdict**: MATERIAL
 
 **Issues**:
@@ -374,12 +395,14 @@ fabrications flagged previously.
 ---
 
 ## MED-05 Key value map updates are not visible everywhere
+
 **Verdict**: CORRECT
 
 **Issues**: none. The previous pass's rewrite is accurate and the scoping is the strongest part of
 it.
 
 Verified against `api-platform_reference_policies_key-value-map-operations-policy.txt`:
+
 - L411: "using `PUT` will only refresh the cache in the single runtime node that services the
   request. To refresh the cache in each distributed runtime node, use the `<ExpiryTimeInSecs>`
   element to specify refresh intervals for each node" — quoted verbatim in the ground truth.
@@ -394,6 +417,7 @@ Verified against `api-platform_reference_policies_key-value-map-operations-polic
 ---
 
 ## MED-06 Latency jumped and nobody knows which layer moved
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -405,6 +429,7 @@ correlation), and the trace-vs-external-measurement methodology is sound. Removi
 ---
 
 ## MED-07 Deployment succeeds on hybrid but the runtime never applies it
+
 **Verdict**: MINOR
 
 **Issues**:
@@ -430,6 +455,7 @@ correlation), and the trace-vs-external-measurement methodology is sound. Removi
 ---
 
 ## MED-08 Mutual TLS broke after a certificate authority renewal
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -445,6 +471,7 @@ follow directly.
 ---
 
 ## MED-09 Intermittent 429 under bursty client traffic
+
 **Verdict**: MINOR
 
 **Issues**:
@@ -473,6 +500,7 @@ follow directly.
 ---
 
 ## MED-10 Token works against one API and fails against another
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -490,6 +518,7 @@ The rubric line "Verifies expired and valid on both" is well matched to the diag
 ---
 
 ## MED-11 Everything works in test and fails in production
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -501,6 +530,7 @@ this consistent). No undocumented claims, no invented elements.
 ---
 
 ## MED-12 Service callout times out and takes the request with it
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -516,6 +546,7 @@ is the right treatment.
 ---
 
 ## MED-13 Two conditions produce the same error code
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -532,6 +563,7 @@ string useful for diagnosis, error code for handling — is the correct one and 
 ---
 
 ## MED-14 A revoked token still works for a few minutes
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -546,6 +578,7 @@ instinct to reward.
 ---
 
 ## MED-15 A Java callout fails only on some requests
+
 **Verdict**: MATERIAL
 
 **Issues**:
@@ -576,6 +609,7 @@ instinct to reward.
 ---
 
 ## MED-16 The OAuth error names a missing parameter
+
 **Verdict**: MINOR
 
 **Issues**:
@@ -604,6 +638,7 @@ instinct to reward.
 ---
 
 ## MED-17 The deploy tool says "Deployment failed"
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -622,6 +657,7 @@ is the right design here.
 ---
 
 ## MED-18 Every API product, app and developer fails to load after a hybrid upgrade
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -639,6 +675,7 @@ both correct additions.
 ---
 
 ## MED-19 Runtime logs stopped after a successful upgrade
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -656,6 +693,7 @@ this one was clean was right.
 ---
 
 ## MED-20 A deployed timeout change is not taking effect on some requests only
+
 **Verdict**: MINOR
 
 **Issues**:
@@ -690,6 +728,7 @@ this one was clean was right.
 ---
 
 ## MED-21 The linter and the security team want opposite things
+
 **Verdict**: CORRECT
 
 **Issues**: none.
@@ -712,6 +751,7 @@ to three and promoted the antipattern to a scored element.
 ---
 
 ## MED-22 A routine cert-manager upgrade plants a future outage
+
 **Verdict**: CORRECT
 
 **Issues**: none.

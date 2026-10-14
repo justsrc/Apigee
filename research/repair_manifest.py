@@ -28,6 +28,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from typing import cast
 
 HERE = Path(__file__).resolve().parent
 PAGES = HERE / "pages"
@@ -113,8 +114,9 @@ def resolve(url: str) -> tuple[str, int | None, str]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dry-run", action="store_true")
+    _ = ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
+    dry_run = cast(bool, args.dry_run)
 
     recorded: dict[str, str] = {}
     prior_provenance: dict[str, str] = {}
@@ -160,8 +162,12 @@ def main() -> int:
           + ", ".join(f"{k} {v}" for k, v in sorted(by_provenance.items())))
 
     todo = [j for j in jobs if j[1]]
+
+    def resolve_job(job: tuple[str, str, str]) -> tuple[str, int | None, str]:
+        return resolve(job[1])
+
     with cf.ThreadPoolExecutor(max_workers=WORKERS) as ex:
-        resolved = list(ex.map(lambda j: resolve(j[1]), todo))
+        resolved = list(ex.map(resolve_job, todo))
     outcome = dict(zip([j[0] for j in todo], resolved))
 
     rows: list[tuple[str, str, str]] = []
@@ -170,7 +176,7 @@ def main() -> int:
         if not url:
             rows.append((stem, "", f"UNRESOLVED;{UNRESOLVED.get(stem, 'unconfirmed')}"))
             continue
-        final, code, note = outcome[stem]
+        final, _code, note = outcome[stem]
         prov = provenance
         if note:
             prov += f";{note}"
@@ -185,7 +191,7 @@ def main() -> int:
     for stem in sorted(UNRESOLVED):
         print(f"  UNRESOLVED  {stem}\n              {UNRESOLVED[stem]}")
 
-    if args.dry_run:
+    if dry_run:
         print("\ndry run, manifest not written")
         return 0
 
@@ -199,7 +205,7 @@ def main() -> int:
            "# Every URL below was confirmed live on the date this file was written."]
     for stem, url, prov in rows:
         out.append(f"{stem}\t{url}\t{prov}")
-    MANIFEST.write_text("\n".join(out) + "\n", encoding="utf-8")
+    _ = MANIFEST.write_text("\n".join(out) + "\n", encoding="utf-8")
     final_counts: dict[str, int] = {}
     for _s, _u, prov in rows:
         final_counts[prov.split(";")[0]] = final_counts.get(prov.split(";")[0], 0) + 1

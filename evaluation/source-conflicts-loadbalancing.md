@@ -18,7 +18,7 @@ DOCUMENTATION_CONFLICT
 
 ### Load balancing across backend servers
 
-- URL: https://cloud.google.com/apigee/docs/api-platform/deploy/load-balancing-across-backend-servers (per research/pages/MANIFEST.tsv, entry `api-platform_deploy_load-balancing-across-backend-servers`)
+- URL: <https://cloud.google.com/apigee/docs/api-platform/deploy/load-balancing-across-backend-servers> (per research/pages/MANIFEST.tsv, entry `api-platform_deploy_load-balancing-across-backend-servers`)
 - Local cache: research/pages/api-platform_deploy_load-balancing-across-backend-servers.txt (byte-identical duplicate: research/pages/lb-verify.txt, md5 01e14fef95a3246328503735df6e6f36)
 - Line: 350 (related: 342, 344, 537, 539, 589)
 - Product/deployment model: "This page applies to **Apigee** and **Apigee hybrid**." (cache line 1); Edge mirror also published at docs.apigee.com (see third source)
@@ -29,7 +29,7 @@ DOCUMENTATION_CONFLICT
 
 ### Antipattern: Load Balance with a single target server with MaxFailures set to a non-zero value
 
-- URL: https://cloud.google.com/apigee/docs/api-platform/antipatterns/load-balancing-maxfailures (per research/pages/MANIFEST.tsv)
+- URL: <https://cloud.google.com/apigee/docs/api-platform/antipatterns/load-balancing-maxfailures> (per research/pages/MANIFEST.tsv)
 - Local cache: research/pages/api-platform_antipatterns_load-balancing-maxfailures.txt
 - Line: 98 (related: 53, 73, 96, 104, 106, 113, 146)
 - Product/deployment model: "This page applies to **Apigee** and **Apigee hybrid**." (cache line 1); cache line 3 links the Edge mirror at docs.apigee.com/api-platform/antipatterns/load-balancing-maxfailures. No version-scoped statement anywhere on the page.
@@ -38,14 +38,14 @@ DOCUMENTATION_CONFLICT
   > "Even if the TargetServer "target1" gets back to its normal state and is capable of sending successful responses, the requests to the API Proxy will continue to return 503 errors. This is because Apigee does not automatically put the TargetServer back in rotation even after the target is up and running again. To address this issue, ***the API Proxy must be redeployed*** for Apigee to put the TargetServer back into rotation."
   > (Fetched live 2026-10-12: sentence still renders, with "Apigee" in place; page footer "Last updated 2026-10-09 UTC".)
 
-No `# ` heading exists in either cached file (`grep -n '^# '` on both returns nothing), so titles
+No `#` heading exists in either cached file (`grep -n '^# '` on both returns nothing), so titles
 are taken from the live page H1/`<title>` (fetched 2026-10-12), corroborated for the antipatterns
 page by the docs-nav title in research/pages/api-platform_troubleshoot_playbooks_504-target-read-timeout.txt:1960
 ("Load Balance with a single target server with MaxFailures set to a non-zero value").
 
 ### Load balancing across backend servers (Apigee Edge mirror)
 
-- URL: https://docs.apigee.com/api-platform/deploy/load-balancing-across-backend-servers (fetched live 2026-10-12; no local cache, no MANIFEST.tsv entry)
+- URL: <https://docs.apigee.com/api-platform/deploy/load-balancing-across-backend-servers> (fetched live 2026-10-12; no local cache, no MANIFEST.tsv entry)
 - Local cache: none
 - Line: n/a — live HTML fetch 2026-10-12, not a line-numbered cache file
 - Product/deployment model: Edge (public/private cloud) docs tree, unversioned current page; page footer "Last updated 2026-10-09 UTC" (fetched 2026-10-12)
@@ -57,7 +57,7 @@ page by the docs-nav title in research/pages/api-platform_troubleshoot_playbooks
 
 ### Antipattern (Apigee Edge mirror)
 
-- URL: https://docs.apigee.com/api-platform/antipatterns/load-balancing-maxfailures (fetched live 2026-10-12)
+- URL: <https://docs.apigee.com/api-platform/antipatterns/load-balancing-maxfailures> (fetched live 2026-10-12)
 - Local cache: none
 - Line: n/a — live HTML fetch 2026-10-12
 - Product/deployment model: Edge docs tree

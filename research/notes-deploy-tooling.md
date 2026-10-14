@@ -17,7 +17,7 @@ returned HTTP 200 but served a "page does not exist" placeholder; that is treate
 ### gcloud CLI reference (prefix `https://cloud.google.com/sdk/gcloud/reference/apigee`)
 
 | Title | URL | HTTP status | bytes |
-|-------|-----|-------------|-------|
+| ------- | ----- | ------------- | ------- |
 | gcloud apigee | /apigee | 200 | 2488 |
 | gcloud apigee apis | /apis | 200 | 2775 |
 | gcloud apigee apis deploy | /apis/deploy | 200 | 6327 |
@@ -50,8 +50,8 @@ All of the above share the prefix `https://cloud.google.com/sdk/gcloud/reference
 ### alpha / beta variants
 
 | Title | URL | HTTP status | bytes |
-|-------|-----|-------------|-------|
-| gcloud alpha apigee | https://cloud.google.com/sdk/gcloud/reference/alpha/apigee | 200 | 3166 |
+| ------- | ----- | ------------- | ------- |
+| gcloud alpha apigee | <https://cloud.google.com/sdk/gcloud/reference/alpha/apigee> | 200 | 3166 |
 | gcloud alpha apigee apis | .../alpha/apigee/apis | 200 | 3281 |
 | gcloud alpha apigee deployments describe | .../alpha/apigee/deployments/describe | 200 | 5522 |
 | gcloud beta apigee | .../beta/apigee | 200 | 2967 |
@@ -64,7 +64,7 @@ All of the above share the prefix `https://cloud.google.com/sdk/gcloud/reference
 ### Apigee documentation (prefix `https://cloud.google.com/apigee/docs`)
 
 | Title | URL (after prefix) | HTTP status | bytes |
-|-------|--------------------|-------------|-------|
+| ------- | -------------------- | ------------- | ------- |
 | Getting started using gcloud with Apigee | api-platform/get-started/gcloud-get-started | 200 | 5117 |
 | Deployment overview | api-platform/deploy/ui-deploy-overview | 200 | 14351 |
 | Deploying an API proxy (UI/API/gcloud) | api-platform/deploy/ui-deploy-new | 200 | 13243 |
@@ -93,7 +93,7 @@ All of the above share the prefix `https://cloud.google.com/sdk/gcloud/reference
 ### Management API reference (prefix `https://cloud.google.com/apigee/docs`)
 
 | Title | URL (after prefix) | HTTP status | bytes |
-|-------|--------------------|-------------|-------|
+| ------- | -------------------- | ------------- | ------- |
 | Apigee API REST reference index | reference/apis/apigee/rest | 200 | 186374 |
 | Method: ...revisions.deployments.deploy | reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/deploy | 200 | 6290 |
 | Method: ...revisions.deployments.undeploy | .../organizations.environments.apis.revisions.deployments/undeploy | 200 | 4149 |
@@ -141,7 +141,7 @@ Not documented — do not invent either.
 ### 2.2 Subcommands, discovered from each group's own link tree
 
 | Command | Source URL |
-|---------|-----------|
+| --------- | ----------- |
 | `gcloud apigee apis deploy` | /sdk/gcloud/reference/apigee/apis/deploy |
 | `gcloud apigee apis describe` | /sdk/gcloud/reference/apigee/apis/describe |
 | `gcloud apigee apis import` | /sdk/gcloud/reference/apigee/apis/import |
@@ -377,7 +377,7 @@ Source: `https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/orga
 ### 3.2 Deployment read/undeploy/report
 
 | Method | HTTP request | Source |
-|--------|--------------|--------|
+| -------- | -------------- | -------- |
 | undeploy | `DELETE https://apigee.googleapis.com/v1/{name=organizations/*/environments/*/apis/*/revisions/*}/deployments` | .../revisions.deployments/undeploy |
 | get | `GET https://apigee.googleapis.com/v1/{name=organizations/*/environments/*/apis/*/revisions/*}/deployments` | .../revisions.deployments/get |
 | generateDeployChangeReport | `POST https://apigee.googleapis.com/v1/{name=organizations/*/environments/*/apis/*/revisions/*}/deployments:generateDeployChangeReport` | .../revisions.deployments/generateDeployChangeReport |
@@ -394,12 +394,13 @@ page itself, so treat the method name as index-confirmed only.
 ### 3.3 Import / export / revisions
 
 | Method | HTTP request | Source |
-|--------|--------------|--------|
+| -------- | -------------- | -------- |
 | Create an API proxy **and a new revision** | `POST https://apigee.googleapis.com/v1/{parent=organizations/*}/apis` | organizations.apis/create |
 | Update an existing API proxy revision | `POST https://apigee.googleapis.com/v1/{name=organizations/*/apis/*/revisions/*}` | organizations.apis.revisions/updateApiProxyRevision |
 | Get (export) a revision bundle | see note | organizations.apis.revisions/get (linked from download-api-proxies) |
 
 `organizations.apis/create` detail, verbatim:
+
 * "Creates an API proxy. The API proxy created will not be accessible at runtime until it is
   deployed to an environment."
 * To import a zip bundle: set `name` query param to the proxy name, set `action=import`, set
@@ -420,7 +421,7 @@ The resource collection is **`apiproducts`, not `products`** — `organizations.
 returns 404 (section 5).
 
 | Method | HTTP request | Source |
-|--------|--------------|--------|
+| -------- | -------------- | -------- |
 | Create API product | `POST https://apigee.googleapis.com/v1/{parent=organizations/*}/apiproducts` | organizations.apiproducts/create |
 | Create developer | `POST https://apigee.googleapis.com/v1/{parent=organizations/*}/developers` | organizations.developers/create |
 | Create developer app | `POST https://apigee.googleapis.com/v1/{parent=organizations/*/developers/*}/apps` | organizations.developers.apps/create |
@@ -432,6 +433,7 @@ returns 404 (section 5).
 `issuedAt`, `scopes[]`, `status` (`approved` | `revoked`), `expiresInSeconds`.
 
 Two important verbatim notes from that page:
+
 * "**Do not specify the list of API products when creating a consumer key and secret for a
   developer app.** Instead, use the `keys.updateDeveloperAppKey` API to make the association
   after the consumer key and secret are created."
@@ -446,7 +448,7 @@ an `.../add` or `.../remove` (both 404).
 ### 3.5 Environment groups and instances
 
 | Method | HTTP request | Source |
-|--------|--------------|--------|
+| -------- | -------------- | -------- |
 | Create env group | `POST https://apigee.googleapis.com/v1/{parent=organizations/*}/envgroups` | organizations.envgroups/create |
 | Attach env to group | `POST https://apigee.googleapis.com/v1/{parent=organizations/*/envgroups/*}/attachments` | organizations.envgroups.attachments/create |
 | List instances | `GET https://apigee.googleapis.com/v1/{parent=organizations/*}/instances` | organizations.instances/list |
@@ -597,7 +599,7 @@ an environment before it can be accessed."
 Deployment types in an environment (verbatim table):
 
 | Type | Description |
-|------|-------------|
+| --- | --- |
 | Proxy | Develop and test API proxies in development environments, then deploy to integration test and production. |
 | Archive | Develop and test programmable API proxies using Apigee in VS Code. |
 
@@ -662,7 +664,7 @@ The zip's top-level directory **must be `/apiproxy`**. Verbatim from `download-a
 (the example uses `weatherapi.xml`). The page's contents table:
 
 | Component | Meaning |
-|-----------|---------|
+| ----------- | --------- |
 | Base configuration | Primary configuration settings; e.g. `/apiproxy/weatherapi.xml`. Name must be unique within the organization. |
 | ProxyEndpoint | Inbound HTTP connection, request/response flows, policy attachments (`/proxies`). |
 | TargetEndpoint | Outbound HTTP connection to the backend, request/response flows, policy attachments (`/targets`). |
@@ -730,7 +732,7 @@ behavior as a proxy that you build in the Apigee UI or from an XML bundle."
 Three document types by `type` field:
 
 | Document type | `type` | Purpose |
-|----|----|----|
+| ---- | ---- | ---- |
 | Template | `template` | The entry point that you deploy. Composes features; defines endpoints and routes. |
 | Feature | `feature` | Reusable unit of configuration; holds the policies and resources. |
 | Proxy | `proxy` | Fully resolved proxy the CLI produces; can also be imported directly. |
@@ -757,6 +759,7 @@ So: YAML is a **source format** that compiles down to the XML bundle. There is n
 converter documented. XML is still the canonical runtime format and still what you see in the UI.
 
 Documented YAML limitations (verbatim, all real constraints that will generate support cases):
+
 * "**Features are local files.** A template can only reference feature files that are in the same
   directory. Referencing features by URL or from a shared catalog is not supported."
 * "**Parameter values use their defaults.** Features can define parameters, but parameter values
@@ -785,22 +788,22 @@ engineer would plausibly write, which is exactly why they are listed.
 ### Guessed Apigee docs paths
 
 | URL | Status |
-|-----|--------|
-| https://cloud.google.com/apigee/docs/api-platform/get-started/create-proxy-deployment | 404 |
-| https://cloud.google.com/apigee/docs/api-platform/get-started/set-up-cloud-apigee | 404 |
-| https://cloud.google.com/apigee/docs/api-platform/cicd/overview | 404 |
-| https://cloud.google.com/apigee/docs/api-platform/cicd | 404 |
-| https://cloud.google.com/apigee/docs/api-platform/deploy/cicd | 404 |
-| https://cloud.google.com/apigee/docs/api-platform/develop/cicd | 404 |
-| https://cloud.google.com/apigee/docs/api-platform/develop/maven-plugin | 404 |
-| https://cloud.google.com/apigee/docs/api-platform/reference/api-proxy-linter | 404 |
-| https://cloud.google.com/apigee/docs/api-platform/test/api-proxy-linter | 404 |
-| https://cloud.google.com/apigee/docs/api-platform/get-started/api-proxy-linter | 404 |
+| ----- | -------- |
+| <https://cloud.google.com/apigee/docs/api-platform/get-started/create-proxy-deployment> | 404 |
+| <https://cloud.google.com/apigee/docs/api-platform/get-started/set-up-cloud-apigee> | 404 |
+| <https://cloud.google.com/apigee/docs/api-platform/cicd/overview> | 404 |
+| <https://cloud.google.com/apigee/docs/api-platform/cicd> | 404 |
+| <https://cloud.google.com/apigee/docs/api-platform/deploy/cicd> | 404 |
+| <https://cloud.google.com/apigee/docs/api-platform/develop/cicd> | 404 |
+| <https://cloud.google.com/apigee/docs/api-platform/develop/maven-plugin> | 404 |
+| <https://cloud.google.com/apigee/docs/api-platform/reference/api-proxy-linter> | 404 |
+| <https://cloud.google.com/apigee/docs/api-platform/test/api-proxy-linter> | 404 |
+| <https://cloud.google.com/apigee/docs/api-platform/get-started/api-proxy-linter> | 404 |
 
 ### Guessed Management API method paths
 
 | URL | Status | Correct path |
-|-----|--------|--------------|
+| ----- | -------- | -------------- |
 | .../v1/organizations.products/create | 404 | `organizations.apiproducts/create` |
 | .../v1/organizations.apps/create | 404 | `organizations.developers.apps/create` (apps are nested under a developer) |
 | .../v1/organizations.apis.revisions/create | 404 | `organizations.apis/create` creates the revision; there is no revisions/create |
