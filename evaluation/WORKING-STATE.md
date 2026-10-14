@@ -2,6 +2,66 @@
 
 Recoverable note so no work lives only in conversation context.
 
+## Status as of 2026-10-14, harness pass
+
+Branch `audit/evaluation-harness`, based on `75f1997`. Five defects found and fixed, all
+recorded as D-038 through D-042 in `evaluation/defect-register.md` with reproduction steps.
+Changelog entry at the top of `CHANGELOG.md`.
+
+They were found by checking the harness out fresh and running it. Every one was invisible
+from inside the working tree the earlier passes used, because that tree's own file timestamps
+happened to be in the order the checkers wanted. This is worth carrying forward: a green
+`check_repo.py` in a long-edited working directory is weaker evidence than the same result in
+a clone.
+
+- **D-038.** Packet freshness was decided by mtime, which is not in a commit. On a fresh
+  clone all 103 packets looked stale, the `valid-repo-baseline` control probe failed, and
+  therefore all 33 FAIL-expecting fault probes passed vacuously. `release_gate.py` lost A1,
+  F1, F2 and F3. Fixed by comparing rendered packet text.
+- **D-039.** Two origin probes anchored a regex with `^` and passed no `re.MULTILINE`, so
+  they matched nothing and never mutated anything. They read green only because of D-038.
+  `check_origin_integrity` is correct; the coverage claim was not.
+- **D-040.** `run_generation.py` tested `rc == -1` instead of `rc != 0`, so a nonzero
+  provider exit became a completed answer. This is the first of the two paths `75f1997`
+  recorded as deliberately left open.
+- **D-041.** `grade_run.py --run` never read the manifest. It wrote `PASS` with
+  `normalized_score 1.0` for a scenario recorded `NOT_STARTED` with no answer file. This is
+  the grading-side counterpart of what `75f1997` fixed on the generation side.
+- **D-042.** An uncomputable score was coerced to `FAIL` when anchors were present, so a
+  grader typo became a model failure. PROTOCOL.md forbids this in one line.
+
+### Where the gate stands
+
+`release_gate.py --skip-urls` reports `BLOCKED 1, PASS 28, UNVERIFIED 3`, verdict NOT
+QUALIFIED. That is the same verdict as before this pass and is the correct one. C4 is BLOCKED
+because no URL audit was run offline, and E5, G1 and G2 stay UNVERIFIED because no recorded
+run meets the A/B design. Recovering four criteria did not qualify the project.
+
+Full offline suite after the pass: `check_repo.py --strict` PASS, `fault_probe.py` 35 of 35
+with 0 false passes, `test_leakage.py` PASS, `test_release_gate.py` 32 of 32,
+`test_isolation_classify.py` 23 of 23, `test_generation_outcomes.py` 15 of 15,
+`test_generation_workspace.py` 8 of 8, `test_grading_integrity.py` 8 of 8.
+
+### What this pass does not establish
+
+Run 3 collected nothing. All 103 scenarios in its manifest are `NOT_STARTED` and no answer
+file exists, so none of these five defects has touched a recorded score. They are latent
+defects in the machinery, not damage to a result, and the register records them that way.
+
+Nothing here is evidence about whether the skills help. A passing probe suite says the
+harness classifies the inputs it was given as described. It does not say a live model or
+provider cannot produce a stream shape these suites do not model, and it does not move E5,
+G1 or G2.
+
+### Still open, deliberately
+
+- The second path `75f1997` named: a policy carrying `continueOnError="true"` that swallows
+  a failure contributes no fault to the manifest while its text still reaches the answer
+  file. A defect in the fault inventory rather than in the outcome classification.
+- The NO MUTATION guard proves each probe changed a file. It cannot prove the probe changed
+  the right one, and nothing short of reading all 35 settles that.
+- The A/B experiment remains unrun, for the reasons in `evaluation/ab-protocol-and-power.md`.
+
 ## Status as of 2026-10-13, later in the day
 
 Re-verified against the repository, not against the previous pass's summary. Three items the
