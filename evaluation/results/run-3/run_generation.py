@@ -20,6 +20,21 @@ Execution path: one `opencode run` per turn, in the isolated workspace, with the
 prompt file passed as the prompt. The workspace carries an `opencode.jsonc` denying
 external_directory, shell, edit, webfetch, websearch and subagent, so the model has the
 skill available and no route to an answer key.
+
+Workspace invariants, because breaking one of these makes a run look complete when it is
+not:
+
+  * `ws_path` is the only mapping from a selection to a workspace directory, and the
+    directory `opencode run` executes in is the one the builder was told to build.
+  * A scenario's workspace is keyed on that scenario alone, so it is identical for turn 1
+    and turn 2 and identical whether the run is the full suite or narrowed with `--only`.
+    Resuming finds the workspace the earlier attempt used.
+  * A workspace is checked against the scenario it is for, by reading the workspace's own
+    MANIFEST.json, before any request is spent.
+  * A workspace that cannot be built, or does not match, is recorded as
+    BLOCKED_BY_INFRASTRUCTURE with a `workspace unusable:` error. It is never recorded as
+    a completed turn, and never surfaces as a bare traceback from a missing `cwd`.
+  * An unknown scenario id is rejected before a workspace is chosen.
 """
 from __future__ import annotations
 
@@ -129,12 +144,72 @@ def parse_events(raw: str) -> tuple[str, str | None, str | None, str | None]:
     return "\n".join(t for t in text if t.strip()), etype, emsg, sid
 
 
+class WorkspaceError(RuntimeError):
+    """The isolated workspace could not be built, or is not the one the scenario needs.
+
+    Raised instead of letting the problem surface later as an OS error from `opencode run`
+    with a `cwd` that does not exist.
+    """
+
+
+def ws_path(ids: list[str]) -> Path:
+    """The one mapping from a scenario selection to its workspace directory.
+
+    Every caller goes through this. The path used to be computed twice: once here over
+    the ids handed to `build_ws`, and once in `one_turn` over the whole manifest roster.
+    The two never agreed, `build_ws` returned the directory it had actually built, and
+    `one_turn` threw that return value away, so the harness built one directory and then
+    ran the model in another. The ids are sorted so the mapping is a function of the set
+    and not of the order a caller happened to pass them in.
+    """
+    return WS_ROOT / ("ws-" + hashlib.sha256("|".join(sorted(ids)).encode()).hexdigest()[:10])
+
+
 def build_ws(ids: list[str]) -> Path:
-    out = WS_ROOT / ("ws-" + hashlib.sha256("|".join(ids).encode()).hexdigest()[:10])
-    subprocess.run([sys.executable, "tests/make_eval_workspace.py", "--out", str(out),
-                    "--force"] + sum([["--scenario", i] for i in ids], []),
-                   cwd=ROOT, check=True)
+    out = ws_path(ids)
+    args = [x for i in ids for x in ("--scenario", i)]
+    try:
+        subprocess.run([sys.executable, "tests/make_eval_workspace.py", "--out", str(out),
+                        "--force", *args], cwd=ROOT, check=True)
+    except subprocess.CalledProcessError as e:
+        # make_eval_workspace exits 1 both when a packet is missing and when it finds
+        # answer material in the tree. Either way it is a workspace problem, not a
+        # provider one, and it must not look like a model failure.
+        raise WorkspaceError(f"builder exited {e.returncode} for {' '.join(ids)}") from e
+    except OSError as e:
+        raise WorkspaceError(f"builder could not be run for {' '.join(ids)}: {e}") from e
     return out
+
+
+def scenario_ws(sid: str) -> Path:
+    """The workspace `sid` runs in: built if absent, then checked against `sid`.
+
+    A scenario's workspace is keyed on that scenario alone, so it is the same for turn 1
+    and turn 2, and the same whether the run was started as the full suite or narrowed
+    with `--only`. A resumed run therefore finds the workspace the earlier attempt used.
+
+    The check reads the workspace's own MANIFEST.json rather than trusting that a
+    directory exists: a directory left behind by an interrupted build can exist without
+    the packet copies this scenario needs.
+    """
+    ws = ws_path([sid])
+    if not (ws / "MANIFEST.json").exists():
+        ws = build_ws([sid])
+    mf = ws / "MANIFEST.json"
+    if not mf.is_file():
+        raise WorkspaceError(f"{ws} has no MANIFEST.json after the builder reported success")
+    # Written by tests/make_eval_workspace.py. `missing_packets` names any packet the builder
+    # could not copy, so a workspace that lists one is not one this scenario can run.
+    try:
+        built = json.loads(mf.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        raise WorkspaceError(f"{mf} is unreadable: {e}") from e
+    missing = built.get("missing_packets") or []
+    if missing:
+        raise WorkspaceError(f"{ws} is missing packets: {', '.join(missing)}")
+    if sid not in (built.get("scenarios") or []):
+        raise WorkspaceError(f"{ws} was built for {built.get('scenarios')}, not {sid}")
+    return ws
 
 
 def one_turn(m: dict, sid: str, turn: int, model: str, timeout: int) -> str:
@@ -145,10 +220,16 @@ def one_turn(m: dict, sid: str, turn: int, model: str, timeout: int) -> str:
     packet = ROOT / "evaluation" / "packets" / f"{sid}{suffix}.prompt.md"
     prompt = packet.read_text(encoding="utf-8")
 
-    ws = WS_ROOT / ("ws-" + hashlib.sha256(
-        json.dumps(sorted(m["scenarios"])).encode()).hexdigest()[:10])
-    if not (ws / "MANIFEST.json").exists():
-        build_ws([sid])
+    try:
+        ws = scenario_ws(sid)
+    except WorkspaceError as e:
+        # A local orchestration failure. It is not a model failure and not a quota
+        # failure, and recording it as anything other than blocked would let an
+        # incomplete scenario read as a completed evaluation.
+        rec["status"] = "BLOCKED_BY_INFRASTRUCTURE"
+        rec["error"] = f"workspace unusable: {e}"
+        save(m)
+        return rec["status"]
 
     # Carried across the two turns of one scenario so turn 2 continues the conversation.
     session_id = (rec.get("turns", {}).get("turn1") or {}).get("session_id")
@@ -259,6 +340,17 @@ def main() -> int:
     m = load()
     m["model"] = a.model
     ids = a.only or scenarios()
+
+    # Reject an unknown id before any workspace is chosen. The roster in the manifest is
+    # fixed when the manifest is first written, so a packet added after that point makes
+    # a full run select an id the manifest has no record of. Failing here says which id
+    # is wrong; falling through used to raise KeyError, and picking a workspace for an id
+    # nobody vouched for is the failure this harness exists to avoid.
+    unknown = [s for s in ids if s not in m["scenarios"]]
+    if unknown:
+        print("no such scenario in this run's manifest: " + ", ".join(unknown),
+              file=sys.stderr)
+        return 2
 
     if a.list:
         from collections import Counter
