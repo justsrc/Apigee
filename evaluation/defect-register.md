@@ -1145,3 +1145,266 @@ same function and were found together, but they are separate defects with separa
 separate tests, and only D-041 required a new gate. A grader's own data being wrong and a
 scenario never having run are different problems, and a fix for either one does not address
 the other.
+
+---
+
+## Open findings from the 2026-10-14 review pass, recorded not fixed
+
+A second and third review pass ran over the checkers and over the run-3 freeze and
+resumption machinery. The three defects already fixed from that work are D-043, D-044 and
+D-045 below. Everything after them is recorded here as OPEN, with the evidence each rests
+on, and none of it is fixed on this branch.
+
+Two labels are used throughout and they mean different things.
+
+- **Reproduced here** means the reviewer or I ran the demonstration and saw the output on
+  this branch. The command is given so a reader can repeat it.
+- **From the review pass** means the evidence is the reviewer's captured output, relayed
+  here rather than independently re-run by me. The reasoning is checkable against the code
+  and the cited line numbers; the run is not one I performed.
+
+Nothing in this section is a claim about model quality or about whether the skills help. All
+of it is about machinery. Run 3 collected nothing, so no recorded score depends on any of it.
+
+### D-043 HIGH — The fault-code check was switched off by the ordinary word "Rejected"
+
+- **Affected** `tests/check_repo.py::check_scenario_codes`
+- **Remediation** `5ee1356`
+- **Regression test** probe `scenario-invents-fault-code-in-a-scenario-naming-rejected`
+- **Evidence** reproduced here
+
+**What failed.** The guard that skips scenarios carrying the "cases deliberately not converted"
+appendix was `if "NOT converted into scenarios" in block or "Rejected" in block`. That is a
+bare substring search over the whole scenario, so any scenario whose prose contains the word
+was exempt from the fault-code check entirely. HARD-22 uses "Rejected" as a label in a list
+of LDAP symptoms, so it was exempt, and MED-39 was exempt for the intended reason.
+
+**Why it matters.** This is the check the project was built around. `26f9430` exists to check
+every fault code cited in a scenario against the source corpus, and D-001 is the defect it
+was written for. One scenario out of 103 had that check silently disabled.
+
+**Reproduction.**
+
+```bash
+# inject a code that exists in no source page into HARD-22's ground truth,
+# then inject the identical code into HARD-21, which lacks the word
+python3 tests/check_repo.py --strict --root .
+```
+
+Before the fix, HARD-22 was reported clean and HARD-21 was caught. After, both are caught.
+
+**Fix.** The exemption matches a heading containing "not converted into scenarios" rather
+than a word anywhere in the block, and the number of exempt scenarios is reported in the
+check's own pass line so a future one has to be explained.
+
+**Test results.** 36 probes, 36 behaved as expected, 0 false passes. The new probe reports a
+false pass against the previous check once packets are re-synced, which they have to be: see
+D-046.
+
+**Status: FIXED and covered.**
+
+### D-044 HIGH — A5 passed on a git error string, claiming a tag it could not see
+
+- **Affected** `tests/release_gate.py`
+- **Remediation** `30e2876`
+- **Evidence** reproduced here
+
+**What failed.** A5 asserts the baseline tag is present. It read the stdout of
+`git tag -l baseline-v0.1` and tested whether the string was non-empty, ignoring the exit
+code. `run()` answers a missing or failing binary with `(-2, "ERROR FileNotFoundError: ...")`,
+and that string is not empty.
+
+**Reproduction.** With git off `PATH`, the gate printed "git tag baseline-v0.1 present",
+reported A5 as PASS, and printed a line character-for-character identical to the one it
+prints when git works. Nothing in the report distinguished the two.
+
+**Fix.** The exit code is checked. A5 is BLOCKED when git cannot answer, and the reason is
+recorded.
+
+**Status: FIXED.** No dedicated regression test; the gate's own suite covers its verdict
+logic, and this path is exercised by running the gate without git.
+
+### D-045 MEDIUM — Two probes can pass on packet staleness rather than on the check they target
+
+- **Affected** `tests/fault_probe.py`
+- **Evidence** reproduced here
+
+**What failed.** Any probe that edits a file under `scenarios/` makes every packet stale, and
+`check_packets_current` then fails the checker for a reason unrelated to the check the probe
+aimed at. The probe reads green either way, so the targeted check is never exercised.
+
+`scenario-empty-required-section` is the clearest case and is worse than that. Its declared
+purpose is "keep the heading but empty its body", and it computes the scenario span into
+unused locals before doing something else entirely: it replaces `#### Verification\n` with
+`#### Verification\n\nPLACEHOLDER_MARKER\n`, which *inserts* a line. The body was 2317
+characters before the "emptying" edit and 2337 after. It then re-syncs the packets and the
+checker returns PASS, because the scenario the probe claims to have broken is intact.
+
+The trap is self-defeating in a way worth stating plainly: the failure message tells the
+operator to run `make_packets.py`, and following the project's own advice restores a green
+build over the defect.
+
+`failed_lines`, the list of failure lines that would distinguish "caught by the check I
+targeted" from "caught by something else", is computed at `fault_probe.py:527` and never used.
+
+**Partially addressed.** `Sandbox.sync_packets()` was added and is used by the new probe in
+D-043, which is why that probe is sound. The other scenario-editing probes still do not call
+it, and the mechanism to report *which* check fired is still unwired.
+
+**Status: OPEN, partially addressed.** Recorded rather than completed because fixing it means
+touching the probes one at a time and proving each against its own check, and the first
+attempt at that is D-043's probe, which needed two corrections before it proved anything.
+
+### D-046 HIGH — `test_leakage.py` returns success when the isolation half cannot run
+
+- **Affected** `tests/test_leakage.py`
+- **Evidence** from the review pass
+
+**What failed.** The workspace-isolation check returns `True, "SKIPPED (not importable)"` when
+`make_eval_workspace` cannot be imported. `True` is success, so deleting the builder makes the
+entire isolation half of the leakage test disappear while the script still reports
+`RESULT: PASS` and exits 0. `release_gate.py` maps exit 0 to PASS for its leakage criterion.
+
+This is the same shape as D-044 in a different file, and the same failure the gate was written
+to catch.
+
+**Status: OPEN**, in progress on a separate branch.
+
+### D-047 MEDIUM — "Every reference path resolves" passes when no path was found
+
+- **Affected** `tests/check_repo.py::check_reference_discovery`
+- **Evidence** from the review pass
+
+**What failed.** The orphan check is guarded by `if total and not orphans`, but the
+unresolvable check is guarded only by `if not unresolvable`. The list is empty both when
+every listed path resolves and when the regex that collects paths matched nothing at all.
+
+**Reproduction.** Strip the backticks from every reference path in every `SKILL.md` and delete
+`.agents/skills/apigee-support-core/references/hybrid.md`. The check still reports "every
+reference path listed in a SKILL.md resolves to a file" and `check_repo --strict` returns
+PASS. The deleted file is precisely what the `reference-path-unresolvable` probe protects; the
+probe passes today only because the repository happens to use backticks.
+
+**Status: OPEN**, in progress on a separate branch.
+
+### D-048 MEDIUM — A workspace with no prompts still reports `structural: PASS`
+
+- **Affected** `tests/make_eval_workspace.py`, `tests/test_isolation.py`, `tests/test_leakage.py`
+- **Evidence** from the review pass
+
+**What failed.** `make_eval_workspace.build()` returns `1 if missing else 0`, but both callers
+test only `rc == 2`. A missing packet therefore yields exit 1, which no caller recognises, and
+`release_gate.py` decides F6 by looking for the string `structural: PASS` while ignoring the
+exit code.
+
+**Reproduction.** Delete MED-13's two prompt packets and build a workspace for it: the builder
+reports `0 packets (2 missing)` and returns 1, and the isolation run still reports
+`structural: PASS`. F6 therefore passes on a workspace containing no prompts at all.
+
+Two things make this worse than a cosmetic exit-code mismatch. The coverage is 12 of 103
+scenarios, chosen by `ids[::8][:12]`, which happened not to include a scenario with a missing
+packet. And the same blindness is in `test_leakage.py:127`.
+
+**Status: OPEN.**
+
+### D-049 HIGH — A run cannot resume past its own quota error
+
+- **Affected** `evaluation/results/run-3/run_generation.py`
+- **Evidence** from the review pass
+
+**What failed.** Work is selected with `status == "NOT_STARTED"` only. Every failure path
+writes `BLOCKED_BY_INFRASTRUCTURE` and a completed turn 1 writes `TURN1_COMPLETE`, and neither
+is ever selected again. Demonstrated: a scenario blocked by a 429 is not picked up after the
+window resets, and a scenario stranded at `TURN1_COMPLETE` by a crash or a turn-2 429 never
+receives its turn 2. A second invocation prints "nothing pending in this selection" and spends
+nothing.
+
+The budget window itself does reset correctly, so the machinery is half-built. The window is
+resumable and the scenario is not. That contradicts `PROTOCOL.md`'s "manifest.json is
+authoritative for collection state" and the recovery procedure in `evaluation/WORKING-STATE.md`,
+which budgets 337 requests across roughly eight windows and expects each session to add a
+batch and checkpoint.
+
+**Why it matters now.** The free provider quota resets on a wall-clock boundary, so the state
+of the world is the trigger. Running `--batch` before the reset would strand those scenarios
+for the whole run, and only a hand-edit of `manifest.json` would revive them, which no
+document describes.
+
+**Status: OPEN**, in progress on a separate branch.
+
+### D-050 HIGH — A stale workspace is reused with nothing checking what is inside it
+
+- **Affected** `evaluation/results/run-3/run_generation.py`
+- **Evidence** from the review pass
+
+**What failed.** `scenario_ws()` rebuilds only when the workspace's own `MANIFEST.json` is
+absent, then checks that `missing_packets` is empty and that the scenario id is present. It
+never compares `skill_dir_sha256` or `permission_config_sha256`, both of which the builder
+writes for exactly this purpose.
+
+**Reproduction.** Build a workspace with the real builder, empty its `opencode.jsonc`,
+replace a skill file, corrupt both digests in the workspace's own manifest, then run a turn.
+The turn records `TURN1_COMPLETE` with every isolation deny stripped, no request refused, and
+no warning. The module docstring's claim that the workspace carries an enforcing
+`opencode.jsonc` holds only for a workspace the current builder produced, and nothing
+re-establishes it on resume.
+
+Compounding it, `ws_path()` hashes only the scenario ids and `WS_ROOT` defaults under `/tmp`,
+so every checkout, branch and commit resolves a given scenario to the same directory.
+
+**Status: OPEN**, in progress on a separate branch.
+
+### D-051 HIGH — The freeze verifies deletions, additions, and almost nothing else
+
+- **Affected** `evaluation/results/run-3/freeze_artifacts.py`
+- **Evidence** from the review pass
+
+**What failed.** Three separate problems, all demonstrated.
+
+- `--verify` skips any file that is *absent*, because the comparison is guarded by
+  `now is not None`. Deleting `evaluation/rubric.md`, `tests/make_eval_workspace.py`, an
+  answer key, a turn-2 packet or a scenario file all leave the exit at 0. Adding a whole new
+  scenario is also undetected, because the comparison iterates only the old file set.
+- `collect()` hashes five files. `grade_run.py`, `run_generation.py`, `PROTOCOL.md`,
+  `manifest.json` and `evaluation/model-eval-protocol.md` are all outside the freeze, and
+  `git_head` is collected but never compared. `grade_run.py` is the only thing that turns
+  anchors into PASS or FAIL, and `PROTOCOL.md`'s stated reason for the freeze is "so the
+  rules that decide a verdict cannot be written after the verdicts are known".
+- The hash file is self-certifying: `--write` rewrites it from the current tree, deleting a
+  section un-verifies everything that section covered, and `--verify` accepts any path.
+
+**Why it matters.** The freeze is what makes a recorded result mean anything, and a deleted
+packet is both invisible to it and fatal to the harness, which reads the packet outside any
+error handling and dies with a bare traceback.
+
+**Status: OPEN**, in progress on a separate branch.
+
+### D-052 MEDIUM — A recorded result that would not survive being re-examined
+
+- **Affected** `evaluation/results/run-3/grade_run.py`, `run_generation.py`
+- **Evidence** from the review pass
+
+Two smaller integrity gaps, recorded together because they are both about a recorded result
+not being checkable after the fact.
+
+- `run_generation.py` records `response_sha256` per turn. `grade_run.py` never reads it, and
+  the grade file records `key_sha256` but not the response hash. Replacing an answer file after
+  collection is undetectable. `evaluation/WORKING-STATE.md` says "Do not re-run a completed
+  scenario because its answer looks inconvenient", and the record that would make that
+  auditable exists and is unused.
+- A refused scenario keeps its earlier grade file. When `grade_run.py` refuses a scenario it
+  writes nothing for it in that pass but removes nothing from the previous one, so the
+  directory a report would read still holds the old PASS. The summary and the exit code are
+  correct; the artifact on disk is not.
+
+**Status: OPEN.**
+
+### D-053 LOW — Recorded and accepted, with the disagreement written down
+
+`evaluation/results/run-3/PILOT-PROTOCOL.md` lists 3 easy, 3 medium, 3 hard, 2 adversarial
+and 2 regression in its sample table, which is 13, while the prose says 12 and the budget says
+"12 scenarios x 2 turns = 24 requests maximum". `evaluation/results/RUNS.md` hedges to "1
+regression + REG-08", which is 13 under a 12 label. The denominator for a strict pass rate is
+fixed by that list. Not fixed: the sample is declared in advance, so editing it after the fact
+would be exactly the thing the freeze exists to prevent. Recorded so a reader does not have to
+rediscover which number is authoritative.
