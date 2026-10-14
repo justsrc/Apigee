@@ -30,6 +30,7 @@ from pathlib import Path
 from typing import NamedTuple, NotRequired, TypedDict
 
 PAGES = Path(__file__).parent / "pages"
+MANIFEST = PAGES / "MANIFEST.tsv"
 OUT = Path(__file__).parent.parent / ".agents/skills/apigee-support-core/references/error-codes.md"
 
 
@@ -56,13 +57,62 @@ class MergedRow(NamedTuple):
     conflict: bool
 
 
-# Map fetched filenames back to their canonical doc URLs. The fetch script saves as
-# <path with slashes replaced by underscores>.txt, so this is a pure function.
-def url_for(stem: str) -> str | None:
-    stem = stem.replace("_", "/")
-    if stem.startswith("https:"):
+# Map fetched filenames back to their canonical doc URLs.
+#
+# The old comment here said the fetch script saves as "<path with slashes replaced by
+# underscores>.txt, so this is a pure function". That is true of the naming and false as a
+# conclusion. fetch.sh also replaces colons, and it lets a maintainer choose an output
+# name, so the stem is a local shorthand rather than an encoding. Inverting it produced a
+# citation that does not resolve: research/pages/oauthv2.txt was fetched from
+# .../api-platform/reference/policies/oauthv2-policy, and the 31 rows citing it shipped
+# https://cloud.google.com/apigee/docs/oauthv2, which returns 404. 88 of the 335 cached
+# pages have a stem that does not spell the page's path.
+#
+# research/pages/MANIFEST.tsv records where each page was actually fetched from.
+# build_doc_index.py reads it and says in its own docstring that guessing "guessed wrong for
+# every absolute URL". This generator had the same bug with the same fix available.
+#
+# The manifest is used only where it disagrees about the path. cloud.google.com and
+# docs.cloud.google.com are the same page and the index has always used the first, so rows
+# whose stem already resolves keep their existing citation rather than churning 300 correct
+# URLs to satisfy a tidier rule.
+def _manifest_urls() -> dict[str, str]:
+    """Cached filename stem -> the URL it was fetched from."""
+    if not MANIFEST.is_file():
+        return {}
+    out: dict[str, str] = {}
+    for line in MANIFEST.read_text(encoding="utf-8", errors="replace").splitlines():
+        parts = line.split("\t")
+        if len(parts) >= 2 and parts[0] and parts[1]:
+            out[parts[0]] = parts[1]
+    return out
+
+
+def _url_path(url: str) -> str:
+    """The path a URL points at, ignoring which Google host serves it."""
+    for marker in ("cloud.google.com", "docs.apigee.com", "apigee.com"):
+        _, sep, rest = url.partition(marker)
+        if sep:
+            return "/" + rest.split("?", 1)[0].split("#", 1)[0].rstrip("/")
+    return url.rstrip("/")
+
+
+def url_for(stem: str, manifest: dict[str, str] | None = None) -> str | None:
+    """Where this cached page was actually fetched from, or None if it cannot be told."""
+    if manifest is None:
+        manifest = _manifest_urls()
+    guessed = stem.replace("_", "/")
+    if guessed.startswith("https:"):
         return None
-    return f"https://cloud.google.com/apigee/docs/{stem}"
+    from_stem = f"https://cloud.google.com/apigee/docs/{guessed}"
+
+    recorded = manifest.get(stem)
+    if not recorded:
+        return from_stem
+    # Same page under the other host: keep the host this index has always used.
+    if _url_path(recorded) == _url_path(from_stem):
+        return from_stem
+    return recorded
 
 
 def rows_of(block: str) -> list[list[str]]:
