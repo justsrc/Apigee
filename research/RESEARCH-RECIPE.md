@@ -9,7 +9,7 @@ not checked.
 ## Use the fetch script
 
 ```bash
-cd /Users/justinjacob/Projects/Work/Apigee/research
+cd research
 ./fetch.sh <doc-path-without-extension> [output-name]
 ```
 
