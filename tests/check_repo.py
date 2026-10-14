@@ -918,6 +918,35 @@ def check_reference_discovery(root: Path, r: Results) -> None:
         r.ok("every reference path listed in a SKILL.md resolves to a file")
 
 
+def _has_rejected_codes_appendix(block: str) -> bool:
+    """True when the block carries the "deliberately not converted" appendix.
+
+    Matched on a heading, not on a word. The appendix exists so that codes considered
+    and rejected can be written down without the fault-code check reading them as
+    claims. A scenario that merely mentions the word "Rejected" is not that appendix,
+    and treating it as one switches the check off for the whole scenario.
+    """
+    for _lvl, text, _ln in _headings_of(block):
+        if re.search(r"not converted into scenarios", text, re.I):
+            return True
+    return False
+
+
+def _headings_of(block: str) -> list[tuple[int, str, int]]:
+    """(level, text, line) for every heading outside a fenced code block."""
+    out, in_fence = [], False
+    for i, line in enumerate(block.splitlines()):
+        if re.match(r"^\s*(```|~~~)", line):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        m = re.match(r"^(#{1,6})\s+(.*)$", line)
+        if m:
+            out.append((len(m.group(1)), m.group(2).strip(), i))
+    return out
+
+
 def check_scenario_codes(root: Path, r: Results) -> None:
     """Every fault-code-shaped token in a scenario body must exist in the source corpus.
 
@@ -964,13 +993,24 @@ def check_scenario_codes(root: Path, r: Results) -> None:
 
     unknown: list[str] = []
     checked = 0
+    exempted = 0
     for p in sorted((root / SCENARIOS_DIR).glob("*.md")):
         if p.name == "index.md":
             continue
         for sid, block in find_scenario_blocks(read(p)):
             # The "cases deliberately not converted" appendix records codes that were
-            # considered and rejected. Flagging them would invert their meaning.
-            if "NOT converted into scenarios" in block or "Rejected" in block:
+            # considered and rejected, and flagging those would invert their meaning.
+            #
+            # The exemption is scoped to the appendix itself, as a heading. It used to be
+            # `"NOT converted into scenarios" in block or "Rejected" in block`, a bare
+            # substring test over the whole scenario, so any scenario whose prose
+            # happened to contain the ordinary English word "Rejected" had the whole
+            # fault-code check switched off. HARD-22 uses it as a label in a list of
+            # LDAP symptoms, and an invented code injected into HARD-22's ground truth
+            # was reported clean while the same injection into HARD-21 was caught. The
+            # check this guard protects is the one the project was built around.
+            if _has_rejected_codes_appendix(block):
+                exempted += 1
                 continue
             for m in code_re.finditer(block):
                 tok = m.group(1)
@@ -999,8 +1039,10 @@ def check_scenario_codes(root: Path, r: Results) -> None:
                f"{'...' if len(set(unknown)) > 8 else ''}. An invented code is worse than "
                f"no code, because an agent is graded against it.")
     else:
+        note = (f"; {exempted} scenario(s) exempt via the not-converted appendix"
+                if exempted else "")
         r.ok(f"all {checked} fault-code-shaped tokens in scenario bodies exist in the "
-             f"cached source corpus")
+             f"cached source corpus{note}")
 
 
 def check_origin_integrity(root: Path, r: Results) -> None:

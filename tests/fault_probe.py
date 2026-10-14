@@ -88,6 +88,25 @@ class Sandbox:
             h.update(b"\0")
         return h.hexdigest()
 
+    def sync_packets(self) -> None:
+        """Regenerate the sandbox's packets from its (mutated) scenarios.
+
+        Any probe that edits scenarios/*.md makes every packet stale, and
+        `check_packets_current` then fails the run for a reason that has nothing to do
+        with what the probe was testing. The probe reads green either way, so the
+        targeted check is never exercised. Worse, the failure message tells the
+        operator to run make_packets.py, so following the project's own advice
+        restores a green build over the defect.
+
+        Probes that mutate a scenario call this, so the only failure left standing is
+        the one they aimed at.
+        """
+        for turn in ("1", "2"):
+            subprocess.run(
+                [sys.executable, str(self.root / "tests" / "make_packets.py"),
+                 "--all", "--turn", turn],
+                cwd=self.root, capture_output=True, text=True, timeout=300, check=True)
+
     def path(self, rel: str) -> Path:
         return self.root / rel
 
@@ -487,6 +506,27 @@ def _p_invented_code(sb: Sandbox) -> None:
         raise AssertionError("fixture precondition failed: code not present")
     p.write_text(t.replace("`InvalidQuotaInterval`",
                           "`steps.quota.TotallyMadeUpQuotaCode`", 1))
+
+
+@probe("scenario-invents-fault-code-in-a-scenario-naming-rejected", "FAIL",
+       "the fault-code check was exempting any scenario whose prose contained the word "
+       "'Rejected', so an invented code in HARD-22, which uses it as an LDAP symptom "
+       "label, went unreported. Inject into HARD-22, not easy.md, or this proves nothing.")
+def _p_invented_code_exempt(sb: Sandbox) -> None:
+    p = sb.path("scenarios/hard.md")
+    t = p.read_text()
+    start, end = scenario_span(t, "HARD-22")
+    block = t[start:end]
+    if "Rejected" not in block:
+        raise AssertionError("fixture precondition failed: HARD-22 no longer contains the word")
+    if "#### Ground-truth resolution" not in block:
+        raise AssertionError("fixture precondition failed: no ground-truth section")
+    injected = block.replace(
+        "#### Ground-truth resolution",
+        "#### Ground-truth resolution\n\nThe fault string is "
+        "`steps.javacallout.AnInjectedNonexistentCode`.", 1)
+    p.write_text(t[:start] + injected + t[end:])
+    sb.sync_packets()
 
 
 @probe("scenario-code-quoted-as-real-but-absent", "FAIL",
