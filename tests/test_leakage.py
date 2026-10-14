@@ -30,17 +30,42 @@ Usage:
 
 from __future__ import annotations
 
+import importlib
+import os
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+from collections.abc import Iterator
 from pathlib import Path
+from typing import Protocol, cast
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tests"))
 
-import make_packets as mp  # noqa: E402
+
+class _MakePackets(Protocol):
+    FILES: dict[str, Path]
+
+    def blocks(self, path: Path) -> list[tuple[str, str]]: ...
+
+    def headings_of(self, block: str) -> list[tuple[int, str, int]]: ...
+
+    def section(
+        self, block: str, wanted: str, headings: list[tuple[int, str, int]]
+    ) -> str | None: ...
+
+
+class _MakeEvalWorkspace(Protocol):
+    def all_scenario_ids(self) -> list[str]: ...
+
+    def build(self, out: Path, ids: list[str], with_corpus: bool, force: bool) -> int: ...
+
+    def find_leaks(self, root: Path) -> list[str]: ...
+
+
+mp = cast("_MakePackets", cast("object", importlib.import_module("make_packets")))
 
 # Sections the generator must never release, whatever the turn.
 HELD_BACK = [
@@ -70,7 +95,7 @@ def norm(text: str) -> str:
 
 def sentences(text: str) -> list[str]:
     """Long sentences from a block, normalised, ignoring headings and short fragments."""
-    out = []
+    out: list[str] = []
     for raw in re.split(r"(?<=[.!?])\s+", text):
         s = re.sub(r"[`*_#>|\[\]()-]", " ", raw)
         s = norm(s)
@@ -126,10 +151,13 @@ def _workspace_test() -> tuple[str, str]:
     check could fail to run returned success.
     """
     try:
-        import tempfile
-
-        import make_eval_workspace as mew
+        mew = cast("_MakeEvalWorkspace",
+                   cast("object", importlib.import_module("make_eval_workspace")))
     except ImportError:
+        # The wip branch's typing sweep replaced this fallback with a bare return, which
+        # both dropped a retry that works and reinstated the old `True`, and True is
+        # success. The fallback is kept: the import above is importlib, which needs the
+        # module on sys.path, and this is what puts tests/ there.
         sys.path.insert(0, str(Path(__file__).resolve().parent))
         try:
             import make_eval_workspace as mew
@@ -175,7 +203,6 @@ def main() -> int:
         checked += 1
         sid = path.name.split(".")[0]
         text = path.read_text(encoding="utf-8")
-        low = text.lower()
 
         for sec in HELD_BACK:
             # Match the section as a heading, not as a substring. A prose sentence
@@ -184,7 +211,7 @@ def main() -> int:
             # user references a routine", which are the opposite of findings.
             if re.search(rf"^#{{1,6}}\s*{re.escape(sec)}\s*$", text, re.M | re.I):
                 failures.append(f"{path.name}: contains held-back section heading "
-                                f"'{sec}'")
+                                + f"'{sec}'")
 
         blocks = _sections(sid)
         gt = blocks.get("ground-truth resolution", "")
@@ -216,7 +243,7 @@ def main() -> int:
                 heading = re.sub(r"^[A-Z]+-\d+\.?\s*:?\s*", "", m.group(1)).strip()
                 if heading[:40] and heading[:40] in clean:
                     failures.append(f"{path.name}: emits the scenario title as a "
-                                    f"heading: {m.group(0)[:70]}")
+                                    + f"heading: {m.group(0)[:70]}")
                     break
 
             # The heading test above has a blind spot: a title pasted into the ticket as a
@@ -229,7 +256,7 @@ def main() -> int:
             bare = norm(re.sub(r"^[A-Z]+-\d+\.?\s*", "", title)).strip("\"'“”` ")
             if bare and bare[:60] in norm(text) and bare[:60] not in ticket:
                 failures.append(f"{path.name}: title text appears in the packet body but "
-                                f"not in the customer's ticket: {bare[:60]}...")
+                                + f"not in the customer's ticket: {bare[:60]}...")
 
     # Deliberate leak: inject a canary into held-back material and prove it does not escape.
     leaked_ok = _canary_test()
@@ -245,7 +272,7 @@ def main() -> int:
         print(f"  LEAK: {f}")
     if not failures:
         print("  no ground truth, incorrect answers, titles or held-back sections found "
-              "in any prompt")
+              + "in any prompt")
     print()
     print(f"deliberate canary leak test: {'held back correctly' if leaked_ok else 'LEAKED'}")
     if not leaked_ok:
@@ -271,7 +298,7 @@ def main() -> int:
     return 0
 
 
-def _blocks(sid: str):
+def _blocks(sid: str) -> Iterator[tuple[str, str]]:
     for path in mp.FILES.values():
         if not path.is_file():
             continue
@@ -293,8 +320,8 @@ def _canary_test() -> bool:
     tmp = Path(tempfile.mkdtemp(prefix="apigee-leak-"))
     try:
         sandbox = tmp / "repo"
-        shutil.copytree(ROOT, sandbox,
-                        ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc"))
+        _ = shutil.copytree(ROOT, sandbox,
+                            ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc"))
         sc = sandbox / "scenarios" / "easy.md"
         text = sc.read_text(encoding="utf-8")
         anchor = "#### Ground-truth resolution\n"
@@ -303,13 +330,13 @@ def _canary_test() -> bool:
                   file=sys.stderr)
             return False
         text = text.replace(anchor, anchor + f"\nMARKER_SENTENCE {MARKER}.\n", 1)
-        sc.write_text(text, encoding="utf-8")
+        _ = sc.write_text(text, encoding="utf-8")
 
         env = {"PYTHONPATH": str(sandbox / "tests")}
-        subprocess.run(
+        _ = subprocess.run(
             [sys.executable, str(sandbox / "tests" / "make_packets.py"),
              "--all", "--turn", "1"],
-            capture_output=True, text=True, env={**dict(__import__("os").environ), **env},
+            capture_output=True, text=True, env={**dict(os.environ), **env},
             timeout=300)
 
         for p in (sandbox / "evaluation" / "packets").glob("*.prompt.md"):

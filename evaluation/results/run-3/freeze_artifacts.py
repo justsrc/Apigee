@@ -81,6 +81,7 @@ import hashlib
 import json
 import subprocess
 from pathlib import Path
+from typing import Literal, TypedDict
 
 # This file lives at <root>/evaluation/results/run-3/, so the root is four levels up.
 ROOT = Path(__file__).resolve().parents[3]
@@ -111,12 +112,32 @@ MISSING = "MISSING"
 # Sections that must exist, must be a mapping, and must not be empty. An absent or empty
 # section previously iterated nothing and reported nothing, so removing it un-verified
 # everything it had covered without a word.
-FILE_SECTIONS = ("skill_files", "scripts", "scenarios", "keys", "turn1", "turn2")
+SectionName = Literal["skill_files", "scripts", "scenarios", "keys", "turn1", "turn2"]
+FILE_SECTIONS: tuple[SectionName, ...] = (
+    "skill_files", "scripts", "scenarios", "keys", "turn1", "turn2")
 SCALAR_SECTIONS = ("git_head", "skill_digest")
 
 # Sentinel for "--verify with no path", which means the recorded manifest. Kept distinct
 # from None, which means --verify was not asked for at all.
 _RECORDED = ""
+
+
+class Manifest(TypedDict):
+    """The shape `collect()` returns and `artifact-hashes.json` holds.
+
+    Typed rather than a bare dict so that adding a section is a type error at both ends
+    rather than a key that one side writes and the other never reads. `integrity_problems`
+    checks for sections that are absent at runtime, which is the case a dict annotation
+    cannot catch.
+    """
+    git_head: str
+    skill_digest: str
+    skill_files: dict[str, str]
+    scripts: dict[str, str]
+    scenarios: dict[str, str]
+    keys: dict[str, str]
+    turn1: dict[str, str]
+    turn2: dict[str, str]
 
 
 def sha(p: Path) -> str:
@@ -150,7 +171,7 @@ def git_head() -> str:
     return out if r.returncode == 0 and out else MISSING
 
 
-def collect() -> dict:
+def collect() -> Manifest:
     packets = ROOT / "evaluation" / "packets"
     scen = {p.name: sha(p) for p in sorted((ROOT / "scenarios").glob("*.md"))}
     keys = {p.name: sha(p) for p in sorted(packets.glob("*.key.md"))}
@@ -307,6 +328,19 @@ def report(moved: list[str], lines: list[str]) -> None:
             print(f"  {line}")
 
 
+class Args(argparse.Namespace):
+    """argparse fields, named rather than reached for by attribute guess.
+
+    `parse_args` returns a bare Namespace, so `a.verify` type-checks as Any and a
+    renamed flag reads as a valid attribute right up until it is None. Naming the
+    fields makes the two additions, --strict-head and the optional --verify path,
+    visible to the checker.
+    """
+    write: bool = False
+    verify: str | None = None
+    strict_head: bool = False
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(
         description="Freeze run 3's material and prove it has not moved since.")
@@ -316,7 +350,7 @@ def main() -> int:
     ap.add_argument("--strict-head", action="store_true",
                     help="treat a moved git_head as drift as well (off by default, see "
                          "the module docstring)")
-    a = ap.parse_args()
+    a = ap.parse_args(namespace=Args())
     cur = collect()
     out, anchor = manifest_path(), anchor_path()
 

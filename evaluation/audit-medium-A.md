@@ -337,7 +337,7 @@ non-actionable rather than silently dropped.
 
 ---
 
-## Cross-cutting findings
+## Cross-cutting findings (MED-01–MED-04)
 
 1. **Environment-group absence is asserted as a global fact in MED-01 and then relied on in
    MED-02 with opposite consequences.** The same corpus line
@@ -651,7 +651,7 @@ non-actionable rather than silently dropped.
 
 ---
 
-## Cross-cutting findings
+## Cross-cutting findings (MED-05–MED-08)
 
 1. **Citation drift between scenario bodies and their own References lists (MED-07;
    latent in MED-05 and MED-08).** MED-07 is the confirmed instance: its two References
@@ -904,7 +904,7 @@ MED-07 or MED-06 alone, with item 1 generalizing as a process recommendation.
 
 ---
 
-## Cross-cutting findings
+## Cross-cutting findings (MED-09–MED-12)
 
 1. Turn-2 "Diagnostic evidence" contradicts the "Ground-truth resolution" in two of the
    four scenarios, and in both cases the contradiction is the kind the corpus settles
@@ -1128,7 +1128,7 @@ MED-07 or MED-06 alone, with item 1 generalizing as a process recommendation.
 
 ---
 
-## Cross-cutting findings
+## Cross-cutting findings (MED-13–MED-15)
 
 - **No XML anywhere in this batch.** MED-13, MED-14 and MED-15 contain no policy configuration
   snippets, so the largest defect class in this audit family is untestable here. MED-15's
@@ -1156,6 +1156,7 @@ MED-07 or MED-06 alone, with item 1 generalizing as a process recommendation.
 ---
 
 ### MED-16 The OAuth error names a missing parameter, but the token request never reached the token endpoint
+
 - Verdict: DEFECT
 - Defect: Two findings.
   1. **Title leakage (medium.md:1716).** The title states the ground-truth mechanism verbatim. The scenario's "Ground-truth resolution" (medium.md:1769-1772) reads "The token request is being served by the authorization-code flow because of how the proxy was deployed." The title already tells the agent the token request "never reached the token endpoint", which is the single inference the scenario is built around. The remaining work (deployment vs proxy base path, the redeploy) is procedural, not diagnostic.
@@ -1197,6 +1198,7 @@ MED-07 or MED-06 alone, with item 1 generalizing as a process recommendation.
 ---
 
 ### MED-17 The deploy tool says "Deployment failed" and the Management API says the deployment worked
+
 - Verdict: OK
 - Defect: n/a
 - Severity: n/a
@@ -1249,6 +1251,7 @@ MED-07 or MED-06 alone, with item 1 generalizing as a process recommendation.
 ---
 
 ### MED-18 Every API product, app and developer fails to load after a hybrid upgrade
+
 - Verdict: DEFECT
 - Defect: **Logically invalid inference embedded in the ground truth, the common-incorrect-answer list, and the critical-failure list.** medium.md:1975-1977 correctly states "affecting environments that use Workload Identity Federation together with an HTTP forward proxy. Both conditions are required." medium.md:1980-1982 then asserts the opposite: "An agent that checks only 'are you using WIF?' or only 'do you have a forward proxy?' will correctly observe one is absent and wrongly close the case." Under a documented conjunction, correctly observing one condition **absent** *does* correctly rule the issue out. The sentence is self-contradictory as written ("correctly observe ... wrongly close"). The same error is repeated at medium.md:2016-2018 ("Either alone rules the issue out incorrectly") and is escalated into a critical failure at medium.md:2029-2030 ("ruling the issue out by checking only one of the two gating features"). Source of truth: `research/pages/apigee-known-issues.txt:265` — "environments using Workload Identity Federation (WIF) **in conjunction with** an HTTP Forward Proxy **may fail**", i.e. an AND. Also `research/pages/hybrid_release-notes.txt:2184`. Note the same flawed phrasing originates in `references/hybrid.md:96-98` ("Checking either one alone rules it out wrongly"); MED-18 inherited it rather than inventing it.
 - Severity: high
@@ -1273,7 +1276,8 @@ MED-07 or MED-06 alone, with item 1 generalizing as a process recommendation.
 
   **The remediation YAML is the documented workaround, character for character**
   - medium.md:1989-1998 vs `research/pages/apigee-known-issues.txt:273-283`:
-    ```
+
+    ```text
     ao:
       image:
         url: "gcr.io/apigee-release/hybrid/apigee-operators"
@@ -1283,6 +1287,7 @@ MED-07 or MED-06 alone, with item 1 generalizing as a process recommendation.
         url: "gcr.io/apigee-release/hybrid/apigee-mart-server"
         tag: "1.16.0-hotfix.1"
     ```
+
   - All four property paths exist: `ao.image.url` config-prop-ref.txt:137, `ao.image.tag` :136, `mart.image.url` :2190, `mart.image.tag` :2189. No invented keys, correct casing. **No XML/YAML defect.**
 
   **Neighbouring defect 479040521 — correctly described**
@@ -1307,6 +1312,7 @@ MED-07 or MED-06 alone, with item 1 generalizing as a process recommendation.
 ---
 
 ### MED-19 Runtime logs stopped after a successful upgrade
+
 - Verdict: OK
 - Defect: n/a
 - Severity: n/a
@@ -1331,13 +1337,15 @@ MED-07 or MED-06 alone, with item 1 generalizing as a process recommendation.
 
   **Both remediation branches are the documented workaround, character for character**
   - medium.md:2099-2105 vs known-issues.txt:44-49:
-    ```
+
+    ```text
     logger:
       enabled: true
       nodeSelector:
         key: ""
         value: ""
     ```
+
   - medium.md:2110 vs known-issues.txt:59 — `kubectl label nodes NODE_NAME apigee.cloud.google.com/apigee-logger-enabled=true`. Exact.
   - known-issues.txt:36 ("To run the logger on every node, which matches the behavior of earlier releases, clear the default node selector") and :51 ("keep the default node selector and label each of those nodes") match medium.md:2097 and 2107 exactly, including the framing of the two options.
   - "Then upgrade the `apigee-telemetry` chart" (medium.md:2113) matches known-issues.txt:34 — "**Workaround:** Choose one of the following, then upgrade the `apigee-telemetry` chart." The upgrade step is documented, not invented.
@@ -1371,7 +1379,7 @@ MED-07 or MED-06 alone, with item 1 generalizing as a process recommendation.
 
 ---
 
-## Cross-cutting findings
+## Cross-cutting findings (MED-16–MED-19)
 
 **1. The conjunction trap in MED-18 is inherited from the skill reference, not invented by the scenario.**
 `references/hybrid.md:96-98` states: "**MART credential regression** is gated on workload identity federation **and** a forward proxy **together**. Checking either one alone rules it out wrongly, which is a trap when the two configurations arrived at different times." MED-18 (medium.md:1980-1982, 2016-2018, 2029-2030) drops the temporal qualifier ("arrived at different times") and converts it into an unconditional logical error. The source register, `research/pages/apigee-known-issues.txt:265`, documents an AND ("in conjunction with"), under which a single definitive negative check correctly rules the issue out.
@@ -1390,6 +1398,7 @@ In both, the ticket names the exact affected hybrid version (medium.md:1951 `1.1
 ---
 
 ### MED-20 A deployed timeout change is not taking effect on some requests only
+
 - Verdict: DEFECT
 - Defect: Known issue **246774745 is mis-scoped to hybrid**. The register's Affects column for
   246774745 is `Apigee` (SaaS), not hybrid — `research/pages/known-issues-v.txt:2168-2176` and
@@ -1464,6 +1473,7 @@ In both, the ticket names the exact affected hybrid version (medium.md:1951 `1.1
 ---
 
 ### MED-21 The linter and the security team want opposite things
+
 - Verdict: OK
 - Defect: n/a
 - Severity: n/a
@@ -1566,6 +1576,7 @@ In both, the ticket names the exact affected hybrid version (medium.md:1951 `1.1
 ---
 
 ### MED-22 A routine cert-manager upgrade plants a future outage
+
 - Verdict: DEFECT
 - Defect: **Spurious, wrongly-scoped Verification step.** Medium.md:2454-2455 requires "Separately,
   verify Cassandra backup and restore across the clusters, because Cassandra backup and restore
@@ -1659,7 +1670,7 @@ In both, the ticket names the exact affected hybrid version (medium.md:1951 `1.1
 
 ---
 
-## Cross-cutting findings
+## Cross-cutting findings (MED-20–MED-22)
 
 1. **Register product-scope drift (MED-20).** MED-20 imports 246774745, whose Affects column is
    `Apigee`, into a scenario declared `Product: hybrid` and with a hybrid version in the ticket. The

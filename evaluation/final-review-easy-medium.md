@@ -16,7 +16,7 @@ so the extractor stops at the rubric heading and never emits it.
 
 Verified mechanically:
 
-```
+```text
 EASY-01..15 : cf_inside_rubric=True   cf_own_section=False
 MED-01..22  : cf_inside_rubric=False  cf_own_section=True
 ```
@@ -50,8 +50,10 @@ allowed. MED-16 does not make that attribution, so it silently breaks its own fi
 ---
 
 ## EASY-01 Quota policy rejects the revision over a fractional interval
+
 **Verdict**: MINOR
 **Issues**:
+
 1. The remediation block recommends `<TimeUnit>second</TimeUnit>` and then says "Confirm
    `second` is a supported `<TimeUnit>` value before recommending it." That hedge is
    correct but understates the constraint. `quota-policy.txt:1030` states `second` is
@@ -66,6 +68,7 @@ allowed. MED-16 does not make that attribution, so it silently breaks its own fi
    "no HTTP status" framing for deployment errors matches the index's own preamble.
 
 ## EASY-02 Missing Interval produces a runtime 500
+
 **Verdict**: CORRECT
 **Issues**: none. `policies.ratelimit.FailedToResolveQuotaIntervalReference` at 500 with
 "`<Interval>` element is not defined... This element is mandatory" is verbatim at
@@ -73,6 +76,7 @@ allowed. MED-16 does not make that attribution, so it silently breaks its own fi
 is not conflated.
 
 ## EASY-03 FlowCallout cannot find the shared flow
+
 **Verdict**: CORRECT
 **Issues**: none. `flow.SharedFlowNotFound`, 500, "Either the shared flow does not exist, or
 the shared flow exists but is not deployed" — `flow-callout-policy.txt:412`. The scenario's
@@ -80,6 +84,7 @@ insistence on separating the two causes is exactly right, and the "cannot prove 
 from the code" discipline is correct.
 
 ## EASY-04 AccessControl blocks a corporate IP range
+
 **Verdict**: CORRECT
 **Issues**: none. `accesscontrol.IPDeniedAccess` at 403 caused by a client IP matching
 `SourceAddress` is in the index and matches `access-control-policy.txt`. `IPRules`,
@@ -87,8 +92,10 @@ from the code" discipline is correct.
 (`access-control-policy.txt:32-36`). The TEST-NET-3 observation is accurate.
 
 ## EASY-05 JavaScript policy blocked by a security violation
+
 **Verdict**: MINOR
 **Issues**:
+
 1. "Also worth removing the now-unused callout if nothing else uses it" (easy.md:597) is
    orphaned. There is no callout anywhere in EASY-05. It reads as a leftover from another
    scenario and instructs the agent to remove something that does not exist. Appears in the
@@ -99,6 +106,7 @@ from the code" discipline is correct.
    doc names the blocked call, it says the fault string does. Correct handling.
 
 ## EASY-06 BasicAuthentication cannot resolve its source variable
+
 **Verdict**: CORRECT
 **Issues**: none. The earlier header-casing error is gone; the cause is now step ordering,
 which the runtime-errors page supports exactly:
@@ -110,6 +118,7 @@ element is set to `false`"
 115). Good.
 
 ## EASY-07 JWS algorithm mismatch
+
 **Verdict**: CORRECT
 **Issues**: none. `steps.jws.AlgorithmMismatch`, 401, "The algorithm specified in the header
 by the `Generate` policy did not match the one expected in the `Verify` policy" — matches
@@ -118,6 +127,7 @@ the index and `verify-jws-policy.txt`. PS256 is in the supported list
 this config" distinction holds.
 
 ## EASY-08 InvalidMessageWeight does not identify the policy
+
 **Verdict**: CORRECT
 **Issues**: none. Verified the shared-code claim in both directions: `quota-policy.txt:1867`
 and `spike-arrest-policy.txt:727` both carry `policies.ratelimit.InvalidMessageWeight`. The
@@ -125,8 +135,10 @@ and `spike-arrest-policy.txt:727` both carry `policies.ratelimit.InvalidMessageW
 `context.getVariable` / `context.setVariable` correctly.
 
 ## EASY-09 JSONToXML cannot resolve its source variable
+
 **Verdict**: MINOR
 **Issues**:
+
 1. The ground truth says `request.body.payload` "is not a variable that exists. Apigee
    exposes the request payload as `request.content`." True, but the scenario does not
    acknowledge that a *nonexistent* variable is the textbook trigger for the sibling code
@@ -141,6 +153,7 @@ and `spike-arrest-policy.txt:727` both carry `policies.ratelimit.InvalidMessageW
    marked down. The `<OutputVariable>`-mandatory-when-string rule is correct (line 604).
 
 ## EASY-10 HMAC policy missing a required element
+
 **Verdict**: CORRECT
 **Issues**: none. `steps.hmac.MissingConfigurationElement` is real and is listed under
 **Deployment errors** on the HMAC page (`hmac-policy.txt:357`), so the 400-at-save framing
@@ -150,6 +163,7 @@ check (line 78-81). `InvalidSecretInConfig` and `InvalidVariableName` causes mat
 358-359. No invented elements.
 
 ## EASY-11 Unsupported TimeUnit
+
 **Verdict**: CORRECT
 **Issues**: none. The deployment-error row lists exactly `minute`, `hour`, `day`, `week`,
 `month` (`quota-policy.txt:1877`), matching the scenario's list and the rubric's
@@ -158,6 +172,7 @@ mentions `year` (line 766) and `second` (line 1030); the scenario correctly scop
 to the deployment-error reference, which is the source the error name points at.
 
 ## EASY-12 RevokeOAuthV2 timestamp bound
+
 **Verdict**: CORRECT
 **Issues**: none. `revoke-oauth-v2-policy.txt:315` gives
 `steps.oauth.v2.InvalidEarlyTimestamp` / 500 / "Timestamp cannot be earlier than January 1,
@@ -167,6 +182,7 @@ policy executes" claim matches line 295. The seconds-vs-millis variant is labell
 second hypothesis rather than the confirmed cause, which is the honest framing.
 
 ## EASY-13 JWKS verification fails without kid
+
 **Verdict**: CORRECT
 **Issues**: none. `steps.jwt.KeyIdMissing` / 401 / "the signed JWT does not include a `kid`
 property in the header" — `verify-jwt-policy.txt:1202`. The faultstring names the variable
@@ -174,6 +190,7 @@ via `fault.name` per the documented model. The explicit-key fallback is presente
 cost (loss of rotation), and the scenario does not fabricate a manual `kid` injection path.
 
 ## EASY-14 Target handshake fails against legacy TLS
+
 **Verdict**: CORRECT
 **Issues**: none, and the caveat section is doing exactly the right work.
 `options-configuring-tls.txt:8` names the code and the TLS 1.0/1.1 restriction directly;
@@ -183,6 +200,7 @@ attributions in the caveat check out. `<Protocols>` semantics confirmed
 protocols available for the JVM will be permitted"), so "narrower, never wider" is right.
 
 ## EASY-15 Quota counter behaves differently than expected
+
 **Verdict**: CORRECT
 **Issues**: none. `quota-policy.txt:14` is almost a verbatim source for the ground truth:
 "Quotas apply to individual API proxies and are not distributed among API proxies. For
@@ -193,6 +211,7 @@ across all three even if all three use the same quota policy configuration." 3 �
 ---
 
 ## MED-01 Deployed successfully, every request returns 404
+
 **Verdict**: CORRECT
 **Issues**: none. `environments-overview.txt:16`: "An environment must be a member of at
 least one environment group before you can access proxies deployed within it." The
@@ -201,12 +220,14 @@ environment groups" only under Apigee, and hybrid docs treat envgroups as first-
 (`hybrid_latest_environments-about.txt:129`).
 
 ## MED-02 Works for some users, 404s for others
+
 **Verdict**: CORRECT
 **Issues**: none. `READY` state and per-pod `deploymentStatus: deployed` are the real
 fields (`ui-deploy-overview.txt:111,148`). The rubric correctly forbids asserting a
 regional deployment model, which no evidence supports.
 
 ## MED-03 Load balancing does not fail over
+
 **Verdict**: CORRECT
 **Issues**: none, and this one is unusually well-anchored. `<MaxFailures>` default 0 with
 "Apigee always tries to connect to the target for each request and never removes the target
@@ -219,6 +240,7 @@ counter is reset." `<RetryEnabled>` default true and its I/O-or-timeout trigger 
 is accurate. The critical failure — changing only MaxFailures — is the right trap.
 
 ## MED-04 Cached responses are stale
+
 **Verdict**: CORRECT
 **Issues**: none. The scenario's central claim, that the two official pages disagree about
 the `Exclusive` prefix, is real and I confirmed both forms:
@@ -235,6 +257,7 @@ child-element tables; `<CacheKey>`/`<KeyFragment>`/`<Prefix>` are correct. The
 it refuses to force a conclusion and says the question has to be tested.
 
 ## MED-05 Key value map updates not visible everywhere
+
 **Verdict**: CORRECT
 **Issues**: none. The single-node quote is verbatim
 (`key-value-map-operations-policy.txt:411`). The scoping is the valuable part and it is
@@ -244,8 +267,10 @@ The `private.` prefix behaviour is confirmed (`cache/key-value-maps.txt:130,258`
 failure correctly separates the policy `PUT` path from the Management API path.
 
 ## MED-06 Latency jumped, unknown layer
+
 **Verdict**: MINOR
 **Issues**:
+
 1. "The absence of a deploy is not evidence of applause; it is the absence of one class of
    cause" (medium.md:705) is a rhetorical flourish that does not parse as a technical
    claim. It reads as a joke dropped into an answer key. Harmless to correctness, but it is
@@ -255,8 +280,10 @@ failure correctly separates the policy `PUT` path from the Management API path.
    codes or elements asserted.
 
 ## MED-07 Hybrid deployment succeeds, runtime never applies it
+
 **Verdict**: MINOR
 **Issues**:
+
 1. "the Synchronizer pulls the contract, the Message Processor applies it, and the Watcher
    reports status" (medium.md:761) lists four steps including a Watcher. The Watcher
    component exists in hybrid (`watcher.image.url` in `hybrid_latest_config-prop-ref.txt`)
@@ -271,6 +298,7 @@ failure correctly separates the policy `PUT` path from the Management API path.
    the role.
 
 ## MED-08 Mutual TLS broke after CA renewal
+
 **Verdict**: CORRECT
 **Issues**: none. `api-proxy-configuration-reference.txt:458` is nearly verbatim:
 "Apigee requires the `clientAuth` EKU to be present in client certificates for mTLS
@@ -280,8 +308,10 @@ therefore exactly the documented signature, and the "check EKU before chains or 
 ordering is right.
 
 ## MED-09 Intermittent 429 under bursty client traffic
+
 **Verdict**: MATERIAL
 **Issues**:
+
 1. **Fabricated configuration elements in the answer key.** The remediation says "add
    SpikeArrest with a low `rateLimit` and a short `timeWindow`" (medium.md:971, and
    `evaluation/packets/MED-09.key.md`). Neither element exists. The documented SpikeArrest
@@ -301,6 +331,7 @@ ordering is right.
    argue about a status code that is not the point. Worth a sentence.
 
 ## MED-10 Token works against one API, fails against another
+
 **Verdict**: CORRECT
 **Issues**: none. The policy-specific status split is real: `steps.oauth.v2.access_token_expired`
 is 500 on GetOAuthV2Info (`get-oauth-v2-info-policy.txt:451`) and SetOAuthV2Info
@@ -311,8 +342,10 @@ The trace-based discriminator is sound. Attributing the 500 to a later `SetOAuth
 step while VerifyAccessToken succeeded at the validate step is coherent.
 
 ## MED-11 Works in test, fails in production
+
 **Verdict**: MINOR
 **Issues**:
+
 1. "A JavaScript policy reads that variable and passes it as a timeout, producing a
    malformed value in production only" (medium.md:1145-1146) is thin. `prod` has
    `orders.timeout` set to `30` and `test` has no such key, so in production the variable
@@ -327,6 +360,7 @@ step while VerifyAccessToken succeeded at the validate step is coherent.
    critical failure against repeated manual map edits is the right one.
 
 ## MED-12 Service callout times out
+
 **Verdict**: CORRECT
 **Issues**: none. `service-callout-policy.txt:519` is verbatim: "If the ServiceCallout hits
 a timeout, an HTTP 500 is returned, the policy fails, and the API proxy goes into an error
@@ -334,6 +368,7 @@ state." The p95-hides-the-tail reasoning and the "which timeout is firing" discr
 both correct, and the fault rule recommendation is sound.
 
 ## MED-13 Two conditions produce the same error code
+
 **Verdict**: CORRECT
 **Issues**: none. `javascript-policy.txt:490` confirms ScriptExecutionFailed is a family
 (RangeError, ReferenceError, SyntaxError, TypeError, URIError) and that the fault string
@@ -342,6 +377,7 @@ while allowing it as a *diagnostic aid* is precisely the distinction the docs dr
 (`javascript-policy.txt:519`: "Do not rely on the text in the `faultstring`").
 
 ## MED-14 Revoked token still works for a few minutes
+
 **Verdict**: CORRECT
 **Issues**: none. `oauthv2-policy.txt:1108` is verbatim: "OAuth tokens are cached for three
 minutes (180 seconds); therefore, a revoked token may still succeed for up to three
@@ -350,6 +386,7 @@ override the documented behaviour, while still surfacing the operational consequ
 handled well.
 
 ## MED-15 Java callout fails on some requests
+
 **Verdict**: CORRECT
 **Issues**: none, and this scenario is now exactly right. `java-callout-policy.txt:222`
 gives the single runtime error `steps.javacallout.ExecutionError`, 500, "Occurs when Java
@@ -362,8 +399,10 @@ The critical failure against naming a deployment error at request time is correc
 "stop short of naming the Java line" instruction is the honest calibration.
 
 ## MED-16 OAuth error names a missing parameter
+
 **Verdict**: MINOR (scenario content correct; see cross-cutting finding B for the index issue)
 **Issues**:
+
 1. `steps.oauth.v2.InvalidRequest` is absent from `error-codes.md`, which medium.md's own
    preamble forbids. Code and 400 status are real (`oauthv2-policy.txt:2250-2256`) and the
    quoted cause matches. The fix belongs in `build_error_index.py` (the OAuthV2 page's
@@ -376,6 +415,7 @@ The critical failure against naming a deployment error at request time is correc
    correct and the "error text is a symptom, not a contract" framing is the right lesson.
 
 ## MED-17 Deploy tool says failed, Management API says worked
+
 **Verdict**: CORRECT
 **Issues**: none. Every disputed detail is sourced. The maintainer: "you can ignore that
 hardcoded value. Thats just used to get the deployment details and see if the deployment is
@@ -389,6 +429,7 @@ recorded. Closure for inactivity is at line 180. The scenario's refusal to decla
 "States that the 30-second deployment time is unexplained" anchor rewards it.
 
 ## MED-18 MART entities fail to load after hybrid upgrade
+
 **Verdict**: CORRECT
 **Issues**: none. `apigee-known-issues.txt:257-282` gives issue 479872706, "hybrid 1.16.0
 (EKS with WIF and forward proxy)", FIXED in 1.16.0-hotfix.1, with the credential-casting
@@ -401,6 +442,7 @@ either gating feature alone rules the issue out incorrectly — is the real cont
 correct.
 
 ## MED-19 Runtime logs stopped after upgrade
+
 **Verdict**: CORRECT
 **Issues**: none. `apigee-known-issues.txt:20-59` confirms 543171828, affected versions
 1.14.7/1.15.7/1.16.8, FIXED in 1.16.9, the `apigee-logger` DaemonSet desired count of 0,
@@ -411,6 +453,7 @@ platform note is also right: "Logging is provided by default on GKE and GKE on-p
 AKS, you must explicitly enable logging" (`hybrid_v1.17_logging-view.txt:57`).
 
 ## MED-20 Deployed timeout change not taking effect
+
 **Verdict**: CORRECT
 **Issues**: none. `apigee-known-issues.txt:337-347` gives 471125841, hybrid 1.14.x and
 1.15.x, FIXED in 1.16.x, "The updated value of `io.timeout.millis` is intermittently not
@@ -422,6 +465,7 @@ inside the affected range, and the scenario is right that "we are on 1.16.x or l
 change the answer.
 
 ## MED-21 Linter and security team want opposite things
+
 **Verdict**: CORRECT
 **Issues**: none. `research/issues/apigee_apigeelint-526.txt` confirms all three rule strings
 verbatim (`TargetEndpoint HTTPTargetConnection should have exactly one SSLInfo` TD012;
@@ -438,6 +482,7 @@ ServiceCallout 500 variant). Note the maintainer's actual resolution for TD006 w
 demote it to an external plugin and narrow TD012, which the scenario reports correctly.
 
 ## MED-22 cert-manager upgrade plants a future outage
+
 **Verdict**: CORRECT
 **Issues**: none. `apigee-known-issues.txt:359-447` gives 465834046, "hybrid 1.14.3, hybrid
 1.15.1, and hybrid 1.16.0 and later for upgrades", FIXED for fresh installs in those
@@ -462,7 +507,7 @@ Cross-cutting finding B is scoped as MINOR per-scenario because the fault code i
 real and correctly attributed; the defect is in the generated index.
 
 | # | Location | Error | Evidence | Severity |
-|---|----------|-------|----------|----------|
+| --- | --- | --- | --- | --- |
 | 1 | `scenarios/medium.md` (all 22 `#### Critical failures:` headings, e.g. line 99); `evaluation/packets/MED-*.key.md` | Critical-failure conditions are omitted from every MED answer key because they are sibling headings rather than body text under the rubric. A grader using the packets cannot see the fail-the-scenario conditions. | `grep -l "Critical failures" evaluation/packets/MED-*.key.md` → 0/22; EASY → 15/15; hard.md → 15/15. `make_packets.py` `section()` stops at the next heading. | MATERIAL |
 | 2 | `scenarios/medium.md:971`; `evaluation/packets/MED-09.key.md` | Answer key recommends SpikeArrest "with a low `rateLimit` and a short `timeWindow`". Neither element exists. | `spike-arrest-policy.txt` children are `<DisplayName>`, `<Identifier>`, `<MessageWeight>`, `<Rate>`, `<UseEffectiveCount>`; rate is `<Rate>5ps</Rate>` form (lines 484-537). `grep -rn -i timeWindow` over 285 pages → no matches; `rateLimit` appears only in the `ratelimit.*` flow-variable namespace. | MATERIAL |
 

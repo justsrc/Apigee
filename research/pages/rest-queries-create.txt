@@ -1,0 +1,82 @@
+<div id="/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.queries/create" class="section">
+
+- [HTTP request](#body.HTTP_TEMPLATE)
+- [Path parameters](#body.PATH_PARAMETERS)
+- [Request body](#body.request_body)
+- [Response body](#body.response_body)
+- [Authorization scopes](#body.aspect)
+- [Try it!](#try-it)
+
+<div id="google.cloud.apigee.v1.AsyncQueryService.CreateAsyncQuery" class="section">
+
+</div>
+
+<div id="description" class="section">
+
+Submit a query to be processed in the background. If the submission of the query succeeds, the API returns a 201 status and an ID that refer to the query. In addition to the HTTP status 201, the `state` of "enqueued" means that the request succeeded.
+
+</div>
+
+<div id="body" class="section">
+
+<div id="body.HTTP_TEMPLATE" class="section">
+
+### HTTP request
+
+`POST https://apigee.googleapis.com/v1/{parent=organizations/*/environments/*}/queries`
+
+The URL uses [gRPC Transcoding](https://google.aip.dev/127) syntax.
+
+</div>
+
+<div id="body.PATH_PARAMETERS" class="section">
+
+### Path parameters
+
+| Parameters |  |
+| --- | --- |
+| parent | string Required. The parent resource name. Must be of the form organizations/{org}/environments/{env} . Authorization requires the following IAM permission on the specified resource parent : apigee.queries.create |
+
+</div>
+
+<div id="body.request_body" class="section">
+
+### Request body
+
+The request body contains an instance of [`Query`](/apigee/docs/reference/apis/apigee/rest/v1/Query).
+
+</div>
+
+<div id="body.response_body" class="section">
+
+### Response body
+
+If successful, the response body contains a newly created instance of [`AsyncQuery`](/apigee/docs/reference/apis/apigee/rest/v1/AsyncQuery).
+
+</div>
+
+<div id="body.aspect" class="section">
+
+### Authorization scopes
+
+Requires the following OAuth scope:
+
+- `https://www.googleapis.com/auth/cloud-platform`
+
+</div>
+
+</div>
+
+<div id="try-it" class="section">
+
+<div class="devsite-apix">
+
+<div class="apis-explorer" discovery-rest-url="https://apigee.googleapis.com/$discovery/rest?version=v1" method-id="apigee.organizations.environments.queries.create" params="">
+
+</div>
+
+</div>
+
+</div>
+
+</div>

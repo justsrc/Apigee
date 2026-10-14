@@ -25,7 +25,7 @@ earlier passes did not touch.
   ones for evaluation, because the correct answer is "this is how it is designed" rather than
   "wait for a patch".
 
-### Register traps found while working this
+## Register traps found while working this
 
 1. **The page header lies about scope.** It reads "*This page applies to **Apigee**
    and **Apigee hybrid***" and offers a link to Edge for Private Cloud docs — but the
@@ -363,7 +363,7 @@ depending on the headers, because the reversion is a reprieve, not a guarantee.
 > basepaths, resulting in a `404` error. For example, use of the following basepaths for two
 > proxies deployed in the same environment may result in a `404` error when calling `Proxy-2`:
 >
-> ```
+> ```text
 > Proxy-1: /a/v1/b
 > Proxy-2: /a/*/c
 > ```
@@ -574,7 +574,7 @@ These are still useful, because the correct answer is "this will never work":
 
 ---
 
-# PROPOSED SCENARIOS
+## PROPOSED SCENARIOS
 
 Format copied from `scenarios/medium.md`. Fault codes used are restricted to those in
 `.agents/skills/apigee-support-core/references/error-codes.md`. HTTP status codes, header
@@ -675,6 +675,7 @@ and both attachments are correct.
 | Quality of next step | Restarts or redeploys | Asks the team to rename a path | Names the path change, the client impact, and the missing verification step |
 
 #### Critical failures: recommending a redeploy as the fix; treating a successful deployment as
+
 proof the environment is internally consistent.
 
 Not a critical failure: not being able to say which proxy 404s. That is exactly the customer
@@ -779,6 +780,7 @@ code and will not be there.
 | Client impact | Advises re-issuing credentials | Says clients still work | States the App must be updated but credentials and client-side details do not change |
 
 #### Critical failures: attributing the failure to a proxy; telling the customer their
+
 credentials must be re-issued.
 
 Not a critical failure: proposing multiple API products without noting the App update. It is an
@@ -888,7 +890,8 @@ slots against the 1000 ceiling.
 | Cross-group reasoning | Assumes shared org means shared limit | Notes the groups differ | Uses base path length as the discriminator between the two groups |
 | Quality of next step | Opens a quota request | Advises shortening paths | Splits the group or shortens paths, and recounts per environment |
 
-#### Critical failures: ruling the issue out after confirming both groups are under 800 proxies;
+#### Critical failures: ruling the issue out after confirming both groups are under 800 proxies
+
 counting revisions instead of base paths.
 
 #### References
@@ -988,7 +991,8 @@ change for whichever team owns it.
 | Version handling | Reads "fixed" as resolved | Notices opt-in wording | States that hybrid 1.14.3 contains a fix that is disabled by default |
 | Quality of next step | Upgrades again | Deletes the explicit path | Requests enablement for Apigee, follows the procedure for hybrid |
 
-#### Critical failures: telling the customer to upgrade when they are already on a fixed version;
+#### Critical failures: telling the customer to upgrade when they are already on a fixed version
+
 concluding the environment group is at fault because other proxies on it serve traffic.
 
 #### References
@@ -1096,6 +1100,7 @@ request, on request.
 | Quality of next step | Turns tracing on | Requests the pin | Requests the pin and starts removing the backend dependency |
 
 #### Critical failures: enabling Distributed Trace as the remedy; concluding that an org on a
+
 version at or past 1-15-0-apigee-7 cannot be affected.
 
 Not a critical failure: recommending removing the `x-b3` dependency first, without requesting the
@@ -1193,6 +1198,7 @@ form that does not appear.
 | Quality of next step | Changes proxy URLs | Recommends an upgrade | Recommends upgrading to 1-17-0-apigee-2 with no proxy change |
 
 #### Critical failures: recommending a proxy or URL change; telling the customer their request is
+
 malformed.
 
 #### References
@@ -1292,6 +1298,7 @@ returns them to no certificate validation at all, which is the opposite of what 
 | Quality of next step | Removes `<Enforce>` | Suggests restarting pods | Fixes the chain or truststore, and does not disable enforcement |
 
 #### Critical failures: advising removal of `<Enforce>true</Enforce>` as the fix; opening a load
+
 balancing or gateway investigation and closing it as an upstream outage.
 
 Not a critical failure: not knowing the corresponding 503. The register gives only the observed

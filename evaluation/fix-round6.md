@@ -18,7 +18,7 @@ The title said "Intermittent 429". The evidence in the scenario says HTTP 500 wi
 `policies.ratelimit.QuotaViolation`. Both halves of the reviewer's point check out, and
 they come from two different documents:
 
-```
+```text
 grep -n "QuotaViolation" scratch-pages/rev-quota-policy.txt
 1868:| `policies.ratelimit.QuotaViolation` | `500` | The quota limit was exceeded. | N/A |
 
@@ -28,7 +28,7 @@ grep -n "SpikeArrestViolation" pages/api-platform_reference_policies_spike-arres
 
 with the SpikeArrest status on the following line:
 
-```
+```text
 665:`500`   (FailedToResolveSpikeArrestRate)
 673:`500`   (InvalidMessageWeight)
 681:`429`   (SpikeArrestViolation)
@@ -42,7 +42,7 @@ policy. The title named a fault code the scenario never produces.
 The finding is subtler than it first looks, which is why the title could not simply be
 changed to 429. The **Quota** page documents *both* statuses, on the same page:
 
-```
+```text
 grep -n "429" scratch-pages/rev-quota-policy.txt
 1931:**Note:** When the rate of incoming requests exceeds the thresholds set by Quota or
      SpikeArrest policy, the system returns an HTTP status code` 429 Too Many Requests`.
@@ -50,7 +50,7 @@ grep -n "429" scratch-pages/rev-quota-policy.txt
 
 and the comparison table lists `429` as the Quota status as well:
 
-```
+```text
 grep -n "429" scratch-pages/rev-comparing-quota-spike.txt
 68:<td>429</td>   (Quota)
 69:<td>429</td>   (SpikeArrest)
@@ -121,7 +121,7 @@ said to "quote the pinned form rather than `latest`". The reviewer asked whether
 pinned form is evidenced. Checked the scratch cache, which retains hrefs the `.txt`
 normalization drops:
 
-```
+```text
 grep -o 'href="[^"]*"' scratch-pages/rev-opdk-versions.txt | grep v4.53
 /private-cloud/v4.53.00/how-configure-edge      <- 4.53.00 pinned, attested
 grep -n "latest" scratch-pages/rev-opdk-versions.txt
@@ -133,7 +133,7 @@ The landing page uses `latest` for 4.53.01 and `v4.53.00` for the previous relea
 `/private-cloud/v4.53.01/how-configure-edge` appears anywhere.** But the pinned 4.53.01
 tree is real and attested elsewhere:
 
-```
+```text
 grep -o 'href="[^"]*"' scratch-pages/rev-opdk-update-apigee-edge-45202-45301.txt
 /private-cloud/v4.53.01/install-and-configure-edge-sso#commonconfig
 grep -n "private-cloud/v4.53.01" scratch-pages/rev-opdk-how-perform-backup.txt
@@ -177,7 +177,7 @@ only two things: the rollback created a new revision, and the environment is not
 of any group. Nothing connected them. A rollback is a revision operation inside an
 environment; the environments overview is explicit that group membership is separate:
 
-```
+```text
 grep -n "environment group" pages/api-platform_fundamentals_environments-overview.txt
 16:An environment must be a member of at least one environment group before you can
    access proxies deployed within it.

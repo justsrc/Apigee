@@ -793,7 +793,7 @@ regression pin.
 
 ## Summary
 
-**MATERIAL ERROR COUNT: 5 of 35**
+### MATERIAL ERROR COUNT: 5 of 35
 
 | # | ID | Material error | Doc evidence | Inversion risk? |
 | --- | --- | --- | --- | --- |

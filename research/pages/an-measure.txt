@@ -1,0 +1,587 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+Apigee records a wide variety of operational and business data that flows across APIs. The metrics derived from this data are useful for operational monitoring and business monitoring. Using Apigee Analytics, you can, for example, determine which APIs are performing well or poorly, which developers are delivering the highest value traffic, and which apps are causing the most issues for your backend services.
+
+To help access this metrics data easily, use the metrics API when you need to automate certain analytics functions, such as retrieving metrics periodically using an automation client or script. You can also use the API to build your own visualizations in the form of custom widgets that you can embed in portals or custom apps.
+
+To learn how to use Analytics in the Apigee UI, see [Apigee Analytics overview](/apigee/docs/api-platform/analytics/analytics-services-overview).
+
+**Note:** **Data delay interval**  
+After API calls are made to proxies, it may take up to **10 minutes** for the data to appear in dashboards, custom reports, and management API calls.
+
+## About the metrics API
+
+**Note**: If you are a Pay-as-you-go customer, you must enable the Apigee API Analytics add-on in your eligible environments to use this API. If the Apigee API Analytics add-on is not enabled, you will see an error that you are unable to access this API. For more information, see [Manage the Apigee API Analytics add-on](/apigee/docs/api-platform/reference/manage-analytics-add-on).
+
+There are two ways you can use the metrics API:
+
+Get metrics for an **organization and environment** over a period of time, such as an hour, day, or week. This method returns raw metrics for the entire organization and environment.
+
+For example, for the previous week, you want to obtain:
+
+- Number of policy errors
+- Average response time
+- Total traffic
+
+Get metrics **organized by [dimension](/apigee/docs/api-platform/analytics/analytics-reference#dimensions)** over a period of time for an organization and environment.
+
+For example, for the previous week, you can use dimensions to group metrics by API product, API proxy, and developer email (which can also be an AppGroup Id) to obtain:
+
+- Number of policy errors **per API product**
+- Average response time **per API proxy**
+- Total traffic **per developer email**
+
+To manage the results returned, the metrics API supports the following features:
+
+- [Sorting by relative ranking](#sortingresultsbyrelativeranking)
+- [Filtering results](#filteringresults)
+- [Paginating results](#paginatingresults)
+
+For more information, see the [metrics API reference](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.stats).
+
+## Getting started using the metrics API
+
+The request URL for the metrics API is:
+
+<div>
+
+</div>
+
+```
+https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats[dimension]
+```
+
+For example, to get metrics grouped by API proxy, use the following URL to call the Apigee API:
+
+<div>
+
+</div>
+
+```
+https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?timeRange=07/21/2018+00:00:00~08/23/2018+00:00:00
+```
+
+Omit the dimension to return raw metrics for the entire organization and environment for the specified time period:
+
+<div>
+
+</div>
+
+```
+https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats?timeRange=07/21/2019+00:00:00~08/23/2018+00:00:00
+```
+
+### Specifying the metrics to return
+
+Use the `select` query parameter to specify the [metrics](/apigee/docs/api-platform/analytics/analytics-reference#metrics) to retrieve, and an optional aggregation function, in the form:
+
+<div>
+
+</div>
+
+```
+?select=metric
+```
+
+or:
+
+<div>
+
+</div>
+
+```
+?select=aggFunction(metric)
+```
+
+Where:
+
+- `metric` specifies the data you want to return. For example, the number of API requests, cache hits, or policy errors. See [metrics](/apigee/docs/api-platform/analytics/analytics-reference#metrics) for a table that specifies the metric name to use with the `select` query parameter.
+
+- `aggFunction` specifies the optional aggregation function run against the metric. For example, you can use the following aggregation functions with the processing latency metric:
+
+  - `avg`: Returns the average processing latency.
+  - `min`: Returns the minimum processing latency.
+  - `max`: Returns the maximum processing latency.
+  - `sum`: Returns the sum of all processing latencies.
+  - `p50`: Returns the 50th percentile for processing latencies, calculated using `percentile(latency_metric,50)&aggTable=agg_percentile`.
+  - `p95`: Returns the 95th percentile for processing latencies, calculated using `percentile(latency_metric,95)&aggTable=agg_percentile`.
+  - `p99`: Returns the 99th percentile for processing latencies, calculated using `percentile(latency_metric,99)&aggTable=agg_percentile`.
+
+  The `latency_metric` can be:
+
+  - `total_response_time`
+  - `target_response_time`
+  - `response_processing_latency`
+  - `request_processing_latency`
+
+  Not all metrics support all aggregation functions. The documentation on [metrics](/apigee/docs/api-platform/analytics/analytics-reference#metrics) contains a table that specifies the metric name and the functions (`sum`, `avg`, `min`, `max`) supported by the metric.
+
+For example, to return the average number of transactions, meaning API proxy requests, per second:
+
+<div>
+
+</div>
+
+```
+?select=tps
+```
+
+Notice that this example does not require an aggregation function. The next example uses an aggregation function to return the sum of cache hits:
+
+<div>
+
+</div>
+
+```
+?select=sum(cache_hit)
+```
+
+You can return multiple metrics for a single API call. To get metrics for the sum of policy errors and the average request size, set the `select` query param using a comma-separated list of metrics:
+
+<div>
+
+</div>
+
+```
+?select=sum(policy_error),avg(request_size)
+```
+
+### Specifying the time period
+
+The metrics API returns data for a specified period of time. Use the `timeRange` (6 months max) query parameter to specify the time period, in the form:
+
+<div>
+
+</div>
+
+```
+?timeRange=MM/DD/YYYY%20HH:MM~MM/DD/YYYY%20HH:MM
+```
+
+Notice the `%20` before `HH:MM`. The `timeRange` parameter requires a URL-encoded space character before `HH:MM`, or a `+` character, as in: `MM/DD/YYYY+HH:MM~MM/DD/YYYY+HH:MM`.
+
+For example:
+
+<div>
+
+</div>
+
+```
+?timeRange=03/01/2018%2000:00~03/30/2018%2023:59
+```
+
+Do not use 24:00 as the time because it wraps around to 00:00. Use 23:59 instead.
+
+**Note:** For information on the length of data retention, see the [Apigee plans page](https://cloud.google.com/apigee/pricing).
+
+### Examples of calling the metrics API
+
+This section provides examples using the metrics API. See [Metrics API examples](/apigee/docs/api-platform/analytics/analytics-command-reference) for additional examples.
+
+**Return the total number of calls made to your APIs for one month**
+
+To return the total number of calls made to all APIs in your organization and environment for one month, use a call similar to the following:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+
+curl -v "https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/?select=sum(message_count)\
+&timeRange=03/01/2018%2000:00~03/31/2018%2023:59" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+The following provides an example of the response:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "environments": [
+    {
+      "metrics": [
+        {
+          "name": "sum(message_count)",
+          "values": [
+            "7.44944088E8"
+          ]
+        }
+      ],
+      "name": "prod"
+    }
+  ],
+...
+}
+```
+
+**Return the total message count per API proxy for two days**
+
+In this example, you return metrics for the number of requests received by all API proxies over a two-day period. The `select` query param defines the aggregate function `sum` for the metric `message_count` on the dimension `apiproxy`. The report returns the request message throughput for all APIs for traffic received between the beginning of 6/20/2018 and the end of 6/21/2018, in UTC time:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?\
+select=sum(message_count)\
+&timeRange=06/20/2018%2000:00~06/21/2018%2023:59" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+The following provides an example of the response:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "environments" : [ {
+    "dimensions" : [ {
+      "metrics" : [ {
+        "name" : "sum(message_count)",
+        "values" : [ {
+          "timestamp" : 1498003200000,
+          "value" : "1100.0"
+        } ]
+      } ],
+      "name" : "target-reroute"
+    } ],
+    "name" : "test"
+  } ]...
+}
+```
+
+This response indicates that 1100 messages were received by one API proxy called 'target-reroute' running in the test environment between the start of 6/20/2018 and the end of 6/21/2018.
+
+**Tip:** Note that the timestamp, `1498003200000`, is in Unix timestamp format. There are many Unix timestamp conversion tools available on the Internet that you can use to decode these timestamps.
+
+To get metrics for other dimensions, specify a different dimension as the URI parameter. For example, you can specify the `developer_app` dimension to retrieve metrics for developer apps. The following API call returns the total throughput (messages received) from any apps for the specified time interval:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/developer_app?\
+select=sum(message_count)\
+&timeRange=06/20/2018%2000:00~06/21/2018%2023:59\
+&timeUnit=day" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+The following provides an example of the response:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "environments": [
+    {
+      "dimensions": [
+        {
+          "metrics": [
+            {
+              "name": "sum(message_count)",
+              "values": [
+                {
+                  "timestamp": 1498003200000,
+                  "value": "886.0"
+                }
+              ]
+            }
+          ],
+          "name": "Test-App"
+        },
+        {
+          "metrics": [
+            {
+              "name": "sum(message_count)",
+              "values": [
+                {
+                  "timestamp": 1498003200000,
+                  "value": "6645.0"
+                }
+              ]
+            }
+          ],
+          "name": "johndoe_app"
+        },
+        {
+          "metrics": [
+            {
+              "name": "sum(message_count)",
+              "values": [
+                {
+                  "timestamp": 1498003200000,
+                  "value": "1109.0"
+                }
+              ]
+            }
+          ],
+          "name": "marys_app"
+        }
+  ]...
+}
+```
+
+## Sorting results by relative ranking
+
+Many times when getting metrics, you only want to get results for a subset of the total set of data. Usually, you need to get the results for the "top 10", for example, the "top 10 slowest APIs", the "top 10 most active apps". You can do this using the `topk` query parameter as part of the request.
+
+For example, you may be interested to know who your top developers are, measured by throughput, or what your worst performers (i.e., 'top slowest') target APIs are by latency.
+
+The `topk` (meaning 'top k' entities) enables reporting on the entities associated with the highest value for a given metric. This enables you to filter metrics for a list of entities that exemplify a particular condition.
+
+For example, to find which target URL was the most error prone over the last week, the `topk` parameter is appended to the request, with a value of `1`:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/target_url?\
+select=sum(is_error)\
+&timeRange=05/08/2018%2000:00~05/15/2018%2000:00\
+&timeUnit=week\
+&sortby=sum(is_error)\
+&topk=1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+The following provides an example of the response:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "environments": [
+    {
+      "dimensions": [
+        {
+          "metrics": [
+            {
+              "name": "sum(is_error)",
+              "values": [
+                {
+                  "timestamp": 1494201600000,
+                  "value": "12077.0"
+                }
+              ]
+            }
+          ],
+          "name": "http://api.company.com"
+        }
+      ]...
+}
+```
+
+The result of this request is a set of metrics that shows that the buggiest target URL is `http://api.company.com`.
+
+You can also use the `topk` parameter to sort for the APIs experiencing the highest throughput. The following example retrieves metrics on the top ranked API, defined by highest throughput in the last week:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?\
+select=sum(message_count)\
+&timeRange=05/08/2018%2000:00~05/15/2018%2000:00\
+&timeUnit=day\
+&sortby=sum(message_count)\
+&sort=DESC\
+&topk=1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+The following provides an example of the response:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+  "environments": [
+    {
+      "dimensions": [
+        {
+          "metrics": [
+            {
+              "name": "sum(message_count)",
+              "values": [
+                {
+                  "timestamp": 1494720000000,
+                  "value": "5750.0"
+                },
+                {
+                  "timestamp": 1494633600000,
+                  "value": "5752.0"
+                },
+                {
+                  "timestamp": 1494547200000,
+                  "value": "5747.0"
+                },
+                {
+                  "timestamp": 1494460800000,
+                  "value": "5751.0"
+                },
+                {
+                  "timestamp": 1494374400000,
+                  "value": "5753.0"
+                },
+                {
+                  "timestamp": 1494288000000,
+                  "value": "5751.0"
+                },
+                {
+                  "timestamp": 1494201600000,
+                  "value": "5752.0"
+                }
+              ]
+            }
+          ],
+          "name": "testCache"
+        }
+      ],
+      "name": "test"
+    }
+  ]...
+}
+```
+
+## Filtering results
+
+For greater granularity, you can filter results to limit the data returned. When using filters, you must use dimensions as filter properties.
+
+For example, let's suppose that you need to retrieve a count of errors from backend services filtered by the HTTP verb of the request. Your goal is to find out how many POST and PUT requests are generating errors per backend service. To do so, you use the dimension `target_url` along with the filter `request_verb`:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/target_url?\
+select=sum(is_error)\
+&timeRange=05/08/2018%2000:00~05/15/2018%2000:00\
+&timeUnit=week\
+&filter=(request_verb%20in%20'POST','PUT')" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+**Note:** You must put filter text between single quotes, for example, `'POST'`. Do *not* use double quotes.
+
+The following provides an example of the response:
+
+<div>
+
+</div>
+
+```
+
+{
+  "environments" : [
+    {
+      "dimensions" : [
+        {
+          "metrics" : [
+            {
+              "name" : "sum(is_error)",
+              "values" : [
+                {
+                  "timestamp" : 1519516800000,
+                  "value" : "1.0"
+                }
+              ]
+          }
+        ],
+        "name" : "testCache"
+        }
+      ],
+      "name" : "test"
+    }
+  ]...
+}
+```
+
+## Paginating results
+
+In production environments, some requests to the Apigee analytics API return very large data sets. To make it easy to display large data sets in the context of a UI-based application, the API natively supports pagination.
+
+To paginate results, use the `offset` and `limit` query parameters, along with the `sortby` sorting parameter to ensure a consistent ordering of items.
+
+**Note:** When paginating results, it's important to sort results in a predictable way using the `sortby` query parameter. Without sorting, results are returned in an unpredictable order, which defeats the purpose of pagination.
+
+The `sortby` value must be the same as the one used in the `select` query parameter. For example, if `select=sum(message_count)`, then `sortby=sum(message_count)`.
+
+For example, the following request would be likely to return a large data set, since it retrieves metrics for all errors on all APIs in the product environment for the last week.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?\
+select=sum(is_error)\
+&timeRange=05/08/2018%2000:00~05/15/2018%2000:00\
+&timeUnit=week\
+&sortby=sum(is_error)" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+If your UI-based application can reasonably display 50 results per page, you can set the limit to 50. Since 0 counts as the first item, the following call returns items 0-49 in descending order (`sort=DESC` is the default).
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?\
+select=sum(is_error)\
+&timeRange=05/08/2018%2000:00~05/15/2018%2000:00\
+&timeUnit=week\
+&sortby=sum(is_error)\
+&limit=50\
+&offset=0" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+For the second 'page' of results, use the offset query parameter, as follows. Note that the limit and offset are identical. That's because 0 counts as the first item. With a limit of 50 and an offset of 0, items 0-49 are returned. With an offset of 50, items 50-99 are returned.
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/$ORG/environments/$ENV/stats/apiproxy?\
+select=sum(is_error)\
+&timeRange=05/08/2018%2000:00~05/15/2018%2000:00\
+&timeUnit=week\
+&sortby=sum(is_error)\
+&limit=50\
+&offset=50" \
+  -H "Authorization: Bearer $TOKEN"
+```

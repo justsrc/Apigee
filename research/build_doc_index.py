@@ -24,6 +24,7 @@ import re
 import subprocess
 from collections import defaultdict
 from pathlib import Path
+from typing import NotRequired, TypedDict
 
 HERE = Path(__file__).parent
 PAGES = HERE / "pages"
@@ -47,6 +48,20 @@ AREAS = [
 ]
 
 OTHER = "Other"
+
+
+class PageRow(TypedDict):
+    """One indexed page: a document that was fetched and read.
+
+    `status` is only present when --verify re-checked the URL in this run.
+    """
+
+    title: str
+    url: str
+    path: str
+    bytes: int
+    area: str
+    status: NotRequired[str]
 
 
 def area_for(path: str) -> str:
@@ -135,15 +150,17 @@ def http_status(url: str) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--verify", action="store_true", help="re-check every indexed URL now")
-    ap.add_argument("--check-known", action="store_true", help="re-check the recorded 404 list")
+    _ = ap.add_argument("--verify", action="store_true", help="re-check every indexed URL now")
+    _ = ap.add_argument("--check-known", action="store_true", help="re-check the recorded 404 list")
     args = ap.parse_args()
+    check_known: bool = bool(getattr(args, "check_known", False))
+    verify: bool = bool(getattr(args, "verify", False))
 
-    if args.check_known and NOTES.is_file():
+    if check_known and NOTES.is_file():
         known = [ln.strip() for ln in NOTES.read_text().splitlines()
                  if ln.strip() and not ln.startswith("#")]
         print(f"re-checking {len(known)} recorded 404 URLs")
-        revived = []
+        revived: list[tuple[str, str]] = []
         with cf.ThreadPoolExecutor(max_workers=12) as ex:
             for url, code in zip(known, ex.map(http_status, known)):
                 if code != "404":
@@ -162,7 +179,7 @@ def main() -> int:
         return 1
 
     manifest = load_manifest()
-    rows = []
+    rows: list[PageRow] = []
     for p in pages:
         text = p.read_text(encoding="utf-8", errors="replace")
         url = url_for(p.stem, manifest)
@@ -175,25 +192,25 @@ def main() -> int:
         })
 
     status_line = "status not re-verified in this run (each page returned 200 when fetched)"
-    if args.verify:
+    if verify:
         print(f"verifying {len(rows)} URLs")
         with cf.ThreadPoolExecutor(max_workers=12) as ex:
-            codes = list(ex.map(http_status, [r["url"] for r in rows]))
+            codes: list[str] = list(ex.map(http_status, [r["url"] for r in rows]))
         for r, c in zip(rows, codes):
             r["status"] = c
-        bad = [r for r in rows if r["status"] != "200"]
+        bad: list[PageRow] = [r for r in rows if r.get("status") != "200"]
         status_line = (f"re-verified this run, {len(rows) - len(bad)} of {len(rows)} returned 200")
         if bad:
             status_line += f", {len(bad)} did not"
             print("not reachable now:")
             for r in bad[:20]:
-                print(f"  {r['status']}  {r['url']}")
+                print(f"  {r.get('status', '000')}  {r['url']}")
 
-    grouped = defaultdict(list)
+    grouped: defaultdict[str, list[PageRow]] = defaultdict(list)
     for r in rows:
-        grouped[r["area"]].append(r)
+        grouped[str(r["area"])].append(r)
 
-    L = []
+    L: list[str] = []
     A = L.append
     A("# Official documentation index")
     A("")
@@ -226,7 +243,7 @@ def main() -> int:
 
     ordered = [label for label, _ in AREAS] + [OTHER]
     for area in ordered:
-        items = sorted(grouped.get(area, []), key=lambda r: r["path"])
+        items: list[PageRow] = sorted(grouped.get(area, []), key=lambda r: str(r["path"]))
         if not items:
             continue
         A(f"## {area} ({len(items)})")
@@ -234,10 +251,10 @@ def main() -> int:
         A("| Page | URL | Bytes | Why it is here |")
         A("| --- | --- | --- | --- |")
         for r in items:
-            A(f"| {r['title']} | [{r['path']}]({r['url']}) | {r['bytes']} | {note_for(r['url'])} |")
+            A(f"| {r['title']} | [{r['path']}]({r['url']}) | {r['bytes']} | {note_for(str(r['url']))} |")
         A("")
 
-    OUT.write_text("\n".join(L), encoding="utf-8")
+    _ = OUT.write_text("\n".join(L), encoding="utf-8")
     print(f"wrote {OUT}")
     for area in ordered:
         if grouped.get(area):

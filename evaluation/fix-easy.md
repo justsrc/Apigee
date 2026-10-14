@@ -106,7 +106,7 @@ discriminator) is unchanged and still valid.
 
 ---
 
-# Second pass: three defects (no network, `research/pages/` only)
+## Second pass: three defects (no network, `research/pages/` only)
 
 ## FIX 6 — EASY-06, the ground truth was backwards
 
@@ -216,7 +216,7 @@ The one-argument read became `getVariable`; the two-argument writes became `setV
 - All 11 required subsections present 15 times each.
 - Zero occurrences remain of `context.variable`, `SecretVariable`,
   `VerificationOutputVariableToVerify`, `HS256`, or any case-sensitivity claim.
-- All 17 ```xml and 9 ```json fenced blocks parse (ElementTree / json.loads), 0 failures.
+- All 17 \`\`\`xml and 9 \`\`\`json fenced blocks parse (ElementTree / json.loads), 0 failures.
 - Error payloads keep the nested `{"fault":{"detail":{"errorcode":...}}}` shape; all 9
   `errorcode` occurrences are inside `"detail"`.
 - Only `scenarios/easy.md` and this report were modified.

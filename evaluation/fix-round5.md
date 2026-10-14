@@ -9,7 +9,7 @@ done against the 285-page local cache in `research/pages/`. No network access wa
 
 ### Verification
 
-```
+```text
 grep -oE '<(DisplayName|Identifier|MessageWeight|Rate|UseEffectiveCount|SpikeArrest)[ />]' \
   pages/api-platform_reference_policies_spike-arrest-policy.txt | sort -u
 ```
@@ -17,13 +17,13 @@ grep -oE '<(DisplayName|Identifier|MessageWeight|Rate|UseEffectiveCount|SpikeArr
 Returns `DisplayName`, `Identifier`, `MessageWeight`, `Rate`, `UseEffectiveCount`,
 `SpikeArrest`. The page's own child-element line reads:
 
-```
+```text
 | Child Elements | <Identifier> <MessageWeight> <Rate> (Required) <UseEffectiveCount> |
 ```
 
 Neither `rateLimit` nor `timeWindow` appears anywhere in the corpus:
 
-```
+```text
 grep -rn "timeWindow\|rateLimit" pages/ | head -20   ->  (no output)
 ```
 
@@ -36,6 +36,7 @@ From the `<Rate>` element section:
 
 > Valid rate values (either defined as a variable value or in the body of the element) must
 > conform to the following format:
+>
 > - `int``ps` (number of requests per second, smoothed into intervals of milliseconds)
 > - `int``pm` (number of requests per minute, smoothed into intervals of seconds)
 >
@@ -87,7 +88,7 @@ correct elements; the critical failure names the invented ones. No overlap.
 
 ### Verification
 
-```
+```text
 grep -n -B4 -A12 "SourceUnavailable\|InvalidSourceType" \
   pages/api-platform_reference_policies_json-xml-policy.txt
 ```
@@ -159,7 +160,7 @@ the code value swapped. `steps.jsontoxml.SourceUnavailable` was confirmed presen
 
 ### Verification
 
-```
+```text
 grep -n -i -B2 -A6 "not defined\|unresolved\|private" pages/api-platform_cache_key-value-maps.txt
 ```
 

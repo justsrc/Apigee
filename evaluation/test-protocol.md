@@ -79,6 +79,7 @@ A useful result is directional. With seven scenarios you cannot establish that t
 works, only whether it is worth continuing to develop.
 
 Worth watching for:
+
 - Critical failures in A that do not appear in B. This is the clearest evidence of value.
 - B being worse anywhere, especially on length. The skill tells the model to write less,
   and a rubric that rewards verbosity would hide that.

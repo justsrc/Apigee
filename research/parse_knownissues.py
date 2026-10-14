@@ -15,7 +15,26 @@ Usage: python3 research/parse_knownissues.py [page.txt]
 import json
 import re
 import sys
+from collections import Counter
 from pathlib import Path
+from typing import TypedDict
+
+
+class Entry(TypedDict):
+    id: str
+    product: str
+    affects: str
+    status: str
+    open: bool
+    summary: str
+    body: str
+    has_workaround: bool
+    has_fix: bool
+    has_cause: bool
+    fault_codes: list[str]
+    backticked: list[str]
+    chars: int
+
 
 HERE = Path(__file__).resolve().parent
 PAGE = Path(sys.argv[1]) if len(sys.argv) > 1 else HERE / "pages" / "ki-live-20261012.txt"
@@ -38,27 +57,28 @@ text = PAGE.read_text(encoding="utf-8", errors="replace")
 lines = text.splitlines()
 
 ID_RE = re.compile(r"^(\d{9})\s*$")
-anchors = [(i, ID_RE.match(l).group(1)) for i, l in enumerate(lines) if ID_RE.match(l)]
+anchors = [(i, m.group(1)) for i, line in enumerate(lines) if (m := ID_RE.match(line))]
 if len(anchors) != len({a[1] for a in anchors}):
     raise SystemExit("duplicate anchors, aborting")
 
-entries = []
+entries: list[Entry] = []
 for n, (idx, iid) in enumerate(anchors):
     end = anchors[n + 1][0] if n + 1 < len(anchors) else len(lines)
-    chunk = [l for l in lines[idx + 1:end]]
+    chunk = [line for line in lines[idx + 1:end]]
     # The header row plus a handful of preamble lines repeat before the first entry.
     while chunk and not chunk[0].strip():
-        chunk.pop(0)
+        _ = chunk.pop(0)
 
     # Status line: the line carrying a colour span with a state word. The window has to be
     # wider than one line: merged rows stack a product label, a version list and THEN the
     # status chip, so a 1-line lookahead misses the chip and treats "**FIXED**" as prose.
-    status, status_line_no = "", None
-    for i, l in enumerate(chunk[:8]):
-        m = STATUS_RE.search(l)
+    status: str = ""
+    status_line_no: int | None = None
+    for i, line in enumerate(chunk[:8]):
+        m = STATUS_RE.search(line)
         if m:
             status = m.group(1).upper()
-            plain = strip_html(l)
+            plain = strip_html(line)
             m2 = re.search(r"\bIN\s+(.+)$", plain, re.I)
             if m2:
                 status += " in " + m2.group(1).strip()
@@ -68,16 +88,16 @@ for n, (idx, iid) in enumerate(anchors):
         status_line_no = 0
 
     # Affects: lines before the status line, excluding the header row remnants.
-    affects_lines = chunk[:status_line_no] if status_line_no is not None else chunk[:1]
-    affects = "; ".join(filter(None, (strip_html(l) for l in affects_lines)))
+    affects_lines = chunk[:status_line_no]
+    affects = "; ".join(filter(None, (strip_html(line) for line in affects_lines)))
     if affects in ("Affects", "Status", "Description", "Issue ID"):
         affects = ""
     for junk in ("Issue ID", "Affects", "Status", "Description"):
         affects = affects.replace(junk, "").strip(" ;,")
 
-    body_lines = chunk[status_line_no + 1:] if status_line_no is not None else chunk
+    body_lines = chunk[status_line_no + 1:]
     while body_lines and not body_lines[0].strip():
-        body_lines.pop(0)
+        _ = body_lines.pop(0)
 
     summary = strip_html(body_lines[0]) if body_lines else ""
     # Merged rows put a bare product label or version list in the description cell before
@@ -85,17 +105,17 @@ for n, (idx, iid) in enumerate(anchors):
     # the asterisks, so a bolded "**FIXED**" would otherwise be mistaken for noise and the
     # loop would eat the actual issue summary as well.
     NOISE = re.compile(r"^(Apigee|hybrid|UI|Monetization|All|Integrated portal|"
-                       r"Apigee in VS Code|Apigee Emulator|N/?A)?\s*"
-                       r"([\d.]+[\w.-]*(\s*[,;]\s*[\d.]+[\w.-]*)*)?$", re.I)
+                       + r"Apigee in VS Code|Apigee Emulator|N/?A)?\s*"
+                       + r"([\d.]+[\w.-]*(\s*[,;]\s*[\d.]+[\w.-]*)*)?$", re.I)
     while body_lines:
         raw = body_lines[0]
         txt = strip_html(raw)
         if not txt:
-            body_lines.pop(0)
+            _ = body_lines.pop(0)
             continue
         if "**" in raw or not NOISE.match(txt) or len(txt) >= 120:
             break
-        body_lines.pop(0)
+        _ = body_lines.pop(0)
     summary = strip_html(body_lines[0]) if body_lines else ""
     body = "\n".join(body_lines).strip()
 
@@ -130,8 +150,7 @@ for n, (idx, iid) in enumerate(anchors):
         "chars": len(body),
     })
 
-OUT.write_text(json.dumps(entries, indent=1), encoding="utf-8")
+_ = OUT.write_text(json.dumps(entries, indent=1), encoding="utf-8")
 print(f"{len(entries)} entries -> {OUT}")
 print(f"open={sum(e['open'] for e in entries)} fixed={sum(not e['open'] for e in entries)}")
-from collections import Counter
 print(Counter(e["product"] for e in entries).most_common())

@@ -29,6 +29,8 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import NotRequired, TypedDict, cast
+from typing import NotRequired, TypedDict, cast
 
 ROOT = Path(__file__).resolve().parents[3]
 RUN = ROOT / "evaluation" / "results" / "run-3"
@@ -40,10 +42,61 @@ PASS_AT, MARGINAL_AT = 0.75, 0.50
 SUITES = {"EASY": "easy", "MED": "medium", "HARD": "hard",
           "ADV": "adversarial", "REG": "regression"}
 
+
+class Scenario(TypedDict):
+    status: str
+    turns: dict[str, object]
+    attempts: int
+    error: str | None
+    block_kind: NotRequired[str]
+
+
+class Manifest(TypedDict):
+    run: str
+    protocol: str
+    created: str
+    model: str | None
+    scenarios: dict[str, Scenario]
+
+
+class GradeInput(TypedDict, total=False):
+    """What a grader supplies. Every field is optional because the grader's JSON is
+    free-form and `main` checks each one before trusting it; naming the shape does not
+    make missing fields safe, it just says which ones are consulted."""
+    anchors: dict[str, int]
+    critical: bool
+    note: str
+    unscorable_reason: str
+    critical_evidence: str
+
+
+class GradeEntry(TypedDict):
+    scenario: str
+    suite: str
+    rubric_route: str
+    rows: int
+    anchors: dict[str, int]
+    critical_failure: bool
+    normalized_score: float | None
+    verdict: str
+    unscorable_reason: str | None
+    note: str | None
+    grader: str
+    key_sha256: str
+    critical_failure_evidence: NotRequired[str | None]
+
+
+class Args(argparse.Namespace):
+    list: bool = False
+    grader: str = "primary"
+    run: bool = False
+    scores: str | None = None
+
+
 # Difficulty-stratified second-grader sample, fixed by rule before any output exists:
 # per suite, sort the IDs and take evenly spaced indices so easy, medium and hard are all
 # represented and the choice does not depend on any answer.
-SECOND_GRADER_SAMPLE = {}
+SECOND_GRADER_SAMPLE: dict[str, list[str]] = {}
 for _pre, _n in (("EASY", 3), ("MED", 9), ("HARD", 4), ("ADV", 2), ("REG", 2)):
     _ids = sorted(p.name.split(".")[0] for p in PK.glob(f"{_pre}-*.prompt.md")
                   if not p.name.endswith(".turn2.prompt.md"))
@@ -65,12 +118,13 @@ def rubric_rows(key: str) -> int:
                       re.M | re.S)
     if not block:
         return 0
-    rows = [l for l in block.group(1).splitlines()
-            if l.strip().startswith("|") and not re.match(r"^\|[\s-]+\|", l.strip())]
+    rows = [line for line in block.group(1).splitlines()
+            if line.strip().startswith("|")
+            and not re.match(r"^\|[\s-]+\|", line.strip())]
     return max(0, len(rows) - 1)  # minus the header row
 
 
-def normalized(anchors: dict, rows: int) -> float | None:
+def normalized(anchors: dict[str, int], rows: int) -> float | None:
     """Route 1. Each dimension contributes its anchor value; 4 is the top anchor."""
     if rows <= 0 or not anchors:
         return None
@@ -104,11 +158,11 @@ def unscorable_reason(anchors: dict, rows: int) -> str:
            f"input error and is not a model failure"
 
 
-def load_manifest() -> dict:
+def load_manifest() -> Manifest:
     if not MANIFEST.exists():
         print("no manifest; nothing has been generated yet", file=sys.stderr)
         raise SystemExit(2)
-    return json.loads(MANIFEST.read_text(encoding="utf-8"))
+    return cast("Manifest", json.loads(MANIFEST.read_text(encoding="utf-8")))
 
 
 def why_ungradeable(sid: str, m: dict) -> str | None:
@@ -139,11 +193,11 @@ def why_ungradeable(sid: str, m: dict) -> str | None:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--list", action="store_true")
-    ap.add_argument("--grader", default="primary", choices=["primary", "second"])
-    ap.add_argument("--run", action="store_true", help="summarise existing grade files")
-    ap.add_argument("--scores", help="JSON file of {sid: {anchors, critical, note}}")
-    a = ap.parse_args()
+    _ = ap.add_argument("--list", action="store_true")
+    _ = ap.add_argument("--grader", default="primary", choices=["primary", "second"])
+    _ = ap.add_argument("--run", action="store_true", help="summarise existing grade files")
+    _ = ap.add_argument("--scores", help="JSON file of {sid: {anchors, critical, note}}")
+    a = ap.parse_args(namespace=Args())
 
     if a.list:
         m = load_manifest()
@@ -163,7 +217,8 @@ def main() -> int:
     if not a.scores:
         print("--run needs --scores pointing at the grader's JSON output", file=sys.stderr)
         return 2
-    supplied = json.loads(Path(a.scores).read_text(encoding="utf-8"))
+    supplied = cast("dict[str, GradeInput]",
+                    json.loads(Path(a.scores).read_text(encoding="utf-8")))
     out_dir = RUN / "grades" / a.grader
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -176,7 +231,7 @@ def main() -> int:
         refused.append({"scenario": sid, "reason": why})
         print(f"  {sid}: refused, {why}", file=sys.stderr)
 
-    written = []
+    written: list[GradeEntry] = []
     for sid, rec in supplied.items():
         if any(r["scenario"] == sid for r in refused):
             continue
@@ -190,17 +245,17 @@ def main() -> int:
         # A grader who scores fewer dimensions than the table has rows has under-counted the
         # denominator, which silently inflates the score. Refuse rather than scale it.
         if anchors and rows and len(anchors) < rows:
-            entry = {
+            entry: GradeEntry = {
                 "scenario": sid, "suite": suite_of(sid), "rubric_route": "Route 1",
                 "rows": rows, "anchors": anchors, "critical_failure": crit,
                 "normalized_score": None, "verdict": "UNSCORABLE",
                 "unscorable_reason": (f"grader supplied {len(anchors)} anchors for a "
-                                      f"{rows}-row table; the score is not computable"),
+                                      + f"{rows}-row table; the score is not computable"),
                 "note": rec.get("note"), "grader": a.grader,
                 "key_sha256": hashlib.sha256(key.read_bytes()).hexdigest(),
             }
-            (out_dir / f"{sid}.json").write_text(json.dumps(entry, indent=2) + "\n",
-                                                 encoding="utf-8")
+            _ = (out_dir / f"{sid}.json").write_text(json.dumps(entry, indent=2) + "\n",
+                                                     encoding="utf-8")
             written.append(entry)
             continue
         score = normalized(anchors, rows)
@@ -228,13 +283,14 @@ def main() -> int:
             "grader": a.grader,
             "key_sha256": hashlib.sha256(key.read_bytes()).hexdigest(),
         }
-        (out_dir / f"{sid}.json").write_text(json.dumps(entry, indent=2) + "\n",
-                                             encoding="utf-8")
+        _ = (out_dir / f"{sid}.json").write_text(json.dumps(entry, indent=2) + "\n",
+                                                 encoding="utf-8")
         written.append(entry)
 
     n = len(written)
     by = {"PASS": 0, "MARGINAL": 0, "FAIL": 0, "UNSCORABLE": 0}
-    scores, cf = [], 0
+    scores: list[float] = []
+    cf = 0
     for e in written:
         by[e["verdict"]] = by.get(e["verdict"], 0) + 1
         if e["normalized_score"] is not None:
@@ -248,8 +304,8 @@ def main() -> int:
         "mean_normalized_score": round(sum(scores) / len(scores), 4) if scores else None,
         "scored": len(scores),
     }
-    (out_dir / "_summary.json").write_text(json.dumps(summary, indent=2) + "\n",
-                                           encoding="utf-8")
+    _ = (out_dir / "_summary.json").write_text(json.dumps(summary, indent=2) + "\n",
+                                               encoding="utf-8")
     print(json.dumps(summary, indent=2))
     if refused:
         # A refused scenario wrote no grade file, so it cannot be mistaken for a result.

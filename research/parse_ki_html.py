@@ -17,7 +17,22 @@ import html
 import json
 import re
 import sys
+from collections.abc import Iterator
 from pathlib import Path
+from typing import Literal, TypedDict, cast
+
+
+class IssueEntry(TypedDict):
+    id: str
+    affects: str
+    status: str
+    description: str
+    rows: int
+
+
+class FlatEntry(TypedDict):
+    id: str
+
 
 RAW = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("/tmp/ki_raw.html")
 HERE = Path(__file__).resolve().parent
@@ -28,7 +43,7 @@ ID_RE = re.compile(r"^\s*(\d{9})\s*$")
 TOKEN_RE = re.compile(r"<(/?)(tr|t[dh])\b[^>]*?(/?)>", re.I)
 
 
-def iter_rows(text: str):
+def iter_rows(text: str) -> Iterator[tuple[int, int]]:
     """Yield (start, end) of every paired <tr>...</tr>, nesting-aware, one forward pass.
 
     Uses a stack rather than a depth counter. The page has 133 <tr> opens and 131
@@ -36,7 +51,7 @@ def iter_rows(text: str):
     emitting rows partway down. Popping a stack pairs each close with its own open and
     discards the unpaired opens on their own.
     """
-    stack = []
+    stack: list[int] = []
     for m in TOKEN_RE.finditer(text):
         if m.group(2).lower() != "tr" or m.group(3) == "/":
             continue
@@ -58,7 +73,7 @@ def cell_text(cell: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", s).strip()
 
 
-def split_cells(inner: str):
+def split_cells(inner: str) -> list[str]:
     """Split a <tr>'s inner HTML into cell texts by <td>/<th> open-tag position.
 
     Do NOT pair `<td>` with `</td>` non-greedily. Issue 421402073's affects cell is
@@ -67,21 +82,15 @@ def split_cells(inner: str):
     cells instead of four. Splitting on open-tag positions is immune to that.
     """
     opens = list(re.finditer(r"<t[dh]\b[^>]*>", inner, re.I))
-    out = []
+    out: list[str] = []
     for i, m in enumerate(opens):
         stop = opens[i + 1].start() if i + 1 < len(opens) else len(inner)
         out.append(cell_text(inner[m.end():stop]))
     return out
-    s = re.sub(r"<br\s*/?>", "\n", cell)
-    s = re.sub(r"</(p|li|h\d|tr|div|pre)>", "\n", s)
-    s = re.sub(r"<li[^>]*>", "\n- ", s)
-    s = re.sub(r"<[^>]+>", "", s)
-    s = html.unescape(s)
-    s = re.sub(r"[ \t]+", " ", s)
-    return re.sub(r"\n{3,}", "\n\n", s).strip()
 
 
-merged, current = [], None
+merged: list[IssueEntry] = []
+current: IssueEntry | None = None
 nrows = 0
 for start, end in iter_rows(doc):
     nrows += 1
@@ -100,12 +109,15 @@ for start, end in iter_rows(doc):
         merged.append(current)
     elif current is not None:
         current["rows"] += 1
-        for k, v in zip(("affects", "status", "description"), c[1:4]):
+        cont_keys: tuple[Literal["affects", "status", "description"], ...] = (
+            "affects", "status", "description")
+        for k, v in zip(cont_keys, c[1:4]):
             v = v.strip()
             if v and v not in current[k]:
                 current[k] = f"{current[k]}\n{v}".strip() if current[k] else v
 
-flat = [e["id"] for e in json.loads((HERE / "ki-entries.json").read_text())]
+flat_raw = cast("list[FlatEntry]", json.loads((HERE / "ki-entries.json").read_text()))
+flat = [e["id"] for e in flat_raw]
 got = [e["id"] for e in merged]
 print(f"rows scanned: {nrows}   register issues: {len(got)}   flattened text: {len(flat)}")
 print(f"duplicates in HTML parse: {sorted({i for i in got if got.count(i) > 1})}")
@@ -114,5 +126,5 @@ print(f"in HTML only           : {sorted(set(got) - set(flat))}")
 multi = [e["id"] for e in merged if e["rows"] > 1]
 print(f"issues spanning >1 row ({len(multi)}): {multi}")
 
-OUT.write_text(json.dumps(merged, indent=1), encoding="utf-8")
+_ = OUT.write_text(json.dumps(merged, indent=1), encoding="utf-8")
 print(f"-> {OUT}")

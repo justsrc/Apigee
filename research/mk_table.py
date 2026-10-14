@@ -3,9 +3,22 @@
 import json
 import re
 from pathlib import Path
+from typing import TypedDict, cast
+
+
+class Entry(TypedDict):
+    id: str
+    product: str
+    affects: str
+    summary: str
+    body: str
+    status: str
+    open: bool
+    has_workaround: bool
+
 
 HERE = Path(__file__).resolve().parent
-E = json.loads((HERE / "ki-entries.json").read_text())
+E = cast(list[Entry], json.loads((HERE / "ki-entries.json").read_text()))
 USED = {"465834046", "479872706", "543171828", "471125841"}
 
 # A LIMITATION is documented design behaviour that stays true after the entry closes.
@@ -14,20 +27,20 @@ USED = {"465834046", "479872706", "543171828", "471125841"}
 # "regression", "will fail", "crash", "stuck" describe defects.
 LIMIT_PAT = re.compile(
     r"does not support|does not validate|not supported by|is not supported|"
-    r"by design|current design|no known workaround|is expected to|"
-    r"this is expected|harmless condition|does not indicate any risk|"
-    r"enforcing a temporary limit|are limited to|is limited to \d+|"
-    r"will not support|does not function as expected|"
-    r"security requirements are not enforced|"
-    r"only supports TLS|are expected", re.I)
+    + r"by design|current design|no known workaround|is expected to|"
+    + r"this is expected|harmless condition|does not indicate any risk|"
+    + r"enforcing a temporary limit|are limited to|is limited to \d+|"
+    + r"will not support|does not function as expected|"
+    + r"security requirements are not enforced|"
+    + r"only supports TLS|are expected", re.I)
 BUG_PAT = re.compile(
     r"regression|will fail|crash.?loop|stuck|not honored|not honoured|"
-    r"times? out|fails? with|error|wedge|race condition|leak|"
-    r"not scheduled|not created|does not complete|incompatible|"
-    r"impossible to|broken", re.I)
+    + r"times? out|fails? with|error|wedge|race condition|leak|"
+    + r"not scheduled|not created|does not complete|incompatible|"
+    + r"impossible to|broken", re.I)
 
 
-def clean(s, n=260):
+def clean(s: str, n: int = 260) -> str:
     s = re.sub(r"\n<div>\s*\n</div>\n", " ", s)
     s = re.sub(r"``` devsite-[a-z-]+\n", " ", s)
     s = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", s)
@@ -37,9 +50,9 @@ def clean(s, n=260):
     return s if len(s) <= n else s[:n - 1].rstrip() + "…"
 
 
-def kind(e):
+def kind(e: Entry) -> str:
     b = f"{e['summary']} {e['body']}"
-    fixed = re.search(r"FIXED", e["status"], re.I)
+    _fixed = re.search(r"FIXED", e["status"], re.I)
     lim, bug = LIMIT_PAT.search(b), BUG_PAT.search(b)
     if lim and not bug:
         return "LIMITATION"
@@ -48,8 +61,8 @@ def kind(e):
     return "BUG"
 
 
-def resolution(e):
-    b = e["body"]
+def resolution(e: Entry) -> str:
+    _b = e["body"]
     if e["open"]:
         return "none published; issue still OPEN"
     if e["has_workaround"]:
@@ -62,7 +75,7 @@ for e in sorted(E, key=lambda x: -int(x["id"])):
     k = kind(e)
     if k == "LIMITATION*":
         k = "LIMITATION+symptom"
-    print(f"| {e['id']} | {e['product']} | {clean(e['affects'], 90)} | "
-          f"{status}; {'OPEN' if e['open'] else 'closed'} | **{k}** | "
-          f"{clean(e['summary'], 210)} | {clean(resolution(e), 90)} | "
-          f"{'used' if e['id'] in USED else 'NEW'} |")
+    print(f"| {e['id']} | {e['product']} | {clean(str(e['affects']), 90)} | "
+          + f"{status}; {'OPEN' if e['open'] else 'closed'} | **{k}** | "
+          + f"{clean(str(e['summary']), 210)} | {clean(resolution(e), 90)} | "
+          + f"{'used' if e['id'] in USED else 'NEW'} |")

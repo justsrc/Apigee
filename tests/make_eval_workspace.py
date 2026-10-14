@@ -225,7 +225,7 @@ def build(out: Path, ids: list[str], with_corpus: bool, force: bool) -> int:
     print(f"  packets     {len(copied)}" + (f" ({len(missing)} missing)" if missing else ""))
     print(f"  corpus      {'included' if with_corpus else 'excluded'}")
     print(f"  skill sha   {manifest['skill_dir_sha256']}")
-    print(f"  leaks       none")
+    print("  leaks       none")
     return 1 if missing else 0
 
 

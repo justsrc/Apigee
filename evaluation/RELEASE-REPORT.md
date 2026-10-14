@@ -136,7 +136,7 @@ grep 'invalid_access_token' .agents/skills/apigee-support-core/references/error-
 **Two scenarios were invisible to every tool.** MED-32 and MED-40 had their heading jammed
 onto a horizontal rule:
 
-```
+```text
 ---### MED-32. Six requests admitted where three per minute is configured
 ```
 

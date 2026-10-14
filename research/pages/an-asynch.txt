@@ -1,0 +1,642 @@
+*This page applies to **Apigee** and **Apigee hybrid**.*
+
+<span style="background-color: var(--tenant-background-3); font-size:12pt"> *View <a href="https://docs.apigee.com/api-platform/get-started/what-apigee-edge" target="_blank">Apigee Edge</a> documentation.* </span> <span class="tooltip" title="If you are using Apigee
+      Edge for Public or Private Cloud, click this link to view Apigee Edge documentation." style="vertical-align:middle;"> <img src="https://fonts.gstatic.com/s/i/googlematerialicons/help/v13/gm_grey-24dp/1x/gm_help_gm_grey_24dp.png" style="width:2.5%" /> </span>
+
+[Apigee Analytics](/apigee/docs/api-platform/analytics/analytics-services-overview) provides a rich set of interactive dashboards, custom report generators, and related capabilities. However, these features are intended to be interactive: you submit either an API or UI request and the request is blocked until the analytics server provides a response.
+
+However, analytics requests can time out if they take too long to complete. If a query request needs to process a large amount of data (for example, 100s of GB), then it might fail because of a time out.
+
+Asynchronous query processing lets you query for very large data sets and retrieve the results at a later time. You might consider using an offline query when you find that your interactive queries time out. Some situations when asynchronous query processing might be a good alternative include:
+
+- Analyzing and creating reports that span large time intervals.
+- Analyzing data with a variety of grouping dimensions and other constraints that add complexity to the query.
+- Managing queries when you find that data volumes have increased significantly for some users or organizations.
+
+This document describes how to initiate an asynchronous query by using the API. You can also use the UI, as described in [Running a custom report](/apigee/docs/api-platform/analytics/create-custom-reports#run).
+
+**Note:** Free and trial accounts cannot create asynchronous custom reports. For more information, see <a href="https://apigee.com/api-management/#/pricing" class="external">Apigee pricing plans</a>.
+
+If you are a Pay-as-you-go customer, you must enable the Apigee API Analytics add-on in your eligible environments in order to use this API. If the Apigee API Analytics add-on is not enabled, you will see an error that you are unable to access the API. For more information, see [Manage the Apigee API Analytics add-on](/apigee/docs/api-platform/reference/manage-analytics-add-on).
+
+## Comparing the reports API to the UI
+
+[Create and manage custom reports](/apigee/docs/api-platform/analytics/create-custom-reports) describes how to use the Apigee UI to create and run custom reports. You can run those reports synchronously or asynchronously.
+
+Most of the concepts for generating custom reports with the UI apply to using the API. That is, when creating custom reports with the API you specify [metrics](/apigee/docs/api-platform/analytics/analytics-reference#metrics), [dimensions](/apigee/docs/api-platform/analytics/analytics-reference#dimensions), and [filters](/apigee/docs/api-platform/analytics/analytics-reference#filters) built into Apigee.
+
+The main difference between reports generated with the API as opposed to the UI is that the former are written to CSV or JSON (newline delimited) files, while the latter are displayed in the UI.
+
+## Time limit on queries
+
+Apigee enforces 365 day maximum on the time range for an asynchronous query.
+
+## How to make an asynchronous analytics query
+
+You make asynchronous analytics queries in **three steps**:
+
+1.  [Submit the query.](#submit-query)
+
+2.  [Get the query status.](#get-query-status)
+
+3.  [Retrieve the query results.](#retrieve-query-results)
+
+### Step 1. Submit the query
+
+You must send a POST request to the [Queries API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.queries). This API tells Apigee to process your request in the background. If the submission of the query succeeds, the API returns a 201 status and an ID that you will use to refer to the query in later steps.
+
+**Note:** You must be in the role of organization administrator to call this API.
+
+For example:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/ORG/environments/ENV/queries" \
+  -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d @json-query-file
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+The body of the request is a JSON description of the query. In the JSON body, specify the [metrics](/apigee/docs/api-platform/analytics/analytics-reference#metrics), [dimensions](/apigee/docs/api-platform/analytics/analytics-reference#dimensions), and [filters](/apigee/docs/api-platform/analytics/analytics-reference#filters) that define the report.
+
+Shown below is an example `json-query-file` file:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{ 
+   "metrics":  [
+     {
+         "name": "message_count",
+         "function": "sum",
+         "alias": "sum_txn"
+    }
+        ],
+    "dimensions": ["apiproxy"],
+    "timeRange": "last24hours",
+    "limit": 14400,
+    "filter":"(message_count ge 0)"
+}
+```
+
+See [About the request body](#about-request-body) below for a complete description of the request body syntax.
+
+Sample response:
+
+Note that the query ID `9cfc0d85-0f30-46d6-ae6f-318d0cb961bd` is included in the response. In addition to the HTTP status 201, the `state` of `enqueued` means that the request succeeded.
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+HTTP/1.1 201 Created
+
+{  
+  "self":"/organizations/myorg/environments/myenv/queries/9cfc0d85-0f30-46d6-ae6f-318d0cb961bd",
+  "created":"2018-05-10T07:11:10Z",
+  "state":"enqueued",
+  "error":"false",
+}
+```
+
+### Step 2. Get the query status
+
+To request the **status** of the query, send a GET request to the [Queries API](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.queries). You provide the query ID that was returned from the POST call. For example:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/ORG/environments/ENV/queries/QUERY_ID" \
+  -X GET \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+Sample responses:
+
+If the query is still in progress, you'll get a response like this, where the `state` is `running`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+    "self": "/organizations/myorg/environments/myenv/queries/1577884c-4f48-4735-9728-5da4b05876ab",
+    "state": "running",
+    "created": "2018-02-23T14:07:27Z",
+    "updated": "2018-02-23T14:07:54Z"
+}
+```
+
+After the query has completed successfully, you will see a response like this, where `state` is set to `completed`:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{
+      "self": "/organizations/myorg/environments/myenv/queries/9cfc0d85-0f30-46d6-ae6f-318d0cb961bd",
+      "state": "completed",
+      "result": {
+        "self": "/organizations/myorg/environments/myenv/queries/9cfc0d85-0f30-46d6-ae6f-318d0cb961bd/result",
+        "expires": "2017-05-22T14:56:31Z"
+      },
+      "resultRows": 1,
+      "resultFileSize": "922KB",
+      "executionTime": "11 sec",
+      "created": "2018-05-10T07:11:10Z",
+      "updated": "2018-05-10T07:13:22Z"
+}
+```
+
+### Step 3. Retrieve the query results
+
+After the query status is `completed`, there are two methods that you can use to retrieve the query results:
+
+- [`getResulturl`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.queries/getResulturl) (recommended): This is a newer method that returns a URL where you can view the query results. This method has no size limit on the results of a query.
+- [`getResult`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.queries/getResult): This is an older method that downloads a zip file containing the query results. This method enforces a 32 MB size limit on the results of a query.
+
+The tabs below show API calls for retrieving the query results using either method. As above, the query ID is `9cfc0d85-0f30-46d6-ae6f-318d0cb961bd`.
+
+<div class="ds-selector-tabs">
+
+<div class="section">
+
+### `getResulturl` (recommended)
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/ORG/environments/ENV/queries/QUERY_ID/resulturl" \
+  -X GET \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+The following is a sample response to the call:
+
+<div>
+
+</div>
+
+```
+{
+  "urls": [
+    "uri": "https://storage.googleapis.com/example-bucket/cat.jpeg?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=example%40example-project.iam.gserviceaccount.com%2F20181026%2Fus-central1%2Fstorage%2Fgoog4_request&X-Goog-Date=20181026T181309Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=247a2aa45f169edf4d187d54e7cc46e4731b1e6273242c4f4c39a1d2507a0e58706e25e3a85a7dbb891d62afa8496def8e260c1db863d9ace85ff0a184b894b117fe46d1225c82f2aa19efd52cf21d3e2022b3b868dcc1aca2741951ed5bf3bb25a34f5e9316a2841e8ff4c530b22ceaa1c5ce09c7cbb5732631510c20580e61723f5594de3aea497f195456a2ff2bdd0d13bad47289d8611b6f9cfeef0c46c91a455b94e90a66924f722292d21e24d31dcfb38ce0c0f353ffa5a9756fc2a9f2b40bc2113206a81e324fc4fd6823a29163fa845c8ae7eca1fcf6e5bb48b3200983c56c5ca81fffb151cca7402beddfc4a76b133447032ea7abedc098d2eb14a7",
+  "md5": "23db6982caef9e9152f1a5b2589e6ca3",
+  "sizeBytes": 1024
+  ]
+}
+```
+
+The response contains a list `urls[]` with the following fields:
+
+- `uri`: A string which is the signed URL of the JSON data for the report. You can view the report at the URL.
+- `md5`: The MD5 hash of the JSON data.
+- `sizeBytes`: The size of the returned file in bytes.
+
+See [About the query results](#about-query-results) for a sample result in JSON format.
+
+</div>
+
+<div class="section">
+
+### `getResult`
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/ORG/environments/ENV/queries/QUERY_ID/result" \
+  -X GET \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+To retrieve the downloaded file, you need to configure the tool that you use so that it will save a downloaded file to your system. For example:
+
+- If you use cURL, you can use the `-O -J` options, as shown above.
+- If you use Postman, you need to select the **Save and Download** button. In this case, a zip file called **`response`** is downloaded.
+- If you use the Chrome browser, the download is accepted automatically.
+
+If the request succeeds, and there is a non-zero result set, the result is downloaded to the client as a zipped JSON (newline delimited) file. The name of the downloaded file will be `OfflineQueryResult-.zip`.
+
+For example: `OfflineQueryResult-9cfc0d85-0f30-46d6-ae6f-318d0cb961bd.zip `.
+
+**Note:** A zip file is downloaded because for very large files it takes Apigee a long time to combine the results. Thus, for performance reasons, Apigee returns a zip file consisting of the result parts. To avoid this, use the method `getResulturl` instead.
+
+The zip file contains a .gz archive file of the JSON results. To access the JSON file, unzip the download file, then use the `gzip` command to extract the JSON file:
+
+<div>
+
+</div>
+
+``` devsite-terminal
+unzip OfflineQueryResult-9cfc0d85-0f30-46d6-ae6f-318d0cb961bd.zip
+gzip -d QueryResult-9cfc0d85-0f30-46d6-ae6f-318d0cb961bd-000000000000.json.gz
+```
+
+</div>
+
+</div>
+
+## About the request body
+
+This section describes each of the parameters that you can use in the JSON request body for a query. For details on metrics and dimensions that you can use in your query, see [Analytics reference](/apigee/docs/api-platform/analytics/analytics-reference).
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{  
+   "metrics":[  
+      {  
+        "name":"metric_name",
+        "function":"aggregation_function",
+        "alias":"metric_display_name_in_results",
+        "operator":"post_processing_operator",
+        "value":"post_processing_operand"
+      },
+   ...
+   ],
+   "dimensions":[  
+      "dimension_name",
+      ...
+   ],
+   "timeRange":"time_range",
+   "limit":results_limit,
+   "filter":"filter",
+   "groupByTimeUnit": "grouping",
+   "outputFormat": "format",
+   "csvDelimiter": "delimiter"
+}
+```
+
+| Property | Description | Required? |
+| --- | --- | --- |
+| metrics | Array of metrics. You can specify one or more metrics for a query where each metric includes. Only the metric name is required: name : (Required) The name of the metric as defined by the table at metrics . function : (Optional) The aggregation function as avg , min , max , or sum . Not all metrics support all aggregation functions. The documentation on metrics contains a table that specifies the metric name and the function ( avg , min , max , sum ) supported by the metric. alias : (Optional) The name of the property containing the metric data in the output. If omitted, it defaults to the metric name combined with the name of the aggregation function. operator : (Optional) An operation to perform on the metric after its value has been calculated. Works with the value property. Supported operations include: + - / % * . value : (Optional) The value applied to the calculated metric by the specified operator . The operator and value properties define a post-processing operation performed on the metric. For example, if you specify the metric response_processing_latency , the metric returns the average response processing latency with a unit of milliseconds. To convert the units to seconds, set the operator to "/" and the value to ”1000.0“ : "metrics":[ { "name":"response_processing_latency", "function":"avg", "alias":"average_response_time_in_seconds", "operator":"/", "value":"1000" } ] For more information, see Analytics metrics, dimensions, and filters reference . | Yes |
+| dimensions | Array of dimensions to group the metrics. For more information, see the list of supported dimension . You can specify multiple dimensions. | Yes |
+| timeRange | Time range for the query. You can use the following predefined strings to specify the time range: last60minutes last24hours last7days Or, you can specify the timeRange as a structure describing start and end timestamps in the ISO format: yyyy-mm-dd T hh:mm:ss Z . For example: "timeRange": { "start": "2018-07-29T00:13:00Z", "end": "2018-08-01T00:18:00Z" } | Yes |
+| limit | Maximum number of rows that can be returned in the result. | No |
+| filter | Boolean expression that can be used to filter data. Filter expressions can be combined using AND/OR terms and should be fully parenthesized to avoid ambiguity. See Analytics metrics, dimensions, and filters reference for more information on the fields available to filter on. For more information on the tokens that you use to build filter expressions, see Filter expression syntax . | No |
+| groupByTimeUnit | Time unit used to group the result set. Valid values include: second , minute , hour , day , week , or month . If a query includes groupByTimeUnit , then the result is an aggregation based on the specified time unit and the resultant timestamp does not include milliseconds precision. If a query omits groupByTimeUnit , then the resultant timestamp includes milliseconds precision. | No |
+| outputFormat | Output format. Valid values include: csv or json . Defaults to json corresponding to newline delimited JSON. Note : Configure the delimiter for CSV output using the csvDelimiter property. | No |
+| csvDelimiter | Delimiter used in the CSV file, if outputFormat is set to csv . Defaults to the , (comma) character. Supported delimiter characters include comma ( , ), pipe ( \| ), and tab ( \t ). | No |
+
+### Filter expression syntax
+
+This reference section describes the tokens that you can use to build filter expressions in the request body. For example, the following expression uses the "ge" token (greater than or equal to):
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+"filter":"(message_count ge 0)"
+```
+
+| Token | Description | Examples |
+| --- | --- | --- |
+| in | Include in list | (apiproxy in 'ethorapi','weather-api') (apiproxy in 'ethorapi') (apiproxy in 'Search','ViewItem') (response_status_code in 400,401,500,501) Note: Strings must be in quotes. |
+| notin | Exclude from list | (response_status_code notin 400,401,500,501) |
+| eq | Equal to ( ==) | (response_status_code eq 504) (apiproxy eq 'non-prod') |
+| ne | Not equal to (!=) | (response_status_code ne 500) (apiproxy ne 'non-prod') |
+| gt | Greater than ( >) | (response_status_code gt 500) |
+| lt | Less than ( <) | (response_status_code lt 500) |
+| ge | Greater than or equal to ( >=) | (target_response_code ge 400) |
+| le | Less than or equal to ( <=) | (target_response_code le 300) |
+| like | Returns true if the string pattern matches the supplied pattern. The example to the right matches as follows: - any value that has the word 'buy' - any value ending in 'item' - any value that starts with 'Prod' - any value that starts with 4, note response_status_code is numeric | (apiproxy like '%buy%') (apiproxy like '%item') (apiproxy like 'Prod%') |
+| not like | Returns false if the string pattern matches the supplied pattern. | (apiproxy not like '%buy%') (apiproxy not like '%item') (apiproxy not like 'Prod%') |
+| and | Lets you use 'and' logic to include more than one filter expression. The filter includes data that meets all the conditions. | (target_response_code gt 399) and (response_status_code ge 400) |
+| or | Lets you use 'or' logic to evaluate different possible filter expressions. The filter includes data that meets at least one of the conditions. | (response_size ge 1000) or (response_status_code eq 500) |
+
+**Note:** Compound filter expressions of the following form are *not* supported:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+(response_size ge 1000 and response_status_code eq 500) or (developer_app eq 'api_prod')
+```
+
+Instead, when compounding "and" and/or "or" logic, every subclause must be enclosed within parentheses. For example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+((response_size ge 1000) and (response_status_code eq 500)) or (developer_app eq 'api_prod')
+```
+
+### Constraints and defaults
+
+Following are a list of constraints and defaults for the asynchronous query processing feature.
+
+| Constraint | Default | Description |
+|----|----|----|
+| Query call limit | See description | You can make up to 300 calls per day to the [/queries](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.queries/create) Apigee API to initiate an asynchronous report. If you exceed the call quota, the API returns an HTTP 429 response. |
+| Active query limit | 10 | You can have up to 10 active queries for an organization/environment. |
+| Query execution time threshold | 6 hours | Queries that take longer than 6 hours will be terminated. |
+| Query Time Range | See description | The maximum allowed time range for a query is 365 days. |
+| Dimensions and metrics limit | 25 | The maximum number of dimensions and metrics you can specify in the query payload. |
+
+## About the query results
+
+The following is an example result in JSON format. How you view the results depends on which method you used to [retrieve the query results](#retrieve-query-results):
+
+- If you used the method [`getResulturl`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.queries/getResulturl) you can view the results at the URL given in the `uri` field of the result. This method has no size limit on the results of a query.
+
+- If you used the method [`getResult`](/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.queries/getResult), the results will be downloaded in a zip file.
+
+  The method `getResult` enforces a 32 MB size limit on the results of a query. If the results exceed 32 MB, the query will return a 400 status code with the message "query result is larger than 32 MB." To avoid this limit, use the method `getReulturl` as described in [Retrieve the query results](#retrieve-query-results).
+
+The results consist of JSON rows separated by a new line delimiter, as shown in the following example:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{"message_count":"10209","apiproxy":"guest-auth-v3","hour":"2018-08-07 19:26:00 UTC"}
+{"message_count":"2462","apiproxy":"carts-v2","hour":"2018-08-06 13:16:00 UTC"}    
+…
+```
+
+You can fetch the results from the URL until the expiry of the data in the repository. See [Constraints and defaults](#constraints-defaults).
+
+## Examples
+
+### Example 1: Sum of message counts
+
+Query for the sum of message counts over the last 60 minutes.
+
+**Query**
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/ORG/environments/ENV/queries" \
+  -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d @last60minutes.json
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+**Request Body from last60minutes.json**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{  
+   "metrics":[  
+      {  
+         "name":"message_count",
+         "function":"sum"
+      }
+   ],
+   "dimensions":[  
+      "apiproxy"
+   ],
+   "groupByTimeUnit":"minute",
+   "limit":1000,
+   "timeRange":"last60minutes"
+}
+```
+
+### Example 2: Custom time range
+
+Query using a custom time range.
+
+**Query**
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/ORG/environments/ENV/queries" \
+  -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d @custom-timerange.json
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+**Request body from custom-timerange.json**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{  
+   "metrics":[  
+      {  
+         "name":"message_count",
+         "function":"sum"
+      },
+      {  
+         "name":"total_response_time",
+         "function":"avg",
+         "alias":"average_response_time"
+      }
+   ],
+   "dimensions":[  
+      "apiproxy"
+   ],
+   "groupByTimeUnit":"minute",
+   "limit":1000,
+   "timeRange":{  
+      "start":"2018-11-01T11:00:00Z",
+      "end":"2018-11-30T11:00:00Z"
+   }
+}
+```
+
+### Example 3: Transactions per minute
+
+Query on the metric for transactions per minute (tpm).
+
+**Query**
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/ORG/environments/ENV/queries" \
+  -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d @tpm.json
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+**Request body from tpm.json**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{  
+   "metrics":[  
+      {  
+         "name":"tpm"
+      }
+   ],
+   "dimensions":[  
+      "apiproxy"
+   ],
+   "groupByTimeUnit":"minute",
+   "limit":1000,
+   "timeRange":{  
+      "start":"2018-07-01T11:00:00Z",
+      "end":"2018-07-30T11:00:00Z"
+   }
+}
+```
+
+**Sample result**
+
+Excerpt from the results file:
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{"tpm":149995.0,"apiproxy":"proxy_1","minute":"2018-07-06 12:16:00 UTC"}
+{"tpm":149998.0,"apiproxy":"proxy_1","minute":"2018-07-09 15:12:00 UTC"}
+{"tpm":3.0,"apiproxy":"proxy_2","minute":"2018-07-11 16:18:00 UTC"}
+{"tpm":148916.0,"apiproxy":"proxy_1","minute":"2018-07-15 17:14:00 UTC"}
+{"tpm":150002.0,"apiproxy":"proxy_1","minute":"2018-07-18 18:11:00 UTC"}
+...
+```
+
+### Example 4: Using a filter expression
+
+Query with a filter expression that uses a boolean operator.
+
+**Query**
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/ORG/environments/ENV/queries" \
+  -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d @filterCombo.json
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+**Request body from filterCombo.json**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{  
+   "metrics":[  
+      {  
+         "name":"message_count",
+         "function":"sum"
+      },
+      {  
+         "name":"total_response_time",
+         "function":"avg",
+         "alias":"average_response_time"
+      }
+   ],
+   "filter":"(apiproxy ne \u0027proxy_1\u0027) and (apiproxy ne \u0027proxy_2\u0027)",
+   "dimensions":[  
+      "apiproxy"
+   ],
+   "groupByTimeUnit":"minute",
+   "limit":1000,
+   "timeRange":{  
+      "start":"2018-11-01T11:00:00Z",
+      "end":"2018-11-30T11:00:00Z"
+   }
+}
+```
+
+### Example 5: Passing expression in the metrics parameter
+
+Query with an expression that is passed in as part of the metrics parameter. You can use only simple one-operator expressions.
+
+**Query**
+
+<div>
+
+</div>
+
+``` devsite-terminal
+curl "https://apigee.googleapis.com/v1/organizations/ORG/environments/ENV/queries" \
+  -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d @metricsExpression.json
+```
+
+Where `$TOKEN` is set to your OAuth 2.0 access token, as described in [Obtaining an OAuth 2.0 access token](/apigee/docs/api-platform/get-started/api-get-started#oauth20). For information about the `curl` options used in this example, see [Using curl](/apigee/docs/api-platform/get-started/api-get-started#curl). For a description of environment variables you can use, see [Setting environment variables for Apigee API requests](/apigee/docs/api-platform/get-started/api-get-started#api-environment-variables).
+
+**Request body from metricsExpression.json**
+
+<div>
+
+</div>
+
+``` devsite-click-to-copy
+{  
+   "metrics":[  
+      {  
+         "name":"message_count",
+         "function":"sum",
+         "operator":"/",
+         "value":"7"
+      }
+   ],
+   "dimensions":[  
+      "apiproxy"
+   ],
+   "groupByTimeUnit":"minute",
+   "limit":10,
+   "timeRange":"last60minutes"
+}
+```

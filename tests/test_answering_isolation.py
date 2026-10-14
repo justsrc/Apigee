@@ -13,17 +13,19 @@ from __future__ import annotations
 
 import hashlib
 import json
-import shutil
-import subprocess
 import sys
 import tempfile
+from collections.abc import Callable
 from pathlib import Path
+from typing import TypedDict, TypeVar, cast
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tests"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from tests import make_eval_workspace as mew
+from tests import test_isolation as ti
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "tests"))
-
-import make_eval_workspace as mew  # noqa: E402
-import test_isolation as ti  # noqa: E402
 
 PROTECTED = [
     "evaluation/packets/MED-13.key.md",
@@ -36,14 +38,43 @@ PROTECTED = [
     ".git",
 ]
 
-CASES: list[dict] = []
+
+class _Case(TypedDict):
+    name: str
+    fn: Callable[[], None]
 
 
-def case(name):
-    def deco(f):
+_F = TypeVar("_F", bound=Callable[[], None])
+
+CASES: list[_Case] = []
+
+
+def case(name: str) -> Callable[[_F], _F]:
+    def deco(f: _F) -> _F:
         CASES.append({"name": name, "fn": f})
         return f
     return deco
+
+
+class _Permission(TypedDict):
+    action: str
+    resource: str
+    effect: str
+
+
+class _Config(TypedDict):
+    permissions: list[_Permission]
+
+
+class _ManifestPrompt(TypedDict):
+    file: str
+    sha256: str
+
+
+class _Manifest(TypedDict):
+    built_from_commit: str
+    scenarios: list[str]
+    prompts: list[_ManifestPrompt]
 
 
 def build(tmp: Path, sid: str = "MED-13") -> Path:
@@ -86,7 +117,7 @@ def _():
 def _():
     with tempfile.TemporaryDirectory() as td:
         ws = build(Path(td))
-        cfg = json.loads((ws / "opencode.jsonc").read_text())
+        cfg = cast(_Config, json.loads((ws / "opencode.jsonc").read_text()))
         rules = {r["action"]: r["effect"] for r in cfg["permissions"]}
         for needed in ("external_directory", "shell", "edit", "webfetch", "websearch",
                        "subagent"):
@@ -115,7 +146,7 @@ def _():
         outside = tmp / "outside"
         outside.mkdir()
         canary = outside / "MED-13.key.md"
-        canary.write_text("CANARY-KEY-CONTENT-a1b2c3\n")
+        _ = canary.write_text("CANARY-KEY-CONTENT-a1b2c3\n")
         ws = build(tmp)
         # every relative route out of the workspace must fail at the filesystem boundary
         # for a path that does not exist inside it
@@ -154,7 +185,7 @@ def _():
 def _():
     with tempfile.TemporaryDirectory() as td:
         ws = build(Path(td))
-        man = json.loads((ws / "MANIFEST.json").read_text())
+        man = cast(_Manifest, json.loads((ws / "MANIFEST.json").read_text()))
         assert man["built_from_commit"], man
         assert man["scenarios"] == ["MED-13"], man["scenarios"]
         names = {p["file"] for p in man["prompts"]}
@@ -169,12 +200,14 @@ def _():
 @case("no prompt contains its own scenario title")
 def _():
     sys.path.insert(0, str(ROOT / "tests"))
-    import make_packets as mp
+    from tests import make_packets
     import re as _re
-    leaked = []
-    for f in mp.FILES.values():
-        for sid, block in mp.blocks(f):
-            hs = mp.headings_of(block)
+    headings_of = cast(Callable[[str], list[tuple[int, str, int]]],
+                       getattr(make_packets, "headings_of"))
+    leaked: list[str] = []
+    for f in make_packets.FILES.values():
+        for sid, block in make_packets.blocks(f):
+            hs = headings_of(block)
             if not hs:
                 continue
             title = _re.sub(r"^[A-Z]+-\d+\.?\s*", "", hs[0][1]).strip()
@@ -207,7 +240,7 @@ def _():
 
 
 def main() -> int:
-    failed = []
+    failed: list[str] = []
     for c in CASES:
         try:
             c["fn"]()

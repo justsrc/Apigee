@@ -44,13 +44,27 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Callable
 from pathlib import Path
+from typing import TypedDict, TypeVar, cast
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from test_isolation import (  # noqa: E402
-    BREACHES, classify, canary_for, live_verdict,
-)
+from tests import test_isolation as ti
+
+BREACHES = ti.BREACHES
+classify = ti.classify
+canary_for = ti.canary_for
+
+
+class _Verdict(TypedDict):
+    by_state: dict[str, int]
+    inconclusive: bool
+    breached: int
+
+
+live_verdict = cast(Callable[[list[dict[str, str]]], _Verdict],
+                    getattr(ti, "live_verdict"))
 
 CANARY = "CANARY-ABSOLUTE-PATH-a7f3e91c"
 
@@ -68,11 +82,18 @@ def state(stdout: str = "", stderr: str = "", rc: int = 0, canary: str = CANARY)
     return classify(stdout, stderr, rc, canary)[0]
 
 
-CASES: list[dict] = []
+class _Case(TypedDict):
+    name: str
+    fn: Callable[[], None]
 
 
-def case(name: str):
-    def deco(f):
+_F = TypeVar("_F", bound=Callable[[], None])
+
+CASES: list[_Case] = []
+
+
+def case(name: str) -> Callable[[_F], _F]:
+    def deco(f: _F) -> _F:
         CASES.append({"name": name, "fn": f})
         return f
     return deco
@@ -184,7 +205,7 @@ def _():
     # local copy of the decision order and tested that, so it passed no matter what
     # test_isolation.py did. Assert the real program uses the real function.
     import inspect
-    from test_isolation import live
+    live = cast(Callable[..., object], getattr(ti, "live"))
     assert "classify(" in inspect.getsource(live), \
         "live() must call classify(); a local copy of the order would make these cases vacuous"
 
@@ -231,17 +252,18 @@ def _():
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--json", action="store_true")
+    _ = ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
+    json_out = cast(bool, getattr(args, "json"))
 
-    failed = []
+    failed: list[dict[str, str]] = []
     for c in CASES:
         try:
             c["fn"]()
         except AssertionError as e:
             failed.append({"name": c["name"], "detail": str(e) or "assertion failed"})
 
-    if args.json:
+    if json_out:
         print(json.dumps({"cases": len(CASES), "passed": len(CASES) - len(failed),
                           "failed": failed}, indent=2))
     else:

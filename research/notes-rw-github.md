@@ -8,6 +8,7 @@ Method: GitHub REST API (`gh api`, authenticated as a user). Every repo below wa
 threads were fetched, not read from search snippets.
 
 Resolution status vocabulary used throughout, four distinct claims:
+
 - CLOSED: issue state is closed. NOT a fix.
 - PROPOSED: a fix suggested in a comment. NOT a fix.
 - MERGED: a linked PR was merged. The strongest claim available on GitHub.
@@ -20,7 +21,7 @@ workaround, (d) unverified community claim.
 
 ## Case 1. apigeelint PO035 rejects a Quota policy that the runtime accepts
 
-- URL: https://github.com/apigee/apigeelint/issues/443
+- URL: <https://github.com/apigee/apigeelint/issues/443>
 - Repo: apigee/apigeelint, owner_type = Organization (confirmed via API)
 - Problem: lint plugin PO035 treated `SyncIntervalInSeconds` and `SyncMessageCount` as
   mutually exclusive inside `<AsynchronousConfiguration>`, so a bundle that runs correctly on
@@ -35,7 +36,7 @@ workaround, (d) unverified community claim.
 - Environment: apigeelint plugin PO035; any version containing the pre-#445 behaviour.
 - Evidence for claimed cause: maintainer (COLLABORATOR) reading the runtime semantics, plus the
   official Quota policy reference. Evidence level (b), corroborated by (a).
-- Resolution: MERGED. PR https://github.com/apigee/apigeelint/pull/445 "fix: PO035 allows both of
+- Resolution: MERGED. PR <https://github.com/apigee/apigeelint/pull/445> "fix: PO035 allows both of
   Sync{IntervalInSeconds, MessageCount}", merged=true, merged_at 2024-05-16T17:31:09Z. Issue
   closed as completed. NOT reporter-confirmed on a live proxy.
 - Still applies today: the fix merged in 2024-05; apigeelint has released since (latest tag
@@ -44,7 +45,7 @@ workaround, (d) unverified community claim.
 
 ## Case 2. apigeelint crashes on a Quota policy attached to a FaultRule
 
-- URL: https://github.com/apigee/apigeelint/issues/527
+- URL: <https://github.com/apigee/apigeelint/issues/527>
 - Repo: apigee/apigeelint, owner_type = Organization
 - Problem: linter plugin crashed instead of linting. Verbatim error string from the issue:
   `plugin error: PO023-quotaPolicyReuseCheck.js TypeError: step.getParent(...).getPhase is not a function`
@@ -56,7 +57,7 @@ workaround, (d) unverified community claim.
   `<Step>`, and `getPhase` is not defined on it.
 - Environment: apigeelint, plugin PO023. Opened 2025-06-01.
 - Evidence for claimed cause: maintainer statement. Evidence level (b).
-- Resolution: MERGED. PR https://github.com/apigee/apigeelint/pull/528 "fix: correct PO023
+- Resolution: MERGED. PR <https://github.com/apigee/apigeelint/pull/528> "fix: correct PO023
   handling of Quota in FaultRule", merged=true, merged_at 2025-06-02T16:43:37Z. Issue closed
   2025-06-02. No reporter confirmation.
 - Still applies today: fixed in a version released after June 2025; verify the installed
@@ -64,7 +65,7 @@ workaround, (d) unverified community claim.
 
 ## Case 3. apigeetool fails TLS with UNABLE_TO_VERIFY_LEAF_SIGNATURE against an on-prem endpoint
 
-- URL: https://github.com/apigee/apigeetool-node/issues/6
+- URL: <https://github.com/apigee/apigeetool-node/issues/6>
 - Repo: apigee/apigeetool-node, owner_type = Organization. "apigeetool" implementation in
   Node.js for managing Apigee Edge apps and proxies.
 - Problem: apigeetool cannot talk to a private/on-prem Apigee SSL endpoint. Verbatim error:
@@ -82,7 +83,7 @@ workaround, (d) unverified community claim.
   case -- thanks! ... We could add a flag that lets you pass in a CA certificate as a PEM file ...
   Or, we could add a flag to disable certificate validation, like the '-k' flag to 'curl.'"
   Evidence level (b).
-- Resolution: MERGED and CONFIRMED. PR https://github.com/apigee/apigeetool-node/pull/7 "added
+- Resolution: MERGED and CONFIRMED. PR <https://github.com/apigee/apigeetool-node/pull/7> "added
   'cafile' and 'insecure' command line options for handling SSL connections", merged=true,
   merged_at 2015-02-26. Reporter confirmed: ivan-novakov, 2016-01-05: "I think, this problem has
   been resolved in #7 . At least it works for me :." Issue remains OPEN (state_reason None).
@@ -93,7 +94,7 @@ workaround, (d) unverified community claim.
 
 ## Case 4. Same TLS symptom, different cause: corporate TLS-intercepting proxy, and the popular fix does not work
 
-- URL: https://github.com/apigee/apigeetool-node/issues/33
+- URL: <https://github.com/apigee/apigeetool-node/issues/33>
 - Repo: apigee/apigeetool-node, owner_type = Organization
 - Problem: verbatim error `Error: unable to verify the first certificate`. Reporter states the
   discriminator plainly: "As long as I'm outside the firewall, apigeetool works properly."
@@ -122,14 +123,14 @@ workaround, (d) unverified community claim.
 - Resolution: PROPOSED only, and explicitly not confirmed. tmarrs: "I'm wondering if the
   solution for .../issues/6 fixes this too" -> ivan-novakov's confirm applies to #6 only.
   tmarrs: "I tried the `insecure` option and it didn't solve
-  https://github.com/apigee/apigeetool-node/issues/33". Issue is still OPEN today.
+  <https://github.com/apigee/apigeetool-node/issues/33>". Issue is still OPEN today.
 - Still applies today: the node-version-specific mechanics may have changed, but the trap
   stands: `strict-ssl` is an npm setting and does not govern apigeetool's own outbound TLS,
   and "turn off certificate checking" is not the same operation as "trust our internal CA".
 
 ## Case 5. apigee-remote-service-cli provisions over mTLS, then fails its own verification with 400
 
-- URL: https://github.com/apigee/apigee-remote-service-cli/issues/261
+- URL: <https://github.com/apigee/apigee-remote-service-cli/issues/261>
 - Repo: apigee/apigee-remote-service-cli, owner_type = Organization
 - Problem: verbatim, reporter: "the proxy resources are successfully created over mTLS, but the
   subsequent verification steps fail with HTTP 400. The verification logic appears to ignore the
@@ -169,7 +170,7 @@ workaround, (d) unverified community claim.
 
 ## Case 6. Maven says deployment failed, the UI says "revision is deployed", the real cause is a corrupted jar
 
-- URL: https://github.com/apigee/apigee-deploy-maven-plugin/issues/155
+- URL: <https://github.com/apigee/apigee-deploy-maven-plugin/issues/155>
 - Repo: apigee/apigee-deploy-maven-plugin, owner_type = Organization
 - Problem: three different failure messages for one deployment. Verbatim from the reporter:
   - Edge UI: `"Error in deployment for environment dev. The revision is deployed, but traffic cannot flow"`
@@ -215,7 +216,7 @@ workaround, (d) unverified community claim.
 
 ## Case 7. "Path /x conflicts with existing deployment path" — the maintainer's first diagnosis was also wrong
 
-- URL: https://github.com/apigee/apigeetool-node/issues/57
+- URL: <https://github.com/apigee/apigeetool-node/issues/57>
 - Repo: apigee/apigeetool-node, owner_type = Organization
 - Problem: verbatim, reporter: "My CI tool just updated the npm package to 0.6.4 and now my
   deployments are broken because of the message > 'Error: Path /myproxy conflicts with existing
@@ -236,14 +237,14 @@ workaround, (d) unverified community claim.
 - Evidence for the claimed cause: maintainer statement, evidence level (b), and explicitly
   provisional ("it seemed to work", "can you confirm?").
 - Resolution: PROPOSED, not confirmed. mukundha: "we just published v0.6.6 to npm, with these
-  https://github.com/apigee/apigeetool-node/pull/60 — let me know if it fixes your issue". The
+  <https://github.com/apigee/apigeetool-node/pull/60> — let me know if it fixes your issue". The
   reporter never answered. Issue is still OPEN.
 - Still applies today: apigeetool-node is actively maintained (pushed 2026-08-07) and 0.6.6 is
   many releases behind; treat the current tool as fixed and the reporting as unverified.
 
 ## Case 8. `kvms export --org=$ORG` exports proxy KVMs only, and the help text says otherwise
 
-- URL: https://github.com/apigee/apigeecli/issues/540
+- URL: <https://github.com/apigee/apigeecli/issues/540>
 - Repo: apigee/apigeecli, owner_type = Organization. Reporter kurtkanaskie, COLLABORATOR.
 - Problem: the tool's own help text, quoted verbatim from the issue: `export      Export all KV Map
   entries for all KV Maps`, with only `-o, --org string  Apigee organization name` and
@@ -254,12 +255,14 @@ workaround, (d) unverified community claim.
   export never looked at org-scoped KVMs.
 - Cause, located in source by a collaborator (kurtkanaskie): `internal/cmd/kvm/expkvm.go`
   line 54, verbatim:
+
   ```go
-  		// return all kvm entries from all proxies
-  		if env == "" && proxyName == "" {
-  			return kvm.ExportAllEntries()
-  		}
+    // return all kvm entries from all proxies
+    if env == "" && proxyName == "" {
+     return kvm.ExportAllEntries()
+    }
   ```
+
   With no `--env` and no `--proxy`, `ExportAllEntries()` is proxy-scoped, so
   `kvms export --org=$ORG` means "every KVM in every proxy", not "every KVM".
 - The useful second-order finding: a second collaborator (srinandan) states the scope rule
@@ -283,17 +286,21 @@ workaround, (d) unverified community claim.
 
 ## Case 9. Shared flow deployment fails silently with `"state":"error"` and partialResults
 
-- URL: https://github.com/apigee/apigeetool-node/issues/151
+- URL: <https://github.com/apigee/apigeetool-node/issues/151>
 - Repo: apigee/apigeetool-node, owner_type = Organization. Reporter jhonnymertz, NONE.
 - Problem: a deploy that partially fails is reported as success by the SDK. Verbatim, the
   failing response:
+
   ```json
   [{"name":"shared-flow-name","environment":"dev","revision":47,"state":"error","basePath":"N/A","partialResults":[{"pod":{"name":"rde1dmp010-1","region":"eu-central-1"},"status":"deployed","type":["message-processor"],"uUID":"1be899cb-3228-4239-baeb-713ac2b5fad4"},{"pod":{"name":"rea1dmp010-1","region":"us-east-1"},"status":"deployed","type":["message-processor"],"uUID":"d7ffaa10-16da-4bc3-a2e8-5512f37bc33d"}, ... ]}]
   ```
+
   versus the success shape:
+
   ```json
   [{"name":"shared-flow-name","environment":"dev","revision":48,"state":"deployed","basePath":"N/A","uris":[]}]
   ```
+
   Reporter: "sometimes the deploy of shared flows fail and the javascript command does not result
   on errors nor trigger exceptions. It may be due to some network issue or something on apigee
   side that `partially` deploys the shared flow, so I'm not able to reproduce it." And: "apigeetool
@@ -326,7 +333,7 @@ workaround, (d) unverified community claim.
 
 ## Case 10. apigeelint BN003 false positive: PopulateCache in one proxy, LookupCache in another, and the maintainer decided not to fix it
 
-- URL: https://github.com/apigee/apigeelint/issues/480
+- URL: <https://github.com/apigee/apigeelint/issues/480>
 - Repo: apigee/apigeelint, owner_type = Organization. Reporter ssvaidyanathan, COLLABORATOR.
 - Problem: plugin BN003 requires a `<PopulateCache>` for every `<LookupCache>` found in the bundle
   being linted, and errors when the PopulateCache is not in that bundle. Verbatim: "The logic for
@@ -346,7 +353,7 @@ workaround, (d) unverified community claim.
   attached at TargetEndpoint , prefix is of the form ApiProxyName_TargetName . Cache key
   prepended in the form orgName__envName__applicationName__proxyNameITargetName". And line 244:
   "Global | Cache key is shared across all API proxies deployed in the environment. Cache key is
-  prepended in the form orgName __ envName __."
+  prepended in the form orgName__ envName __."
   So: a PopulateCache in proxy A and a LookupCache in proxy B only share a cache key if Scope is
   `Global` (or a `<Prefix>` is set, since line 238 says "A `<Prefix>` element overrides any
   `<Scope>` element"). With the default, they can never meet. The linter is detecting a genuine
@@ -380,7 +387,7 @@ workaround, (d) unverified community claim.
 
 ## Case 11. Quota CountOnly/EnforceOnly pairing rule proposed, then withdrawn because the maintainers' own topology violates it
 
-- URL: https://github.com/apigee/apigeelint/issues/475
+- URL: <https://github.com/apigee/apigeelint/issues/475>
 - Repo: apigee/apigeelint, owner_type = Organization. Reporter DinoChiesa, COLLABORATOR.
 - Problem: a proposed new lint rule. Verbatim: "It should be the case that if there is an
   EnforceOnly Quota policy, we should also have a CountOnly policy attached. @ssvaidyanathan
@@ -412,7 +419,7 @@ workaround, (d) unverified community claim.
 
 ## Case 12. Two apigeelint rules that cannot both be satisfied: TD006 vs TD012, plus a rule that fights the official anti-pattern page
 
-- URL: https://github.com/apigee/apigeelint/issues/526
+- URL: <https://github.com/apigee/apigeelint/issues/526>
 - Repo: apigee/apigeelint, owner_type = Organization. Reporter PratMoha, NONE (an outside user).
 - Problem, part 1 — the unsatisfiable pair. Verbatim from a second reporter, kacperillo, who hit
   it independently: "I get the linting warning: 'TargetEndpoint HTTPTargetConnection should have
@@ -479,10 +486,11 @@ workaround, (d) unverified community claim.
 
 ## Case 13. Build passes, deployment says "Sharedflow deployment failed with status: ERROR", exit code is 0
 
-- URL: https://github.com/apigee/apigeecli/issues/644
+- URL: <https://github.com/apigee/apigeecli/issues/644>
 - Repo: apigee/apigeecli, owner_type = Organization. Reporter ascopes, CONTRIBUTOR.
 - Problem: verbatim terminal transcript from the issue:
-  ```
+
+  ```text
   ➜ code git:(task/test) >>> apigeecli sharedflows deploy --org my-org --account  ~/.gcloud/my-key.json --env my-env --name sharedflow-x-powered-by --rev 12 --ovr --wait
   {
           "environment": "my-env",
@@ -496,6 +504,7 @@ workaround, (d) unverified community claim.
   ➜ code git:(task/test) >>> echo $?
   0
   ```
+
   Reporter: "If the `apigeecli sharedflows deploy` command fails, we still get an exit status of 0.
   This means we are unable to fail our builds if sharedflow deployments fail. The equivalent
   command for `apigeecli apis deploy` _does_ fail with a non-zero exit code, which means the
@@ -526,7 +535,7 @@ workaround, (d) unverified community claim.
 
 ## Case 14. Maven fails with an error whose message is literally `null`, caused by a feature that cannot work in the wrapper
 
-- URL: https://github.com/apigee/devrel/issues/533
+- URL: <https://github.com/apigee/devrel/issues/533>
 - Repo: apigee/devrel, owner_type = Organization. Reporter vitor-a-pinto-alb, NONE.
 - Problem: verbatim, `[ERROR] Failed to execute goal io.apigee.build-tools.enterprise4g:apigee-edge-maven-plugin:2.3.1:configure (configure-bundle-step) on project apigee-deployer: null: MojoExecutionException -> [Help 1]`.
   Reporter: "If config.json (supported by apigee-deploy-maven-plugin) is present, using sackmesser
@@ -562,17 +571,19 @@ workaround, (d) unverified community claim.
 
 ## Case 15. A linter upgrade breaks every SpikeArrest policy, and the fix is to upgrade the linter again
 
-- URL: https://github.com/apigee/apigeelint/issues/590
+- URL: <https://github.com/apigee/apigeelint/issues/590>
 - Repo: apigee/apigeelint, owner_type = Organization. Reporter guycall, NONE.
 - Problem: verbatim error string from the issue,
   `PO042 The element <UseEffectiveCount> is not allowed here in profile=apigee`
   against this policy, which the reporter quotes verbatim:
+
   ```xml
   <SpikeArrest name="SA-ThrottleOnSomething">
     <Rate ref="somevariable">10ps</Rate>
     <UseEffectiveCount>true</UseEffectiveCount>
   </SpikeArrest>
   ```
+
   Reporter: "Upgrading from v2.75.0 to v2.76.0 has introduced a new linting error in our project ...
   This occurs in all our Spike Arrest policies. From a look at the docs our usage is correct and also
   these policies are deployed and appear to be working as expected."
@@ -590,7 +601,7 @@ workaround, (d) unverified community claim.
   - line 589 onwards documents `true` as a supported value, and line 600 notes "Although the
     default value is `false`, Apigee organizations should set this element to `true`."
   - line 462 carries the actual restriction, verbatim: "**Note:** The use of
-    [`<UseEffectiveCount>`] with a value or `false` is not supported for *any* Apigee
+    [`<UseEffectiveCount>`] with a value or `false` is not supported for _any_ Apigee
     organizations or for Apigee hybrid organizations running production workloads."
   So the documented constraint is about the VALUE `false` and about hybrid production workloads.
   It is not "the element is not allowed here". An agent that trusts the lint text over the
@@ -611,15 +622,17 @@ workaround, (d) unverified community claim.
 
 ## Case 16. Hybrid install fails with `error: You must be logged in to the server (Unauthorized)` from a kubectl wait
 
-- URL: https://github.com/apigee/apigee-hybrid-install/issues/30
+- URL: <https://github.com/apigee/apigee-hybrid-install/issues/30>
 - Repo: apigee/apigee-hybrid-install, owner_type = Organization. Reporter DinoChiesa, NONE.
 - Problem: verbatim log, and the timestamps are the diagnostic content:
-  ```
+
+  ```text
   2022-12-09T20:38:14.187368 apigee-hybrid-setup.sh: Running: '/usr/bin/kubectl wait apigeedatastore/default apigeeredis/default apigeeenvironment/intrinsic-beam-11622-eval apigeeorganization/intrinsic-beam-11622 apigeetelemetry/apigee-telemetry -n apigee --for=jsonpath=.status.state=running --timeout=15m'
   error: You must be logged in to the server (Unauthorized)
   error: You must be logged in to the server (Unauthorized)
   2022-12-09T20:47:40.545270 apigee-hybrid-setup.sh: FAILED.
   ```
+
   Reporter: "At line 416, the script `apigee-hybrid-install/tools/apigee-hybrid-setup.sh` performs a
   `kubectl wait`. In my experience this thing can wait a good long time. It has a timeout of 15
   minutes ... But I have seen the credentials expire during this wait, causing an unexpected
@@ -657,10 +670,10 @@ workaround, (d) unverified community claim.
 
 ## Case 17. Edge Microgateway quota plugin: "the local-mode check is reversed", issue closed, claim unverified
 
-- URL: https://github.com/apigee/microgateway-plugins/issues/86
+- URL: <https://github.com/apigee/microgateway-plugins/issues/86>
 - Repo: apigee/microgateway-plugins, owner_type = Organization. Reporter heckler, NONE.
 - Problem: a pure code-reading claim, quoted verbatim: "Looking at the quota plugin, the check for
-  local mode appears reversed: https://github.com/apigee/microgateway-plugins/blob/master/quota/index.js#L61-L65
+  local mode appears reversed: <https://github.com/apigee/microgateway-plugins/blob/master/quota/index.js#L61-L65>
   For the 'if' test clause to match the debug message it should be reversed:
   `!process.env.EDGEMICRO_LOCAL` or `process.env.EDGEMICRO_LOCAL != \"1\"`".
 - Why the obvious first explanation is wrong, and why this case is worth keeping despite being
@@ -680,6 +693,7 @@ workaround, (d) unverified community claim.
   state_reason completed. No merged PR is referenced anywhere in the thread.
 - Verified against current source, which is why this is still worth recording: the plugin today
   (apigee/microgateway-plugins, pushed 2026-03-31) reads
+
   ```js
   onrequest: function(req, res, next) {
       if ( process.env.EDGEMICRO_LOCAL !== undefined ) {
@@ -690,6 +704,7 @@ workaround, (d) unverified community claim.
       }
   },
   ```
+
   The commit history for `quota/index.js` shows no December 2018 fix; the entries jump from
   2019-06-28 onward. So the specific correction the reporter asked for was NOT applied: the code
   still tests `!== undefined` rather than truthiness or `!= "1"`. If `EDGEMICRO_LOCAL` is set to
@@ -699,20 +714,25 @@ workaround, (d) unverified community claim.
 
 ## Case 18. Shared flow deploy reports success, then the revision goes to ERROR with `repository.FailedToLoadFile` — and three maintainers could not reproduce it
 
-- URL: https://github.com/apigee/apigeecli/issues/276 (the companion issue
-  https://github.com/apigee/apigeecli/issues/273 was closed as a duplicate of this one)
+- URL: <https://github.com/apigee/apigeecli/issues/276> (the companion issue
+  <https://github.com/apigee/apigeecli/issues/273> was closed as a duplicate of this one)
 - Repo: apigee/apigeecli, owner_type = Organization. Reporter cygnus8595, NONE.
 - Problem: verbatim, from the issue:
+
   ```sh
   apigeecli sharedflows create -n $SF_NAME -f $SF_PATH -t $GCLOUD_TOKEN -o $APIGEE_ORG
   ```
+
   with `$SF_PATH="./fromscratch/sharedflowbundle"` succeeds. The subsequent
   `apigeecli sharedflows deploy -n $SF_NAME -e $APIGEE_ENV -t $GCLOUD_TOKEN -o $APIGEE_ORG -r -v $REV`
   succeeds. Then:
-  ```
+
+  ```text
   Status: instance "us-east1" reported error repository.FailedToLoadFile: "Failed to load file : /sharedflows/fromscratch.xml"
   ```
+
   And in full deployments-response form, quoted from the thread:
+
   ```json
   {
           "environment": "mobility-dev",
@@ -733,6 +753,7 @@ workaround, (d) unverified community claim.
           ]
   }
   ```
+
   With `$SF_PATH="fromscratch/sharedflowbundle"` (no `./`) the same flow deploys cleanly.
   The reporter also notes the filename in the error changes between runs, verbatim: "once
   deployed, there's an error where it can't find the base xml file. Sometimes it has the name
@@ -784,7 +805,7 @@ workaround, (d) unverified community claim.
 
 ## Case 19. OAuthV2 returns `"token_type": "BearerToken"` and downstream clients send a broken Authorization header
 
-- URL: https://github.com/apigee/apigee-api-catalog-drupal/issues/46
+- URL: <https://github.com/apigee/apigee-api-catalog-drupal/issues/46>
 - Repo: apigee/apigee-api-catalog-drupal, owner_type = Organization. Reporter arunz6161, NONE.
 - Problem: verbatim: "As described on the following community post, Apigee OAuth 2.0 Policy returns
   a non compliant token type causing downstream applications like SmartDocs and Swagger UI to send
@@ -831,7 +852,7 @@ workaround, (d) unverified community claim.
 
 ## Case 20. Quota policy lint error caused by attaching the same quota to mutually exclusive flows
 
-- URL: https://github.com/apigee/apigeelint/issues/168
+- URL: <https://github.com/apigee/apigeelint/issues/168>
 - Repo: apigee/apigeelint, owner_type = Organization. Reporter karsten-wagner, NONE.
 - Problem: rule PO023 flags a proxy that attaches the same Quota policy more than once.
   Verbatim: "I have a setup with three different proxy sections/files, each using the same quota
@@ -874,19 +895,23 @@ workaround, (d) unverified community claim.
 
 ## Case 21. A linter fix shipped, failed to fix the report, shipped again, and the reporter diagnosed the second defect himself
 
-- URL: https://github.com/apigee/apigeelint/issues/551
+- URL: <https://github.com/apigee/apigeelint/issues/551>
 - Repo: apigee/apigeelint, owner_type = Organization. Reporter dangrasso, NONE.
 - Problem: verbatim error string,
-  ```
+
+  ```text
   error CC005 : Invalid Condition - cannot parse
   ```
+
   triggered by a perfectly ordinary condition:
+
   ```xml
   <Condition>notValidJson == true</Condition>
   ```
+
   Reporter: "This is likely a regression due to the fix in
-  https://github.com/apigee/apigeelint/pull/544/files#diff-...R483. Would an option be to
-  explicitly replace only `not(` and `not ` but not everything starting with `not`?"
+  <https://github.com/apigee/apigeelint/pull/544/files#diff-...R483>. Would an option be to
+  explicitly replace only `not(` and `not` but not everything starting with `not`?"
   Note the tell: the variable is NAMED `notValidJson`. The linter is treating the leading `not` in
   an identifier as the `NOT` operator. The bundle is fine. The version ladder the reporter
   measured is the key evidence: `2.67.0 Pass`, `2.68.0 Fail`, `2.69.0 Fail`.
@@ -901,7 +926,7 @@ workaround, (d) unverified community claim.
   as failed for that condition block."
   He then found the residual himself, with a file, a line number and a regex, verbatim: "I see
   that this replacement still happens a few lines above:
-  https://github.com/DinoChiesa/apigeelint/blob/bc113b92f6f39ae7868f27f8b6f4480c32898514/lib/package/TruthTable.js#L484
+  <https://github.com/DinoChiesa/apigeelint/blob/bc113b92f6f39ae7868f27f8b6f4480c32898514/lib/package/TruthTable.js#L484>
   The * quantifier will match on 0 or more occurrences of the space, so any condition starting with
   a variable starting with not... will be affected. You probably want to match only on `^ *NOT +` to
   ensure there is a space after the not."
@@ -924,9 +949,11 @@ workaround, (d) unverified community claim.
 - My own source-level follow-up, recorded because it is a live observation and NOT a
   maintainer-confirmed finding (evidence level (d), my own verification): the leading-NOT
   normalization in today's `lib/package/TruthTable.js` reads
+
   ```js
   expression = expression.replace(new RegExp("^ *NOT\b", "i"), " ! "); // leading NOT
   ```
+
   In JavaScript, `\b` inside a double-quoted string literal is the BACKSPACE escape, not a regex
   word boundary. I extracted that exact line from the current source and evaluated it under Node:
   `new RegExp("^ *NOT\b", "i").test("NOT (a == b)")` returns false, while

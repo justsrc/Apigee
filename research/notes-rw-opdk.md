@@ -24,7 +24,7 @@ because a slug that carries the release number silently 404s when you substitute
 
 ## FINDING 1 — 4.53.01 breaks proxies at upgrade time, and the failure looks like a proxy bug
 
-- URL: https://docs.apigee.com/private-cloud/v4.53.01/changes-privatecloud-45301
+- URL: <https://docs.apigee.com/private-cloud/v4.53.01/changes-privatecloud-45301>
 - Source: official Edge for Private Cloud 4.53.01 "Changes in" page
 - Product / release: Edge for Private Cloud 4.53.01
 - Status: HTTP 200, page last updated 2026-10-09 UTC
@@ -41,7 +41,7 @@ Quoted verbatim from the page:
 > Warning: If Edge message processor is upgraded to version 4.53.01 without sufficiently
 > addressing the JSON expressions as described below, your proxies may either not function as
 > intended or fail to deploy on the message processor.
-
+>
 > Warning: The actions described for each type of change is not backwards compatible - taking
 > the action prematurely and deploying proxies with changes associated with newer JSONPath
 > expressions in an Edge for Private Cloud cluster older than 4.53.01 will result in failures.
@@ -66,7 +66,7 @@ OASValidation, verbatim:
 >
 > Current behavior: The policy will now correctly return a validation error (example: defines
 > a response schema but no response body found ) in this scenario
-
+>
 > Previous behavior: If your OpenAPI specification explicitly stated that no response body was
 > expected, but the actual response from target or upstream policy included a body, the policy
 > would not result in a failure.
@@ -114,9 +114,10 @@ Yes for anything moving to 4.53.01 or later. It is the single richest source of
 (a) official documentation.
 
 ---
+
 ## FINDING 2 — The Cassandra rollback window closes at the last data center, and the page says so in advance
 
-- URL: https://docs.apigee.com/private-cloud/v4.53.01/update-apigee-edge-45202-45301
+- URL: <https://docs.apigee.com/private-cloud/v4.53.01/update-apigee-edge-45202-45301>
 - Source: official upgrade procedure, "Update Apigee Edge 4.52.02 or 4.53.00 to 4.53.01"
 - Product / release: Edge for Private Cloud 4.52.02 -> 4.53.01 (Cassandra 3.11.X -> 4.0.18)
 - Status: HTTP 200
@@ -132,17 +133,17 @@ visible before, not after.
 Quoted verbatim:
 
 > Important: There is no direct in-place rollback option available after upgrading Cassandra.
-
+>
 > Checkpoint 2: After all Cassandra nodes in all data centers are updated. You can roll back
 > to this state, but you cannot revert to Checkpoint 1.
-
+>
 > If your entire Cassandra cluster is upgraded to 4.0.X, you must not roll back to Cassandra
 > 3.11.X. You must continue using the newer Cassandra version with the other components of
 > Private Cloud 4.53.00 or 4.52.02.
-
+>
 > Remember: You can only roll back to the previous Cassandra version if you have at least one
 > data center still running the older version.
-
+>
 > Time-sensitive: While you can pause for a short period (a few hours is recommended) to
 > validate functionality, you cannot remain in a mixed-version state indefinitely. This is
 > because a non-uniform Cassandra cluster (with nodes on different versions) has operational
@@ -153,7 +154,7 @@ And on why the obvious alternative is bad:
 > Direct in-place rollback from Cassandra 4.0.X to 3.11.X is not possible. Rolling back using
 > replicas or backups is a complex procedure and may involve downtime and/or data loss.
 > Troubleshooting issues and upgrading to Cassandra 4.0.X is preferable to rolling back.
-
+>
 > For production workloads, it's strongly advised to add a new data center with at least
 > Cassandra nodes available in the new data center before initiating the upgrade.
 
@@ -176,7 +177,7 @@ not to the start state.
 
 Expected output quoted verbatim from the page:
 
-```
+```text
 Cassandra version is verified - [cqlsh 6.0.0 | Cassandra 4.0.18 | CQL spec 3.4.5 | Native protocol v5]
 Metadata is verified
 ```
@@ -186,7 +187,7 @@ Prerequisites that are easy to have forgotten, quoted verbatim:
 > The post_upgrade command was executed on each Cassandra node during previous upgrade
 >
 > The drop_old_tables command was executed on the entire Cassandra cluster during previous upgrade.
-
+>
 > If you are not sure that the post_upgrade and drop_old_tables commands were executed on
 > Cassandra 3.11 while using Edge for Private Cloud 4.52.02, you can safely re-run them before
 > attempting the upgrade to 4.53.01.
@@ -208,9 +209,9 @@ you cannot roll back from here" rather than a repair command.
 
 ## FINDING 3 — The 4.53.01 OpenLDAP upgrade deletes the LDAP data directory, and the backup is the only rollback
 
-- URL: https://docs.apigee.com/private-cloud/v4.53.01/update-apigee-edge-45202-45301
+- URL: <https://docs.apigee.com/private-cloud/v4.53.01/update-apigee-edge-45202-45301>
   (section "Required Upgrade to OpenLDAP 2.6"), corroborated by
-  https://docs.apigee.com/private-cloud/v4.53.01/changes-privatecloud-45301
+  <https://docs.apigee.com/private-cloud/v4.53.01/changes-privatecloud-45301>
 - Product / release: Edge for Private Cloud 4.52.02 or 4.53.00 -> 4.53.01 (OpenLDAP 2.4 -> 2.6)
 - Status: both HTTP 200
 
@@ -225,7 +226,7 @@ Quoted verbatim:
 
 > Backup is Critical: A complete and validated backup of your existing LDAP data is
 > non-negotiable. Proceeding without a valid backup will cause irreversible data loss.
-
+>
 > Note: Make sure this LDAP backup is saved and archived from the older LDAP 2.4 version.
 > This backup is critical for both upgrade as well as rollback. Without backups, you will incur
 > complete LDAP data loss as the upgrade process involves wiping out LDAP data temporarily
@@ -243,7 +244,7 @@ ldapsearch -VV
 
 Expected output quoted verbatim:
 
-```
+```text
 ldapsearch: @(#) $OpenLDAP: ldapsearch 2.6.7
 ```
 
@@ -279,12 +280,12 @@ From the changes page, verbatim:
 
 > In OpenLDAP 2.6, relative distinguished name (RDN) is limited to approximately 241
 > bytes/characters. This limitation is a hard cap enforced and cannot be modified.
-
+>
 > Replication or import failures occur for entries with excessively large RDNs.
-
+>
 > Attempting to create an entities like organizations,environments, custom roles, permissions
 > etc. may results in the error message: "message": "[LDAP: error code 80 - Other]" .
-
+>
 > Any DN longer than 241 bytes in Apigee's LDAP is impacted. Such DN's will prevent successful
 > upgrade of Apigee OpenLDAP software
 
@@ -319,7 +320,7 @@ Yes, mandatory for 4.53.01 and later.
 
 ## FINDING 4 — Postgres 17 upgrade: a silent performance cliff after a successful upgrade
 
-- URL: https://docs.apigee.com/private-cloud/v4.53.01/update-apigee-edge-45202-45301
+- URL: <https://docs.apigee.com/private-cloud/v4.53.01/update-apigee-edge-45202-45301>
 - Product / release: Edge for Private Cloud 4.53.01 (Postgres 17)
 - Status: HTTP 200
 
@@ -335,13 +336,13 @@ Quoted verbatim:
 > After a major Postgres upgrade, the internal statistics of Postgres are wiped out. These
 > statistics aid the Postgres query planner in utilizing the most optimal indexes and paths
 > to execute queries.
-
+>
 > Postgres can gradually rebuild its statistics over time as queries are executed and when the
 > autovacuum daemon runs. However, until the statistics are rebuilt, your queries may be slow.
-
+>
 > To address this issue, execute ANALYZE on all tables in the database on the master Postgres
 > node. Alternatively, you can execute ANALYZE for a few tables at a time.
-
+>
 > NOTE: ANALYZE can take a long time to run, but it only takes a read lock on the table,
 > allowing other operations on Postgres to continue executing while ANALYZE is running.
 
@@ -350,10 +351,10 @@ Quoted verbatim:
 Quoted verbatim:
 
 > You must upgrade to Zookeeper 3.8.4 before performing the upgrade to Postgres 17.
-
+>
 > Make sure that yum is not set to clean requirements on remove. Otherwise, Postgres upgrades
 > will fail.
-
+>
 > If apigee-monit is installed and enabled, you must disable apigee-monit before upgrading the
 > Postgres server to ensure that it does not try to restart the Postgres database while the
 > upgrade is in progress.
@@ -389,7 +390,7 @@ Quoted verbatim:
 
 > If you use local data storage for your Postgres nodes , you must install a new Postgres
 > standby node for the duration of the upgrade.
-
+>
 > In a 1-node and 2-node configuration of Edge, topologies used for prototyping and testing,
 > you only have a single Postgres node. You can update these Postgres nodes directly without
 > having to create a new Postgres node.
@@ -416,9 +417,10 @@ Yes for the 4.53.01 Postgres 17 step.
 (a) official documentation.
 
 ---
+
 ## FINDING 5 — Rollback order is not the reverse of upgrade order, and shared code makes components non-independent
 
-- URL: https://docs.apigee.com/private-cloud/v4.53.01/rollback-45301
+- URL: <https://docs.apigee.com/private-cloud/v4.53.01/rollback-45301>
 - Source: official rollback page, "Roll back Apigee Edge 4.53.01"
 - Product / release: Edge for Private Cloud 4.53.01 -> 4.53.00 or 4.52.02
 - Status: HTTP 200
@@ -460,11 +462,11 @@ Third, and the one that most often ends a rollback path quietly:
 > Note: The Edge all-in-one and 2-node topologies are designed for a "getting started" or
 > prototyping environment, not for production. Therefore, there is no rollback procedure for
 > the all-in-one and 2-node topologies.
-
+>
 > In the situation where the update of these topologies fails, try the update procedure again.
 > If the update continues to fail after multiple attempts, then the easiest option is to do a
 > fresh install of 4.52.02.
-
+>
 > Note: If you are performing an update in an environment that
 > uses a single Postgres node, such as the
 > all-in-one and
@@ -499,7 +501,7 @@ Message Processor" recovery.
 
 ## FINDING 6 — `nodetool repair` is documented here as a LAST resort, after the down node is fixed
 
-- URL: https://docs.apigee.com/private-cloud/v4.53.01/rollback-45301
+- URL: <https://docs.apigee.com/private-cloud/v4.53.01/rollback-45301>
 - Source: official rollback page, "Rollback Cassandra using rebuild"
 - Product / release: Edge for Private Cloud 4.53.01, Cassandra 4.0.X rollback to 3.11.X
 - Status: HTTP 200
@@ -527,7 +529,7 @@ And the "backup instead" alternative carries an explicit data-loss warning, verb
 > Warning: Restoring backups without having replicas available to rebuild will result in data
 > loss. Any data written to Cassandra between the time the backup was taken and the time it is
 > restored will be lost.
-
+>
 > Backup optimizations (advanced option)
 >
 > You can potentially minimize (or eliminate) data loss while restoring backups if you have
@@ -543,7 +545,7 @@ inverted the documented order.
 
 Quoted verbatim:
 
-```
+```text
 /opt/apigee/apigee-cassandra/bin/nodetool status
 ```
 
@@ -555,7 +557,7 @@ Legend quoted verbatim from the sample output:
 And `nodetool describecluster` is the test that distinguishes a mixed-version cluster from
 anything else. The page's own sample output is the evidence, quoted verbatim:
 
-```
+```text
 Database versions :
 4.0 . 13 : [ DC - 1 - IP1 : 7000 , DC - 1 - IP2 : 7000 , DC - 1 - IP3 : 7000 ]
 3.11 . 16 : [ DC - 2 - IP1 : 7000 , DC - 2 - IP2 : 7000 , DC - 2 - IP3 : 7000 ]
@@ -579,7 +581,7 @@ Quoted verbatim:
 Sample output quoted verbatim, showing three different files where the same key appears and
 only the last is authoritative:
 
-```
+```text
 Found key conf_cassandra_seeds, with value, "127.0.0.1", in /opt/apigee/apigee-cassandra/token/default.properties
 Found key conf_cassandra_seeds, with value, 127.0.0.1, in /opt/apigee/apigee-cassandra/token/application/cassandra.properties
 Found key conf_cassandra_seeds, with value, "DC-1-IP1, DC-1-IP2, DC-2-IP1, DC-2-IP2", in /opt/apigee/apigee-token/application/cassandra.properties
@@ -599,9 +601,10 @@ Yes.
 (a) official documentation.
 
 ---
+
 ## FINDING 7 — `apigee_repair` is a wrapper, and it is a scheduled maintenance job, not an incident response
 
-- URL: https://docs.apigee.com/private-cloud/v4.53.01/apache-cassandra-maintenance-tasks
+- URL: <https://docs.apigee.com/private-cloud/v4.53.01/apache-cassandra-maintenance-tasks>
 - Source: official Operations section, "Apache Cassandra maintenance tasks"
 - Product / release: Edge for Private Cloud v4.53.01
 - Status: HTTP 200
@@ -615,23 +618,23 @@ during an incident.
 Quoted verbatim:
 
 > apigee-service apigee-cassandra apigee_repair -pr
-
+>
 > Run on one node at a time, to ensure consistency across all nodes in the ring.
 > Running repair jobs on multiple nodes at the same time can
 > impair the health of Cassandra.
-
+>
 > Run during periods of relatively low workload (the tool imposes a significant load on the
 > system).
-
+>
 > Run at least every seven days in order to eliminate problems related to Cassandra's
 > "forgotten deletes".
-
+>
 > Run on different nodes on different days, or schedule it so that there are
 > several hours between running it on each node.
-
+>
 > Use the -pr option (partitioner range) to specify the primary partitioner range
 > of the node only.
-
+>
 > Note: apigee_repair is a wrapper around Cassandra's nodetool repair,
 > which performs additional checks before performing Cassandra's repair.
 
@@ -704,8 +707,8 @@ Yes.
 
 ## FINDING 8 — Cross-store restore: the "restore the other store too" reflex destroys newer state
 
-- URL: https://docs.apigee.com/private-cloud/v4.53.01/backup-and-restore
-  and https://docs.apigee.com/private-cloud/v4.53.01/how-perform-restore
+- URL: <https://docs.apigee.com/private-cloud/v4.53.01/backup-and-restore>
+  and <https://docs.apigee.com/private-cloud/v4.53.01/how-perform-restore>
 - Source: official Operations section, "Backup and restore" and "Restore from a backup"
 - Product / release: Edge for Private Cloud v4.53.01
 - Status: both HTTP 200, both last updated 2026-10-09 UTC
@@ -720,11 +723,11 @@ Quoted verbatim:
 
 > You may observe that installation data is distributed across several systems, for example
 > organizations are in LDAP, ZooKeeper and Cassandra.
-
+>
 > When you restore one of ZooKeeper, Cassandra or LDAP nodes it is recommended to restore all
 > three nodes in order to achieve consistency (especially when organizations/environments have
 > been created since backup was created).
-
+>
 > Note : The above does not affect restoration of one
 > Cassandra or ZooKeeper node in a datastore cluster, since no backup is used.
 
@@ -743,7 +746,7 @@ Quoted verbatim:
 >   specified.
 > - Ensures that the component's data directories are empty.
 > - Stops the component. You must explicitly restart the component after a restore.
-
+>
 > Ensure that the following directories are empty:
 >
 > /opt/apigee/data/ component_name
@@ -753,7 +756,7 @@ Quoted verbatim:
 >
 > rm -r /opt/apigee/data/ component_name
 > rm -r /opt/apigee/etc/ component_name .d
-
+>
 > NOTE: There is no "restore all" command. You must restore
 > each component individually.
 
@@ -764,11 +767,11 @@ inconsistent between components and getting it wrong silently restores nothing u
 > backed up that component; this value does not include
 > the path, but does include the "backup-" prefix and file extensions. For example,
 > backup-2019.03.17,14.40.41.tar.gz .
-
+>
 > Note: backup_file should not include
 > the path or backup- prefix, or the file extension. For example,
 > 2019.03.17,14.40.41 .
-
+>
 > Note: In the case of apigee-postgresql components,
 > backup_file
 > should not include the path or database name (for example, apigee- ) as
@@ -786,14 +789,14 @@ Quoted verbatim:
 
 > Stop the component (except for PostgreSQL and Cassandra which must be running to
 > backup):
-
+>
 > NOTE: Ensure that you stop the components,
 > except for PostgreSQL and Cassandra, before doing the backup. Then start the components after the
 > backup completes.
-
+>
 > If you have multiple ZooKeeper nodes, back them up one at a time. The backup process
 > temporarily shuts down ZooKeeper.
-
+>
 > Note: For PostgreSQL only, you can optionally create a network storage
 > snapshot as an alternative to using the Apigee backup command. This snapshot cab be useful
 > because the Apigee backup command takes time to run and PostgreSQL data generated while the
@@ -821,7 +824,7 @@ single-replica exception and the filename-format contradiction.
 
 ## FINDING 9 — Postgres failover: promoting a standby while the master is still running
 
-- URL: https://docs.apigee.com/private-cloud/v4.53.01/handling-postgresql-database-failover
+- URL: <https://docs.apigee.com/private-cloud/v4.53.01/handling-postgresql-database-failover>
 - Source: official Operations section
 - Product / release: Edge for Private Cloud v4.53.01
 - Status: HTTP 200
@@ -899,9 +902,10 @@ Yes.
 (a) official documentation.
 
 ---
+
 ## FINDING 10 — REAL REPORTED CASE. Management Server will not start after an upgrade, and `nodetool repair` was the wrong move
 
-- URL: https://discuss.google.dev/t/apigee-edge-management-server-failing-after-startup/6797
+- URL: <https://discuss.google.dev/t/apigee-edge-management-server-failing-after-startup/6797>
 - Source: Google Developer forums, topic "Apigee Edge Management Server failing after startup",
   official Apigee community forum. Thread dated January 2018.
 - Product / release: Edge for Private Cloud 4.17.0.5, on-premises installation (reporter states
@@ -914,7 +918,7 @@ Yes.
 
 Symptom log line, verbatim:
 
-```
+```text
 2018-01-05 12:56:06,948 main WARN DATASTORE.CASSANDRA -
 ConfigurationUtil.resolveLocalDataCenter() : TException while resolving
 datacenter for
@@ -927,7 +931,7 @@ org.apache.cassandra.thrift.InvalidRequestException: null
 
 Decisive log line, verbatim:
 
-```
+```text
 2018-01-05 12:56:37,610 main ERROR KERNEL.DEPLOYMENT -
 ServiceDeployer.startService() : ServiceDeployer.deploy() : Got a life
 cycle exception while starting service [IdentityZoneService, All host(s)
@@ -946,7 +950,7 @@ Note the stack frames that identify the mechanism rather than the symptom: `Cass
 `cassandra-thrift-2.1.2.jar`. After the firewall was opened, a second and different failure
 appeared, verbatim:
 
-```
+```text
 2018-01-09 10:43:55,769 main ERROR KERNEL.DEPLOYMENT -
 ServiceDeployer.startService() : ServiceDeployer.deploy() : Got a life
 cycle exception while starting service [IdentityZoneService, Keyspace
@@ -1005,7 +1009,7 @@ that window left a permanent gap, which is why the fault survived the firewall f
 
 Two different resolutions, offered by two different people, with different quality:
 
-1. FIX PROPOSED (and the correct one), `paulmibus`, post 11, verbatim:
+1\. FIX PROPOSED (and the correct one), `paulmibus`, post 11, verbatim:
 
 > If the issue was connectivity which prevented the keyspace from being created at upgrade time,
 > you can rerun the management server setup script and it should correct any gaps in the database
@@ -1013,9 +1017,9 @@ Two different resolutions, offered by two different people, with different quali
 >
 > /opt/apigee/apigee-setup/bin/setup.sh -f /tmp/apigee-response.txt -p ms
 
-2. FIX PROPOSED (and the one the reporter actually executed), post 13, verbatim:
+2\. FIX PROPOSED (and the one the reporter actually executed), post 13, verbatim:
 
-```
+```text
 CREATE KEYSPACE identityzone WITH replication = {'class': 'NetworkTopologyStrategy', 'dc-1': '1'} AND durable_writes = true;
 
 CREATE TABLE identityzone.identityzones (
@@ -1079,9 +1083,10 @@ the recommended remediation. Evidence level for the 4.17.0.5 mechanism is high. 
 whether the identityzone gap still occurs on 4.53.01 is not established by this source.
 
 ---
+
 ## FINDING 11 — REAL REPORTED CASE. Upgrade 4.52.02 to 4.53.00 stops on nodetool JMX auth, and "wrong credentials" is provably wrong
 
-- URL: https://discuss.google.dev/t/apigee-upgrade-4-52-02-to-4-53-00-failing-with-casssandra-authentication/191176
+- URL: <https://discuss.google.dev/t/apigee-upgrade-4-52-02-to-4-53-00-failing-with-casssandra-authentication/191176>
 - Source: Google Developer forums, official Apigee community forum, thread dated June 2025
 - Product / release: Edge for Private Cloud 4.52.02 -> 4.53.00
 - Status: HTTP 200. FIX PROPOSED by an Apigee forum expert, FIX CONFIRMED by the reporter
@@ -1091,7 +1096,7 @@ whether the identityzone gap still occurs on 4.53.01 is not established by this 
 > I am trying to upgrade the Apigee Private Cloud from 4.52.02 to 4.53.00 and following the
 > upgrade paths documentation . When I am trying to upgrade the cassandra/management server
 > running into issues with authentication for local connection to cassandra on port 7199.
-
+>
 > I have verified that the credentials are correct using nodetool and also cqlsh both are
 > working fine. Even the cassandra restart is failing with nodetool connection errors. This is
 > happening after the cassandra components are upgraded to the latest version 4.* This is also
@@ -1100,7 +1105,7 @@ whether the identityzone gap still occurs on 4.53.01 is not established by this 
 
 Command output, verbatim:
 
-```
+```text
 sudo /opt/apigee/apigee-service/bin/apigee-service apigee-cassandra restart
 Checking the status of Cassandra before shutdown
 Disabling binary...
@@ -1115,7 +1120,7 @@ Could not drain.done
 
 And the evidence that falsifies the obvious explanation, verbatim:
 
-```
+```text
 nodetool call succesful with same credentials.
 
 sudo /opt/apigee/apigee-cassandra/bin/nodetool -u cassadmin -pw password status
@@ -1151,7 +1156,7 @@ credentials are not the variable. Something about the invocation is.
 > username or password' . This error is safe to disregard, as Cassandra will still successfully
 > upgrade to version 4.0.13. This should be patched in a future patch of 4.53.00. For reference,
 > this is being tracked in 420338166.
-
+>
 > Generally, note the below:
 >
 > If feasible, during the upgrade, temporarily disable JMX auth on the Cassandra node being
@@ -1159,7 +1164,7 @@ credentials are not the variable. Something about the invocation is.
 >
 > When manually running apigee-cassandra commands (like "apigee-service apigee-cassandra
 > restart"), make sure that JMX credentials are set in your environment variables as described
-> in https://docs.apigee.com/private-cloud/v4.53.00/how-monitor#cassauthenable
+> in <https://docs.apigee.com/private-cloud/v4.53.00/how-monitor#cassauthenable>
 >
 > You can also invoke a restart command by supplying the JMX credentials inline as
 > CASS_JMX_USERNAME= CASS_JMX_PASSWORD= apigee-service apigee-cassandra restart
@@ -1229,7 +1234,7 @@ still current on v4.53.01.
 
 ## FINDING 12 — REAL REPORTED CASE. Stale ZooKeeper entries, and the forum's own advice is partly destructive
 
-- URL: https://discuss.google.dev/t/how-can-we-clear-stale-entries-in-zookeeper/6740
+- URL: <https://discuss.google.dev/t/how-can-we-clear-stale-entries-in-zookeeper/6740>
 - Source: Google Developer forums, official Apigee community forum. Original thread July 2015,
   last reply June 2019.
 - Product / release: not stated in the original post; the follow-up links
@@ -1242,7 +1247,7 @@ still current on v4.53.01.
 > Deploying a proxy sometimes can take more time than usual. When the management server logs are
 > checked - the following errors are observed :
 
-```
+```text
 ConfigurationService.validateEvent() - Unable to find application {} in apprepo for
 organization {} but entry exists in zk, ignoring it. " + "Please use force undeploy to remove
 these stale entries"
@@ -1250,7 +1255,7 @@ these stale entries"
 
 ### The explanation offered, verbatim
 
-> App bundles are stored in C* where as active revision details are stored in ZK , During
+> App bundles are stored in C*where as active revision details are stored in ZK , During
 > undeployment the corresponding entries get deleted from both C* and ZK .
 >
 > AFAIK If there are any network issues or time outs to ZK , this issue might happen .
@@ -1310,7 +1315,7 @@ commands.
 
 ## FINDING 13 — REAL REPORTED CASE. Management Server setup fails when Cassandra auth is enabled; the fix was in the install script's arguments
 
-- URL: https://discuss.google.dev/t/replacing-ms-with-cassandra-authentication-enabled/7692
+- URL: <https://discuss.google.dev/t/replacing-ms-with-cassandra-authentication-enabled/7692>
 - Source: Google Developer forums, official Apigee community forum, March 2016
 - Product / release: Edge for Private Cloud OPDK 4.15.07
 - Status: HTTP 200. Reporter CONFIRMED the cause by reading the install scripts.
@@ -1339,7 +1344,7 @@ That did not work. The reporter's follow-up, verbatim:
 > DS node. The concern I have with this is that the error message indicates no credentials are
 > being passed, not invalid credentials.
 
-```
+```text
 Error: Unable to connect to XXX.XXX.XXX.XXX 
 
 Exception in thread “main” java.lang.SecurityException: Authentication failed! Credentials required
@@ -1390,9 +1395,10 @@ documents `CASS_JMX_USERNAME` and `CASS_JMX_PASSWORD` as the JMX credential mech
 4.15.07 today.
 
 ---
+
 ## FINDING 14 — Google-authored Knowledge Hub article: you cannot upgrade the OS in place at all
 
-- URL: https://discuss.google.dev/t/upgrading-apigee-opdk-4-51-to-4-53-with-os-modernization/348221
+- URL: <https://discuss.google.dev/t/upgrading-apigee-opdk-4-51-to-4-53-with-os-modernization/348221>
 - Source: Google Developer forums, Apigee Knowledge Hub, tagged `googler-article`, author
   `RakeshTalanki`, April 2026
 - Product / release: Edge for Private Cloud 4.51 -> 4.52.x -> 4.53, with an OS major upgrade
@@ -1410,7 +1416,7 @@ Quoted verbatim:
 > Critical Guideline: Apigee does not support an in-place OS upgrade on servers with Apigee
 > components installed. You must first migrate your Apigee platform to new servers running the
 > target OS, and only then can you upgrade the Apigee software. This is the only supported path.
-
+>
 > This sequence is mandatory because Apigee 4.53 drops support for older OS versions like
 > RHEL 7.x. Therefore, the OS upgrade is a non-negotiable prerequisite for the final Apigee
 > upgrade.
@@ -1528,7 +1534,7 @@ and:
 
 ## FINDING 15 — Third and higher data centers: LOCAL_QUORUM means cross-AZ writes can read stale
 
-- URL: https://discuss.google.dev/t/scaling-apigee-edge-private-cloud-opdk-part-1-scaling-above-two-data-centers/135883
+- URL: <https://discuss.google.dev/t/scaling-apigee-edge-private-cloud-opdk-part-1-scaling-above-two-data-centers/135883>
 - Source: Google Developer forums, Apigee Knowledge Hub, author `paul-wright`, November 2023
 - Product / release: not version-stated; OPDK multi-data-center topologies
 - Status: HTTP 200. No defect; an operational article.
@@ -1556,7 +1562,7 @@ with them:
 > Google's OPDK documentation is generally focused on the novice to intermediate Operations team,
 > providing guidance that will cover most situations with an expectation that advanced needs will
 > be handled by teams that have built experience with operating Apigee.
-
+>
 > In some cases below, the guidance may appear to conflict with Google's public documentation.
 > However, advanced use cases may require advanced techniques.
 
@@ -1575,26 +1581,26 @@ ZooKeeper scaling rule, verbatim:
 ### The mechanism, cross-checked against official documentation - CONFIRMED
 
 The LOCAL_QUORUM claim is not just a community assertion. Verified against
-https://docs.apigee.com/private-cloud/v4.53.01/about-cassandra-replication-factor-and-consistency-level
+<https://docs.apigee.com/private-cloud/v4.53.01/about-cassandra-replication-factor-and-consistency-level>
 (HTTP 200, last updated 2026-10-09 UTC), quoted verbatim:
 
 > When connecting to Cassandra for read and write operations, Message Processor and Management
 > Server nodes typically use the Cassandra value of LOCAL_QUORUM to
 > specify the consistency level for a keyspace. However, some keyspaces are defined to use a
 > consistency level of one.
-
+>
 > The calculation of the value of LOCAL_QUORUM for a data center is:
 >
 > LOCAL_QUORUM = (replication_factor/2) + 1
-
+>
 > As described above, the default replication factor for an Edge production environment with
 > three Cassandra nodes is three. Therefore, the default value of LOCAL_QUORUM =
 > (3/2) +1 = 2 (the value is rounded down to an integer).
-
+>
 > With LOCAL_QUORUM = 2, at least two of the three Cassandra nodes in the data
 > center must respond to a read/write operation for the operation to succeed. For a three node
 > Cassandra cluster, the cluster could therefore tolerate one node being down per data center.
-
+>
 > By specifying the consistency level as LOCAL_QUORUM , Edge avoids the latency
 > required by validating operations across multiple data centers. If a keyspace used the Cassandra
 > QUORUM value as the consistency level, read/write operations would have to be
@@ -1623,10 +1629,10 @@ And the replication-factor hard stop, also verbatim, which matters because the o
 >
 > - May or may not increase overall availability when more than one node fails
 > - Might result in adverse effects on the overall ecosystem with increased latencies
-
+>
 > If you add additional Cassandra nodes to the cluster, the default replication factor is not
 > affected.
-
+>
 > If you add additional Cassandra nodes to the cluster, the consistency level is not affected.
 
 ### Evidence level
@@ -1646,9 +1652,10 @@ The consistency level and replication-factor behaviour: yes, verified against v4
 documentation. The topology expansion patterns: unversioned, treat as advisory.
 
 ---
+
 ## FINDING 16 — REAL REPORTED CASE (GitHub). Bouncy Castle provider change at 4.53 breaks JavaCallout crypto; a "fix" that looks safe is not
 
-- URL: https://github.com/DinoChiesa/Apigee-CustomPolicy-RsaCrypto/issues/10
+- URL: <https://github.com/DinoChiesa/Apigee-CustomPolicy-RsaCrypto/issues/10>
 - Source: GitHub issue, public repository `DinoChiesa/Apigee-CustomPolicy-RsaCrypto`,
   issue #10, opened January 2025 by `Roaaabdullah`, closed `COMPLETED` with 3 comments.
   Retrieved via GitHub REST API and the rendered HTML (API rate-limited, HTML fallback used).
@@ -1660,10 +1667,10 @@ documentation. The topology expansion patterns: unversioned, treat as advisory.
 
 > We're facing issues after upgrading MP & Router from (4.52.02 to 4.53.00) it's affecting the
 > traffic due exception throw by Java Callout Policy in runtime
-
+>
 > It's was working fine on the apigee 4.52.02, in apigee 4.53 some third part deleted from server
 
-```
+```text
 bc-fips-1.0.2.4.jar
 bctls-fips-1.0.19.jar
 bcpkix-fips-1.0.7.jar 
@@ -1671,20 +1678,20 @@ bcpkix-fips-1.0.7.jar
 
 Decisive exception, verbatim:
 
-```
+```text
 org.bouncycastle.openssl.PEMException: unable to convert key pair: no such provider: BC
-	at org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter.getPrivateKey(Unknown Source)
-	at com.google.apigee.util.KeyUtil.decodePrivateKey(KeyUtil.java:87)
-	at com.google.apigee.callouts.RsaBase.getPrivateKey(RsaBase.java:143)
-	at com.google.apigee.callouts.RsaCrypto.execute(RsaCrypto.java:271)
-	at com.apigee.steps.javacallout.JavaCalloutStepDefinition$ClassLoadWrappedExecution.execute(JavaCalloutStepDefinition.java:235)
+ at org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter.getPrivateKey(Unknown Source)
+ at com.google.apigee.util.KeyUtil.decodePrivateKey(KeyUtil.java:87)
+ at com.google.apigee.callouts.RsaBase.getPrivateKey(RsaBase.java:143)
+ at com.google.apigee.callouts.RsaCrypto.execute(RsaCrypto.java:271)
+ at com.apigee.steps.javacallout.JavaCalloutStepDefinition$ClassLoadWrappedExecution.execute(JavaCalloutStepDefinition.java:235)
 ...
 Caused by: java.security.NoSuchProviderException: no such provider: BC
-	at sun.security.jca.GetInstance.getService(GetInstance.java:83)
-	at sun.security.jca.GetInstance.getInstance(GetInstance.java:206)
-	at java.security.KeyFactory.getInstance(KeyFactory.java:211)
-	at org.bouncycastle.jcajce.util.NamedJcaJceHelper.createKeyFactory(Unknown Source)
-	... 21 more
+ at sun.security.jca.GetInstance.getService(GetInstance.java:83)
+ at sun.security.jca.GetInstance.getInstance(GetInstance.java:206)
+ at java.security.KeyFactory.getInstance(KeyFactory.java:211)
+ at org.bouncycastle.jcajce.util.NamedJcaJceHelper.createKeyFactory(Unknown Source)
+ ... 21 more
 ```
 
 The policy, verbatim:
@@ -1710,18 +1717,18 @@ The policy, verbatim:
 > In some cases when I publish a Java callout, I assume the dependencies, like BouncyCastle , are
 > available in Apigee. You can see that in the pom.xml file of that callout , which has this snip
 > in the ant plugin used during the package phase
-
+>
 > Strictly speaking , excluding dependencies like this from the packaging phase is risky. Apigee
 > doesn't make any guarantees that it supplies a set of  "common" or "popular" Java JARs  for use
 > by callouts.  Apigee of course is built on Java and uses many JARs itself, and at least up
 > until now, the JARs Apigee packages for itself could also be used by callouts. But there has
 > been no guarantee.
-
+>
 > The Apigee documentation has always said that you must explicitly provide all dependencies for
 > any JARs you use in JavaCallouts. For years, those JARs have been available and have been
 > resolvable, so it hasn't been a problem.  I am not familiar with the changes to OPDK 4.53, but
 > it is possible that one or more of those JARs are no longer available.
-
+>
 > To correct that, package the JARs with your call-out.
 
 Note the hedge: "I am not familiar with the changes to OPDK 4.53". The maintainer correctly
@@ -1732,22 +1739,22 @@ declines to confirm the platform cause.
 The obvious remediation is "bundle the BouncyCastle jar with the callout". The reporter tried
 exactly that, verbatim:
 
-> Hi @DinoChiesa 
+> Hi @DinoChiesa
 > Thank you for your feedback. Yes, I have tried to use the new JAR, but we have received a new
 > error message
 
-```
+```text
 java.lang.SecurityException: sealing violation: package org.bouncycastle.jcajce.util is sealed
-	at java.net.URLClassLoader.getAndVerifyPackage(URLClassLoader.java:405)
-	at java.net.URLClassLoader.definePackageInternal(URLClassLoader.java:425)
-	at java.net.URLClassLoader.defineClass(URLClassLoader.java:457)
-	at com.apigee.messaging.resource.JavaResourceClassLoader.loadClassSelfOnly(JavaResourceClassLoader.java:246)
-	at com.apigee.messaging.resource.JavaResourceClassLoader.loadClassSelfFirst(JavaResourceClassLoader.java:230)
-	at com.apigee.messaging.resource.JavaResourceClassLoader.loadClass(JavaResourceClassLoader.java:133)
-	at java.lang.ClassLoader.loadClass(ClassLoader.java:351)
-	at com.google.apigee.util.KeyUtil.decodePublicKey(KeyUtil.java:46)
-	at com.google.apigee.callouts.RsaBase.getPublicKey(RsaBase.java:139)
-	at com.google.apigee.callouts.RsaCrypto.execute(RsaCrypto.java:281)
+ at java.net.URLClassLoader.getAndVerifyPackage(URLClassLoader.java:405)
+ at java.net.URLClassLoader.definePackageInternal(URLClassLoader.java:425)
+ at java.net.URLClassLoader.defineClass(URLClassLoader.java:457)
+ at com.apigee.messaging.resource.JavaResourceClassLoader.loadClassSelfOnly(JavaResourceClassLoader.java:246)
+ at com.apigee.messaging.resource.JavaResourceClassLoader.loadClassSelfFirst(JavaResourceClassLoader.java:230)
+ at com.apigee.messaging.resource.JavaResourceClassLoader.loadClass(JavaResourceClassLoader.java:133)
+ at java.lang.ClassLoader.loadClass(ClassLoader.java:351)
+ at com.google.apigee.util.KeyUtil.decodePublicKey(KeyUtil.java:46)
+ at com.google.apigee.callouts.RsaBase.getPublicKey(RsaBase.java:139)
+ at com.google.apigee.callouts.RsaCrypto.execute(RsaCrypto.java:281)
 ```
 
 Bouncy Castle FIPS ships signed (sealed) jars. Shading them into a callout jar breaks the seal.
@@ -1773,7 +1780,7 @@ The 4.53.01 changes page, verified live on 2026-10-12, states verbatim:
 > $APIGEE_ROOT/edge-message-processor/lib/deprecated ) that contained a bunch of JAR libraries.
 > These libraries were available for use in Java code in JavaCallout policy and could have been
 > used by your custom Java code directly or indirectly.
-
+>
 > The deprecated directory is now removed in Edge for private cloud version 4.53.01. In case your
 > java code is relying on such libraries, proxies using such java callouts will fail when message
 > processors are upgraded to version 4.53.01.
@@ -1785,7 +1792,7 @@ And on the provider itself:
 > for both encryption and signing), such JavaCallout policies will need to be modernized.
 > JavaCallout policies attempting to load the Bouncy Castle cryptography provider using the name
 > BC may fail because the default provider has changed.
-
+>
 > The recommended workaround is to use the BCFIPS provider.
 
 So the official answer (switch to BCFIPS) and the reporter's working answer (drop the library
@@ -1804,10 +1811,11 @@ provider change are both permanent and documented.
 documentation for the platform cause.
 
 ---
+
 ## FINDING 17 — After the 4.53.01 upgrade the routers are mixed-version twice over: Apigee 4.53.01 on NGINX 1.20.x
 
-- URL: https://docs.apigee.com/private-cloud/v4.53.01/nginx-45301, corroborated by
-  https://docs.apigee.com/private-cloud/v4.53.01/update-apigee-edge-45202-45301
+- URL: <https://docs.apigee.com/private-cloud/v4.53.01/nginx-45301>, corroborated by
+  <https://docs.apigee.com/private-cloud/v4.53.01/update-apigee-edge-45202-45301>
   ("Nginx 1.26 upgrade in Edge-Router")
 - Product / release: Edge for Private Cloud 4.53.01, Edge Router
 - Status: both HTTP 200
@@ -1828,7 +1836,7 @@ places. Quoted verbatim:
 > Some headers that were previously accepted by Nginx but caused failures downstream in the
 > message processor are now rejected directly by Nginx. Although these headers still lead to API
 > failures, the HTTP failure messages will change.
-
+>
 > This section covers headers that were allowed by the old Nginx but rejected by the upstream
 > message processor, resulting in a 400 status code. However, in Nginx 1.26, such headers cause
 > failures directly at Nginx, preventing the request from being forwarded to the message
@@ -1837,7 +1845,7 @@ places. Quoted verbatim:
 > For clients that send such headers, the HTTP status code will remain 400. However, the HTTP
 > response body may change as the failure will now be generated by Nginx instead of the message
 > processor.
-
+>
 > HTAB or WS in between HEADERNAME
 > The Message Processor rejects such requests. With Nginx 1.26, these requests will be rejected by
 > Nginx itself. The API consumer will receive a 400 error response with an Nginx error message in
@@ -1851,14 +1859,14 @@ Other documented NGINX 1.26 behaviour changes, all producing 400, quoted verbati
 
 > Nginx now explicitly blocks requests that contain both headers. If such a request is sent,
 > Nginx will respond with a 400 Bad Request error.
-
+>
 > Previously, RSA, DSA, and DH keys smaller than 2048 bits, and ECC keys smaller than 224 bits,
 > were accepted by default. However, with this update, such keys will no longer be allowed for
 > both one-way and two-way TLS connections for northbound requests.
 
 Disallowed header name examples, verbatim from the page's table:
 
-```
+```text
 {"Header2 ", "Value2"}
 {" Header3", "Value3"}
 {" Header4 ", "Value4"}
@@ -1883,10 +1891,10 @@ dnf update apigee-nginx-1.26.3
 ```
 
 > Repeat the process on each router node, one at a time
-
+>
 > Note: For fresh installations of Edge for Private Cloud 4.53.01, Nginx 1.26.X will be installed
 > by default on router nodes.
-
+>
 > Note: Nginx 1.26 is automatically installed if you are using 9 series operating system (RHEL
 > 9.X, Rocky 9.X or Oracle Linux 9.X)
 
@@ -1911,7 +1919,7 @@ does not answer this question. The NGINX version must be read separately.
 
 ## FINDING 18 — REAL REPORTED CASE (GitHub). A tool reports "authentication error status: 500" when the real problem is that it is talking to the wrong host
 
-- URL: https://github.com/apigee/devrel/issues/808
+- URL: <https://github.com/apigee/devrel/issues/808>
 - Source: GitHub issue, public repository `apigee/devrel`, issue #808, opened January 2026
 - Product / release: Apigee Edge to X Migration Tool against an Edge for Private Cloud (OPDK)
   source, target Hybrid
@@ -1923,14 +1931,14 @@ does not answer this question. The NGINX version must be read separately.
 > We have tested Apigee Edge to X Migration Tool trying to migrate our Apigee Edge OPDK into
 > Hybrid but it failed with error:
 
-```
+```text
 Unable to authenticate to Apigee Edge using username and password. Apigee Edge authentication error status: 500, message: {"signupX":"https://apigee.google.com/welcome","passwd":"https://login.apigee.com/reset","signup":"https://login.apigee.com/sign_up"} at file:///Users/taagare9/git/apigee/migration/devrel/tools/apigee-edge-to-x-migration-tool/src/gateway-clients/apigee-edge/ApigeeEdgeClient.js:191:13
 ```
 
 and the reporter's own diagnosis, verbatim:
 
 > After some investigation it showed in:
-> https://github.com/apigee/devrel/blob/main/tools/apigee-edge-to-x-migration-tool/src/gateway-clients/apigee-edge/ApigeeEdgeClient.js
+> <https://github.com/apigee/devrel/blob/main/tools/apigee-edge-to-x-migration-tool/src/gateway-clients/apigee-edge/ApigeeEdgeClient.js>
 > that it trying to get token from hardcoded url of google api:
 
 ```javascript
@@ -1979,16 +1987,16 @@ real and because the absence is itself a finding about where OPDK material lives
 
 | URL | Status | Outcome |
 | --- | --- | --- |
-| https://cloud.google.com/apigee/docs/edge-private-cloud/release-notes | 200 | Only one entry, September 2026: an announcement that release notes moved from docs.apigee.com. No per-release content. Cached locally too. |
-| https://docs.apigee.com/release/notes/apigee-release-notes | 200 | Index only, listing patch numbers 4.50.00.01 through 4.53.01.02. Content lives on the per-release pages, not here. |
-| https://cloud.google.com/apigee/docs/release/known-issues | 200 | 69,005 characters of content, zero matches for "private cloud", "OPDK", or "Edge for Private". The known-issues tracker is Apigee X and hybrid only. This is the coverage gap. |
-| https://docs.apigee.com/private-cloud/v4.54.00/ | - | Confirmed absent. `/private-cloud/v4.53.01/` is the newest version root. Matches the task brief. |
-| https://docs.apigee.com/private-cloud/v4.53.01/update-apigee-edge-45300-45301 | 404 | Real 404. The only 4.53.01 upgrade page is `update-apigee-edge-45202-45301`, which covers both 4.52.02 and 4.53.00 as sources. Do not invent a 45300-to-45301 page. |
-| https://docs.apigee.com/private-cloud/v4.53.01/restore-from-backup | 404 | The page is `how-perform-restore`, titled "Restore from a backup". |
-| https://docs.apigee.com/private-cloud/v4.53.01/cassandra-recovery | 404 | Cassandra recovery material lives under `rollback-45301`, not in Operations. |
-| https://github.com/apigee/ansible-opdk-accelerator/issues/2 | 200 | "Does it work for 13 node installation" - open, one comment, no diagnosis. Too thin. |
-| https://github.com/apigee/apigee-config-maven-plugin/issues/125 | 200 | Maintainer self-response: "That was a blunder. Sorry about that. Will fix and release it. Wonder how my test cases passed." Useful as an evidence-of-process example, not as a scenario. |
-| https://discuss.google.dev/t/apigee-edge-management-server-failing-after-startup/6797 AI-suggested: "edge management server starts and dead after sometime" | 200 | Mismatched title; the thread is about ExtractVariables and a SOAP request, public cloud vs on-prem, resolved as a client-side HTTP method difference. Not OPDK. |
+| <https://cloud.google.com/apigee/docs/edge-private-cloud/release-notes> | 200 | Only one entry, September 2026: an announcement that release notes moved from docs.apigee.com. No per-release content. Cached locally too. |
+| <https://docs.apigee.com/release/notes/apigee-release-notes> | 200 | Index only, listing patch numbers 4.50.00.01 through 4.53.01.02. Content lives on the per-release pages, not here. |
+| <https://cloud.google.com/apigee/docs/release/known-issues> | 200 | 69,005 characters of content, zero matches for "private cloud", "OPDK", or "Edge for Private". The known-issues tracker is Apigee X and hybrid only. This is the coverage gap. |
+| <https://docs.apigee.com/private-cloud/v4.54.00/> | - | Confirmed absent. `/private-cloud/v4.53.01/` is the newest version root. Matches the task brief. |
+| <https://docs.apigee.com/private-cloud/v4.53.01/update-apigee-edge-45300-45301> | 404 | Real 404. The only 4.53.01 upgrade page is `update-apigee-edge-45202-45301`, which covers both 4.52.02 and 4.53.00 as sources. Do not invent a 45300-to-45301 page. |
+| <https://docs.apigee.com/private-cloud/v4.53.01/restore-from-backup> | 404 | The page is `how-perform-restore`, titled "Restore from a backup". |
+| <https://docs.apigee.com/private-cloud/v4.53.01/cassandra-recovery> | 404 | Cassandra recovery material lives under `rollback-45301`, not in Operations. |
+| <https://github.com/apigee/ansible-opdk-accelerator/issues/2> | 200 | "Does it work for 13 node installation" - open, one comment, no diagnosis. Too thin. |
+| <https://github.com/apigee/apigee-config-maven-plugin/issues/125> | 200 | Maintainer self-response: "That was a blunder. Sorry about that. Will fix and release it. Wonder how my test cases passed." Useful as an evidence-of-process example, not as a scenario. |
+| <https://discuss.google.dev/t/apigee-edge-management-server-failing-after-startup/6797> AI-suggested: "edge management server starts and dead after sometime" | 200 | Mismatched title; the thread is about ExtractVariables and a SOAP request, public cloud vs on-prem, resolved as a client-side HTTP method difference. Not OPDK. |
 
 Two negative results worth stating plainly.
 
@@ -2002,7 +2010,7 @@ on-prem are public-cloud questions about availability zones.
 
 ---
 
-# PROPOSED SCENARIOS
+## PROPOSED SCENARIOS
 
 Structure copied from `scenarios/hard.md`.
 
@@ -2050,7 +2058,7 @@ From the Management Server's `system.log`, at
 rotation page states that similar files exist for the other `edge-*` components, naming
 `edge-management-server` among them:
 
-```
+```text
 WARN DATASTORE.CASSANDRA - ConfigurationUtil.resolveLocalDataCenter() : TException while resolving datacenter for
 datastoreconfig:[DataStoreConfig{name='identityzone-datastore', type=null, keyspace='identityzone', ...
 org.apache.cassandra.thrift.InvalidRequestException: null
@@ -2058,7 +2066,7 @@ org.apache.cassandra.thrift.InvalidRequestException: null
 
 then, about thirty seconds later:
 
-```
+```text
 ERROR KERNEL.DEPLOYMENT - ServiceDeployer.startService() : ServiceDeployer.deploy() : Got a life cycle exception
 while starting service [IdentityZoneService, All host(s) tried for query failed (tried: /10.0.0.5:9042
 (com.datastax.driver.core.TransportException: [/10.0.0.5:9042] Cannot connect), /10.0.0.7:9042
@@ -2092,7 +2100,7 @@ from the ticket.
 
 The Management Server node can reach all three Cassandra nodes:
 
-```
+```text
 $ /opt/apigee/apigee-cassandra/bin/nodetool status
 Datacenter: dc-1
 ================
@@ -2120,7 +2128,7 @@ Port 9042 is documented for exactly this, and 8080 is what the Management Server
 
 After the 9042 path is opened, the Management Server starts and then fails again, differently:
 
-```
+```text
 INFO c.d.driver.core.Cluster - Cluster$Manager.init() : New Cassandra host /10.0.0.5:9042 added
 INFO c.d.driver.core.Cluster - Cluster$Manager.init() : New Cassandra host /10.0.0.7:9042 added
 INFO c.d.driver.core.Cluster - Cluster$Manager.init() : New Cassandra host /10.0.0.6:9042 added
@@ -2279,7 +2287,7 @@ of competing causes captures the incompleteness.
 
 #### Initial evidence
 
-```
+```text
 $ sudo /opt/apigee/apigee-service/bin/apigee-service apigee-cassandra restart
 Checking the status of Cassandra before shutdown
 Disabling binary...
@@ -2294,7 +2302,7 @@ Could not drain.done
 
 The reporter has also supplied the fact that falsifies the obvious explanation:
 
-```
+```text
 $ sudo /opt/apigee/apigee-cassandra/bin/nodetool -u cassadmin -pw password status
 
 Datacenter: dc-1
@@ -2338,7 +2346,7 @@ advise a manual restart that is genuinely blocked.
 Cassandra JMX authentication is enabled, confirmed in
 `/opt/apigee/customer/application/cassandra.properties`:
 
-```
+```text
 conf_cassandra-env_com.sun.management.jmxremote.authenticate=true
 ```
 
@@ -2350,7 +2358,7 @@ different operator's session does not.
 
 Running the failing command with the credentials inline succeeds:
 
-```
+```text
 $ CASS_JMX_USERNAME=ADMIN CASS_JMX_PASSWORD=PASSWORD \
   /opt/apigee/apigee-service/bin/apigee-service apigee-cassandra ring
 ```
@@ -2388,7 +2396,7 @@ What is NOT established and should not be asserted:
 
   which should print something along the lines of:
 
-  ```
+  ```text
   Cassandra version is verified - [cqlsh 6.0.0 | Cassandra 4.0.18 | CQL spec 3.4.5 | Native protocol v5]
   Metadata is verified
   ```
@@ -2521,7 +2529,7 @@ Cassandra upgrade completed.
 
 `/opt/apigee/apigee-cassandra/bin/nodetool describecluster`, run from any node:
 
-```
+```text
 Schema versions :
 2eadcd74-0245-309a-9992-3625afa70038 : [ DC-1-IP1, DC-1-IP2, DC-1-IP3 ]
 129dc15e-198e-3c11-b64c-701044a3a1ad : [ DC-2-IP1, DC-2-IP2, DC-2-IP3 ]
@@ -2554,7 +2562,7 @@ The slowness is in Postgres query performance after the major Postgres upgrade, 
 
 `/opt/apigee/apigee-cassandra/bin/nodetool status`, on any Cassandra node:
 
-```
+```text
 Datacenter: dc-1
 ================
 Status=Up/Down |/ State=Normal/Leaving/Joining/Moving
@@ -2606,11 +2614,11 @@ will not make Postgres queries faster.
 Cassandra cannot be rolled back. That is not a preference, it is the documented state boundary:
 
 > Important: There is no direct in-place rollback option available after upgrading Cassandra.
-
+>
 > If your entire Cassandra cluster is upgraded to 4.0.X, you must not roll back to Cassandra
 > 3.11.X. You must continue using the newer Cassandra version with the other components of
 > Private Cloud 4.53.00 or 4.52.02.
-
+>
 > Checkpoint 2: After all Cassandra nodes in all data centers are updated. You can roll back
 > to this state, but you cannot revert to Checkpoint 1.
 
@@ -2628,7 +2636,7 @@ motivation:
 > After a major Postgres upgrade, the internal statistics of Postgres are wiped out. These
 > statistics aid the Postgres query planner in utilizing the most optimal indexes and paths to
 > execute queries.
-
+>
 > To address this issue, execute ANALYZE on all tables in the database on the master Postgres
 > node.
 
@@ -2792,19 +2800,19 @@ From the Message Processor trace of a failing request:
 
 and from the Message Processor log:
 
-```
+```text
 org.bouncycastle.openssl.PEMException: unable to convert key pair: no such provider: BC
-	at org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter.getPrivateKey(Unknown Source)
-	at com.google.apigee.util.KeyUtil.decodePrivateKey(KeyUtil.java:87)
-	at com.google.apigee.callouts.RsaBase.getPrivateKey(RsaBase.java:143)
-	at com.google.apigee.callouts.RsaCrypto.execute(RsaCrypto.java:271)
-	at com.apigee.steps.javacallout.JavaCalloutStepDefinition$ClassLoadWrappedExecution.execute(JavaCalloutStepDefinition.java:235)
+ at org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter.getPrivateKey(Unknown Source)
+ at com.google.apigee.util.KeyUtil.decodePrivateKey(KeyUtil.java:87)
+ at com.google.apigee.callouts.RsaBase.getPrivateKey(RsaBase.java:143)
+ at com.google.apigee.callouts.RsaCrypto.execute(RsaCrypto.java:271)
+ at com.apigee.steps.javacallout.JavaCalloutStepDefinition$ClassLoadWrappedExecution.execute(JavaCalloutStepDefinition.java:235)
 ...
 Caused by: java.security.NoSuchProviderException: no such provider: BC
-	at sun.security.jca.GetInstance.getInstance(GetInstance.java:206)
-	at java.security.KeyFactory.getInstance(KeyFactory.java:211)
-	at org.bouncycastle.jcajce.util.NamedJcaJceHelper.createKeyFactory(Unknown Source)
-	... 21 more
+ at sun.security.jca.GetInstance.getInstance(GetInstance.java:206)
+ at java.security.KeyFactory.getInstance(KeyFactory.java:211)
+ at org.bouncycastle.jcajce.util.NamedJcaJceHelper.createKeyFactory(Unknown Source)
+ ... 21 more
 ```
 
 The policy:
@@ -2840,7 +2848,7 @@ The Bouncy Castle provider changed:
 
 > In Edge for Private Cloud 4.53.00, the internal cryptography provider was updated from Bouncy
 > Castle (BC) to Bouncy Castle FIPS (BCFIPS) to enable FIPS support.
-
+>
 > JavaCallout policies attempting to load the Bouncy Castle cryptography provider using the name
 > BC may fail because the default provider has changed.
 
@@ -2848,7 +2856,7 @@ And the deprecated library directory was removed:
 
 > Edge for Private cloud 4.53.00 and earlier used to contain a directory called deprecated (
 > $APIGEE_ROOT/edge-message-processor/lib/deprecated ) that contained a bunch of JAR libraries.
-
+>
 > The deprecated directory is now removed in Edge for private cloud version 4.53.01. In case your
 > java code is relying on such libraries, proxies using such java callouts will fail when message
 > processors are upgraded to version 4.53.01.
@@ -2920,12 +2928,12 @@ BEFORE upgrading, because 4.53.01 removes that directory. And bundling the Bounc
 jars inside the callout jar does not work - in the source case that produced a different
 exception:
 
-```
+```text
 java.lang.SecurityException: sealing violation: package org.bouncycastle.jcajce.util is sealed
-	at java.net.URLClassLoader.getAndVerifyPackage(URLClassLoader.java:405)
-	at com.apigee.messaging.resource.JavaResourceClassLoader.loadClassSelfOnly(JavaResourceClassLoader.java:246)
-	at com.apigee.messaging.resource.JavaResourceClassLoader.loadClassSelfFirst(JavaResourceClassLoader.java:230)
-	at com.apigee.messaging.resource.JavaResourceClassLoader.loadClass(JavaResourceClassLoader.java:133)
+ at java.net.URLClassLoader.getAndVerifyPackage(URLClassLoader.java:405)
+ at com.apigee.messaging.resource.JavaResourceClassLoader.loadClassSelfOnly(JavaResourceClassLoader.java:246)
+ at com.apigee.messaging.resource.JavaResourceClassLoader.loadClassSelfFirst(JavaResourceClassLoader.java:230)
+ at com.apigee.messaging.resource.JavaResourceClassLoader.loadClass(JavaResourceClassLoader.java:133)
 ```
 
 Signed Bouncy Castle jars keep their seal when shaded. Path B therefore applies to non-BC
@@ -3063,9 +3071,9 @@ ring is healthy and the replication is complete.
 
 The consistency level configured on the Message Processor:
 
-```
-$ cd /opt/apigee/edge-message-processor/conf
-$ grep -ri "consistency.level" *
+```text
+cd /opt/apigee/edge-message-processor/conf
+grep -ri "consistency.level" *
 ```
 
 which returns the configured value for each keyspace. The documentation's explanation of what
@@ -3074,19 +3082,19 @@ that value means is the whole answer:
 > The Cassandra consistency level is defined as the minimum number of Cassandra nodes that must
 > acknowledge a read or write operation before the operation can be considered successful.
 > Different consistency levels can be assigned to different Edge keyspaces.
-
+>
 > When connecting to Cassandra for read and write operations, Message Processor and Management
 > Server nodes typically use the Cassandra value of LOCAL_QUORUM to
 > specify the consistency level for a keyspace. However, some keyspaces are defined to use a
 > consistency level of one.
-
+>
 > The calculation of the value of LOCAL_QUORUM for a data center is:
 >
 > LOCAL_QUORUM = (replication_factor/2) + 1
-
+>
 > With LOCAL_QUORUM = 2, at least two of the three Cassandra nodes in the data
 > center must respond to a read/write operation for the operation to succeed.
-
+>
 > By specifying the consistency level as LOCAL_QUORUM , Edge avoids the latency
 > required by validating operations across multiple data centers.
 
@@ -3261,7 +3269,7 @@ rubric line on uncertainty captures the gap between a hypothesis and a finding.
 
 #### Initial evidence
 
-```
+```text
 HTTP/1.1 400 Bad Request
 ```
 
@@ -3343,7 +3351,7 @@ itself. The documented behaviour, verbatim:
 > Some headers that were previously accepted by Nginx but caused failures downstream in the
 > message processor are now rejected directly by Nginx. Although these headers still lead to API
 > failures, the HTTP failure messages will change.
-
+>
 > This section covers headers that were allowed by the old Nginx but rejected by the upstream
 > message processor, resulting in a 400 status code. However, in Nginx 1.26, such headers cause
 > failures directly at Nginx, preventing the request from being forwarded to the message
@@ -3355,7 +3363,7 @@ itself. The documented behaviour, verbatim:
 
 The client's headers, and the client is not misbehaving in any way the documentation recognises:
 
-```
+```text
 {"Header 5", "Value5"}
 {"Header\t14", "Value14"}
 {"Header\t 32", "Value32"}
@@ -3511,7 +3519,7 @@ or doing it without stating that the TLS key size change is deferred with it.
 
 #### Initial evidence
 
-```
+```text
 POST /v1/organizations/acme-environments/env-prod/apiproducts
 [LDAP: error code 80 - Other]
 ```
@@ -3549,7 +3557,7 @@ limit is hard-coded, quoted verbatim from the changes page:
 
 > In OpenLDAP 2.6, relative distinguished name (RDN) is limited to approximately 241
 > bytes/characters. This limitation is a hard cap enforced and cannot be modified.
-
+>
 > Any DN longer than 241 bytes in Apigee's LDAP is impacted. Such DN's will prevent successful
 > upgrade of Apigee OpenLDAP software and you will have to follow mitigation strategies for such
 > items before you can proceed with the upgrade.
@@ -3558,7 +3566,7 @@ The documented diagnosis, verbatim:
 
 > Generally, in Apigee's LDAP, long DNs are related to permissions since they are created by
 > concatenating multiple entities. Such permission entries are especially prone to upgrade issues.
-
+>
 > Attempting to create an entities like organizations,environments, custom roles, permissions
 > etc. may results in the error message: "message": "[LDAP: error code 80 - Other]" .
 
@@ -3573,7 +3581,7 @@ ldapsearch -o ldif-wrap=no -b "dc=apigee,dc=com" \
 itself have a 241-character name, which is what makes this hard: the offending DN is built by
 concatenation. The documented example, verbatim:
 
-```
+```text
 dn: cn=@@@environments@@@*@@@applications@@@*@@@revisions@@@*@@@debugsessions,ou=resources,cn=businessuser,ou=userroles,o=orgname,ou=organizations,dc=apigee,dc=com
 ```
 
@@ -3605,10 +3613,10 @@ documented mitigations are all destructive:
 
 > If it is the custom role name, App, API product or other entities which is the primary factor
 > causing the RDN to be long, migrate to using an alternate entity with a shorter name.
-
+>
 > If it is the organization name or environment name that is the primary contributor to long RDN,
 > you will have to migrate to a different organization or environment with a shorter name.
-
+>
 > Keep repeating the steps above until your LDAP has no RDNs longer than 241 bytes. Once you
 > reach this state, proceed with the private cloud version upgrade as usual.
 

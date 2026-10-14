@@ -59,6 +59,7 @@ code itself is real (see EASY-14 below); the rule is what is broken.
 **Verdict**: MINOR ISSUES
 
 **Fault codes checked**:
+
 - `InvalidQuotaInterval` -> confirmed as a **deployment** error at
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy>
   (Deployment errors table, cached `api-platform_reference_policies_quota-policy.txt:1205`)
@@ -70,15 +71,19 @@ code itself is real (see EASY-14 below); the rule is what is broken.
 **Issues found**:
 
 1. The "error message in full" the user supplies is invented:
-   ```
+
+   ```text
    Error Saving Revision 4
    InvalidQuotaInterval: The quota interval is not a valid integer.
    ```
+
    The documented message is:
-   ```
+
+   ```text
    Error Saving Revision [revision_number]
    Invalid quota interval [interval] in quota policy [policy_name].
    ```
+
    (quota-deployment-errors page, "Error message" section). A learner comparing the scenario
    string to the doc sees an immediate mismatch and learns to distrust the scenario.
 
@@ -106,6 +111,7 @@ narrative is coherent given the documented cause.
 **Verdict**: CORRECT
 
 **Fault codes checked**:
+
 - `policies.ratelimit.FailedToResolveQuotaIntervalReference` / `500` -> confirmed at
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy>
   (cached `api-platform_reference_policies_quota-policy.txt:1194`). Cause text confirmed
@@ -130,6 +136,7 @@ still a deployment error" is correct.
 **Verdict**: MINOR ISSUES
 
 **Fault codes checked**:
+
 - `flow.SharedFlowNotFound` / `500`, cause *"Either the shared flow does not exist, or the
   shared flow exists but is not deployed."* -> confirmed at
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/flow-callout-policy>
@@ -166,6 +173,7 @@ documented two-cause statement plus the deployment evidence, and the difficulty 
 **Verdict**: MATERIAL ERROR
 
 **Fault codes checked**:
+
 - `accesscontrol.IPDeniedAccess` / `403` -> confirmed at
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/access-control-policy>
   (cached `api-platform_reference_policies_access-control-policy.txt:558`). Cause text
@@ -174,17 +182,21 @@ documented two-cause statement plus the deployment evidence, and the difficulty 
 **Issues found**:
 
 1. **The XML in the diagnostic evidence uses elements that do not exist.** The scenario shows:
+
    ```xml
    <SourceAddress mask="32">
      <Address>203.0.113.0</Address>
      <Address>198.51.100.0</Address>
    </SourceAddress>
    ```
+
    `<SourceAddress>` is a leaf element whose **text content** is the address. It has no
    `<Address>` child. The doc's examples (same page, lines 34, 82, 106):
+
    ```xml
    <SourceAddress mask="32">198.51.100.1</SourceAddress>
    ```
+
    There is no `<Address>` element anywhere in the AccessControl schema.
 
 2. **The mask semantics contradict the ground truth.** With `mask="32"` only the exact address
@@ -207,6 +219,7 @@ The `403` status and the "policy decision, not credential failure" reasoning are
 **Verdict**: MATERIAL ERROR
 
 **Fault codes checked**:
+
 - `steps.javascript.ScriptSecurityError` / `500`, cause *"A security error occurred when the
   `JavaScript` executed. See the fault string for details."* -> confirmed at
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/javascript-policy>
@@ -245,6 +258,7 @@ unverified method names.
 **Verdict**: MATERIAL ERROR
 
 **Fault codes checked**:
+
 - `steps.basicauthentication.UnresolvedVariable` / `500` -> confirmed at
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/basic-authentication-policy>
   (cached `api-platform_reference_policies_basic-authentication-policy.txt:333`)
@@ -267,10 +281,12 @@ unverified method names.
 
 2. **`<SourceVariable>` does not exist in the BasicAuthentication policy.** The scenario's
    policy config is:
+
    ```xml
    <BasicAuthentication name="DecodeBasicAuth">
      <SourceVariable request.header.Authorization</SourceVariable>
    ```
+
    The real element is `<Source>` (and `<User>`/`<Password>` are required for Decode). Same
    page, lines 109–116 and the `<Source>` element reference.
 
@@ -298,6 +314,7 @@ unverified method names.
 **Verdict**: CORRECT
 
 **Fault codes checked**:
+
 - `steps.jws.AlgorithmMismatch` / `401`, cause *"The algorithm specified in the header by the
   `Generate` policy did not match the one expected in the `Verify` policy. The algorithms
   specified must match."* -> confirmed at
@@ -308,8 +325,8 @@ No issues found. `<Algorithm>` is a real VerifyJWS element (line 164: valid valu
 `HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512`), so the
 scenario's claim that PS256 is supported platform-wide and the mismatch is a local
 configuration constraint is correct. The "VerifyJWS does not document a wildcard" claim holds —
-the doc only documents comma-separated multiple values, with the constraint that HS* cannot be
-combined with others and ES* cannot be combined with others, while RS* **and** PS* can be
+the doc only documents comma-separated multiple values, with the constraint that HS*cannot be
+combined with others and ES* cannot be combined with others, while RS***and** PS* can be
 combined (line 157). The remediation of `RS256, PS256` is therefore legal, and the "no
 wildcard" warning is correct. The 401 is correct. Difficulty label is right.
 
@@ -320,6 +337,7 @@ wildcard" warning is correct. The 401 is correct. Difficulty label is right.
 **Verdict**: CORRECT
 
 **Fault codes checked**:
+
 - `policies.ratelimit.InvalidMessageWeight` / `500`, *"the value of the `<MessageWeight>` element
   specified through a flow variable is invalid (a non-integer value)"* -> confirmed on the
   Quota page, <https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy>
@@ -342,6 +360,7 @@ cleanest scenarios in the file.
 **Verdict**: MATERIAL ERROR
 
 **Fault codes checked**:
+
 - `steps.jsontoxml.InvalidSourceType` / `500`, cause *"This error occurs if the type of the
   variable used to define the `<Source>` element is invalid. The valid types of variable are
   `message` and `string`."* -> confirmed at
@@ -380,6 +399,7 @@ is wrong.
 **Verdict**: MATERIAL ERROR
 
 **Fault codes checked**:
+
 - `steps.hmac.MissingConfigurationElement`, listed under **Deployment errors** -> confirmed at
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/hmac-policy>
   (cached `api-platform_reference_policies_hmac-policy.txt:356`)
@@ -418,6 +438,7 @@ sound. Only the XML and the status are wrong.
 **Verdict**: MINOR ISSUES
 
 **Fault codes checked**:
+
 - `InvalidQuotaTimeUnit`, *"If the time unit specified in the `<TimeUnit>` element is
   unsupported, then the deployment of the API proxy fails. The supported time units are
   `minute`, `hour`, `day`, `week`, and `month`."* -> confirmed at
@@ -452,6 +473,7 @@ The singular/plural insight, the "1 minutes is doubly wrong" observation, and th
 **Verdict**: MATERIAL ERROR
 
 **Fault codes checked**:
+
 - `steps.oauth.v2.InvalidEarlyTimestamp` -> **NOT FOUND** on the page the scenario cites.
   It appears on
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/revoke-oauth-v2-policy>
@@ -499,6 +521,7 @@ documentation does not state. That is the worst failure mode in the suite.
 **Verdict**: CORRECT
 
 **Fault codes checked**: none quoted — the scenario deliberately names no code.
+
 - The behaviour is quoted near-verbatim from
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/jwt-policies-overview>
   (cached `api-platform_reference_policies_jwt-policies-overview.txt:357`, JWKS resolution
@@ -525,6 +548,7 @@ weighted.
 **Verdict**: MINOR ISSUES
 
 **Fault codes checked**:
+
 - `messaging.adaptors.http.flow.SslHandshakeFailed` -> confirmed at
   <https://cloud.google.com/apigee/docs/api-platform/system-administration/options-configuring-tls>
   (cached `api-platform_system-administration_options-configuring-tls.txt:8`, fetched and
@@ -646,6 +670,7 @@ state enum and the self-containment are problems.
    <https://cloud.google.com/apigee/docs/api-platform/deploy/load-balancing-across-backend-servers>
    (cached `api-platform_deploy_load-balancing-across-backend-servers.txt:322–340, 247–258`)
    uses:
+
    ```xml
    <LoadBalancer>
      <Algorithm>RoundRobin</Algorithm>
@@ -655,6 +680,7 @@ state enum and the self-containment are problems.
      <ServerUnhealthyResponse>...</ServerUnhealthyResponse>
    </LoadBalancer>
    ```
+
    The scenario uses `<LoadBalancing>` (wrong element name), `<TargetServer>orders-1</TargetServer>`
    (wrong — it is `<Server name="..."/>`), and `<Algorithm>ROUND_ROBIN</Algorithm>` (wrong value
    — *"The available algorithms are `RoundRobin`, `Weighted`, and `LeastConnections`"*, line 237;
@@ -674,6 +700,7 @@ state enum and the self-containment are problems.
    `api-platform/deploy/load-balancing-across-backend-servers`.
 
 The **reasoning is correct and is the scenario's actual value**:
+
 - *"**The MaxFailures default is 0.** This means that Apigee always tries to connect to the target
   for each request and never removes the target server from the rotation."* (line 342) — the
   scenario's headline claim is verbatim correct.
@@ -702,6 +729,7 @@ So the diagnosis is documented; every line of XML in the scenario is wrong.
    a non-existent element. The real structure, per
    <https://cloud.google.com/apigee/docs/api-platform/reference/policies/response-cache-policy>
    (cached `api-platform_reference_policies_response-cache-policy.txt:51–59, 190–232`):
+
    ```xml
    <ResponseCache name="ResponseCache">
      <CacheKey>
@@ -712,6 +740,7 @@ So the diagnosis is documented; every line of XML in the scenario is wrong.
      </ExpirySettings>
    </ResponseCache>
    ```
+
    Confirmed by <https://cloud.google.com/apigee/docs/api-platform/reference/policies/working-cachekeys>
    (cached `api-platform_reference_policies_working-cachekeys.txt`): *"Apigee uses the values of
    configuration elements -- `<Scope>`, `<CacheKey>`/`<Prefix>`, and `<CacheKey>`/`<KeyFragment>`
@@ -869,6 +898,7 @@ southbound pass" verification discipline is right and is the reason this scenari
 **Verdict**: MATERIAL ERROR
 
 **Fault codes checked**:
+
 - `policies.ratelimit.QuotaViolation` / `500` -> confirmed at
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy>
   line 1197 ("The quota limit was exceeded.")
@@ -914,6 +944,7 @@ sound. The SpikeArrest configuration the scenario hands the agent is not.
 **Verdict**: MINOR ISSUES
 
 **Fault codes checked**:
+
 - `steps.oauth.v2.access_token_expired` / **401** "The access token is expired." ->
   confirmed at <https://cloud.google.com/apigee/docs/api-platform/reference/policies/oauthv2-policy>
   (cached `api-platform_reference_policies_oauthv2-policy.txt:1328`, Thrown by operations:
@@ -977,6 +1008,7 @@ honestly marked synthetic. The `private.`-prefix advice in MED-05 is echoed corr
 **Verdict**: CORRECT
 
 **Fault codes checked**: none quoted directly, but the behaviour is documented:
+
 - `<Timeout>` element, milliseconds, **default 55000**:
   <https://cloud.google.com/apigee/docs/api-platform/reference/policies/service-callout-policy>
   (cached `api-platform_reference_policies_service-callout-policy.txt:414–430`)
@@ -1002,6 +1034,7 @@ appropriate.
 **Verdict**: MINOR ISSUES
 
 **Fault codes checked**:
+
 - `steps.javascript.ScriptExecutionFailed` / `500`, *"The `JavaScript` policy can throw many
   different types of `ScriptExecutionFailed` errors. Commonly seen types of errors include
   RangeError, ReferenceError, SyntaxError, TypeError, and URIError."* -> confirmed at
@@ -1014,9 +1047,11 @@ appropriate.
 **Issues found**:
 
 1. **The remediation uses an undocumented JavaScript API** (see S2):
+
    ```javascript
    var raw = context.request.getValue("items");
    ```
+
    The documented way to read a flow variable from JavaScript is
    `context.getVariable("request.queryparam.items")`
    (<https://cloud.google.com/apigee/docs/api-platform/reference/javascript-object-model>,
@@ -1039,6 +1074,7 @@ trap. The difficulty label is right — the work is asking for the fault string 
 > token may still succeed for up to three minutes, until its cache limit expires."*
 
 Confirmed at:
+
 - <https://cloud.google.com/apigee/docs/api-platform/security/oauth/validating-and-invalidating-access-tokens>
   (three occurrences, lines 10, 29 and in context; fetched live, HTTP 200, 9,224 bytes)
 - <https://cloud.google.com/apigee/docs/api-platform/security/oauth/enable-retrieval-and-revocation-oauth-20-access-tokens-end-user-id-app-id-or-both>
@@ -1068,6 +1104,7 @@ is a real `<Operation>` value.
 **Verdict**: MATERIAL ERROR
 
 **Fault codes checked**:
+
 - `JavaClassNotFoundInJavaResource`, fault string `Failed to find the ClassName in java resource
   [jar_name] - [class_name]`, HTTP status `N/A`, listed under **Deployment errors** ->
   confirmed at <https://cloud.google.com/apigee/docs/api-platform/reference/policies/java-callout-policy>
@@ -1106,7 +1143,7 @@ agent to accept a documented deployment error occurring at runtime.
 ## Summary table of MATERIAL ERRORs
 
 | Scenario | Material error | Contradicting source |
-|---|---|---|
+| --- | --- | --- |
 | **EASY-04** | `<SourceAddress>` shown with non-existent `<Address>` children and outside `<IPRules>/<MatchRule>`; `mask="32"` cannot produce the stated block of `203.0.113.47` | [access-control-policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/access-control-policy) |
 | **EASY-05** | Ground truth blames `context.request.getValue` (not a documented API); "confirming" experiment `JavaScript.fromCharCode(0)` is not valid JS; `context.variable()` is not documented | [javascript-object-model](https://cloud.google.com/apigee/docs/api-platform/reference/javascript-object-model) |
 | **EASY-06** | Says `UnresolvedVariable` occurs only when `IgnoreUnresolvedVariables` is **set**; doc says it can only occur when it is **false**. Uses non-existent `<SourceVariable>` (real name `<Source>`). Case-sensitivity premise for `request.header.*` is undocumented | [basic-authentication-policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/basic-authentication-policy), [variables-reference](https://cloud.google.com/apigee/docs/api-platform/reference/variables-reference) |

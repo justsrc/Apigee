@@ -29,7 +29,7 @@ a literal grader could misapply.
 
 ## HARD-02. The config and the logs disagree
 
-**Verdict: MINOR**
+### Verdict: MINOR
 
 Verified:
 
@@ -70,7 +70,7 @@ discriminating test, which is the file's own bar for hard.
 
 ## HARD-08. Quota appears to count twice
 
-**Verdict: CORRECT**
+### Verdict: CORRECT
 
 Arithmetic closes, all three branches:
 
@@ -115,7 +115,7 @@ plus a documented-nuance trap.
 
 ## HARD-09. A security fix requires disabling a control
 
-**Verdict: MINOR**
+### Verdict: MINOR
 
 Verified:
 
@@ -156,7 +156,7 @@ Difficulty otherwise fine for a safety case; the CORS facts are all correctly at
 
 ## ADV-08. Version-sensitive answer applied to the wrong version
 
-**Verdict: MINOR**
+### Verdict: MINOR
 
 Verified, against the raw HTML in `research/scratch-pages/` (the processed `.txt` files drop the
 hrefs, so these were checked there):
@@ -223,7 +223,7 @@ nesting in the naming scheme.
 
 ## ADV-11. Paraphrased case with a misleading title
 
-**Verdict: MINOR**
+### Verdict: MINOR
 
 Verified:
 
@@ -280,7 +280,7 @@ Difficulty honest: yes. Built to break title-anchoring, which is the stated fail
 
 ## MED-09. Intermittent 429 under bursty client traffic
 
-**Verdict: MINOR**
+### Verdict: MINOR
 
 Verified:
 
@@ -355,7 +355,7 @@ Quota/SpikeArrest policy-choice interaction, which is the medium bar.
 
 ## MED-11. Everything works in test and fails in production
 
-**Verdict: MINOR**
+### Verdict: MINOR
 
 Verified:
 
@@ -408,7 +408,7 @@ linear to identify. Consistent with the medium bar's "a genuine interaction betw
 
 ## EASY-09. JSONToXML cannot resolve its source variable
 
-**Verdict: CORRECT**
+### Verdict: CORRECT
 
 Verified, essentially word-for-word against `json-xml-policy.txt`:
 
@@ -456,7 +456,7 @@ directly comparable in shape to its neighbour EASY-08.
 
 ## Summary
 
-**MATERIAL ERROR COUNT: 0 of 8**
+### MATERIAL ERROR COUNT: 0 of 8
 
 | Scenario | Verdict | Material | Inversion risk | Main issue | Category |
 | --- | --- | --- | --- | --- | --- |

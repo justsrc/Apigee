@@ -28,27 +28,74 @@ import json
 import re
 import sys
 import tempfile
+from collections.abc import Callable
 from pathlib import Path
+from typing import Protocol, TypedDict, cast, overload
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from release_gate import (  # noqa: E402
+from tests import release_gate
+from tests.release_gate import (
     BLOCKED, DECLARED, EXECUTED, FAIL, NOT_QUALIFIED, PASS, PROVISIONAL, QUALIFIED,
-    UNVERIFIED, Criterion, audit_manifest, decide, f6_status,
+    UNVERIFIED, Criterion, decide, f6_status,
 )
 
-CASES: list[dict] = []
+
+class Case(TypedDict):
+    name: str
+    fn: Callable[[], None]
 
 
-def case(name: str, fn=None) -> None:
+class RunRecord(TypedDict):
+    name: str
+    fields: dict[str, str]
+    missing: list[str]
+    qualifies: bool
+
+
+class ManifestAudit(TypedDict):
+    prov: dict[str, int]
+    undeclared: list[str]
+    bad_unresolved: list[str]
+    malformed: list[str]
+    orphans: list[str]
+
+
+class Result(TypedDict):
+    name: str
+    ok: bool
+    note: str
+
+
+class _ReportAdd(Protocol):
+    def __call__(self, cid: str, cat: str, req: str, status: str,
+                 evidence: str = "", detail: str = "", kind: str = EXECUTED,
+                 mandatory: bool = True) -> None: ...
+
+
+CaseFn = Callable[[], None]
+
+CASES: list[Case] = []
+
+# release_gate's public functions are annotated with bare `dict`, which basedpyright sees as
+# partially unknown. Casting the module attributes here keeps the unknown out of this file.
+audit_eval_runs = cast("Callable[[Path], list[RunRecord]]", release_gate.audit_eval_runs)
+audit_manifest = cast("Callable[[Path, Path], ManifestAudit]", release_gate.audit_manifest)
+
+
+@overload
+def case(name: str) -> Callable[[CaseFn], CaseFn]: ...
+@overload
+def case(name: str, fn: CaseFn) -> None: ...
+def case(name: str, fn: CaseFn | None = None) -> Callable[[CaseFn], CaseFn] | None:
     """Register a case. Usable as @case("name") or @case("name", fn)."""
-    def deco(f):
+    def deco(f: CaseFn) -> CaseFn:
         CASES.append({"name": name, "fn": f})
         return f
     if fn is not None:
-        deco(fn)
-    else:
-        return deco
+        _ = deco(fn)
+        return None
+    return deco
 
 
 def crit(cid: str, status: str, mandatory: bool = True) -> Criterion:
@@ -63,13 +110,12 @@ def crit(cid: str, status: str, mandatory: bool = True) -> Criterion:
 
 def _run_record(tmp: Path, body: str) -> Path:
     p = tmp / "RUNS.md"
-    p.write_text(body, encoding="utf-8")
+    _ = p.write_text(body, encoding="utf-8")
     return p
 
 
 @case("a-complete-ab-run-qualifies")
 def _run_qualifies():
-    import release_gate
     with tempfile.TemporaryDirectory() as d:
         p = _run_record(Path(d), (
             "## Run 9, 2026-01-01\n\n"
@@ -78,7 +124,7 @@ def _run_qualifies():
             "| Turns released | Both |\n"
             "| Model | some/model-1 |\n"
             "| Protocol | protocol.md |\n"))
-        runs = release_gate.audit_eval_runs(p)
+        runs = audit_eval_runs(p)
         assert len(runs) == 1 and runs[0]["qualifies"], runs
 
 
@@ -89,7 +135,6 @@ def _run_one_arm():
     The word "baseline" is present, in a negation. An auditor that tests for the substring
     reads that run as a completed A/B and the gate starts implying an evaluation exists.
     """
-    import release_gate
     with tempfile.TemporaryDirectory() as d:
         p = _run_record(Path(d), (
             "## Run 2, 2026-10-13\n\n"
@@ -98,7 +143,7 @@ def _run_one_arm():
             "| Turns released | Both |\n"
             "| Model | some/model-1 |\n"
             "| Protocol | protocol.md |\n"))
-        runs = release_gate.audit_eval_runs(p)
+        runs = audit_eval_runs(p)
         assert len(runs) == 1, runs
         assert not runs[0]["qualifies"], runs
         assert runs[0]["missing"] == ["a baseline arm"], runs
@@ -106,7 +151,6 @@ def _run_one_arm():
 
 @case("a-turn-one-run-does-not-qualify")
 def _run_one_turn():
-    import release_gate
     with tempfile.TemporaryDirectory() as d:
         p = _run_record(Path(d), (
             "## Run 1, 2026-10-11\n\n"
@@ -114,7 +158,7 @@ def _run_one_turn():
             "| Arms | A no skill, B with skill |\n"
             "| Turns released | **1 only.** Diagnostic evidence was never released. |\n"
             "| Model | Subagent via the harness. Exact model id not captured. |\n"))
-        runs = release_gate.audit_eval_runs(p)
+        runs = audit_eval_runs(p)
         assert not runs[0]["qualifies"], runs
         assert "both turns released" in runs[0]["missing"], runs
         assert "a captured model id" in runs[0]["missing"], runs
@@ -123,17 +167,15 @@ def _run_one_turn():
 @case("a-plan-section-is-not-a-run")
 def _run_plan_section():
     """RUNS.md carries "## Runs not yet performed". Counting it would invent a failed run."""
-    import release_gate
     with tempfile.TemporaryDirectory() as d:
         p = _run_record(Path(d), "## Runs not yet performed\n\nNothing yet.\n")
-        assert release_gate.audit_eval_runs(p) == [], p
+        assert audit_eval_runs(p) == [], p
 
 
 @case("the-repository-runs-do-not-qualify")
 def _run_real_record():
     """Whatever this repository records today, the honest state has to be visible."""
-    import release_gate
-    runs = release_gate.audit_eval_runs(
+    runs = audit_eval_runs(
         Path(release_gate.__file__).resolve().parent.parent / "evaluation/results/RUNS.md")
     assert runs, "the run record is empty or unreadable"
     assert not any(r["qualifies"] for r in runs), \
@@ -228,11 +270,11 @@ def _empty():
 
 def _write_manifest(tmp: Path, rows: list[str], pages: list[str]) -> tuple[Path, Path]:
     man = tmp / "MANIFEST.tsv"
-    man.write_text("# header\n" + "".join(r + "\n" for r in rows), encoding="utf-8")
+    _ = man.write_text("# header\n" + "".join(r + "\n" for r in rows), encoding="utf-8")
     pdir = tmp / "pages"
-    pdir.mkdir()
+    _ = pdir.mkdir()
     for p in pages:
-        (pdir / f"{p}.txt").write_text("body", encoding="utf-8")
+        _ = (pdir / f"{p}.txt").write_text("body", encoding="utf-8")
     return man, pdir
 
 
@@ -333,7 +375,6 @@ def _model_criteria():
     Demoting them would make the gate return QUALIFIED without changing a single check,
     which is the same false qualification this gate is being fixed for.
     """
-    import release_gate
     src = Path(release_gate.__file__).read_text(encoding="utf-8")
     lines = src.splitlines()
     for cid in ("E5", "G1", "G2"):
@@ -346,7 +387,7 @@ def _model_criteria():
             f"{cid} is no longer UNVERIFIED:\n{window}"
         assert "mandatory=False" not in window, \
             f"{cid} was quietly made non-mandatory, which would make the gate return\n" \
-            f"QUALIFIED without a single check changing:\n{window}"
+            + f"QUALIFIED without a single check changing:\n{window}"
 
 
 @case("declared-is-not-the-default-evidence-kind")
@@ -356,10 +397,10 @@ def _declared_inventory():
     If DECLARED were the default, a criterion added later without thinking would silently
     become an assertion rather than a check, and the gate would keep printing PASS.
     """
-    import release_gate
     rep = release_gate.Report(generated="test")
-    rep.add("X", "c", "explicit", PASS, kind=DECLARED)
-    rep.add("Y", "c", "default", PASS)
+    add = cast(_ReportAdd, rep.add)
+    add("X", "c", "explicit", PASS, kind=DECLARED)
+    add("Y", "c", "default", PASS)
     assert rep.criteria[0].evidence_kind == DECLARED
     assert rep.criteria[1].evidence_kind == EXECUTED, \
         "the default must be EXECUTED, not DECLARED"
@@ -389,7 +430,7 @@ def _rubric_threshold():
         "an inapplicable dimension must be excluded from the denominator, not scored zero"
     assert re.search(r"never excluded", body), \
         "Recognition of missing information must be non-excludable; it is the dimension " \
-        "that carries calibration, and excluding it is how a confident wrong answer scores"
+        + "that carries calibration, and excluding it is how a confident wrong answer scores"
 
 
 @case("scenario-rubric-tables-are-scorable")
@@ -400,7 +441,8 @@ def _scenario_tables():
     overstates what was measured.
     """
     root = Path(__file__).resolve().parent.parent
-    bad, checked = [], 0
+    bad: list[str] = []
+    checked = 0
     for f in sorted((root / "scenarios").glob("*.md")):
         if f.name == "index.md":
             continue
@@ -456,8 +498,7 @@ def _f6_words():
     # adversarial model was refused. These read the module source, so they only bite if the
     # wording is reintroduced; a copy of the string here would not.
     import inspect
-    import release_gate as rg
-    src = inspect.getsource(rg.main)
+    src = inspect.getsource(release_gate.main)
     for phrase in ("live isolation passes", "isolation demonstrated", "boundary held",
                    "no breach occurred", "blocked all eight"):
         assert phrase not in src.lower(), f"F6 wording overclaims: {phrase}"
@@ -468,33 +509,34 @@ def _g_words():
     # E5, G1 and G2 tell a reader whether isolation was actually tested. If they pass
     # without that note, a run with no live-isolation evidence could be read as isolated.
     import inspect
-    import release_gate as rg
-    src = inspect.getsource(rg.main)
+    src = inspect.getsource(release_gate.main)
     assert "live isolation has not been demonstrated" in src.lower(), \
         "G1/G2 detail must carry the live-isolation limitation"
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--json", action="store_true")
-    ap.add_argument("--only", default=None, help="substring filter on case name")
+    _ = ap.add_argument("--json", action="store_true")
+    _ = ap.add_argument("--only", default=None, help="substring filter on case name")
     args = ap.parse_args()
 
-    results = []
+    as_json = cast(bool, args.json)
+    only = cast("str | None", args.only)
+    results: list[Result] = []
     for c in CASES:
-        if args.only and args.only not in c["name"]:
+        if only and only not in c["name"]:
             continue
         try:
             c["fn"]()
             results.append({"name": c["name"], "ok": True, "note": ""})
         except AssertionError as e:
             results.append({"name": c["name"], "ok": False, "note": str(e) or "assertion failed"})
-        except Exception as e:  # noqa: BLE001 - a crash is a failure, not an error to hide
+        except Exception as e:  # a crash is a failure, not an error to hide
             results.append({"name": c["name"], "ok": False,
                             "note": f"{type(e).__name__}: {e}"})
 
     failed = [r for r in results if not r["ok"]]
-    if args.json:
+    if as_json:
         print(json.dumps(results, indent=2))
     else:
         for r in results:

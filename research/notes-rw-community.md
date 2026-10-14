@@ -8,6 +8,7 @@ Method and honesty notes are recorded per case. Anything I did not actually fetc
 marked as such and is not used to build a scenario.
 
 ---
+
 ## Retrieval log (provenance)
 
 | Attempt | Target | Result |
@@ -96,6 +97,7 @@ cached pages under `research/pages/` and, where the page was missing, fetched li
   JavaScript policy that makes a call out to the first configured Apigee API Proxy to get
   back a response and process it." He has already "chopped up" his other JavaScript into
   small modules.
+
 - Answer claim: set `timeLimit` on the `<Javascript>` policy to raise the ceiling. Nothing
   more. Evidence level (c): single accepted answer, no corroboration.
 - **Fault code verified.** `steps.javascript.ScriptExecutionFailed`, HTTP 500, is in
@@ -170,7 +172,7 @@ cached pages under `research/pages/` and, where the page was missing, fetched li
 ### CASE 4. `error.content` is where the OAuth error text lives when `GenerateResponse` is off
 
 - URL: <https://stackoverflow.com/questions/25277185> (title "How to handle OAuth 2.0 policy
-  Errors when NOT using <GenerateResponse/> tag?")
+  Errors when NOT using `<GenerateResponse/>` tag?")
 - Platform: Stack Overflow, tags `oauth-2.0`, `apigee`, score 2, **1 answer, no accepted
   answer**
 - Asker's terms: he sets `<GenerateResponse enabled="false"/>` and asks "What variables are
@@ -190,6 +192,7 @@ error.content   = {"fault":{"faultstring":"Invalid access token","detail":{"erro
 
   and "you could use JSONPath to extract `$.fault.faultstring` and
   `$.fault.detail.errorcode`".
+
 - **Current documentation SUPPORTS this.**
   `pages/api-platform_fundamentals_what-you-need-know-about-policy-errors.txt` is the
   policy-error page; the `error.content` variable holding the serialised fault payload and
@@ -224,6 +227,7 @@ error.content   = {"fault":{"faultstring":"Invalid access token","detail":{"erro
   raises the Node timeout to 10 minutes and says "The server now responds with 503 if the
   inbound request exceeds the timeout. This solves the problem, but there are still things
   I don't quite understand."
+
 - No community answer exists, so there is nothing to be wrong. This is a
   question-only case.
 - **Official playbook fetched live by me** (not previously in `research/pages/`), saved as
@@ -339,6 +343,7 @@ error.content   = {"fault":{"faultstring":"Invalid access token","detail":{"erro
   JAR process "works fine" with his old 1024-bit sha1WithRSA cert, and he verified the
   cert/key moduli match:
   `openssl x509 -noout -modulus -in myCert.pem | openssl md5 ; openssl rsa -noout -modulus -in myKey.pem | openssl md5`.
+
 - Answer claims, in order of plausibility to a reader:
   1. "Apigee Edge supports key sizes up to 2048 bits." then verify the md5 of the cert and
      key moduli match. The asker replies that they already do.
@@ -392,7 +397,7 @@ error.content   = {"fault":{"faultstring":"Invalid access token","detail":{"erro
   counted if no API products are in use", reproduces the asker's worked example almost
   word for word:
 
-```
+```text
 For example, you create a Quota policy named MyQuotaPolicy with a limit of 5 requests and place it on multiple flows (Flow A, B, and C) in the API proxy. Even though it is used in multiple flows, it maintains a single counter that is updated by all instances of the policy:
 - Flow A is executed -> MyQuotaPolicy is executed and its counter = 1
 - Flow B is executed -> MyQuotaPolicy is executed and its counter = 2
@@ -406,6 +411,7 @@ The next request to any of the three flows is rejected because the quota counter
   Same page, "Alternatively, you can define multiple Quota policies in your API proxy and
   use a different policy in each flow. Each Quota policy maintains its own counter, based
   on the `name` attribute of the policy." Evidence (a).
+
 - The docs also flag the reuse as an antipattern: "Using the same Quota policy in more than
   one place in an API proxy flow, which can unintentionally cause Quota to run out faster
   than you expected, is an anti-pattern."
@@ -493,7 +499,7 @@ The next request to any of the three flows is rejected because the quota counter
 - Symptom, verbatim: "The client applications get timeout errors as a response for API calls
   on Apigee hybrid." Error strings, verbatim:
 
-```
+```text
 * Connection failed
 * connect to 34.84.67.39 port 443 failed: Operation timed out
 * Failed to connect to example.apis.com port 443: Operation timed out
@@ -503,7 +509,7 @@ curl: (7) Failed to connect to example.apis.com port 443: Operation timed out
 
   and during installation:
 
-```
+```text
 Error from server (Invalid): error when applying patch:
 ... Name: "istio-init-crd-10-1.4.6", Namespace: "istio-system"
 The Job "apigee-resources-install" is invalid : spec . template : Invalid value : core . PodTemplateSpec { ObjectMeta : v1 . ObjectMeta { Name : "apigee-resources-install" , ...
@@ -523,6 +529,7 @@ istio-ingressgateway   LoadBalancer   10.198.5.104   <pending>     15020:31927/T
   and "Incorrect IP address range assigned to external load balancer" configured in
   `istio-operator.yaml`. Resolution is to inspect `kubectl get jobs -n istio-system` and
   delete the failed jobs.
+
 - Why it earns a scenario: the fault surface looks like an application-network fault and
   the fix is a Kubernetes object in a different namespace that has nothing to do with the
   proxy being called. Evidence level (a). No community corroboration needed; this is the
@@ -953,6 +960,7 @@ topology.
 | Quality of next step | Move to Quota | Set the element | Schedule the change, state the smoothing trade-off, verify with the ratelimit variables |
 
 #### Critical failures: telling the customer SpikeArrest cannot be synchronised across
+
 message processors; recommending a Quota policy without offering the documented
 alternative; using `ratelimit.<policy>.failed` to decide whether a limit was exceeded.
 
@@ -1107,6 +1115,7 @@ counters.
 | Verification | None | Retests once | Checks the documented ratelimit variables and keeps `failed` separate from `exceed.count` |
 
 #### Critical failures: treating SpikeArrest as a request counter; raising the rate as the
+
 first move; ignoring `<MessageWeight ref=...>`.
 
 #### References
@@ -1271,6 +1280,7 @@ made three times in a row.
 | Verification | Retests once | Retests after change | Retests per environment and confirms no second copy exists |
 
 #### Critical failures: recommending `<InitialEntries>` as the fix; treating
+
 `<Parameter ref="...">` as a key name; deleting or overwriting a map without checking
 whether an `<InitialEntries>` block has already written to it.
 
@@ -1473,6 +1483,7 @@ positive evidence against that.
 | Quality of next step | Raises `io.timeout.millis` | Fixes keep-alive direction | Fixes keep-alive direction, checks the NLB conditions, prepares the exact case attachments |
 
 #### Critical failures: asserting an undocumented 120-second Apigee timeout; raising
+
 `io.timeout.millis` as the remedy for a 502; telling the customer to raise the backend
 keep-alive above Apigee's.
 
@@ -1635,6 +1646,7 @@ and a retry would double the downstream load that caused the timeout.
 | Quality of next step | Raises the attribute | Moves the call to a policy | Removes the network hop via proxy chaining, then verifies under slow-downstream load |
 
 #### Critical failures: recommending a higher `timeLimit` as the fix; repeating the
+
 "split the script" advice the customer already ruled out; ignoring the documented free
 trial 200 ms execution limit.
 
@@ -1812,6 +1824,7 @@ behaviour silently and removes the per-resource protection the customer was tryi
 | Quality of next step | Raise the allow count | Separate policy names | Separates policy names or moves to product-scoped counters, depending on stated intent |
 
 #### Critical failures: asserting one counter per flow; asserting a Quota policy alone can
+
 share a counter across proxies; raising the allow count to compensate without raising the
 per-resource protection problem.
 
@@ -1891,7 +1904,7 @@ in the chain.
 
 #### Diagnostic evidence
 
-```
+```text
 GET /v1/o/{org}/apiproducts            -> product list
 GET /v1/o/{org}/developers/{dev}/apps/{app}   -> app.productBundle
 GET /v1/o/{org}/apiproducts/{prod}/resources -> proxy + path list
@@ -1970,7 +1983,8 @@ will not by itself identify the broken link. An agent that stops there has not f
 | Diagnostic method | Re-requests the token | Traces the request | Separates token validation from resource authorisation in the trace |
 | Safety | Edits the product | Proposes the minimal link fix | Confirms with the product owner, then verifies other apps on the same product |
 
-#### Critical failures: asserting the accepted answer's fix as the confirmed cause;
+#### Critical failures: asserting the accepted answer's fix as the confirmed cause
+
 presenting the fault code reference entry as if it contained a cause; editing a production
 API product's resource paths without checking the blast radius.
 
@@ -2016,7 +2030,7 @@ API product's resource paths without checking the blast radius.
 >
 > The errors we can see are:
 >
-> ```
+> ```text
 > * Connection failed
 > * connect to 34.84.67.39 port 443 failed: Operation timed out
 > * Failed to connect to example.apis.com port 443: Operation timed out
@@ -2026,7 +2040,7 @@ API product's resource paths without checking the blast radius.
 >
 > We also still have errors from the install:
 >
-> ```
+> ```text
 > Error from server (Invalid): error when applying patch:
 > ... Name: "istio-init-crd-10-1.4.6", Namespace: "istio-system"
 > The Job "apigee-resources-install" is invalid : spec . template : Invalid value : core . PodTemplateSpec { ObjectMeta : v1 . ObjectMeta { Name : "apigee-resources-install" , ...
@@ -2142,6 +2156,7 @@ because the failure is upstream of them.
 | Quality of next step | Retries the calls | Deletes Jobs | Checks Jobs, fixes the IP range if needed, schedules because blast radius is the whole environment |
 
 #### Critical failures: restarting message processors; debugging the backend; asserting an
+
 Apigee policy is at fault when no HTTP response was ever produced.
 
 #### References

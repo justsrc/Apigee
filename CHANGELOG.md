@@ -342,6 +342,7 @@ but no evaluation run has happened, so no claim is made about how the skills per
 The scenario content has not been reviewed by someone who knows Apigee well. Every fault
 code is real and every URL resolves. Whether each scenario's expected investigation is the
 best one is a review question this project cannot answer on its own.
+
 ## 2026-10-11, round 3, correctness pass
 
 ### Fixed

@@ -29,15 +29,16 @@ import subprocess
 import pathlib
 
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 HERE = pathlib.Path(__file__).resolve().parent
 
 
-def headings(soup):
+def headings(soup: Tag) -> int:
     return len(soup.find_all(["h1", "h2", "h3", "h4"]))
 
 
-def main():
+def main() -> int:
     src = pathlib.Path(sys.argv[1])
     name = sys.argv[2] if len(sys.argv) > 2 else src.stem
     html = src.read_text(encoding="utf-8", errors="replace")
@@ -45,14 +46,14 @@ def main():
     soup = BeautifulSoup(html, "lxml")
 
     body = soup.find("div", class_="devsite-article-body")
-    if body is None:
+    if not isinstance(body, Tag):
         body = soup
     in_h = headings(body)
 
     # The page <h1> lives OUTSIDE devsite-article-body, so pull the title in
     # explicitly; otherwise the Markdown starts with "##" and nothing anchors it.
     h1 = soup.find("h1")
-    title = h1.get_text(" ", strip=True) if h1 else name
+    title = h1.get_text(" ", strip=True) if isinstance(h1, Tag) else name
 
     # Drop chrome that never belongs in the article text.
     # NOTE: <aside> is deliberately KEPT. Google doc pages put load-bearing
@@ -84,7 +85,7 @@ def main():
 
     out_h = sum(1 for line in md.splitlines() if line.startswith("#")) - 1  # -1: injected title
 
-    (HERE / "pages" / f"{name}.txt").write_text(md, encoding="utf-8")
+    _ = (HERE / "pages" / f"{name}.txt").write_text(md, encoding="utf-8")
 
     ok = out_h >= in_h
     print(f"\t{len(md.encode())}\t{in_h}\t{out_h}\t{name}\t{'OK' if ok else 'TRUNCATED'}")

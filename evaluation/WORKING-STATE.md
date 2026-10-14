@@ -122,7 +122,7 @@ now closed, as recorded in the section above:
 ## Committed before this pass
 
 | Commit | What |
-|---|---|
+| --- | --- |
 | `c564ee1` | Release gate: three verdicts (QUALIFIED / PROVISIONAL / NOT QUALIFIED); UNVERIFIED no longer yields QUALIFIED; C2 `PASS if unresolved else PASS` tautology fixed; C4 mapped `check_urls.py` exit 2 to PASS, now FAIL; EXECUTED/DERIVED/DECLARED evidence kinds; new `tests/test_release_gate.py` |
 | `3e23cfa` | README states `.agents/skills/` is the only tested platform. B4 had been a false PASS |
 | `bb5d859` | Cached the 11 missing OPDK pages (the project said "ten"; `view-page` was not a URL, `antipatterns/intro` is not OPDK, and three were missing from the list). Manifest recorded 109 to 120 |
@@ -142,6 +142,7 @@ now closed, as recorded in the section above:
 ### 1. Scenario fixes from the second review
 
 **MED-09** `scenarios/medium.md` ~line 1077 and ~1016.
+
 - The `Technical correctness` 0-anchor is "Says quota miscounts", which fails a
   documented correct answer. `<Distributed>` defaults to `false` and `<Synchronous>`
   defaults to `false`, and the Quota policy page says calls may exceed the quota on the
@@ -191,6 +192,7 @@ section. Do not rewrite the historical content into looking like the project qua
 earlier.
 
 Also:
+
 - `evaluation/defect-register.md` D-012 and D-024: 108 of 168 to 111 of 171. D-022: restate
   as twelve URLs, eleven of them OPDK.
 - `evaluation/outstanding-errors.md`: add a superseded banner pointing at
@@ -280,7 +282,9 @@ no graded surface on it.
 **Corrected 2026-10-13 later.** The claim below that `opencode/*` returns 403 from the CLI
 is wrong. It works. Probed repeatedly on 2026-10-13:
 
-    opencode run --auto --model opencode/space-bunny-free --format json "Reply with exactly: PONG"
+```text
+opencode run --auto --model opencode/space-bunny-free --format json "Reply with exactly: PONG"
+```
 
 returned `PONG` on many separate occasions, from the repository root and from an unrelated
 temporary directory. `opencode/*` is a different provider from `openrouter/*`, so it is
@@ -289,7 +293,9 @@ capacity the exhausted OpenRouter daily quota does not touch.
 The real constraint is not an auth wall. It is **burst rate limiting**, and the provider
 reports it badly: a rate-limited call returns
 
-    provider.auth: OpenCode's free tier can only be used from within OpenCode.
+```text
+provider.auth: OpenCode's free tier can only be used from within OpenCode.
+```
 
 which reads as an entitlement refusal and is not one. Two requests fired in quick succession
 behave differently from two spaced 90 seconds apart, and repeated probes of an unchanged

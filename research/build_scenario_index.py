@@ -11,7 +11,6 @@ Usage:
 from __future__ import annotations
 
 import re
-import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -39,7 +38,7 @@ ID_RE = re.compile(r"\b(EASY|MED|HARD|ADV|REG)-(\d{2,3})\b")
 
 def entries(path: Path) -> list[tuple[str, str]]:
     """Return (id, title) for each scenario heading in a file."""
-    out = []
+    out: list[tuple[str, str]] = []
     in_fence = False
     for line in path.read_text(encoding="utf-8").splitlines():
         if re.match(r"^\s*(```|~~~)", line):
@@ -64,7 +63,7 @@ def build() -> str:
     Comparing a generated file to itself proves nothing; comparing it to an independent
     regeneration is what catches a hand edit or an index left over from an older run.
     """
-    rows = []
+    rows: list[tuple[str, str, str]] = []
     for fname, kind in FILES:
         p = SCEN / fname
         if not p.is_file():
@@ -73,7 +72,7 @@ def build() -> str:
             rows.append((kind, sid, title))
 
     total = len(rows)
-    lines = []
+    lines: list[str] = []
     A = lines.append
 
     A("# Scenario index")
@@ -117,7 +116,7 @@ def build() -> str:
 def main() -> int:
     body = build()
     total = len(re.findall(r"^\| `[A-Z]+-\d+` \|", body, re.M))
-    OUT.write_text(body, encoding="utf-8")
+    _ = OUT.write_text(body, encoding="utf-8")
     print(f"wrote {OUT}, {total} scenarios")
     return 0
 
