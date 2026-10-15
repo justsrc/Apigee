@@ -182,6 +182,28 @@ def _workspace_test() -> tuple[str, str]:
         if leaks:
             return WS_LEAK, f"LEAK, workspace contains: {', '.join(leaks[:3])}"
 
+        # Exit-code handling: builder rc==1 covers both leaks and missing packets.
+        # A rc==1 with no name/content leak but missing packets is not a clean build.
+        try:
+            _man = json.loads((out / "MANIFEST.json").read_text(encoding="utf-8"))
+            _missing = _man.get("missing_packets") or []
+        except Exception:
+            _missing = []
+        if rc == 1 and _missing and not leaks:
+            return WS_UNRUNNABLE, ("UNRUNNABLE (workspace is missing packets: "
+                                  + ", ".join(_missing[:3]) + ")")
+        
+        # Regression for the content-based detector: an answer key copied under an
+        # innocuous filename must still be detected.
+        held_keys = sorted((ROOT / "evaluation" / "packets").glob("*.key.md"))
+        if held_keys:
+            _ = (out / "secret.md").write_text(
+                held_keys[0].read_text(encoding="utf-8"), encoding="utf-8")
+            if not mew.find_leaks(out):
+                return WS_LEAK, ("LEAK, content detection did not catch an answer key "
+                                "hidden under an innocuous filename")
+            (out / "secret.md").unlink()
+
         # Belt and braces. The name patterns are the fast check; confirm directly that the
         # things that actually hold answers are absent.
         for sub in ("evaluation", "scenarios", "research"):

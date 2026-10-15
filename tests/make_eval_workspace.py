@@ -53,12 +53,13 @@ What never lands, and why:
 from __future__ import annotations
 
 import argparse
+import functools
 import hashlib
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
-
 ROOT = Path(__file__).resolve().parent.parent
 SKILLS = ROOT / ".agents/skills"
 PACKETS = ROOT / "evaluation/packets"
@@ -151,7 +152,20 @@ def sha256(p: Path) -> str:
 
 
 def find_leaks(root: Path) -> list[str]:
-    hits = []
+    """Return paths inside ``root`` that carry held-back answer material.
+
+    Two complementary checks, name-based first then content-based, because names
+    alone are trivially evaded: a key copied to ``secret.md`` or ``payload.txt``
+    never matches a forbidden *name*.
+
+    (1) Forbidden path-name patterns (case-insensitive), kept from the
+        original implementation.
+
+    (2) Content signatures: answer-key section headings and held-back blocks copied
+        from the scenario source. Scan every regular file; the specific exclusion
+        lists are documented in ``_content_leaks``.
+    """
+    hits: set[str] = set()
     for p in root.rglob("*"):
         if not p.is_file():
             continue
@@ -159,9 +173,162 @@ def find_leaks(root: Path) -> list[str]:
         low = rel.lower()
         for bad in FORBIDDEN:
             if bad in low:
-                hits.append(rel)
+                hits.add(rel)
                 break
+
+    # Content check supplements the names above.
+    for rel in _content_leaks(root):
+        hits.add(rel)
+
     return sorted(hits)
+
+
+def _norm_heading(line: str) -> str | None:
+    m = re.match(r"^#{1,6}\s*(.*)$\s*$", line.strip())
+    if not m:
+        return None
+    text = m.group(1).strip().lower()
+    # Normalise punctuation and spacing, but keep the hyphen meaningful.
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\s*[-–—]?\s*", " ", text).strip()
+    text = re.sub(r"\s+", " ", text)
+    return text
+
+
+def _is_key_heading(text: str) -> bool:
+    if "answer key" in text and "do not show to the agent" in text:
+        return True
+    if text.startswith("critical failure"):
+        return True
+    if text.startswith("not a critical failure"):
+        return True
+    return text in {
+        "ground truth resolution",
+        "ground-truth resolution".replace("-", " "),
+        "correct remediation",
+        "verification",
+        "common incorrect answers",
+        "evaluation rubric",
+        "references",
+    }
+
+
+def _content_leak_headings(text: str) -> bool:
+    for line in text.splitlines():
+        h = _norm_heading(line)
+        if h is None:
+            continue
+        if _is_key_heading(h):
+            return True
+    return False
+
+
+def _held_back_snippets() -> tuple[str, ...]:
+    """Build normalised long-text signatures of the held-back material.
+
+    Source of truth is the scenario files under ``scenarios/`` plus the blocks
+    ``make_packets`` classifies as never released. Reading the builder's own
+    definitions (rather than re-typing them) keeps this from drifting.
+    """
+    try:
+        if str(ROOT / "tests") not in sys.path:
+            sys.path.insert(0, str(ROOT / "tests"))
+        import make_packets as mpk
+    except Exception:
+        return ()
+
+    texts: list[str] = []
+    for path in getattr(mpk, "FILES", {}).values():
+        try:
+            if not Path(path).is_file():
+                continue
+        except Exception:
+            continue
+        for _sid, block in mpk.blocks(Path(path)):
+            hs = mpk.headings_of(block)
+            for sec in list(getattr(mpk, "KEY", [])) + list(
+                getattr(mpk, "KEY_EXTRA", [])
+            ):
+                if sec in getattr(mpk, "KEY_EXTRA", []):
+                    for piece in mpk.sections(block, sec, hs, prefix=True):
+                        if piece:
+                            texts.append(piece)
+                else:
+                    one = mpk.section(block, sec, hs)
+                    if one:
+                        texts.append(one)
+            cf = getattr(mpk, "critical_failures", lambda _b: "")(block)
+            if cf:
+                texts.append(cf)
+
+    def _norm(s: str) -> str:
+        return re.sub(r"\\s+", " ", s).strip().lower()
+
+    pieces: set[str] = set()
+    for t in texts:
+        n = _norm(t)
+        if len(n) < 120:
+            continue
+        # Sliding windows so a *partial* copy of a held-back block is still
+        # caught, not only a whole sentence.
+        window = 160
+        step = 40
+        if len(n) <= window:
+            pieces.add(n)
+            continue
+        for i in range(0, len(n) - window + 1, step):
+            pieces.add(n[i : i + window])
+    return tuple(sorted(pieces))
+
+
+@functools.lru_cache(maxsize=1)
+def _held_back_signature_list() -> tuple[str, ...]:
+    return _held_back_snippets()
+
+
+def _eligible_for_block_scan(rel: str) -> bool:
+    # Headings are checked on *every* file (see _content_leaks). Long-form
+    # held-back block signatures are only matched against files that are not
+    # part of the builder's trusted/allowed output, because those trees
+    # legitimately reuse documentation prose and would otherwise false-positive:
+    #   prompts/      released ticket + evidence (and is checked separately)
+    #   .agents/      shipped skills, trusted content
+    #   corpus/       cached research pages, deliberately included
+    #   build artefacts (MANIFEST.json, opencode.jsonc, WORKSPACE.md)
+    if rel.startswith("prompts/") and rel.endswith(".prompt.md"):
+        return False
+    if rel.startswith(".agents/"):
+        return False
+    if rel.startswith("corpus/"):
+        return False
+    if rel in {"MANIFEST.json", "opencode.jsonc", "WORKSPACE.md"}:
+        return False
+    return True
+
+
+def _content_leaks(root: Path) -> list[str]:
+    """Return relative paths in ``root`` whose *contents* hold back answer material."""
+    hits: list[str] = []
+    signatures = _held_back_signature_list()
+    for p in root.rglob("*"):
+        if not p.is_file():
+            continue
+        rel = p.relative_to(root).as_posix()
+        try:
+            raw = p.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        if raw == "":
+            continue
+        if _content_leak_headings(raw):
+            hits.append(rel)
+            continue
+        if not _eligible_for_block_scan(rel):
+            continue
+        norm = re.sub(r"\\s+", " ", raw).strip().lower()
+        if any(sig in norm for sig in signatures):
+            hits.append(rel)
+    return hits
 
 
 def build(out: Path, ids: list[str], with_corpus: bool, force: bool) -> int:

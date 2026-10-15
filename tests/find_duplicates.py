@@ -64,11 +64,17 @@ def section(block: str, name: str) -> str:
         pass
     _ok, _size = cr.section_present(block, name)
     hs = cr.parse_headings(block)
-    target = cr._norm(name)
+    # Exact match only, sharing the alias table from check_repo. The old `target in
+    # cr._norm(text)` substring branch let a heading such as "Fault-code verification
+    # ledger references" satisfy the request for "references", so a duplicate report
+    # could be built from a section the scenario never wrote. The alias table exists
+    # for the one genuinely different canonical name ("remediation" -> "correct
+    # remediation"); anything else must match exactly.
+    target = cr._norm(cr.SECTION_ALIASES.get(name, name))
     for i, (_lvl, text, ln) in enumerate(hs):
         if i == 0:
             continue
-        if cr._norm(text) == target or target in cr._norm(text):
+        if cr._norm(text) == target:
             lines = block.splitlines()
             stop = hs[i + 1][2] if i + 1 < len(hs) else len(lines)
             return "\n".join(lines[ln + 1:stop])

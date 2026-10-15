@@ -226,11 +226,11 @@ def page_title(body: str) -> str:
 
 
 def is_soft_404(body: str) -> bool:
+    # Use every marker declared in SOFT_404_MARKERS rather than a handful of
+    # hard-coded phrases, so a body carrying any declared soft-404 marker is
+    # recognised (including Google's "page not found" stub).
     low = body.lower()
-    if "equivalent page does not exist in apigee" in low:
-        return True
-    # Google's generic stub, without the Apigee phrasing, still means no document.
-    return "the equivalent page does not exist" in low
+    return any(marker.lower() in low for marker in SOFT_404_MARKERS)
 
 
 def expected_slug(url: str) -> str:
@@ -240,8 +240,10 @@ def expected_slug(url: str) -> str:
 
 
 def slug_appears(body: str, slug: str) -> bool:
+    # An empty slug matches nothing: it must not be treated as "present in any
+    # body", otherwise a root URL with arbitrary content would verify.
     if not slug:
-        return True
+        return False
     needle = re.escape(slug.lower())
     return bool(re.search(needle, body.lower()))
 
@@ -312,7 +314,14 @@ def classify(url: str, code: int | None, body: str, chain: list[str]) -> Result:
         # replacement page. The fixture "redirect-to-replacement" is what caught it.
         landed = chain[-1] if chain else url
         slug = expected_slug(landed)
-        if slug and not slug_appears(body, slug):
+        if not slug:
+            # A URL with no path tail has nothing to match against the body, so it
+            # cannot be content-verified by this tool's slug signal.
+            res.status = "UNVERIFIED"
+            res.detail = "HTTP 200 but the URL has no path slug to match against the body"
+            res.evidence = res.title[:120]
+            return res
+        if not slug_appears(body, slug):
             res.status = "CONTENT_MISMATCH"
             res.detail = (f"HTTP 200 but the page does not mention '{slug}', so it is "
                           f"probably not the cited document")
@@ -571,6 +580,26 @@ FIXTURES: list[_Fixture] = [
         "chain": ["https://cloud.google.com/apigee/docs/api-platform/reference/policies/gone"],
         "body": "<html><body>The equivalent page does not exist in Apigee.</body></html>",
         "expect": "SOFT_404",
+    },
+    {
+        # Regression: Google's declared "page not found" marker must count as a
+        # soft 404 even though the URL slug also appears in the body.
+        "name": "page-not-found-marker",
+        "url": "https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy",
+        "code": 200,
+        "chain": [],
+        "body": "<html><body>quota-policy. Page not found.</body></html>",
+        "expect": "SOFT_404",
+    },
+    {
+        # Regression: a root URL with an empty path slug must not verify just
+        # because the body is arbitrary content.
+        "name": "empty-path-slug",
+        "url": "https://example.com/",
+        "code": 200,
+        "chain": [],
+        "body": "<html><body>hello world</body></html>",
+        "expect": "UNVERIFIED",
     },
 ]
 

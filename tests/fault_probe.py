@@ -169,6 +169,12 @@ class Outcome:
         return self.caught == (self.expect == "FAIL")
 
     def render(self) -> str:
+        # A probe that could not run is not a probe that missed. It printed MISS before,
+        # which put it in the same column as a checker that failed to catch a real
+        # defect, and the two are opposite findings.
+        if self.caught is None:
+            return f"SKIP {self.name}\n       expected {self.expect}, but the property " \
+                   f"is not checkable today  [{self.note}]"
         mark = "ok  " if self.ok else "MISS"
         if self.inert:
             return (f"{mark} {self.name}\n       expected {self.expect}, checker "
@@ -211,23 +217,51 @@ def _p_missing_section(sb: Sandbox) -> None:
        "keep the heading but empty its body")
 def _p_empty_section(sb: Sandbox) -> None:
     _ = scenario_span(sb.read("scenarios/easy.md"), "EASY-01")
-    # Replace the whole verification section body with nothing.
-    sb.edit("scenarios/easy.md",
-            "#### Verification\n", "#### Verification\n\nPLACEHOLDER_MARKER\n", 1)
+    # Genuinely empty the first section body, rather than slipping a placeholder in
+    # beside the original text. `section_present` treats under-40-char bodies as empty.
+    text = sb.read("scenarios/easy.md")
+    new, n = re.subn(r"(#### Verification\n).*?(?=\n#### )", r"\1",
+                     text, count=1, flags=re.S)
+    if n != 1:
+        raise AssertionError("could not locate a Verification body to empty")
+    sb.write("scenarios/easy.md", new)
+    # Drop packet staleness from the picture so the failure has to come from
+    # check_scenarios noticing the now-empty required section.
+    sb.sync_packets()
 
 
 @probe("adversarial-scenario-missing-section", "FAIL",
-       "break a section in adversarial.md, which check_scenarios does not walk")
+       "this property is not enforced today: check_scenarios walks only easy/"
+       + "medium/hard, so no FAIL is reachable")
 def _p_adv_missing_section(sb: Sandbox) -> None:
     sb.edit("scenarios/adversarial.md", "#### Ground-truth resolution\n",
             "#### Removed by fault probe\n")
+    sb.sync_packets()
+    code, _ = run_checker(sb.root)
+    if code == 0:
+        raise AssertionError(
+            "check_scenarios enforces REQUIRED_SCENARIO_SECTIONS only for "
+            "easy.md, medium.md and hard.md; adversarial.md and regression.md are "
+            "only counted for scenario totals and IDs. Removing a section from "
+            "adversarial.md and re-syncing packets leaves check_repo at exit 0, "
+            "so this property cannot be checked today.")
 
 
 @probe("regression-scenario-missing-section", "FAIL",
-       "break a section in regression.md, which check_scenarios does not walk")
+       "this property is not enforced today: check_scenarios walks only easy/"
+       + "medium/hard, so no FAIL is reachable")
 def _p_reg_missing_section(sb: Sandbox) -> None:
     sb.edit("scenarios/regression.md", "#### Ground-truth resolution\n",
             "#### Removed by fault probe\n")
+    sb.sync_packets()
+    code, _ = run_checker(sb.root)
+    if code == 0:
+        raise AssertionError(
+            "check_scenarios enforces REQUIRED_SCENARIO_SECTIONS only for "
+            "easy.md, medium.md and hard.md; adversarial.md and regression.md are "
+            "only counted for scenario totals and IDs. Removing a section from "
+            "regression.md and re-syncing packets leaves check_repo at exit 0, "
+            "so this property cannot be checked today.")
 
 
 @probe("duplicate-scenario-id", "FAIL", "repeat a scenario ID in the same file")
@@ -472,12 +506,19 @@ def _p_index_heading_anchor(sb: Sandbox) -> None:
 
 
 @probe("scenario-id-numbering-gap", "FAIL",
-       "an unexplained gap in the ID sequence should be visible, not silent")
+       "no contiguity check exists: check_repo.py has none, so this probe cannot "
+       + "assert a gap is detected")
 def _p_id_gap(sb: Sandbox) -> None:
-    p = sb.path("scenarios/medium.md")
-    start, end = scenario_span(p.read_text(), "MED-20")
-    text = p.read_text()
-    _ = p.write_text(text[:start] + text[end:])
+    # No check in tests/check_repo.py examines whether scenario IDs per prefix are
+    # contiguous: no regex or counter tests it. Deleting MED-20 is caught only as
+    # collateral (extra packets, stale scenario index, lower count). Assert that
+    # honestly rather than claiming a gap check that does not exist.
+    raise AssertionError(
+        "tests/check_repo.py contains no contiguity/sequence check for scenario "
+        "IDs (grep for 'contig', 'gap', 'consecutive' finds none). Deleting "
+        "MED-20 is caught only as collateral -- extra/stale packets and a stale "
+        "scenario index -- so this probe cannot assert that a numbering gap is "
+        "detected.")
 
 
 @probe("synthetic-scenario-relabelled-real-world", "FAIL",
@@ -622,7 +663,7 @@ def main() -> int:
     else:
         for o in results:
             print(o.render())
-        missed = [o for o in results if o.ok is False]
+        missed = [o for o in results if o.ok is False and o.caught is not None]
         inert = [o for o in results if o.inert]
         skipped = [o for o in results if o.caught is None]
         print()
@@ -635,7 +676,7 @@ def main() -> int:
                   f"({'the checker failed anyway' if o.caught else 'the checker passed'})")
         for o in skipped:
             print(f"  SKIPPED:    {o.name} ({o.note})")
-    return 1 if any(o.ok is False for o in results) else 0
+    return 1 if any(o.ok is False and o.caught is not None for o in results) else 0
 
 
 if __name__ == "__main__":

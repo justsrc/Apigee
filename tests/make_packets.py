@@ -329,12 +329,31 @@ def main() -> int:
         print(__doc__)
         return 1
 
-    wanted = set(argv)
-    if "--all" in wanted:
-        wanted = {sid for path in FILES.values() for sid, _ in blocks(path)}
-        wanted.discard("--all")
+    if set(argv) == {"--help"} or "-h" in argv:
+        print(__doc__)
+        return 1
 
-    if not wanted or wanted == {"--help"} or "-h" in wanted:
+    known_ids = {sid for path in FILES.values() for sid, _ in blocks(path)}
+
+    # Unknown ids are an error, not a no-op. Silently dropping one (as --all did with
+    # MED-99) rendered every scenario and exited 0, so a typo in an id built the wrong
+    # thing with no signal. Validate before writing anything.
+    extra_tokens = [t for t in argv if t != "--all"]
+    unknown = [t for t in extra_tokens if t not in known_ids]
+    if unknown:
+        print("error: unknown scenario id(s): " + ", ".join(sorted(set(unknown))),
+              file=sys.stderr)
+        print("  asked for: " + ", ".join(argv), file=sys.stderr)
+        print("  known: " + ", ".join(sorted(known_ids)), file=sys.stderr)
+        return 1
+
+    all_flag = "--all" in argv
+    if all_flag:
+        wanted = set(known_ids)
+    else:
+        wanted = set(argv)
+
+    if not wanted:
         print(__doc__)
         return 1
     OUT.mkdir(parents=True, exist_ok=True)
