@@ -136,9 +136,17 @@ CASES: list[tuple[str, Callable[[], None]]] = []
 
 
 def turn_stream(text: str, session: str = "sess-1") -> str:
-    """One turn's `opencode run --format json` event stream."""
-    return json.dumps({"type": "text", "sessionID": session,
-                       "part": {"type": "text", "text": text}}) + "\n"
+    """One complete turn's `opencode run --format json` event stream.
+
+    The closing `step_finish` is what the harness now requires before it will call a turn
+    answered, so a fixture that omits it describes a run that stopped early. This suite
+    is about where the model runs, not about completeness, so it uses the finished shape
+    and leaves the truncated one to tests/test_generation_outcomes.py.
+    """
+    return (json.dumps({"type": "text", "sessionID": session,
+                        "part": {"type": "text", "text": text}}) + "\n"
+            + json.dumps({"type": "step_finish", "sessionID": session,
+                          "part": {"type": "step-finish"}}) + "\n")
 
 
 def load_harness() -> _Harness:

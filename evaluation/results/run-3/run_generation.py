@@ -75,6 +75,14 @@ Outcome invariants, for the same reason. A provider error must never be able to 
   * A provider error's message is never answer text. `parse_events` returns it separately
     and does not append it to the assistant text, so an error event cannot satisfy the
     "did the model answer" test however the stream is shaped.
+  * A turn is complete only when the CLI said so. `opencode run --format json` closes a
+    step with a `step_finish` event, and its failure path can exit 0 having emitted text
+    and nothing else: a provider stream that ends unexpectedly is swallowed in that
+    compatibility mode, so neither the exit code nor the presence of prose proves the
+    answer finished. Missing the completion event is a failure, not an answer.
+  * A line the stream cannot parse is a failure, not a shrug. `--format json` writes one
+    JSON object per line and nothing else to stdout, so a malformed non-blank line is a
+    truncated or corrupted stream, and the count is recorded with the attempt.
   * One predicate decides whether an attempt produced an answer, and the retry branch and
     the give-up branch both use it. Whatever earns a retry is therefore caught if the
     retry also fails, instead of falling through to OK.
@@ -82,6 +90,8 @@ Outcome invariants, for the same reason. A provider error must never be able to 
     the one that earns the retry.
   * Only the OK branch writes an answer artifact. An exhausted retry records
     BLOCKED_BY_INFRASTRUCTURE and leaves no `raw/<sid>.turn<N>.md` behind.
+  * A mistake made before any request is spent is terminal, not retried: an unreadable
+    prompt packet, and a binary that cannot be run at all.
   * Turn 2 is not run at all without the session id that carries turn 1's conversation.
     The alternative was reachable and quiet: turn 1's stream yields no sessionID, the
     `--session` flag is skipped, `opencode run` opens a fresh conversation, and the
@@ -102,7 +112,7 @@ import sys
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import NotRequired, TypedDict, cast
+from typing import NamedTuple, NotRequired, TypedDict, cast
 
 ROOT = Path(__file__).resolve().parents[3]
 RUN = ROOT / "evaluation" / "results" / "run-3"
@@ -118,9 +128,21 @@ MANIFEST = RUN / "manifest.json"
 
 # Protocol budget: 45 attempts per quota window, five below the reported 50.
 MAX_ATTEMPTS = 45
+# The provider's daily quota window opens at 05:30 IST. Every reported X-RateLimit-Reset
+# instant has been that boundary (2026-10-14 05:30 IST was 1791936000), but the window
+# recurs daily, so the boundary is what the keys are computed from and a single reported
+# timestamp is kept here as provenance, not as the thing that decides a window.
+QUOTA_WINDOW_OPEN_HOUR = 5
+QUOTA_WINDOW_OPEN_MINUTE = 30
 QUOTA_RESET_UTC = 1791936000  # 2026-10-14 05:30 IST, as reported by X-RateLimit-Reset
 QUOTA_ERRORS = ("rate-limit", "rate limit", "free-models-per-day", "quota",
                 "free tier can only be used")
+
+# How the CLI says a step finished, in `--format json`: `{"type":"step_finish", "part":
+# {"type":"step-finish", ...}}`. Both spellings are accepted because the event and the
+# part inside it differ, and a completeness rule must not depend on which one a version
+# happens to emit.
+COMPLETION_TYPES = frozenset({"step_finish", "step-finish"})
 
 STATUSES = ["NOT_STARTED", "TURN1_COMPLETE", "TURN2_COMPLETE", "AWAITING_GRADE",
             "GRADED", "UNSCORABLE", "BLOCKED_BY_INFRASTRUCTURE"]
@@ -197,8 +219,27 @@ class ResponseEntry(TypedDict):
     error_type: str | None
     prompt_sha256: str
     bytes_out: int
+    completed: bool
+    malformed_lines: int
     status: NotRequired[str]
     error: NotRequired[str]
+
+
+class Stream(NamedTuple):
+    """What one attempt's event stream actually said.
+
+    `completed` is the field the exit code cannot supply: the CLI closes a step with
+    `step_finish`, and a provider stream that ends unexpectedly can leave the process
+    exiting 0 with text and no closing event at all. `malformed` counts the non-blank
+    lines that were not JSON, which in `--format json` mode is a truncated stream rather
+    than noise.
+    """
+    text: str
+    error_type: str | None
+    error_message: str | None
+    session_id: str | None
+    completed: bool
+    malformed: int
 
 
 class EventPart(TypedDict, total=False):
@@ -237,8 +278,22 @@ def now_ist() -> datetime:
     return datetime.now(timezone(timedelta(hours=5, minutes=30)))
 
 
+def window_start(d: datetime) -> datetime:
+    """The 05:30 IST instant that opened the window `d` is spending from.
+
+    Keyed by the window's start rather than by the calendar day, because the quota is
+    not. The old key was `d.strftime("%Y-%m-%d ...")`, so a run at 04:00 IST on the
+    fifteenth was filed under a fresh window that the provider would not open for another
+    hour and a half: the day's 45 attempts had already been spent by midnight and the
+    counter started again anyway.
+    """
+    opened = d.replace(hour=QUOTA_WINDOW_OPEN_HOUR, minute=QUOTA_WINDOW_OPEN_MINUTE,
+                       second=0, microsecond=0)
+    return opened - timedelta(days=1) if d < opened else opened
+
+
 def window_key(d: datetime) -> str:
-    return d.strftime("%Y-%m-%d 05:30->05:29 IST")
+    return window_start(d).strftime("%Y-%m-%d 05:30->05:29 IST")
 
 
 def load() -> Manifest:
@@ -321,40 +376,61 @@ def pending_turn(rec: Scenario) -> int | None:
     return None
 
 
-def parse_events(raw: str) -> tuple[str, str | None, str | None, str | None]:
-    """Return (assistant text, error type, error message, session id).
+def parse_events(raw: str) -> Stream:
+    """Read one `opencode run --format json` stream.
 
     The session id comes from the event stream. It is what makes turn 2 continue the
     turn-1 conversation instead of starting over.
 
-    A provider error's message is returned as `emsg` and is never appended to `text`.
-    Appending it made an error event look like a delivered answer, which is how a 401
-    body once reached `raw/*.turn1.md` as though the model had written it. The message
+    A provider error's message is returned as `error_message` and is never appended to
+    `text`. Appending it made an error event look like a delivered answer, which is how a
+    401 body once reached `raw/*.turn1.md` as though the model had written it. The message
     stays available for the quota scan and for the recorded error; the answer text stays
     text the model actually produced.
+
+    Two more things are reported rather than inferred. `completed` is true only when the
+    stream carried the CLI's closing `step_finish` event, because a stream cut short can
+    still exit 0 with the prose it managed to emit. `malformed` counts non-blank lines
+    that were not JSON: this format writes one object per line and nothing else to
+    stdout, so such a line is a truncated or corrupted stream, not decoration.
     """
     text: list[str] = []
     etype: str | None = None
     emsg: str | None = None
     sid: str | None = None
+    completed = False
+    malformed = 0
     for line in raw.splitlines():
         line = line.strip()
         if not line:
             continue
         try:
-            d = cast("Event", json.loads(line))
+            d = json.loads(line)
         except json.JSONDecodeError:
+            malformed += 1
             continue
-        if d.get("sessionID") and not sid:
-            sid = str(d.get("sessionID"))
-        part: EventPart = d.get("part") or {}
-        if d.get("type") == "text" and part.get("type") == "text":
+        if not isinstance(d, dict):
+            malformed += 1
+            continue
+        event = cast("Event", d)
+        if event.get("sessionID") and not sid:
+            sid = str(event.get("sessionID"))
+        kind = str(event.get("type") or "")
+        part: EventPart = event.get("part") or {}
+        part_kind = str(part.get("type") or "")
+        # Named both ways on purpose: the CLI writes `step_finish` for the event and
+        # `step-finish` for the part inside it, and which one is read should not depend on
+        # the version that produced the stream.
+        if kind in COMPLETION_TYPES or part_kind in COMPLETION_TYPES:
+            completed = True
+        if kind == "text" and part_kind == "text":
             text.append(part.get("text", ""))
-        if d.get("type") == "error":
-            err: EventError = d.get("error") or {}
+        if kind == "error":
+            err: EventError = event.get("error") or {}
             etype = str(err.get("type") or "error")
             emsg = str(err.get("message") or "")
-    return "\n".join(t for t in text if t.strip()), etype, emsg, sid
+    return Stream("\n".join(t for t in text if t.strip()), etype, emsg, sid,
+                  completed, malformed)
 
 
 class WorkspaceError(RuntimeError):
@@ -552,7 +628,15 @@ def one_turn(m: Manifest, sid: str, turn: int, model: str, timeout: int) -> str:
     win = window(m)
     suffix = "" if turn == 1 else ".turn2"
     packet = ROOT / "evaluation" / "packets" / f"{sid}{suffix}.prompt.md"
-    prompt = packet.read_text(encoding="utf-8")
+    try:
+        prompt = packet.read_text(encoding="utf-8")
+    except OSError as e:
+        # A packet that cannot be read is a repository fault, not a provider one, and the
+        # retry rule is for the provider. Left as an exception it ended the whole batch
+        # with a traceback and a partly written manifest; recorded here the scenario says
+        # what is missing and the rest of the batch still runs.
+        return block(m, rec, BLOCK_TERMINAL,
+                     f"prompt packet {packet.name} is unreadable: {e}")
 
     try:
         ws = scenario_ws(sid)
@@ -597,6 +681,7 @@ def one_turn(m: Manifest, sid: str, turn: int, model: str, timeout: int) -> str:
         attempt += 1
         ts = now_ist().isoformat()
         started = time.time()
+        spawn_error: str | None = None
         try:
             # Turn 2 must continue the SAME session as turn 1. Without --session,
             # `opencode run` starts a fresh conversation each time, so the scenario's own
@@ -613,8 +698,16 @@ def one_turn(m: Manifest, sid: str, turn: int, model: str, timeout: int) -> str:
             out, err, rc = proc.stdout, proc.stderr, proc.returncode
         except subprocess.TimeoutExpired:
             out, err, rc = "", "TIMEOUT", -1
+        except OSError as e:
+            # A binary that is missing or cannot be executed is not a transient provider
+            # failure, so it does not earn the retry: the second attempt fails identically
+            # and the run would report two requests spent on a mistake made before either.
+            out, err, rc = "", f"could not run opencode: {e}", 127
+            spawn_error = f"could not run opencode: {e}"
 
-        text, etype, emsg, got_sid = parse_events(out)
+        stream = parse_events(out)
+        text, etype, emsg, got_sid = (
+            stream.text, stream.error_type, stream.error_message, stream.session_id)
         if got_sid and not session_id:
             session_id = got_sid
         RAW.mkdir(parents=True, exist_ok=True)
@@ -627,7 +720,9 @@ def one_turn(m: Manifest, sid: str, turn: int, model: str, timeout: int) -> str:
         entry: ResponseEntry = {"turn": turn, "attempt": attempt, "at": ts,
                                 "exit": rc, "seconds": round(time.time() - started, 1),
                                 "error_type": etype, "prompt_sha256": sha(packet),
-                                "bytes_out": len(text)}
+                                "bytes_out": len(text),
+                                "completed": stream.completed,
+                                "malformed_lines": stream.malformed}
         win["requests"].append({"sid": sid, "turn": turn, "attempt": attempt,
                                 "at": ts, "status": None, "error_type": etype})
 
@@ -656,9 +751,18 @@ def one_turn(m: Manifest, sid: str, turn: int, model: str, timeout: int) -> str:
         # the event stream, so a stream that is not empty says nothing about whether the
         # turn finished. A truncated answer written to raw/<sid>.turn1.md is graded
         # exactly like a whole one.
-        failed = bool(etype) or rc != 0 or not text.strip()
+        #
+        # `not stream.completed` closes the last version of that same hole, the one no
+        # exit code covers. The CLI closes a step with `step_finish`, and its provider
+        # failure path can exit 0 having emitted prose and no closing event at all, so
+        # "rc == 0 and there is text" is exactly the shape a truncated answer takes.
+        # `stream.malformed` closes the same hole from the other side: this format writes
+        # one JSON object per line and nothing else to stdout, so a line that is not JSON
+        # is a stream that was cut or corrupted mid-write.
+        failed = (spawn_error is not None or bool(etype) or rc != 0 or not text.strip()
+                  or not stream.completed or bool(stream.malformed))
 
-        if failed and attempt == 1:
+        if failed and attempt == 1 and spawn_error is None:
             entry["status"] = "RETRY_ONCE"
             win["requests"][-1]["status"] = "RETRY_ONCE"
             save(m)
@@ -666,7 +770,16 @@ def one_turn(m: Manifest, sid: str, turn: int, model: str, timeout: int) -> str:
 
         if failed:
             entry["status"] = "NO_ANSWER"
-            why = emsg or etype or (err.strip()[:200] if err else "")
+            why = spawn_error or emsg or etype or (err.strip()[:200] if err else "")
+            if stream.malformed:
+                # Named before the exit code: when both are true, a corrupt stream is the
+                # more informative reason, and the exit code is appended under it.
+                why = (f"{stream.malformed} line(s) of the event stream were not valid JSON"
+                       + (f"; {why}" if why else ""))
+            elif not stream.completed and not etype and rc == 0:
+                why = (why or "") + ("; " if why else "") + (
+                    "the provider exited 0 but never reported the step as finished, "
+                    "so this stream cannot be shown to be a complete answer")
             if rc != 0 and not (emsg or etype):
                 # The exit code is the only thing that went wrong, so name it. Falling
                 # through to "empty response" described a turn that returned text as one

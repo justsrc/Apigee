@@ -58,7 +58,7 @@ import sys
 import tempfile
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import ModuleType
 from typing import Protocol, TypedDict, cast
@@ -128,27 +128,57 @@ class Step:
 
     `timeout` models the harness's own `subprocess.TimeoutExpired` handler, which the
     workspace cases cannot reach because their stub always exits 0.
+    `spawn_error` models the binary being missing or unrunnable, which the harness must
+    not retry and must not report as a provider failure it can wait out.
     """
     out: str = ""
     rc: int = 0
     err: str = ""
     timeout: bool = False
+    spawn_error: str | None = None
+
+
+def step_finish(session: str | None = "sess-1") -> str:
+    """The event the CLI writes when it closes a step.
+
+    `--format json` emits `{"type":"step_finish","part":{"type":"step-finish",...}}`, and
+    it is the only thing in the stream that says the answer finished. A run cut short
+    after a step never emits it, which is what the truncated cases below model.
+    `session=None` writes the closing event without a sessionID, which is what the
+    sessionless stream needs so the closing event does not quietly supply the id the
+    stream is supposed to be missing.
+    """
+    event: dict[str, object] = {"type": "step_finish", "part": {"type": "step-finish"}}
+    if session is not None:
+        event["sessionID"] = session
+    return json.dumps(event) + "\n"
 
 
 def turn_stream(text: str, session: str = "sess-1") -> str:
-    """One turn's `opencode run --format json` event stream."""
+    """One complete turn's `opencode run --format json` event stream."""
+    return json.dumps({"type": "text", "sessionID": session,
+                       "part": {"type": "text", "text": text}}) + "\n" + step_finish(session)
+
+
+def unfinished_stream(text: str, session: str = "sess-1") -> str:
+    """Prose with no closing event: a stream that stopped mid-turn and exited 0.
+
+    The provider can exit 0 after emitting the text it managed to produce, so this is the
+    shape of a truncated answer, and it is the case no exit-code test can catch.
+    """
     return json.dumps({"type": "text", "sessionID": session,
                        "part": {"type": "text", "text": text}}) + "\n"
 
 
 def sessionless_stream(text: str) -> str:
-    """A well-formed turn stream that carries no `sessionID` at all.
+    """A complete turn whose stream carries no `sessionID` at all.
 
     Nothing in the harness produced this, and it is not a provider error: it is the shape
     that let turn 2 run cold. Modelled here because the guard against it has to exist for
     the stream the harness did not get an id from, whatever the reason was.
     """
-    return json.dumps({"type": "text", "part": {"type": "text", "text": text}}) + "\n"
+    return json.dumps({"type": "text", "part": {"type": "text", "text": text}}) + "\n" \
+        + step_finish(None)
 
 
 def error_stream(message: str, etype: str = "ProviderError",
@@ -189,6 +219,8 @@ class _SubprocessShim:
             step = plan.pop(0) if len(plan) > 1 else (plan[0] if plan else Step())
             if step.timeout:
                 raise subprocess.TimeoutExpired(cmd, timeout if timeout is not None else 0)
+            if step.spawn_error:
+                raise FileNotFoundError(step.spawn_error)
             return subprocess.CompletedProcess(cmd, step.rc, stdout=step.out, stderr=step.err)
         return cast("subprocess.CompletedProcess[str]", subprocess.run(
             cmd, cwd=cwd, check=check, capture_output=capture_output,
@@ -198,6 +230,16 @@ class _SubprocessShim:
 # run_generation.py is a script, not an importable package module, so it is loaded by path
 # and cast to the surface these cases drive. Declaring that surface keeps basedpyright
 # from treating every attribute as `Any`, which would hide a renamed or removed function.
+class _Stream(Protocol):
+    """The slice of run_generation.Stream these cases assert on."""
+    text: str
+    error_type: str | None
+    error_message: str | None
+    session_id: str | None
+    completed: bool
+    malformed: int
+
+
 class _Harness(Protocol):
     RUN: Path
     RAW: Path
@@ -212,7 +254,8 @@ class _Harness(Protocol):
     def ws_path(self, ids: list[str]) -> Path: ...
     def one_turn(self, m: Mapping[str, object], sid: str, turn: int, model: str,
                  timeout: int) -> str: ...
-    def parse_events(self, raw: str) -> tuple[str, str | None, str | None, str | None]: ...
+    def parse_events(self, raw: str) -> _Stream: ...
+    def window_key(self, d: datetime) -> str: ...
     def main(self) -> int: ...
     def now_ist(self) -> datetime: ...
 
@@ -387,20 +430,114 @@ def _():
 @case("an error event's message never reaches the assistant text")
 def _():
     h = harness(Path("/nonexistent"))       # no request is made; only parse_events is used
-    text, etype, emsg, _sid = h.mod.parse_events(
-        error_stream("upstream busy") + turn_stream("real prose"))
-    assert text == "real prose", f"the error leaked into the answer text: {text!r}"
-    assert etype == "ProviderError", etype
-    assert emsg == "upstream busy", emsg
+    s = h.mod.parse_events(error_stream("upstream busy") + turn_stream("real prose"))
+    assert s.text == "real prose", f"the error leaked into the answer text: {s.text!r}"
+    assert s.error_type == "ProviderError", s.error_type
+    assert s.error_message == "upstream busy", s.error_message
 
 
 @case("error text and answer text in one stream keeps only the answer")
 def _():
     h = harness(Path("/nonexistent"))
-    text, _etype, emsg, _sid = h.mod.parse_events(
-        error_stream("upstream busy") + turn_stream(ANSWER))
-    assert text == ANSWER, text
-    assert emsg == "upstream busy", emsg
+    s = h.mod.parse_events(error_stream("upstream busy") + turn_stream(ANSWER))
+    assert s.text == ANSWER, s.text
+    assert s.error_message == "upstream busy", s.error_message
+
+
+@case("a complete stream reports the CLI's closing step event")
+def _():
+    h = harness(Path("/nonexistent"))
+    s = h.mod.parse_events(turn_stream(ANSWER))
+    assert s.completed is True, s
+    assert s.malformed == 0, s
+
+
+@case("a stream that stopped before the closing event is not complete")
+def _():
+    h = harness(Path("/nonexistent"))
+    s = h.mod.parse_events(unfinished_stream(TRUNCATED))
+    assert s.text == TRUNCATED, s.text
+    assert s.completed is False, s
+
+
+@case("a line that is not JSON is counted, not ignored")
+def _():
+    h = harness(Path("/nonexistent"))
+    s = h.mod.parse_events(turn_stream(ANSWER) + "{not json\n" + "42\n")
+    assert s.malformed == 2, s
+    assert s.text == ANSWER, s.text
+
+
+@case("text alone at exit 0 is not an answer")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        # Exit 0, prose in the stream, no step_finish: the shape a provider cut short
+        # leaves behind. Nothing about it says the answer finished.
+        h.script(Step(unfinished_stream(TRUNCATED)), Step(unfinished_stream(TRUNCATED)))
+        st = h.mod.one_turn(m, ALPHA, 1, "fake/model", 30)
+        assert st == "BLOCKED_BY_INFRASTRUCTURE", st
+        assert_no_answer(h, m, ALPHA)
+        assert statuses(m) == [(ALPHA, 1, "RETRY_ONCE"), (ALPHA, 2, "NO_ANSWER")], statuses(m)
+        err = m["scenarios"][ALPHA]["error"] or ""
+        assert "never reported the step as finished" in err, err
+
+
+@case("a malformed line in an otherwise complete stream is not an answer")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        h.script(Step(turn_stream(ANSWER) + '{"type":"text","part":{"typ\n'),
+                  Step(turn_stream(ANSWER) + '{"type":"text","part":{"typ\n'))
+        st = h.mod.one_turn(m, ALPHA, 1, "fake/model", 30)
+        assert st == "BLOCKED_BY_INFRASTRUCTURE", st
+        assert_no_answer(h, m, ALPHA)
+        err = m["scenarios"][ALPHA]["error"] or ""
+        assert "not valid JSON" in err, err
+
+
+@case("a binary that cannot be run is terminal and spends one request")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        h.script(Step(spawn_error="opencode"), Step(turn_stream(ANSWER)))
+        st = h.mod.one_turn(m, ALPHA, 1, "fake/model", 30)
+        assert st == "BLOCKED_BY_INFRASTRUCTURE", st
+        assert_no_answer(h, m, ALPHA)
+        # One attempt, not two: a missing binary is not a transient provider failure.
+        assert len(h.calls) == 1, h.calls
+        assert statuses(m) == [(ALPHA, 1, "NO_ANSWER")], statuses(m)
+        err = m["scenarios"][ALPHA]["error"] or ""
+        assert "could not run opencode" in err, err
+        assert m["scenarios"][ALPHA]["block_kind"] == harness_kind(h, "BLOCK_TERMINAL")
+
+
+@case("a prompt packet that cannot be read is terminal and spends nothing")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest(["NOPE-99"])
+        st = h.mod.one_turn(m, "NOPE-99", 1, "fake/model", 30)
+        assert st == "BLOCKED_BY_INFRASTRUCTURE", st
+        assert len(h.calls) == 0, h.calls
+        err = m["scenarios"]["NOPE-99"]["error"] or ""
+        assert "NOPE-99.prompt.md is unreadable" in err, err
+
+
+@case("the quota window opens at 05:30 IST, not at midnight")
+def _():
+    h = harness(Path("/nonexistent"))      # window_key is pure; no request is made
+    ist = timezone(timedelta(hours=5, minutes=30))
+    before = datetime(2026, 10, 16, 4, 59, tzinfo=ist)
+    after = datetime(2026, 10, 16, 5, 30, tzinfo=ist)
+    late = datetime(2026, 10, 16, 23, 59, tzinfo=ist)
+    # 04:59 IST still spends from the window that opened the previous day.
+    assert h.mod.window_key(before) == "2026-10-15 05:30->05:29 IST", h.mod.window_key(before)
+    assert h.mod.window_key(after) == "2026-10-16 05:30->05:29 IST", h.mod.window_key(after)
+    assert h.mod.window_key(late) == "2026-10-16 05:30->05:29 IST", h.mod.window_key(late)
 
 
 # ---------------------------------------------------------------------------
