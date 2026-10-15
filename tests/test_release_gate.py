@@ -343,6 +343,23 @@ def _manifest_undeclared():
         assert r["undeclared"] == ["known"], r
 
 
+@case("manifest-provenance-the-format-does-not-define-is-rejected")
+def _manifest_numeric_provenance():
+    """A byte count used to sit in the provenance column and counted as a record.
+
+    The manifest's header names four provenance words. C1 asked only that the column
+    was not empty, so a page's size in that column passed a criterion that says every
+    cached page has a provenance record.
+    """
+    with tempfile.TemporaryDirectory() as d:
+        tmp = Path(d)
+        man, pdir = _write_manifest(
+            tmp, ["known\thttps://example.test/a\t83844"], ["known"])
+        r = audit_manifest(man, pdir)
+        assert r["malformed"] == ["known"], r
+        assert "83844" not in r["prov"], r
+
+
 @case("manifest-missing-entirely-is-rejected")
 def _manifest_absent():
     with tempfile.TemporaryDirectory() as d:

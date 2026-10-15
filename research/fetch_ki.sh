@@ -70,5 +70,5 @@ if grep -q '<table' "$outdir/$name.txt" 2>/dev/null; then
   bytes=$(wc -c < "$outdir/$name.txt" | tr -d ' ')
 fi
 
-printf '%s\t%s\t%s\n' "$name" "$base" "$bytes" >> "$outdir/MANIFEST.tsv"
+printf '%s\t%s\trecorded\n' "$name" "$base" >> "$outdir/MANIFEST.tsv"
 printf '%s\t%s\t%s\n' "$status" "$bytes" "$base"

@@ -105,7 +105,12 @@ fi
 # Record the real URL. Deriving it back from the filename does not work: fetch.sh
 # replaces slashes and colons with underscores, so the mapping is lossy and cannot be
 # inverted. A manifest keeps the citation honest.
-printf '%s\t%s\t%s\n' "$name" "$base" "$bytes" >> "$outdir/MANIFEST.tsv"
+#
+# The third column is the provenance of that URL, which is what the manifest's own
+# header documents and what audit_manifest in tests/release_gate.py validates. This is
+# the fetch-time recorder, so its value is "recorded". The byte count used to sit here;
+# it describes the page, not the URL, and nothing reads it out of this column.
+printf '%s\t%s\trecorded\n' "$name" "$base" >> "$outdir/MANIFEST.tsv"
 
 if [ "$bytes" -lt 400 ]; then
   printf '200(SUSPECT %s bytes)\t%s\t%s\n' "$bytes" "$bytes" "$base" >&2

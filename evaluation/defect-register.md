@@ -1691,3 +1691,30 @@ in the commit that fixed them: the section matcher accepted any heading containi
 phrase, and `check_repo`'s eight checks could pass on inputs they did not describe — a packet
 padded with trailing whitespace, an answer key carrying only the last six words of a
 critical-failure condition, a reference "named" by a sentence mentioning it.
+
+### D-060 MEDIUM — The provenance column held byte counts, and C1 could not tell
+
+- **Affected** `research/pages/MANIFEST.tsv`, `research/fetch.sh`, `research/fetch_ki.sh`,
+  `tests/release_gate.py`
+- **Evidence** found by reading the manifest against its own header, then counted
+- **Regression test** `tests/test_release_gate.py`, case
+  `manifest-provenance-the-format-does-not-define-is-rejected`
+
+**What failed.** The manifest's third column is documented in its own header as the provenance
+of the URL: one of `recorded`, `corrected`, `guess` or `unresolved`. Both fetch scripts wrote
+the page's byte count there instead. Thirty rows carry a number.
+
+Nothing rejected them. C1 asks that a row has three columns and that the third is not empty,
+so it reported `PASS` over thirty rows that have no provenance record. `repair_manifest.py`
+carries the value forward when it regenerates the file, so the defect never healed on its own.
+
+**Why the duplicate detection did not see it.** These rows are not duplicates. D-056 removed
+fourteen *stems* that had two rows each, and all fourteen of those removed rows carried a byte
+count, which is what made the malformation look like a duplicate-row problem. The thirty that
+remain are one row for one page.
+
+**Status: FIXED and covered.** The fetchers write `recorded`, which is what the header says
+this column holds when the fetcher recorded the URL. The thirty rows are corrected to
+`recorded`, which is also true of them, since a fetcher wrote them at fetch time.
+`audit_manifest` now reports a provenance value the header does not document as malformed, so
+a byte count in that column cannot be counted as a record again.

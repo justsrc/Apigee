@@ -724,10 +724,15 @@ def main() -> int:
     return exit_code
 
 
+# The provenance words the manifest's header documents. A value that is not one of
+# them is not a provenance record.
+PROVENANCE_WORDS = ("recorded", "corrected", "guess", "unresolved")
+
+
 def audit_manifest(man: Path, pages_dir: Path) -> dict:
     """Parse MANIFEST.tsv and report what C1 and C2 actually claim.
 
-    Returns the provenance tally plus three defect lists. Kept separate from main() so the
+    Returns the provenance tally plus the defect lists. Kept separate from main() so the
     gate's two source-integrity criteria can be tested against hand-built manifests instead
     of being taken on trust; C2 was previously `PASS if unresolved else PASS`, which is a
     line that cannot fail, and a line that cannot fail is the defect.
@@ -759,6 +764,11 @@ def audit_manifest(man: Path, pages_dir: Path) -> dict:
                 continue
             url, origin = parts[1], parts[2]
             key_raw = origin.split(";")[0].strip()
+            # The header documents four provenance words. A byte count used to sit in this
+            # column and counted as a record, because only emptiness was checked.
+            if key_raw and key_raw.lower() not in PROVENANCE_WORDS:
+                malformed.append(name)
+                continue
             # The UNRESOLVED label is case-insensitive. A lowercase variant used to bypass C2.
             key = "UNRESOLVED" if key_raw.upper() == "UNRESOLVED" else key_raw
             prov[key] = prov.get(key, 0) + 1
