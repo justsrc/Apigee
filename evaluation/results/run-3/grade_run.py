@@ -20,16 +20,36 @@ are recorded, never instead of them.
 
 A scenario with an invalid key is UNSCORABLE. It is not forced to PASS or FAIL to keep a
 denominator, and the frozen key is never edited here.
+
+WHAT A GRADE IS ABOUT. Each entry records the digest of the answer it was computed from,
+not only the digest of the key. `key_sha256` alone certifies the rubric that was applied
+and says nothing about which text was scored, so an answer file replaced between
+collection and grading produced a PASS that no later reader could tie back to the response
+it claimed to be about. `response_sha256` is the manifest's own digest of the turn the
+harness recorded, read at grading time and compared with the bytes on disk: a mismatch
+refuses the scenario instead of grading whatever is there.
+
+A REFUSAL REMOVES WHAT IT REFUSES. A refused scenario used to write nothing, which left
+the previous run's file in place. A directory that still holds last week's PASS for a
+scenario this run refused reads exactly like a result, and the run's own summary says
+nothing about files it did not write. A refusal now clears any file it is refusing, and
+says in its summary entry whether there was one, so an absent file and a cleared file are
+distinguishable from a file nobody looked at.
+
+GRADES ARE WRITTEN ATOMICALLY. A grader interrupted mid-write used to leave truncated
+JSON under a scenario's name, which is a file that exists and parses as nothing. Each
+entry is written to a temporary file beside its destination and moved into place, so what
+is under a scenario's name is either the previous entry or the whole new one.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import os
 import re
 import sys
 from pathlib import Path
-from typing import NotRequired, TypedDict, cast
 from typing import NotRequired, TypedDict, cast
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -84,6 +104,13 @@ class GradeEntry(TypedDict):
     grader: str
     key_sha256: str
     critical_failure_evidence: NotRequired[str | None]
+    # The answer this verdict is about. Not optional on purpose: an entry written without
+    # it is an entry whose subject cannot be identified later.
+    response_sha256: dict[str, str]
+    # Set when the bytes on disk did not match what the manifest recorded for this turn.
+    # The scenario is refused in that case, so this only ever appears on an entry that
+    # records the mismatch it was refused for, never on a scored one.
+    response_drift: NotRequired[dict[str, str]]
 
 
 class Args(argparse.Namespace):
@@ -165,6 +192,19 @@ def load_manifest() -> Manifest:
     return cast("Manifest", json.loads(MANIFEST.read_text(encoding="utf-8")))
 
 
+def write_entry(path: Path, entry: object) -> Path:
+    """Write one grade entry whole or not at all.
+
+    `path.write_text` truncates the destination first, so a grader killed between the
+    truncate and the write left a file that exists, is named after a scenario, and parses
+    as nothing. The destination is only ever replaced by a file that is already complete.
+    """
+    tmp = path.with_suffix(".json.tmp")
+    _ = tmp.write_text(json.dumps(entry, indent=2) + "\n", encoding="utf-8")
+    _ = os.replace(tmp, path)
+    return path
+
+
 def why_ungradeable(sid: str, m: dict) -> str | None:
     """Why this scenario may not be graded, or None if it may.
 
@@ -177,6 +217,13 @@ def why_ungradeable(sid: str, m: dict) -> str | None:
 
     The docstring here and the commit that fixed the sibling generation defect both claimed
     this file selects the scenarios the manifest marks AWAITING_GRADE. Only --list did.
+
+    It also checks that the answers on disk are the answers the manifest recorded.
+    `key_sha256` in a grade entry ties a verdict to a rubric; nothing tied it to a
+    response, so an answer file rewritten between collection and grading was graded and
+    recorded with no record of which text produced the score. The manifest holds
+    `response_sha256` per turn for exactly this check, and it is made here, before any
+    score is computed.
     """
     rec = m.get("scenarios", {}).get(sid)
     if rec is None:
@@ -188,7 +235,33 @@ def why_ungradeable(sid: str, m: dict) -> str | None:
                if not (RUN / "raw" / f"{sid}.turn{n}.md").is_file()]
     if missing:
         return "no answer file for " + " or ".join(missing)
+    drift = response_drift(sid, m)
+    if drift:
+        return ("the answer on disk is not the answer the manifest recorded: "
+                + "; ".join(f"{turn} is {got[:12]} on disk, {want[:12]} when collected"
+                            for turn, (got, want) in sorted(drift.items())))
     return None
+
+
+def response_drift(sid: str, m: dict) -> dict[str, tuple[str, str]]:
+    """Turns whose answer file no longer matches the digest the manifest recorded.
+
+    Returns (on_disk, recorded) per turn. A turn the manifest never recorded a digest for
+    is not drift: an older manifest predates the field, and refusing those would make a
+    recorded run ungradable rather than making it auditable. The scenario is still
+    refused when any of its turns did drift.
+    """
+    drift: dict[str, tuple[str, str]] = {}
+    turns = (m.get("scenarios", {}).get(sid) or {}).get("turns") or {}
+    for n in (1, 2):
+        recorded = (turns.get(f"turn{n}") or {}).get("response_sha256")
+        p = RUN / "raw" / f"{sid}.turn{n}.md"
+        if not recorded or not p.is_file():
+            continue
+        got = hashlib.sha256(p.read_bytes()).hexdigest()
+        if got != recorded:
+            drift[f"turn{n}"] = (got, str(recorded))
+    return drift
 
 
 def main() -> int:
@@ -228,8 +301,20 @@ def main() -> int:
         why = why_ungradeable(sid, m)
         if why is None:
             continue
-        refused.append({"scenario": sid, "reason": why})
+        # A refusal that leaves the previous run's file in place is not a refusal: a
+        # reader of grades/<grader>/ sees the old PASS and no indication that this run
+        # declined to produce one. Clear it, and record whether there was something to
+        # clear so an absent file, a cleared file, and a file nobody looked at stay
+        # distinguishable.
+        stale = out_dir / f"{sid}.json"
+        cleared = stale.is_file()
+        if cleared:
+            _ = stale.unlink()
+        refused.append({"scenario": sid, "reason": why, "stale_grade_removed": cleared})
         print(f"  {sid}: refused, {why}", file=sys.stderr)
+        if cleared:
+            print(f"  {sid}: removed the previous run's grade file for this scenario",
+                  file=sys.stderr)
 
     written: list[GradeEntry] = []
     for sid, rec in supplied.items():
@@ -242,6 +327,11 @@ def main() -> int:
         rows = rubric_rows(key.read_text(encoding="utf-8"))
         anchors = {k: int(v) for k, v in (rec.get("anchors") or {}).items()}
         crit = bool(rec.get("critical", False))
+        # What the verdict is about, read from the manifest and checked against the bytes
+        # being scored above. Recorded on every entry so a later reader can tell which
+        # text produced this score without trusting the grade file's own word.
+        answered = {f"turn{n}": hashlib.sha256(
+            (RUN / "raw" / f"{sid}.turn{n}.md").read_bytes()).hexdigest() for n in (1, 2)}
         # A grader who scores fewer dimensions than the table has rows has under-counted the
         # denominator, which silently inflates the score. Refuse rather than scale it.
         if anchors and rows and len(anchors) < rows:
@@ -253,9 +343,9 @@ def main() -> int:
                                       + f"{rows}-row table; the score is not computable"),
                 "note": rec.get("note"), "grader": a.grader,
                 "key_sha256": hashlib.sha256(key.read_bytes()).hexdigest(),
+                "response_sha256": answered,
             }
-            _ = (out_dir / f"{sid}.json").write_text(json.dumps(entry, indent=2) + "\n",
-                                                     encoding="utf-8")
+            _ = write_entry(out_dir / f"{sid}.json", entry)
             written.append(entry)
             continue
         score = normalized(anchors, rows)
@@ -282,9 +372,9 @@ def main() -> int:
             "note": rec.get("note"),
             "grader": a.grader,
             "key_sha256": hashlib.sha256(key.read_bytes()).hexdigest(),
+            "response_sha256": answered,
         }
-        _ = (out_dir / f"{sid}.json").write_text(json.dumps(entry, indent=2) + "\n",
-                                                 encoding="utf-8")
+        _ = write_entry(out_dir / f"{sid}.json", entry)
         written.append(entry)
 
     n = len(written)
@@ -304,8 +394,7 @@ def main() -> int:
         "mean_normalized_score": round(sum(scores) / len(scores), 4) if scores else None,
         "scored": len(scores),
     }
-    _ = (out_dir / "_summary.json").write_text(json.dumps(summary, indent=2) + "\n",
-                                               encoding="utf-8")
+    _ = write_entry(out_dir / "_summary.json", summary)
     print(json.dumps(summary, indent=2))
     if refused:
         # A refused scenario wrote no grade file, so it cannot be mistaken for a result.

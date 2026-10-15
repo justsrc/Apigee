@@ -43,6 +43,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import subprocess
@@ -90,9 +91,38 @@ class Sandbox:
     def write_manifest(self) -> None:
         self.manifest_path.write_text(json.dumps(self.manifest, indent=2), encoding="utf-8")
 
-    def write_answers(self, sid: str, turn1: str = "t1", turn2: str = "t2") -> None:
+    def write_answers(self, sid: str, turn1: str = "t1", turn2: str = "t2",
+                      record_digests: bool = False) -> None:
+        """Write both answer files, optionally the way run_generation.py records them.
+
+        `record_digests` puts a `response_sha256` per turn into the manifest, which is
+        what the harness writes when a turn completes and what the grader now compares
+        the bytes on disk against. Left off it is an older manifest, and an older manifest
+        must still be gradeable rather than refused for a field it predates.
+        """
+        turns: dict[str, dict] = {}
         for n, body in ((1, turn1), (2, turn2)):
-            (self.run / "raw" / f"{sid}.turn{n}.md").write_text(body, encoding="utf-8")
+            p = self.run / "raw" / f"{sid}.turn{n}.md"
+            p.write_text(body, encoding="utf-8")
+            if record_digests:
+                turns[f"turn{n}"] = {
+                    "response_sha256": hashlib.sha256(body.encode()).hexdigest(),
+                    "session_id": "sess-1", "attempts": 1, "chars": len(body),
+                    "raw": f"raw/{sid}.turn{n}.attempt1.jsonl",
+                }
+        if record_digests:
+            self.manifest["scenarios"][sid]["turns"] = turns  # type: ignore[index]
+            self.write_manifest()
+
+    def seed_stale_grade(self, sid: str) -> Path:
+        """A grade file from an earlier run of the same scenario."""
+        d = self.run / "grades" / "primary"
+        d.mkdir(parents=True, exist_ok=True)
+        p = d / f"{sid}.json"
+        p.write_text(json.dumps({"scenario": sid, "verdict": "PASS",
+                                 "normalized_score": 1.0, "grader": "primary"}) + "\n",
+                     encoding="utf-8")
+        return p
 
     def run_grade(self, scores: dict, grader: str = "primary") -> subprocess.CompletedProcess:
         """Run the real grade_run.py in a subprocess, against this scratch run.
@@ -325,6 +355,137 @@ def _():
         s = sb.summary()
         assert s["graded"] == 1 and s["scored"] == 1, s
         assert len(s["refused"]) == 1, s
+
+
+# ---------------------------------------------------------------------------
+# A verdict must name the answer it is about, and a refusal must not leave the
+# previous run's verdict standing in its place.
+# ---------------------------------------------------------------------------
+
+
+@case("a grade records the digest of the answer it was computed from")
+def _():
+    mod = load_grader()
+    with tempfile.TemporaryDirectory(prefix="apigee-grade-") as d:
+        sb = Sandbox()
+        sb.dir = Path(d)
+        sb.run = sb.dir / "run-3"
+        (sb.run / "raw").mkdir(parents=True)
+        sb.manifest_path = sb.run / "manifest.json"
+        sb.set_status(SID, "AWAITING_GRADE")
+        sb.write_answers(SID, record_digests=True)
+        proc = sb.run_grade({SID: {"anchors": anchors_from_key(mod, SID, 4),
+                                  "critical": False}})
+        assert proc.returncode == 0, proc.stderr
+        g = sb.grade_file(SID)
+        assert g is not None
+        # key_sha256 ties the verdict to a rubric. response_sha256 ties it to a response.
+        # Without the second, a grade file says which rules produced it and not what they
+        # were applied to.
+        assert set(g["response_sha256"]) == {"turn1", "turn2"}, g["response_sha256"]
+        for n, body in ((1, "t1"), (2, "t2")):
+            want = hashlib.sha256(body.encode()).hexdigest()
+            assert g["response_sha256"][f"turn{n}"] == want, g["response_sha256"]
+
+
+@case("an answer rewritten after collection is refused, not graded")
+def _():
+    mod = load_grader()
+    with tempfile.TemporaryDirectory(prefix="apigee-grade-") as d:
+        sb = Sandbox()
+        sb.dir = Path(d)
+        sb.run = sb.dir / "run-3"
+        (sb.run / "raw").mkdir(parents=True)
+        sb.manifest_path = sb.run / "manifest.json"
+        sb.set_status(SID, "AWAITING_GRADE")
+        sb.write_answers(SID, record_digests=True)
+        # Same scenario, still AWAITING_GRADE, but turn 2 has been replaced since the
+        # manifest recorded it. Grading it would produce a score with no record of which
+        # text produced it.
+        (sb.run / "raw" / f"{SID}.turn2.md").write_text("a different answer",
+                                                        encoding="utf-8")
+        proc = sb.run_grade({SID: {"anchors": anchors_from_key(mod, SID, 4),
+                                  "critical": False}})
+        assert proc.returncode != 0, "answer drift must not exit 0"
+        assert sb.grade_file(SID) is None, "a drifted answer was graded"
+        assert "not the answer the manifest recorded" in proc.stderr, proc.stderr
+
+
+@case("an answer the manifest never recorded a digest for is still gradeable")
+def _():
+    # The opposite failure to guard against: a manifest written before the field existed
+    # must not become ungradable, which would turn "cannot prove" into "refused" and read
+    # as a run that collected nothing.
+    mod = load_grader()
+    with tempfile.TemporaryDirectory(prefix="apigee-grade-") as d:
+        sb = Sandbox()
+        sb.dir = Path(d)
+        sb.run = sb.dir / "run-3"
+        (sb.run / "raw").mkdir(parents=True)
+        sb.manifest_path = sb.run / "manifest.json"
+        sb.set_status(SID, "AWAITING_GRADE")
+        sb.write_answers(SID)
+        proc = sb.run_grade({SID: {"anchors": anchors_from_key(mod, SID, 4),
+                                  "critical": False}})
+        assert proc.returncode == 0, proc.stderr
+        assert sb.grade_file(SID)["verdict"] == "PASS", sb.grade_file(SID)
+
+
+@case("a refusal clears the previous run's grade for that scenario")
+def _():
+    mod = load_grader()
+    with tempfile.TemporaryDirectory(prefix="apigee-grade-") as d:
+        sb = Sandbox()
+        sb.dir = Path(d)
+        sb.run = sb.dir / "run-3"
+        (sb.run / "raw").mkdir(parents=True)
+        sb.manifest_path = sb.run / "manifest.json"
+        stale = sb.seed_stale_grade(SID)
+        assert stale.is_file()
+        sb.set_status(SID, "NOT_STARTED")
+        proc = sb.run_grade({SID: {"anchors": anchors_from_key(mod, SID, 4),
+                                  "critical": False}})
+        assert proc.returncode != 0
+        # The old PASS was written by a run that could grade this scenario. This run
+        # cannot, and a directory still holding that file reads exactly like a result.
+        assert not stale.exists(), "the stale grade file survived its own refusal"
+        s = sb.summary()
+        assert s["refused"][0]["stale_grade_removed"] is True, s["refused"]
+
+
+@case("a refusal with no earlier grade says so rather than claiming a removal")
+def _():
+    mod = load_grader()
+    with tempfile.TemporaryDirectory(prefix="apigee-grade-") as d:
+        sb = Sandbox()
+        sb.dir = Path(d)
+        sb.run = sb.dir / "run-3"
+        (sb.run / "raw").mkdir(parents=True)
+        sb.manifest_path = sb.run / "manifest.json"
+        sb.set_status(SID, "NOT_STARTED")
+        sb.run_grade({SID: {"anchors": anchors_from_key(mod, SID, 4), "critical": False}})
+        assert sb.summary()["refused"][0]["stale_grade_removed"] is False, sb.summary()
+
+
+@case("a grade file is replaced whole, never truncated in place")
+def _():
+    mod = load_grader()
+    with tempfile.TemporaryDirectory(prefix="apigee-grade-") as d:
+        sb = Sandbox()
+        sb.dir = Path(d)
+        sb.run = sb.dir / "run-3"
+        (sb.run / "raw").mkdir(parents=True)
+        sb.manifest_path = sb.run / "manifest.json"
+        sb.set_status(SID, "AWAITING_GRADE")
+        sb.write_answers(SID)
+        sb.run_grade({SID: {"anchors": anchors_from_key(mod, SID, 4), "critical": False}})
+        grades = sb.run / "grades" / "primary"
+        # A write that truncates its destination first leaves a file named after a
+        # scenario that parses as nothing when the grader dies mid-write. The temporary
+        # file is renamed into place instead, so nothing partial ever holds that name.
+        assert not list(grades.glob("*.tmp")), sorted(p.name for p in grades.iterdir())
+        for p in grades.glob("*.json"):
+            json.loads(p.read_text(encoding="utf-8"))  # every file under that name parses
 
 
 # ---------------------------------------------------------------------------
