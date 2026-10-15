@@ -1,5 +1,73 @@
 # Changelog
 
+## 2026-10-15, nine defects closed from a full adversarial re-audit
+
+An investigation of this repository's own checkers found that a surprising number of them
+could report success while the property they claimed was false. Every one below was
+demonstrated against a mutated tree before it was changed, and each has a test that fails
+without the fix. D-055 through D-059 in `evaluation/defect-register.md` carry the detail.
+
+### Fixed
+
+**The release gate could qualify on a status it did not recognise.** `decide()` compared three
+status strings, so anything else — a typo, an empty string — matched none of them and returned
+`QUALIFIED, 0, []`. Eight mandatory criteria also recorded `PASS` with nothing behind the pass: a
+tree whose structural check had failed still reported generated-files reproducible, skills well
+formed, references reachable and scenarios structurally valid. Six are now computed, two are
+DECLARED because they are claims about records, and one now runs a real check. The gate's
+verdict logic also stopped trusting `test_isolation.py`'s combined-suite exit code for a
+criterion about one tier, so that checker now reports the structural tier in its exit code and
+still prints `RESULT: INCOMPLETE` when the live tier was skipped.
+
+**The corpus manifest carried 14 duplicated page rows, 13 of them malformed**, carrying a byte
+count where the provenance column belongs. Every consumer grouping by stem read the last one, and
+the generated documentation index listed thirteen pages twice. Removed, and
+`research/repair_manifest.py` now emits one row per stem.
+
+**A scores-file key could delete a file outside the grade directory.** `grade_run.py` unlinks
+`<sid>.json` when it refuses a scenario, and the id was never validated, so `../../../tmp/x`
+unlinked that file.
+
+**A workspace leak detector that could not see what it was written to see.** Content detection
+was added to `find_leaks()` in the previous pass and arrived with two escaping bugs: a
+whitespace collapse written as `r"\s+"`, and a heading normaliser whose every group matched
+empty, inserting a space between each character. A reflowed answer key was invisible to it.
+
+**Three fault probes asserted properties nothing enforced**, and were "caught" only by packet
+staleness; a re-run after regenerating the packets passed them. The two extra suites are now
+walked for required sections, scenario ids are checked for contiguity with MED-31 excused and
+pointed at the audit that records it, and all 37 probes behave as expected with no skips.
+
+**Eight `check_repo.py` checks could pass on inputs they did not describe**: a packet padded
+with trailing whitespace matched a fresh render; an answer key carrying only the last six words
+of a critical-failure condition passed a check named "in full"; a reference counted as
+advertised when a sentence merely mentioned its filename; a leakage marker scan and a raw-HTML
+scan were both case-sensitive; a fault code counted as documented if it appeared anywhere
+inside 337 documents of prose; an origin labelled "adversarial, synthetic" was rejected by a
+startswith test; the critical-failure check counted twenty characters of filler as a list; and
+the XML and JSON fence patterns lacked `re.MULTILINE`, so a payload inside a blockquote was
+never parsed at all.
+
+**Two generation defects**, both found by testing against the real CLI rather than by reading
+it. A malformed event-stream line now fails an attempt, and an unreadable packet or an
+unrunnable binary is a terminal block before any retry instead of a traceback. A quota window
+is keyed by the 05:30 IST instant that opened it, so a run at 04:00 is no longer handed a fresh
+45-attempt budget the provider will not open for another ninety minutes; a resumed run folds a
+legacy day-keyed window into that key first, so a closed window cannot look fresh.
+
+**A grade now names the answer it is about.** `grade_run.py` recorded the digest of the rubric
+and not the response, so an answer rewritten between collection and grading was scored with no
+record of what was scored. Every entry carries the answer's digest, a scenario whose bytes no
+longer match is refused, a refusal clears the file it refuses, and grades are written whole or
+not at all.
+
+**An earlier fix in this pass was itself wrong, and is recorded here.** Requiring a closing
+`step_finish` event before an attempt counted as an answer was derived from reading strings out
+of the opencode binary. Five observed runs of `opencode run --auto --format json` show a
+text-only turn is `step_start, text` with no closing event at all, and the closing event marks
+the end of a TOOL step. The requirement would have blocked every legitimate turn. It was removed
+after a real harness turn was run end to end with no stub.
+
 ## 2026-10-15, second review pass recorded, and four gaps closed
 
 ### Added

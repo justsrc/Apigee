@@ -1590,3 +1590,93 @@ the same reason: it asserts that this manifest is the anchored one, which is the
 claim. **Next action:** a maintainer decides whether the current harness edits are accepted,
 then runs `python3 evaluation/results/run-3/freeze_artifacts.py --write` and commits both
 files, recording the reason. Nothing else is waiting on it except D-051's human step.
+
+### D-055 CRITICAL — The release gate could qualify on a status it did not recognise
+
+- **Affected** `tests/release_gate.py`
+- **Regression test** `tests/test_release_gate.py`, cases `decide-fails-closed-on-*`
+
+`decide()` matched FAIL, BLOCKED and UNVERIFIED by string equality. A status outside that
+set — a typo, an empty string, `"PASS "` with a trailing space — matched none of the three
+branches and fell through to `QUALIFIED, 0, []`. The gate's whole purpose is to refuse to
+qualify on anything it has not checked, and a malformed status was a qualification.
+
+Eight mandatory criteria (A2, A3, B1, B2, D1, D2, F4, G3) recorded PASS with nothing behind
+the pass: a repository whose A1 structural check FAILED still reported A3, B1, B2 and D2 as
+PASS, because only the evidence prose was conditional and the status was a literal. Six of
+them are now computed from repository files or from the A1 run's own output; D1 and G3 are
+claims about records and are DECLARED, which is what the evidence-kind column is for; F4 now
+runs `check_urls.py` against an empty corpus and requires exit 2.
+
+**Status: FIXED, covered.** The gate went from NOT QUALIFIED with six failures and a blocked
+criterion to PROVISIONAL: PASS 29, UNVERIFIED 3. The three are E5, G1 and G2, which need
+model runs.
+
+### D-056 HIGH — The corpus manifest carried 14 duplicated page rows
+
+- **Affected** `research/pages/MANIFEST.tsv`, `research/repair_manifest.py`,
+  `research/official-documentation-index.md`
+- **Evidence** found by the new C1 duplicate detection, then verified directly
+
+D-055's `audit_manifest` fix started reporting duplicate rows, and the tree it was pointed at
+had fourteen, every one of them carrying a byte count where the provenance column belongs; one
+was also an exact duplicate of its twin. Every consumer that groups by stem read the last row
+and dropped the other, so the generated documentation index showed one row per page and the
+duplication was invisible there. The gate was the only reader that saw both rows.
+
+**Status: FIXED.** The duplicates are removed, `repair_manifest.py` emits one row per stem, and
+the index was regenerated with `research/build_doc_index.py` rather than edited. A duplicate is
+caught where it can happen, in the manifest, by `audit_manifest`.
+
+### D-057 HIGH — A scores-file key could delete a file outside the grade directory
+
+- **Affected** `evaluation/results/run-3/grade_run.py`
+- **Regression test** `tests/test_grading_integrity.py`, case
+  `a scores key that is not a scenario id removes nothing`
+
+Every scenario id becomes a filename in `grade_run.py`, and the refusal branch unlinks
+`<sid>.json`. The id came from the grader's scores file and was never validated, so a key of
+`../../../tmp/victim` unlinked that file. Demonstrated, then fixed: an id must match the
+suite's own `SUITE-NN` shape before any path is built from it, and nothing is removed on
+behalf of an id that is not one of ours.
+
+**Status: FIXED, covered.**
+
+### D-058 HIGH — The workspace leak detector could not detect a reformatted leak
+
+- **Affected** `tests/make_eval_workspace.py`
+- **Regression test** `tests/test_leakage.py`, workspace isolation tier
+
+`find_leaks()` matched forbidden path names only, so an answer key copied to `secret.md`
+produced a workspace declared clean. Content detection was added and then found to have two
+escaping bugs of its own: the whitespace collapse was `r"\\s+"`, a literal backslash followed
+by s, so nothing collapsed and a block copied with different line wrapping produced a
+different string from the original; and the heading normaliser was `r"\s*[-–—]?\s*"`, where
+every group is optional and matches empty at every position, inserting a space between every
+character so that "references" became "r e f e r e n c e s" and no ordinary heading matched.
+
+**Status: FIXED, covered.** A verbatim key as `secret.md`, the same key reflowed onto one line
+as `payload.txt`, and a heading-only paste are all detected; a clean workspace builds and
+reports clean with and without the corpus.
+
+### D-059 MEDIUM — Three fault probes asserted properties nothing enforced
+
+- **Affected** `tests/fault_probe.py`, `tests/check_repo.py`
+
+`scenario-empty-required-section` inserted a placeholder beside the original body instead of
+emptying the section, so it was caught only by packet staleness and passed after a re-sync.
+`adversarial-scenario-missing-section` and `regression-scenario-missing-section` removed a
+section from files `check_scenarios` only counted, on the stated ground that they "do not
+carry the full graded section list" — all 13 adversarial and all 8 regression scenarios do
+carry it. `scenario-id-numbering-gap` asserted a contiguity check that existed nowhere.
+
+**Status: FIXED, covered.** The two extra suites are walked for sections, a contiguity check
+exists with MED-31 excused and pointed at the audit that records it, and all three probes
+assert what they claim. `fault_probe` is 37 probes, 37 as expected, 0 false passes, 0
+skipped.
+
+Two more defects in the same class, found in the review that produced the above, are recorded
+in the commit that fixed them: the section matcher accepted any heading containing the wanted
+phrase, and `check_repo`'s eight checks could pass on inputs they did not describe — a packet
+padded with trailing whitespace, an answer key carrying only the last six words of a
+critical-failure condition, a reference "named" by a sentence mentioning it.
