@@ -11,7 +11,7 @@ A/B design in general terms. This file pins the specific choices for one run.
 | Run ID | `run-2` |
 | Model | `space-bunny-free`, provider `opencode`, model id `opencode/space-bunny-free` |
 | Model version string | None is published by the provider. The model id is the only identifier available and it is recorded verbatim. |
-| Skill version | `.agents/skills` digest `baddc6e0c05ef2af`, at commit `8e5d666` |
+| Skill version | `.agents/skills` digest `baddc6e0c05ef2af`, at commit `8e5d666` (pre-rewrite history) |
 | Workspace | built by `tests/make_eval_workspace.py`, no corpus |
 | Corpus present | No. `research/pages` is not in the workspace, so the agent cannot read a cached documentation page. |
 | Scenarios | MED-27, HARD-09, ADV-05, REG-04 |

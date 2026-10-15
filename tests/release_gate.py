@@ -37,6 +37,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import tempfile
 import json
 import re
 import subprocess
@@ -49,6 +50,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 PASS, FAIL, BLOCKED, UNVERIFIED, NA = "PASS", "FAIL", "BLOCKED", "UNVERIFIED", "NOT_APPLICABLE"
 
+VALID_STATUSES = {PASS, FAIL, BLOCKED, UNVERIFIED, NA}
 
 # How the evidence for a criterion was obtained. This is the distinction the gate was
 # missing: a criterion whose PASS rests on a subprocess this script ran is a different kind
@@ -124,11 +126,14 @@ def decide(criteria: list[Criterion]) -> tuple[str, int, list[str]]:
     """
     if not criteria:
         return PROVISIONAL, 1, []
+    # Closed vocabulary: a status outside VALID_STATUSES can never be read as a pass,
+    # a clean bill of health, or an unverified item. Fail closed instead.
+    unknown = [c.id for c in criteria if c.status not in VALID_STATUSES]
     failed = [c.id for c in criteria if c.mandatory and c.status == FAIL]
     blocked = [c.id for c in criteria if c.status == BLOCKED]
     unverified = [c.id for c in criteria if c.mandatory and c.status == UNVERIFIED]
-    if failed or blocked:
-        return NOT_QUALIFIED, 1, failed + blocked
+    if unknown or failed or blocked:
+        return NOT_QUALIFIED, 1, unknown + failed + blocked
     if unverified:
         return PROVISIONAL, 1, unverified
     return QUALIFIED, 0, []
@@ -156,25 +161,58 @@ def audit_eval_runs(path: Path) -> list[dict]:
     runs = []
     for i in range(1, len(blocks), 2):
         heading, body = blocks[i], blocks[i + 1]
-        fields = dict(re.findall(r"^\|\s*([^|]+?)\s*\|\s*(.+?)\s*\|$", body, re.M))
+        # A plain dict() over re.findall() silently lets a second row with the same key
+        # overwrite the first. Track duplicates instead of collapsing them.
+        fields = {}
+        seen_fields = set()
+        duplicate_fields = False
+        for km in re.finditer(r"^\|\s*([^|]+?)\s*\|\s*(.+?)\s*\|$", body, re.M):
+            key = km.group(1).strip()
+            val = km.group(2).strip()
+            if key in seen_fields:
+                duplicate_fields = True
+            else:
+                seen_fields.add(key)
+            fields[key] = val
         low = {k.lower(): v.lower() for k, v in fields.items()}
         arms = low.get("arms", "")
         model = low.get("model", "")
         turns = low.get("turns released", "")
         protocol = low.get("protocol", "")
-        has_baseline = ("baseline" in arms or "no skill" in arms or "run a" in arms) and \
-            not re.search(r"\bno (baseline|skill)|baseline arm\.\*?\*?\s*$|only,? assisted", arms)
+        al = arms.lower()
+        # A baseline arm is an arm that runs without the skill. Mentioning the word in a
+        # note or a negation ("No baseline arm") is not one.
+        has_baseline = (
+            "no skill" in al
+            or bool(re.search(r"\ba\s+baseline\b", al))
+            or bool(re.search(r"\bbaseline\s+arm\b", al))
+            or al.strip() == "baseline"
+        )
+        if re.search(r"\bno\s+baseline\b", al):
+            has_baseline = False
+        # "ten" is not the same as "both turns"; count only an explicit both/1-and-2.
+        tl = turns.lower()
+        has_both_turns = (
+            bool(re.search(r"\bboth\b", tl))
+            or (bool(re.search(r"\b1\b", tl)) and bool(re.search(r"\b2\b", tl)))
+        )
+        if re.search(r"\bten\b", tl) or re.search(r"\b1 only\b|\bonly turn\b|\bnever released\b", tl):
+            has_both_turns = False
+        model_ok = bool(model) and not re.search(
+            r"not captured|not recorded|unknown|default|harness", model, re.I)
         missing = []
-        if not (has_baseline and "assist" in arms):
+        if not (has_baseline and "assist" in arms.lower()):
             missing.append("a baseline arm")
-        if not turns or re.search(r"\b1 only\b|\bonly turn\b|\bnever released\b", turns):
+        if not has_both_turns:
             missing.append("both turns released")
-        if not model or re.search(r"not captured|not recorded|unknown", model):
+        if not model_ok:
             missing.append("a captured model id")
         if not protocol:
             missing.append("a declared protocol")
+        if duplicate_fields:
+            missing.append("no duplicate field rows")
         runs.append({"name": heading.strip(), "fields": fields, "missing": missing,
-                     "qualifies": not missing})
+                      "qualifies": not missing, "duplicate_fields": duplicate_fields})
     return runs
 
 
@@ -224,15 +262,26 @@ def main() -> int:
             if line.strip().startswith("- ") and "review" not in line:
                 rep.criteria[-1].detail += line.strip() + "\n"
 
+    index_text = (ROOT / "scenarios" / "index.md").read_text(errors="replace") \
+        if (ROOT / "scenarios" / "index.md").is_file() else ""
+    indexed_ids = set(re.findall(r"`([A-Z]+-\d+)`", index_text))
+    a2_ok = bool(indexed_ids) and indexed_ids == scenario_stems()
     rep.add("A2", "Repository integrity",
             "Every active scenario is accounted for",
-            PASS, "103 scenarios across five files, verified by the scenario index",
-            f"{count_scenarios()} scenario blocks discovered", kind=DERIVED)
+            PASS if a2_ok else FAIL,
+            f"{count_scenarios()} scenario blocks discovered; {len(indexed_ids)} indexed in "
+            f"scenarios/index.md",
+            "the index is generated, so set equality is the check rather than a hard-coded count",
+            kind=DERIVED)
 
+    a3_ok = ("fault-code index matches a fresh run" in out
+             and "scenario index matches" in out
+             and "documentation index matches" in out)
     rep.add("A3", "Repository integrity", "Generated files are reproducible",
-            PASS, "check_repo.py regenerates error-codes.md and scenarios/index.md and diffs "
-                  "them against the committed files",
-            "backed by A1, which runs that check", kind=DERIVED)
+            PASS if a3_ok else FAIL,
+            "check_repo.py regenerates error-codes.md and scenarios/index.md and diffs "
+            "them against the committed files",
+            "read from the A1 run's own output, not from its status string", kind=DERIVED)
 
     archived = ROOT / "archive" / "2026-10-11-original"
     n_arch = len(list(archived.rglob("*"))) if archived.is_dir() else 0
@@ -264,14 +313,18 @@ def main() -> int:
 
     # ---- B. Skill integrity -------------------------------------------------
     skills = sorted(p.parent.name for p in (ROOT / ".agents/skills").glob("*/SKILL.md"))
+    b1_ok = "skills have valid frontmatter" in out
     rep.add("B1", "Skill integrity", "Skills are well formed and references resolve",
-            PASS, f"3 skills: {', '.join(skills)}; frontmatter, naming and relative links "
-                  f"checked", "backed by A1", kind=DERIVED)
+            PASS if b1_ok else FAIL,
+            f"{len(skills)} skills: {', '.join(skills)}; frontmatter, naming and relative links "
+            f"checked by check_skills", "read from the A1 run's own output", kind=DERIVED)
 
     refs = sorted((ROOT / ".agents/skills/apigee-support-core/references").glob("*.md"))
+    b2_ok = ("are named in their SKILL.md" in out and "resolve to a file" in out)
     rep.add("B2", "Skill integrity", "Every reference file is reachable from its skill",
-            PASS, f"{len(refs)} reference files, each named in SKILL.md and each listed path "
-                  f"resolved to a real file", "backed by A1", kind=DERIVED)
+            PASS if b2_ok else FAIL,
+            f"{len(refs)} reference files, each named in SKILL.md and each listed path "
+            f"resolved to a real file", "read from the A1 run's own output", kind=DERIVED)
 
     # B3 and D4 both rest on human review recorded in evaluation/audit-*.md. No checker can
     # decide whether a technical claim is true, so these stay DECLARED and say so rather than
@@ -300,7 +353,8 @@ def main() -> int:
     bad_unresolved, orphan_pages = mrep["bad_unresolved"], mrep["orphans"]
     unres_count = prov.get("UNRESOLVED", 0)
 
-    c1_ok = man.is_file() and not undeclared and not orphan_pages and not mrep["malformed"]
+    c1_ok = (man.is_file() and not undeclared and not orphan_pages
+             and not mrep["malformed"] and not mrep.get("pages_missing", False))
     rep.add("C1", "Source integrity", "Every cached page has a provenance record",
             PASS if c1_ok else FAIL,
             "MANIFEST.tsv: " + ", ".join(f"{k} {v}" for k, v in sorted(prov.items())),
@@ -371,11 +425,15 @@ def main() -> int:
     rep.add("D1", "Scenario integrity", "All active scenarios inventoried", PASS,
             f"{count_scenarios()} scenarios; evaluation/defect-register.md and the "
             f"{len(audits_present())}/4 audit files carry the per-scenario review",
-            kind=DERIVED)
+            "DECLARED: inventory coverage rests on the audit files rather than on a check this "
+            "script ran", kind=DECLARED)
 
-    rep.add("D2", "Scenario integrity", "Every scenario is structurally valid", PASS,
-            "all 103 have the required sections with real content, unique IDs, and parseable "
-            "XML and JSON blocks", "backed by A1", kind=DERIVED)
+    d2_ok = "code blocks parse" in out
+    rep.add("D2", "Scenario integrity", "Every scenario is structurally valid",
+            PASS if d2_ok else FAIL,
+            "all scenarios have the required sections with real content, unique IDs, and "
+            "parseable XML and JSON blocks", "read from the A1 run's own output",
+            kind=DERIVED)
 
     audits = ["audit-easy-adv.md", "audit-medium-A.md", "audit-medium-B.md",
               "audit-hard-reg.md"]
@@ -400,14 +458,20 @@ def main() -> int:
 
     # ---- E. Evaluation integrity --------------------------------------------
     pk = ROOT / "evaluation/packets"
-    n_prompts = len(list(pk.glob("*.prompt.md"))) - len(list(pk.glob("*.turn2.prompt.md")))
-    n_t2 = len(list(pk.glob("*.turn2.prompt.md")))
-    n_keys = len(list(pk.glob("*.key.md")))
-    ok_pk = n_prompts == count_scenarios() and n_t2 == count_scenarios() \
-        and n_keys == count_scenarios()
+    turn1_files = sorted(p for p in pk.glob("*.prompt.md") if ".turn2" not in p.name)
+    turn2_files = sorted(pk.glob("*.turn2.prompt.md"))
+    key_files = sorted(pk.glob("*.key.md"))
+    n_prompts = len(turn1_files)
+    n_t2 = len(turn2_files)
+    n_keys = len(key_files)
+    have_t1 = {p.name.split(".")[0] for p in turn1_files}
+    have_t2 = {p.name.split(".")[0] for p in turn2_files}
+    have_k = {p.name.split(".")[0] for p in key_files}
+    expected = scenario_stems()
+    ok_pk = have_t1 == expected and have_t2 == expected and have_k == expected
     rep.add("E1", "Evaluation integrity", "Packet generation complete for every scenario",
             PASS if ok_pk else FAIL,
-            f"{n_prompts} turn-1, {n_t2} turn-2, {n_keys} keys for {count_scenarios()} "
+            f"{n_prompts} turn-1, {n_t2} turn-2, {n_keys} keys for {len(expected)} "
             f"scenarios")
 
     code_l, out_l = run([sys.executable, "tests/test_leakage.py"], timeout=900)
@@ -467,8 +531,14 @@ def main() -> int:
     pm = re.search(r"(\d+) probes, (\d+) behaved as expected, (\d+) false passes, "
                    r"(\d+) skipped", out_fp)
     pdetail = pm.group(0) if pm else "no probe summary"
+    if pm:
+        n_probe, n_behaved, n_false, n_skipped = (int(x) for x in pm.groups())
+        f1_ok = (code_fp == 0 and n_probe > 0 and n_behaved == n_probe
+                 and n_false == 0 and n_skipped == 0)
+    else:
+        f1_ok = False
     rep.add("F1", "Checker integrity", "Checkers detect deliberately introduced defects",
-            PASS if code_fp == 0 else FAIL,
+            PASS if f1_ok else FAIL,
             f"python3 tests/fault_probe.py -> exit {code_fp}; {pdetail}")
 
     code_strict, out_strict = run([sys.executable, "tests/check_repo.py", "--root", ".",
@@ -480,23 +550,40 @@ def main() -> int:
     # F3 and F4 are consequences of the probe suite that F1 ran, so they read its result
     # rather than asserting their own.
     rep.add("F3", "Checker integrity", "Empty and partial inputs are handled correctly",
-            PASS if code_fp == 0 else FAIL,
+            PASS if f1_ok else FAIL,
             "fault probes cover deleted packets, an emptied corpus, a missing packet "
             "directory, a deleted scenario file and a corrupted generated index",
             "read from the F1 probe run; 0 skipped is required for this to mean anything",
             kind=DERIVED)
 
+    _empty_url_target = tempfile.NamedTemporaryFile("w", suffix=".md", delete=False)
+    _empty_url_target.close()
+    code_empty_urls, _ = run([sys.executable, "tests/check_urls.py", _empty_url_target.name],
+                            timeout=300)
+    try:
+        import os as _os
+        _os.unlink(_empty_url_target.name)
+    except OSError:
+        pass
+    f4_ok = code_empty_urls == 2
     rep.add("F4", "Checker integrity", "A checker cannot report success on zero inputs",
-            PASS, "tests/check_urls.py exits 2 on an empty corpus; the previous shell version "
-                  "exited 0 having verified nothing")
+            PASS if f4_ok else FAIL,
+            f"python3 tests/check_urls.py on an empty input -> exit {code_empty_urls}; a "
+            f"checker that reports success on zero inputs is not a check", kind=EXECUTED)
 
     # The gate itself had never been tested, which is how it shipped `PASS if unresolved
     # else PASS` and a qualification rule that ignored UNVERIFIED. This is here so that
     # fixing those does not silently undo itself.
     code_g, out_g = run([sys.executable, "tests/test_release_gate.py"], timeout=300)
     gm = re.search(r"(\d+) cases, (\d+) passed, (\d+) failed", out_g)
+    if gm:
+        n_cases, n_passed, n_failed = (int(x) for x in gm.groups())
+        f5_ok = (code_g == 0 and n_cases > 0 and n_passed == n_cases
+                 and n_failed == 0)
+    else:
+        f5_ok = False
     rep.add("F5", "Checker integrity", "The gate's own verdict logic is under test",
-            PASS if code_g == 0 else FAIL,
+            PASS if f5_ok else FAIL,
             f"python3 tests/test_release_gate.py -> exit {code_g}; "
             + (gm.group(0) if gm else "no case summary"))
 
@@ -507,7 +594,7 @@ def main() -> int:
     # never reached a model, which is the case whenever the provider quota is exhausted.
     # Both are reported so a reader cannot mistake the structural result for the whole.
     code_i, out_i = run([sys.executable, "tests/test_isolation.py"], timeout=600)
-    struct = "PASS" if "structural: PASS" in out_i else "FAIL"
+    struct = "PASS" if code_i == 0 and "structural: PASS" in out_i else "FAIL"
     live_line = next((ln.strip() for ln in out_i.splitlines()
                       if ln.startswith("live breaches")), "live breach status unknown")
     # Status tracks the mechanism, which is what this criterion names: the workspace is
@@ -567,7 +654,7 @@ def main() -> int:
             PASS,
             "D-001 index provenance, D-002 scenario recovery, D-003 eight checker false "
             "passes, D-004 URL classification and the title leak each have a test that fails "
-            "without the fix")
+            "without the fix", kind=DECLARED)
 
     # ---- Summary ------------------------------------------------------------
     verdict, exit_code, controlling = decide(rep.criteria)
@@ -649,7 +736,10 @@ def audit_manifest(man: Path, pages_dir: Path) -> dict:
     undeclared: list[str] = []
     bad_unresolved: list[str] = []
     listed: set[str] = set()
+    seen_rows: set[str] = set()
     malformed: list[str] = []
+    duplicates: list[str] = []
+    pages_missing = not pages_dir.is_dir()
 
     if man.is_file():
         for line in man.read_text(errors="replace").splitlines():
@@ -657,12 +747,20 @@ def audit_manifest(man: Path, pages_dir: Path) -> dict:
                 continue
             parts = line.split("\t")
             name = parts[0]
+            # Duplicate rows used to collapse through the listed set. Make them visible.
+            if name in seen_rows:
+                malformed.append(name)
+                duplicates.append(name)
+                continue
+            seen_rows.add(name)
             listed.add(name)
             if len(parts) < 3:
                 malformed.append(name)
                 continue
             url, origin = parts[1], parts[2]
-            key = origin.split(";")[0]
+            key_raw = origin.split(";")[0].strip()
+            # The UNRESOLVED label is case-insensitive. A lowercase variant used to bypass C2.
+            key = "UNRESOLVED" if key_raw.upper() == "UNRESOLVED" else key_raw
             prov[key] = prov.get(key, 0) + 1
             if not origin.strip():
                 undeclared.append(name)
@@ -673,9 +771,16 @@ def audit_manifest(man: Path, pages_dir: Path) -> dict:
             ):
                 bad_unresolved.append(name)
 
-    orphans = sorted({p.stem for p in pages_dir.glob("*.txt")} - listed) if pages_dir.is_dir() else []
-    return {"prov": prov, "undeclared": undeclared, "bad_unresolved": bad_unresolved,
-            "malformed": malformed, "orphans": orphans}
+    if pages_missing:
+        # A missing corpus is not the same as a clean one; keep it visible and failing.
+        orphans = ["<pages directory missing>"]
+    else:
+        orphans = sorted({p.stem for p in pages_dir.glob("*.txt")} - listed)
+    result = {"prov": prov, "undeclared": undeclared, "bad_unresolved": bad_unresolved,
+              "malformed": malformed, "orphans": orphans, "duplicates": duplicates,
+              "pages_missing": pages_missing, "missing_pages_dir": pages_missing,
+              "pages_dir_exists": not pages_missing}
+    return result
 
 
 def audits_present() -> list[str]:
@@ -692,6 +797,20 @@ def count_scenarios() -> int:
             if re.match(r"^###\s+(EASY|MED|HARD|ADV|REG)-\d+", line):
                 n += 1
     return n
+
+
+SCENARIO_ID_RE = re.compile(r"\b(EASY|MED|HARD|ADV|REG)-(\d{2,3})\b")
+
+
+def scenario_stems() -> set[str]:
+    """Scenario IDs declared in scenarios/*.md, excluding the generated index."""
+    ids: set[str] = set()
+    for p in (ROOT / "scenarios").glob("*.md"):
+        if p.name == "index.md":
+            continue
+        for prefix, num in SCENARIO_ID_RE.findall(p.read_text(errors="replace")):
+            ids.add(f"{prefix}-{num}")
+    return ids
 
 
 if __name__ == "__main__":

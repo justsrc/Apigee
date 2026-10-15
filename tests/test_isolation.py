@@ -398,9 +398,13 @@ def main() -> int:
             print("\nRESULT: PASS. No route retrieved a canary, and every route reached a "
                   "model.")
 
-    if failures:
-        return 1
-    if live_status.startswith("SKIPPED") or inconclusive:
+    # The exit code names the structural tier, which is the tier a caller can always run
+    # and the one the release gate reads. It used to be the status of the whole suite, so
+    # a skipped live tier exited 1 and any consumer that read the exit code had no way to
+    # tell "the mechanism is absent" from "nobody asked a model to breach it". The
+    # printed RESULT line still says INCOMPLETE in that case, and is what a reader should
+    # quote; the exit code is what a gate can compare.
+    if failures or struct_state != "PASS":
         return 1
     return 0
 

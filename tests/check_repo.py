@@ -1227,6 +1227,99 @@ def check_origin_integrity(root: Path, r: Results) -> None:
         r.ok(f"origin classification is unambiguous across {total} scenarios ({parts})")
 
 
+def check_commit_citations(root: Path, r: Results) -> None:
+    """Commit-like citations in tracked Markdown must resolve to an ancestor of HEAD."""
+    import shutil
+    import subprocess
+
+    exceptions_path = root / "evaluation" / "historical-commit-exceptions.txt"
+    exc_shas = []
+    if exceptions_path.is_file():
+        for line in read(exceptions_path).splitlines():
+            text = line.split("#", 1)[0].strip()
+            if not text:
+                continue
+            parts = text.split()
+            if parts:
+                exc_shas.append(parts[0])
+
+    git = shutil.which("git")
+    if not git:
+        r.warn("git is not available; skipping commit-citation check")
+        return
+    try:
+        ls = subprocess.run([git, "-C", str(root), "ls-files", "--", "*.md"],
+                            capture_output=True, text=True, timeout=60)
+    except Exception as e:
+        r.warn(f"git ls-files failed ({e}); skipping commit-citation check")
+        return
+    if ls.returncode != 0:
+        r.warn("git ls-files failed; skipping commit-citation check")
+        return
+
+    tracked = [p for p in ls.stdout.splitlines() if p.strip()]
+    tracked = [p for p in tracked if not p.startswith("research/pages/")
+               and "/research/pages/" not in p]
+
+    token_re = re.compile(r"(?<![0-9a-fA-F])([0-9a-f]{7,40})(?![0-9a-fA-F])")
+
+    type_cache = {}
+    ancestor_cache = {}
+
+    def git_type(tok):
+        if tok in type_cache:
+            return type_cache[tok]
+        try:
+            cp = subprocess.run([git, "-C", str(root), "cat-file", "-t", tok],
+                                capture_output=True, text=True, timeout=30)
+        except Exception:
+            type_cache[tok] = ""
+            return ""
+        value = cp.stdout.strip() if cp.returncode == 0 else ""
+        type_cache[tok] = value
+        return value
+
+    def is_ancestor(tok):
+        if tok in ancestor_cache:
+            return ancestor_cache[tok]
+        try:
+            cp = subprocess.run([git, "-C", str(root), "merge-base", "--is-ancestor", tok, "HEAD"],
+                                capture_output=True, text=True, timeout=30)
+        except Exception:
+            ancestor_cache[tok] = False
+            return False
+        result = cp.returncode == 0
+        ancestor_cache[tok] = result
+        return result
+
+    failures = []
+    for rel in tracked:
+        path = root / rel
+        if not path.is_file():
+            continue
+        try:
+            text = read(path)
+        except Exception:
+            continue
+        for lineno, line in enumerate(text.splitlines(), 1):
+            for m in token_re.finditer(line):
+                tok = m.group(1)
+                if git_type(tok) != "commit":
+                    continue
+                if is_ancestor(tok):
+                    continue
+                covered = any(exc.startswith(tok) or tok.startswith(exc) for exc in exc_shas)
+                if covered:
+                    continue
+                failures.append(f"{rel}:{lineno}: commit citation `{tok}` is not an ancestor of HEAD and is not listed in evaluation/historical-commit-exceptions.txt")
+
+    if failures:
+        for item in failures:
+            r.fail(item)
+    else:
+        r.ok("all commit citations in tracked Markdown resolve to an ancestor of HEAD or are listed as historical exceptions")
+
+
 def check_unslop_scope(r: Results) -> None:
     """unslop is a writing skill, not a diagnosis skill. Record that explicitly.
 
@@ -1275,6 +1368,7 @@ def main() -> int:
     check_reference_discovery(root, r)
     check_scenario_codes(root, r)
     check_origin_integrity(root, r)
+    check_commit_citations(root, r)
     check_unslop_scope(r)
 
     def dump(title: str, items: list[str]) -> None:

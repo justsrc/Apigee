@@ -1,0 +1,6 @@
+# Commit citations retained for historical context after a history rewrite.
+# Each resolves as a commit but is not an ancestor of the current HEAD.
+832bbca96a2424f446bb797c7b917ed025d0218e RELEASE-REPORT.md:3 report written at this commit
+8e5d666a760b6e4a250193e5edc74365d152559a model-eval-protocol.md:14 and RUNS.md:14 skill version
+ce3d96d55a01b279bb22d54f2c16c5698242ee33 RELEASE-REPORT.md:8 baseline-v0.1 tag
+a25333b55b2f7e90b44b2313927be2331db5a9fb RUNS.md and run-3/WORKING-STATE.md skill version

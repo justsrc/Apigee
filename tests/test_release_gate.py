@@ -59,6 +59,7 @@ class ManifestAudit(TypedDict):
     bad_unresolved: list[str]
     malformed: list[str]
     orphans: list[str]
+    duplicates: list[str]
 
 
 class Result(TypedDict):
@@ -512,6 +513,30 @@ def _g_words():
     src = inspect.getsource(release_gate.main)
     assert "live isolation has not been demonstrated" in src.lower(), \
         "G1/G2 detail must carry the live-isolation limitation"
+
+
+@case("decide-fails-closed-on-an-unrecognised-status")
+def _unknown_status():
+    v, code, ctrl = decide([crit("A", "PENDING")])
+    assert v == NOT_QUALIFIED, v
+    assert code == 1, code
+    assert "A" in ctrl, ctrl
+
+
+@case("decide-fails-closed-on-a-typo-status")
+def _typo_status():
+    v, code, ctrl = decide([crit("A", "PASS ")])
+    assert v == NOT_QUALIFIED, v
+    assert code == 1, code
+    assert "A" in ctrl, ctrl
+
+
+@case("decide-fails-closed-on-an-empty-status")
+def _empty_status():
+    v, code, ctrl = decide([crit("A", "")])
+    assert v == NOT_QUALIFIED, v
+    assert code == 1, code
+    assert "A" in ctrl, ctrl
 
 
 def main() -> int:

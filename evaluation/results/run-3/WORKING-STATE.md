@@ -12,7 +12,7 @@ exhausted at the moment of the preflight, before a single scenario ran.
 
 | Field | Value |
 |---|---|
-| Base commit | `a25333b55b2f7e90b44b2313927be2331db5a9fb` |
+| Base commit | `a25333b55b2f7e90b44b2313927be2331db5a9fb` (pre-rewrite history) |
 | Branch | `v0.1` |
 | Skill digest | `ba3500db7ca1755d` |
 | Rubric | `evaluation/rubric.md`, Route 1 canonical |

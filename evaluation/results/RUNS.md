@@ -11,7 +11,7 @@ cannot be compared against a later run.
 | Scenarios | 4: MED-27, HARD-09, ADV-05, REG-04 |
 | Turns released | Both |
 | Model | `space-bunny-free`, provider `opencode`, model id `opencode/space-bunny-free`. No version string is published. |
-| Skill version | `.agents/skills` digest `baddc6e0c05ef2af`, at commit `8e5d666` |
+| Skill version | `.agents/skills` digest `baddc6e0c05ef2af`, at commit `8e5d666` (pre-rewrite history) |
 | Workspace | `tests/make_eval_workspace.py`, no corpus, manifest retained |
 | Arms | 1, assisted. **No baseline arm.** |
 | Graders | 1, and the same process that produced the answers |
@@ -124,7 +124,7 @@ the skills than without them, would be invented until an A/B run with the protoc
 | Scenarios | 103: 15 easy, 45 medium, 22 hard, 13 adversarial, 8 regression |
 | Turns | Both, 206 generation requests at full coverage |
 | Model | `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free`. No version string published. |
-| Skill version | `.agents/skills` digest `ba3500db7ca1755d`, at commit `a25333b` |
+| Skill version | `.agents/skills` digest `ba3500db7ca1755d`, at commit `a25333b` (pre-rewrite history) |
 | Workspace | `tests/make_eval_workspace.py`, corpus excluded, structural isolation PASS |
 | Rubric | Route 1, the scenario's own table, normalised by `4 x rows` |
 | Thresholds | 0.75 pass, 0.50 marginal, below fail; critical failure overrides the score |

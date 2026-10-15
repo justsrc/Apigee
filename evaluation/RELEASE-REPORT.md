@@ -1,11 +1,11 @@
 # Audit and release report
 
-> **Superseded in part.** This report was written at commit `832bbca` on 2026-10-12. Everything
+> **Superseded in part.** This report was written at commit `832bbca` on 2026-10-12 (pre-rewrite history). Everything
 > below section 0 is kept as a dated record and has not been rewritten. Its section 1 is not
 > the current verdict and several of its figures are out of date. Section 0 states where
 > things stand now and why they moved.
 
-Date: 2026-10-12. Baseline: git tag `baseline-v0.1` at `ce3d96d`.
+Date: 2026-10-12. Baseline: git tag `baseline-v0.1` at `ce3d96d` (pre-rewrite history, not an ancestor of HEAD).
 
 ## 0. Current status
 
