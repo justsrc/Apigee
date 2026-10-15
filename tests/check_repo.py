@@ -939,7 +939,9 @@ def check_generated_freshness(root: Path, r: Results) -> None:
         r.fail("missing references/error-codes.md, the generated fault-code index")
         return
     committed = read(ref)
-    if committed.strip() != produced.strip():
+    # Exact, not stripped. Stripping both sides accepted a committed file whose only
+    # difference was blank lines at either end, which no generator writes.
+    if committed != produced:
         missing = _missing_fault_codes(produced, committed)
         extra_note = ""
         if missing:
@@ -972,7 +974,9 @@ def check_generated_freshness(root: Path, r: Results) -> None:
     except Exception as e:  # pragma: no cover - a generator crash is itself a finding
         r.fail(f"research/build_doc_index.py could not render the current corpus: {e}")
         return
-    if read(doc_index).strip() != produced_doc_index.strip():
+    # Exact, not stripped, for the same reason as the fault-code index above: the
+    # generator ends in one newline and main() writes that string verbatim.
+    if read(doc_index) != produced_doc_index:
         r.fail("research/official-documentation-index.md is not what "
                "research/build_doc_index.py produces from research/pages/. It is generated: "
                "fix the generator or the pages, then regenerate, do not edit the output. "
@@ -1009,8 +1013,10 @@ def check_packets_current(root: Path, r: Results, packets: list[Path]) -> None:
         r.fail(f"tests/make_packets.py could not render the current scenarios: {e}")
         return
 
+    # Exact, not stripped. Stripping both sides accepted a packet padded with
+    # trailing whitespace, which is the hand edit this check exists to catch.
     stale = sorted(p.name for p in packets
-                   if rendered.get(p.name, "").rstrip() != read(p).rstrip())
+                   if rendered.get(p.name, "") != read(p))
     if stale:
         shown = ", ".join(stale[:6]) + ("..." if len(stale) > 6 else "")
         r.fail(f"{len(stale)} packet(s) are not what tests/make_packets.py produces from "
@@ -1037,7 +1043,8 @@ def _scenario_index_current(root: Path, build_scenario_index: _IndexBuilder) -> 
     idx = root / "scenarios" / "index.md"
     if not idx.is_file():
         return False
-    return read(idx).strip() == produced.strip()
+    # Exact, not stripped, for the same reason as the two comparisons above.
+    return read(idx) == produced
 
 
 def check_reference_discovery(root: Path, r: Results) -> None:
