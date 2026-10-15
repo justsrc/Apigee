@@ -19,9 +19,10 @@ verdict logic also stopped trusting `test_isolation.py`'s combined-suite exit co
 criterion about one tier, so that checker now reports the structural tier in its exit code and
 still prints `RESULT: INCOMPLETE` when the live tier was skipped.
 
-**The corpus manifest carried 14 duplicated page rows, 13 of them malformed**, carrying a byte
-count where the provenance column belongs. Every consumer grouping by stem read the last one, and
-the generated documentation index listed thirteen pages twice. Removed, and
+**The corpus manifest carried 14 duplicated page rows**, every one carrying a byte count where
+the provenance column belongs. Every consumer grouping by stem read the last one and dropped the
+other, so the generated documentation index showed one row per page and the duplication was
+invisible there. Removed, and
 `research/repair_manifest.py` now emits one row per stem.
 
 **A scores-file key could delete a file outside the grade directory.** `grade_run.py` unlinks
@@ -43,10 +44,10 @@ with trailing whitespace matched a fresh render; an answer key carrying only the
 of a critical-failure condition passed a check named "in full"; a reference counted as
 advertised when a sentence merely mentioned its filename; a leakage marker scan and a raw-HTML
 scan were both case-sensitive; a fault code counted as documented if it appeared anywhere
-inside 337 documents of prose; an origin labelled "adversarial, synthetic" was rejected by a
-startswith test; the critical-failure check counted twenty characters of filler as a list; and
-the XML and JSON fence patterns lacked `re.MULTILINE`, so a payload inside a blockquote was
-never parsed at all.
+inside 337 documents of prose; an origin labelled "adversarial, synthetic" was absorbed as
+synthetic by a chain whose last branch took any unrecognised label, replaced by a table that
+fails closed; the critical-failure check counted twenty characters of filler as a list; and the
+fence pattern's `re.MULTILINE` decided what the capture held, not whether the block was found.
 
 **Two generation defects**, both found by testing against the real CLI rather than by reading
 it. A malformed event-stream line now fails an attempt, and an unreadable packet or an
@@ -82,8 +83,8 @@ path resolves to nothing, a run can resume past its own quota error, a stale wor
 refused unless its digests match the source tree, and the run-3 freeze now checks additions
 and deletions rather than one direction.
 
-Three of those remain open and are recorded as open: D-045, D-048 and D-052. D-053 is
-recorded and accepted, with the disagreement written down.
+Two of those remain open and are recorded as open: D-045 and D-048. D-052 is fixed and
+covered, and D-053 is recorded and accepted, with the disagreement written down.
 
 ### Fixed
 

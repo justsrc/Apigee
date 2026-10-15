@@ -39,11 +39,12 @@ rather than passing it. That is the correct way to run it without a network.
 
 2. **Write the ticket** as a person would, without the cause in it.
 
-3. **Set `Origin:`** to a value that starts with `reported real-world`, `documented`, or
-   contains `synthetic`. `check_repo.py` parses the leading keyword and fails on anything
-   else. The adversarial and regression suites may not be labelled real-world; they are
-   constructed evaluations and counting them as incident reports inflated the library's
-   apparent provenance by 21 scenarios.
+3. **Set `Origin:`** to a value that starts with `reported real-world case`, `reported
+   real-world`, `documented`, `adversarial, synthetic` or `synthetic`. `check_repo.py`
+   matches those prefixes in class order and reports anything else as unclassified, so a
+   label it does not know is a failure rather than a default. The adversarial and regression
+   suites may not be labelled real-world; they are constructed evaluations and counting them
+   as incident reports inflated the library's apparent provenance by 21 scenarios.
 
 4. **Fill every required section.** `check_repo.py` lists what is missing.
 
