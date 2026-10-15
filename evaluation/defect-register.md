@@ -18,11 +18,11 @@ Severity, as defined for this project:
 | Status | Count |
 | --- | --- |
 | Open, blocking release | 0 |
-| Fixed and covered by a test | 31 |
+| Fixed and covered by a test | 34 |
 | Fixed, coverage recorded, no dedicated probe yet | 9 |
 | Open, accepted with documented reason | 9 |
 | Open, awaiting external evidence | 2 |
-| Open, reproduced and not yet fixed | 2 |
+| Open, reproduced and not yet fixed | 1 |
 
 Three entries changed on 2026-10-13. D-035 adds the seventh fixed-without-a-dedicated-probe
 entry. D-036 adds two probes for the packet generator. The isolation-route classifier is what
@@ -46,13 +46,19 @@ A third review pass added eleven more, D-043 through D-053. Nine are now fixed: 
 and D-051 carry a probe or a suite each, D-049 and D-050 are fixed with 13 new cases between
 them, and D-044 and D-046 are fixed with the behaviour itself as the evidence rather than a
 dedicated test. Fixed-and-covered goes from 26 to 31 and the coverage-recorded row from 7 to 9.
-Two are reproduced and open, D-045 in part and D-052, and D-053 is a disagreement between two
-documents about a sample size, recorded rather than fixed because the sample was declared in
-advance and editing it after the fact is the thing the freeze exists to prevent.
+One is reproduced and open, D-045 in part, and D-053 is a disagreement between two documents
+about a sample size, recorded rather than fixed because the sample was declared in advance and
+editing it after the fact is the thing the freeze exists to prevent.
 
 The summary gains a row for findings that are reproduced and not yet fixed. "Open" previously
 meant either something somebody had decided to live with or something nobody had looked at, and
 the table could not tell them apart.
+
+A fourth pass on 2026-10-16 added D-060 and D-061 and closed D-052. D-052's two gaps are the
+ones the entry names and both are covered; the third path to the same harm, a scenario whose
+answer key is missing, is D-061. D-060 is the manifest's provenance column, which the
+fetchers filled with a byte count and C1 accepted as a record. Fixed-and-covered goes from 31
+to 34 and the open-reproduced row from 2 to 1.
 
 ## Later additions
 
@@ -1177,14 +1183,14 @@ Two labels are used throughout and they mean different things.
   here rather than independently re-run by me. The reasoning is checkable against the code
   and the cited line numbers; the run is not one I performed.
 
-Seven of the entries below have been fixed since they were written, and each says so at
-its own heading rather than being moved: D-043, D-044, D-046, D-047, D-049, D-050 and
-D-051. D-046, D-047 and D-051 were found in the review pass and fixed on this branch after
-the evidence was reproduced here, so they carry the stronger label. D-043 and D-044 were
-reproduced here before being fixed, as were D-049 and D-050. The rest are open: D-045,
-D-048 and D-052, plus D-053 which is recorded and accepted rather than open or fixed.
-D-051 is fixed but carries a human step that is deliberately not done, which its entry
-spells out.
+Eight of the entries below have been fixed since they were written, and each says so at
+its own heading rather than being moved: D-043, D-044, D-046, D-047, D-049, D-050, D-051
+and D-052. D-046, D-047 and D-051 were found in the review pass and fixed on this branch
+after the evidence was reproduced here, so they carry the stronger label. D-043 and D-044
+were reproduced here before being fixed, as were D-049, D-050 and D-052. The rest are
+open: D-045 and D-048, plus D-053 which is recorded and accepted rather than open or
+fixed. D-051 is fixed but carries a human step that is deliberately not done, which its
+entry spells out.
 
 Nothing in this section is a claim about model quality or about whether the skills help. All
 of it is about machinery. Run 3 collected nothing, so no recorded score depends on any of it.
@@ -1379,9 +1385,8 @@ of the world is the trigger. Running `--batch` before the reset would strand tho
 for the whole run, and only a hand-edit of `manifest.json` would revive them, which no
 document describes.
 
-**Remediation** `b27bbea`, with D-050 and the turn-2 half of D-052 in the same commit because
-the three are interlocked in the same two functions and splitting them would leave
-intermediate states that do not run.
+**Remediation** `b27bbea`, with D-050 in the same commit because the two are interlocked in
+the same two functions and splitting them would leave intermediate states that do not run.
 
 **Fix.** `BLOCKED_BY_INFRASTRUCTURE` stays one status, and a new `block_kind` field says which
 situation it was. `BLOCK_WINDOW` covers a 429, the attempt cap and an already-closed window,
@@ -1515,8 +1520,8 @@ the moved artifacts until the freeze is reset.
 - **Evidence** from the review pass
 
 Two smaller integrity gaps, recorded together because they are both about a recorded result
-not being checkable after the fact. Both are open; the run-3 half of `b27bbea` edited
-`run_generation.py` but neither of these is what that commit fixed, and both are cheap.
+not being checkable after the fact. The run-3 half of `b27bbea` edited `run_generation.py`
+but neither of these is what that commit fixed.
 
 - `run_generation.py` records `response_sha256` per turn. `grade_run.py` never reads it, and
   the grade file records `key_sha256` but not the response hash. Replacing an answer file after
@@ -1528,9 +1533,11 @@ not being checkable after the fact. Both are open; the run-3 half of `b27bbea` e
   directory a report would read still holds the old PASS. The summary and the exit code are
   correct; the artifact on disk is not.
 
-**Status: OPEN.** The second is the more pressing of the two. A refusal that leaves the thing
-it refused sitting in the directory is a refusal a reader of that directory will not see, and
-`grade_run.py` now refuses scenarios as a matter of routine.
+**Status: FIXED and covered.** The grade entry records the digest of the response it was
+computed from, so an answer file replaced after collection is refused rather than graded,
+and a refusal removes that scenario's earlier grade file instead of leaving it for a reader
+to mistake for a result. `tests/test_grading_integrity.py` carries a case for each, and a
+third for a refusal with no earlier grade, which says so rather than claiming a removal.
 
 ### D-053 LOW — Recorded and accepted, with the disagreement written down
 
@@ -1718,3 +1725,24 @@ this column holds when the fetcher recorded the URL. The thirty rows are correct
 `recorded`, which is also true of them, since a fetcher wrote them at fetch time.
 `audit_manifest` now reports a provenance value the header does not document as malformed, so
 a byte count in that column cannot be counted as a record again.
+
+### D-061 MEDIUM — A scenario with no answer key was skipped, leaving a stale PASS
+
+- **Affected** `evaluation/results/run-3/grade_run.py`
+- **Evidence** from reading the write loop against the refusal path beside it
+- **Regression test** `tests/test_grading_integrity.py`, case
+  `a scenario with no answer key is refused, not skipped`
+
+**What failed.** The write loop looked for the scenario's rubric key and, when it was absent,
+printed `no key, skipped` and moved on. Whatever the directory already held for that scenario
+stayed where it was, including a `PASS` from an earlier run, and the summary counted the
+scenario as neither graded nor refused. A run whose only defect was the missing key exited 0.
+
+This is the third path to the harm D-052 records, after the unread response digest and the
+uncleared grade file. The two D-052 names are covered; this one was not, and it is the one
+that needs nothing rewritten to reach, only a file that is not there.
+
+**Status: FIXED and covered.** `why_ungradeable` reports a missing key, so the scenario goes
+through the refusal path that already exists: it is named, the reason is recorded, and any
+earlier grade file is removed rather than left in place. The write loop's own key check is
+gone, because a scenario that reaches it has already been found gradeable.
