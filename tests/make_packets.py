@@ -100,8 +100,25 @@ def blocks(path: Path) -> list[tuple[str, str]]:
     return out
 
 
-def section(block: str, wanted: str, headings: list) -> str | None:
-    """First section whose heading matches `wanted`.
+def matches(heading: str, wanted: str, prefix: bool = False) -> bool:
+    """Does this heading name the section that was asked for?
+
+    Exact on the normalized text, unless the caller says the heading carries a subject
+    after the marker. The old test was `target in norm(text)`, which matched a wanted
+    section inside any heading that merely contained the phrase: `references` was
+    satisfied by "Fault-code verification ledger references", and `verification` by any
+    heading with the word in it. A packet or a key built from a section the scenario
+    never wrote is worse than one missing, because it looks complete.
+
+    `prefix=True` is for the one heading shape that is genuinely a prefix:
+    `#### Not a critical failure: <subject>`, where the subject is the ruling.
+    """
+    text = norm(heading)
+    return text == norm(wanted) or (prefix and text.startswith(norm(wanted)))
+
+
+def section(block: str, wanted: str, headings: list, prefix: bool = False) -> str | None:
+    """First section whose heading names `wanted`.
 
     First match only. That is right for the held-back material, where one section per
     heading is enough. It is NOT enough for `Not a critical failure`: MED-09 carries two
@@ -110,19 +127,18 @@ def section(block: str, wanted: str, headings: list) -> str | None:
     documented-correct caveat, so dropping it reinstated the defect that commit fixed.
     `sections()` handles the repeat case.
     """
-    target = norm(wanted)
     body = block.splitlines()
     for idx, (_lvl, text, ln) in enumerate(headings):
         if idx == 0:
             continue
-        if norm(text) == target or target in norm(text):
+        if matches(text, wanted, prefix):
             stop = headings[idx + 1][2] if idx + 1 < len(headings) else len(body)
             return "\n".join(body[ln + 1:stop]).strip()
     return None
 
 
-def sections(block: str, wanted: str, headings: list) -> list[str]:
-    """Every section whose heading matches `wanted`, keeping the heading's own subject.
+def sections(block: str, wanted: str, headings: list, prefix: bool = False) -> list[str]:
+    """Every section whose heading names `wanted`, keeping the heading's own subject.
 
     A `#### Not a critical failure: <subject>` heading states the ruling in the heading
     line itself. Returning only the body yields a key section that begins mid-sentence
@@ -131,13 +147,12 @@ def sections(block: str, wanted: str, headings: list) -> list[str]:
     comes back as `<heading text minus the marker>` followed by the body, and repeats are
     kept rather than collapsed.
     """
-    target = norm(wanted)
     body = block.splitlines()
     out = []
     for idx, (_lvl, text, ln) in enumerate(headings):
         if idx == 0:
             continue
-        if norm(text) == target or target in norm(text):
+        if matches(text, wanted, prefix):
             stop = headings[idx + 1][2] if idx + 1 < len(headings) else len(body)
             inline = re.sub(r"^#{1,6}\s*", "", text).strip()
             inline = re.sub(r"^Not a critical failure\b[:\s]*", "", inline, flags=re.I).strip()
@@ -268,7 +283,7 @@ def packet_texts(scen: Path, wanted: set[str] | None = None) -> dict[str, str]:
             # the second, which was the ruling cb057df added.
             for sec in KEY_EXTRA + KEY:
                 if sec in KEY_EXTRA:
-                    pieces = sections(block, sec, hs)
+                    pieces = sections(block, sec, hs, prefix=True)
                 else:
                     one = section(block, sec, hs)
                     pieces = [one] if one else []

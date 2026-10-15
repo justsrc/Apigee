@@ -59,6 +59,15 @@ REQUIRED_SCENARIO_SECTIONS = [
     "references",
 ]
 
+# Required section -> the heading the scenarios actually write. Kept as data rather than
+# folded into the matching rule, so the one place a name differs is visible and the
+# matcher itself stays exact. "remediation" is the requirement; "Correct remediation" is
+# the heading all 103 graded scenarios use, and it was matching only because the test
+# accepted a substring.
+SECTION_ALIASES = {
+    "remediation": "correct remediation",
+}
+
 # Scenario files and the difficulty each one asserts.
 SCENARIO_FILES = {
     "easy.md": "easy",
@@ -216,16 +225,19 @@ def section_present(block: str, wanted: str) -> tuple[bool, int]:
     a title like "JWKS verification fails..." matches the search for "verification",
     the region under it is empty, and a perfectly good scenario is reported as missing
     its section.
+
+    The match is exact once normalized, or through the alias table. It used to accept
+    `target in norm`, which satisfied "references" with a heading like "Fault-code
+    verification ledger references" and "verification" with anything containing the
+    word. A section check that a scenario can pass with a heading it never wrote is a
+    check that reports the shape of the suite rather than the shape of a scenario.
     """
     headings = parse_headings(block)
-    target = _norm(wanted)
+    target = _norm(SECTION_ALIASES.get(wanted, wanted))
     for idx, (_lvl, text, line_no) in enumerate(headings):
         if idx == 0:
             continue
-        norm = _norm(text)
-        # Exact match wins over substring, so "Verification" is not shadowed by
-        # "Verification of the fix".
-        if norm == target or target in norm:
+        if _norm(text) == target:
             body_lines = block.splitlines()
             stop = headings[idx + 1][2] if idx + 1 < len(headings) else len(body_lines)
             content = "\n".join(body_lines[line_no + 1 : stop]).strip()
