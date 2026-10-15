@@ -448,6 +448,17 @@ def check_scenario_id_sequences(root: Path, r: Results) -> None:
     (a packet for a scenario that no longer exists, and a stale index), never as a gap in
     the sequence, so a fault probe asserting a gap is detected was asserting a property
     that did not exist.
+
+    What this does not catch, stated rather than implied: deleting the LAST scenario of a
+    suite leaves no hole, only a shorter list, and this check reports nothing for it; the
+    orphaned-packet and stale-index checks still catch it on their own, and an easy suite
+    also trips the floor. Only a coordinated deletion that regenerates scenarios/index.md
+    and removes the scenario's packets, of a first or last id, escapes everything, and only
+    while the suite stays at or above the minimum. The minimum is a floor, not an inventory:
+    medium at 45 and hard at 22 can lose 30 and 7 that way, and adversarial and regression
+    have no floor at all. Closing that needs an expected count per suite, which is a decision
+    about what the suite is meant to contain and belongs to whoever owns that, not to this
+    check.
     """
     scenarios_dir = root / SCENARIOS_DIR
     if not scenarios_dir.is_dir():

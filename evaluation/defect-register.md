@@ -1675,6 +1675,17 @@ exists with MED-31 excused and pointed at the audit that records it, and all thr
 assert what they claim. `fault_probe` is 37 probes, 37 as expected, 0 false passes, 0
 skipped.
 
+**What the contiguity check does not catch, recorded so the probe is not read as more than
+it is.** Deleting the last scenario of a suite leaves no hole, only a shorter list; the
+contiguity check reports nothing for it, and the orphaned-packet and stale-index checks catch
+it only if the deletion is left uncoordinated. Only a coordinated deletion that regenerates
+scenarios/index.md and removes the scenario's packets, of a first or last id, escapes
+everything, and only while the suite stays at or above the floor: medium at 45 and hard at 22
+can lose 30 and 7 that way, and adversarial at 13 and regression at 8 have no floor at all.
+An expected count per suite would close it, which is a statement about what the suite is meant
+to contain and belongs to whoever owns that. The two section probes and the mid-sequence gap
+probe are fully covered.
+
 Two more defects in the same class, found in the review that produced the above, are recorded
 in the commit that fixed them: the section matcher accepted any heading containing the wanted
 phrase, and `check_repo`'s eight checks could pass on inputs they did not describe — a packet
