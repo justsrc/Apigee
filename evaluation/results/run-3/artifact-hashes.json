@@ -1,5 +1,5 @@
 {
-  "git_head": "fef9db51f5e969293e70f8f51acb4c10bbf65b2e",
+  "git_head": "c77b57cd94e801e5702a9a1cfafd5d30c43c977a",
   "skill_digest": "eaa215eaaa3e62ef",
   "skill_files": {
     ".agents/skills/apigee-opdk-troubleshooter/SKILL.md": "f64299e5a4737de5637f44d6e3a96bdddf2b50eb95264c642c02f1e43fa46dbb",
@@ -17,10 +17,10 @@
     "tests/make_packets.py": "df3227aa2bc939c923b9b8f8e1cf79187587936def0e98c5d315c779de440cb9",
     "tests/make_eval_workspace.py": "86e48cbc542cf78495e98ce97b92a9ba1ce5015b2827644250b020938c4caa73",
     "tests/test_isolation.py": "ecc79d1064c10dc0994dd280646eb40fdf24298be96c5a7ba57e2bd8996a5d29",
-    "tests/release_gate.py": "beaf912c3c6fa69343d1ffd289bf90c241786b0147891ade275da97447f832b9",
+    "tests/release_gate.py": "d5d8e563c47d557515e220ffe4dfc7f2db00b5403e4384cd6019b511e348fb2b",
     "evaluation/model-eval-protocol.md": "10c2a5dccf5b0340d9c8f78972b197aabdbbfb6e16c636aa9c22fbc486cfb4e9",
     "evaluation/results/run-3/PROTOCOL.md": "4f7b613beb0b2df2212ecddc6a01c6adeb90ef6b687b48710db72d3bfd462e1b",
-    "evaluation/results/run-3/grade_run.py": "d5f81017a54364f6e1f22e7ada6fc2a31ab4e58b29fa74eaa38e4f18e9a2a6a7",
+    "evaluation/results/run-3/grade_run.py": "1eb6effb1052b3d0dda65c986dde3ceaf8a5e6062d81c0d7e0068cb727f85db4",
     "evaluation/results/run-3/run_generation.py": "d0d6ed14f3e0f879e0d57594b6af5002ab20d8343ad4a67a94b8728314fafcb1",
     "evaluation/results/run-3/freeze_artifacts.py": "234a5de036ee31743962bf7d53cf1b869dac23274e7b71ba9807be0dffab0b46"
   },
