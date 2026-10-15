@@ -49,6 +49,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 from pathlib import Path
 from typing import NotRequired, TypedDict, cast
 
@@ -199,9 +200,19 @@ def write_entry(path: Path, entry: object) -> Path:
     truncate and the write left a file that exists, is named after a scenario, and parses
     as nothing. The destination is only ever replaced by a file that is already complete.
     """
-    tmp = path.with_suffix(".json.tmp")
-    _ = tmp.write_text(json.dumps(entry, indent=2) + "\n", encoding="utf-8")
-    _ = os.replace(tmp, path)
+    # A unique name in the destination directory, not a derived one. A derived
+    # `<name>.json.tmp` is shared by two graders writing the same scenario at once, and
+    # by `_summary.json` and a scenario that happened to be named `_summary`.
+    fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix=path.name, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            _ = fh.write(json.dumps(entry, indent=2) + "\n")
+        _ = os.replace(tmp, path)
+    except BaseException:
+        # os.replace either happened or it did not; either way this name must not survive.
+        if os.path.exists(tmp):
+            _ = os.unlink(tmp)
+        raise
     return path
 
 
@@ -298,8 +309,18 @@ def main() -> int:
     m = load_manifest()
     refused: list[dict] = []
     for sid, rec in supplied.items():
-        why = why_ungradeable(sid, m)
+        # `_summary.json` is the run's own summary and `_summary` is the id that would
+        # write it. A scores file naming it was refused for being unknown to the manifest,
+        # and the refusal cleanup then deleted the summary it had just been about to
+        # write. Ids beginning with an underscore are refused here instead, and nothing is
+        # removed for them.
+        why = (f"scenario id {sid!r} is reserved: ids beginning with _ are the run's own "
+               "summaries, not scenarios") if sid.startswith("_") else why_ungradeable(sid, m)
         if why is None:
+            continue
+        if sid.startswith("_"):
+            refused.append({"scenario": sid, "reason": why, "stale_grade_removed": False})
+            print(f"  {sid}: refused, {why}", file=sys.stderr)
             continue
         # A refusal that leaves the previous run's file in place is not a refusal: a
         # reader of grades/<grader>/ sees the old PASS and no indication that this run

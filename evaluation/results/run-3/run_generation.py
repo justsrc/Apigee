@@ -75,14 +75,20 @@ Outcome invariants, for the same reason. A provider error must never be able to 
   * A provider error's message is never answer text. `parse_events` returns it separately
     and does not append it to the assistant text, so an error event cannot satisfy the
     "did the model answer" test however the stream is shaped.
-  * A turn is complete only when the CLI said so. `opencode run --format json` closes a
-    step with a `step_finish` event, and its failure path can exit 0 having emitted text
-    and nothing else: a provider stream that ends unexpectedly is swallowed in that
-    compatibility mode, so neither the exit code nor the presence of prose proves the
-    answer finished. Missing the completion event is a failure, not an answer.
   * A line the stream cannot parse is a failure, not a shrug. `--format json` writes one
     JSON object per line and nothing else to stdout, so a malformed non-blank line is a
-    truncated or corrupted stream, and the count is recorded with the attempt.
+    truncated or corrupted stream, and the count is recorded with the attempt. It
+    catches a cut mid-line; it does not catch a stream cut between two whole lines that
+    exits 0 with no error, which is indistinguishable from a finished answer.
+  * There is no positive "the answer finished" event, and an earlier version of this file
+    required one. It was wrong, and wrong in the dangerous direction: five observed
+    successful runs of `opencode run --auto --format json` (opencode 2.0.25) ended
+    `step_start, text` with no `step_finish` at all, and the multi-step ones ended
+    `..., step_finish, step_start, text`. The closing `step_finish` is emitted after a
+    tool step, not after the final text step, so requiring it would have blocked every
+    legitimate turn while still not catching a provider stream the CLI reports as
+    finished. `completed` is recorded on each attempt as evidence of which shape came
+    back, and nothing is graded on it.
   * One predicate decides whether an attempt produced an answer, and the retry branch and
     the give-up branch both use it. Whatever earns a retry is therefore caught if the
     retry also fails, instead of falling through to OK.
@@ -296,9 +302,43 @@ def window_key(d: datetime) -> str:
     return window_start(d).strftime("%Y-%m-%d 05:30->05:29 IST")
 
 
+def migrate_windows(m: Manifest) -> bool:
+    """Fold a window recorded under the old day-based key into the boundary key.
+
+    The old key spelled the same string and meant a different day: it named the calendar
+    day, so one key covered the tail of yesterday's window AND the head of today's. The
+    new key names the window's opening day, so an interrupted run's closed window can end
+    up under a key the resumed run never reads. That is the dangerous direction: a window
+    the provider had closed looks fresh, and 45 attempts are spent against a quota that
+    is still closed.
+
+    A legacy key is folded into the boundary key for the window it overlaps, counting its
+    attempts and its requests and keeping its closure. Both directions of error are
+    possible when an old key is reinterpreted and only one of them costs requests, so this
+    adds them together rather than choosing. Returns whether it changed anything.
+    """
+    windows = m["budget"]["windows"]
+    now = now_ist()
+    legacy = now.strftime("%Y-%m-%d 05:30->05:29 IST")
+    boundary = window_key(now)
+    if legacy == boundary or legacy not in windows:
+        return False
+    old = windows.pop(legacy)
+    current = windows.setdefault(
+        boundary, {"attempts": 0, "quota_exhausted": False, "requests": []})
+    current["attempts"] = int(current["attempts"]) + int(old.get("attempts", 0))
+    current["quota_exhausted"] = bool(current["quota_exhausted"]) or bool(
+        old.get("quota_exhausted"))
+    current["requests"] = list(old.get("requests") or []) + list(current["requests"])
+    return True
+
+
 def load() -> Manifest:
     if MANIFEST.exists():
-        return cast("Manifest", json.loads(MANIFEST.read_text(encoding="utf-8")))
+        m = cast("Manifest", json.loads(MANIFEST.read_text(encoding="utf-8")))
+        if migrate_windows(m):
+            save(m)
+        return m
     m: Manifest = {
         "run": "run-3",
         "protocol": "evaluation/results/run-3/PROTOCOL.md",
@@ -752,15 +792,20 @@ def one_turn(m: Manifest, sid: str, turn: int, model: str, timeout: int) -> str:
         # turn finished. A truncated answer written to raw/<sid>.turn1.md is graded
         # exactly like a whole one.
         #
-        # `not stream.completed` closes the last version of that same hole, the one no
-        # exit code covers. The CLI closes a step with `step_finish`, and its provider
-        # failure path can exit 0 having emitted prose and no closing event at all, so
-        # "rc == 0 and there is text" is exactly the shape a truncated answer takes.
-        # `stream.malformed` closes the same hole from the other side: this format writes
-        # one JSON object per line and nothing else to stdout, so a line that is not JSON
-        # is a stream that was cut or corrupted mid-write.
+        # `stream.malformed` is the completeness signal, and the only one there is. This
+        # format writes one JSON object per line and nothing else to stdout, so a line
+        # that is not JSON is a stream that was cut or corrupted mid-write.
+        #
+        # An earlier version also failed the turn when no `step_finish` event was seen,
+        # on the theory that the CLI's closing event is what proves the answer finished.
+        # Observed streams say otherwise: a text-only turn is `step_start, text`, with no
+        # closing event, and a tool-using turn is `step_start, tool_use, step_finish,
+        # step_start, text`. `step_finish` marks the end of a tool step, not the end of
+        # the answer, and the CLI emits no event for a successful completion at all. That
+        # condition blocked every real turn, so it was removed; the field is kept because
+        # which shape came back is worth having on the record.
         failed = (spawn_error is not None or bool(etype) or rc != 0 or not text.strip()
-                  or not stream.completed or bool(stream.malformed))
+                  or bool(stream.malformed))
 
         if failed and attempt == 1 and spawn_error is None:
             entry["status"] = "RETRY_ONCE"
@@ -770,23 +815,30 @@ def one_turn(m: Manifest, sid: str, turn: int, model: str, timeout: int) -> str:
 
         if failed:
             entry["status"] = "NO_ANSWER"
-            why = spawn_error or emsg or etype or (err.strip()[:200] if err else "")
+            # Every reason this attempt failed, in the order a person needs them: what the
+            # harness knows about the shape of the stream, then what the process said, then
+            # the exit code. The code used to be prepended, so a corrupt stream read as
+            # "opencode run exited 1: 1 line(s) ... were not valid JSON" and led with the
+            # least informative part.
+            reasons: list[str] = []
+            if spawn_error:
+                reasons.append(spawn_error)
             if stream.malformed:
-                # Named before the exit code: when both are true, a corrupt stream is the
-                # more informative reason, and the exit code is appended under it.
-                why = (f"{stream.malformed} line(s) of the event stream were not valid JSON"
-                       + (f"; {why}" if why else ""))
-            elif not stream.completed and not etype and rc == 0:
-                why = (why or "") + ("; " if why else "") + (
-                    "the provider exited 0 but never reported the step as finished, "
-                    "so this stream cannot be shown to be a complete answer")
+                reasons.append(f"{stream.malformed} line(s) of the event stream were not "
+                               "valid JSON")
+            if not stream.completed and not etype and not spawn_error:
+                # Recorded, never fatal. See the note above: this shape is what a
+                # successful text-only turn looks like.
+                reasons.append("no step_finish event in the stream (normal for a "
+                               "text-only turn)")
+            detail = emsg or etype or (err.strip()[:200] if err.strip() else "")
+            if detail:
+                reasons.append(detail)
             if rc != 0 and not (emsg or etype):
-                # The exit code is the only thing that went wrong, so name it. Falling
-                # through to "empty response" described a turn that returned text as one
-                # that returned none, which is the kind of wrong reason that costs an
-                # afternoon.
-                why = f"opencode run exited {rc}" + (f": {why}" if why else "")
-            entry["error"] = why or "empty response"
+                # Only named on its own when the process said nothing: a number that
+                # repeats a message already in the list is noise.
+                reasons.append(f"opencode run exited {rc}")
+            entry["error"] = "; ".join(reasons) or "empty response"
             win["requests"][-1]["status"] = "NO_ANSWER"
             # Terminal. The quota window is not why this failed and the next window
             # changes nothing about it, so re-queueing would buy a second and third

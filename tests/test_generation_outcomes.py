@@ -138,15 +138,32 @@ class Step:
     spawn_error: str | None = None
 
 
-def step_finish(session: str | None = "sess-1") -> str:
-    """The event the CLI writes when it closes a step.
+def step_start(session: str | None = "sess-1") -> str:
+    """The event the CLI writes when it opens a step.
 
-    `--format json` emits `{"type":"step_finish","part":{"type":"step-finish",...}}`, and
-    it is the only thing in the stream that says the answer finished. A run cut short
-    after a step never emits it, which is what the truncated cases below model.
-    `session=None` writes the closing event without a sessionID, which is what the
-    sessionless stream needs so the closing event does not quietly supply the id the
-    stream is supposed to be missing.
+    Observed on every successful run, immediately before the first text event. As with
+    `step_finish`, `session=None` omits the id so a sessionless fixture stays sessionless.
+    """
+    event: dict[str, object] = {"type": "step_start", "part": {"type": "step-start"}}
+    if session is not None:
+        event["sessionID"] = session
+    return json.dumps(event) + "\n"
+
+
+def step_finish(session: str | None = "sess-1") -> str:
+    """The event the CLI writes when it closes a TOOL step.
+
+    Observed shape of `opencode run --auto --format json` (2.0.25), five runs:
+
+        text-only:        step_start, text
+        one tool call:    step_start, tool_use, step_finish, step_start, text
+        two tool calls:   step_start, tool_use, tool_use, step_finish, step_start, text
+
+    So `step_finish` marks the end of a tool step and never the end of the answer: the
+    final text step is not closed by any event, and a successful run emits none. A
+    harness that required one would block every real turn. It is modelled here because
+    a tool-using turn carries it and a text-only turn does not, and that difference is
+    the evidence for that conclusion.
     """
     event: dict[str, object] = {"type": "step_finish", "part": {"type": "step-finish"}}
     if session is not None:
@@ -154,17 +171,35 @@ def step_finish(session: str | None = "sess-1") -> str:
     return json.dumps(event) + "\n"
 
 
-def turn_stream(text: str, session: str = "sess-1") -> str:
-    """One complete turn's `opencode run --format json` event stream."""
-    return json.dumps({"type": "text", "sessionID": session,
-                       "part": {"type": "text", "text": text}}) + "\n" + step_finish(session)
+def tool_step(session: str = "sess-1") -> str:
+    """A step that used a tool, and so is closed by a step_finish event."""
+    return (json.dumps({"type": "tool_use", "sessionID": session,
+                        "part": {"type": "tool", "tool": "read",
+                                 "state": {"status": "completed"}}}) + "\n"
+            + step_finish(session))
+
+
+def turn_stream(text: str, session: str = "sess-1", tool: bool = False) -> str:
+    """One complete turn's `opencode run --format json` event stream, as observed.
+
+    `tool=True` gives the multi-step shape, where a step_finish closes the tool step and
+    the answer follows in a fresh step that nothing closes.
+    """
+    out = step_start(session)
+    if tool:
+        out += tool_step(session) + step_start(session)
+    return out + json.dumps({"type": "text", "sessionID": session,
+                             "part": {"type": "text", "text": text}}) + "\n"
 
 
 def unfinished_stream(text: str, session: str = "sess-1") -> str:
-    """Prose with no closing event: a stream that stopped mid-turn and exited 0.
+    """Prose with no step_start either: a stream that stopped before the CLI opened a step.
 
-    The provider can exit 0 after emitting the text it managed to produce, so this is the
-    shape of a truncated answer, and it is the case no exit-code test can catch.
+    Modelled so the case is covered by a test rather than by a belief, but note that the
+    harness does NOT gate on it: a truncated stream that exits 0 and produces no malformed
+    line is not distinguishable from a complete answer, because the CLI emits no success
+    event to distinguish it. The case below, "a turn with neither step event is still an
+    answer if the text is whole", is the honest statement of what is left.
     """
     return json.dumps({"type": "text", "sessionID": session,
                        "part": {"type": "text", "text": text}}) + "\n"
@@ -177,8 +212,8 @@ def sessionless_stream(text: str) -> str:
     that let turn 2 run cold. Modelled here because the guard against it has to exist for
     the stream the harness did not get an id from, whatever the reason was.
     """
-    return json.dumps({"type": "text", "part": {"type": "text", "text": text}}) + "\n" \
-        + step_finish(None)
+    return step_start(None) + json.dumps(
+        {"type": "text", "part": {"type": "text", "text": text}}) + "\n"
 
 
 def error_stream(message: str, etype: str = "ProviderError",
@@ -444,20 +479,37 @@ def _():
     assert s.error_message == "upstream busy", s.error_message
 
 
-@case("a complete stream reports the CLI's closing step event")
+@case("a text-only turn carries no step_finish, and still counts as an answer")
 def _():
+    # The observed shape of a successful text-only run. An earlier harness version failed
+    # any turn without a step_finish and would have rejected this, i.e. every real turn.
     h = harness(Path("/nonexistent"))
     s = h.mod.parse_events(turn_stream(ANSWER))
-    assert s.completed is True, s
+    assert s.text == ANSWER, s.text
+    assert s.completed is False, "a text-only turn should not carry step_finish"
+    assert s.malformed == 0, s
+    assert s.session_id == "sess-1", s.session_id
+
+
+@case("a tool-using turn carries the closing event that marks the tool step")
+def _():
+    h = harness(Path("/nonexistent"))
+    s = h.mod.parse_events(turn_stream(ANSWER, tool=True))
+    assert s.text == ANSWER, s.text
+    assert s.completed is True, "a tool step is closed by step_finish"
     assert s.malformed == 0, s
 
 
-@case("a stream that stopped before the closing event is not complete")
+@case("a turn with neither step event is still an answer if the text is whole")
 def _():
+    # Recorded so the residual limit is pinned by a test rather than by a comment: a stream
+    # cut short that exits 0, leaves the line it was cut on well-formed, and emits no
+    # error is not distinguishable from a finished answer. Nothing in the CLI says so.
     h = harness(Path("/nonexistent"))
     s = h.mod.parse_events(unfinished_stream(TRUNCATED))
     assert s.text == TRUNCATED, s.text
     assert s.completed is False, s
+    assert s.malformed == 0, s
 
 
 @case("a line that is not JSON is counted, not ignored")
@@ -468,20 +520,39 @@ def _():
     assert s.text == ANSWER, s.text
 
 
-@case("text alone at exit 0 is not an answer")
+@case("a complete text-only turn is accepted, which the step_finish rule would have blocked")
 def _():
     with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
         h = harness(Path(d))
         m = h.manifest([ALPHA])
-        # Exit 0, prose in the stream, no step_finish: the shape a provider cut short
-        # leaves behind. Nothing about it says the answer finished.
-        h.script(Step(unfinished_stream(TRUNCATED)), Step(unfinished_stream(TRUNCATED)))
+        h.script(Step(turn_stream(ANSWER)))
+        st = h.mod.one_turn(m, ALPHA, 1, "fake/model", 30)
+        assert st == "TURN1_COMPLETE", st
+        assert answer_file(h, ALPHA, 1).read_text(encoding="utf-8") == ANSWER
+
+
+@case("a multi-step turn is accepted")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        h.script(Step(turn_stream(ANSWER, tool=True)))
+        assert h.mod.one_turn(m, ALPHA, 1, "fake/model", 30) == "TURN1_COMPLETE"
+        assert answer_file(h, ALPHA, 1).read_text(encoding="utf-8") == ANSWER
+
+
+@case("a stream cut mid-line is still caught, with no completion event in sight")
+def _():
+    with tempfile.TemporaryDirectory(prefix="apigee-genout-") as d:
+        h = harness(Path(d))
+        m = h.manifest([ALPHA])
+        cut = turn_stream(TRUNCATED) + '{"type":"text","part":{"ty'
+        h.script(Step(cut), Step(cut))
         st = h.mod.one_turn(m, ALPHA, 1, "fake/model", 30)
         assert st == "BLOCKED_BY_INFRASTRUCTURE", st
         assert_no_answer(h, m, ALPHA)
-        assert statuses(m) == [(ALPHA, 1, "RETRY_ONCE"), (ALPHA, 2, "NO_ANSWER")], statuses(m)
         err = m["scenarios"][ALPHA]["error"] or ""
-        assert "never reported the step as finished" in err, err
+        assert "not valid JSON" in err, err
 
 
 @case("a malformed line in an otherwise complete stream is not an answer")
