@@ -468,7 +468,12 @@ def check_code_blocks(root: Path, r: Results) -> None:
 
     for path in sorted((root / SCENARIOS_DIR).glob("*.md")):
         text = read(path)
-        for m in re.finditer(r"```xml\n(.*?)(?:^>\s*)?```", text, re.DOTALL):
+        # re.MULTILINE controls what the capture contains, not whether the block is
+        # found: (?:^>\s*)? is optional, so without the flag the block is still
+        # extracted and only the closing fence's `> ` prefix lands inside group(1),
+        # where the re.sub below strips it anyway. The flag is kept so that prefix is
+        # excluded from the capture rather than cleaned up after the fact.
+        for m in re.finditer(r"```xml\n(.*?)(?:^>\s*)?```", text, re.DOTALL | re.MULTILINE):
             xml_total += 1
             body = re.sub(r"^>\s?", "", m.group(1), flags=re.MULTILINE).strip()
             # Fragments use a bare attribute value such as
@@ -576,7 +581,7 @@ def check_packets(root: Path, r: Results) -> None:
         text = read(p)
         for marker in ("Ground-Truth Resolution", "Correct Remediation",
                        "Common Incorrect Answers", "Evaluation Rubric"):
-            if marker in text:
+            if marker.lower() in text.lower():
                 leaked.append(f"{p.name} contains '{marker}'")
                 break
     for hit in leaked:
@@ -593,8 +598,16 @@ def check_packets(root: Path, r: Results) -> None:
         text = read(k)
         ok = False
         if "## Critical failures" in text:
-            after = text.split("## Critical failures", 1)[1].strip()
-            ok = len(after) >= 20
+            # This section only, and a word count rather than a character count. Reading
+            # the whole rest of the file meant the next section could satisfy the
+            # heading, and `len >= 20` meant twenty characters of filler did too. A
+            # critical-failure list that is a sentence of filler is not a list.
+            after = text.split("## Critical failures", 1)[1].split("\n## ", 1)[0].strip()
+            # Four words, not eight. A real condition is a clause and the shortest one in
+            # the suite is five words ("presenting an undocumented flag as valid."); a
+            # threshold of eight flagged five correct keys. Four is still enough to reject
+            # filler, which is the case `len >= 20` characters let through.
+            ok = len(after.split()) >= 4
         if not ok:
             missing_cf.append(k.name.split(".")[0])
     if missing_cf:
@@ -638,8 +651,13 @@ def check_critical_failure_completeness(root: Path, r: Results) -> None:
     """Every key's critical failures must cover the whole condition in the scenario.
 
     A truncated condition is worse than a missing one: the key looks present and the
-    grader applies only the fragment that survived. Compare the tail of the source
-    paragraph against the key so a first-line-only extraction fails here.
+    grader applies only the fragment that survived.
+
+    The whole normalized paragraph must appear in the key's own critical-failures
+    section. It used to compare only the last six words of the source, which is enough
+    to prove the extraction ran at all and not enough to prove it kept the condition: a
+    key holding the tail and nothing else passed, and the grader would apply a
+    fragment whose leading condition was gone.
     """
     packets = root / "evaluation" / "packets"
     if not packets.is_dir():
@@ -661,8 +679,8 @@ def check_critical_failure_completeness(root: Path, r: Results) -> None:
             key_text = read(key)
             key_cf = key_text.split("## Critical failures", 1)[1] if "## Critical failures" in key_text else ""
             words = _normalized_words(para).split()
-            tail = " ".join(words[-6:]) if words else ""
-            if not tail or tail not in _normalized_words(key_cf):
+            whole = " ".join(words)
+            if not whole or whole not in _normalized_words(key_cf):
                 truncated.append(sid)
 
     if truncated:
@@ -770,8 +788,10 @@ def check_generated_references(root: Path, r: Results) -> None:
     bad: list[str] = []
     for p in files:
         text = read(p)
+        # Case-folded. `DOCS` renders tags uppercase often enough that a lowercase-only
+        # marker list let <SPAN> and <DIV> through a check whose name is "no raw HTML".
         for marker in ("<span", "<div", "<table", "sheets-userformat", "<\\"):
-            if marker in text:
+            if marker in text.lower():
                 bad.append(f"{p.name} contains {marker!r}")
 
     for hit in bad:
@@ -937,6 +957,7 @@ def check_reference_discovery(root: Path, r: Results) -> None:
 
     orphans: list[str] = []
     unresolvable: list[str] = []
+    unadvertised: list[str] = []
     total = 0
     listed = 0
     advertising = 0
@@ -947,27 +968,40 @@ def check_reference_discovery(root: Path, r: Results) -> None:
             continue
         advertising += 1
         body = read(skill_md)
+        paths = sorted(set(cast("list[str]", re.findall(
+            r"`(references/[A-Za-z0-9._-]+\.md)`", body))))
         for f in sorted(refs.glob("*.md")):
             total += 1
-            if f.name not in body:
+            # Listed as a path, not merely named. The old test was `f.name not in body`,
+            # which a sentence mentioning the file satisfies: "we mention error-codes.md
+            # here" is not a link a model can open, and the check was reporting that a
+            # file had been advertised when nothing pointed at it. Every reference in this
+            # repository is listed as a backticked path, so the stricter test costs
+            # nothing and closes the prose route.
+            if f"references/{f.name}" not in paths:
                 orphans.append(f"{d.name}/references/{f.name}")
 
         # The skill advertises its references as backticked relative paths in a table,
-        # not as markdown links, so the relative-link check above never saw them and the
-        # name match above cannot tell a real path from a sentence that happens to contain
-        # the filename. Resolving the listed paths is what catches a deleted or renamed
-        # reference, which previously exited 0.
-        paths = sorted(set(cast("list[str]", re.findall(
-            r"`(references/[A-Za-z0-9._-]+\.md)`", body))))
+        # not as markdown links, so the relative-link check above never saw them.
+        # Resolving the listed paths is what catches a deleted or renamed reference,
+        # which previously exited 0.
         listed += len(paths)
         for rel in paths:
             if not (d / rel).is_file():
                 unresolvable.append(f"{d.name}/{rel}")
+        # Per skill, not across the repository. One global counter meant a skill whose
+        # paths were all unquoted was covered by another skill's contribution, so the
+        # gate this feeds stayed green while that skill pointed at nothing.
+        if refs.is_dir() and any(refs.glob("*.md")) and not paths:
+            unadvertised.append(d.name)
 
     for o in orphans:
-        r.fail(f"reference file is not named in its SKILL.md: {o}")
+        r.fail(f"reference file is not listed as a `references/...md` path in its SKILL.md: {o}")
     for u in unresolvable:
         r.fail(f"SKILL.md lists a reference path that does not resolve: {u}")
+    for name in unadvertised:
+        r.fail(f"{name} has a references/ directory but its SKILL.md lists no reference "
+               "path, so nothing in it can be reached")
     if total and not orphans:
         r.ok(f"all {total} reference files are named in their SKILL.md")
     # `unresolvable` is empty both when every listed path resolved and when the regex above
@@ -1087,7 +1121,17 @@ def check_scenario_codes(root: Path, r: Results) -> None:
                 if not_codes.match(tok):
                     continue
                 checked += 1
-                if tok in corpus:
+                # Token boundary, not substring. The corpus is 337 fetched documents of
+                # prose, so `tok in corpus` matched an invented code that happened to
+                # appear as a fragment of ordinary text, and the check that exists to
+                # catch invented codes was satisfied by prose.
+                # A word boundary on each side, which still accepts the code as the tail
+                # of a longer dotted identifier: the corpus writes
+                # `messaging.adaptors.http.flow.SslHandshakeFailed` where the scenario
+                # cites `SslHandshakeFailed`, and a rule that forbade a preceding dot
+                # flagged that code as invented. What it must reject is the token
+                # appearing as a fragment of ordinary prose, which a word boundary does.
+                if re.search(rf"(?<!\w){re.escape(tok)}(?!\w)", corpus):
                     continue
                 # A scenario may deliberately quote a code that does not exist, provided
                 # it says so. HARD-21 transcribes an operator's errorcode that is absent
@@ -1113,6 +1157,17 @@ def check_scenario_codes(root: Path, r: Results) -> None:
                 if exempted else "")
         r.ok(f"all {checked} fault-code-shaped tokens in scenario bodies exist in the "
              f"cached source corpus{note}")
+
+
+# The classification the gate reports, against the labels the suite writes. Order matters
+# across classes only: the first class with a matching prefix wins, so a label that could
+# match two classes is settled by which class is listed first. Within a class every prefix
+# maps to the same kind, so their order has no observable effect.
+ORIGIN_LABELS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("real-world", ("reported real-world case", "reported real-world")),
+    ("documented", ("documented",)),
+    ("synthetic", ("adversarial, synthetic", "synthetic")),
+)
 
 
 def check_origin_integrity(root: Path, r: Results) -> None:
@@ -1142,13 +1197,17 @@ def check_origin_integrity(root: Path, r: Results) -> None:
                 unclassified.append(f"{sid}: no Origin field")
                 continue
             low = m.group(1).strip().lower()
-            if low.startswith("reported real-world"):
-                kind = "real-world"
-            elif low.startswith("documented"):
-                kind = "documented"
-            elif "synthetic" in low:
-                kind = "synthetic"
-            else:
+            # An explicit table, not `in`. The old chain's last branch accepted any
+            # label containing "synthetic" that had not already matched, so an
+            # unrecognised label was absorbed as synthetic rather than failing as
+            # unclassified. A bare startswith("synthetic") test would fail the other
+            # way, reporting as unclassified the composed label this suite really
+            # carries: adversarial.md's "adversarial, synthetic", all 13 of them.
+            # The classes are the three the check reports and the prefixes are the
+            # labels the suite uses, and anything unrecognised fails closed.
+            kind = next((k for k, prefixes in ORIGIN_LABELS for prefix in prefixes
+                         if low.startswith(prefix)), None)
+            if kind is None:
                 unclassified.append(f"{sid}: origin '{m.group(1).strip()[:40]}' is not one "
                                     + "of real-world, documented or synthetic")
                 continue

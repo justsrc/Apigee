@@ -357,6 +357,30 @@ def _():
         assert len(s["refused"]) == 1, s
 
 
+@case("more anchors than the rubric has rows is unscorable, not a score above one")
+def _():
+    # Eight anchors at the top anchor on a seven-row table is 32/28. That is not a grade,
+    # it is a score above the scale's own maximum, and it was recorded as a clean PASS.
+    mod = load_grader()
+    with tempfile.TemporaryDirectory(prefix="apigee-grade-") as d:
+        sb = Sandbox()
+        sb.dir = Path(d)
+        sb.run = sb.dir / "run-3"
+        (sb.run / "raw").mkdir(parents=True)
+        sb.manifest_path = sb.run / "manifest.json"
+        sb.set_status(SID, "AWAITING_GRADE")
+        sb.write_answers(SID)
+        anchors = anchors_from_key(mod, SID, 4)
+        anchors["a dimension the rubric does not have"] = 4
+        sb.run_grade({SID: {"anchors": anchors, "critical": False}})
+        g = sb.grade_file(SID)
+        assert g is not None
+        assert g["verdict"] == "UNSCORABLE", g
+        assert g["normalized_score"] is None, g
+        assert "more" in g["unscorable_reason"], g["unscorable_reason"]
+        assert sb.summary()["by_verdict"]["PASS"] == 0, sb.summary()
+
+
 # ---------------------------------------------------------------------------
 # A verdict must name the answer it is about, and a refusal must not leave the
 # previous run's verdict standing in its place.

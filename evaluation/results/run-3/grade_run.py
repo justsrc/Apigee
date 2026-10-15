@@ -353,15 +353,22 @@ def main() -> int:
         # text produced this score without trusting the grade file's own word.
         answered = {f"turn{n}": hashlib.sha256(
             (RUN / "raw" / f"{sid}.turn{n}.md").read_bytes()).hexdigest() for n in (1, 2)}
-        # A grader who scores fewer dimensions than the table has rows has under-counted the
-        # denominator, which silently inflates the score. Refuse rather than scale it.
-        if anchors and rows and len(anchors) < rows:
+        # A grader whose anchor count is not the rubric's row count is not scoring this
+        # table, and the score is not computable. The guard used to test `len(anchors) <
+        # rows` only, which caught the under-count and waved the over-count through:
+        # eight anchors at the top anchor on a seven-row table scores 32/28 = 1.1429,
+        # rounds to 1.14, and is recorded as a clean PASS above the scale's own maximum.
+        # Direction matters here. Under-counting inflates the score, and over-counting
+        # inflates it too, so neither is a number to scale and both are refusals.
+        if anchors and rows and len(anchors) != rows:
+            direction = "fewer" if len(anchors) < rows else "more"
             entry: GradeEntry = {
                 "scenario": sid, "suite": suite_of(sid), "rubric_route": "Route 1",
                 "rows": rows, "anchors": anchors, "critical_failure": crit,
                 "normalized_score": None, "verdict": "UNSCORABLE",
                 "unscorable_reason": (f"grader supplied {len(anchors)} anchors for a "
-                                      + f"{rows}-row table; the score is not computable"),
+                                      + f"{rows}-row table, which is {direction} than the "
+                                      "table has rows; the score is not computable"),
                 "note": rec.get("note"), "grader": a.grader,
                 "key_sha256": hashlib.sha256(key.read_bytes()).hexdigest(),
                 "response_sha256": answered,
