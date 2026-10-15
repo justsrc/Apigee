@@ -1,11 +1,11 @@
 {
-  "git_head": "a25333b55b2f7e90b44b2313927be2331db5a9fb",
-  "skill_digest": "ba3500db7ca1755d",
+  "git_head": "fef9db51f5e969293e70f8f51acb4c10bbf65b2e",
+  "skill_digest": "eaa215eaaa3e62ef",
   "skill_files": {
     ".agents/skills/apigee-opdk-troubleshooter/SKILL.md": "f64299e5a4737de5637f44d6e3a96bdddf2b50eb95264c642c02f1e43fa46dbb",
     ".agents/skills/apigee-opdk-upgrader/SKILL.md": "1e9aca8131606c6a733f7bd3aec15aa9fa1da909f58f38f984b27b077f4ec6c1",
-    ".agents/skills/apigee-support-core/SKILL.md": "af19dee54c58a9c1e821ce6d5104fceff1031780c938e8a133778711c17083d3",
-    ".agents/skills/apigee-support-core/references/error-codes.md": "6e10862b7999b1b0422bc52a2656a94e9022e89a25474a71734e797a2896c73c",
+    ".agents/skills/apigee-support-core/SKILL.md": "a8d312ded2c92e55a1bf4b8655dc74ee919d23c8feb0c91c6f409d684a72fcc6",
+    ".agents/skills/apigee-support-core/references/error-codes.md": "44ec787908f0c7e52eb7423f72f665ebd355c6bb4853371832c1b093dbfef43c",
     ".agents/skills/apigee-support-core/references/hybrid.md": "9ac15a2bc628eb9f596493b4c454c48f80775389ea2f0d6029d1509c743f0dc7",
     ".agents/skills/apigee-support-core/references/policy-mechanics.md": "cb4dc4536b56459bb54626c994f288e054165897198bcf1114108a18711cb575",
     ".agents/skills/apigee-support-core/references/products.md": "5feca8f9c0e7843dc7e27bf84864412acb64f9d633cce6618ed72ecadd039159",
@@ -14,10 +14,15 @@
   },
   "scripts": {
     "evaluation/rubric.md": "7ff34eb51bffb3899edcca72ef3e0755738e73d638fd8475b57bb7907a433a46",
-    "tests/make_packets.py": "d3c0622b8d27016c5d940e9c8ad5cad7ca3cbeaa85f973a4a668abe5bfeef7e5",
-    "tests/make_eval_workspace.py": "b67e404d5799bed99661f3a770be4de073389b489927807ba1c9ec77b753efbe",
-    "tests/test_isolation.py": "3c3263aa4618ec41d985f776aff803baea3b5633ec5d9104c8c6a25eba9130b5",
-    "tests/release_gate.py": "9247b1f348b3a5120e275362f0cdb9942cb3f1d3be29b21b9587d3cd93b8fbd0"
+    "tests/make_packets.py": "df3227aa2bc939c923b9b8f8e1cf79187587936def0e98c5d315c779de440cb9",
+    "tests/make_eval_workspace.py": "86e48cbc542cf78495e98ce97b92a9ba1ce5015b2827644250b020938c4caa73",
+    "tests/test_isolation.py": "ecc79d1064c10dc0994dd280646eb40fdf24298be96c5a7ba57e2bd8996a5d29",
+    "tests/release_gate.py": "beaf912c3c6fa69343d1ffd289bf90c241786b0147891ade275da97447f832b9",
+    "evaluation/model-eval-protocol.md": "10c2a5dccf5b0340d9c8f78972b197aabdbbfb6e16c636aa9c22fbc486cfb4e9",
+    "evaluation/results/run-3/PROTOCOL.md": "4f7b613beb0b2df2212ecddc6a01c6adeb90ef6b687b48710db72d3bfd462e1b",
+    "evaluation/results/run-3/grade_run.py": "d5f81017a54364f6e1f22e7ada6fc2a31ab4e58b29fa74eaa38e4f18e9a2a6a7",
+    "evaluation/results/run-3/run_generation.py": "d0d6ed14f3e0f879e0d57594b6af5002ab20d8343ad4a67a94b8728314fafcb1",
+    "evaluation/results/run-3/freeze_artifacts.py": "234a5de036ee31743962bf7d53cf1b869dac23274e7b71ba9807be0dffab0b46"
   },
   "scenarios": {
     "adversarial.md": "0de52bb6fbcc3bd3d410f00fdae1e939820cbb5dd33d43a7987a712aa365e474",
