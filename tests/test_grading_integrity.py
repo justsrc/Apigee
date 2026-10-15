@@ -628,6 +628,19 @@ def main() -> int:
         except AssertionError as e:
             mark, note = "FAIL", f"  [{e}]"
             failed.append(f"{name} -- {e}")
+        except Exception as e:
+            # A case that raises is a defect, not a reason to stop the run. Name the
+            # type and the text, plus the case's own line, so the reader does not need
+            # a debugger to see where it came from.
+            tb, line = e.__traceback__, None
+            while tb is not None:
+                if tb.tb_frame.f_code.co_filename == __file__:
+                    line = tb.tb_lineno
+                tb = tb.tb_next
+            at = f" at line {line}" if line else ""
+            detail = f"{type(e).__name__}: {e}{at}"
+            mark, note = "FAIL", f"  [{detail}]"
+            failed.append(f"{name} -- {detail}")
         print(f"{mark} {name}{note}")
 
     total = passed + len(failed)
