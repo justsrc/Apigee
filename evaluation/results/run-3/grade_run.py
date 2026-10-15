@@ -260,6 +260,11 @@ def why_ungradeable(sid: str, m: dict) -> str | None:
         return ("the answer on disk is not the answer the manifest recorded: "
                 + "; ".join(f"{turn} is {got[:12]} on disk, {want[:12]} when collected"
                             for turn, (got, want) in sorted(drift.items())))
+    # A missing key used to be skipped in the write loop, which left any grade file
+    # from an earlier run in place with nothing marking it. It is a refusal like any
+    # other, so it goes through the same machinery and clears what it refuses.
+    if not (PK / f"{sid}.key.md").is_file():
+        return "no answer key for this scenario"
     return None
 
 
@@ -370,10 +375,9 @@ def main() -> int:
     for sid, rec in supplied.items():
         if any(r["scenario"] == sid for r in refused):
             continue
+        # The key is checked in why_ungradeable, which refuses the scenario and clears
+        # any grade file it left behind. A scenario that reaches here has one.
         key = (PK / f"{sid}.key.md")
-        if not key.is_file():
-            print(f"  {sid}: no key, skipped", file=sys.stderr)
-            continue
         rows = rubric_rows(key.read_text(encoding="utf-8"))
         anchors = {k: int(v) for k, v in (rec.get("anchors") or {}).items()}
         crit = bool(rec.get("critical", False))

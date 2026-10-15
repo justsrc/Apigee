@@ -557,6 +557,34 @@ def _():
         assert sb.summary()["refused"][0]["stale_grade_removed"] is False, sb.summary()
 
 
+@case("a scenario with no answer key is refused, not skipped")
+def _():
+    mod = load_grader()
+    with tempfile.TemporaryDirectory(prefix="apigee-grade-") as d:
+        sb = Sandbox()
+        sb.dir = Path(d)
+        sb.run = sb.dir / "run-3"
+        (sb.run / "raw").mkdir(parents=True)
+        sb.manifest_path = sb.run / "manifest.json"
+        # Gradeable in every other respect: AWAITING_GRADE, both answers on disk.
+        # Only the rubric key is absent, because this sandbox has no packets.
+        sb.set_status(SID, "AWAITING_GRADE")
+        sb.write_answers(SID)
+        sb.packets = sb.dir / "packets"
+        sb.packets.mkdir()
+        stale = sb.seed_stale_grade(SID)
+        proc = sb.run_grade({SID: {"anchors": anchors_from_key(mod, SID, 4),
+                                   "critical": False}})
+        assert proc.returncode != 0, "a refusal must not exit 0"
+        # The skip used to leave the earlier run's PASS sitting in the directory,
+        # with nothing in it saying this run declined to produce one.
+        assert not stale.exists(), "the stale grade file survived the skip"
+        assert "no answer key" in proc.stderr, proc.stderr
+        s = sb.summary()
+        assert s["refused"] and s["refused"][0]["scenario"] == SID, s
+        assert s["refused"][0]["stale_grade_removed"] is True, s
+
+
 @case("a grade file is replaced whole, never truncated in place")
 def _():
     mod = load_grader()
