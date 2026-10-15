@@ -63,6 +63,11 @@ PASS_AT, MARGINAL_AT = 0.75, 0.50
 SUITES = {"EASY": "easy", "MED": "medium", "HARD": "hard",
           "ADV": "adversarial", "REG": "regression"}
 
+# The shape of a scenario id in this suite. Anything else is not one, and because every
+# scenario id is turned into a filename below, anything else is refused before a path is
+# built from it.
+SCENARIO_ID = re.compile(r"^(?:EASY|MED|HARD|ADV|REG)-\d{2,3}$")
+
 
 class Scenario(TypedDict):
     status: str
@@ -207,6 +212,10 @@ def write_entry(path: Path, entry: object) -> Path:
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as fh:
             _ = fh.write(json.dumps(entry, indent=2) + "\n")
+        # mkstemp creates the file 0600, so replacing an existing grade with it changed
+        # that file's mode on every rewrite: a silent change to a file people read.
+        if path.exists():
+            _ = os.chmod(tmp, os.stat(path).st_mode & 0o777)
         _ = os.replace(tmp, path)
     except BaseException:
         # os.replace either happened or it did not; either way this name must not survive.
@@ -314,13 +323,33 @@ def main() -> int:
         # and the refusal cleanup then deleted the summary it had just been about to
         # write. Ids beginning with an underscore are refused here instead, and nothing is
         # removed for them.
-        why = (f"scenario id {sid!r} is reserved: ids beginning with _ are the run's own "
-               "summaries, not scenarios") if sid.startswith("_") else why_ungradeable(sid, m)
-        if why is None:
+        # Two kinds of id must never reach the filesystem, whatever the scores file says.
+        #
+        # `_summary` is the run's own summary: a key of that name was refused for being
+        # unknown to the manifest, and the refusal cleanup below then deleted the summary
+        # it was about to write.
+        #
+        # Every scenario id becomes a filename here, and the cleanup unlinks
+        # `<sid>.json`. A key of `../../../tmp/victim` therefore unlinked a file outside
+        # the grade directory: the path was built from an unvalidated key. An id that is
+        # not one of the suite's own is refused before any path is built from it, and
+        # nothing is removed on its behalf.
+        if not SCENARIO_ID.match(sid):
+            refused.append({"scenario": sid, "stale_grade_removed": False,
+                            "reason": f"scenario id {sid!r} is not a scenario id of the "
+                                      "form SUITE-NN; nothing was written or removed for it"})
+            print(f"  {sid!r}: refused, not a scenario id; nothing was removed for it",
+                  file=sys.stderr)
             continue
         if sid.startswith("_"):
-            refused.append({"scenario": sid, "reason": why, "stale_grade_removed": False})
-            print(f"  {sid}: refused, {why}", file=sys.stderr)
+            refused.append({"scenario": sid, "stale_grade_removed": False,
+                            "reason": f"scenario id {sid!r} is reserved: ids beginning "
+                                      "with _ are the run's own summaries, not scenarios"})
+            print(f"  {sid}: refused, reserved id; nothing was removed for it",
+                  file=sys.stderr)
+            continue
+        why = why_ungradeable(sid, m)
+        if why is None:
             continue
         # A refusal that leaves the previous run's file in place is not a refusal: a
         # reader of grades/<grader>/ sees the old PASS and no indication that this run

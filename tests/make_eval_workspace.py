@@ -183,16 +183,40 @@ def find_leaks(root: Path) -> list[str]:
     return sorted(hits)
 
 
+# Headings that only an answer key carries. A prompt is built from the ticket and the
+# evidence, a skill from the documentation, a corpus page from the page it was fetched
+# from: none of them contains any of these, so their presence anywhere in the workspace is
+# a leak. Checked on every file.
+UNIQUE_KEY_HEADINGS = frozenset({
+    "ground truth resolution",
+    "correct remediation",
+    "common incorrect answers",
+    "evaluation rubric",
+})
+
+# Headings that DO occur legitimately. "References" and "Verification" are ordinary
+# documentation headings, so they are only held against files that are not trusted
+# builder output; see _eligible_for_block_scan for why prompts, skills and corpus are
+# excluded from that scan.
+GENERIC_KEY_HEADINGS = frozenset({"references", "verification"})
+
+
 def _norm_heading(line: str) -> str | None:
-    m = re.match(r"^#{1,6}\s*(.*)$\s*$", line.strip())
+    """A markdown heading reduced to comparable words, or None if the line is not one.
+
+    Every non-alphanumeric character becomes a space, so "Ground-truth resolution" and
+    "Ground Truth Resolution" compare equal. The previous version tried to do that with
+    `re.sub(r"\\s*[-–—]?\\s*", " ", text)`, where every group is optional and therefore
+    matches the empty string at every position: it inserted a space between each
+    character and turned "references" into "r e f e r e n c e s". The result was that no
+    ordinary heading ever matched, so the heading half of the leak check never fired.
+    """
+    m = re.match(r"^#{1,6}\s*(.*?)\s*#*\s*$", line.strip())
     if not m:
         return None
-    text = m.group(1).strip().lower()
-    # Normalise punctuation and spacing, but keep the hyphen meaningful.
-    text = re.sub(r"[ \t]+", " ", text)
-    text = re.sub(r"\s*[-–—]?\s*", " ", text).strip()
-    text = re.sub(r"\s+", " ", text)
-    return text
+    text = m.group(1).lower()
+    text = re.sub(r"[^a-z0-9]+", " ", text)
+    return re.sub(r"\s+", " ", text).strip() or None
 
 
 def _is_key_heading(text: str) -> bool:
@@ -202,23 +226,19 @@ def _is_key_heading(text: str) -> bool:
         return True
     if text.startswith("not a critical failure"):
         return True
-    return text in {
-        "ground truth resolution",
-        "ground-truth resolution".replace("-", " "),
-        "correct remediation",
-        "verification",
-        "common incorrect answers",
-        "evaluation rubric",
-        "references",
-    }
+    return text in UNIQUE_KEY_HEADINGS
 
 
-def _content_leak_headings(text: str) -> bool:
+def _is_generic_key_heading(text: str) -> bool:
+    return text in GENERIC_KEY_HEADINGS
+
+
+def _content_leak_headings(text: str, generic: bool) -> bool:
     for line in text.splitlines():
         h = _norm_heading(line)
         if h is None:
             continue
-        if _is_key_heading(h):
+        if _is_key_heading(h) or (generic and _is_generic_key_heading(h)):
             return True
     return False
 
@@ -262,7 +282,10 @@ def _held_back_snippets() -> tuple[str, ...]:
                 texts.append(cf)
 
     def _norm(s: str) -> str:
-        return re.sub(r"\\s+", " ", s).strip().lower()
+        # r"\\s+" matched a literal backslash followed by s, so nothing was ever
+        # collapsed and a held-back block copied with different line wrapping produced a
+        # different string from the original and was not detected.
+        return re.sub(r"\s+", " ", s).strip().lower()
 
     pieces: set[str] = set()
     for t in texts:
@@ -320,12 +343,13 @@ def _content_leaks(root: Path) -> list[str]:
             continue
         if raw == "":
             continue
-        if _content_leak_headings(raw):
+        generic = _eligible_for_block_scan(rel)
+        if _content_leak_headings(raw, generic):
             hits.append(rel)
             continue
-        if not _eligible_for_block_scan(rel):
+        if not generic:
             continue
-        norm = re.sub(r"\\s+", " ", raw).strip().lower()
+        norm = re.sub(r"\s+", " ", raw).strip().lower()
         if any(sig in norm for sig in signatures):
             hits.append(rel)
     return hits

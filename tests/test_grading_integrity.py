@@ -381,6 +381,72 @@ def _():
         assert sb.summary()["by_verdict"]["PASS"] == 0, sb.summary()
 
 
+@case("a scores key that is not a scenario id removes nothing")
+def _():
+    # Every scenario id becomes a filename here, and the refusal cleanup unlinks
+    # `<sid>.json`. A key of `../../../tmp/victim` unlinked a file outside the grade
+    # directory: the path was built from a key nobody validated.
+    mod = load_grader()
+    with tempfile.TemporaryDirectory(prefix="apigee-grade-") as d:
+        sb = Sandbox()
+        sb.dir = Path(d)
+        sb.run = sb.dir / "run-3"
+        (sb.run / "raw").mkdir(parents=True)
+        sb.manifest_path = sb.run / "manifest.json"
+        outside = Path(d).parent / "victim"
+        outside.write_text("not a grade", encoding="utf-8")
+        traversal = "../" * 6 + outside.name
+        sb.set_status(SID, "AWAITING_GRADE")
+        sb.write_answers(SID)
+        proc = sb.run_grade({SID: {"anchors": anchors_from_key(mod, SID, 4),
+                                  "critical": False},
+                             traversal: {"anchors": {"a": 4}, "critical": False}})
+        assert proc.returncode != 0, "a bad id must not exit 0"
+        assert outside.is_file(), "a refusal deleted a file outside the grade directory"
+        assert "not a scenario id" in proc.stderr, proc.stderr
+        assert sb.grade_file(SID) is not None, "the real scenario should still be graded"
+        assert outside.unlink() or True
+
+
+@case("a reserved id removes nothing either")
+def _():
+    mod = load_grader()
+    with tempfile.TemporaryDirectory(prefix="apigee-grade-") as d:
+        sb = Sandbox()
+        sb.dir = Path(d)
+        sb.run = sb.dir / "run-3"
+        (sb.run / "raw").mkdir(parents=True)
+        sb.manifest_path = sb.run / "manifest.json"
+        sb.set_status(SID, "AWAITING_GRADE")
+        sb.write_answers(SID)
+        sb.seed_stale_grade(SID)
+        sb.run_grade({SID: {"anchors": anchors_from_key(mod, SID, 4), "critical": False},
+                      "_summary": {"anchors": {"a": 4}, "critical": False}})
+        # The run's own summary is written after grading, so the one that matters is the
+        # scenario's: a reserved key must not remove a scenario's grade on its way past.
+        assert sb.grade_file(SID) is not None, "a reserved key removed a scenario grade"
+        s = sb.summary()
+        assert any(r["scenario"] == "_summary" for r in s["refused"]), s["refused"]
+
+
+@case("rewriting a grade leaves its permissions alone")
+def _():
+    mod = load_grader()
+    with tempfile.TemporaryDirectory(prefix="apigee-grade-") as d:
+        sb = Sandbox()
+        sb.dir = Path(d)
+        sb.run = sb.dir / "run-3"
+        (sb.run / "raw").mkdir(parents=True)
+        sb.manifest_path = sb.run / "manifest.json"
+        sb.set_status(SID, "AWAITING_GRADE")
+        sb.write_answers(SID)
+        target = sb.seed_stale_grade(SID)
+        _ = target.chmod(0o644)
+        sb.run_grade({SID: {"anchors": anchors_from_key(mod, SID, 4), "critical": False}})
+        mode = (sb.run / "grades" / "primary" / f"{SID}.json").stat().st_mode & 0o777
+        assert mode == 0o644, oct(mode)
+
+
 # ---------------------------------------------------------------------------
 # A verdict must name the answer it is about, and a refusal must not leave the
 # previous run's verdict standing in its place.

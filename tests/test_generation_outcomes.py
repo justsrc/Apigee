@@ -512,6 +512,28 @@ def _():
     assert s.malformed == 0, s
 
 
+@case("a line that is valid JSON of the wrong shape is counted, not fatal")
+def _():
+    # Parseable is not the same as readable. These took the harness down rather than
+    # failing an attempt: part.get on a string, and .strip() on None.
+    h = harness(Path("/nonexistent"))
+    s = h.mod.parse_events(
+        '{"type":"text","part":"x"}\n'
+        '{"type":"text","part":{"type":"text","text":null}}\n'
+        + turn_stream(ANSWER))
+    assert s.text == ANSWER, s.text
+    assert s.malformed == 2, s
+    assert s.session_id == "sess-1", s.session_id
+
+
+@case("a text event whose part is missing entirely is counted")
+def _():
+    h = harness(Path("/nonexistent"))
+    s = h.mod.parse_events('{"type":"text"}\n' + turn_stream(ANSWER))
+    assert s.malformed == 1, s
+    assert s.text == ANSWER, s.text
+
+
 @case("a line that is not JSON is counted, not ignored")
 def _():
     h = harness(Path("/nonexistent"))

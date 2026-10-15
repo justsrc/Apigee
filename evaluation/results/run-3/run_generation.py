@@ -335,10 +335,7 @@ def migrate_windows(m: Manifest) -> bool:
 
 def load() -> Manifest:
     if MANIFEST.exists():
-        m = cast("Manifest", json.loads(MANIFEST.read_text(encoding="utf-8")))
-        if migrate_windows(m):
-            save(m)
-        return m
+        return cast("Manifest", json.loads(MANIFEST.read_text(encoding="utf-8")))
     m: Manifest = {
         "run": "run-3",
         "protocol": "evaluation/results/run-3/PROTOCOL.md",
@@ -363,6 +360,10 @@ def save(m: Manifest) -> None:
 
 
 def window(m: Manifest) -> BudgetWindow:
+    # Migration happens here, not in load(), so `--list` stays a read of the manifest
+    # rather than a write to it. Everything that spends reads this window first.
+    if migrate_windows(m):
+        save(m)
     k = window_key(now_ist())
     return m["budget"]["windows"].setdefault(
         k, {"attempts": 0, "quota_exhausted": False, "requests": []})
@@ -456,7 +457,18 @@ def parse_events(raw: str) -> Stream:
         if event.get("sessionID") and not sid:
             sid = str(event.get("sessionID"))
         kind = str(event.get("type") or "")
-        part: EventPart = event.get("part") or {}
+        # Valid JSON is not the same as the shape this reads. `{"type":"text",
+        # "part":"x"}` and `{"type":"text","part":{"text":null}}` are both parseable and
+        # both took the harness down: part.get on a string, and .strip() on None. A stream
+        # shape this parser does not understand is a failed attempt, recorded as one, not
+        # an exception that ends the run.
+        raw_part = event.get("part")
+        part: EventPart = raw_part if isinstance(raw_part, dict) else {}
+        if kind == "text" and not isinstance(raw_part, dict):
+            # Every text event this harness has seen carries a part. One that does not is
+            # a stream shape it cannot read, and counting it is what turns a silent skip
+            # into a failed attempt.
+            malformed += 1
         part_kind = str(part.get("type") or "")
         # Named both ways on purpose: the CLI writes `step_finish` for the event and
         # `step-finish` for the part inside it, and which one is read should not depend on
@@ -464,7 +476,13 @@ def parse_events(raw: str) -> Stream:
         if kind in COMPLETION_TYPES or part_kind in COMPLETION_TYPES:
             completed = True
         if kind == "text" and part_kind == "text":
-            text.append(part.get("text", ""))
+            chunk = part.get("text")
+            if not isinstance(chunk, str):
+                # A text event with no string in it is not an answer and is not silently
+                # an empty one: it is counted, so a stream of them fails the attempt.
+                malformed += 1
+            else:
+                text.append(chunk)
         if kind == "error":
             err: EventError = event.get("error") or {}
             etype = str(err.get("type") or "error")

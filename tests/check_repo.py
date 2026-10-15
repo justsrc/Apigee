@@ -64,6 +64,10 @@ REQUIRED_SCENARIO_SECTIONS = [
 # matcher itself stays exact. "remediation" is the requirement; "Correct remediation" is
 # the heading all 103 graded scenarios use, and it was matching only because the test
 # accepted a substring.
+# What a section may say to state that it is deliberately empty.
+AUTHORED_ABSENCE = frozenset({"none", "n a", "none available", "no evidence",
+                              "not applicable", "no initial evidence"})
+
 SECTION_ALIASES = {
     "remediation": "correct remediation",
 }
@@ -241,7 +245,12 @@ def section_present(block: str, wanted: str) -> tuple[bool, int]:
             body_lines = block.splitlines()
             stop = headings[idx + 1][2] if idx + 1 < len(headings) else len(body_lines)
             content = "\n".join(body_lines[line_no + 1 : stop]).strip()
-            if len(content) >= 40:
+            # An authored "there is none" counts as the section being there. ADV-06 is an
+            # adversarial scenario whose first turn carries no evidence at all, and its
+            # Initial evidence section says so in five characters; that is the premise,
+            # not a truncated extraction. The allowance is exactly these markers and
+            # nothing else, so a heading left empty by a partial write still fails.
+            if len(content) >= 40 or _norm(content) in AUTHORED_ABSENCE:
                 return True, len(content)
             return False, len(content)
     return False, 0
@@ -374,9 +383,9 @@ def check_scenarios(root: Path, r: Results) -> None:
             if len(urls) < 1:
                 missing_section_hits.append(f"{sid}: References section has no URL")
 
-    for hit in missing_section_hits:
-        r.fail(f"scenario {hit}")
-
+    # Reported after every file has been walked. This loop used to sit above the
+    # adversarial/regression walk, so any hit those two files appended was collected and
+    # never printed: the checks ran and their findings went nowhere.
     for difficulty, count in sorted(per_difficulty.items()):
         if count >= MIN_PER_DIFFICULTY:
             r.ok(f"{difficulty}: {count} scenarios (minimum {MIN_PER_DIFFICULTY})")
@@ -385,20 +394,96 @@ def check_scenarios(root: Path, r: Results) -> None:
 
     # Adversarial and regression suites are additional but load-bearing: the regression
     # suite is the documented smoke test after a skill change, so a missing file is a
-    # missing test rather than a missing extra. Both were previously warned about, which
-    # let `rm scenarios/regression.md` exit 0. Their IDs are still checked for uniqueness
-    # and prefix, but they do not carry the full graded section list.
+    # missing test rather than a missing extra.
+    #
+    # They used to be counted and nothing else, on the stated ground that they "do not
+    # carry the full graded section list". All 13 adversarial and 8 regression scenarios
+    # do carry it, so the exemption checked nothing and let two fault probes claim a
+    # property nothing enforced. They are walked like the other three files now.
     for extra in ("adversarial.md", "regression.md"):
         p = scenarios_dir / extra
         if not p.is_file():
             r.fail(f"missing scenario file: {extra}. The regression suite is the "
                    + "documented post-change smoke test and cannot be optional.")
             continue
-        n = len(find_scenario_blocks(read(p)))
-        if n:
-            r.ok(f"{extra}: {n} scenarios")
-        else:
+        extra_blocks = find_scenario_blocks(read(p))
+        if not extra_blocks:
             r.fail(f"{extra}: no scenarios found")
+            continue
+        for sid, block in extra_blocks:
+            if sid not in all_ids:
+                all_ids[sid] = extra
+            for section in REQUIRED_SCENARIO_SECTIONS:
+                ok, size = section_present(block, section)
+                if not ok:
+                    if size:
+                        missing_section_hits.append(
+                            f"{sid}: '{section}' is present but nearly empty ({size} chars)")
+                    else:
+                        missing_section_hits.append(f"{sid}: missing section '{section}'")
+            if URL_RE.search(block) is None:
+                missing_section_hits.append(f"{sid}: References section has no URL")
+        r.ok(f"{extra}: {len(extra_blocks)} scenarios with the required sections")
+
+    for hit in missing_section_hits:
+        r.fail(f"scenario {hit}")
+
+
+# Scenario ids that are absent on purpose, each with where that is written down. An id
+# sequence is otherwise expected to be contiguous: a deleted scenario leaves a gap that
+# nothing else in the repository reports, and the gap is what makes "we have 45 medium
+# scenarios" a different claim from "we lost one".
+#
+# MED-31 is the one real gap. It is recorded as absent in evaluation/audit-medium-B.md,
+# which also carries the grep that establishes it.
+KNOWN_SCENARIO_ID_GAPS: dict[str, str] = {
+    "MED-31": "evaluation/audit-medium-B.md records it as not present, with the grep",
+}
+
+
+def check_scenario_id_sequences(root: Path, r: Results) -> None:
+    """Each suite's ids run 1..N with no unexplained hole.
+
+    There was no contiguity check anywhere: deleting MED-20 was caught only as collateral
+    (a packet for a scenario that no longer exists, and a stale index), never as a gap in
+    the sequence, so a fault probe asserting a gap is detected was asserting a property
+    that did not exist.
+    """
+    scenarios_dir = root / SCENARIOS_DIR
+    if not scenarios_dir.is_dir():
+        return
+    by_prefix: dict[str, list[int]] = defaultdict(list)
+    for p in sorted(scenarios_dir.glob("*.md")):
+        if p.name == "index.md":
+            continue
+        for m in re.finditer(r"^### ([A-Z]+)-(\d+)\b", read(p), re.M):
+            by_prefix[m.group(1)].append(int(m.group(2)))
+
+    unexplained: list[str] = []
+    documented: list[str] = []
+    for prefix, numbers in sorted(by_prefix.items()):
+        uniq = sorted(set(numbers))
+        if not uniq:
+            continue
+        holes = [n for n in range(uniq[0], uniq[-1] + 1) if n not in set(uniq)]
+        for n in holes:
+            sid = f"{prefix}-{n:02d}"
+            if sid in KNOWN_SCENARIO_ID_GAPS:
+                documented.append(f"{sid} ({KNOWN_SCENARIO_ID_GAPS[sid]})")
+            else:
+                unexplained.append(sid)
+        dups = len(numbers) - len(uniq)
+        if dups:
+            unexplained.append(f"{prefix} has {dups} duplicate id number(s)")
+
+    if unexplained:
+        r.fail("scenario ids have unexplained gaps: " + ", ".join(unexplained)
+               + ". Add an entry to KNOWN_SCENARIO_ID_GAPS in tests/check_repo.py if the "
+               "number was retired deliberately.")
+    if documented:
+        r.ok("scenario id gaps, all documented: " + "; ".join(documented))
+    if not unexplained and not documented:
+        r.ok(f"scenario ids are contiguous in {len(by_prefix)} suite(s)")
 
 
 def check_local_links(root: Path, r: Results) -> None:
@@ -968,8 +1053,15 @@ def check_reference_discovery(root: Path, r: Results) -> None:
             continue
         advertising += 1
         body = read(skill_md)
-        paths = sorted(set(cast("list[str]", re.findall(
-            r"`(references/[A-Za-z0-9._-]+\.md)`", body))))
+        # Two spellings, because a skill may advertise its references either way and a
+        # gate that accepts only one reports a reachable file as unreachable. Backticked
+        # paths are this repository's own convention; markdown links are the other way a
+        # reference is normally written down.
+        listed_paths = set(cast("list[str]", re.findall(
+            r"`(references/[A-Za-z0-9._-]+\.md)`", body)))
+        listed_paths.update(cast("list[str]", re.findall(
+            r"\]\((references/[A-Za-z0-9._/-]+\.md)\)", body)))
+        paths = sorted(listed_paths)
         for f in sorted(refs.glob("*.md")):
             total += 1
             # Listed as a path, not merely named. The old test was `f.name not in body`,
@@ -1365,6 +1457,7 @@ def main() -> int:
     check_not_a_critical_failure_completeness(root, r)
     check_generated_references(root, r)
     check_generated_freshness(root, r)
+    check_scenario_id_sequences(root, r)
     check_reference_discovery(root, r)
     check_scenario_codes(root, r)
     check_origin_integrity(root, r)
