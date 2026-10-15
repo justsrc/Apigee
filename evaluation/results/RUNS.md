@@ -133,6 +133,14 @@ the skills than without them, would be invented until an A/B run with the protoc
 | Budget | 45 attempts per 05:30-to-05:29 IST window, 337 total at full coverage |
 | Protocol | `evaluation/results/run-3/PROTOCOL.md`, frozen before collection |
 
+The two runs record different `.agents/skills` digests, and they are not comparable. Run 2's
+`baddc6e0c05ef2af` comes from `dir_digest` in `tests/make_eval_workspace.py`, which feeds each
+file's raw bytes to sha256. Run 3's `ba3500db7ca1755d` comes from `skill_digest` in
+`evaluation/results/run-3/freeze_artifacts.py`, which feeds each file's sha256 hex digest and
+skips `__pycache__`. The skill tree is byte-identical at `8e5d666` and `a25333b` (tree
+`ace3acd6`, nine files); evaluating both functions over it reproduces both recorded values. Neither
+record is wrong, and a difference between the two is not drift.
+
 ### Status
 
 **Zero answers collected.** The preflight returned HTTP 429 with

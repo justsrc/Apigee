@@ -1492,14 +1492,20 @@ is always red. `git_head` is reported on every verify and gated only behind an o
 `--strict-head`, because a commit comparison is weaker than the content hashes where it
 matters (a working-tree edit moves bytes, not HEAD) and noisier for no gain.
 
-**What is still open, deliberately.** The real tree is now unanchored and reports eight moved
-artifacts at exit 2. That is the honest state: the freeze predates the harness work on this
-branch, including its own first three fixes, and `artifact-hashes.json` has no sections for
-the four files that decide a verdict. Re-writing it re-blesses whatever is on disk at the
-moment it is written, so it is a human decision, taken at an agreed commit, with the harness
-edits either accepted or reverted on purpose. It is not done on this branch. `PROTOCOL.md`
-also needs a line about the sidecar and `--strict-head`, and `evaluation/results/run-4/`
-invokes this script, so both runs will hit the unanchored failure until the freeze is reset.
+**What is still open, deliberately.** The manifest is now anchored.
+`artifact-hashes.json.sha256` is committed beside it and carries the digest of the manifest as
+recorded in `d5656b7`, which has not been edited since. `--verify` therefore exits 1 and names
+eleven moved artifacts, instead of exiting 2 because nothing anchored it. The manifest is
+unchanged: adding the sidecar records what was already true rather than re-blessing the tree.
+
+The drift is real and is what the freeze exists to catch. The freeze predates the harness work
+on this branch, including its own first three fixes, and `artifact-hashes.json` has no entries
+for the four files that decide a verdict, so those now read as added. Re-writing the manifest
+would re-bless whatever is on disk at the moment it is written, so the re-freeze remains a human
+decision, taken at an agreed commit, with the harness edits either accepted or reverted on
+purpose. It is not done on this branch. `PROTOCOL.md` also still needs a line about the sidecar
+and `--strict-head`, and `evaluation/results/run-4/` invokes this script, so both runs stop on
+the moved artifacts until the freeze is reset.
 
 **Status: FIXED and covered**, with the re-freeze recorded above as a separate human step.
 
