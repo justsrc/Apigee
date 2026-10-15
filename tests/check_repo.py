@@ -831,7 +831,7 @@ def check_generated_freshness(root: Path, r: Results) -> None:
         r.ok("scenario index matches a fresh run of build_scenario_index.py")
 
     # The documentation index was the one generated file with no freshness check, so
-    # build_doc_index.py was rewritten in 96cc5c4 and its output kept describing a corpus
+    # build_doc_index.py was rewritten in c6a9fd1 and its output kept describing a corpus
     # thirty pages smaller than the one on disk. Nothing failed. This renders it offline,
     # the same way the two above are rendered.
     doc_index = root / "research/official-documentation-index.md"

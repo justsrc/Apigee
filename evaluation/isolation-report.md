@@ -241,7 +241,7 @@ in this repository has demonstrated that a model was refused.
 ## What F6 does and does not claim
 
 `release_gate.py` F6 reads "Evaluation isolation is enforced, not instructed". Its scope was
-set by `de540e5` and is deliberate. It certifies that the enforcement mechanism exists: the
+set by `20b7bd5` and is deliberate. It certifies that the enforcement mechanism exists: the
 workspace is built with no answer material in it, and `opencode.jsonc` denies
 `external_directory`, `shell`, `webfetch`, `websearch` and `subagent` in a rule the harness
 resolves before a tool call executes, where `--auto` cannot override it.

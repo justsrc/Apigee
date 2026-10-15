@@ -574,7 +574,7 @@ Two cross-cutting observations worth carrying forward:
    > `antipatterns/intro` is a cloud.google.com page scoped to Apigee and hybrid, not an OPDK
    > page. Three genuinely uncached OPDK pages (nginx-45301, rollback-45301,
    > update-apigee-edge-45202-45301) are missing from the list because raw copies of them survive
-   > under `research/scratch-pages/` and read as fetched. Commit `bb5d859` re-derived the list and
+   > under `research/scratch-pages/` and read as fetched. Commit `9c02e0a` re-derived the list and
    > cached all eleven OPDK pages. Five cited documentation URLs still have no local copy; they
    > are listed in D-022 in `evaluation/defect-register.md`.
 

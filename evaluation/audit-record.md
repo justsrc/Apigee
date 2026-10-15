@@ -27,11 +27,11 @@ Defects confirmed by reproduction, with the commit that fixed each one.
 
 | ID | Defect | Where | Fix |
 | --- | --- | --- | --- |
-| D1 | Critical-failure text truncated at the first line break in generated answer keys | `tests/make_packets.py` | `0a976fa` |
-| D2 | Raw `<span>` markup and pandoc escapes leaked into generated fault codes and causes | `research/build_error_index.py` | `6508133` |
-| D3 | README and checker comments stated scenario and reference counts that no longer match the repository | `README.md`, `tests/check_urls.sh` | `abb9906` |
-| D4 | A runtime table with no HTTP column was read as (code, status, cause), and its header row was kept as a fault code | `research/build_error_index.py` | `eb164f8` |
-| D5 | `policy-mechanics.md` existed but no skill file named it, so no agent would load it | `SKILL.md`, `tests/check_repo.py` | `c8aefbc` |
+| D1 | Critical-failure text truncated at the first line break in generated answer keys | `tests/make_packets.py` | `5eddb72` |
+| D2 | Raw `<span>` markup and pandoc escapes leaked into generated fault codes and causes | `research/build_error_index.py` | `25e9f7c` |
+| D3 | README and checker comments stated scenario and reference counts that no longer match the repository | `README.md`, `tests/check_urls.sh` | `04ab4e0` |
+| D4 | A runtime table with no HTTP column was read as (code, status, cause), and its header row was kept as a fault code | `research/build_error_index.py` | `e288719` |
+| D5 | `policy-mechanics.md` existed but no skill file named it, so no agent would load it | `SKILL.md`, `tests/check_repo.py` | `065cfba` |
 
 `tests/check_repo.py` carries a guard for three of them: answer-key completeness (D1), no
 raw HTML or escaped angle brackets in generated references (D2), and every reference file

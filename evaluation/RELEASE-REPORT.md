@@ -10,13 +10,13 @@ Date: 2026-10-12. Baseline: git tag `baseline-v0.1` at `ce3d96d`.
 ## 0. Current status
 
 Written 2026-10-13, corrected 2026-10-13 after re-running the gate. Read this before section 1,
-which describes the project as it stood at `832bbca`.
+which describes the project as it stood at `f21f8dd`.
 
 The earlier version of this section said "31 criteria" and "27 PASS offline". Both were the
-pre-`de540e5` count. That commit added F6 as a 32nd criterion and moved the offline run from
+pre-`20b7bd5` count. That commit added F6 as a 32nd criterion and moved the offline run from
 27 to 28 PASS. Nothing else about the verdict changed.
 
-Current figures, re-run on 2026-10-13 against `898d9d4`:
+Current figures, re-run on 2026-10-13 against `bc44b04`:
 
 `python3 tests/release_gate.py` returns **PROVISIONAL**: 29 PASS, 0 FAIL, 0 BLOCKED,
 3 UNVERIFIED across 32 criteria, on the full run including the live URL audit. The same run
@@ -25,22 +25,22 @@ QUALIFIED, because the URL criterion is recorded as BLOCKED rather than passed w
 run is skipped.
 
 The 32 criterion IDs are A1-A5, B1-B4, C1-C5, D1-D4, E1-E5, F1-F6, G1-G3. F6
-("Evaluation isolation is enforced, not instructed") is the one `de540e5` added.
+("Evaluation isolation is enforced, not instructed") is the one `20b7bd5` added.
 
 **PROVISIONAL is the honest result and is not a step toward a green build.** E5, G1 and G2
 ask for a model to have actually answered the scenarios. No model has been run against this
 suite under a declared protocol, so those three stay UNVERIFIED. Nothing else is missing.
 
 The verdict moved from NOT QUALIFIED to PROVISIONAL because the gate changed, not because
-the project passed something it had not passed before. At `832bbca` the gate computed
+the project passed something it had not passed before. At `f21f8dd` the gate computed
 `qualified = not failed and not blocked`, which ignored UNVERIFIED entirely, so the three
 model criteria were worth nothing to the verdict and the report below reads NOT QUALIFIED
-only because D3 happened to be BLOCKED at the time. `c564ee1` replaced that with three
+only because D3 happened to be BLOCKED at the time. `6ee0bf0` replaced that with three
 outcomes and fixed two criteria that could not fail: C2 read `PASS if unresolved else PASS`,
 which returns PASS for every possible value of the thing it checks, and C4 mapped
 `check_urls.py`'s exit 2, meaning "I could not audit anything", to PASS.
 
-| | At 832bbca | Now |
+| | At f21f8dd | Now |
 | --- | --- | --- |
 | Verdict | NOT QUALIFIED | PROVISIONAL |
 | Criteria | 30 | 32 |
@@ -75,17 +75,17 @@ had to be merged after D-001, not the size of the index.
 
 | Commit | What it changed |
 | --- | --- |
-| `c564ee1` | Three verdicts, UNVERIFIED no longer implies qualified, C2 and C4 made failable, `tests/test_release_gate.py` |
-| `3e23cfa` | README states `.agents/skills/` is the only tested platform; B4 had been a false PASS |
-| `bb5d859` | Cached the eleven OPDK pages the corpus was missing |
-| `7aa47f5` | The leakage test was comparing against an empty string and had never checked anything; `tests/make_eval_workspace.py` added |
-| `1f23d4c` | The rubric defined weights and no pass threshold; thresholds and a two-grader procedure added |
-| `444579a`, `2ffb8bd`, `c53d527`, `d0115e6`, `29ec460`, `7bdcefa` | Scenario ground truths that contradicted their own sources or rubrics |
-| `cb057df`, `135006b`, `970e75a`, `30e42a8`, `f94ef05`, `0755e82` | MED-09, MED-20, MED-18, MED-12, MED-14, MED-16 |
-| `83be335` | E5 reads the run record instead of asserting that no run exists; five cases added |
-| `1aeb0d3`, `a8df013` | Two defects run 2 found in the suite: MED-27's unscoreable rubric row and HARD-09's ground truth contradicting its own evidence |
+| `6ee0bf0` | Three verdicts, UNVERIFIED no longer implies qualified, C2 and C4 made failable, `tests/test_release_gate.py` |
+| `4830f1d` | README states `.agents/skills/` is the only tested platform; B4 had been a false PASS |
+| `9c02e0a` | Cached the eleven OPDK pages the corpus was missing |
+| `b2d830a` | The leakage test was comparing against an empty string and had never checked anything; `tests/make_eval_workspace.py` added |
+| `43d5175` | The rubric defined weights and no pass threshold; thresholds and a two-grader procedure added |
+| `d016fda`, `f616fe4`, `a4ad251`, `0149094`, `63c7c77`, `b8c9be3` | Scenario ground truths that contradicted their own sources or rubrics |
+| `b19d34a`, `9fcea06`, `c68e207`, `70c3159`, `bd1b187`, `551f8a1` | MED-09, MED-20, MED-18, MED-12, MED-14, MED-16 |
+| `99a3c7e` | E5 reads the run record instead of asserting that no run exists; five cases added |
+| `a102819`, `d932a6d` | Two defects run 2 found in the suite: MED-27's unscoreable rubric row and HARD-09's ground truth contradicting its own evidence |
 
-## 1. Verdict as recorded at 832bbca (superseded by section 0)
+## 1. Verdict as recorded at f21f8dd (superseded by section 0)
 
 **NOT QUALIFIED.**
 

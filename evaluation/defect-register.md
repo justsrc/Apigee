@@ -179,10 +179,10 @@ This entry originally said ten. `evaluation/audit-hard-reg.md:528` is where the 
 and the list it carried was wrong three ways: its tenth item, `view-page`, is not a URL and
 appears nowhere else in the repository; its ninth, `antipatterns/intro`, is not an OPDK page;
 and three genuinely uncached OPDK pages were missing from the list altogether, because raw
-copies of them survive under `research/scratch-pages/` and looked fetched. `bb5d859` re-derived
+copies of them survive under `research/scratch-pages/` and looked fetched. `9c02e0a` re-derived
 the list and cached all eleven OPDK pages.
 
-**Status: PARTIALLY FIXED.** As of `bb5d859` the eleven OPDK pages are cached and all eleven
+**Status: PARTIALLY FIXED.** As of `9c02e0a` the eleven OPDK pages are cached and all eleven
 answered HTTP 200 under the pinned v4.53.01 release. Five cited documentation URLs still have
 no local copy:
 
@@ -669,8 +669,8 @@ title-leak findings are superseded rather than outstanding.
 Corrected 2026-10-13: this entry recorded ADV-05, which was wrong. `AM-Enrich` appeared at
 `scenarios/adversarial.md:529` in the pre-fix tree, inside the block that opens at
 `509: ### ADV-07. Symptom points at the wrong component` (ADV-05 runs 351-435 and never
-contained it). `git show 3d6c521:scenarios/adversarial.md` confirms the line, and
-`8966ded` changed it. The scenario ID was the only error; the defect, the diagnosis and the
+contained it). `git show b780d8f:scenarios/adversarial.md` confirms the line, and
+`512311d` changed it. The scenario ID was the only error; the defect, the diagnosis and the
 fix are as recorded below.
 
 **What failed.** `AM-VerifyToken` appeared in HARD-04's diagnostic evidence and
@@ -709,7 +709,7 @@ Found 2026-10-13 by the same blinded review as D-035, and the more mechanical of
 **What failed.** Two separate losses, both invisible in every existing check.
 
 1. MED-09 carries two `#### Not a critical failure:` rulings. `section()` returns the first
-   matching heading, so the second never reached the key. The second is the one `cb057df`
+   matching heading, so the second never reached the key. The second is the one `b19d34a`
    added to stop the grader failing a documented-correct caveat, so the generator was
    reinstating exactly the defect that commit fixed, and the key still looked complete.
 2. A `#### Not a critical failure: <subject>` heading carries its subject in the heading line.
@@ -740,7 +740,7 @@ class of silent loss, which itself silently lost one of them, is the part worth 
 - **Affected** `scenarios/easy.md` EASY-15
 
 Found 2026-10-13 by a blinded review of the 12 scenarios whose model-visible prompts are
-byte-identical between `3d6c521` and `898d9d4`. Recorded because it is the one case in that
+byte-identical between `b780d8f` and `bc44b04`. Recorded because it is the one case in that
 review where the current key was worse than the historical one.
 
 **What failed.** The remediation added a critical failure for "proposing a shared flow as an
@@ -782,7 +782,7 @@ demonstrates it is the evidence.
 Found 2026-10-13 by the same blinded review as D-035 and D-036, and recorded because it is
 the second case of a current key being worse than the historical one it replaced.
 
-**What failed.** The remediation `970e75a` added reads, in the hotfix paragraph: "The same
+**What failed.** The remediation `c68e207` added reads, in the hotfix paragraph: "The same
 property, read as `false` on this cluster, is what excludes the MART defect". The scenario's
 turn-2 diagnostic evidence says the opposite: MART is on `1.16.0` **and** "the installation
 has both Workload Identity Federation enabled and an HTTP forward proxy configured". WIF is
@@ -806,17 +806,17 @@ prompt-visible, and the corpus read is the evidence.
 
 - **Affected** the proposed paired A/B evaluation; no file defect
 
-**What failed.** The handoff named `ecf2ffe` as the pre-remediation state. `ecf2ffe` is the
-child of `f9d7de8`, which is itself a remediation commit that edits
-`references/error-codes.md` and `references/hybrid.md`. The "35 commits since `ecf2ffe`"
-count therefore absorbed `f9d7de8` into the baseline arm.
+**What failed.** The handoff named `e63d130` as the pre-remediation state. `e63d130` is the
+child of `80e8009`, which is itself a remediation commit that edits
+`references/error-codes.md` and `references/hybrid.md`. The "35 commits since `e63d130`"
+count therefore absorbed `80e8009` into the baseline arm.
 
 Had this gone unnoticed, both arms would have carried the first remediation commit and the
 comparison would have returned a guaranteed null. A null that looks like a measurement and
 is an artefact of the baseline choice is the worst available outcome, because it is
 indistinguishable from a real finding at reading time.
 
-**Correct baseline** is `5b40edd96007eda996d5787b540b1ae51e32394f`, the parent of `f9d7de8`.
+**Correct baseline** is `3e78f5f5126627d499c53c3b2bfc5f7747bacf78`, the parent of `80e8009`.
 The remediation span is 37 commits, not 35.
 
 **Why it matters beyond this experiment.** Any comparison that reconstructs its baseline
@@ -861,7 +861,7 @@ wanted.
 ### D-038 HIGH — Packet freshness was decided by file timestamps, which a commit does not record
 
 - **Affected** `tests/check_repo.py` (`check_packets`), `tests/make_packets.py`
-- **Remediation** `0587bc8`
+- **Remediation** `b2e06db`
 
 **What failed.** `check_repo.py` decided an answer key was stale by asking whether the
 packet's mtime was older than the mtime of the scenario file containing that scenario id. An
@@ -937,7 +937,7 @@ design. Recovering four criteria did not qualify the project and was not used to
 
 - **Affected** `tests/fault_probe.py` probes `origin-field-removed` and
   `origin-unclassifiable-value`
-- **Remediation** `3c46b4c`
+- **Remediation** `eed6808`
 
 **What failed.** Both probes anchored their regex with `^` and passed no `re.MULTILINE` flag,
 so the pattern matched only at the start of the file. The field they meant to change is a
@@ -971,7 +971,7 @@ for the same mistake; these were the only two.
 
 **Status: FIXED and covered**, but the coverage claim here is weaker than the other two
 entries and is why D-039 was closed with a second commit. Fixing the probes leaves the suite
-unable to notice a probe that stops working, which is the defect itself. `4069ef2` adds the
+unable to notice a probe that stops working, which is the defect itself. `95a84aa` adds the
 missing guard: each probe digests the sandbox before and after its own mutation, and a probe
 expecting a FAIL that changed no file is reported as NO MUTATION and fails the suite whatever
 the checker said. Content is digested rather than timestamps because a no-op `write_text`
@@ -986,11 +986,11 @@ short of reading each probe settles that, and the suite has 35 of them.
 ### D-040 HIGH — A nonzero exit from the provider was recorded as a completed answer
 
 - **Affected** `evaluation/results/run-3/run_generation.py` (`one_turn`)
-- **Remediation** `db5ee6e`
+- **Remediation** `90a0901`
 
 **What failed.** The harness's failure predicate read `rc == -1`. That value is the harness's
 own sentinel for a `subprocess.TimeoutExpired`, not a real exit status, so every other nonzero
-exit passed the test and fell through to the OK branch. `75f1997` fixed the sibling defect
+exit passed the test and fell through to the OK branch. `6600a19` fixed the sibling defect
 where an error event's message was appended to the answer text, and recorded this path
 deliberately untouched.
 
@@ -1008,7 +1008,7 @@ The Quota policy rejects the revision at upload, because the interval
 `AWAITING_GRADE`, and a grader reads `raw/<sid>.turn<N>.md`. A truncated sentence presented as
 a finished answer is scored against the rubric exactly like a whole one, and a critical-failure
 condition that a complete answer would have tripped can be missed on a partial one. This is the
-same false-success shape `75f1997` was written to close, reached by a different route.
+same false-success shape `6600a19` was written to close, reached by a different route.
 
 **Cause.** Verified. The predicate enumerated one sentinel value rather than testing for
 success.
@@ -1041,7 +1041,7 @@ error, passed before the fix and guards the ordering the fix could have broken.
 
 **Remaining uncertainty.** Run 3 never reached a turn. All 103 scenarios in its manifest are
 NOT_STARTED, so nothing in `evaluation/results/run-3/` was produced by the harness this commit
-changed, and no recorded score is affected either way. The second path `75f1997` left open is
+changed, and no recorded score is affected either way. The second path `6600a19` left open is
 untouched: a policy carrying `continueOnError="true"` that swallows a failure contributes no
 fault to the manifest while its text still reaches the answer file. It is a defect in the fault
 inventory rather than in the outcome classification, it is not what produced the run-3
@@ -1057,7 +1057,7 @@ unverified for the same reason they were before this pass.
 ### D-041 HIGH — `grade_run.py` scored scenarios the manifest said were never run
 
 - **Affected** `evaluation/results/run-3/grade_run.py`
-- **Remediation** `acb326e`
+- **Remediation** `19419c4`
 - **Regression test** `tests/test_grading_integrity.py`
 
 **What failed.** `--run` took the grader's JSON at face value. It read the answer key, scored
@@ -1076,7 +1076,7 @@ Nothing had been generated. The number was arithmetic on the caller's own input,
 thing that made it look like a result was that it was written into the same directory as real
 grades, where `_summary.json` reported `mean_normalized_score: 1.0` and `critical_failure_free: 1`.
 
-**Why it matters.** This is the other end of the sentence in `75f1997`, which stopped the
+**Why it matters.** This is the other end of the sentence in `6600a19`, which stopped the
 generation harness from writing a provider error into an answer file on the grounds that a
 false success "produces a score for a turn the model never answered". The generation path was
 hardened; the component that writes the score was not. The outcome that commit set out to
@@ -1118,7 +1118,7 @@ there to show the new gate does not reject a scenario that genuinely ran.
 ### D-042 MEDIUM — A grading input error was recorded as a model failure
 
 - **Affected** `evaluation/results/run-3/grade_run.py`
-- **Remediation** `acb326e`
+- **Remediation** `19419c4`
 - **Regression test** `tests/test_grading_integrity.py`
 
 **What failed.** Three lines coerced a score that could not be computed into a FAIL, whenever
@@ -1192,7 +1192,7 @@ of it is about machinery. Run 3 collected nothing, so no recorded score depends 
 ### D-043 HIGH — The fault-code check was switched off by the ordinary word "Rejected"
 
 - **Affected** `tests/check_repo.py::check_scenario_codes`
-- **Remediation** `5ee1356`
+- **Remediation** `4bc016d`
 - **Regression test** probe `scenario-invents-fault-code-in-a-scenario-naming-rejected`
 - **Evidence** reproduced here
 
@@ -1202,7 +1202,7 @@ bare substring search over the whole scenario, so any scenario whose prose conta
 was exempt from the fault-code check entirely. HARD-22 uses "Rejected" as a label in a list
 of LDAP symptoms, so it was exempt, and MED-39 was exempt for the intended reason.
 
-**Why it matters.** This is the check the project was built around. `26f9430` exists to check
+**Why it matters.** This is the check the project was built around. `ac23304` exists to check
 every fault code cited in a scenario against the source corpus, and D-001 is the defect it
 was written for. One scenario out of 103 had that check silently disabled.
 
@@ -1229,7 +1229,7 @@ D-046.
 ### D-044 HIGH — A5 passed on a git error string, claiming a tag it could not see
 
 - **Affected** `tests/release_gate.py`
-- **Remediation** `30e2876`
+- **Remediation** `829a199`
 - **Evidence** reproduced here
 
 **What failed.** A5 asserts the baseline tag is present. It read the stdout of
@@ -1301,13 +1301,13 @@ ways the check could not run were found while changing it: a build returning 2 w
 reported as a leak, which it is not, and an empty scenario sample would build an empty
 workspace, find nothing in it, and call that clean.
 
-**Remediation** `c63ebdb`. **Test results.** `test_leakage.py` PASS with exit 0 on a clean
+**Remediation** `7749c30`. **Test results.** `test_leakage.py` PASS with exit 0 on a clean
 tree, `INCOMPLETE` and exit 1 with the builder deleted. **Status: FIXED.**
 
 ### D-047 MEDIUM — "Every reference path resolves" passes when no path was found
 
 - **Affected** `tests/check_repo.py::check_reference_discovery`
-- **Remediation** `57d0627`
+- **Remediation** `f552fed`
 - **Regression test** probe `reference-paths-no-longer-listed`
 - **Evidence** reproduced here
 
@@ -1379,7 +1379,7 @@ of the world is the trigger. Running `--batch` before the reset would strand tho
 for the whole run, and only a hand-edit of `manifest.json` would revive them, which no
 document describes.
 
-**Remediation** `6f13dba`, with D-050 and the turn-2 half of D-052 in the same commit because
+**Remediation** `b27bbea`, with D-050 and the turn-2 half of D-052 in the same commit because
 the three are interlocked in the same two functions and splitting them would leave
 intermediate states that do not run.
 
@@ -1403,7 +1403,7 @@ previous harness. **Status: FIXED and covered.**
 ### D-050 HIGH — A stale workspace is reused with nothing checking what is inside it
 
 - **Affected** `evaluation/results/run-3/run_generation.py`
-- **Remediation** `6f13dba`
+- **Remediation** `b27bbea`
 - **Regression test** `tests/test_generation_workspace.py`
 - **Evidence** reproduced here
 
@@ -1476,7 +1476,7 @@ has already collected for that scenario.
 packet is both invisible to it and fatal to the harness, which reads the packet outside any
 error handling and dies with a bare traceback.
 
-**Remediation** `4d60cb2`. **Regression test** `tests/test_freeze_artifacts.py`, 28 cases of
+**Remediation** `e880235`. **Regression test** `tests/test_freeze_artifacts.py`, 28 cases of
 which 24 fail against the previous script. The 4 that pass both ways are two controls, the
 deliberate exclusion of `manifest.json`, and a case the old script caught for a different
 reason.
@@ -1509,7 +1509,7 @@ invokes this script, so both runs will hit the unanchored failure until the free
 - **Evidence** from the review pass
 
 Two smaller integrity gaps, recorded together because they are both about a recorded result
-not being checkable after the fact. Both are open; the run-3 half of `6f13dba` edited
+not being checkable after the fact. Both are open; the run-3 half of `b27bbea` edited
 `run_generation.py` but neither of these is what that commit fixed, and both are cheap.
 
 - `run_generation.py` records `response_sha256` per turn. `grade_run.py` never reads it, and
@@ -1543,8 +1543,8 @@ a sha256sum-format digest of the first held in a second file. The module docstri
 point of the split is that the manifest cannot vouch for itself, and that "the file has to be
 committed next to the manifest for either to mean anything."
 
-The sidecar has never been committed. Not here, not at `f040dfc`, not at `9fec8d5`, not at
-`60fc922`, not on `main`. Every `--verify` therefore opens with
+The sidecar has never been committed. Not here, not at `f95cd33`, not at `a7f4449`, not at
+`b962bf5`, not on `main`. Every `--verify` therefore opens with
 
 ```
 UNANCHORED MANIFEST, nothing below is anchored to anything:
@@ -1560,15 +1560,15 @@ whatever is on disk produces the same exit code as leaving it alone.
 **Reproduction.** Six refs, each in a detached worktree, one command:
 
 ```
-for ref in 6f13dba f040dfc 0587bc8 9fec8d5 96cc5c4 60fc922; do
+for ref in b27bbea f95cd33 b2e06db a7f4449 c6a9fd1 b962bf5; do
   git checkout --detach "$ref"
   python3 evaluation/results/run-3/freeze_artifacts.py --verify
 done
 ```
 
-`f040dfc` and `6f13dba` report 8 moved at exit 2, `9fec8d5` reports 8, `60fc922` reports 11.
-Running `f040dfc` twice gives the same 8, so the count is not noise. That 8 is what D-051's
-"What is still open" paragraph claims, so the claim holds. `0587bc8` and `96cc5c4` predate the
+`f95cd33` and `b27bbea` report 8 moved at exit 2, `a7f4449` reports 8, `b962bf5` reports 11.
+Running `f95cd33` twice gives the same 8, so the count is not noise. That 8 is what D-051's
+"What is still open" paragraph claims, so the claim holds. `b2e06db` and `c6a9fd1` predate the
 `--verify` flag taking a default, so they exit 2 on an argparse error and are not evidence of
 anything.
 

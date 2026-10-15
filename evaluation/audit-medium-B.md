@@ -8,14 +8,12 @@
 > `evaluation/defect-register.md`. The substantive findings in this file are unaffected.
 
 Scope note: the brief said MED-32 and MED-40 do not exist. They **do** exist in the file
-(`medium.md` line 4250 and line 3529, both recovered by commit `77e7ac8` "Recover MED-32 and
-MED-40"). They are inside the MED-23..MED-46 range, so they are audited here. 23 scenarios
+(`medium.md` line 4250 and line 3529, both recovered by commit `7918fd0` "fix: recover MED-32 and MED-40, close 7 checker false passes"). They are inside the MED-23..MED-46 range, so they are audited here. 23 scenarios
 audited.
 
 A cross-cutting defect affects five scenarios and is recorded per scenario but originates in one
 place: every `error-codes.md` line citation in `medium.md` is stale. The index gained a 4-line
-header paragraph (lines 8-14, commit `97510f0` "Index: merge duplicate fault codes instead of
-dropping them") after the scenarios were written, so all cited line numbers are off by 4-5.
+header paragraph (lines 8-14, commit `cdc3ec8` "fix(references): merge duplicate fault codes instead of dropping") after the scenarios were written, so all cited line numbers are off by 4-5.
 
 ---
 

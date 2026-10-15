@@ -4,7 +4,7 @@ Recoverable note so no work lives only in conversation context.
 
 ## Status as of 2026-10-14, harness pass
 
-Branch `audit/evaluation-harness`, based on `75f1997`. Five defects found and fixed, all
+Branch `audit/evaluation-harness`, based on `6600a19`. Five defects found and fixed, all
 recorded as D-038 through D-042 in `evaluation/defect-register.md` with reproduction steps.
 Changelog entry at the top of `CHANGELOG.md`.
 
@@ -22,11 +22,11 @@ a clone.
   they matched nothing and never mutated anything. They read green only because of D-038.
   `check_origin_integrity` is correct; the coverage claim was not.
 - **D-040.** `run_generation.py` tested `rc == -1` instead of `rc != 0`, so a nonzero
-  provider exit became a completed answer. This is the first of the two paths `75f1997`
+  provider exit became a completed answer. This is the first of the two paths `6600a19`
   recorded as deliberately left open.
 - **D-041.** `grade_run.py --run` never read the manifest. It wrote `PASS` with
   `normalized_score 1.0` for a scenario recorded `NOT_STARTED` with no answer file. This is
-  the grading-side counterpart of what `75f1997` fixed on the generation side.
+  the grading-side counterpart of what `6600a19` fixed on the generation side.
 - **D-042.** An uncomputable score was coerced to `FAIL` when anchors were present, so a
   grader typo became a model failure. PROTOCOL.md forbids this in one line.
 
@@ -55,7 +55,7 @@ G1 or G2.
 
 ### Still open, deliberately
 
-- The second path `75f1997` named: a policy carrying `continueOnError="true"` that swallows
+- The second path `6600a19` named: a policy carrying `continueOnError="true"` that swallows
   a failure contributes no fault to the manifest while its text still reaches the answer
   file. A defect in the fault inventory rather than in the outcome classification.
 - The NO MUTATION guard proves each probe changed a file. It cannot prove the probe changed
@@ -68,7 +68,7 @@ Re-verified against the repository, not against the previous pass's summary. Thr
 earlier note listed as still open are in fact fixed; the note is corrected below and the
 original wording is kept in git history.
 
-- **MED-09's Quota-versus-SpikeArrest characterisation is fixed.** `cb057df` replaced "Keep the
+- **MED-09's Quota-versus-SpikeArrest characterisation is fixed.** `b19d34a` replaced "Keep the
   Quota policy for the long-window allowance" (the Quota in evidence was one minute) with "Move
   the allowance to a longer window and put the bursts in SpikeArrest", and states the comparison
   chart's own wording. Verified at `scenarios/medium.md` "Correct Remediation".
@@ -86,7 +86,7 @@ original wording is kept in git history.
   is at `mon_fault-codes.txt:77` and `options-configuring-tls.txt:8`, and is correctly absent
   from the policy error index because no policy raises it.
 
-`AM-VerifyToken` was resolved by `8966ded` (now `JWT`). It is listed as live in
+`AM-VerifyToken` was resolved by `512311d` (now `JWT`). It is listed as live in
 `evaluation/outstanding-errors.md`, which is stale on that point.
 
 ## Status as of 2026-10-13, end of the earlier pass
@@ -96,7 +96,7 @@ Gate at that point: **PROVISIONAL**, 28 PASS, 0 FAIL, 0 BLOCKED, 3 UNVERIFIED ac
 on the full run with the URL audit; 27 PASS, 1 BLOCKED offline. E5, G1 and G2 stay UNVERIFIED
 because no model has been run under the A/B design, and that is the correct result.
 
-The criterion count was 31 at that point. `de540e5` added F6 as a 32nd, which is why the counts
+The criterion count was 31 at that point. `20b7bd5` added F6 as a 32nd, which is why the counts
 here and in `evaluation/RELEASE-REPORT.md` section 0 read 29 PASS across 32 today.
 
 Run 2 exists: four scenarios, both turns, one arm, scored and retained in
@@ -123,19 +123,19 @@ now closed, as recorded in the section above:
 
 | Commit | What |
 | --- | --- |
-| `c564ee1` | Release gate: three verdicts (QUALIFIED / PROVISIONAL / NOT QUALIFIED); UNVERIFIED no longer yields QUALIFIED; C2 `PASS if unresolved else PASS` tautology fixed; C4 mapped `check_urls.py` exit 2 to PASS, now FAIL; EXECUTED/DERIVED/DECLARED evidence kinds; new `tests/test_release_gate.py` |
-| `3e23cfa` | README states `.agents/skills/` is the only tested platform. B4 had been a false PASS |
-| `bb5d859` | Cached the 11 missing OPDK pages (the project said "ten"; `view-page` was not a URL, `antipatterns/intro` is not OPDK, and three were missing from the list). Manifest recorded 109 to 120 |
-| `12d3f46` | HARD-18: `ANALYZE` attributed to `update-apigee-edge-45202-45301`, not the failover page |
-| `444579a` | MED-13: removed the unsatisfiable "fault string is always the same" premise, supplied both fault strings as evidence, added the missing `try`/`catch` |
-| `2ffb8bd` | MED-22: added the Causal honesty rubric row and third critical failure; resolved the fresh-vs-upgraded evidence contradiction |
-| `c53d527` | MED-10: removed the answer key contradicting its own rubric |
-| `7aa47f5` | Leakage test was comparing against an always-empty string (`_blocks` yields `(sid, whole_block)`, so `blocks.get("ground-truth resolution")` was `""`). Fixed, found a real HARD-22 overlap, added `tests/make_eval_workspace.py` |
-| `1f23d4c` | Rubric: pass thresholds, scenario-table normalisation, not-applicable handling, two-grader procedure |
-| `cb13c73` | `make_packets.py` now emits MED-09 and MED-11's "Not a critical failure" carve-outs, which had never reached the grader |
-| `d0115e6` | MED-02: stopped claiming one cause explains both symptoms, against the zero-downtime deployment model its own reference documents |
-| `29ec460` | MED-07: cited `runtime-logs` (the page its discriminator lives on) and `service-config`; added the missing Safety row; rubric ceiling 5 to 6 |
-| `7bdcefa` | MED-06: Safety row is now a safety scale; fixed an incorrect answer that contradicted its own rationale |
+| `6ee0bf0` | Release gate: three verdicts (QUALIFIED / PROVISIONAL / NOT QUALIFIED); UNVERIFIED no longer yields QUALIFIED; C2 `PASS if unresolved else PASS` tautology fixed; C4 mapped `check_urls.py` exit 2 to PASS, now FAIL; EXECUTED/DERIVED/DECLARED evidence kinds; new `tests/test_release_gate.py` |
+| `4830f1d` | README states `.agents/skills/` is the only tested platform. B4 had been a false PASS |
+| `9c02e0a` | Cached the 11 missing OPDK pages (the project said "ten"; `view-page` was not a URL, `antipatterns/intro` is not OPDK, and three were missing from the list). Manifest recorded 109 to 120 |
+| `8440f56` | HARD-18: `ANALYZE` attributed to `update-apigee-edge-45202-45301`, not the failover page |
+| `d016fda` | MED-13: removed the unsatisfiable "fault string is always the same" premise, supplied both fault strings as evidence, added the missing `try`/`catch` |
+| `f616fe4` | MED-22: added the Causal honesty rubric row and third critical failure; resolved the fresh-vs-upgraded evidence contradiction |
+| `a4ad251` | MED-10: removed the answer key contradicting its own rubric |
+| `b2d830a` | Leakage test was comparing against an always-empty string (`_blocks` yields `(sid, whole_block)`, so `blocks.get("ground-truth resolution")` was `""`). Fixed, found a real HARD-22 overlap, added `tests/make_eval_workspace.py` |
+| `43d5175` | Rubric: pass thresholds, scenario-table normalisation, not-applicable handling, two-grader procedure |
+| `d9b05e8` | `make_packets.py` now emits MED-09 and MED-11's "Not a critical failure" carve-outs, which had never reached the grader |
+| `0149094` | MED-02: stopped claiming one cause explains both symptoms, against the zero-downtime deployment model its own reference documents |
+| `63c7c77` | MED-07: cited `runtime-logs` (the page its discriminator lives on) and `service-config`; added the missing Safety row; rubric ceiling 5 to 6 |
+| `b8c9be3` | MED-06: Safety row is now a safety scale; fixed an incorrect answer that contradicted its own rationale |
 
 ## Remaining work, in priority order
 
@@ -186,7 +186,7 @@ pages, 109 recorded, 82 codes, 25 fault probes, 34 real-world. Live values: 31 c
 171 unique URLs / 883 occurrences, 111 redirects, 103 of 103 reviewed, 300 of 305 cached,
 120 recorded, 99 merged codes, 32 probes, 33 real-world.
 
-Treat it as a dated record: prepend a supersession banner naming commit `832bbca` and the
+Treat it as a dated record: prepend a supersession banner naming commit `f21f8dd` and the
 commits that moved the ground, then restate the current verdict in a clearly separated
 section. Do not rewrite the historical content into looking like the project qualified
 earlier.
@@ -250,12 +250,12 @@ a model has actually been run. That is the correct outcome, not a problem to eng
 The requested experiment was a 206-invocation paired comparison. It was not run.
 `evaluation/ab-protocol-and-power.md` holds the full record.
 
-The baseline was wrong. `ecf2ffe` is the **child** of `f9d7de8`, which is itself a
-remediation commit that edits two skill files, so the "35 commits since ecf2ffe" count
-absorbed it into the baseline arm. Correct baseline: `5b40edd`, parent of `f9d7de8`,
+The baseline was wrong. `e63d130` is the **child** of `80e8009`, which is itself a
+remediation commit that edits two skill files, so the "35 commits since e63d130" count
+absorbed it into the baseline arm. Correct baseline: `3e78f5f`, parent of `80e8009`,
 making the span 37. Logged as D-033.
 
-The treatment is too small to measure. Against `5b40edd` the skill differs by 52 lines in
+The treatment is too small to measure. Against `3e78f5f` the skill differs by 52 lines in
 2 of 9 files. All three `SKILL.md` files are byte-identical, so the always-loaded
 instruction surface differs by zero bytes. 47 of 52 lines are in `error-codes.md`, a
 generated file. The only hand-written change in the skill is 3 lines in `hybrid.md`

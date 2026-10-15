@@ -295,7 +295,7 @@ def _p_key_ncf_no_subject(sb: Sandbox) -> None:
        + "generator used to discard silently")
 def _p_key_second_ruling(sb: Sandbox) -> None:
     # MED-09 carries two rulings and the generator's section() returned only the first. The
-    # second was the one cb057df added to stop the grader failing a documented-correct
+    # second was the one b19d34a added to stop the grader failing a documented-correct
     # caveat, so its loss reinstated that defect invisibly: the key looked complete.
     key = sb.path("evaluation/packets/MED-09.key.md")
     kt = key.read_text()

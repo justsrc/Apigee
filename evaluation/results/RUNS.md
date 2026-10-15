@@ -181,4 +181,4 @@ reads as an entitlement refusal.
 `evaluation/WORKING-STATE.md` previously stated that `opencode/*` free models return 403 from
 the CLI and that headless execution worked for `openrouter/*` entries only. That is wrong and
 it was load-bearing, because it placed a working route outside consideration. Corrected at
-commit `0596f15`; the original text is preserved under the correction.
+commit `1621427`; the original text is preserved under the correction.

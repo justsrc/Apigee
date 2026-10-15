@@ -52,8 +52,8 @@ The invariants these cases pin down:
     is blocked forever.
 
 The cases run against scratch trees, never the real repository. The real freeze is already
-red on this branch, for an unrelated and correct reason: commits 4098ec4, 0587bc8 and
-30e2876 changed `tests/make_packets.py`, `tests/make_eval_workspace.py` and
+red on this branch, for an unrelated and correct reason: commits e6a7ac0, b2e06db and
+829a199 changed `tests/make_packets.py`, `tests/make_eval_workspace.py` and
 `tests/release_gate.py` after the freeze was taken at a25333b. So `--verify` on the real
 tree exits 1 legitimately, and a case that asserted exit 0 against it would be asserting
 that the harness edits were harmless. Each tree here gets its own git repository, and the

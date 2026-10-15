@@ -12,7 +12,7 @@ Nothing had been generated. The score was arithmetic on numbers the caller suppl
 the only thing that made it look like a result was that it landed in the same directory as
 real grades.
 
-That matters because of what the file is for. `75f1997` stopped the generation harness from
+That matters because of what the file is for. `6600a19` stopped the generation harness from
 writing a provider error into an answer file, and its message says a false success "hands an
 error string to a rubric and produces a score for a turn the model never answered". This is
 the other end of that sentence. The generation path was hardened and the component that

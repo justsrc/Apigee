@@ -30,8 +30,8 @@ model.
 | All 12 verified gradable: packets, key, rubric table, critical failures | done, row counts 3 to 7 |
 | Thresholds verified against the frozen rubric | 0.75 pass, 0.50 marginal |
 | 12 deterministic isolation checks on the real production path | pass |
-| Multi-turn session continuity defect found and fixed | commit `cbe11b8` |
-| Workspace banner leak of the ID-to-title lookup removed | commit `4098ec4` |
+| Multi-turn session continuity defect found and fixed | commit `a4449a3` |
+| Workspace banner leak of the ID-to-title lookup removed | commit `e6a7ac0` |
 | Provider-error misclassification pinned | 429 and the misleading `provider.auth` both INDETERMINATE |
 
 ## Isolation position

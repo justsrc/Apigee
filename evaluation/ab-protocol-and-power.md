@@ -19,17 +19,16 @@ to run the comparison later needs to know what was measured before spending the 
 
 ## Baseline identification
 
-The handoff named `ecf2ffe` as the pre-remediation state. **That is wrong, and wrong in the
+The handoff named `e63d130` as the pre-remediation state. **That is wrong, and wrong in the
 direction that would have faked a null result.**
 
 ```text
-$ git rev-parse ecf2ffe^
-f9d7de8b3556acbd2706577b2fb0ed610a59edd6
+$ git rev-parse e63d130^
+80e8009b1c5669ebd8e21f3e2d431f2e5ce554ec
 ```
 
-`ecf2ffe` ("Add handoff document for the next agent") is the **child** of `f9d7de8` ("Review
-MED-01..MED-22, fixing twelve defects"), which is itself a remediation commit that changes
-the skill. The count of "35 commits since `ecf2ffe`" therefore silently absorbed `f9d7de8`
+`e63d130` ("docs(evaluation): add the handoff record") is the **child** of `80e8009` ("fix(scenarios): audit MED-01..MED-22 and fix twelve defects"), which is itself a remediation commit that changes
+the skill. The count of "35 commits since `e63d130`" therefore silently absorbed `80e8009`
 into the baseline arm. Both arms would have carried the first remediation commit, and the
 experiment would have reported a guaranteed null for changes that were present in both.
 
@@ -37,18 +36,18 @@ The correct baseline is the parent of the first remediation commit:
 
 | Field | Value |
 | --- | --- |
-| Baseline commit | `5b40edd96007eda996d5787b540b1ae51e32394f` |
-| Baseline subject | Fix eight defects in the easy and adversarial scenarios |
-| Remediation span | `5b40edd..b46a337`, 37 commits |
-| Current arm | `b46a337`, pinned |
+| Baseline commit | `3e78f5f5126627d499c53c3b2bfc5f7747bacf78` |
+| Baseline subject | fix(scenarios): correct eight easy and adversarial defects |
+| Remediation span | `3e78f5f..042f064`, 37 commits |
+| Current arm | `042f064`, pinned |
 
-Both arms must use the corpus, scenarios and packets from `b46a337`. Checking out the
+Both arms must use the corpus, scenarios and packets from `042f064`. Checking out the
 baseline tree wholesale would also roll back 11 cached documentation pages and roughly 20
 answer-key rewrites, which would measure "older everything" rather than "older skill".
 
 ## The finding that stopped the run
 
-`git diff 5b40edd b46a337 -- .agents/skills/` is **52 changed lines across 2 of 9 files**.
+`git diff 3e78f5f 042f064 -- .agents/skills/` is **52 changed lines across 2 of 9 files**.
 
 | Path | Baseline | Current | Delta |
 | --- | ---: | ---: | --- |
@@ -79,8 +78,8 @@ implicate it. Same rule, plainer wording.
 
 ## Graded surface
 
-Grepping every scenario body for the 36 fault codes that exist at `b46a337` but not at
-`5b40edd` returns **2 hits**, both inside MED-16's answer-key prose, neither in a prompt or
+Grepping every scenario body for the 36 fault codes that exist at `042f064` but not at
+`3e78f5f` returns **2 hits**, both inside MED-16's answer-key prose, neither in a prompt or
 a rubric row. MED-16's rubric scores technical correctness, diagnostic method, competing
 causes and next-step quality, and never asks the agent to name the fault code.
 

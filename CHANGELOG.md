@@ -112,7 +112,7 @@ moves an mtime while leaving the bytes alone.
 
 ### A nonzero provider exit was a completed answer
 
-`75f1997` fixed an error event being written as the answer and recorded two paths it left
+`6600a19` fixed an error event being written as the answer and recorded two paths it left
 open. This is the first. The failure predicate tested `rc == -1`, which is the harness's own
 timeout sentinel, so every other nonzero exit fell through to the OK branch. A provider that
 dies partway through still leaves the text it emitted, so a non-empty stream is not evidence
@@ -126,7 +126,7 @@ and wrote the result, and only `--list` filtered on `AWAITING_GRADE`. Against ru
 state, where all 103 scenarios are NOT_STARTED and no answer file exists, MED-13 came out as
 `{"normalized_score": 1.0, "verdict": "PASS"}`.
 
-This is the other end of the sentence in `75f1997`, which hardened generation on the grounds
+This is the other end of the sentence in `6600a19`, which hardened generation on the grounds
 that a false success produces a score for a turn the model never answered. The grading side
 was not hardened, and the outcome stayed reachable with no generation at all.
 
@@ -151,7 +151,7 @@ live model or provider can produce a shape these suites do not model.
 
 ### Still open
 
-The second path `75f1997` named is untouched: a policy carrying `continueOnError="true"`
+The second path `6600a19` named is untouched: a policy carrying `continueOnError="true"`
 that swallows a failure contributes no fault to the manifest while its text still reaches the
 answer file. It is a defect in the fault inventory rather than in the outcome
 classification, it is not what produced the run-3 artifact, and it is not fixed here.

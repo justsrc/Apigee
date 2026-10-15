@@ -17,7 +17,7 @@
 >
 > No longer live, re-checked 2026-10-13:
 >
-> - **`AM-VerifyToken` is resolved.** `8966ded` replaced it with `JWT` in `scenarios/hard.md`
+> - **`AM-VerifyToken` is resolved.** `512311d` replaced it with `JWT` in `scenarios/hard.md`
 >   and added the note that trace step names are whatever the team named each policy. Zero
 >   occurrences remain in `hard.md`. This bullet previously listed it as still live.
 >
