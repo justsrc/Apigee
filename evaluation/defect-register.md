@@ -60,6 +60,12 @@ answer key is missing, is D-061. D-060 is the manifest's provenance column, whic
 fetchers filled with a byte count and C1 accepted as a record. Fixed-and-covered goes from 31
 to 34 and the open-reproduced row from 2 to 1.
 
+A fifth pass on 2026-10-16 closes D-054. Its entry was recorded on 2026-10-13 without moving
+a row, so closing it moves none of the counts above; they are a record of the passes that
+kept them, not a sum over the entries. This tree's manifest is anchored by its committed
+sidecar, and the unanchored path is covered by `tests/test_freeze_artifacts.py`, case "a
+manifest with no anchor file is refused rather than believed".
+
 ## Later additions
 
 ### D-018 HIGH — Origin classification was inflated by 21 scenarios
@@ -1549,15 +1555,15 @@ fixed by that list. Not fixed: the sample is declared in advance, so editing it 
 would be exactly the thing the freeze exists to prevent. Recorded so a reader does not have to
 rediscover which number is authoritative.
 
-### D-054 MEDIUM — The freeze manifest has never been anchored on any branch
+### D-054 MEDIUM — The freeze manifest carried no committed anchor
 
 `freeze_artifacts.py` writes two files: `artifact-hashes.json`, and `artifact-hashes.json.sha256`,
 a sha256sum-format digest of the first held in a second file. The module docstring says the
 point of the split is that the manifest cannot vouch for itself, and that "the file has to be
 committed next to the manifest for either to mean anything."
 
-The sidecar has never been committed. Not here, not at `f95cd33`, not at `a7f4449`, not at
-`b962bf5`, not on `main`. Every `--verify` therefore opens with
+The sidecar was not committed. Not at `f95cd33`, not at `a7f4449`, not at `b962bf5`, and not on
+`main` at the time. Every `--verify` at those refs therefore opens with
 
 ```
 UNANCHORED MANIFEST, nothing below is anchored to anything:
@@ -1585,18 +1591,14 @@ Running `f95cd33` twice gives the same 8, so the count is not noise. That 8 is w
 `--verify` flag taking a default, so they exit 2 on an argparse error and are not evidence of
 anything.
 
-**Status: OPEN, blocked on the D-051 re-freeze.** The sidecar cannot be created honestly
-before the re-freeze, because writing it now would bind the current manifest, which D-051
-records as stale and scheduled for replacement. `freeze_artifacts.py --write` emits both files
-together and is the fix, but it also re-blesses whatever is on disk at the moment it runs,
-which D-051 reserves as a human decision at an agreed commit. Doing it here would answer a
-question this repository has already decided is not a script's to answer.
-
-The narrower fix, committing only the digest of the manifest as it stands, was rejected for
-the same reason: it asserts that this manifest is the anchored one, which is the contested
-claim. **Next action:** a maintainer decides whether the current harness edits are accepted,
-then runs `python3 evaluation/results/run-3/freeze_artifacts.py --write` and commits both
-files, recording the reason. Nothing else is waiting on it except D-051's human step.
+**Status: FIXED.** The sidecar is committed next to the manifest and `--verify` reports the moved
+count rather than the unanchored banner, so this tree's freeze is anchored. The re-freeze this was
+waiting on is D-051's, recorded there as the separate human step it is, and the re-anchors that
+followed the harness edits were made in the freeze commits, each recording its own reason. The
+narrower fix, committing only the digest, was rejected here as premature rather than as wrong, and
+it is what happened once the re-freeze was a recorded human decision. The unanchored path is
+covered by `tests/test_freeze_artifacts.py`, case "a manifest with no anchor file is refused
+rather than believed", which fails at exit 0 against a script that does not refuse one.
 
 ### D-055 CRITICAL — The release gate could qualify on a status it did not recognise
 
